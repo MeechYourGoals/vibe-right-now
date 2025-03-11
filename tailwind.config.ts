@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,15 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				vibe: {
+					purple: '#8A2BE2',
+					teal: '#20B2AA',
+					pink: '#FF69B4',
+					blue: '#1E90FF',
+					yellow: '#FFD700',
+					dark: '#191919',
+					light: '#F8F8FF'
 				}
 			},
 			borderRadius: {
@@ -84,11 +94,23 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'pulse-gradient': {
+					'0%, 100%': { 
+						backgroundPosition: '0% 50%' 
+					},
+					'50%': { 
+						backgroundPosition: '100% 50%' 
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'pulse-gradient': 'pulse-gradient 3s ease infinite'
+			},
+			backgroundImage: {
+				'gradient-vibe': 'linear-gradient(45deg, #8A2BE2, #20B2AA, #FF69B4, #1E90FF)',
 			}
 		}
 	},

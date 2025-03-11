@@ -1,0 +1,119 @@
+
+import { useState } from "react";
+import { Post } from "@/types";
+import { formatDistanceToNow } from "date-fns";
+import { Heart, MessageSquare, Clock, MapPin, VerifiedIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+
+interface PostCardProps {
+  post: Post;
+}
+
+const PostCard = ({ post }: PostCardProps) => {
+  const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(post.likes);
+
+  const handleLike = () => {
+    if (liked) {
+      setLikeCount(likeCount - 1);
+    } else {
+      setLikeCount(likeCount + 1);
+    }
+    setLiked(!liked);
+  };
+
+  // Calculate time remaining before expiration
+  const now = new Date();
+  const expiresAt = new Date(post.expiresAt);
+  const hoursRemaining = Math.max(0, Math.floor((expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60)));
+
+  // Format when the post was created
+  const timeAgo = formatDistanceToNow(new Date(post.timestamp), { addSuffix: true });
+
+  return (
+    <Card className="vibe-card overflow-hidden mb-4">
+      <CardHeader className="p-4 pb-0">
+        <div className="flex justify-between items-start">
+          <div className="flex items-center gap-2">
+            <Avatar>
+              <AvatarImage src={post.user.avatar} alt={post.user.name} />
+              <AvatarFallback>{post.user.name.charAt(0)}</AvatarFallback>
+            </Avatar>
+            <div>
+              <div className="font-medium">{post.user.name}</div>
+              <div className="text-sm text-muted-foreground">@{post.user.username}</div>
+            </div>
+          </div>
+          <div className="flex flex-col items-end">
+            <div className="flex items-center text-sm text-muted-foreground">
+              <Clock className="h-3 w-3 mr-1" />
+              <span>Expires in {hoursRemaining}h</span>
+            </div>
+            <div className="flex items-center text-sm mt-1">
+              <MapPin className="h-3 w-3 mr-1" />
+              <span className="font-medium">{post.location.name}</span>
+              {post.location.verified && (
+                <VerifiedIcon className="h-3 w-3 ml-1 text-primary" />
+              )}
+            </div>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="p-4">
+        <p className="mb-3">{post.content}</p>
+        <div className="grid grid-cols-1 gap-2">
+          {post.media.map((media, index) => (
+            <div key={index} className="rounded-lg overflow-hidden">
+              {media.type === "image" ? (
+                <img
+                  src={media.url}
+                  alt={`Media by ${post.user.name}`}
+                  className="w-full h-auto object-cover"
+                />
+              ) : (
+                <video
+                  src={media.url}
+                  controls
+                  className="w-full h-auto"
+                  poster="https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
+                />
+              )}
+            </div>
+          ))}
+        </div>
+        <div className="flex items-center gap-2 mt-3">
+          <Badge variant="outline" className="bg-muted">
+            {post.location.type}
+          </Badge>
+          <Badge variant="outline" className="bg-muted">
+            {post.location.city}, {post.location.state}
+          </Badge>
+          <span className="text-xs text-muted-foreground ml-auto">{timeAgo}</span>
+        </div>
+      </CardContent>
+      <CardFooter className="p-4 pt-0 flex justify-between">
+        <Button
+          variant="ghost"
+          size="sm"
+          className={`flex items-center gap-1 ${liked ? 'text-accent' : ''}`}
+          onClick={handleLike}
+        >
+          <Heart className={`h-4 w-4 ${liked ? 'fill-accent' : ''}`} />
+          <span>{likeCount}</span>
+        </Button>
+        <Button variant="ghost" size="sm" className="flex items-center gap-1">
+          <MessageSquare className="h-4 w-4" />
+          <span>{post.comments}</span>
+        </Button>
+        <Button variant="default" size="sm" className="ml-auto">
+          View Location
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+};
+
+export default PostCard;
