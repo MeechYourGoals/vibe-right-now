@@ -40,4 +40,5 @@ export interface Comment {
   user: User;
   content: string;
   timestamp: string;
+  vibedHere: boolean;
 }

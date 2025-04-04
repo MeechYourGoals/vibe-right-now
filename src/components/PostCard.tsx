@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Post } from "@/types";
 import { formatDistanceToNow } from "date-fns";
-import { Heart, MessageSquare, Clock, MapPin, VerifiedIcon, Users } from "lucide-react";
+import { Heart, MessageSquare, Clock, MapPin, VerifiedIcon, Users, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +13,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import CommentList from "@/components/CommentList";
 
 interface PostCardProps {
   post: Post;
@@ -23,6 +24,7 @@ const PostCard = ({ post, locationPostCount = 1 }: PostCardProps) => {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(post.likes);
   const [isOpen, setIsOpen] = useState(false);
+  const [showComments, setShowComments] = useState(false);
 
   const handleLike = () => {
     if (liked) {
@@ -81,6 +83,11 @@ const PostCard = ({ post, locationPostCount = 1 }: PostCardProps) => {
                   <Button variant="link" size="sm" className="p-0 h-auto text-sm">
                     <Users className="h-3 w-3 mr-1" />
                     <span className="font-medium">{locationPostCount} people vibed here in last 24hrs</span>
+                    {isOpen ? (
+                      <ChevronUp className="h-3 w-3 ml-1" />
+                    ) : (
+                      <ChevronDown className="h-3 w-3 ml-1" />
+                    )}
                   </Button>
                 </CollapsibleTrigger>
                 <CollapsibleContent className="text-sm mt-1">
@@ -134,23 +141,34 @@ const PostCard = ({ post, locationPostCount = 1 }: PostCardProps) => {
           <span className="text-xs text-muted-foreground ml-auto">{timeAgo}</span>
         </div>
       </CardContent>
-      <CardFooter className="p-4 pt-0 flex justify-between">
-        <Button
-          variant="ghost"
-          size="sm"
-          className={`flex items-center gap-1 ${liked ? 'text-accent' : ''}`}
-          onClick={handleLike}
-        >
-          <Heart className={`h-4 w-4 ${liked ? 'fill-accent' : ''}`} />
-          <span>{likeCount}</span>
-        </Button>
-        <Button variant="ghost" size="sm" className="flex items-center gap-1">
-          <MessageSquare className="h-4 w-4" />
-          <span>{post.comments}</span>
-        </Button>
-        <Button variant="default" size="sm" className="ml-auto" asChild>
-          <Link to={`/venue/${post.location.id}`}>View Location</Link>
-        </Button>
+      <CardFooter className="p-4 pt-0 flex flex-col">
+        <div className="flex justify-between w-full">
+          <Button
+            variant="ghost"
+            size="sm"
+            className={`flex items-center gap-1 ${liked ? 'text-accent' : ''}`}
+            onClick={handleLike}
+          >
+            <Heart className={`h-4 w-4 ${liked ? 'fill-accent' : ''}`} />
+            <span>{likeCount}</span>
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="flex items-center gap-1"
+            onClick={() => setShowComments(!showComments)}
+          >
+            <MessageSquare className="h-4 w-4" />
+            <span>{post.comments}</span>
+          </Button>
+          <Button variant="default" size="sm" className="ml-auto" asChild>
+            <Link to={`/venue/${post.location.id}`}>View Location</Link>
+          </Button>
+        </div>
+        
+        {showComments && (
+          <CommentList postId={post.id} commentsCount={post.comments} />
+        )}
       </CardFooter>
     </Card>
   );
