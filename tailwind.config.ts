@@ -64,12 +64,12 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				},
 				vibe: {
-					purple: '#8A2BE2',
-					teal: '#20B2AA',
-					pink: '#FF69B4',
+					green: '#20B2AA',
+					teal: '#008080',
 					blue: '#1E90FF',
-					yellow: '#FFD700',
-					dark: '#191919',
+					navy: '#000080',
+					purple: '#9370DB',
+					dark: '#171717',
 					light: '#F8F8FF'
 				}
 			},
@@ -109,7 +109,7 @@ export default {
 				'enter': 'fade-in 0.3s ease-out, scale-in 0.2s ease-out'
 			},
 			backgroundImage: {
-				'gradient-vibe': 'linear-gradient(45deg, #8A2BE2, #20B2AA, #FF69B4, #1E90FF)',
+				'gradient-vibe': 'linear-gradient(45deg, #20B2AA, #1E90FF, #008080, #000080)',
 			},
 			backgroundSize: {
 				'size-200': '200% 200%',
@@ -118,8 +118,10 @@ export default {
 				'pos-0': '0% 0%',
 				'pos-100': '100% 100%',
 			},
+			scale: {
+				'102': '1.02',
+			},
 		}
 	},
 	plugins: [require("tailwindcss-animate")],
 } satisfies Config;
-

@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import { mockLocations } from "@/mock/data";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,10 +10,21 @@ import { MapPin, Search, VerifiedIcon } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import CameraButton from "@/components/CameraButton";
+import SearchVibes from "@/components/SearchVibes";
+import NearbyVibesMap from "@/components/NearbyVibesMap";
 
 const Explore = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("all");
+  
+  const handleSearch = (query: string, filterType: string) => {
+    setSearchQuery(query);
+    if (filterType !== "All") {
+      setActiveTab(filterType.toLowerCase());
+    } else {
+      setActiveTab("all");
+    }
+  };
   
   const filteredLocations = mockLocations.filter((location) => {
     // Filter by type
@@ -44,22 +56,7 @@ const Explore = () => {
           </h1>
           
           <div className="max-w-xl mx-auto mb-6">
-            <div className="relative">
-              <Input
-                type="search"
-                placeholder="Search locations, cities, events..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pr-10"
-              />
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="absolute right-0 top-0"
-              >
-                <Search className="h-4 w-4" />
-              </Button>
-            </div>
+            <SearchVibes onSearch={handleSearch} />
           </div>
           
           <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="max-w-2xl mx-auto">
@@ -73,43 +70,51 @@ const Explore = () => {
             </TabsList>
           </Tabs>
         </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredLocations.map((location) => (
-            <Card key={location.id} className="hover:shadow-md transition-shadow">
-              <CardContent className="p-4">
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="text-lg font-semibold flex items-center">
-                    {location.name}
-                    {location.verified && (
-                      <VerifiedIcon className="h-4 w-4 ml-1 text-primary" />
-                    )}
-                  </h3>
-                  <Badge variant="outline">{location.type}</Badge>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="md:col-span-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {filteredLocations.map((location) => (
+                <Card key={location.id} className="vibe-card-hover">
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="text-lg font-semibold flex items-center">
+                        {location.name}
+                        {location.verified && (
+                          <VerifiedIcon className="h-4 w-4 ml-1 text-primary" />
+                        )}
+                      </h3>
+                      <Badge variant="outline">{location.type}</Badge>
+                    </div>
+                    
+                    <div className="text-sm text-muted-foreground mb-3 flex items-center">
+                      <MapPin className="h-4 w-4 mr-1" />
+                      <span>
+                        {location.address}, {location.city}, {location.state}
+                      </span>
+                    </div>
+                    
+                    <Button className="w-full bg-gradient-vibe" asChild>
+                      <Link to={`/venue/${location.id}`}>View Vibes</Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+              
+              {filteredLocations.length === 0 && (
+                <div className="col-span-full text-center py-10">
+                  <h3 className="text-xl font-semibold mb-2">No locations found</h3>
+                  <p className="text-muted-foreground">
+                    Try adjusting your search or filters
+                  </p>
                 </div>
-                
-                <div className="text-sm text-muted-foreground mb-3 flex items-center">
-                  <MapPin className="h-4 w-4 mr-1" />
-                  <span>
-                    {location.address}, {location.city}, {location.state}
-                  </span>
-                </div>
-                
-                <Button className="w-full" asChild>
-                  <a href={`/location/${location.id}`}>View Vibes</a>
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-          
-          {filteredLocations.length === 0 && (
-            <div className="col-span-full text-center py-10">
-              <h3 className="text-xl font-semibold mb-2">No locations found</h3>
-              <p className="text-muted-foreground">
-                Try adjusting your search or filters
-              </p>
+              )}
             </div>
-          )}
+          </div>
+          
+          <div className="hidden md:block">
+            <NearbyVibesMap />
+          </div>
         </div>
       </main>
       

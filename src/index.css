@@ -5,23 +5,23 @@
 
 @layer base {
   :root {
-    --background: 260 20% 10%;
+    --background: 220 10% 10%;
     --foreground: 0 0% 95%;
 
-    --card: 260 20% 15%;
+    --card: 220 10% 15%;
     --card-foreground: 0 0% 95%;
 
-    --popover: 260 20% 15%;
+    --popover: 220 10% 15%;
     --popover-foreground: 0 0% 95%;
 
-    --primary: 267 70% 55%;
+    --primary: 175 70% 41%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 175 50% 40%;
+    --secondary: 196 80% 40%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 260 20% 20%;
-    --muted-foreground: 260 10% 70%;
+    --muted: 220 10% 20%;
+    --muted-foreground: 220 10% 70%;
 
     --accent: 340 90% 65%;
     --accent-foreground: 0 0% 100%;
@@ -29,9 +29,9 @@
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 95%;
 
-    --border: 260 20% 20%;
-    --input: 260 20% 20%;
-    --ring: 260 70% 60%;
+    --border: 220 10% 20%;
+    --input: 220 10% 20%;
+    --ring: 175 70% 41%;
 
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
@@ -46,23 +46,23 @@
   }
 
   .light {
-    --background: 260 100% 99%;
-    --foreground: 260 10% 10%;
+    --background: 0 0% 98%;
+    --foreground: 220 10% 10%;
 
     --card: 0 0% 100%;
-    --card-foreground: 260 10% 10%;
+    --card-foreground: 220 10% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 260 10% 10%;
+    --popover-foreground: 220 10% 10%;
 
-    --primary: 267 70% 50%;
+    --primary: 175 70% 41%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 175 50% 40%;
+    --secondary: 196 80% 40%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 260 10% 90%;
-    --muted-foreground: 260 10% 40%;
+    --muted: 220 10% 94%;
+    --muted-foreground: 220 10% 40%;
 
     --accent: 340 90% 65%;
     --accent-foreground: 0 0% 100%;
@@ -70,9 +70,9 @@
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 260 20% 85%;
-    --input: 260 20% 85%;
-    --ring: 260 70% 50%;
+    --border: 220 10% 85%;
+    --input: 220 10% 85%;
+    --ring: 175 70% 41%;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -125,3 +125,15 @@
   }
 }
 
+.animate-pulse-slow {
+  animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}

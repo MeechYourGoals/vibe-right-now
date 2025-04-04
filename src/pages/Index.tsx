@@ -4,6 +4,7 @@ import PostFeed from "@/components/PostFeed";
 import LocationsNearby from "@/components/LocationsNearby";
 import TrendingLocations from "@/components/TrendingLocations";
 import CameraButton from "@/components/CameraButton";
+import NearbyVibesMap from "@/components/NearbyVibesMap";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const Index = () => {
@@ -26,7 +27,7 @@ const Index = () => {
           
           {!isMobile && (
             <div className="w-full md:w-1/4 space-y-6">
-              <LocationsNearby />
+              <NearbyVibesMap />
               <TrendingLocations />
             </div>
           )}

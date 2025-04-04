@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Post } from "@/types";
 import { formatDistanceToNow } from "date-fns";
 import { Heart, MessageSquare, Clock, MapPin, VerifiedIcon } from "lucide-react";
@@ -108,8 +109,8 @@ const PostCard = ({ post }: PostCardProps) => {
           <MessageSquare className="h-4 w-4" />
           <span>{post.comments}</span>
         </Button>
-        <Button variant="default" size="sm" className="ml-auto">
-          View Location
+        <Button variant="default" size="sm" className="ml-auto" asChild>
+          <Link to={`/venue/${post.location.id}`}>View Location</Link>
         </Button>
       </CardFooter>
     </Card>

@@ -1,0 +1,91 @@
+
+import { formatDistanceToNow } from "date-fns";
+import { Location } from "@/types";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { VerifiedIcon, Clock, MapPin, Share2 } from "lucide-react";
+
+interface VenuePostProps {
+  venue: Location;
+  content: string;
+  media: {
+    type: "image" | "video";
+    url: string;
+  };
+  timestamp: string;
+}
+
+const VenuePost = ({ venue, content, media, timestamp }: VenuePostProps) => {
+  const timeAgo = formatDistanceToNow(new Date(timestamp), { addSuffix: true });
+
+  return (
+    <Card className="vibe-card overflow-hidden">
+      <CardHeader className="p-4 pb-0">
+        <div className="flex justify-between items-start">
+          <div className="flex items-center gap-2">
+            <Avatar>
+              <AvatarImage src={`https://source.unsplash.com/random/200x200/?${venue.type}`} alt={venue.name} />
+              <AvatarFallback>{venue.name[0]}</AvatarFallback>
+            </Avatar>
+            <div>
+              <div className="font-medium flex items-center">
+                {venue.name}
+                <VerifiedIcon className="h-4 w-4 ml-1 text-primary" />
+              </div>
+              <div className="text-sm text-muted-foreground">Official</div>
+            </div>
+          </div>
+          <div className="flex flex-col items-end">
+            <div className="flex items-center text-sm text-muted-foreground">
+              <Clock className="h-3 w-3 mr-1" />
+              <span>Posted {timeAgo}</span>
+            </div>
+            <div className="flex items-center text-sm mt-1">
+              <MapPin className="h-3 w-3 mr-1" />
+              <span className="font-medium">{venue.city}, {venue.state}</span>
+            </div>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="p-4">
+        <p className="mb-3">{content}</p>
+        <div className="rounded-lg overflow-hidden">
+          {media.type === "image" ? (
+            <img
+              src={media.url}
+              alt={`Media by ${venue.name}`}
+              className="w-full h-auto object-cover"
+            />
+          ) : (
+            <video
+              src={media.url}
+              controls
+              className="w-full h-auto"
+              poster="https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
+            />
+          )}
+        </div>
+        <div className="flex items-center gap-2 mt-3">
+          <Badge className="bg-secondary/20">Promoted</Badge>
+          <Badge variant="outline" className="bg-muted">
+            {venue.type}
+          </Badge>
+          <span className="text-xs text-muted-foreground ml-auto">{timeAgo}</span>
+        </div>
+      </CardContent>
+      <CardFooter className="p-4 pt-0 flex justify-between">
+        <Button variant="ghost" size="sm" className="flex items-center gap-1">
+          <Share2 className="h-4 w-4" />
+          <span>Share</span>
+        </Button>
+        <Button variant="default" size="sm" className="ml-auto">
+          View Event
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+};
+
+export default VenuePost;
