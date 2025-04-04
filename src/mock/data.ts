@@ -1,4 +1,3 @@
-
 import { Location, Post, User, Comment } from "@/types";
 
 export const mockUsers: User[] = [
@@ -91,6 +90,42 @@ export const mockUsers: User[] = [
     username: "coffee_connoisseur",
     name: "Amelia Jackson",
     avatar: "https://randomuser.me/api/portraits/women/8.jpg",
+  },
+  {
+    id: "16",
+    username: "comedy_lover",
+    name: "Emma Lewis",
+    avatar: "https://randomuser.me/api/portraits/women/9.jpg",
+  },
+  {
+    id: "17",
+    username: "cruise_queen",
+    name: "Olivia Parker",
+    avatar: "https://randomuser.me/api/portraits/women/10.jpg",
+  },
+  {
+    id: "18",
+    username: "pastry_chef",
+    name: "Daniel Baker",
+    avatar: "https://randomuser.me/api/portraits/men/11.jpg",
+  },
+  {
+    id: "19",
+    username: "luxury_traveler",
+    name: "Isabella Moore",
+    avatar: "https://randomuser.me/api/portraits/women/11.jpg",
+  },
+  {
+    id: "20",
+    username: "global_explorer",
+    name: "William Harris",
+    avatar: "https://randomuser.me/api/portraits/men/12.jpg",
+  },
+  {
+    id: "21",
+    username: "paris_dreamer",
+    name: "Charlotte Thomas",
+    avatar: "https://randomuser.me/api/portraits/women/12.jpg",
   },
 ];
 
@@ -251,16 +286,86 @@ export const mockLocations: Location[] = [
     type: "event",
     verified: true,
   },
+  {
+    id: "14",
+    name: "Laugh Factory",
+    address: "8001 Sunset Blvd",
+    city: "Los Angeles",
+    state: "CA",
+    country: "USA",
+    lat: 34.0982,
+    lng: -118.3650,
+    type: "event",
+    verified: true,
+  },
+  {
+    id: "15",
+    name: "Disney Wonder Cruise",
+    address: "Port Canaveral",
+    city: "Orlando",
+    state: "FL",
+    country: "USA",
+    lat: 28.4073,
+    lng: -80.6045,
+    type: "other",
+    verified: true,
+  },
+  {
+    id: "16",
+    name: "Sweet Delights Bakery",
+    address: "123 Main Street",
+    city: "Des Moines",
+    state: "IA",
+    country: "USA",
+    lat: 41.5868,
+    lng: -93.6250,
+    type: "restaurant",
+    verified: false,
+  },
+  {
+    id: "17",
+    name: "Waldorf Astoria Rooftop",
+    address: "9850 Wilshire Blvd",
+    city: "Beverly Hills",
+    state: "CA",
+    country: "USA",
+    lat: 34.0669,
+    lng: -118.4143,
+    type: "bar",
+    verified: true,
+  },
+  {
+    id: "18",
+    name: "Sydney Opera House",
+    address: "Bennelong Point",
+    city: "Sydney",
+    state: "NSW",
+    country: "Australia",
+    lat: -33.8568,
+    lng: 151.2153,
+    type: "attraction",
+    verified: true,
+  },
+  {
+    id: "19",
+    name: "Eiffel Tower",
+    address: "Champ de Mars",
+    city: "Paris",
+    state: "",
+    country: "France",
+    lat: 48.8584,
+    lng: 2.2945,
+    type: "attraction",
+    verified: true,
+  },
 ];
 
-// Helper to generate random time in the last few hours
 const getRecentTime = (hoursAgo = 0) => {
   const date = new Date();
   date.setHours(date.getHours() - hoursAgo);
   return date.toISOString();
 };
 
-// Helper to generate expiry time (24 hours after creation)
 const getExpiryTime = (creationTime: string) => {
   const date = new Date(creationTime);
   date.setHours(date.getHours() + 24);
@@ -356,7 +461,6 @@ export const mockPosts: Post[] = [
     likes: 56,
     comments: 11,
   },
-  // New posts with different locations
   {
     id: "6",
     user: mockUsers[5],
@@ -485,11 +589,10 @@ export const mockPosts: Post[] = [
     likes: 118,
     comments: 21,
   },
-  // Additional posts for the same locations to show multiple people vibing
   {
     id: "14",
     user: mockUsers[13],
-    location: mockLocations[1], // Artisan Coffee House
+    location: mockLocations[1],
     content: "New seasonal latte just dropped and it's incredible! Lavender honey flavor is perfect.",
     media: [
       {
@@ -505,7 +608,7 @@ export const mockPosts: Post[] = [
   {
     id: "15",
     user: mockUsers[14],
-    location: mockLocations[1], // Artisan Coffee House
+    location: mockLocations[1],
     content: "The back corner by the bookshelf is empty and it's the best spot to work from! Great wifi today.",
     media: [
       {
@@ -521,7 +624,7 @@ export const mockPosts: Post[] = [
   {
     id: "16",
     user: mockUsers[0],
-    location: mockLocations[7], // Christ the Redeemer
+    location: mockLocations[7],
     content: "Made it to the top! The climb was worth it - barely any crowds this early in the morning.",
     media: [
       {
@@ -537,7 +640,7 @@ export const mockPosts: Post[] = [
   {
     id: "17",
     user: mockUsers[1],
-    location: mockLocations[9], // Allegiant Stadium (Super Bowl)
+    location: mockLocations[9],
     content: "Pre-game is electric! Teams warming up and the stadium is filling fast. Food lines still short!",
     media: [
       {
@@ -553,7 +656,7 @@ export const mockPosts: Post[] = [
   {
     id: "18",
     user: mockUsers[2],
-    location: mockLocations[9], // Allegiant Stadium (Super Bowl)
+    location: mockLocations[9],
     content: "Snack stands on west side have no lines! Get your food now before halftime rush.",
     media: [
       {
@@ -569,7 +672,7 @@ export const mockPosts: Post[] = [
   {
     id: "19",
     user: mockUsers[3],
-    location: mockLocations[9], // Allegiant Stadium (Super Bowl)
+    location: mockLocations[9],
     content: "VIP entrance on south side has no wait right now! Regular entrances are packed.",
     media: [
       {
@@ -585,7 +688,7 @@ export const mockPosts: Post[] = [
   {
     id: "20",
     user: mockUsers[4],
-    location: mockLocations[9], // Allegiant Stadium (Super Bowl)
+    location: mockLocations[9],
     content: "Celebrity row is filling up! Spotted at least 10 A-listers already in section 112.",
     media: [
       {
@@ -598,11 +701,185 @@ export const mockPosts: Post[] = [
     likes: 198,
     comments: 34,
   },
+  {
+    id: "21",
+    user: mockUsers[15],
+    location: mockLocations[13],
+    content: "Thanks for the free tix VRN! Can't believe I'm getting to see a comedy legend right now. The opening act just finished and everyone is crying laughing already!",
+    media: [
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
+    ],
+    timestamp: getRecentTime(0.1),
+    expiresAt: getExpiryTime(getRecentTime(0.1)),
+    likes: 78,
+    comments: 12,
+  },
+  {
+    id: "22",
+    user: mockUsers[16],
+    location: mockLocations[14],
+    content: "Day 2 on the Disney Wonder and it's magical! Character breakfast just ended and the kids are loving it. Almost no wait for the water slide right now!",
+    media: [
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1548574505-5e239809ee19?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
+    ],
+    timestamp: getRecentTime(0.3),
+    expiresAt: getExpiryTime(getRecentTime(0.3)),
+    likes: 91,
+    comments: 15,
+  },
+  {
+    id: "23",
+    user: mockUsers[17],
+    location: mockLocations[15],
+    content: "This new bakery in Des Moines is incredible! They just took out fresh croissants and they smell amazing. Get here before they sell out!",
+    media: [
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1555507036-ab1f4038808a?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
+    ],
+    timestamp: getRecentTime(0.4),
+    expiresAt: getExpiryTime(getRecentTime(0.4)),
+    likes: 54,
+    comments: 7,
+  },
+  {
+    id: "24",
+    user: mockUsers[18],
+    location: mockLocations[16],
+    content: "Sunset cocktails at the Waldorf Rooftop Bar are unmatched! Just got seated with no wait - seems like a hidden gem tonight. View of downtown LA is spectacular!",
+    media: [
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1534353436294-0dbd4bdac845?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
+    ],
+    timestamp: getRecentTime(0.2),
+    expiresAt: getExpiryTime(getRecentTime(0.2)),
+    likes: 112,
+    comments: 16,
+  },
+  {
+    id: "25",
+    user: mockUsers[19],
+    location: mockLocations[17],
+    content: "Just got last-minute tickets to tonight's symphony at the Opera House! Box office had a few returns and there's no line right now if anyone wants to try!",
+    media: [
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1528294146891-effec425a592?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
+    ],
+    timestamp: getRecentTime(0.3),
+    expiresAt: getExpiryTime(getRecentTime(0.3)),
+    likes: 138,
+    comments: 22,
+  },
+  {
+    id: "26",
+    user: mockUsers[20],
+    location: mockLocations[18],
+    content: "Evening light show at the Eiffel Tower just started! South side viewing area still has space, much less crowded than the north side.",
+    media: [
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1543349689-9a4d426bee8e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
+    ],
+    timestamp: getRecentTime(0.1),
+    expiresAt: getExpiryTime(getRecentTime(0.1)),
+    likes: 245,
+    comments: 31,
+  },
+  {
+    id: "27",
+    user: mockUsers[0],
+    location: mockLocations[18],
+    content: "The line for the elevator is crazy but stairs have no wait at all! Worth the climb for the view.",
+    media: [
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
+    ],
+    timestamp: getRecentTime(0.15),
+    expiresAt: getExpiryTime(getRecentTime(0.15)),
+    likes: 187,
+    comments: 23,
+  },
+  {
+    id: "28",
+    user: mockUsers[1],
+    location: mockLocations[18],
+    content: "Pro tip: The cafe on the first level has almost no line right now! Great spot to rest with a cappuccino before continuing up.",
+    media: [
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1623857584158-23c769acb3c6?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
+    ],
+    timestamp: getRecentTime(0.2),
+    expiresAt: getExpiryTime(getRecentTime(0.2)),
+    likes: 156,
+    comments: 18,
+  },
+  {
+    id: "29",
+    user: mockUsers[2],
+    location: mockLocations[18],
+    content: "Managed to get a picnic spot right in front of the tower! The lawn isn't too crowded today, perfect for photos.",
+    media: [
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1542654071-7ded22488685?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
+    ],
+    timestamp: getRecentTime(0.25),
+    expiresAt: getExpiryTime(getRecentTime(0.25)),
+    likes: 134,
+    comments: 16,
+  },
+  {
+    id: "30",
+    user: mockUsers[3],
+    location: mockLocations[18],
+    content: "Secret photo spot: Cross the river to Trocadéro for the best tower views. Way less crowded than on the Champ de Mars side right now!",
+    media: [
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1550340499-a6c60f8c7e87?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
+    ],
+    timestamp: getRecentTime(0.3),
+    expiresAt: getExpiryTime(getRecentTime(0.3)),
+    likes: 167,
+    comments: 21,
+  },
+  {
+    id: "31",
+    user: mockUsers[4],
+    location: mockLocations[18],
+    content: "They just opened up more spots for the guided tour in English - sign up at the info desk on the ground level, no waiting!",
+    media: [
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1520939817895-060bdaf4fe1b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
+    ],
+    timestamp: getRecentTime(0.22),
+    expiresAt: getExpiryTime(getRecentTime(0.22)),
+    likes: 98,
+    comments: 14,
+  },
 ];
 
-// Generate mock comments
 export const mockComments: Comment[] = [
-  // Comments for post 1
   {
     id: "c1",
     postId: "1",
@@ -628,7 +905,6 @@ export const mockComments: Comment[] = [
     vibedHere: false,
   },
   
-  // Comments for post 2
   {
     id: "c4",
     postId: "2",
@@ -646,7 +922,6 @@ export const mockComments: Comment[] = [
     vibedHere: true,
   },
   
-  // Comments for post 6 (Basketball game)
   {
     id: "c6",
     postId: "6",
@@ -672,7 +947,6 @@ export const mockComments: Comment[] = [
     vibedHere: true,
   },
   
-  // Comments for post 10 (Super Bowl)
   {
     id: "c9",
     postId: "10",
@@ -703,6 +977,124 @@ export const mockComments: Comment[] = [
     user: mockUsers[1],
     content: "South entrance has no security line if anyone's still coming in!",
     timestamp: getRecentTime(0.01),
+    vibedHere: true,
+  },
+  
+  {
+    id: "c13",
+    postId: "21",
+    user: mockUsers[10],
+    content: "Is there still a line at the bar? Thinking of coming down.",
+    timestamp: getRecentTime(0.05),
+    vibedHere: false,
+  },
+  {
+    id: "c14",
+    postId: "21",
+    user: mockUsers[11],
+    content: "I'm here too! Sitting in the back and the view is still great. Sound is perfect!",
+    timestamp: getRecentTime(0.04),
+    vibedHere: true,
+  },
+  
+  {
+    id: "c15",
+    postId: "22",
+    user: mockUsers[12],
+    content: "Which character breakfast is this? We have reservations tomorrow!",
+    timestamp: getRecentTime(0.2),
+    vibedHere: false,
+  },
+  {
+    id: "c16",
+    postId: "22",
+    user: mockUsers[13],
+    content: "We're on the same cruise! The Mickey pool is empty right now if you want to avoid crowds.",
+    timestamp: getRecentTime(0.1),
+    vibedHere: true,
+  },
+  
+  {
+    id: "c17",
+    postId: "23",
+    user: mockUsers[14],
+    content: "Do they have any gluten-free options? Been looking for a good bakery in Des Moines!",
+    timestamp: getRecentTime(0.3),
+    vibedHere: false,
+  },
+  {
+    id: "c18",
+    postId: "23",
+    user: mockUsers[0],
+    content: "Just tried their cinnamon roll and it's amazing! Still warm from the oven!",
+    timestamp: getRecentTime(0.25),
+    vibedHere: true,
+  },
+  
+  {
+    id: "c19",
+    postId: "24",
+    user: mockUsers[1],
+    content: "What's the dress code like? Thinking of coming by later.",
+    timestamp: getRecentTime(0.18),
+    vibedHere: false,
+  },
+  {
+    id: "c20",
+    postId: "24",
+    user: mockUsers[2],
+    content: "I'm at a table near the edge! The specialty martini is worth the price - huge pour!",
+    timestamp: getRecentTime(0.15),
+    vibedHere: true,
+  },
+  
+  {
+    id: "c21",
+    postId: "25",
+    user: mockUsers[3],
+    content: "Did they say how many tickets are left? Might head down now!",
+    timestamp: getRecentTime(0.2),
+    vibedHere: false,
+  },
+  {
+    id: "c22",
+    postId: "25",
+    user: mockUsers[4],
+    content: "I'm in the lobby now! They have about 8 tickets left. The pre-show drinks area is pretty empty too.",
+    timestamp: getRecentTime(0.15),
+    vibedHere: true,
+  },
+  
+  {
+    id: "c23",
+    postId: "26",
+    user: mockUsers[5],
+    content: "How crowded is it right now? Planning to head there after dinner.",
+    timestamp: getRecentTime(0.08),
+    vibedHere: false,
+  },
+  {
+    id: "c24",
+    postId: "26",
+    user: mockUsers[6],
+    content: "I'm at the west entrance and there's barely any security line. Much faster than the east side!",
+    timestamp: getRecentTime(0.05),
+    vibedHere: true,
+  },
+  {
+    id: "c25",
+    postId: "26",
+    user: mockUsers[7],
+    content: "Is the top level open? Heard they sometimes close it for high winds.",
+    timestamp: getRecentTime(0.03),
+    vibedHere: false,
+  },
+  {
+    id: "c26",
+    postId: "26",
+    user: mockUsers[8],
+    content: "Just reached the summit! All levels are open and the view is incredible with the sunset!",
+    timestamp: getRecentTime(0.02),
     vibedHere: true,
   },
 ];

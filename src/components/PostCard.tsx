@@ -43,6 +43,12 @@ const PostCard = ({ post, locationPostCount = 1 }: PostCardProps) => {
   // Format when the post was created
   const timeAgo = formatDistanceToNow(new Date(post.timestamp), { addSuffix: true });
 
+  // Format the location post count
+  const formatLocationCount = (count: number) => {
+    if (count > 100) return "100+ people";
+    return `${count} people`;
+  };
+
   return (
     <Card className="vibe-card overflow-hidden mb-4">
       <CardHeader className="p-4 pb-0">
@@ -82,7 +88,11 @@ const PostCard = ({ post, locationPostCount = 1 }: PostCardProps) => {
                 <CollapsibleTrigger asChild>
                   <Button variant="link" size="sm" className="p-0 h-auto text-sm">
                     <Users className="h-3 w-3 mr-1" />
-                    <span className="font-medium">{locationPostCount} people vibed here in last 24hrs</span>
+                    <span className="font-medium">
+                      {locationPostCount > 100 
+                        ? "100+ people vibed here in last 24hrs"  
+                        : `${locationPostCount} people vibed here in last 24hrs`}
+                    </span>
                     {isOpen ? (
                       <ChevronUp className="h-3 w-3 ml-1" />
                     ) : (
