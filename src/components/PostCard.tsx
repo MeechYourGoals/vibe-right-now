@@ -3,19 +3,26 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Post } from "@/types";
 import { formatDistanceToNow } from "date-fns";
-import { Heart, MessageSquare, Clock, MapPin, VerifiedIcon } from "lucide-react";
+import { Heart, MessageSquare, Clock, MapPin, VerifiedIcon, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { 
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 interface PostCardProps {
   post: Post;
+  locationPostCount?: number; // Number of posts at this location in the last 24h
 }
 
-const PostCard = ({ post }: PostCardProps) => {
+const PostCard = ({ post, locationPostCount = 1 }: PostCardProps) => {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(post.likes);
+  const [isOpen, setIsOpen] = useState(false);
 
   const handleLike = () => {
     if (liked) {
@@ -38,28 +45,63 @@ const PostCard = ({ post }: PostCardProps) => {
     <Card className="vibe-card overflow-hidden mb-4">
       <CardHeader className="p-4 pb-0">
         <div className="flex justify-between items-start">
+          {/* Location information (now on the left side) */}
           <div className="flex items-center gap-2">
             <Avatar>
-              <AvatarImage src={post.user.avatar} alt={post.user.name} />
-              <AvatarFallback>{post.user.name.charAt(0)}</AvatarFallback>
+              <AvatarImage 
+                src={`https://source.unsplash.com/random/200x200/?${post.location.type}`} 
+                alt={post.location.name} 
+              />
+              <AvatarFallback>{post.location.name.charAt(0)}</AvatarFallback>
             </Avatar>
             <div>
-              <div className="font-medium">{post.user.name}</div>
-              <div className="text-sm text-muted-foreground">@{post.user.username}</div>
+              <div className="font-medium flex items-center">
+                {post.location.name}
+                {post.location.verified && (
+                  <VerifiedIcon className="h-4 w-4 ml-1 text-primary" />
+                )}
+              </div>
+              <div className="text-sm text-muted-foreground flex items-center">
+                <MapPin className="h-3 w-3 mr-1" />
+                <span>{post.location.city}, {post.location.state}</span>
+              </div>
             </div>
           </div>
+
+          {/* User/post count and expiration (now on the right side) */}
           <div className="flex flex-col items-end">
             <div className="flex items-center text-sm text-muted-foreground">
               <Clock className="h-3 w-3 mr-1" />
               <span>Expires in {hoursRemaining}h</span>
             </div>
-            <div className="flex items-center text-sm mt-1">
-              <MapPin className="h-3 w-3 mr-1" />
-              <span className="font-medium">{post.location.name}</span>
-              {post.location.verified && (
-                <VerifiedIcon className="h-3 w-3 ml-1 text-primary" />
-              )}
-            </div>
+            
+            {locationPostCount > 1 ? (
+              <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+                <CollapsibleTrigger asChild>
+                  <Button variant="link" size="sm" className="p-0 h-auto text-sm">
+                    <Users className="h-3 w-3 mr-1" />
+                    <span className="font-medium">{locationPostCount} people vibed here in last 24hrs</span>
+                  </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="text-sm mt-1">
+                  <div className="flex items-center">
+                    <Avatar className="h-6 w-6 mr-1">
+                      <AvatarImage src={post.user.avatar} alt={post.user.name} />
+                      <AvatarFallback>{post.user.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <span>@{post.user.username} {timeAgo}</span>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+            ) : (
+              <div className="flex items-center text-sm mt-1">
+                <Avatar className="h-5 w-5 mr-1">
+                  <AvatarImage src={post.user.avatar} alt={post.user.name} />
+                  <AvatarFallback>{post.user.name.charAt(0)}</AvatarFallback>
+                </Avatar>
+                <span>@{post.user.username}</span>
+              </div>
+            )}
           </div>
         </div>
       </CardHeader>
@@ -71,7 +113,7 @@ const PostCard = ({ post }: PostCardProps) => {
               {media.type === "image" ? (
                 <img
                   src={media.url}
-                  alt={`Media by ${post.user.name}`}
+                  alt={`Media at ${post.location.name}`}
                   className="w-full h-auto object-cover"
                 />
               ) : (
@@ -88,9 +130,6 @@ const PostCard = ({ post }: PostCardProps) => {
         <div className="flex items-center gap-2 mt-3">
           <Badge variant="outline" className="bg-muted">
             {post.location.type}
-          </Badge>
-          <Badge variant="outline" className="bg-muted">
-            {post.location.city}, {post.location.state}
           </Badge>
           <span className="text-xs text-muted-foreground ml-auto">{timeAgo}</span>
         </div>

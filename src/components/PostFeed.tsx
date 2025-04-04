@@ -34,13 +34,26 @@ const PostFeed = () => {
     return true;
   });
 
+  // Calculate the number of posts per location in the last 24 hours
+  const locationPostCounts = filteredPosts.reduce((acc, post) => {
+    const locationId = post.location.id;
+    acc[locationId] = (acc[locationId] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
   return (
     <div className="max-w-3xl mx-auto">
       <SearchVibes onSearch={handleSearch} />
 
       <div className="p-4 space-y-4">
         {filteredPosts.length > 0 ? (
-          filteredPosts.map((post) => <PostCard key={post.id} post={post} />)
+          filteredPosts.map((post) => (
+            <PostCard 
+              key={post.id} 
+              post={post} 
+              locationPostCount={locationPostCounts[post.location.id]}
+            />
+          ))
         ) : (
           <div className="text-center py-10">
             <h3 className="text-xl font-semibold mb-2">No vibes found</h3>
