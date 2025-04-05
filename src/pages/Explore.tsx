@@ -60,12 +60,13 @@ const Explore = () => {
           </div>
           
           <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="max-w-2xl mx-auto">
-            <TabsList className="grid grid-cols-3 md:grid-cols-6">
+            <TabsList className="grid grid-cols-3 md:grid-cols-7">
               <TabsTrigger value="all">All</TabsTrigger>
               <TabsTrigger value="restaurant">Restaurants</TabsTrigger>
               <TabsTrigger value="bar">Bars</TabsTrigger>
               <TabsTrigger value="event">Events</TabsTrigger>
               <TabsTrigger value="attraction">Attractions</TabsTrigger>
+              <TabsTrigger value="sports">Sports</TabsTrigger>
               <TabsTrigger value="other">Other</TabsTrigger>
             </TabsList>
           </Tabs>

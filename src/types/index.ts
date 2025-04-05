@@ -15,7 +15,7 @@ export interface Location {
   country: string;
   lat: number;
   lng: number;
-  type: "restaurant" | "bar" | "event" | "attraction" | "other";
+  type: "restaurant" | "bar" | "event" | "attraction" | "sports" | "other";
   verified: boolean;
 }
 
