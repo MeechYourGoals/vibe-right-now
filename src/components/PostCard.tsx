@@ -1,9 +1,8 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Post, Comment } from "@/types";
+import { Post, Comment, User } from "@/types";
 import { formatDistanceToNow } from "date-fns";
-import { Heart, MessageSquare, Clock, MapPin, VerifiedIcon, Users, ChevronDown, ChevronUp, User } from "lucide-react";
+import { Heart, MessageSquare, Clock, MapPin, VerifiedIcon, Users, ChevronDown, ChevronUp, User as UserIcon, MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +13,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import CommentList from "@/components/CommentList";
+import { mockUsers } from "@/mock/data";
 
 interface PostCardProps {
   post: Post;
@@ -26,6 +26,7 @@ const PostCard = ({ post, locationPostCount = 1 }: PostCardProps) => {
   const [likeCount, setLikeCount] = useState(post.likes);
   const [isOpen, setIsOpen] = useState(false);
   const [showComments, setShowComments] = useState(false);
+  const [showAllUsers, setShowAllUsers] = useState(false);
 
   const handleLike = () => {
     if (liked) {
@@ -44,11 +45,21 @@ const PostCard = ({ post, locationPostCount = 1 }: PostCardProps) => {
   // Format when the post was created
   const timeAgo = formatDistanceToNow(new Date(post.timestamp), { addSuffix: true });
 
-  // Format the location post count
-  const formatLocationCount = (count: number) => {
-    if (count > 100) return "100+ people";
-    return `${count} people`;
+  // Generate a list of random users who have vibed at this location
+  const getRandomUsers = (count: number) => {
+    const shuffled = [...mockUsers].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count);
   };
+
+  // Get list of users who have vibed here
+  const generateLocationUsers = () => {
+    const count = locationPostCount > 100 ? 100 : locationPostCount;
+    return getRandomUsers(count);
+  };
+
+  // Get a preview of users who have vibed here
+  const previewUsers = generateLocationUsers().slice(0, 5);
+  const allUsers = generateLocationUsers();
 
   // Determine location type categories for badges
   const getLocationCategories = () => {
@@ -137,16 +148,51 @@ const PostCard = ({ post, locationPostCount = 1 }: PostCardProps) => {
                   </Button>
                 </CollapsibleTrigger>
                 <CollapsibleContent className="text-sm mt-1">
-                  <div className="flex items-center">
-                    <Avatar className="h-6 w-6 mr-1">
-                      <AvatarImage src={post.user.avatar} alt={post.user.name} />
-                      <AvatarFallback>{post.user.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <Link to={userProfileLink} className="hover:underline flex items-center">
-                      <span>@{post.user.username}</span>
-                      <User className="h-3 w-3 ml-1 opacity-50" />
-                    </Link>
-                    <span className="ml-1">{timeAgo}</span>
+                  <div className="flex flex-col gap-2">
+                    {/* User who made this post */}
+                    <div className="flex items-center">
+                      <Avatar className="h-6 w-6 mr-1">
+                        <AvatarImage src={post.user.avatar} alt={post.user.name} />
+                        <AvatarFallback>{post.user.name.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <Link to={userProfileLink} className="hover:underline flex items-center">
+                        <span>@{post.user.username}</span>
+                        <UserIcon className="h-3 w-3 ml-1 opacity-50" />
+                      </Link>
+                      <span className="ml-1">{timeAgo}</span>
+                    </div>
+                    
+                    {/* Other users who vibed here */}
+                    <div className="mt-1">
+                      <h4 className="text-xs font-medium mb-2">Recent Vibers:</h4>
+                      <div className="space-y-1 max-h-40 overflow-y-auto">
+                        {previewUsers.map((user, index) => (
+                          <div key={index} className="flex items-center">
+                            <Avatar className="h-5 w-5 mr-1">
+                              <AvatarImage src={user.avatar} alt={user.name} />
+                              <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <Link to={`/user/${user.id}`} className="hover:underline flex items-center">
+                              <span className="text-xs">@{user.username}</span>
+                            </Link>
+                          </div>
+                        ))}
+                        
+                        {locationPostCount > 5 && (
+                          <Link 
+                            to={`/venue/${post.location.id}/vibers`}
+                            className="text-xs text-primary hover:underline flex items-center mt-2"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setShowAllUsers(true);
+                            }}
+                          >
+                            <span>Show all {locationPostCount} people</span>
+                            <MoreHorizontal className="h-3 w-3 ml-1" />
+                          </Link>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </CollapsibleContent>
               </Collapsible>
@@ -158,7 +204,7 @@ const PostCard = ({ post, locationPostCount = 1 }: PostCardProps) => {
                 </Avatar>
                 <Link to={userProfileLink} className="hover:underline flex items-center">
                   <span>@{post.user.username}</span>
-                  <User className="h-3 w-3 ml-1 opacity-50" />
+                  <UserIcon className="h-3 w-3 ml-1 opacity-50" />
                 </Link>
               </div>
             )}
@@ -223,6 +269,34 @@ const PostCard = ({ post, locationPostCount = 1 }: PostCardProps) => {
         
         {showComments && (
           <CommentList postId={post.id} commentsCount={post.comments} />
+        )}
+        
+        {/* Modal for showing all users who vibed here */}
+        {showAllUsers && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowAllUsers(false)}>
+            <div className="bg-background rounded-lg max-w-md w-full max-h-[80vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
+              <div className="p-4 border-b flex justify-between items-center">
+                <h3 className="font-bold">People who vibed at {post.location.name}</h3>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setShowAllUsers(false)}>×</Button>
+              </div>
+              <div className="p-4 overflow-y-auto max-h-[calc(80vh-4rem)]">
+                <div className="grid gap-2">
+                  {allUsers.map((user, index) => (
+                    <Link key={index} to={`/user/${user.id}`} className="flex items-center p-2 hover:bg-muted rounded-md">
+                      <Avatar className="h-8 w-8 mr-2">
+                        <AvatarImage src={user.avatar} alt={user.name} />
+                        <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <div className="font-medium text-sm">@{user.username}</div>
+                        <div className="text-xs text-muted-foreground">{user.name}</div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
         )}
       </CardFooter>
     </Card>

@@ -213,7 +213,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1506202687253-52832a7dc5b5?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1560147307-7fef1854cd4a?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
       },
     ],
     timestamp: getRecentTime(0.2),
@@ -309,7 +309,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1504215680853-026ed2a45def?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
       },
     ],
     timestamp: getRecentTime(0.3),
@@ -448,7 +448,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
       },
     ],
     timestamp: getRecentTime(0.1),
@@ -537,3 +537,4 @@ export const mockPosts: Post[] = [
     comments: 39,
   },
 ];
+
