@@ -5,7 +5,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { VerifiedIcon, Clock, MapPin, Share2 } from "lucide-react";
+import { VerifiedIcon, Clock, MapPin, Share2, ExternalLink } from "lucide-react";
 
 interface VenuePostProps {
   venue: Location;
@@ -17,8 +17,24 @@ interface VenuePostProps {
   timestamp: string;
 }
 
+// Helper function to get official ticket URLs for sports venues
+const getOfficialTicketUrl = (venueId: string) => {
+  // Map venue IDs to official ticket URLs
+  const ticketUrls: Record<string, string> = {
+    "30": "https://www.axs.com/events/crypto-com-arena", // Lakers
+    "31": "https://www.therams.com/tickets/", // Rams
+    "32": "https://www.mlb.com/dodgers/tickets", // Dodgers
+    "33": "https://www.lagalaxy.com/tickets/", // LA Galaxy
+    "34": "https://www.vbusa.org/tickets", // Venice Beach Volleyball
+    "35": "https://wmphoenixopen.com/tickets/", // WM Phoenix Open
+  };
+  
+  return ticketUrls[venueId] || "";
+};
+
 const VenuePost = ({ venue, content, media, timestamp }: VenuePostProps) => {
   const timeAgo = formatDistanceToNow(new Date(timestamp), { addSuffix: true });
+  const officialTicketUrl = venue.type === "sports" ? getOfficialTicketUrl(venue.id) : "";
 
   return (
     <Card className="vibe-card overflow-hidden">
@@ -80,9 +96,28 @@ const VenuePost = ({ venue, content, media, timestamp }: VenuePostProps) => {
           <Share2 className="h-4 w-4" />
           <span>Share</span>
         </Button>
-        <Button variant="default" size="sm" className="ml-auto">
-          View Event
-        </Button>
+        
+        <div className="flex gap-2">
+          {venue.type === "sports" && officialTicketUrl && (
+            <a 
+              href={officialTicketUrl} 
+              target="_blank" 
+              rel="noopener noreferrer"
+            >
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="bg-amber-500/20 text-amber-500 border-amber-500/50 hover:bg-amber-500/30"
+              >
+                <ExternalLink className="h-4 w-4 mr-1" />
+                Buy Tickets Direct
+              </Button>
+            </a>
+          )}
+          <Button variant="default" size="sm">
+            View Event
+          </Button>
+        </div>
       </CardFooter>
     </Card>
   );

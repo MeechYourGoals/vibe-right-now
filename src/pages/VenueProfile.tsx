@@ -6,11 +6,26 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { mockLocations, mockPosts } from "@/mock/data";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, VerifiedIcon, Clock } from "lucide-react";
+import { MapPin, VerifiedIcon, Clock, ExternalLink } from "lucide-react";
 import PostCard from "@/components/PostCard";
 import VenuePost from "@/components/VenuePost";
 import CameraButton from "@/components/CameraButton";
 import Header from "@/components/Header";
+
+// Helper function to get official ticket URLs for sports venues
+const getOfficialTicketUrl = (venueId: string) => {
+  // Map venue IDs to official ticket URLs
+  const ticketUrls: Record<string, string> = {
+    "30": "https://www.axs.com/events/crypto-com-arena", // Lakers
+    "31": "https://www.therams.com/tickets/", // Rams
+    "32": "https://www.mlb.com/dodgers/tickets", // Dodgers
+    "33": "https://www.lagalaxy.com/tickets/", // LA Galaxy
+    "34": "https://www.vbusa.org/tickets", // Venice Beach Volleyball
+    "35": "https://wmphoenixopen.com/tickets/", // WM Phoenix Open
+  };
+  
+  return ticketUrls[venueId] || "";
+};
 
 const VenueProfile = () => {
   const { id } = useParams<{ id: string }>();
@@ -21,6 +36,9 @@ const VenueProfile = () => {
   
   // Filter posts for this venue
   const venuePosts = mockPosts.filter(post => post.location.id === id);
+
+  // Get official ticket URL if this is a sports venue
+  const officialTicketUrl = venue?.type === "sports" ? getOfficialTicketUrl(id || "") : "";
   
   // Check if venue exists
   if (!venue) {
@@ -71,6 +89,22 @@ const VenueProfile = () => {
               
               <div className="flex flex-col items-end">
                 <Button variant="default" className="bg-gradient-vibe">Check In</Button>
+                {venue.type === "sports" && officialTicketUrl && (
+                  <a 
+                    href={officialTicketUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="mt-2"
+                  >
+                    <Button 
+                      variant="outline" 
+                      className="bg-amber-500/20 text-amber-500 border-amber-500/50 hover:bg-amber-500/30"
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Buy Tickets Direct
+                    </Button>
+                  </a>
+                )}
                 <p className="text-xs text-muted-foreground mt-2 flex items-center">
                   <Clock className="h-3 w-3 mr-1" />
                   Posts expire in 24h
