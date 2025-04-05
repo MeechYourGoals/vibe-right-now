@@ -55,6 +55,36 @@ const VenuePost = ({ venue, content, media, timestamp }: VenuePostProps) => {
   const officialTicketUrl = venue.type === "sports" ? getOfficialTicketUrl(venue.id) : "";
   const rideUrl = getRideServiceUrl(venue);
 
+  // Helper function to determine the button text based on venue type
+  const getActionButtonText = (venueType: string): string => {
+    if (venueType === "restaurant") {
+      return "Reserve a Spot";
+    } else if (venueType === "sports") {
+      return "Buy Tickets";
+    } else {
+      return "Visit Website";
+    }
+  };
+
+  // Helper function to determine the external link URL based on venue type
+  const getExternalLinkUrl = (venue: Location): string => {
+    if (venue.type === "restaurant") {
+      return `https://www.opentable.com/s?term=${encodeURIComponent(venue.name)}`;
+    } else if (venue.type === "sports") {
+      return officialTicketUrl;
+    } else {
+      return `https://${venue.name.toLowerCase().replace(/\s+/g, '')}.com`;
+    }
+  };
+
+  // Only show the external action button if there's a valid URL
+  const showExternalActionButton = (): boolean => {
+    if (venue.type === "sports") {
+      return !!officialTicketUrl;
+    }
+    return true;
+  };
+
   return (
     <Card className="vibe-card overflow-hidden">
       <CardHeader className="p-4 pb-0">
@@ -138,9 +168,9 @@ const VenuePost = ({ venue, content, media, timestamp }: VenuePostProps) => {
             </Button>
           </a>
           
-          {venue.type === "sports" && officialTicketUrl && (
+          {showExternalActionButton() && (
             <a 
-              href={officialTicketUrl} 
+              href={getExternalLinkUrl(venue)} 
               target="_blank" 
               rel="noopener noreferrer"
               className="flex-1"
@@ -151,43 +181,7 @@ const VenuePost = ({ venue, content, media, timestamp }: VenuePostProps) => {
                 className="bg-amber-500/20 text-amber-500 border-amber-500/50 hover:bg-amber-500/30 w-full"
               >
                 <ExternalLink className="h-4 w-4 mr-1" />
-                {venue.type === "restaurant" ? "Reserve a Spot" : "Buy Tickets"}
-              </Button>
-            </a>
-          )}
-          
-          {venue.type === "restaurant" && (
-            <a 
-              href={`https://www.opentable.com/s?term=${encodeURIComponent(venue.name)}`} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="flex-1"
-            >
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="bg-amber-500/20 text-amber-500 border-amber-500/50 hover:bg-amber-500/30 w-full"
-              >
-                <ExternalLink className="h-4 w-4 mr-1" />
-                Reserve a Spot
-              </Button>
-            </a>
-          )}
-          
-          {(venue.type !== "sports" && venue.type !== "restaurant") && (
-            <a 
-              href={`https://${venue.name.toLowerCase().replace(/\s+/g, '')}.com`} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="flex-1"
-            >
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="bg-amber-500/20 text-amber-500 border-amber-500/50 hover:bg-amber-500/30 w-full"
-              >
-                <ExternalLink className="h-4 w-4 mr-1" />
-                Visit Website
+                {getActionButtonText(venue.type)}
               </Button>
             </a>
           )}
