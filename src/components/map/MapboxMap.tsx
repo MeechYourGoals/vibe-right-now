@@ -3,6 +3,10 @@ import { useEffect, useRef, useState } from "react";
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { Location } from "@/types";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Navigation, Pin } from "lucide-react";
 
 // Temporary Mapbox token - in production, this should be stored in environment variables
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiZXhhbXBsZXVzZXIiLCJhIjoiY2xyMXp5eWJoMDJ1bTJpcGV3ZXRiZms5dCJ9.hMHS6RL9nNpwqMYlXn8l5A';
@@ -14,6 +18,8 @@ interface MapboxMapProps {
   searchedCity: string;
   mapStyle: "default" | "terrain" | "satellite";
   onLocationSelect: (location: Location) => void;
+  showDistances?: boolean;
+  userAddressLocation?: [number, number] | null;
 }
 
 const MapboxMap = ({ 
@@ -21,7 +27,9 @@ const MapboxMap = ({
   locations, 
   searchedCity, 
   mapStyle,
-  onLocationSelect
+  onLocationSelect,
+  showDistances = false,
+  userAddressLocation = null
 }: MapboxMapProps) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
@@ -66,6 +74,13 @@ const MapboxMap = ({
           .setLngLat([userLocation.longitude, userLocation.latitude])
           .addTo(newMap);
       }
+      
+      // Add user address location marker if provided
+      if (userAddressLocation) {
+        new mapboxgl.Marker({ color: '#F97316' })
+          .setLngLat(userAddressLocation)
+          .addTo(newMap);
+      }
     });
     
     mapRef.current = newMap;
@@ -76,6 +91,40 @@ const MapboxMap = ({
       @keyframes pulse {
         0% { transform: translate(-5px, -5px) scale(1); opacity: 1; }
         100% { transform: translate(-5px, -5px) scale(1.5); opacity: 0; }
+      }
+      
+      .location-marker-container {
+        position: relative;
+        width: 20px;
+        height: 20px;
+      }
+      
+      .location-marker-label {
+        position: absolute;
+        bottom: -24px;
+        left: 50%;
+        transform: translateX(-50%);
+        white-space: nowrap;
+        background-color: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 2px 5px;
+        border-radius: 4px;
+        font-size: 11px;
+        pointer-events: none;
+      }
+      
+      .location-marker-name {
+        position: absolute;
+        top: -24px;
+        left: 50%;
+        transform: translateX(-50%);
+        white-space: nowrap;
+        background-color: rgba(var(--primary), 0.8);
+        color: white;
+        padding: 2px 5px;
+        border-radius: 4px;
+        font-size: 11px;
+        pointer-events: none;
       }
     `;
     document.head.appendChild(style);
@@ -105,14 +154,40 @@ const MapboxMap = ({
     }
   }, [mapStyle]);
   
+  // Calculate distance between two points in miles
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+    const R = 3958.8; // Earth's radius in miles
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const distance = R * c;
+    
+    return distance < 1 ? `${(distance * 10).toFixed(1)} mi` : `${distance.toFixed(1)} mi`;
+  };
+  
   // Add markers to map
   const addMarkersToMap = (map: mapboxgl.Map, locations: Location[]) => {
     // Clear existing markers
     markersRef.current.forEach(marker => marker.remove());
     markersRef.current = [];
     
+    // Reference point for distance calculation (either userAddressLocation or userLocation)
+    const referencePoint = userAddressLocation 
+      ? { lat: userAddressLocation[1], lng: userAddressLocation[0] }
+      : userLocation 
+        ? { lat: userLocation.latitude, lng: userLocation.longitude }
+        : null;
+    
     locations.forEach((loc, index) => {
-      // Create custom HTML element for marker
+      // Create container for marker and labels
+      const container = document.createElement('div');
+      container.className = 'location-marker-container';
+      
+      // Create marker element
       const el = document.createElement('div');
       el.className = 'location-marker';
       el.style.width = '20px';
@@ -121,6 +196,7 @@ const MapboxMap = ({
       el.style.backgroundColor = 'rgba(var(--primary), 0.9)';
       el.style.border = '2px solid white';
       el.style.cursor = 'pointer';
+      container.appendChild(el);
       
       // Create a pulse effect element
       const pulse = document.createElement('div');
@@ -136,8 +212,30 @@ const MapboxMap = ({
       pulse.style.animationDelay = `${index * 0.1}s`;
       el.appendChild(pulse);
       
+      // Add venue name above marker if showDistances is enabled
+      if (showDistances) {
+        const nameLabel = document.createElement('div');
+        nameLabel.className = 'location-marker-name';
+        nameLabel.textContent = loc.name;
+        container.appendChild(nameLabel);
+      }
+      
+      // Add distance label below marker if showDistances is enabled and we have a reference point
+      if (showDistances && referencePoint) {
+        const distanceLabel = document.createElement('div');
+        distanceLabel.className = 'location-marker-label';
+        const distance = calculateDistance(
+          referencePoint.lat, 
+          referencePoint.lng, 
+          loc.lat, 
+          loc.lng
+        );
+        distanceLabel.textContent = `${distance} Away`;
+        container.appendChild(distanceLabel);
+      }
+      
       // Create and add marker
-      const marker = new mapboxgl.Marker(el)
+      const marker = new mapboxgl.Marker(container)
         .setLngLat([loc.lng, loc.lat])
         .addTo(map);
       
@@ -185,7 +283,7 @@ const MapboxMap = ({
     if (mapRef.current && isLoaded && locations.length > 0) {
       addMarkersToMap(mapRef.current, locations);
     }
-  }, [locations, isLoaded]);
+  }, [locations, isLoaded, showDistances, userAddressLocation]);
 
   // Method to resize map (exposed for parent component)
   const resizeMap = () => {
