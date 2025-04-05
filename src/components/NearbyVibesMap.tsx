@@ -10,6 +10,12 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/h
 import { mockPosts } from "@/mock/data";
 import VenuePost from "@/components/VenuePost";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import mapboxgl from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
+
+// Temporary Mapbox token - in production, this should be stored in environment variables
+const MAPBOX_TOKEN = 'pk.eyJ1IjoiZXhhbXBsZXVzZXIiLCJhIjoiY2xyMXp5eWJoMDJ1bTJpcGV3ZXRiZms5dCJ9.hMHS6RL9nNpwqMYlXn8l5A';
+mapboxgl.accessToken = MAPBOX_TOKEN;
 
 const NearbyVibesMap = () => {
   const [userLocation, setUserLocation] = useState<GeolocationCoordinates | null>(null);
@@ -20,6 +26,8 @@ const NearbyVibesMap = () => {
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
   const [searchedCity, setSearchedCity] = useState("");
   const mapContainerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<mapboxgl.Map | null>(null);
+  const markersRef = useRef<mapboxgl.Marker[]>([]);
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -37,20 +45,22 @@ const NearbyVibesMap = () => {
     }
   }, [location]);
   
+  // Initialize map
   useEffect(() => {
+    if (!mapContainerRef.current) return;
+    
+    // Get user location
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           setUserLocation(position.coords);
-          setLoading(false);
           
           // Filter locations within 10 miles of user
-          // In a real app, this would be a backend query
-          const nearbyVenues = mockLocations.filter((location) => {
+          const nearbyVenues = mockLocations.filter((loc) => {
             // Simple distance calculation for demo purposes
             const distance = Math.sqrt(
-              Math.pow(location.lat - position.coords.latitude, 2) +
-              Math.pow(location.lng - position.coords.longitude, 2)
+              Math.pow(loc.lat - position.coords.latitude, 2) +
+              Math.pow(loc.lng - position.coords.longitude, 2)
             );
             // Convert to roughly miles (this is very approximate)
             const milesAway = distance * 69;
@@ -58,19 +68,169 @@ const NearbyVibesMap = () => {
           });
           
           setNearbyLocations(nearbyVenues);
+          initializeMap(position.coords.latitude, position.coords.longitude);
         },
         (error) => {
           console.error("Error getting location:", error);
-          setLoading(false);
           // Use all locations as fallback
           setNearbyLocations(mockLocations);
+          // Default to US center if no location
+          initializeMap(39.8283, -98.5795);
         }
       );
     } else {
-      setLoading(false);
+      // Use all locations as fallback
       setNearbyLocations(mockLocations);
+      // Default to US center if no location
+      initializeMap(39.8283, -98.5795);
     }
+
+    // Cleanup function
+    return () => {
+      if (mapRef.current) {
+        mapRef.current.remove();
+      }
+      // Clear all markers
+      markersRef.current.forEach(marker => marker.remove());
+      markersRef.current = [];
+    };
   }, []);
+
+  // Initialize the map
+  const initializeMap = (lat: number, lng: number) => {
+    if (!mapContainerRef.current) return;
+    
+    // Create new map
+    const newMap = new mapboxgl.Map({
+      container: mapContainerRef.current,
+      style: mapStyle === 'satellite' 
+        ? 'mapbox://styles/mapbox/satellite-streets-v12'
+        : mapStyle === 'terrain' 
+          ? 'mapbox://styles/mapbox/outdoors-v12' 
+          : 'mapbox://styles/mapbox/streets-v12',
+      center: searchedCity 
+        ? [lng, lat] // Use coordinates for the searched city
+        : [lng, lat], // Default to user location or US center
+      zoom: searchedCity ? 12 : 4,
+      projection: 'mercator'
+    });
+    
+    // Add navigation controls
+    newMap.addControl(new mapboxgl.NavigationControl(), 'top-right');
+    
+    // Add markers for locations
+    newMap.on('load', () => {
+      setLoading(false);
+      
+      // Add markers
+      if (nearbyLocations.length > 0) {
+        addMarkersToMap(newMap, nearbyLocations);
+      }
+      
+      // Add user location marker
+      if (userLocation) {
+        new mapboxgl.Marker({ color: '#FF9900' })
+          .setLngLat([userLocation.longitude, userLocation.latitude])
+          .addTo(newMap);
+      }
+    });
+    
+    mapRef.current = newMap;
+  };
+  
+  // Add markers to map
+  const addMarkersToMap = (map: mapboxgl.Map, locations: Location[]) => {
+    // Clear existing markers
+    markersRef.current.forEach(marker => marker.remove());
+    markersRef.current = [];
+    
+    locations.forEach((loc, index) => {
+      // Create custom HTML element for marker
+      const el = document.createElement('div');
+      el.className = 'location-marker';
+      el.style.width = '20px';
+      el.style.height = '20px';
+      el.style.borderRadius = '50%';
+      el.style.backgroundColor = 'rgba(var(--primary), 0.9)';
+      el.style.border = '2px solid white';
+      el.style.cursor = 'pointer';
+      
+      // Create a pulse effect element
+      const pulse = document.createElement('div');
+      pulse.className = 'location-marker-pulse';
+      pulse.style.position = 'absolute';
+      pulse.style.width = '30px';
+      pulse.style.height = '30px';
+      pulse.style.borderRadius = '50%';
+      pulse.style.backgroundColor = 'rgba(var(--primary), 0.2)';
+      pulse.style.border = '1px solid rgba(var(--primary), 0.3)';
+      pulse.style.transform = 'translate(-5px, -5px)';
+      pulse.style.animation = 'pulse 2s infinite';
+      pulse.style.animationDelay = `${index * 0.1}s`;
+      el.appendChild(pulse);
+      
+      // Create and add marker
+      const marker = new mapboxgl.Marker(el)
+        .setLngLat([loc.lng, loc.lat])
+        .addTo(map);
+      
+      // Add popup on hover
+      const popup = new mapboxgl.Popup({ offset: 25, closeButton: false, closeOnClick: false })
+        .setHTML(`
+          <div style="padding: 8px;">
+            <div style="font-weight: bold;">${loc.name}</div>
+            <div style="font-size: 12px; color: #666;">${loc.type} in ${loc.city}</div>
+          </div>
+        `);
+      
+      // Show popup on hover
+      el.addEventListener('mouseenter', () => {
+        marker.setPopup(popup);
+        popup.addTo(map);
+      });
+      
+      // Hide popup on leave
+      el.addEventListener('mouseleave', () => {
+        popup.remove();
+      });
+      
+      // Handle click on marker
+      el.addEventListener('click', () => {
+        setSelectedLocation(loc);
+      });
+      
+      // Store marker for later cleanup
+      markersRef.current.push(marker);
+    });
+  };
+
+  // Update map when style changes
+  useEffect(() => {
+    if (mapRef.current) {
+      mapRef.current.setStyle(
+        mapStyle === 'satellite' 
+          ? 'mapbox://styles/mapbox/satellite-streets-v12'
+          : mapStyle === 'terrain' 
+            ? 'mapbox://styles/mapbox/outdoors-v12' 
+            : 'mapbox://styles/mapbox/streets-v12'
+      );
+    }
+  }, [mapStyle]);
+  
+  // Update map when map container is expanded or collapsed
+  useEffect(() => {
+    if (mapRef.current) {
+      // Resize map after a brief timeout to ensure the container has been resized
+      setTimeout(() => {
+        mapRef.current?.resize();
+        
+        // Re-center the map
+        if (userLocation) {
+          mapRef.current?.setCenter([userLocation.longitude, userLocation.latitude]);
+        }
+      }, 100);
+    }
+  }, [isMapExpanded]);
 
   const handleViewMap = () => {
     navigate("/explore");
@@ -87,6 +247,17 @@ const NearbyVibesMap = () => {
 
   const handleLocationSelect = (location: Location) => {
     setSelectedLocation(location);
+    
+    // Fly to location
+    if (mapRef.current) {
+      mapRef.current.flyTo({
+        center: [location.lng, location.lat],
+        zoom: 15,
+        speed: 1.2,
+        curve: 1,
+        essential: true
+      });
+    }
   };
 
   const changeMapStyle = (style: "default" | "terrain" | "satellite") => {
@@ -166,16 +337,22 @@ const NearbyVibesMap = () => {
       url: imageMap[location.id] || typeDefaultMedia[location.type] || `https://source.unsplash.com/random/800x600/?${location.type},${location.city}`
     };
   };
-
-  // Get appropriate map background based on search or default to US map
-  const getMapBackgroundUrl = () => {
-    if (searchedCity) {
-      return `https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(searchedCity)}&zoom=12&size=1200x800&maptype=${mapStyle === "satellite" ? "satellite" : "roadmap"}&style=feature:administrative|element:labels|visibility:on&style=feature:poi|visibility:off&style=feature:road|element:labels|visibility:on&style=feature:transit|visibility:off&key=YOUR_API_KEY`;
-    } else {
-      // Default to US map
-      return `https://maps.googleapis.com/maps/api/staticmap?center=United+States&zoom=4&size=1200x800&maptype=${mapStyle === "satellite" ? "satellite" : "roadmap"}&style=feature:administrative|element:labels|visibility:on&style=feature:poi|visibility:off&style=feature:road|element:labels|visibility:on&style=feature:transit|visibility:off&key=YOUR_API_KEY`;
-    }
-  };
+  
+  // Add CSS to the document head for marker animations
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.innerHTML = `
+      @keyframes pulse {
+        0% { transform: translate(-5px, -5px) scale(1); opacity: 1; }
+        100% { transform: translate(-5px, -5px) scale(1.5); opacity: 0; }
+      }
+    `;
+    document.head.appendChild(style);
+    
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
   
   return (
     <div className={`space-y-4 ${isMapExpanded ? "fixed inset-0 z-50 bg-background p-4" : ""}`}>
@@ -241,102 +418,7 @@ const NearbyVibesMap = () => {
           ref={mapContainerRef}
           className={`relative ${isMapExpanded ? "h-[85vh]" : "h-60"} rounded-lg overflow-hidden transition-all`}
         >
-          {/* Map background based on selected style */}
-          <div 
-            className="absolute inset-0 bg-cover bg-center"
-            style={{
-              backgroundImage: `url('${getMapBackgroundUrl()}'), 
-                url('${mapStyle === "terrain" 
-                ? "https://images.unsplash.com/photo-1578852612716-854e527abf2e?q=80&w=2070&auto=format&fit=crop" 
-                : mapStyle === "satellite" 
-                ? "https://images.unsplash.com/photo-1569336415962-a4bd9f69cd83?q=80&w=2831&auto=format&fit=crop"
-                : "https://images.unsplash.com/photo-1486325212027-8081e485255e?q=80&w=2070&auto=format&fit=crop"}')`
-            }}
-          >
-            {/* Semi-transparent overlay for better readability */}
-            <div className="absolute inset-0 bg-background/30"></div>
-
-            {/* Map UI elements - grid lines to simulate a map */}
-            {mapStyle === "terrain" && (
-              <div className="absolute inset-0">
-                <div className="absolute inset-0 grid grid-cols-8 grid-rows-6">
-                  {Array.from({ length: 48 }).map((_, i) => (
-                    <div key={i} className="border border-primary/5"></div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Location markers */}
-            {nearbyLocations.map((location, index) => (
-              <Popover key={location.id}>
-                <PopoverTrigger asChild>
-                  <div 
-                    className={`absolute ${selectedLocation?.id === location.id ? "z-20 h-4 w-4 -mt-0.5 -ml-0.5" : "h-3 w-3"} rounded-full ${selectedLocation?.id === location.id ? "bg-accent animate-pulse" : "bg-primary cursor-pointer hover:bg-accent"}`}
-                    style={{ 
-                      left: `${30 + Math.random() * 40}%`, 
-                      top: `${20 + Math.random() * 60}%`,
-                      animationDelay: `${index * 0.2}s`
-                    }}
-                    onClick={() => handleLocationSelect(location)}
-                  >
-                    <div className={`absolute -inset-1 rounded-full ${selectedLocation?.id === location.id ? "bg-accent/30" : "bg-primary/30"} animate-ping`}></div>
-                  </div>
-                </PopoverTrigger>
-                <PopoverContent className="w-64 p-3">
-                  <div className="font-medium">{location.name}</div>
-                  <div className="text-sm text-muted-foreground flex items-center mt-1">
-                    <MapPin className="h-3 w-3 mr-1" />
-                    <span>{location.address}, {location.city}</span>
-                  </div>
-                  <div className="mt-3 space-y-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="w-full text-xs"
-                      onClick={() => handleLocationClick(location.id)}
-                    >
-                      View Vibes
-                    </Button>
-                    <div className="flex gap-2">
-                      <a 
-                        href={getRideServiceUrl(location)} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="flex-1"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <Button variant="outline" size="sm" className="w-full text-xs">
-                          Order a Ride
-                        </Button>
-                      </a>
-                      <a 
-                        href={getOfficialUrl(location)} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="flex-1"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <Button variant="outline" size="sm" className="w-full text-xs">
-                          {location.type === "restaurant" ? "Reservations" : 
-                           location.type === "sports" || location.type === "event" ? "Tickets" : 
-                           "Website"}
-                        </Button>
-                      </a>
-                    </div>
-                  </div>
-                </PopoverContent>
-              </Popover>
-            ))}
-            
-            {/* User location */}
-            <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
-              <div className="h-5 w-5 rounded-full bg-accent animate-pulse">
-                <div className="absolute -inset-1 rounded-full bg-accent/30 animate-ping"></div>
-              </div>
-            </div>
-          </div>
-          
+          {/* Selected location detail sidebar */}
           {isMapExpanded && selectedLocation && (
             <div className="absolute right-4 top-4 w-1/3 max-h-[70vh] bg-background/90 backdrop-blur-sm rounded-lg p-4 shadow-lg overflow-y-auto">
               <div className="flex items-center justify-between mb-4">
