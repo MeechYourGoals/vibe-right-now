@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Map, X, ChevronDown, User, Building, CalendarDays } from "lucide-react";
+import { Search, Map, X, ChevronDown, User, Building, CalendarDays, MapPin, Star } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,6 +19,7 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs";
 import { mockUsers } from "@/mock/users";
+import { mockLocations } from "@/mock/locations";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
@@ -34,6 +35,7 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [searchCategory, setSearchCategory] = useState("all");
   const [showUserSuggestions, setShowUserSuggestions] = useState(false);
+  const [showPlaceSuggestions, setShowPlaceSuggestions] = useState(false);
 
   const filters = [
     "Restaurants",
@@ -49,19 +51,34 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
 
   // Sample users to display in the dropdown
   const suggestedUsers = mockUsers.slice(0, 5);
+  
+  // Featured premium places to display in the dropdown
+  const premiumPlaces = mockLocations
+    .filter(location => location.verified)
+    .slice(0, 5)
+    .map(location => ({
+      ...location,
+      isPremium: true // Mark these locations as premium for styling
+    }));
 
   useEffect(() => {
     // Show user suggestions when "users" tab is selected and hide when another tab is selected
     if (searchCategory === "users") {
       setShowUserSuggestions(true);
+      setShowPlaceSuggestions(false);
+    } else if (searchCategory === "places") {
+      setShowPlaceSuggestions(true);
+      setShowUserSuggestions(false);
     } else {
       setShowUserSuggestions(false);
+      setShowPlaceSuggestions(false);
     }
   }, [searchCategory]);
 
   const handleSearch = () => {
     onSearch(searchQuery, selectedFilter, searchCategory);
     setShowUserSuggestions(false);
+    setShowPlaceSuggestions(false);
   };
 
   const toggleFilter = (filter: string) => {
@@ -88,10 +105,18 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
     onSearch(username, selectedFilter, searchCategory);
   };
 
-  // Function to handle clicks outside of user suggestions
+  const handlePlaceSelect = (placeName: string) => {
+    setSearchQuery(placeName);
+    setShowPlaceSuggestions(false);
+    onSearch(placeName, selectedFilter, searchCategory);
+  };
+
+  // Function to handle clicks on the input field
   const handleInputClick = () => {
     if (searchCategory === "users") {
       setShowUserSuggestions(true);
+    } else if (searchCategory === "places") {
+      setShowPlaceSuggestions(true);
     }
   };
 
@@ -173,6 +198,42 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
                   <div className="flex flex-col">
                     <span className="text-sm font-medium">{user.name}</span>
                     <span className="text-xs text-muted-foreground">@{user.username}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </CollapsibleContent>
+      </Collapsible>
+
+      {/* Places Suggestions Dropdown - Premium Venues */}
+      <Collapsible open={showPlaceSuggestions && searchCategory === "places"} className="w-full">
+        <CollapsibleContent className="overflow-hidden">
+          <Card className="mt-1 w-full p-2 shadow-md border border-border">
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground px-2 py-1 flex items-center">
+                Premium Venues <Star className="h-3 w-3 text-amber-500 ml-1 fill-amber-500" />
+              </p>
+              {premiumPlaces.map((place) => (
+                <div 
+                  key={place.id} 
+                  className="flex items-center gap-2 p-2 hover:bg-amber-100/10 rounded-md cursor-pointer bg-amber-500/20 border border-amber-500/30 my-1"
+                  onClick={() => handlePlaceSelect(place.name)}
+                >
+                  <div className="h-8 w-8 flex items-center justify-center rounded-md bg-amber-500/30">
+                    <MapPin className="h-4 w-4 text-amber-500" />
+                  </div>
+                  <div className="flex flex-col flex-1">
+                    <span className="text-sm font-medium flex items-center">
+                      {place.name}
+                      <Star className="h-3 w-3 text-amber-500 ml-1 fill-amber-500" />
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {place.city}, {place.state}
+                    </span>
+                  </div>
+                  <div className="text-xs px-1.5 py-0.5 rounded bg-amber-500/30 text-amber-500 font-medium">
+                    Premium
                   </div>
                 </div>
               ))}
