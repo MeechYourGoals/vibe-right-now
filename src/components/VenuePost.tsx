@@ -45,9 +45,15 @@ const getOfficialTicketUrl = (venueId: string) => {
   return ticketUrls[venueId] || "";
 };
 
+// Helper function to get ride service URL
+const getRideServiceUrl = (place: Location) => {
+  return `https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[formatted_address]=${encodeURIComponent(`${place.address}, ${place.city}, ${place.state}`)}`;
+};
+
 const VenuePost = ({ venue, content, media, timestamp }: VenuePostProps) => {
   const timeAgo = formatDistanceToNow(new Date(timestamp), { addSuffix: true });
   const officialTicketUrl = venue.type === "sports" ? getOfficialTicketUrl(venue.id) : "";
+  const rideUrl = getRideServiceUrl(venue);
 
   return (
     <Card className="vibe-card overflow-hidden">
@@ -104,32 +110,87 @@ const VenuePost = ({ venue, content, media, timestamp }: VenuePostProps) => {
           <span className="text-xs text-muted-foreground ml-auto">{timeAgo}</span>
         </div>
       </CardContent>
-      <CardFooter className="p-4 pt-0 flex justify-between">
-        <Button variant="ghost" size="sm" className="flex items-center gap-1">
-          <Share2 className="h-4 w-4" />
-          <span>Share</span>
-        </Button>
+      <CardFooter className="p-4 pt-0 flex flex-col gap-2">
+        <div className="flex justify-between w-full">
+          <Button variant="ghost" size="sm" className="flex items-center gap-1">
+            <Share2 className="h-4 w-4" />
+            <span>Share</span>
+          </Button>
+          
+          <Button variant="default" size="sm">
+            View Event
+          </Button>
+        </div>
         
-        <div className="flex gap-2">
+        <div className="flex gap-2 w-full">
+          <a 
+            href={rideUrl} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="flex-1"
+          >
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="w-full"
+            >
+              Order a Ride
+            </Button>
+          </a>
+          
           {venue.type === "sports" && officialTicketUrl && (
             <a 
               href={officialTicketUrl} 
               target="_blank" 
               rel="noopener noreferrer"
+              className="flex-1"
             >
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="bg-amber-500/20 text-amber-500 border-amber-500/50 hover:bg-amber-500/30"
+                className="bg-amber-500/20 text-amber-500 border-amber-500/50 hover:bg-amber-500/30 w-full"
               >
                 <ExternalLink className="h-4 w-4 mr-1" />
-                Buy Tickets Direct
+                {venue.type === "restaurant" ? "Reserve a Spot" : "Buy Tickets"}
               </Button>
             </a>
           )}
-          <Button variant="default" size="sm">
-            View Event
-          </Button>
+          
+          {venue.type === "restaurant" && (
+            <a 
+              href={`https://www.opentable.com/s?term=${encodeURIComponent(venue.name)}`} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex-1"
+            >
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="bg-amber-500/20 text-amber-500 border-amber-500/50 hover:bg-amber-500/30 w-full"
+              >
+                <ExternalLink className="h-4 w-4 mr-1" />
+                Reserve a Spot
+              </Button>
+            </a>
+          )}
+          
+          {(venue.type !== "sports" && venue.type !== "restaurant") && (
+            <a 
+              href={`https://${venue.name.toLowerCase().replace(/\s+/g, '')}.com`} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex-1"
+            >
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="bg-amber-500/20 text-amber-500 border-amber-500/50 hover:bg-amber-500/30 w-full"
+              >
+                <ExternalLink className="h-4 w-4 mr-1" />
+                Visit Website
+              </Button>
+            </a>
+          )}
         </div>
       </CardFooter>
     </Card>

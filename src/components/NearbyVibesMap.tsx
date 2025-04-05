@@ -5,10 +5,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { MapPin, Navigation, Compass, X, Layers, MapIcon } from "lucide-react";
 import { mockLocations } from "@/mock/locations";
 import { Location } from "@/types";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { mockPosts } from "@/mock/data";
 import VenuePost from "@/components/VenuePost";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 const NearbyVibesMap = () => {
   const [userLocation, setUserLocation] = useState<GeolocationCoordinates | null>(null);
@@ -17,8 +18,24 @@ const NearbyVibesMap = () => {
   const [isMapExpanded, setIsMapExpanded] = useState(false);
   const [mapStyle, setMapStyle] = useState<"default" | "terrain" | "satellite">("terrain");
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
+  const [searchedCity, setSearchedCity] = useState("");
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Extract city from URL search params, if available
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const q = params.get('q') || '';
+    
+    // Try to extract city from search query (assuming format like "City, State")
+    if (q) {
+      const city = q.split(',')[0].trim();
+      setSearchedCity(city);
+    } else {
+      setSearchedCity("");
+    }
+  }, [location]);
   
   useEffect(() => {
     if (navigator.geolocation) {
@@ -84,19 +101,10 @@ const NearbyVibesMap = () => {
   // Helper function to get ride service URL
   const getRideServiceUrl = (place: Location) => {
     // Simulate a partnership with Uber
-    const partnerService: string = "uber";
+    const partnerService = "uber";
     
     // Create the deep link to the ride service app
-    switch (partnerService) {
-      case "uber":
-        return `https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[formatted_address]=${encodeURIComponent(`${place.address}, ${place.city}, ${place.state}`)}`;
-      case "lyft":
-        return `https://lyft.com/ride?id=lyft&destination[address]=${encodeURIComponent(`${place.address}, ${place.city}, ${place.state}`)}`;
-      case "waymo":
-        return "https://waymo.com/";
-      default:
-        return `https://maps.google.com/?q=${encodeURIComponent(`${place.address}, ${place.city}, ${place.state}`)}`;
-    }
+    return `https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[formatted_address]=${encodeURIComponent(`${place.address}, ${place.city}, ${place.state}`)}`;
   };
 
   // Helper function to get official ticket or venue URL
@@ -157,6 +165,16 @@ const NearbyVibesMap = () => {
       type: "image" as const,
       url: imageMap[location.id] || typeDefaultMedia[location.type] || `https://source.unsplash.com/random/800x600/?${location.type},${location.city}`
     };
+  };
+
+  // Get appropriate map background based on search or default to US map
+  const getMapBackgroundUrl = () => {
+    if (searchedCity) {
+      return `https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(searchedCity)}&zoom=12&size=1200x800&maptype=${mapStyle === "satellite" ? "satellite" : "roadmap"}&style=feature:administrative|element:labels|visibility:on&style=feature:poi|visibility:off&style=feature:road|element:labels|visibility:on&style=feature:transit|visibility:off&key=YOUR_API_KEY`;
+    } else {
+      // Default to US map
+      return `https://maps.googleapis.com/maps/api/staticmap?center=United+States&zoom=4&size=1200x800&maptype=${mapStyle === "satellite" ? "satellite" : "roadmap"}&style=feature:administrative|element:labels|visibility:on&style=feature:poi|visibility:off&style=feature:road|element:labels|visibility:on&style=feature:transit|visibility:off&key=YOUR_API_KEY`;
+    }
   };
   
   return (
@@ -225,13 +243,15 @@ const NearbyVibesMap = () => {
         >
           {/* Map background based on selected style */}
           <div 
-            className={`absolute inset-0 ${
-              mapStyle === "terrain" 
-                ? "bg-[url('https://images.unsplash.com/photo-1578852612716-854e527abf2e?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center" 
+            className="absolute inset-0 bg-cover bg-center"
+            style={{
+              backgroundImage: `url('${getMapBackgroundUrl()}'), 
+                url('${mapStyle === "terrain" 
+                ? "https://images.unsplash.com/photo-1578852612716-854e527abf2e?q=80&w=2070&auto=format&fit=crop" 
                 : mapStyle === "satellite" 
-                  ? "bg-[url('https://images.unsplash.com/photo-1569336415962-a4bd9f69cd83?q=80&w=2831&auto=format&fit=crop')] bg-cover bg-center"
-                  : "bg-gradient-to-br from-primary/10 to-secondary/10"
-            }`}
+                ? "https://images.unsplash.com/photo-1569336415962-a4bd9f69cd83?q=80&w=2831&auto=format&fit=crop"
+                : "https://images.unsplash.com/photo-1486325212027-8081e485255e?q=80&w=2070&auto=format&fit=crop"}')`
+            }}
           >
             {/* Semi-transparent overlay for better readability */}
             <div className="absolute inset-0 bg-background/30"></div>
@@ -249,8 +269,8 @@ const NearbyVibesMap = () => {
 
             {/* Location markers */}
             {nearbyLocations.map((location, index) => (
-              <HoverCard key={location.id} openDelay={200} closeDelay={100}>
-                <HoverCardTrigger asChild>
+              <Popover key={location.id}>
+                <PopoverTrigger asChild>
                   <div 
                     className={`absolute ${selectedLocation?.id === location.id ? "z-20 h-4 w-4 -mt-0.5 -ml-0.5" : "h-3 w-3"} rounded-full ${selectedLocation?.id === location.id ? "bg-accent animate-pulse" : "bg-primary cursor-pointer hover:bg-accent"}`}
                     style={{ 
@@ -262,8 +282,8 @@ const NearbyVibesMap = () => {
                   >
                     <div className={`absolute -inset-1 rounded-full ${selectedLocation?.id === location.id ? "bg-accent/30" : "bg-primary/30"} animate-ping`}></div>
                   </div>
-                </HoverCardTrigger>
-                <HoverCardContent className="w-64 p-3">
+                </PopoverTrigger>
+                <PopoverContent className="w-64 p-3">
                   <div className="font-medium">{location.name}</div>
                   <div className="text-sm text-muted-foreground flex items-center mt-1">
                     <MapPin className="h-3 w-3 mr-1" />
@@ -305,8 +325,8 @@ const NearbyVibesMap = () => {
                       </a>
                     </div>
                   </div>
-                </HoverCardContent>
-              </HoverCard>
+                </PopoverContent>
+              </Popover>
             ))}
             
             {/* User location */}
@@ -414,7 +434,7 @@ const NearbyVibesMap = () => {
                       className="flex-1"
                     >
                       <Button variant="outline" size="sm" className="w-full h-7 text-xs">
-                        Ride
+                        Order a Ride
                       </Button>
                     </a>
                     <a 
@@ -424,9 +444,9 @@ const NearbyVibesMap = () => {
                       className="flex-1"
                     >
                       <Button variant="outline" size="sm" className="w-full h-7 text-xs">
-                        {location.type === "restaurant" ? "Book" : 
+                        {location.type === "restaurant" ? "Reserve" : 
                          location.type === "sports" || location.type === "event" ? "Tickets" : 
-                         "Site"}
+                         "Website"}
                       </Button>
                     </a>
                   </div>
