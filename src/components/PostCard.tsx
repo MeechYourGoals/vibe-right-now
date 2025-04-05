@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Post, Comment } from "@/types";
 import { formatDistanceToNow } from "date-fns";
-import { Heart, MessageSquare, Clock, MapPin, VerifiedIcon, Users, ChevronDown, ChevronUp } from "lucide-react";
+import { Heart, MessageSquare, Clock, MapPin, VerifiedIcon, Users, ChevronDown, ChevronUp, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -80,6 +80,9 @@ const PostCard = ({ post, locationPostCount = 1 }: PostCardProps) => {
 
   const locationCategories = getLocationCategories();
 
+  // User profile link
+  const userProfileLink = `/user/${post.user.id}`;
+
   return (
     <Card className="vibe-card overflow-hidden mb-4">
       <CardHeader className="p-4 pb-0">
@@ -137,7 +140,11 @@ const PostCard = ({ post, locationPostCount = 1 }: PostCardProps) => {
                       <AvatarImage src={post.user.avatar} alt={post.user.name} />
                       <AvatarFallback>{post.user.name.charAt(0)}</AvatarFallback>
                     </Avatar>
-                    <span>@{post.user.username} {timeAgo}</span>
+                    <Link to={userProfileLink} className="hover:underline flex items-center">
+                      <span>@{post.user.username}</span>
+                      <User className="h-3 w-3 ml-1 opacity-50" />
+                    </Link>
+                    <span className="ml-1">{timeAgo}</span>
                   </div>
                 </CollapsibleContent>
               </Collapsible>
@@ -147,7 +154,10 @@ const PostCard = ({ post, locationPostCount = 1 }: PostCardProps) => {
                   <AvatarImage src={post.user.avatar} alt={post.user.name} />
                   <AvatarFallback>{post.user.name.charAt(0)}</AvatarFallback>
                 </Avatar>
-                <span>@{post.user.username}</span>
+                <Link to={userProfileLink} className="hover:underline flex items-center">
+                  <span>@{post.user.username}</span>
+                  <User className="h-3 w-3 ml-1 opacity-50" />
+                </Link>
               </div>
             )}
           </div>

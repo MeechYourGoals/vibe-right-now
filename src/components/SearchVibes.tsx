@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Map, X, ChevronDown } from "lucide-react";
+import { Search, Map, X, ChevronDown, User, Building, CalendarDays } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,6 +12,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 
 interface SearchVibesProps {
   onSearch: (query: string, filter: string) => void;
@@ -22,6 +28,7 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
   const [showFilters, setShowFilters] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("All");
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
+  const [searchCategory, setSearchCategory] = useState("all");
 
   const filters = [
     "Restaurants",
@@ -53,10 +60,37 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
 
   return (
     <div className="space-y-3 sticky top-16 z-10 bg-background p-4">
+      <Tabs 
+        value={searchCategory} 
+        onValueChange={setSearchCategory} 
+        className="w-full mb-3"
+      >
+        <TabsList className="grid grid-cols-3 w-full">
+          <TabsTrigger value="all" className="flex items-center gap-1">
+            <Search className="h-3.5 w-3.5" />
+            <span>All</span>
+          </TabsTrigger>
+          <TabsTrigger value="places" className="flex items-center gap-1">
+            <Building className="h-3.5 w-3.5" />
+            <span>Places</span>
+          </TabsTrigger>
+          <TabsTrigger value="users" className="flex items-center gap-1">
+            <User className="h-3.5 w-3.5" />
+            <span>Users</span>
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
+
       <div className="relative flex">
         <Input
           type="search"
-          placeholder="Search venues, events, vibes..."
+          placeholder={
+            searchCategory === "users" 
+              ? "Search users by name or username..." 
+              : searchCategory === "places"
+                ? "Search venues, events, locations..."
+                : "Search venues, events, vibes, users..."
+          }
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="pr-20"
