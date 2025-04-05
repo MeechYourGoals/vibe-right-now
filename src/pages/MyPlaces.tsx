@@ -2,14 +2,14 @@
 import { Layout } from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { locations } from "@/mock/locations";
+import { mockLocations } from "@/mock/locations";
 import { Location } from "@/types";
 import { MapPin, Star, Clock } from "lucide-react";
 
 const MyPlaces = () => {
   // Filter locations to get a subset for "Visited" and "Want to Visit"
-  const visitedPlaces = locations.slice(0, 5);
-  const wantToVisitPlaces = locations.slice(5, 10);
+  const visitedPlaces = mockLocations.slice(0, 5);
+  const wantToVisitPlaces = mockLocations.slice(5, 10);
 
   return (
     <Layout>
