@@ -5,11 +5,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { MapPin, Navigation, Compass } from "lucide-react";
 import { mockLocations } from "@/mock/data";
 import { Location } from "@/types";
+import { useNavigate } from "react-router-dom";
 
 const NearbyVibesMap = () => {
   const [userLocation, setUserLocation] = useState<GeolocationCoordinates | null>(null);
   const [nearbyLocations, setNearbyLocations] = useState<Location[]>([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
   
   useEffect(() => {
     if (navigator.geolocation) {
@@ -45,12 +47,16 @@ const NearbyVibesMap = () => {
       setNearbyLocations(mockLocations);
     }
   }, []);
+
+  const handleViewMap = () => {
+    navigate("/explore");
+  };
   
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-bold">Nearby Vibes</h2>
-        <Button variant="ghost" size="sm" className="gap-1">
+        <Button variant="ghost" size="sm" className="gap-1" onClick={handleViewMap}>
           <Navigation className="h-4 w-4" />
           View Map
         </Button>
@@ -63,7 +69,10 @@ const NearbyVibesMap = () => {
           </div>
         </div>
       ) : (
-        <div className="relative h-60 bg-muted/20 rounded-lg overflow-hidden">
+        <div 
+          className="relative h-60 bg-muted/20 rounded-lg overflow-hidden cursor-pointer hover:bg-muted/30 transition-colors"
+          onClick={handleViewMap}
+        >
           {/* Placeholder for actual map integration */}
           <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-secondary/10">
             {/* Placeholder map dots */}
@@ -91,7 +100,7 @@ const NearbyVibesMap = () => {
           
           <div className="absolute bottom-0 left-0 right-0 p-3 glass-effect">
             <p className="text-sm">
-              {nearbyLocations.length} vibing locations within 10 miles of you
+              {nearbyLocations.length} Vibes within 10 miles of you
             </p>
           </div>
         </div>
@@ -115,7 +124,7 @@ const NearbyVibesMap = () => {
       </div>
       
       {nearbyLocations.length > 4 && (
-        <Button variant="ghost" size="sm" className="w-full">
+        <Button variant="ghost" size="sm" className="w-full" onClick={handleViewMap}>
           See All {nearbyLocations.length} Nearby Locations
         </Button>
       )}

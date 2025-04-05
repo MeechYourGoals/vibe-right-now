@@ -3,6 +3,7 @@ import Header from "@/components/Header";
 import PostFeed from "@/components/PostFeed";
 import LocationsNearby from "@/components/LocationsNearby";
 import TrendingLocations from "@/components/TrendingLocations";
+import DiscountLocations from "@/components/DiscountLocations";
 import CameraButton from "@/components/CameraButton";
 import NearbyVibesMap from "@/components/NearbyVibesMap";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -29,6 +30,7 @@ const Index = () => {
             <div className="w-full md:w-1/4 space-y-6">
               <NearbyVibesMap />
               <TrendingLocations />
+              <DiscountLocations />
             </div>
           )}
         </div>
