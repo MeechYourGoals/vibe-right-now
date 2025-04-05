@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Post } from "@/types";
+import { Post, Comment } from "@/types";
 import { formatDistanceToNow } from "date-fns";
 import { Heart, MessageSquare, Clock, MapPin, VerifiedIcon, Users, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,7 @@ import CommentList from "@/components/CommentList";
 interface PostCardProps {
   post: Post;
   locationPostCount?: number; // Number of posts at this location in the last 24h
+  comments?: Comment[]; // Array of comments for this post
 }
 
 const PostCard = ({ post, locationPostCount = 1 }: PostCardProps) => {
