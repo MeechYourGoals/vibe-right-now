@@ -1,5 +1,5 @@
 
-import { mockLocations } from "@/mock/data";
+import { mockLocations } from "@/mock/locations";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, TrendingUp } from "lucide-react";

@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { MapPin, Navigation, Compass } from "lucide-react";
-import { mockLocations } from "@/mock/data";
+import { mockLocations } from "@/mock/locations";
 import { Location } from "@/types";
 import { useNavigate } from "react-router-dom";
 

@@ -1,0 +1,143 @@
+
+import { User } from "@/types";
+
+export const mockUsers: User[] = [
+  {
+    id: "1",
+    username: "sarah_vibes",
+    name: "Sarah Miller",
+    avatar: "https://randomuser.me/api/portraits/women/1.jpg",
+  },
+  {
+    id: "2",
+    username: "jay_experiences",
+    name: "Jay Johnson",
+    avatar: "https://randomuser.me/api/portraits/men/1.jpg",
+  },
+  {
+    id: "3",
+    username: "adventure_alex",
+    name: "Alex Kim",
+    avatar: "https://randomuser.me/api/portraits/women/2.jpg",
+  },
+  {
+    id: "4",
+    username: "marco_travels",
+    name: "Marco Williams",
+    avatar: "https://randomuser.me/api/portraits/men/2.jpg",
+  },
+  {
+    id: "5",
+    username: "local_explorer",
+    name: "Jamie Chen",
+    avatar: "https://randomuser.me/api/portraits/women/3.jpg",
+  },
+  {
+    id: "6",
+    username: "sports_fan",
+    name: "Michael Jones",
+    avatar: "https://randomuser.me/api/portraits/men/3.jpg",
+  },
+  {
+    id: "7",
+    username: "party_queen",
+    name: "Sophie Garcia",
+    avatar: "https://randomuser.me/api/portraits/women/4.jpg",
+  },
+  {
+    id: "8",
+    username: "world_wanderer",
+    name: "David Thompson",
+    avatar: "https://randomuser.me/api/portraits/men/4.jpg",
+  },
+  {
+    id: "9",
+    username: "ski_enthusiast",
+    name: "Emma Wilson",
+    avatar: "https://randomuser.me/api/portraits/women/5.jpg",
+  },
+  {
+    id: "10",
+    username: "luxury_life",
+    name: "James Smith",
+    avatar: "https://randomuser.me/api/portraits/men/5.jpg",
+  },
+  {
+    id: "11",
+    username: "beach_lover",
+    name: "Olivia Brown",
+    avatar: "https://randomuser.me/api/portraits/women/6.jpg",
+  },
+  {
+    id: "12",
+    username: "fitness_guru",
+    name: "Ryan Davis",
+    avatar: "https://randomuser.me/api/portraits/men/6.jpg",
+  },
+  {
+    id: "13",
+    username: "rodeo_fan",
+    name: "Tyler Rodriguez",
+    avatar: "https://randomuser.me/api/portraits/men/7.jpg",
+  },
+  {
+    id: "14",
+    username: "travel_addict",
+    name: "Lisa Martinez",
+    avatar: "https://randomuser.me/api/portraits/women/7.jpg",
+  },
+  {
+    id: "15",
+    username: "coffee_connoisseur",
+    name: "Amelia Jackson",
+    avatar: "https://randomuser.me/api/portraits/women/8.jpg",
+  },
+  {
+    id: "16",
+    username: "comedy_lover",
+    name: "Emma Lewis",
+    avatar: "https://randomuser.me/api/portraits/women/9.jpg",
+  },
+  {
+    id: "17",
+    username: "cruise_queen",
+    name: "Olivia Parker",
+    avatar: "https://randomuser.me/api/portraits/women/10.jpg",
+  },
+  {
+    id: "18",
+    username: "pastry_chef",
+    name: "Daniel Baker",
+    avatar: "https://randomuser.me/api/portraits/men/11.jpg",
+  },
+  {
+    id: "19",
+    username: "luxury_traveler",
+    name: "Isabella Moore",
+    avatar: "https://randomuser.me/api/portraits/women/11.jpg",
+  },
+  {
+    id: "20",
+    username: "global_explorer",
+    name: "William Harris",
+    avatar: "https://randomuser.me/api/portraits/men/12.jpg",
+  },
+  {
+    id: "21",
+    username: "paris_dreamer",
+    name: "Charlotte Thomas",
+    avatar: "https://randomuser.me/api/portraits/women/12.jpg",
+  },
+  {
+    id: "22",
+    username: "fashion_forward",
+    name: "Zoe Campbell",
+    avatar: "https://randomuser.me/api/portraits/women/13.jpg",
+  },
+  {
+    id: "23",
+    username: "music_festival",
+    name: "Jordan Rivers",
+    avatar: "https://randomuser.me/api/portraits/men/13.jpg",
+  },
+];

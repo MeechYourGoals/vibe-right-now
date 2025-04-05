@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   Sheet, 
@@ -14,7 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Award, Gift, Star } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { mockLocations } from "@/mock/data";
+import { mockLocations } from "@/mock/locations";
 
 interface Reward {
   id: string;

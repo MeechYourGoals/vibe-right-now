@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { mockPosts } from "@/mock/data";
+import { mockPosts } from "@/mock/posts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Ticket, Tag } from "lucide-react";
