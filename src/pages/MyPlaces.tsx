@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { mockLocations } from "@/mock/locations";
 import { Location } from "@/types";
-import { MapPin, Star, Clock } from "lucide-react";
+import { MapPin, Star, Clock, Car, ExternalLink } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const MyPlaces = () => {
   // Filter locations to get a subset for "Visited" and "Want to Visit"
@@ -51,7 +52,62 @@ type PlaceCardProps = {
   visitType: "visited" | "planned";
 };
 
+// Helper function to get ride service URL
+const getRideServiceUrl = (place: Location) => {
+  // Simulate a partnership with Uber
+  const partnerService = "uber";
+  
+  // Create the deep link to the ride service app
+  switch (partnerService) {
+    case "uber":
+      // Format: uber://?action=setPickup&pickup=my_location&dropoff[latitude]={LAT}&dropoff[longitude]={LNG}&dropoff[nickname]={NAME}
+      return `https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[formatted_address]=${encodeURIComponent(`${place.address}, ${place.city}, ${place.state}`)}`;
+    case "lyft":
+      // Format: lyft://ridetype?id=lyft&destination[latitude]={LAT}&destination[longitude]={LNG}
+      return `https://lyft.com/ride?id=lyft&destination[address]=${encodeURIComponent(`${place.address}, ${place.city}, ${place.state}`)}`;
+    case "waymo":
+      // Direct to Waymo app or website
+      return "https://waymo.com/";
+    default:
+      return `https://maps.google.com/?q=${encodeURIComponent(`${place.address}, ${place.city}, ${place.state}`)}`;
+  }
+};
+
+// Helper function to get official ticket or venue URL
+const getOfficialUrl = (place: Location) => {
+  // For sports venues, we would typically have specific ticket platform partnerships
+  if (place.type === "sports") {
+    // Use the same logic as in VenuePost to get ticket URLs
+    const ticketUrls: Record<string, string> = {
+      "30": "https://www.axs.com/events/crypto-com-arena", // Lakers
+      "31": "https://www.therams.com/tickets/", // Rams
+      "32": "https://www.mlb.com/dodgers/tickets", // Dodgers
+      "33": "https://www.lagalaxy.com/tickets/", // LA Galaxy
+      "34": "https://www.vbusa.org/tickets", // Venice Beach Volleyball
+      "35": "https://wmphoenixopen.com/tickets/", // WM Phoenix Open
+    };
+    
+    return ticketUrls[place.id] || `https://seatgeek.com/${place.city.toLowerCase()}-tickets`;
+  }
+  
+  // For events, we'd link to event ticket platforms
+  if (place.type === "event") {
+    return `https://www.ticketmaster.com/search?q=${encodeURIComponent(place.name)}`;
+  }
+  
+  // For restaurants, we would link to reservation platforms
+  if (place.type === "restaurant") {
+    return `https://www.opentable.com/s?term=${encodeURIComponent(place.name)}&queryId=${place.id}`;
+  }
+  
+  // For bars and attractions, default to their presumed website
+  return `https://${place.name.toLowerCase().replace(/\s+/g, '')}.com`;
+};
+
 const PlaceCard = ({ place, visitType }: PlaceCardProps) => {
+  const rideServiceUrl = getRideServiceUrl(place);
+  const officialUrl = getOfficialUrl(place);
+  
   return (
     <Card className="overflow-hidden">
       <div className="flex flex-col md:flex-row">
@@ -103,6 +159,27 @@ const PlaceCard = ({ place, visitType }: PlaceCardProps) => {
                 {place.type === "sports" && "Great venue with perfect views of the action."}
                 {place.type === "attraction" && "Worth the visit. Stunning views and unique experience."}
               </p>
+              
+              <div className="flex flex-wrap gap-2 mt-4">
+                <a href={rideServiceUrl} target="_blank" rel="noopener noreferrer">
+                  <Button variant="outline" size="sm" className="flex items-center gap-1">
+                    <Car className="h-4 w-4" />
+                    <span>Order a Ride</span>
+                  </Button>
+                </a>
+                
+                <a href={officialUrl} target="_blank" rel="noopener noreferrer">
+                  <Button variant="default" size="sm" className="flex items-center gap-1">
+                    <ExternalLink className="h-4 w-4" />
+                    <span>
+                      {place.type === "sports" ? "Buy Tickets" : 
+                       place.type === "restaurant" ? "Reserve a Table" : 
+                       place.type === "event" ? "Get Tickets" : 
+                       "Official Site"}
+                    </span>
+                  </Button>
+                </a>
+              </div>
             </div>
           </CardContent>
         </div>
