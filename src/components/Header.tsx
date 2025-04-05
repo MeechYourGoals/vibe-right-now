@@ -13,17 +13,49 @@ import {
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
 import { User, Bookmark, MapPin, Award, UserCircle } from "lucide-react";
+import { useEffect, useState } from "react";
+
+// Array of V-words to cycle through
+const vWords = ["Vibe", "Vacation", "Vlog", "Visit", "Voyage", "Venture"];
 
 const Header = () => {
   const isMobile = useIsMobile();
+  const [currentVWord, setCurrentVWord] = useState(vWords[0]);
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsAnimating(true);
+      
+      // Wait for exit animation to complete before changing word
+      setTimeout(() => {
+        setCurrentVWord(prevWord => {
+          const currentIndex = vWords.indexOf(prevWord);
+          const nextIndex = (currentIndex + 1) % vWords.length;
+          return vWords[nextIndex];
+        });
+      }, 500); // Half the animation duration
+      
+      // Reset animation state after full animation cycle
+      setTimeout(() => {
+        setIsAnimating(false);
+      }, 1000); // Full animation duration
+      
+    }, 4000); // Change word every 4 seconds
+    
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <header className="sticky top-0 z-20 w-full border-b backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center">
         <div className="mr-4 flex">
           <Link to="/" className="flex items-center space-x-2">
-            <span className="text-xl font-bold vibe-gradient-text">
-              Vibe Right Now
+            <span className="text-xl font-bold relative overflow-hidden">
+              <span className={`inline-block transition-transform duration-500 ease-in-out ${isAnimating ? 'transform -translate-y-full opacity-0' : ''}`}>
+                {currentVWord}
+              </span>
+              <span className="text-transparent vibe-gradient-text"> Right Now</span>
             </span>
           </Link>
         </div>

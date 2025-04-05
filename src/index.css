@@ -123,6 +123,22 @@
   .reward-badge {
     @apply inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-primary/20 text-primary-foreground;
   }
+  
+  .word-rotate-enter {
+    @apply absolute transform translate-y-full opacity-0 transition-all duration-500 ease-in-out;
+  }
+  
+  .word-rotate-enter-active {
+    @apply transform translate-y-0 opacity-100;
+  }
+  
+  .word-rotate-exit {
+    @apply absolute transform translate-y-0 opacity-100 transition-all duration-500 ease-in-out;
+  }
+  
+  .word-rotate-exit-active {
+    @apply transform -translate-y-full opacity-0;
+  }
 }
 
 .animate-pulse-slow {
@@ -137,3 +153,23 @@
     transform: scale(1.05);
   }
 }
+
+@keyframes rotate-words {
+  0%, 20% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  25%, 45% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  50%, 70% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  75%, 100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
