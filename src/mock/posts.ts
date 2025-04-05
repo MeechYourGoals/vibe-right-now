@@ -1,3 +1,4 @@
+
 import { Post } from "@/types";
 import { mockUsers } from "./users";
 import { mockLocations } from "./locations";
@@ -447,7 +448,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6a3?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
       },
     ],
     timestamp: getRecentTime(0.1),

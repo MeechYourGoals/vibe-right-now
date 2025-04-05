@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MessageSquare, Send } from "lucide-react";
 import CommentItem from "@/components/CommentItem";
 import { mockComments } from "@/mock/data";
+import { mockUsers } from "@/mock/data";
 
 interface CommentListProps {
   postId: string;
@@ -18,7 +19,48 @@ const CommentList = ({ postId, commentsCount }: CommentListProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Filter comments for this specific post
-  const postComments = mockComments.filter(comment => comment.postId === postId);
+  let postComments = mockComments.filter(comment => comment.postId === postId);
+  
+  // If no comments found in mock data, generate example comments
+  if (postComments.length === 0 && commentsCount > 0) {
+    // Generate 2-3 example comments
+    const commentCount = Math.min(commentsCount, Math.floor(Math.random() * 2) + 2);
+    const exampleComments: Comment[] = [];
+    
+    // Regular comment
+    exampleComments.push({
+      id: `example-${postId}-1`,
+      postId: postId,
+      user: mockUsers[Math.floor(Math.random() * mockUsers.length)],
+      content: "This place looks amazing! How's the crowd right now?",
+      timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30 minutes ago
+      vibedHere: false
+    });
+    
+    // "Vibed Here" comment
+    exampleComments.push({
+      id: `example-${postId}-2`,
+      postId: postId,
+      user: mockUsers[Math.floor(Math.random() * mockUsers.length)],
+      content: "I was here yesterday and it was incredible! The line moves fast if you go around to the side entrance.",
+      timestamp: new Date(Date.now() - 1000 * 60 * 120).toISOString(), // 2 hours ago
+      vibedHere: true
+    });
+    
+    // Add a third comment if needed
+    if (commentCount > 2) {
+      exampleComments.push({
+        id: `example-${postId}-3`,
+        postId: postId,
+        user: mockUsers[Math.floor(Math.random() * mockUsers.length)],
+        content: "Heading there now! Anyone want to meet up?",
+        timestamp: new Date(Date.now() - 1000 * 60 * 10).toISOString(), // 10 minutes ago
+        vibedHere: Math.random() > 0.5 // 50% chance of being "Vibed Here"
+      });
+    }
+    
+    postComments = exampleComments;
+  }
 
   const handleSubmitComment = () => {
     if (!newComment.trim()) return;

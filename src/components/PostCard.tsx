@@ -98,7 +98,9 @@ const PostCard = ({ post, locationPostCount = 1 }: PostCardProps) => {
             </Avatar>
             <div>
               <div className="font-medium flex items-center">
-                {post.location.name}
+                <Link to={`/venue/${post.location.id}`} className="hover:underline">
+                  {post.location.name}
+                </Link>
                 {post.location.verified && (
                   <VerifiedIcon className="h-4 w-4 ml-1 text-primary" />
                 )}
