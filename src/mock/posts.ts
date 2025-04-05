@@ -164,7 +164,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1597680424501-abd4bed6128b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
       },
     ],
     timestamp: getRecentTime(0.1),
@@ -271,12 +271,12 @@ export const mockPosts: Post[] = [
   {
     id: "17",
     user: mockUsers[1],
-    location: mockLocations[9],
-    content: "Pre-game is electric! Teams warming up and the stadium is filling fast. Food lines still short!",
+    location: mockLocations[21], // Bitcoin Conference location
+    content: "Bitcoin Conference is packed today! Great keynotes happening on the main stage with minimal wait times for entry.",
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1608245449230-4ac19066d2d0?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1639815188546-c43c240ff4df?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
       },
     ],
     timestamp: getRecentTime(0.15),
@@ -287,12 +287,12 @@ export const mockPosts: Post[] = [
   {
     id: "18",
     user: mockUsers[2],
-    location: mockLocations[9],
-    content: "Snack stands on west side have no lines! Get your food now before halftime rush.",
+    location: mockLocations[22], // InvestFest location
+    content: "InvestFest workshops are incredible! The west wing has shorter lines for the top speakers right now.",
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1562155955-1cb2f99b2d8b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1515187029135-18ee286d815b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
       },
     ],
     timestamp: getRecentTime(0.2),
@@ -303,12 +303,12 @@ export const mockPosts: Post[] = [
   {
     id: "19",
     user: mockUsers[3],
-    location: mockLocations[9],
+    location: mockLocations[9], // Keep one Allegiant Stadium post
     content: "VIP entrance on south side has no wait right now! Regular entrances are packed.",
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1628891890377-57dba2715fdd?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
       },
     ],
     timestamp: getRecentTime(0.3),
@@ -319,12 +319,23 @@ export const mockPosts: Post[] = [
   {
     id: "20",
     user: mockUsers[4],
-    location: mockLocations[9],
-    content: "Celebrity row is filling up! Spotted at least 10 A-listers already in section 112.",
+    location: {
+      id: "29",
+      name: "CES Las Vegas",
+      address: "3150 Paradise Rd",
+      city: "Las Vegas",
+      state: "NV",
+      country: "USA",
+      lat: 36.1318,
+      lng: -115.1516,
+      type: "event",
+      verified: true,
+    },
+    content: "Just spotted the newest tech innovations at CES! North hall is less crowded if you want to see the automotive displays.",
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1608245449230-4ac19066d2d0?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
       },
     ],
     timestamp: getRecentTime(0.25),
@@ -436,7 +447,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1471478331149-c72f17e33c73?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6a3?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
       },
     ],
     timestamp: getRecentTime(0.1),

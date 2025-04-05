@@ -1,4 +1,3 @@
-
 import { Location } from "@/types";
 
 export const mockLocations: Location[] = [
@@ -335,6 +334,18 @@ export const mockLocations: Location[] = [
     country: "USA",
     lat: 33.6823,
     lng: -116.2383,
+    type: "event",
+    verified: true,
+  },
+  {
+    id: "29",
+    name: "CES Las Vegas",
+    address: "3150 Paradise Rd",
+    city: "Las Vegas",
+    state: "NV",
+    country: "USA",
+    lat: 36.1318,
+    lng: -115.1516,
     type: "event",
     verified: true,
   },
