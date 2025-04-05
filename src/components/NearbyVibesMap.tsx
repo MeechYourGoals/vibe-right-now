@@ -26,6 +26,12 @@ import {
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import mapboxgl from 'mapbox-gl';
+
+// Use the Mapbox token from MapboxMap to ensure consistency
+// Temporary Mapbox token - in production, this should be stored in environment variables
+const MAPBOX_TOKEN = 'pk.eyJ1IjoiZXhhbXBsZXVzZXIiLCJhIjoiY2xyMXp5eWJoMDJ1bTJpcGV3ZXRiZms5dCJ9.hMHS6RL9nNpwqMYlXn8l5A';
+mapboxgl.accessToken = MAPBOX_TOKEN;
 
 const NearbyVibesMap = () => {
   const [userLocation, setUserLocation] = useState<GeolocationCoordinates | null>(null);

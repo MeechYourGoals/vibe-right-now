@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
@@ -9,31 +8,27 @@ import { Button } from "@/components/ui/button";
 import { MapPin, Search, VerifiedIcon } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
 import CameraButton from "@/components/CameraButton";
 import SearchVibes from "@/components/SearchVibes";
 import NearbyVibesMap from "@/components/NearbyVibesMap";
 import { Location } from "@/types";
 import VenuePost from "@/components/VenuePost";
 
-// Mock data for city-specific event previews
 const getCitySpecificContent = (city: string, type: string) => {
-  // This would be an API call in a real app
   return `Check out this amazing ${type} in ${city}! The vibes are incredible right now.`;
 };
 
 const getMediaForLocation = (location: Location) => {
-  // Return appropriate media based on location type and name
   const imageMap: Record<string, string> = {
-    // Sports venues
-    "30": "https://images.unsplash.com/photo-1504450758481-7338eba7524a?q=80&w=1000&auto=format&fit=crop",  // Lakers
-    "31": "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?q=80&w=1000&auto=format&fit=crop",  // Rams
-    "32": "https://images.unsplash.com/photo-1566577134624-d9b13555e288?q=80&w=1000&auto=format&fit=crop",  // Dodgers
-    "33": "https://images.unsplash.com/photo-1459865264687-595d652de67e?q=80&w=1000&auto=format&fit=crop",  // LA Galaxy
-    "34": "https://images.unsplash.com/photo-1530915872-13619796d013?q=80&w=1000&auto=format&fit=crop",    // Volleyball
-    "35": "https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?q=80&w=1000&auto=format&fit=crop",  // Golf
+    "30": "https://images.unsplash.com/photo-1504450758481-7338eba7524a?q=80&w=1000&auto=format&fit=crop",
+    "31": "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?q=80&w=1000&auto=format&fit=crop",
+    "32": "https://images.unsplash.com/photo-1566577134624-d9b13555e288?q=80&w=1000&auto=format&fit=crop",
+    "33": "https://images.unsplash.com/photo-1459865264687-595d652de67e?q=80&w=1000&auto=format&fit=crop",
+    "34": "https://images.unsplash.com/photo-1530915872-13619796d013?q=80&w=1000&auto=format&fit=crop",
+    "35": "https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?q=80&w=1000&auto=format&fit=crop",
   };
 
-  // Default media based on type if no specific image is available
   const typeDefaultMedia: Record<string, string> = {
     "restaurant": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=1000&auto=format&fit=crop",
     "bar": "https://images.unsplash.com/photo-1572116469696-31de0f17cc34?q=80&w=1000&auto=format&fit=crop",
@@ -49,15 +44,12 @@ const getMediaForLocation = (location: Location) => {
   };
 };
 
-// Function to generate mock locations for any city
 const generateMockLocationsForCity = (city: string, state: string) => {
   const types = ["restaurant", "bar", "event", "attraction", "sports", "other"];
   const mockCityLocations: Location[] = [];
   
-  // Generate 2-3 locations for each type
   types.forEach((type, typeIndex) => {
-    const count = Math.floor(Math.random() * 2) + 2; // 2-3 locations per type
-    
+    const count = Math.floor(Math.random() * 2) + 2;
     for (let i = 0; i < count; i++) {
       const id = `${city.toLowerCase()}-${type}-${i}`;
       let name = "";
@@ -93,12 +85,33 @@ const generateMockLocationsForCity = (city: string, state: string) => {
         lat: 40 + Math.random(),
         lng: -75 + Math.random(),
         type: type as any,
-        verified: Math.random() > 0.3, // 70% chance of being verified
+        verified: Math.random() > 0.3,
       });
     }
   });
   
   return mockCityLocations;
+};
+
+const getAdditionalTags = (location: Location) => {
+  const commonTags = ["Happening Now", "Popular", "Trending"];
+  const typeSpecificTags: Record<string, string[]> = {
+    "restaurant": ["Fine Dining", "Casual Eats", "Brunch Spot", "Discounted Menu"],
+    "bar": ["Live Music", "Happy Hour", "Nightlife", "Craft Cocktails", "Sports Bar"],
+    "event": ["Live Music", "Festival", "Discounted Tix", "Limited Time", "Family Friendly"],
+    "attraction": ["Tourist Spot", "Local Favorite", "Photo Spot", "Cultural", "Outdoor"],
+    "sports": ["Game Day", "Discounted Tix", "Live Broadcast", "Family Friendly"],
+    "other": ["Hidden Gem", "New Opening", "Local Favorite"]
+  };
+  
+  const specificTags = typeSpecificTags[location.type] || [];
+  
+  const numberOfTags = Math.floor(Math.random() * 3) + 2;
+  const additionalTags = [...specificTags, ...commonTags]
+    .sort(() => 0.5 - Math.random())
+    .slice(0, numberOfTags);
+  
+  return additionalTags;
 };
 
 const Explore = () => {
@@ -108,6 +121,15 @@ const Explore = () => {
   const [searchedState, setSearchedState] = useState("");
   const [searchCategory, setSearchCategory] = useState("all");
   const [filteredLocations, setFilteredLocations] = useState(mockLocations);
+  const [locationTags, setLocationTags] = useState<Record<string, string[]>>({});
+  
+  useEffect(() => {
+    const tagsMap: Record<string, string[]> = {};
+    mockLocations.forEach(location => {
+      tagsMap[location.id] = getAdditionalTags(location);
+    });
+    setLocationTags(tagsMap);
+  }, []);
   
   const handleSearch = (query: string, filterType: string, category: string) => {
     setSearchQuery(query);
@@ -119,7 +141,6 @@ const Explore = () => {
       setActiveTab("all");
     }
     
-    // Parse city and state from query (assuming format like "Chicago, IL")
     let city = "";
     let state = "";
     
@@ -134,14 +155,11 @@ const Explore = () => {
       setSearchedState("");
     }
     
-    // Filter locations based on search
     let results = [...mockLocations];
     
     if (category === "places" && city) {
-      // For city search in places tab, generate mock locations
       results = generateMockLocationsForCity(city, state);
     } else if (query) {
-      // Filter existing locations
       results = mockLocations.filter(location => {
         const locationMatches = 
           location.name.toLowerCase().includes(query.toLowerCase()) ||
@@ -152,7 +170,6 @@ const Explore = () => {
       });
     }
     
-    // Additional type filtering
     if (activeTab !== "all") {
       results = results.filter(location => location.type === activeTab);
     }
@@ -160,7 +177,33 @@ const Explore = () => {
     setFilteredLocations(results);
   };
 
-  // Generate a title based on search
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    
+    let results = [...mockLocations];
+    
+    if (searchQuery) {
+      results = results.filter(location => {
+        const locationMatches = 
+          location.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          location.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          location.address.toLowerCase().includes(searchQuery.toLowerCase());
+        
+        return locationMatches;
+      });
+    }
+    
+    if (searchCategory === "places" && searchedCity) {
+      results = generateMockLocationsForCity(searchedCity, searchedState);
+    }
+    
+    if (value !== "all") {
+      results = results.filter(location => location.type === value);
+    }
+    
+    setFilteredLocations(results);
+  };
+
   const getPageTitle = () => {
     if (searchedCity) {
       return `Explore Vibes in ${searchedCity}${searchedState ? `, ${searchedState}` : ''}`;
@@ -182,7 +225,7 @@ const Explore = () => {
             <SearchVibes onSearch={handleSearch} />
           </div>
           
-          <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="max-w-2xl mx-auto">
+          <Tabs defaultValue="all" value={activeTab} onValueChange={handleTabChange} className="max-w-2xl mx-auto">
             <TabsList className="grid grid-cols-3 md:grid-cols-7">
               <TabsTrigger value="all">All</TabsTrigger>
               <TabsTrigger value="restaurant">Restaurants</TabsTrigger>
@@ -229,7 +272,22 @@ const Explore = () => {
                             <VerifiedIcon className="h-4 w-4 ml-1 text-primary" />
                           )}
                         </h3>
-                        <Badge variant="outline">{location.type}</Badge>
+                        <HoverCard>
+                          <HoverCardTrigger asChild>
+                            <Badge variant="outline" className="cursor-help">{location.type}</Badge>
+                          </HoverCardTrigger>
+                          <HoverCardContent className="w-auto">
+                            <div className="space-y-2">
+                              <h4 className="text-sm font-semibold">More Tags</h4>
+                              <div className="flex flex-wrap gap-1.5">
+                                <Badge variant="outline" className="bg-primary/10">{location.type}</Badge>
+                                {locationTags[location.id]?.map((tag, index) => (
+                                  <Badge key={index} variant="outline" className="bg-muted/40">{tag}</Badge>
+                                ))}
+                              </div>
+                            </div>
+                          </HoverCardContent>
+                        </HoverCard>
                       </div>
                       
                       <div className="text-sm text-muted-foreground mb-3 flex items-center">
