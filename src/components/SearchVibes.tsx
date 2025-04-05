@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/tabs";
 
 interface SearchVibesProps {
-  onSearch: (query: string, filter: string) => void;
+  onSearch: (query: string, filterType: string, category: string) => void;
 }
 
 const SearchVibes = ({ onSearch }: SearchVibesProps) => {
@@ -43,7 +43,7 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
   ];
 
   const handleSearch = () => {
-    onSearch(searchQuery, selectedFilter);
+    onSearch(searchQuery, selectedFilter, searchCategory);
   };
 
   const toggleFilter = (filter: string) => {
@@ -58,11 +58,17 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
     setActiveFilters([]);
   };
 
+  const handleCategoryChange = (category: string) => {
+    setSearchCategory(category);
+    // Auto-search when changing between all/places/users tabs
+    onSearch(searchQuery, selectedFilter, category);
+  };
+
   return (
     <div className="space-y-3 sticky top-16 z-10 bg-background p-4">
       <Tabs 
         value={searchCategory} 
-        onValueChange={setSearchCategory} 
+        onValueChange={handleCategoryChange} 
         className="w-full mb-3"
       >
         <TabsList className="grid grid-cols-3 w-full">
@@ -88,11 +94,12 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
             searchCategory === "users" 
               ? "Search users by name or username..." 
               : searchCategory === "places"
-                ? "Search venues, events, locations..."
+                ? "Search cities, venues, events..."
                 : "Search venues, events, vibes, users..."
           }
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
           className="pr-20"
         />
         <div className="absolute right-0 top-0 flex h-full">

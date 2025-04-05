@@ -29,6 +29,19 @@ const getOfficialTicketUrl = (venueId: string) => {
     "35": "https://wmphoenixopen.com/tickets/", // WM Phoenix Open
   };
   
+  // For dynamically generated city locations (format: city-type-index)
+  if (venueId.includes('sports')) {
+    const city = venueId.split('-')[0];
+    if (venueId.includes('basketball')) {
+      return `https://tickets.nba.com/${city}`;
+    } else if (venueId.includes('football')) {
+      return `https://tickets.nfl.com/${city}`;
+    } else if (venueId.includes('baseball')) {
+      return `https://tickets.mlb.com/${city}`;
+    }
+    return `https://seatgeek.com/${city}-tickets`;
+  }
+  
   return ticketUrls[venueId] || "";
 };
 
