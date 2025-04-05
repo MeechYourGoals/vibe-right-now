@@ -55,7 +55,8 @@ type PlaceCardProps = {
 // Helper function to get ride service URL
 const getRideServiceUrl = (place: Location) => {
   // Simulate a partnership with Uber
-  const partnerService = "uber";
+  // Using type 'string' instead of a specific literal type to avoid comparison errors
+  const partnerService: string = "uber";
   
   // Create the deep link to the ride service app
   switch (partnerService) {
