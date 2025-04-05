@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { mockPosts } from "@/mock/data";
+import { mockPosts, mockComments } from "@/mock/data";
 import PostCard from "@/components/PostCard";
 import SearchVibes from "@/components/SearchVibes";
 
@@ -65,12 +65,17 @@ const PostFeed = () => {
       if (locationId in specificCounts) {
         counts[locationId] = specificCounts[locationId];
       } else {
-        counts[locationId] = (counts[locationId] || 0) + 1;
+        counts[locationId] = (counts[locationId] || 0) + Math.floor(Math.random() * 50) + 1;
       }
     });
     
     return counts;
   })();
+
+  // Get post comments
+  const getPostComments = (postId: string) => {
+    return mockComments.filter(comment => comment.postId === postId);
+  };
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -83,6 +88,7 @@ const PostFeed = () => {
               key={post.id} 
               post={post} 
               locationPostCount={locationPostCounts[post.location.id]}
+              comments={getPostComments(post.id)}
             />
           ))
         ) : (
