@@ -35,11 +35,42 @@ const PostFeed = () => {
   });
 
   // Calculate the number of posts per location in the last 24 hours
-  const locationPostCounts = filteredPosts.reduce((acc, post) => {
-    const locationId = post.location.id;
-    acc[locationId] = (acc[locationId] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  // For demo purposes, add variation to the counts
+  const locationPostCounts = (() => {
+    const counts: Record<string, number> = {};
+    
+    // Define specific counts for certain locations to ensure variety
+    const specificCounts: Record<string, number> = {
+      "1": 15, // Sunset Lounge
+      "2": 23, // Artisan Coffee House
+      "3": 8,  // Summer Music Festival
+      "4": 3,  // Modern Art Museum
+      "5": 42, // Skyline Rooftop Bar
+      "6": 67, // Madison Square Garden
+      "7": 89, // Encore Beach Club
+      "8": 35, // Christ the Redeemer
+      "9": 12, // Aspen Highlands
+      "10": 121, // Allegiant Stadium (Super Bowl)
+      "13": 78, // Houston Rodeo
+      "14": 19, // Laugh Factory
+      "18": 53, // Sydney Opera House
+      "19": 145, // Eiffel Tower
+      "20": 104, // Coachella Valley Music Festival
+      "21": 31, // Gucci Pop-Up
+    };
+    
+    // Apply the specific counts where defined, and calculate naturally for others
+    filteredPosts.forEach(post => {
+      const locationId = post.location.id;
+      if (locationId in specificCounts) {
+        counts[locationId] = specificCounts[locationId];
+      } else {
+        counts[locationId] = (counts[locationId] || 0) + 1;
+      }
+    });
+    
+    return counts;
+  })();
 
   return (
     <div className="max-w-3xl mx-auto">

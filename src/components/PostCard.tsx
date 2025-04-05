@@ -49,11 +49,41 @@ const PostCard = ({ post, locationPostCount = 1 }: PostCardProps) => {
     return `${count} people`;
   };
 
+  // Determine location type categories for badges
+  const getLocationCategories = () => {
+    const mainType = post.location.type;
+    
+    // Add secondary categories for certain location types
+    const secondaryTypes = [];
+    
+    if (mainType === "event") {
+      if (post.location.name.toLowerCase().includes("festival")) {
+        secondaryTypes.push("music");
+      } else if (post.location.name.toLowerCase().includes("rodeo")) {
+        secondaryTypes.push("sports");
+      } else if (post.location.name.toLowerCase().includes("comedy") || post.location.name.toLowerCase().includes("laugh")) {
+        secondaryTypes.push("comedy");
+      }
+    }
+    
+    if (mainType === "attraction") {
+      if (post.location.name.toLowerCase().includes("ski") || post.location.name.toLowerCase().includes("snow")) {
+        secondaryTypes.push("winter sports");
+      } else if (post.location.name.toLowerCase().includes("beach") || post.location.name.toLowerCase().includes("ocean")) {
+        secondaryTypes.push("beach");
+      }
+    }
+    
+    return [mainType, ...secondaryTypes];
+  };
+
+  const locationCategories = getLocationCategories();
+
   return (
     <Card className="vibe-card overflow-hidden mb-4">
       <CardHeader className="p-4 pb-0">
         <div className="flex justify-between items-start">
-          {/* Location information (now on the left side) */}
+          {/* Location information (on the left side) */}
           <div className="flex items-center gap-2">
             <Avatar>
               <AvatarImage 
@@ -76,7 +106,7 @@ const PostCard = ({ post, locationPostCount = 1 }: PostCardProps) => {
             </div>
           </div>
 
-          {/* User/post count and expiration (now on the right side) */}
+          {/* User/post count and expiration (on the right side) */}
           <div className="flex flex-col items-end">
             <div className="flex items-center text-sm text-muted-foreground">
               <Clock className="h-3 w-3 mr-1" />
@@ -144,10 +174,12 @@ const PostCard = ({ post, locationPostCount = 1 }: PostCardProps) => {
             </div>
           ))}
         </div>
-        <div className="flex items-center gap-2 mt-3">
-          <Badge variant="outline" className="bg-muted">
-            {post.location.type}
-          </Badge>
+        <div className="flex flex-wrap items-center gap-2 mt-3">
+          {locationCategories.map((category, index) => (
+            <Badge key={index} variant="outline" className="bg-muted">
+              {category}
+            </Badge>
+          ))}
           <span className="text-xs text-muted-foreground ml-auto">{timeAgo}</span>
         </div>
       </CardContent>

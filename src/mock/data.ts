@@ -127,6 +127,18 @@ export const mockUsers: User[] = [
     name: "Charlotte Thomas",
     avatar: "https://randomuser.me/api/portraits/women/12.jpg",
   },
+  {
+    id: "22",
+    username: "fashion_forward",
+    name: "Zoe Campbell",
+    avatar: "https://randomuser.me/api/portraits/women/13.jpg",
+  },
+  {
+    id: "23",
+    username: "music_festival",
+    name: "Jordan Rivers",
+    avatar: "https://randomuser.me/api/portraits/men/13.jpg",
+  },
 ];
 
 export const mockLocations: Location[] = [
@@ -358,6 +370,30 @@ export const mockLocations: Location[] = [
     type: "attraction",
     verified: true,
   },
+  {
+    id: "20",
+    name: "Coachella Valley Music Festival",
+    address: "Empire Polo Club",
+    city: "Indio",
+    state: "CA",
+    country: "USA",
+    lat: 33.6823,
+    lng: -116.2378,
+    type: "event",
+    verified: true,
+  },
+  {
+    id: "21",
+    name: "Gucci Pop-Up",
+    address: "347 N Rodeo Drive",
+    city: "Beverly Hills",
+    state: "CA",
+    country: "USA",
+    lat: 34.0696,
+    lng: -118.4058,
+    type: "other",
+    verified: true,
+  },
 ];
 
 const getRecentTime = (hoursAgo = 0) => {
@@ -533,7 +569,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1566577134770-3d85bb3a9cc4?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1642189027760-74570195c918?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
       },
     ],
     timestamp: getRecentTime(0.1),
@@ -629,7 +665,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1593411867335-3a098c381d5d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1572358337087-ab2addf09aa1?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
       },
     ],
     timestamp: getRecentTime(0.9),
@@ -645,7 +681,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1577213331500-c0d706b636a0?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1608245449230-4ac19066d2d0?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
       },
     ],
     timestamp: getRecentTime(0.15),
@@ -661,7 +697,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1603091888332-b85292bc35bd?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1562155955-1cb2f99b2d8b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
       },
     ],
     timestamp: getRecentTime(0.2),
@@ -677,7 +713,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1612214195022-64f68592f674?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1628891890377-57dba2715fdd?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
       },
     ],
     timestamp: getRecentTime(0.3),
@@ -693,7 +729,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1504450758481-7338eba7524a?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1608245449230-4ac19066d2d0?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
       },
     ],
     timestamp: getRecentTime(0.25),
@@ -763,338 +799,4 @@ export const mockPosts: Post[] = [
     timestamp: getRecentTime(0.2),
     expiresAt: getExpiryTime(getRecentTime(0.2)),
     likes: 112,
-    comments: 16,
-  },
-  {
-    id: "25",
-    user: mockUsers[19],
-    location: mockLocations[17],
-    content: "Just got last-minute tickets to tonight's symphony at the Opera House! Box office had a few returns and there's no line right now if anyone wants to try!",
-    media: [
-      {
-        type: "image",
-        url: "https://images.unsplash.com/photo-1528294146891-effec425a592?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
-      },
-    ],
-    timestamp: getRecentTime(0.3),
-    expiresAt: getExpiryTime(getRecentTime(0.3)),
-    likes: 138,
-    comments: 22,
-  },
-  {
-    id: "26",
-    user: mockUsers[20],
-    location: mockLocations[18],
-    content: "Evening light show at the Eiffel Tower just started! South side viewing area still has space, much less crowded than the north side.",
-    media: [
-      {
-        type: "image",
-        url: "https://images.unsplash.com/photo-1543349689-9a4d426bee8e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
-      },
-    ],
-    timestamp: getRecentTime(0.1),
-    expiresAt: getExpiryTime(getRecentTime(0.1)),
-    likes: 245,
-    comments: 31,
-  },
-  {
-    id: "27",
-    user: mockUsers[0],
-    location: mockLocations[18],
-    content: "The line for the elevator is crazy but stairs have no wait at all! Worth the climb for the view.",
-    media: [
-      {
-        type: "image",
-        url: "https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
-      },
-    ],
-    timestamp: getRecentTime(0.15),
-    expiresAt: getExpiryTime(getRecentTime(0.15)),
-    likes: 187,
-    comments: 23,
-  },
-  {
-    id: "28",
-    user: mockUsers[1],
-    location: mockLocations[18],
-    content: "Pro tip: The cafe on the first level has almost no line right now! Great spot to rest with a cappuccino before continuing up.",
-    media: [
-      {
-        type: "image",
-        url: "https://images.unsplash.com/photo-1623857584158-23c769acb3c6?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
-      },
-    ],
-    timestamp: getRecentTime(0.2),
-    expiresAt: getExpiryTime(getRecentTime(0.2)),
-    likes: 156,
-    comments: 18,
-  },
-  {
-    id: "29",
-    user: mockUsers[2],
-    location: mockLocations[18],
-    content: "Managed to get a picnic spot right in front of the tower! The lawn isn't too crowded today, perfect for photos.",
-    media: [
-      {
-        type: "image",
-        url: "https://images.unsplash.com/photo-1542654071-7ded22488685?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
-      },
-    ],
-    timestamp: getRecentTime(0.25),
-    expiresAt: getExpiryTime(getRecentTime(0.25)),
-    likes: 134,
-    comments: 16,
-  },
-  {
-    id: "30",
-    user: mockUsers[3],
-    location: mockLocations[18],
-    content: "Secret photo spot: Cross the river to Trocadéro for the best tower views. Way less crowded than on the Champ de Mars side right now!",
-    media: [
-      {
-        type: "image",
-        url: "https://images.unsplash.com/photo-1550340499-a6c60f8c7e87?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
-      },
-    ],
-    timestamp: getRecentTime(0.3),
-    expiresAt: getExpiryTime(getRecentTime(0.3)),
-    likes: 167,
-    comments: 21,
-  },
-  {
-    id: "31",
-    user: mockUsers[4],
-    location: mockLocations[18],
-    content: "They just opened up more spots for the guided tour in English - sign up at the info desk on the ground level, no waiting!",
-    media: [
-      {
-        type: "image",
-        url: "https://images.unsplash.com/photo-1520939817895-060bdaf4fe1b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
-      },
-    ],
-    timestamp: getRecentTime(0.22),
-    expiresAt: getExpiryTime(getRecentTime(0.22)),
-    likes: 98,
-    comments: 14,
-  },
-];
-
-export const mockComments: Comment[] = [
-  {
-    id: "c1",
-    postId: "1",
-    user: mockUsers[5],
-    content: "This looks amazing! Is it still busy?",
-    timestamp: getRecentTime(0.5),
-    vibedHere: false,
-  },
-  {
-    id: "c2",
-    postId: "1",
-    user: mockUsers[6],
-    content: "I'm here right now! DJ just switched and the new set is even better!",
-    timestamp: getRecentTime(0.3),
-    vibedHere: true,
-  },
-  {
-    id: "c3",
-    postId: "1",
-    user: mockUsers[7],
-    content: "Is there a cover charge?",
-    timestamp: getRecentTime(0.7),
-    vibedHere: false,
-  },
-  
-  {
-    id: "c4",
-    postId: "2",
-    user: mockUsers[8],
-    content: "I love their pastries! Heading there now, thanks for the tip!",
-    timestamp: getRecentTime(1.5),
-    vibedHere: false,
-  },
-  {
-    id: "c5",
-    postId: "2",
-    user: mockUsers[9],
-    content: "Just got here - line is now out the door! You started a rush!",
-    timestamp: getRecentTime(1.1),
-    vibedHere: true,
-  },
-  
-  {
-    id: "c6",
-    postId: "6",
-    user: mockUsers[10],
-    content: "What's the score right now? TV broadcast is behind!",
-    timestamp: getRecentTime(0.2),
-    vibedHere: false,
-  },
-  {
-    id: "c7",
-    postId: "6",
-    user: mockUsers[11],
-    content: "I'm in section 120! The energy is unreal tonight!",
-    timestamp: getRecentTime(0.15),
-    vibedHere: true,
-  },
-  {
-    id: "c8",
-    postId: "6",
-    user: mockUsers[12],
-    content: "Any food stands with short lines? I'm starving!",
-    timestamp: getRecentTime(0.1),
-    vibedHere: true,
-  },
-  
-  {
-    id: "c9",
-    postId: "10",
-    user: mockUsers[13],
-    content: "So jealous! Those seats must have cost a fortune!",
-    timestamp: getRecentTime(0.05),
-    vibedHere: false,
-  },
-  {
-    id: "c10",
-    postId: "10",
-    user: mockUsers[14],
-    content: "I'm in section 230! The atmosphere is electric!",
-    timestamp: getRecentTime(0.03),
-    vibedHere: true,
-  },
-  {
-    id: "c11",
-    postId: "10",
-    user: mockUsers[0],
-    content: "Can you see any celebrities from where you are?",
-    timestamp: getRecentTime(0.02),
-    vibedHere: false,
-  },
-  {
-    id: "c12",
-    postId: "10",
-    user: mockUsers[1],
-    content: "South entrance has no security line if anyone's still coming in!",
-    timestamp: getRecentTime(0.01),
-    vibedHere: true,
-  },
-  
-  {
-    id: "c13",
-    postId: "21",
-    user: mockUsers[10],
-    content: "Is there still a line at the bar? Thinking of coming down.",
-    timestamp: getRecentTime(0.05),
-    vibedHere: false,
-  },
-  {
-    id: "c14",
-    postId: "21",
-    user: mockUsers[11],
-    content: "I'm here too! Sitting in the back and the view is still great. Sound is perfect!",
-    timestamp: getRecentTime(0.04),
-    vibedHere: true,
-  },
-  
-  {
-    id: "c15",
-    postId: "22",
-    user: mockUsers[12],
-    content: "Which character breakfast is this? We have reservations tomorrow!",
-    timestamp: getRecentTime(0.2),
-    vibedHere: false,
-  },
-  {
-    id: "c16",
-    postId: "22",
-    user: mockUsers[13],
-    content: "We're on the same cruise! The Mickey pool is empty right now if you want to avoid crowds.",
-    timestamp: getRecentTime(0.1),
-    vibedHere: true,
-  },
-  
-  {
-    id: "c17",
-    postId: "23",
-    user: mockUsers[14],
-    content: "Do they have any gluten-free options? Been looking for a good bakery in Des Moines!",
-    timestamp: getRecentTime(0.3),
-    vibedHere: false,
-  },
-  {
-    id: "c18",
-    postId: "23",
-    user: mockUsers[0],
-    content: "Just tried their cinnamon roll and it's amazing! Still warm from the oven!",
-    timestamp: getRecentTime(0.25),
-    vibedHere: true,
-  },
-  
-  {
-    id: "c19",
-    postId: "24",
-    user: mockUsers[1],
-    content: "What's the dress code like? Thinking of coming by later.",
-    timestamp: getRecentTime(0.18),
-    vibedHere: false,
-  },
-  {
-    id: "c20",
-    postId: "24",
-    user: mockUsers[2],
-    content: "I'm at a table near the edge! The specialty martini is worth the price - huge pour!",
-    timestamp: getRecentTime(0.15),
-    vibedHere: true,
-  },
-  
-  {
-    id: "c21",
-    postId: "25",
-    user: mockUsers[3],
-    content: "Did they say how many tickets are left? Might head down now!",
-    timestamp: getRecentTime(0.2),
-    vibedHere: false,
-  },
-  {
-    id: "c22",
-    postId: "25",
-    user: mockUsers[4],
-    content: "I'm in the lobby now! They have about 8 tickets left. The pre-show drinks area is pretty empty too.",
-    timestamp: getRecentTime(0.15),
-    vibedHere: true,
-  },
-  
-  {
-    id: "c23",
-    postId: "26",
-    user: mockUsers[5],
-    content: "How crowded is it right now? Planning to head there after dinner.",
-    timestamp: getRecentTime(0.08),
-    vibedHere: false,
-  },
-  {
-    id: "c24",
-    postId: "26",
-    user: mockUsers[6],
-    content: "I'm at the west entrance and there's barely any security line. Much faster than the east side!",
-    timestamp: getRecentTime(0.05),
-    vibedHere: true,
-  },
-  {
-    id: "c25",
-    postId: "26",
-    user: mockUsers[7],
-    content: "Is the top level open? Heard they sometimes close it for high winds.",
-    timestamp: getRecentTime(0.03),
-    vibedHere: false,
-  },
-  {
-    id: "c26",
-    postId: "26",
-    user: mockUsers[8],
-    content: "Just reached the summit! All levels are open and the view is incredible with the sunset!",
-    timestamp: getRecentTime(0.02),
-    vibedHere: true,
-  },
-];
+    comments: 1
