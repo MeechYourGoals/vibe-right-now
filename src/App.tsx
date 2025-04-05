@@ -9,6 +9,10 @@ import Index from "./pages/Index";
 import Explore from "./pages/Explore";
 import VenueProfile from "./pages/VenueProfile";
 import NotFound from "./pages/NotFound";
+import ProfileBio from "./pages/ProfileBio";
+import MyPlaces from "./pages/MyPlaces";
+import PinnedVibes from "./pages/PinnedVibes";
+import UserPointsPage from "./pages/UserPoints";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +27,10 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/explore" element={<Explore />} />
             <Route path="/venue/:id" element={<VenueProfile />} />
+            <Route path="/profile/bio" element={<ProfileBio />} />
+            <Route path="/profile/places" element={<MyPlaces />} />
+            <Route path="/profile/pinned" element={<PinnedVibes />} />
+            <Route path="/profile/points" element={<UserPointsPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

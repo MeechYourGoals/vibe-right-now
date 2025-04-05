@@ -51,21 +51,29 @@ const Header = () => {
                 <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuLabel>My Account</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    <User className="mr-2 h-4 w-4" />
-                    <span>Bio</span>
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile/bio">
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Bio</span>
+                    </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <MapPin className="mr-2 h-4 w-4" />
-                    <span>My Places</span>
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile/places">
+                      <MapPin className="mr-2 h-4 w-4" />
+                      <span>My Places</span>
+                    </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Bookmark className="mr-2 h-4 w-4" />
-                    <span>Pinned</span>
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile/pinned">
+                      <Bookmark className="mr-2 h-4 w-4" />
+                      <span>Pinned</span>
+                    </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Award className="mr-2 h-4 w-4" />
-                    <span>Points</span>
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile/points">
+                      <Award className="mr-2 h-4 w-4" />
+                      <span>Points</span>
+                    </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem>
