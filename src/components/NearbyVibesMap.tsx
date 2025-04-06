@@ -32,6 +32,7 @@ const NearbyVibesMap = () => {
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
   const [showDistances, setShowDistances] = useState(false);
   const [isAddressPopoverOpen, setIsAddressPopoverOpen] = useState(false);
+  const [localLoading, setLocalLoading] = useState(false); // Add local loading state
   
   const navigate = useNavigate();
   const location = useLocation();
@@ -46,7 +47,7 @@ const NearbyVibesMap = () => {
     } else {
       setSearchedCity("");
     }
-  }, [location]);
+  }, [location, setSearchedCity]);
 
   const handleViewMap = () => {
     navigate("/explore");
@@ -78,7 +79,7 @@ const NearbyVibesMap = () => {
     }
     
     try {
-      setLoading(true);
+      setLocalLoading(true); // Use local loading state instead of the one from the hook
       
       const coordinates = await geocodeAddress(address);
       
@@ -94,7 +95,7 @@ const NearbyVibesMap = () => {
         }
       }
     } finally {
-      setLoading(false);
+      setLocalLoading(false); // Use local loading state
     }
   };
   
@@ -104,6 +105,9 @@ const NearbyVibesMap = () => {
     setIsAddressPopoverOpen(false);
     toast.success("Using your current location for distances");
   };
+  
+  // Determine the effective loading state (either from hook or local)
+  const effectiveLoading = loading || localLoading;
   
   return (
     <div className={`space-y-4 ${isMapExpanded ? "fixed inset-0 z-50 bg-background p-4" : ""}`}>
@@ -125,7 +129,7 @@ const NearbyVibesMap = () => {
               setIsOpen={setIsAddressPopoverOpen}
               onSearch={handleAddressSearch}
               onUseCurrentLocation={handleUseCurrentLocation}
-              loading={loading}
+              loading={effectiveLoading} // Use the combined loading state
               hasUserLocation={!!userLocation}
             />
           )}
@@ -134,7 +138,7 @@ const NearbyVibesMap = () => {
       
       {/* Map Container */}
       <MapContainer
-        loading={loading}
+        loading={effectiveLoading} // Use the combined loading state 
         isExpanded={isMapExpanded}
         userLocation={userLocation}
         locations={nearbyLocations}
