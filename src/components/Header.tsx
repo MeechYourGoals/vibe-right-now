@@ -54,12 +54,12 @@ const Header = () => {
 
   return (
     <>
-      <header className="sticky top-0 z-20 w-full border-b backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="fixed top-0 z-50 w-full border-b backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center">
           <div className="mr-4 flex">
             <Link to="/" className="flex items-center space-x-2">
               <span className="text-xl font-bold relative">
-                <span className={`inline-block transition-opacity duration-500 ease-in-out ${isAnimating ? 'opacity-0' : 'opacity-100'}`}>
+                <span className={`inline-block vibe-gradient-text transition-opacity duration-500 ease-in-out ${isAnimating ? 'opacity-0' : 'opacity-100'}`}>
                   {currentVWord}
                 </span>
                 <span className="text-transparent vibe-gradient-text"> Right Now</span>
@@ -141,6 +141,8 @@ const Header = () => {
           </div>
         </div>
       </header>
+      
+      <div className="h-16"></div> {/* Spacer to prevent content from being hidden under fixed header */}
       
       <AuthDialog 
         open={showAuthDialog} 
