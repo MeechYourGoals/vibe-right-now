@@ -42,7 +42,7 @@ const AddressSearchPopover = ({
           View Distance
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 z-[9999]">
+      <PopoverContent className="w-80">
         <form onSubmit={handleSubmit} className="space-y-3">
           <h4 className="font-medium">Enter your address</h4>
           <p className="text-xs text-muted-foreground">
@@ -59,18 +59,16 @@ const AddressSearchPopover = ({
               {loading ? "Loading..." : "Go"}
             </Button>
           </div>
-          {hasUserLocation && (
-            <Button 
-              type="button" 
-              variant="outline" 
-              size="sm" 
-              className="w-full"
-              onClick={onUseCurrentLocation}
-            >
-              <LocateFixed className="h-4 w-4 mr-2" />
-              Use my current location
-            </Button>
-          )}
+          <Button 
+            type="button" 
+            variant="outline" 
+            size="sm" 
+            className="w-full"
+            onClick={onUseCurrentLocation}
+          >
+            <LocateFixed className="h-4 w-4 mr-2" />
+            Use my current location
+          </Button>
         </form>
       </PopoverContent>
     </Popover>

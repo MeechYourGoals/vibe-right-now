@@ -32,7 +32,7 @@ const NearbyVibesMap = () => {
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
   const [showDistances, setShowDistances] = useState(false);
   const [isAddressPopoverOpen, setIsAddressPopoverOpen] = useState(false);
-  const [localLoading, setLocalLoading] = useState(false); // Add local loading state
+  const [localLoading, setLocalLoading] = useState(false);
   
   const navigate = useNavigate();
   const location = useLocation();
@@ -79,7 +79,7 @@ const NearbyVibesMap = () => {
     }
     
     try {
-      setLocalLoading(true); // Use local loading state instead of the one from the hook
+      setLocalLoading(true);
       
       const coordinates = await geocodeAddress(address);
       
@@ -95,11 +95,16 @@ const NearbyVibesMap = () => {
         }
       }
     } finally {
-      setLocalLoading(false); // Use local loading state
+      setLocalLoading(false);
     }
   };
   
   const handleUseCurrentLocation = () => {
+    if (!userLocation) {
+      toast.error("Unable to access your location. Please allow location access or enter an address manually.");
+      return;
+    }
+    
     setShowDistances(true);
     setUserAddressLocation(null);
     setIsAddressPopoverOpen(false);
@@ -129,8 +134,8 @@ const NearbyVibesMap = () => {
               setIsOpen={setIsAddressPopoverOpen}
               onSearch={handleAddressSearch}
               onUseCurrentLocation={handleUseCurrentLocation}
-              loading={effectiveLoading} // Use the combined loading state
-              hasUserLocation={!!userLocation}
+              loading={effectiveLoading}
+              hasUserLocation={true} // Always show the current location option
             />
           )}
         </div>
@@ -138,7 +143,7 @@ const NearbyVibesMap = () => {
       
       {/* Map Container */}
       <MapContainer
-        loading={effectiveLoading} // Use the combined loading state 
+        loading={effectiveLoading}
         isExpanded={isMapExpanded}
         userLocation={userLocation}
         locations={nearbyLocations}
