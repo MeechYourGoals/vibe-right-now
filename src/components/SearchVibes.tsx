@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -23,6 +22,7 @@ import { mockLocations } from "@/mock/locations";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
+import { cityCoordinates } from "@/utils/cityLocations";
 
 interface SearchVibesProps {
   onSearch: (query: string, filterType: string, category: string) => void;
@@ -36,6 +36,10 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
   const [searchCategory, setSearchCategory] = useState("all");
   const [showUserSuggestions, setShowUserSuggestions] = useState(false);
   const [showPlaceSuggestions, setShowPlaceSuggestions] = useState(false);
+  
+  // Add new state for city suggestions
+  const [citySuggestions, setCitySuggestions] = useState<string[]>([]);
+  const [showCitySuggestions, setShowCitySuggestions] = useState(false);
 
   const filters = [
     "Restaurants",
@@ -60,6 +64,11 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
       ...location,
       isPremium: true // Mark these locations as premium for styling
     }));
+    
+  // Get all city names from cityCoordinates
+  const allCities = Object.values(cityCoordinates).map(city => 
+    `${city.name}${city.state ? `, ${city.state}` : ''}, ${city.country}`
+  );
 
   useEffect(() => {
     // Show user suggestions when "users" tab is selected and hide when another tab is selected
@@ -110,6 +119,32 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
     setShowPlaceSuggestions(false);
     onSearch(placeName, selectedFilter, searchCategory);
   };
+  
+  // Function to handle city autocomplete
+  const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+    
+    // Only show city suggestions if we're in the places tab
+    if (searchCategory === 'places' && value.length > 1) {
+      const filtered = allCities.filter(city => 
+        city.toLowerCase().includes(value.toLowerCase())
+      ).slice(0, 5); // Limit to 5 suggestions
+      
+      setCitySuggestions(filtered);
+      setShowCitySuggestions(filtered.length > 0);
+    } else {
+      setShowCitySuggestions(false);
+    }
+  };
+  
+  // Function to handle selection of a city suggestion
+  const handleCitySelect = (city: string) => {
+    setSearchQuery(city);
+    setCitySuggestions([]);
+    setShowCitySuggestions(false);
+    onSearch(city, selectedFilter, searchCategory);
+  };
 
   // Function to handle clicks on the input field
   const handleInputClick = () => {
@@ -154,7 +189,7 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
                 : "Search venues, events, vibes, users..."
           }
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={handleSearchInputChange}
           onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
           onClick={handleInputClick}
           className="pr-20"
@@ -178,6 +213,31 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
           </Button>
         </div>
       </div>
+
+      {/* City Suggestions Dropdown */}
+      <Collapsible open={showCitySuggestions && searchCategory === "places"} className="w-full">
+        <CollapsibleContent className="overflow-hidden">
+          <Card className="mt-1 w-full p-2 shadow-md border border-border">
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground px-2 py-1">Suggested Cities</p>
+              {citySuggestions.map((city, index) => (
+                <div 
+                  key={index} 
+                  className="flex items-center gap-2 p-2 hover:bg-muted rounded-md cursor-pointer"
+                  onClick={() => handleCitySelect(city)}
+                >
+                  <div className="h-8 w-8 flex items-center justify-center rounded-md bg-primary/10">
+                    <MapPin className="h-4 w-4 text-primary" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium">{city}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </CollapsibleContent>
+      </Collapsible>
 
       {/* User Suggestions Dropdown */}
       <Collapsible open={showUserSuggestions && searchCategory === "users"} className="w-full">
