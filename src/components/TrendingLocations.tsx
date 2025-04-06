@@ -1,11 +1,12 @@
 
-import { mockLocations } from "@/mock/locations";
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect } from 'react';
 import { Location } from "@/types";
+import { mockLocations } from "@/mock/locations";
+import { getTrendingLocationsForCity } from "@/mock/cityLocations";
 
 // Event bus for updating trending locations from VernonChat
 export const eventBus = {
@@ -31,13 +32,24 @@ export const updateTrendingLocations = (cityName: string, events: Location[]) =>
 };
 
 const TrendingLocations = () => {
-  // In a real implementation, this would be calculated based on post activity
-  const [trendingLocations, setTrendingLocations] = useState(mockLocations.slice(2, 5));
+  // Default to some popular locations if no city is specified
+  const [trendingLocations, setTrendingLocations] = useState(mockLocations.slice(0, 3));
+  const [currentCity, setCurrentCity] = useState("Los Angeles");
+  
+  // Initialize with trending locations for a default city
+  useEffect(() => {
+    const defaultTrending = getTrendingLocationsForCity("Los Angeles");
+    if (defaultTrending.length > 0) {
+      setTrendingLocations(defaultTrending);
+    }
+  }, []);
   
   useEffect(() => {
     // Listen for updates from VernonChat
     const handleUpdate = (data: { cityName: string, events: Location[] }) => {
       const { cityName, events } = data;
+      
+      setCurrentCity(cityName);
       
       // Replace trending locations with the new events
       if (events && events.length > 0) {
@@ -46,6 +58,12 @@ const TrendingLocations = () => {
         // Show toast notification
         // This would use the toast component in a real implementation
         console.log(`Updated trending locations for ${cityName}`);
+      } else {
+        // If no events were provided, get trending locations for the city
+        const cityTrending = getTrendingLocationsForCity(cityName);
+        if (cityTrending.length > 0) {
+          setTrendingLocations(cityTrending);
+        }
       }
     };
     
@@ -62,7 +80,7 @@ const TrendingLocations = () => {
       <CardHeader className="pb-2">
         <CardTitle className="text-xl flex items-center">
           <TrendingUp className="h-5 w-5 mr-2" />
-          <span>Trending Now</span>
+          <span>Trending in {currentCity}</span>
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -75,14 +93,14 @@ const TrendingLocations = () => {
               <div>
                 <div className="font-medium">{location.name}</div>
                 <div className="text-sm text-muted-foreground flex items-center gap-2">
-                  <span>{location.city}, {location.state}</span>
+                  <span>{location.city}, {location.state || location.country}</span>
                   <Badge variant="outline" className="text-xs">
                     {location.type}
                   </Badge>
                 </div>
               </div>
               <Button variant="ghost" size="sm" className="h-8" asChild>
-                <a href={`/location/${location.id}`}>
+                <a href={`/venue/${location.id}`}>
                   <ArrowRight className="h-4 w-4" />
                 </a>
               </Button>

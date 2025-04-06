@@ -1,77 +1,57 @@
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Lightbulb, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { mockLocations } from "@/mock/data";
-import { Link } from "react-router-dom";
-import { Star, ExternalLink } from "lucide-react";
-import { Location as AppLocation } from "@/types";
-
-// Define a local interface that matches the structure of the mockLocations data
-interface Location {
-  id: string;
-  name: string;
-  address: string;
-  city: string;
-  state?: string;
-  country: string;
-  lat: number;
-  lng: number;
-  type: string;
-  verified: boolean;
-  imageUrl?: string; // Making this optional since we'll add fallbacks
-}
+import { Location } from "@/types";
+import { getRecommendedLocations } from "@/mock/cityLocations";
 
 const RecommendedForYou = () => {
   const [recommendations, setRecommendations] = useState<Location[]>([]);
   
   useEffect(() => {
-    // In a real app, this would filter based on user preferences from settings
-    // For now, we're just picking a few random locations
-    const randomLocations = [...mockLocations]
-      .sort(() => 0.5 - Math.random())
-      .slice(0, 3);
-    
-    setRecommendations(randomLocations as Location[]);
+    // Get recommendations from our city data
+    const recs = getRecommendedLocations();
+    setRecommendations(recs);
   }, []);
-
+  
   if (recommendations.length === 0) {
     return null;
   }
-
+  
   return (
     <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg font-semibold flex items-center">
-          <Star className="h-4 w-4 text-yellow-400 mr-2" />
-          Recommended For You
+      <CardHeader className="pb-2">
+        <CardTitle className="text-xl flex items-center">
+          <Lightbulb className="h-5 w-5 mr-2" />
+          <span>Recommended For You</span>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {recommendations.map((location) => (
-          <div key={location.id} className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
-              <img 
-                src={location.imageUrl || "/placeholder.svg"} 
-                alt={location.name} 
-                className="w-full h-full object-cover"
-              />
+      <CardContent>
+        <div className="space-y-4">
+          {recommendations.map((location) => (
+            <div 
+              key={location.id} 
+              className="p-3 border rounded-lg flex justify-between items-center hover:bg-accent/10 transition-colors"
+            >
+              <div>
+                <div className="font-medium">{location.name}</div>
+                <div className="text-sm text-muted-foreground flex items-center gap-2">
+                  <span>{location.city}, {location.state || location.country}</span>
+                  <Badge variant="outline" className="text-xs">
+                    {location.type}
+                  </Badge>
+                </div>
+              </div>
+              <Button variant="ghost" size="sm" className="h-8" asChild>
+                <a href={`/venue/${location.id}`}>
+                  <ArrowRight className="h-4 w-4" />
+                </a>
+              </Button>
             </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="font-medium text-sm truncate">
-                {location.name}
-              </h3>
-              <p className="text-xs text-muted-foreground truncate">
-                {location.type}
-              </p>
-            </div>
-            <Button size="sm" variant="ghost" asChild className="flex-shrink-0">
-              <Link to={`/venue/${location.id}`}>
-                <ExternalLink className="h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
-        ))}
+          ))}
+        </div>
       </CardContent>
     </Card>
   );

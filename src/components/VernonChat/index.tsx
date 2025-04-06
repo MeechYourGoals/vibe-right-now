@@ -9,6 +9,8 @@ import MessageInput from './MessageInput';
 import { PerplexityService } from '@/services/PerplexityService';
 import { updateTrendingLocations } from '@/utils/trendingLocationsUpdater';
 import { Location } from '@/types';
+import { getLocationsByCity, getTrendingLocationsForCity } from '@/mock/cityLocations';
+import { cityCoordinates } from '@/utils/cityLocations';
 
 const VernonChat = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -41,66 +43,83 @@ const VernonChat = () => {
       // Get response from Perplexity
       const responseText = await PerplexityService.searchPerplexity(inputValue);
       
-      // Parse events if the query was about local events
-      if (inputValue.toLowerCase().includes("going on in") || 
-          inputValue.toLowerCase().includes("events in") || 
-          inputValue.toLowerCase().includes("happening in")) {
-        
-        const cityMatch = inputValue.match(/in ([a-zA-Z\s]+)($|\?|\.)/i);
-        const city = cityMatch ? cityMatch[1].trim() : "your area";
-        
-        // Mock events that would be extracted from the Perplexity response
-        const events: Location[] = [
-          {
-            id: `event-${Date.now()}-1`,
-            name: "Summer Music Festival",
-            address: "Downtown Park",
-            city: city,
-            state: "CA",
-            country: "USA",
-            lat: 34.0522,
-            lng: -118.2437,
-            type: "event",
-            verified: true
-          },
-          {
-            id: `event-${Date.now()}-2`,
-            name: "Art Gallery Opening",
-            address: "Metropolitan Museum", 
-            city: city,
-            state: "CA",
-            country: "USA",
-            lat: 34.0522,
-            lng: -118.2437,
-            type: "attraction",
-            verified: true
-          },
-          {
-            id: `event-${Date.now()}-3`,
-            name: "Food Truck Rally",
-            address: "Civic Center",
-            city: city,
-            state: "CA",
-            country: "USA",
-            lat: 34.0522,
-            lng: -118.2437,
-            type: "event",
-            verified: false
+      // Parse city if the query was about events or places in a specific city
+      let detectedCity = "";
+      
+      // Common patterns for city detection in user queries
+      const cityPatterns = [
+        /(?:in|at|near|around|for)\s+([a-zA-Z\s]+)(?:\?|$|\.)/i,
+        /what's\s+(?:happening|going on)\s+in\s+([a-zA-Z\s]+)(?:\?|$|\.)/i,
+        /places\s+(?:in|at|near)\s+([a-zA-Z\s]+)(?:\?|$|\.)/i,
+        /events\s+(?:in|at|near)\s+([a-zA-Z\s]+)(?:\?|$|\.)/i,
+        /([a-zA-Z\s]+)\s+(?:nightlife|restaurants|bars|clubs)(?:\?|$|\.)/i,
+        /([a-zA-Z\s]+)\s+(?:things to do|activities|attractions)(?:\?|$|\.)/i
+      ];
+      
+      // Try to detect a city in the query
+      for (const pattern of cityPatterns) {
+        const match = inputValue.match(pattern);
+        if (match && match[1]) {
+          const potentialCity = match[1].trim().toLowerCase();
+          // Check if it matches any of our city keys
+          if (Object.keys(cityCoordinates).includes(potentialCity)) {
+            detectedCity = potentialCity;
+            break;
           }
-        ];
-        
-        // Update trending locations with these events
-        updateTrendingLocations(city, events);
+        }
       }
       
-      const aiMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        text: responseText,
-        sender: 'ai',
-        timestamp: new Date()
-      };
-      
-      setMessages(prev => [...prev, aiMessage]);
+      // If city was detected and the query seems to be about locations or events
+      if (detectedCity && 
+          (inputValue.toLowerCase().includes("going on") || 
+           inputValue.toLowerCase().includes("events") || 
+           inputValue.toLowerCase().includes("places") ||
+           inputValue.toLowerCase().includes("happening") ||
+           inputValue.toLowerCase().includes("visit") ||
+           inputValue.toLowerCase().includes("things to do"))) {
+        
+        // Get locations for the detected city
+        const cityInfo = cityCoordinates[detectedCity];
+        const cityLocations = getLocationsByCity(cityInfo.name);
+        
+        if (cityLocations.length > 0) {
+          // Update trending locations with these events
+          updateTrendingLocations(cityInfo.name, getTrendingLocationsForCity(cityInfo.name));
+          
+          // Customize the response to include references to the actual locations
+          const locationResponse = generateLocationResponse(cityInfo.name, cityLocations);
+          
+          // Add response about events in the city
+          const aiMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            text: locationResponse || responseText,
+            sender: 'ai',
+            timestamp: new Date()
+          };
+          
+          setMessages(prev => [...prev, aiMessage]);
+        } else {
+          // Fall back to standard response
+          const aiMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            text: responseText,
+            sender: 'ai',
+            timestamp: new Date()
+          };
+          
+          setMessages(prev => [...prev, aiMessage]);
+        }
+      } else {
+        // Standard response if no city was detected or query isn't about events
+        const aiMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          text: responseText,
+          sender: 'ai',
+          timestamp: new Date()
+        };
+        
+        setMessages(prev => [...prev, aiMessage]);
+      }
     } catch (error) {
       console.error('Error getting AI response:', error);
       
@@ -116,6 +135,48 @@ const VernonChat = () => {
       setIsTyping(false);
       setIsSearching(false);
     }
+  };
+  
+  // Generate a natural language response about locations in a city
+  const generateLocationResponse = (cityName: string, locations: Location[]): string => {
+    if (locations.length === 0) return "";
+    
+    const sportVenues = locations.filter(loc => loc.type === "sports");
+    const bars = locations.filter(loc => loc.type === "bar");
+    const restaurants = locations.filter(loc => loc.type === "restaurant");
+    const events = locations.filter(loc => loc.type === "event");
+    const attractions = locations.filter(loc => loc.type === "attraction");
+    const others = locations.filter(loc => loc.type === "other");
+    
+    let response = `Here's what's happening in ${cityName} right now:\n\n`;
+    
+    if (sportVenues.length > 0) {
+      response += `🏟️ **Sports:** ${sportVenues.map(v => v.name).join(", ")}.\n\n`;
+    }
+    
+    if (bars.length > 0) {
+      response += `🍸 **Nightlife:** ${bars.map(v => v.name).join(", ")}.\n\n`;
+    }
+    
+    if (restaurants.length > 0) {
+      response += `🍽️ **Dining:** ${restaurants.map(v => v.name).join(", ")}.\n\n`;
+    }
+    
+    if (events.length > 0) {
+      response += `🎭 **Events:** ${events.map(v => v.name).join(", ")}.\n\n`;
+    }
+    
+    if (attractions.length > 0) {
+      response += `🏛️ **Attractions:** ${attractions.map(v => v.name).join(", ")}.\n\n`;
+    }
+    
+    if (others.length > 0) {
+      response += `🏋️ **Other Activities:** ${others.map(v => v.name).join(", ")}.\n\n`;
+    }
+    
+    response += `These are all trending in ${cityName} right now. You can check the map to see their exact locations. Would you like more details about any specific place?`;
+    
+    return response;
   };
   
   const toggleMinimize = () => {

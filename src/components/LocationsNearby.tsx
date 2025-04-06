@@ -1,21 +1,47 @@
 
-import { useState } from "react";
-import { mockLocations } from "@/mock/locations";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MapPin, ArrowRight, VerifiedIcon, Navigation } from "lucide-react";
 import OpenStreetMap from "./map/OpenStreetMap";
 import { Location } from "@/types";
+import { getNearbyLocations } from "@/mock/cityLocations";
 
 const LocationsNearby = () => {
   const navigate = useNavigate();
   const [isMapExpanded, setIsMapExpanded] = useState(false);
   const [mapStyle, setMapStyle] = useState<"default" | "terrain" | "satellite">("default");
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
+  const [userLocation, setUserLocation] = useState<GeolocationCoordinates | null>(null);
+  const [nearbyLocations, setNearbyLocations] = useState<Location[]>([]);
   
-  // In a real app, this would use geolocation to find actually nearby locations
-  const nearbyLocations = mockLocations.slice(0, 3);
+  // Get user's current location
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation(position.coords);
+          
+          // Get nearby locations based on user coordinates
+          const userLat = position.coords.latitude;
+          const userLng = position.coords.longitude;
+          const locations = getNearbyLocations(userLat, userLng);
+          setNearbyLocations(locations.slice(0, 3)); // Limit to 3 for this component
+        },
+        (error) => {
+          console.error("Error getting location:", error);
+          // Use a default set of locations if geolocation fails
+          const defaultLocations = getNearbyLocations(34.0522, -118.2437); // Los Angeles
+          setNearbyLocations(defaultLocations.slice(0, 3));
+        }
+      );
+    } else {
+      // Use a default set of locations if geolocation is not available
+      const defaultLocations = getNearbyLocations(34.0522, -118.2437); // Los Angeles
+      setNearbyLocations(defaultLocations.slice(0, 3));
+    }
+  }, []);
   
   const handleLocationSelect = (location: Location) => {
     setSelectedLocation(location);
@@ -47,7 +73,7 @@ const LocationsNearby = () => {
           </div>
           <div className="h-[85vh] rounded-lg overflow-hidden">
             <OpenStreetMap
-              userLocation={null}
+              userLocation={userLocation}
               locations={nearbyLocations}
               searchedCity=""
               mapStyle={mapStyle}
@@ -82,7 +108,7 @@ const LocationsNearby = () => {
                     )}
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    {location.city}, {location.state}
+                    {location.city}, {location.state || location.country}
                   </div>
                 </div>
                 <Button variant="outline" size="sm" asChild>
