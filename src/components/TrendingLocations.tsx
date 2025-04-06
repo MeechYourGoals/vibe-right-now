@@ -4,10 +4,58 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useState, useEffect } from 'react';
+import { Location } from "@/types";
+
+// Event bus for updating trending locations from VernonChat
+export const eventBus = {
+  listeners: new Map<string, Function[]>(),
+  
+  on(event: string, callback: Function) {
+    if (!this.listeners.has(event)) {
+      this.listeners.set(event, []);
+    }
+    this.listeners.get(event)?.push(callback);
+  },
+  
+  emit(event: string, data: any) {
+    if (this.listeners.has(event)) {
+      this.listeners.get(event)?.forEach(callback => callback(data));
+    }
+  }
+};
+
+// Export function for VernonChat to update trending locations
+export const updateTrendingLocations = (cityName: string, events: Location[]) => {
+  eventBus.emit('trending-locations-update', { cityName, events });
+};
 
 const TrendingLocations = () => {
   // In a real implementation, this would be calculated based on post activity
-  const trendingLocations = mockLocations.slice(2, 5);
+  const [trendingLocations, setTrendingLocations] = useState(mockLocations.slice(2, 5));
+  
+  useEffect(() => {
+    // Listen for updates from VernonChat
+    const handleUpdate = (data: { cityName: string, events: Location[] }) => {
+      const { cityName, events } = data;
+      
+      // Replace trending locations with the new events
+      if (events && events.length > 0) {
+        setTrendingLocations(events);
+        
+        // Show toast notification
+        // This would use the toast component in a real implementation
+        console.log(`Updated trending locations for ${cityName}`);
+      }
+    };
+    
+    eventBus.on('trending-locations-update', handleUpdate);
+    
+    // Cleanup listener on unmount
+    return () => {
+      eventBus.listeners.delete('trending-locations-update');
+    };
+  }, []);
   
   return (
     <Card>

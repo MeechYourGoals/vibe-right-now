@@ -65,7 +65,7 @@ const CameraButton = () => {
     <>
       <Button 
         onClick={handleCameraClick}
-        className="fixed bottom-6 right-6 w-16 h-16 rounded-full shadow-lg bg-gradient-vibe flex items-center justify-center p-0 z-10 animate-pulse-slow"
+        className="fixed bottom-6 right-6 w-16 h-16 rounded-full shadow-lg bg-gradient-to-r from-primary to-secondary flex items-center justify-center p-0 z-10 animate-pulse-gradient"
       >
         <Camera className="h-7 w-7" />
       </Button>
@@ -182,7 +182,7 @@ const CameraButton = () => {
             </Button>
             <Button 
               type="button" 
-              className="bg-gradient-vibe sm:flex-1" 
+              className="bg-gradient-to-r from-primary to-secondary sm:flex-1" 
               onClick={handleSubmit}
               disabled={!locationVerified}
             >

@@ -8,7 +8,8 @@ import {
   Send, 
   Minimize, 
   Maximize, 
-  Bot
+  Bot,
+  Loader
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from '@/hooks/use-toast';
@@ -20,17 +21,48 @@ interface Message {
   timestamp: Date;
 }
 
-// Mock responses for demonstration
-const mockResponses = [
-  "Based on your preferences, I'd recommend checking out The Roxy on Sunset Blvd. They have live music events almost every night!",
-  "There are 5 coffee shops within walking distance of your current location. Would you like me to list them?",
-  "The Jazz Festival starts at 7pm tonight at Downtown Commons. You can find tickets on their website or at the entrance.",
-  "Yes, Crypto.com Arena allows food and non-alcoholic beverages in clear plastic containers.",
-  "According to recent visitors, the crowd at The Grove is moderate right now. Might be a good time to visit!",
-  "For hiking trails with a view of the city, I'd recommend Runyon Canyon or Griffith Observatory trails. Both are moderately difficult.",
-  "The best happy hour deals near you are at Murphy's Pub (4-7pm) and Luna Lounge (5-8pm).",
-  "Sorry, I can't answer that. I'm here to provide recommendations for events, venues, and places to go only."
-];
+// Service to interact with Perplexity AI
+const PerplexityService = {
+  async searchPerplexity(query: string): Promise<string> {
+    try {
+      // Note: In a real implementation, this would call a Supabase Edge Function with a Perplexity API key
+      // For now, we'll simulate the response
+      console.log('Searching Perplexity for:', query);
+      
+      // Check if query is about local events
+      if (query.toLowerCase().includes("going on in") || 
+          query.toLowerCase().includes("events in") || 
+          query.toLowerCase().includes("happening in")) {
+        
+        // Extract city name if possible
+        const cityMatch = query.match(/in ([a-zA-Z\s]+)($|\?|\.)/i);
+        const city = cityMatch ? cityMatch[1].trim() : "the area";
+        
+        return `Based on my search, here are some exciting events happening in ${city} tonight:\n\n` +
+               `1. "Summer Music Festival" at Downtown Park - Live performances starting at 7PM\n` +
+               `2. "Art Gallery Opening" at Metropolitan Museum - New exhibition from 6-9PM\n` +
+               `3. "Food Truck Rally" at Civic Center - Various food options from 5-10PM\n\n` +
+               `Would you like more details about any of these events?`;
+      }
+      
+      // For other types of questions, simulate a helpful response
+      return `I found this information for you: ${query} is a great question! Based on my search, there are several interesting answers. The most relevant information suggests that this is something many people are curious about. Would you like more specific details?`;
+    } catch (error) {
+      console.error('Error searching Perplexity:', error);
+      return "I'm having trouble connecting to my search service right now. Could you try again in a moment?";
+    }
+  }
+};
+
+// Function to update trending locations based on AI query results
+const updateTrendingLocations = (cityName: string, events: any[]) => {
+  // In a real implementation, this would update the global state or database
+  // For demonstration, we'll just log what would happen
+  console.log(`Updating trending locations for ${cityName} with:`, events);
+  
+  // This function would normally modify the app's state to display these events
+  // in the TrendingLocations component
+};
 
 const VernonChat = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -38,13 +70,14 @@ const VernonChat = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: "Hi there! I'm Vernon (Vern for short), your Vibe Language Model assistant. How can I help you discover venues and events?",
+      text: "Hi there! I'm Vernon (Vern for short), your Vibe Language Model assistant. I can help you discover venues, events, and answer general questions too. What would you like to know?",
       sender: 'ai',
       timestamp: new Date()
     }
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
@@ -53,7 +86,7 @@ const VernonChat = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
   
-  const handleSendMessage = (e?: React.FormEvent) => {
+  const handleSendMessage = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     
     if (!inputValue.trim()) return;
@@ -69,16 +102,54 @@ const VernonChat = () => {
     setMessages(prev => [...prev, userMessage]);
     setInputValue('');
     setIsTyping(true);
+    setIsSearching(true);
     
-    // Check if the message is about something other than venues, events, or places
-    const isOffTopic = checkIfOffTopic(inputValue);
-    
-    // Simulate AI thinking and typing
-    setTimeout(() => {
-      // If off-topic, respond with the "Sorry, I can't answer that" message
-      const responseText = isOffTopic 
-        ? "Sorry, I can't answer that. I'm here to provide recommendations for events, venues, and places to go only."
-        : mockResponses[Math.floor(Math.random() * (mockResponses.length - 1))]; // Exclude the last response which is the "sorry" message
+    try {
+      // Get response from Perplexity
+      const responseText = await PerplexityService.searchPerplexity(inputValue);
+      
+      // Parse events if the query was about local events
+      if (inputValue.toLowerCase().includes("going on in") || 
+          inputValue.toLowerCase().includes("events in") || 
+          inputValue.toLowerCase().includes("happening in")) {
+        
+        const cityMatch = inputValue.match(/in ([a-zA-Z\s]+)($|\?|\.)/i);
+        const city = cityMatch ? cityMatch[1].trim() : "your area";
+        
+        // Mock events that would be extracted from the Perplexity response
+        const events = [
+          {
+            id: `event-${Date.now()}-1`,
+            name: "Summer Music Festival",
+            address: "Downtown Park",
+            city: city,
+            state: "CA",
+            type: "event",
+            verified: true
+          },
+          {
+            id: `event-${Date.now()}-2`,
+            name: "Art Gallery Opening",
+            address: "Metropolitan Museum", 
+            city: city,
+            state: "CA",
+            type: "attraction",
+            verified: true
+          },
+          {
+            id: `event-${Date.now()}-3`,
+            name: "Food Truck Rally",
+            address: "Civic Center",
+            city: city,
+            state: "CA",
+            type: "event",
+            verified: false
+          }
+        ];
+        
+        // Update trending locations with these events
+        updateTrendingLocations(city, events);
+      }
       
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -88,45 +159,21 @@ const VernonChat = () => {
       };
       
       setMessages(prev => [...prev, aiMessage]);
+    } catch (error) {
+      console.error('Error getting AI response:', error);
+      
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        text: "I'm having trouble finding that information right now. Could you try again in a moment?",
+        sender: 'ai',
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
-  };
-  
-  // Simple function to check if a message is likely off-topic
-  const checkIfOffTopic = (message: string): boolean => {
-    const lowercaseMsg = message.toLowerCase();
-    
-    // Keywords related to venues, events, and places
-    const onTopicKeywords = [
-      'place', 'venue', 'event', 'restaurant', 'bar', 'club', 'concert', 
-      'festival', 'show', 'theater', 'museum', 'gallery', 'park', 'beach',
-      'where', 'when', 'how much', 'ticket', 'location', 'address', 'open',
-      'close', 'hour', 'time', 'today', 'tomorrow', 'weekend', 'recommend',
-      'suggestion', 'near', 'nearby', 'visit', 'go to', 'music', 'food',
-      'drink', 'entertainment', 'fun', 'activity', 'happening', 'vibe'
-    ];
-    
-    // Check if any on-topic keywords are in the message
-    const isOnTopic = onTopicKeywords.some(keyword => lowercaseMsg.includes(keyword));
-    
-    // If the message contains any of these obviously off-topic prefixes, it's off-topic
-    const obviouslyOffTopic = [
-      'what is the meaning of life',
-      'who is the president',
-      'how do i',
-      'can you write',
-      'tell me about politics',
-      'tell me a joke',
-      'what is your opinion on',
-      'solve this math',
-      'write code',
-      'create a',
-      'generate a',
-      'help me with my homework',
-      'what do you think about'
-    ].some(prefix => lowercaseMsg.includes(prefix));
-    
-    return obviouslyOffTopic || !isOnTopic;
+      setIsSearching(false);
+    }
   };
   
   const toggleMinimize = () => {
@@ -200,12 +247,19 @@ const VernonChat = () => {
                   <AvatarImage src="/placeholder.svg" />
                   <AvatarFallback className="bg-amber-500 text-white">V</AvatarFallback>
                 </Avatar>
-                <div className="px-3 py-2 rounded-lg bg-muted">
-                  <div className="flex space-x-1">
-                    <div className="w-2 h-2 rounded-full bg-muted-foreground/50 animate-bounce"></div>
-                    <div className="w-2 h-2 rounded-full bg-muted-foreground/50 animate-bounce delay-75"></div>
-                    <div className="w-2 h-2 rounded-full bg-muted-foreground/50 animate-bounce delay-150"></div>
-                  </div>
+                <div className="px-3 py-2 rounded-lg bg-muted flex items-center">
+                  {isSearching ? (
+                    <div className="flex items-center">
+                      <span className="text-xs mr-2">Searching web</span>
+                      <Loader className="h-3 w-3 animate-spin" />
+                    </div>
+                  ) : (
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 rounded-full bg-muted-foreground/50 animate-bounce"></div>
+                      <div className="w-2 h-2 rounded-full bg-muted-foreground/50 animate-bounce delay-75"></div>
+                      <div className="w-2 h-2 rounded-full bg-muted-foreground/50 animate-bounce delay-150"></div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -220,13 +274,13 @@ const VernonChat = () => {
             <Input
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              placeholder="Ask about venues, events..."
+              placeholder="Ask me anything..."
               className="flex-1 mr-2"
             />
             <Button 
               type="submit" 
               size="icon" 
-              disabled={!inputValue.trim()}
+              disabled={!inputValue.trim() || isTyping}
               className="bg-amber-500 hover:bg-amber-600 text-white"
             >
               <Send className="h-4 w-4" />
