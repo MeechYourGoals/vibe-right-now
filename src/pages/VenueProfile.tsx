@@ -1,12 +1,15 @@
-
 import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+import { formatDistanceToNow } from "date-fns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { mockLocations, mockPosts } from "@/mock/data";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, VerifiedIcon, Clock, ExternalLink, Grid2X2, ListIcon, PlusCircle } from "lucide-react";
+import { 
+  MapPin, VerifiedIcon, Clock, ExternalLink, Grid2X2, 
+  ListIcon, PlusCircle, Heart
+} from "lucide-react";
 import PostCard from "@/components/PostCard";
 import VenuePost from "@/components/VenuePost";
 import CameraButton from "@/components/CameraButton";
@@ -15,16 +18,14 @@ import { mockComments } from "@/mock/data";
 import { Comment, Post } from "@/types";
 import { toast } from "@/hooks/use-toast";
 
-// Helper function to get official ticket URLs for sports venues
 const getOfficialTicketUrl = (venueId: string) => {
-  // Map venue IDs to official ticket URLs
   const ticketUrls: Record<string, string> = {
-    "30": "https://www.axs.com/events/crypto-com-arena", // Lakers
-    "31": "https://www.therams.com/tickets/", // Rams
-    "32": "https://www.mlb.com/dodgers/tickets", // Dodgers
-    "33": "https://www.lagalaxy.com/tickets/", // LA Galaxy
-    "34": "https://www.vbusa.org/tickets", // Venice Beach Volleyball
-    "35": "https://wmphoenixopen.com/tickets/", // WM Phoenix Open
+    "30": "https://www.axs.com/events/crypto-com-arena",
+    "31": "https://www.therams.com/tickets/",
+    "32": "https://www.mlb.com/dodgers/tickets",
+    "33": "https://www.lagalaxy.com/tickets/",
+    "34": "https://www.vbusa.org/tickets",
+    "35": "https://wmphoenixopen.com/tickets/",
   };
   
   return ticketUrls[venueId] || "";
@@ -36,21 +37,14 @@ const VenueProfile = () => {
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [isFollowing, setIsFollowing] = useState(false);
   
-  // Find the venue from mock data
   const venue = mockLocations.find(location => location.id === id);
-  
-  // Filter posts for this venue
   const venuePosts = mockPosts.filter(post => post.location.id === id);
-
-  // Get official ticket URL if this is a sports venue
   const officialTicketUrl = venue?.type === "sports" ? getOfficialTicketUrl(id || "") : "";
 
-  // Function to get comments for a post
   const getPostComments = (postId: string): Comment[] => {
     return mockComments.filter(comment => comment.postId === postId);
   };
 
-  // Function to toggle following status
   const handleFollowToggle = () => {
     setIsFollowing(!isFollowing);
     
@@ -67,7 +61,6 @@ const VenueProfile = () => {
     }
   };
   
-  // Check if venue exists
   if (!venue) {
     return (
       <div className="min-h-screen bg-background">
@@ -87,7 +80,6 @@ const VenueProfile = () => {
       
       <main className="container py-6">
         <div className="max-w-4xl mx-auto">
-          {/* Venue Header */}
           <div className="glass-effect p-6 rounded-xl mb-6">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-4">
@@ -148,7 +140,6 @@ const VenueProfile = () => {
             </div>
           </div>
           
-          {/* Venue Tabs */}
           <Tabs defaultValue="ugv" value={activeTab} onValueChange={setActiveTab} className="mb-6">
             <div className="flex justify-between items-center mb-2">
               <TabsList className="grid grid-cols-2 w-[200px]">
@@ -223,7 +214,6 @@ const VenueProfile = () => {
   );
 };
 
-// Grid item component for grid view
 interface PostGridItemProps {
   post: Post;
 }
