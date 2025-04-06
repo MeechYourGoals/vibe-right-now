@@ -127,8 +127,10 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
       style={{ height: '100%', width: '100%' }}
       center={effectiveCenter}
       zoom={locations.length > 1 ? 10 : 13}
+      scrollWheelZoom={false}
     >
       <TileLayer
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       
@@ -142,6 +144,7 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
               ? userAddressLocation 
               : [userLocation!.latitude, userLocation!.longitude]
           }
+          icon={blueIcon}
         >
           <Popup>
             {userAddressLocation ? 'Your Address Location' : 'Your Current Location'}
@@ -157,6 +160,13 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
           eventHandlers={{
             click: () => onLocationSelect(location)
           }}
+          icon={
+            location.id === selectedLocation?.id
+            ? redIcon
+            : location.verified 
+              ? goldIcon
+              : greenIcon
+          }
         >
           <Popup>
             <div className="font-semibold">{location.name}</div>
