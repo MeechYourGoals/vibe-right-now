@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { Message } from '../types';
-import { PerplexityService } from '@/services/PerplexityService';
+import { SimpleSearchService } from '@/services/SimpleSearchService';
 import { updateTrendingLocations } from '@/utils/trendingLocationsUpdater';
 import { getLocationsByCity, getTrendingLocationsForCity } from '@/mock/cityLocations';
 import { cityCoordinates } from '@/utils/cityLocations';
@@ -72,8 +72,8 @@ export const useChat = () => {
     setIsSearching(true);
     
     try {
-      // Get response from Perplexity
-      const responseText = await PerplexityService.searchPerplexity(inputValue);
+      // Get response from our simple search service
+      const responseText = await SimpleSearchService.searchForCityInfo(inputValue);
       
       // Parse city if the query was about events or places in a specific city
       let detectedCity = "";
@@ -118,7 +118,7 @@ export const useChat = () => {
           // Update trending locations with these events
           updateTrendingLocations(cityInfo.name, getTrendingLocationsForCity(cityInfo.name));
           
-          // Send the Perplexity response but also add local venue data
+          // Send the search response but also add local venue data
           const combinedResponse = `${responseText}\n\n**Local Venues in our Database:**\n${generateLocationResponse(cityInfo.name, cityLocations)}`;
           
           const aiMessage: Message = {
@@ -130,7 +130,7 @@ export const useChat = () => {
           
           setMessages(prev => [...prev, aiMessage]);
         } else {
-          // Fall back to just the Perplexity response
+          // Fall back to just the search response
           const aiMessage: Message = {
             id: (Date.now() + 1).toString(),
             text: responseText,
@@ -156,7 +156,7 @@ export const useChat = () => {
       
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: "I'm having trouble finding that information right now. Could you try again in a moment? Make sure you've provided a valid Perplexity API key.",
+        text: "I'm having trouble finding that information right now. Could you try again in a moment?",
         sender: 'ai',
         timestamp: new Date()
       };

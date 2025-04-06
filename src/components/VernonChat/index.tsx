@@ -12,12 +12,8 @@ const VernonChat = () => {
   const [isMinimized, setIsMinimized] = useState(false);
   
   const {
-    apiKey,
     isApiKeyPopoverOpen,
     setIsApiKeyPopoverOpen,
-    apiKeyInput,
-    setApiKeyInput,
-    saveApiKey
   } = useApiKey();
   
   const {
@@ -46,9 +42,6 @@ const VernonChat = () => {
         closeChat={() => setIsOpen(false)}
         isApiKeyPopoverOpen={isApiKeyPopoverOpen}
         setIsApiKeyPopoverOpen={setIsApiKeyPopoverOpen}
-        apiKeyInput={apiKeyInput}
-        setApiKeyInput={setApiKeyInput}
-        saveApiKey={saveApiKey}
       />
       
       {!isMinimized && (
