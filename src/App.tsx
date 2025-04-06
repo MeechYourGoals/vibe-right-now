@@ -13,6 +13,7 @@ import ProfileBio from "./pages/ProfileBio";
 import MyPlaces from "./pages/MyPlaces";
 import PinnedVibes from "./pages/PinnedVibes";
 import UserPointsPage from "./pages/UserPoints";
+import Settings from "./pages/Settings";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +32,7 @@ const App = () => (
             <Route path="/profile/places" element={<MyPlaces />} />
             <Route path="/profile/pinned" element={<PinnedVibes />} />
             <Route path="/profile/points" element={<UserPointsPage />} />
+            <Route path="/settings" element={<Settings />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
