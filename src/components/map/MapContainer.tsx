@@ -1,0 +1,89 @@
+
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { Compass } from "lucide-react";
+import GoogleMap from "./GoogleMap";
+import LocationDetailsSidebar from "./LocationDetailsSidebar";
+import { Location } from "@/types";
+
+interface MapContainerProps {
+  loading: boolean;
+  isExpanded: boolean;
+  userLocation: GeolocationCoordinates | null;
+  locations: Location[];
+  searchedCity: string;
+  mapStyle: "default" | "terrain" | "satellite";
+  selectedLocation: Location | null;
+  showDistances: boolean;
+  userAddressLocation: [number, number] | null;
+  onLocationSelect: (location: Location) => void;
+  onCloseLocation: () => void;
+  nearbyCount: number;
+  onToggleDistances: () => void;
+}
+
+const MapContainer = ({
+  loading,
+  isExpanded,
+  userLocation,
+  locations,
+  searchedCity,
+  mapStyle,
+  selectedLocation,
+  showDistances,
+  userAddressLocation,
+  onLocationSelect,
+  onCloseLocation,
+  nearbyCount,
+  onToggleDistances
+}: MapContainerProps) => {
+  if (loading) {
+    return (
+      <div className={`bg-muted/20 rounded-lg flex items-center justify-center ${isExpanded ? "h-[85vh]" : "h-60"}`}>
+        <div className="animate-spin">
+          <Compass className="h-8 w-8 text-muted-foreground" />
+        </div>
+      </div>
+    );
+  }
+  
+  return (
+    <div className={`relative ${isExpanded ? "h-[85vh]" : "h-60"} rounded-lg overflow-hidden transition-all`}>
+      <GoogleMap
+        userLocation={userLocation}
+        locations={locations}
+        searchedCity={searchedCity}
+        mapStyle={mapStyle}
+        onLocationSelect={onLocationSelect}
+        showDistances={showDistances}
+        userAddressLocation={userAddressLocation}
+      />
+      
+      {isExpanded && selectedLocation && (
+        <LocationDetailsSidebar
+          location={selectedLocation}
+          onClose={onCloseLocation}
+          onViewVibes={(id) => window.location.href = `/venue/${id}`}
+        />
+      )}
+      
+      <div className="absolute bottom-0 left-0 right-0 p-3 glass-effect bg-background/70 backdrop-blur-sm">
+        <p className="text-sm">
+          {nearbyCount} Vibes within 10 miles of you
+          {showDistances && (
+            <Button 
+              variant="link" 
+              size="sm" 
+              className="p-0 h-auto ml-2" 
+              onClick={onToggleDistances}
+            >
+              Hide distances
+            </Button>
+          )}
+        </p>
+      </div>
+    </div>
+  );
+};
+
+export default MapContainer;
