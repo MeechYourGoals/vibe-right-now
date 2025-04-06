@@ -1,5 +1,5 @@
-
 import Header from "./Header";
+import VernonChat from '@/components/VernonChat';
 
 export const Layout = ({ children }: { children: React.ReactNode }) => {
   return (
