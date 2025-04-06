@@ -1,4 +1,7 @@
 
+"use client";
+
+import * as React from "react";
 import { createContext, useContext, useEffect, useState } from "react";
 
 type Theme = "dark" | "light" | "system";
@@ -28,10 +31,23 @@ export function ThemeProvider({
   ...props
 }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(
-    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
+    () => {
+      try {
+        if (typeof window !== "undefined") {
+          const storedTheme = window.localStorage.getItem(storageKey);
+          return (storedTheme as Theme) || defaultTheme;
+        }
+        return defaultTheme;
+      } catch (error) {
+        console.error("Error accessing localStorage:", error);
+        return defaultTheme;
+      }
+    }
   );
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    
     const root = window.document.documentElement;
     root.classList.remove("light", "dark");
 
@@ -50,8 +66,15 @@ export function ThemeProvider({
   const value = {
     theme,
     setTheme: (theme: Theme) => {
-      localStorage.setItem(storageKey, theme);
-      setTheme(theme);
+      try {
+        if (typeof window !== "undefined") {
+          localStorage.setItem(storageKey, theme);
+        }
+        setTheme(theme);
+      } catch (error) {
+        console.error("Error setting theme:", error);
+        setTheme(theme);
+      }
     },
   };
 
