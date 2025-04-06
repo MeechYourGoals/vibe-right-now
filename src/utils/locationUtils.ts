@@ -25,7 +25,20 @@ export const getOfficialUrl = (place: Location): string => {
       "35": "https://wmphoenixopen.com/tickets/", // WM Phoenix Open
     };
     
-    return ticketUrls[place.id] || `https://seatgeek.com/${place.city.toLowerCase()}-tickets`;
+    // For dynamically generated city locations (format: city-type-index)
+    if (place.id.includes('sports')) {
+      const city = place.id.split('-')[0];
+      if (place.id.includes('basketball')) {
+        return `https://tickets.nba.com/${city}`;
+      } else if (place.id.includes('football')) {
+        return `https://tickets.nfl.com/${city}`;
+      } else if (place.id.includes('baseball')) {
+        return `https://tickets.mlb.com/${city}`;
+      }
+      return `https://seatgeek.com/${city}-tickets`;
+    }
+    
+    return ticketUrls[place.id] || "";
   }
   
   // For events, we'd link to event ticket platforms

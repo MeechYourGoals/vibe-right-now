@@ -20,7 +20,7 @@ export async function geocodeAddress(address: string) {
     const data = await response.json();
     
     if (data && data.length > 0) {
-      // Nominatim returns lon/lat (not lat/lng)
+      // Nominatim returns lat/lon (not lon/lat as we need)
       return [parseFloat(data[0].lon), parseFloat(data[0].lat)] as [number, number];
     } else {
       toast.error("Address not found. Please try again with a more specific address.");
