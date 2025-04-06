@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Layout } from "@/components/Layout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useToast } from "@/hooks/use-toast";
-import { Car, MapPin, User, Shield, Ticket, Tag, UserCheck, BellRing, Bell, Fingerprint, EyeOff, Eye, Lock } from "lucide-react";
+import { Car, MapPin, User, Shield, Ticket, Tag, UserCheck, BellRing, Bell, Fingerprint, EyeOff, Eye, Lock, Store } from "lucide-react";
 
 const PREFERENCE_TAGS = [
   "Cozy", "High Energy", "Locally Owned", "Clubs", "Lounges", 
@@ -308,6 +307,13 @@ const Settings = () => {
                         <Label htmlFor="notifications-follows">New Followers</Label>
                       </div>
                       <Switch id="notifications-follows" defaultChecked />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <Store className="h-4 w-4" />
+                        <Label htmlFor="notifications-venue-follows">Venue Follows</Label>
+                      </div>
+                      <Switch id="notifications-venue-follows" defaultChecked />
                     </div>
                   </div>
                 </div>
