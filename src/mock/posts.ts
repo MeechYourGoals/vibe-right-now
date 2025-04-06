@@ -1,4 +1,3 @@
-
 import { Post } from "@/types";
 import { mockUsers } from "./users";
 import { mockLocations } from "./locations";
@@ -101,7 +100,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1560012057-4372e14c5085?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1504450758481-7338eba7524a?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
       },
     ],
     timestamp: getRecentTime(0.3),
@@ -117,7 +116,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6a3?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1566737236500-c8ac43014a67?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
       },
     ],
     timestamp: getRecentTime(0.2),
@@ -537,4 +536,3 @@ export const mockPosts: Post[] = [
     comments: 39,
   },
 ];
-
