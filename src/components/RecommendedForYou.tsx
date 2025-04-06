@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { locations } from "@/mock/locations";
+import { mockLocations } from "@/mock/data";
 import { Link } from "react-router-dom";
 import { Star, ExternalLink } from "lucide-react";
 
@@ -24,7 +24,7 @@ const RecommendedForYou = () => {
   useEffect(() => {
     // In a real app, this would filter based on user preferences from settings
     // For now, we're just picking a few random locations
-    const randomLocations = [...locations]
+    const randomLocations = [...mockLocations]
       .sort(() => 0.5 - Math.random())
       .slice(0, 3);
     
