@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { mockLocations } from "@/mock/locations";
 import { Location } from "@/types";
-import { cityCoordinates } from "@/utils/cityLocations";
+import { cityCoordinates } from "@/utils/locations";
 import { getLocationsByCity, getNearbyLocations } from "@/mock/cityLocations";
 
 // Improved version that uses city data

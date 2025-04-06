@@ -1,10 +1,9 @@
-
 import { useState } from 'react';
 import { Message } from '../types';
 import { SimpleSearchService } from '@/services/SimpleSearchService';
 import { updateTrendingLocations } from '@/utils/trendingLocationsUpdater';
 import { getLocationsByCity, getTrendingLocationsForCity } from '@/mock/cityLocations';
-import { cityCoordinates } from '@/utils/cityLocations';
+import { cityCoordinates } from '@/utils/locations';
 
 export const useChat = () => {
   const [messages, setMessages] = useState<Message[]>([
