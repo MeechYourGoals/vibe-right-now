@@ -1,6 +1,5 @@
 
-import { Location } from "@/types";
-import { Media } from "@/types";
+import { Location, Media } from "@/types";
 
 // Get media for a location
 export const getMediaForLocation = (location: Location): Media => {

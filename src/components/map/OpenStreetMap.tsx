@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
@@ -12,10 +13,10 @@ interface OpenStreetMapProps {
   locations: Location[];
   searchedCity: string;
   mapStyle: "default" | "terrain" | "satellite";
-  selectedLocation: Location | null;
   onLocationSelect: (location: Location) => void;
+  selectedLocation?: Location | null; // Make optional
   showDistances?: boolean;
-  userAddressLocation: [number, number] | null;
+  userAddressLocation?: [number, number] | null; // Make optional
   showAllCities?: boolean;
 }
 
@@ -48,10 +49,10 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
   locations,
   searchedCity,
   mapStyle,
-  selectedLocation,
+  selectedLocation = null, // Default value
   onLocationSelect,
   showDistances = false,
-  userAddressLocation,
+  userAddressLocation = null, // Default value
   showAllCities = true
 }) => {
   // Determine map center based on available location data
@@ -118,7 +119,6 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url={tileLayerUrl}
-        subdomains={['mt0', 'mt1', 'mt2', 'mt3']}
       />
       
       <MapRecenter center={mapCenter} zoom={zoom} />

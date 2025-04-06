@@ -106,6 +106,8 @@ const VenueProfile = () => {
               locations={[venue]}
               searchedCity={venue.city}
               mapStyle="default"
+              selectedLocation={null}
+              userAddressLocation={null}
               onLocationSelect={() => {}}
               showAllCities={!venue.city}
             />
@@ -189,6 +191,8 @@ const VenueProfile = () => {
                 locations={[venue]}
                 searchedCity={venue.city}
                 mapStyle="default"
+                selectedLocation={null}
+                userAddressLocation={null}
                 onLocationSelect={() => {}}
                 showAllCities={false}
               />

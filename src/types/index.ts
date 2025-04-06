@@ -19,15 +19,17 @@ export interface Location {
   verified: boolean;
 }
 
+export interface Media {
+  type: "image" | "video";
+  url: string;
+}
+
 export interface Post {
   id: string;
   user: User;
   location: Location;
   content: string;
-  media: {
-    type: "image" | "video";
-    url: string;
-  }[];
+  media: Media[];
   timestamp: string;
   expiresAt: string;
   likes: number;

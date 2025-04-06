@@ -82,6 +82,8 @@ const LocationsNearby = () => {
               searchedCity=""
               mapStyle={mapStyle}
               onLocationSelect={handleLocationSelect}
+              selectedLocation={selectedLocation}
+              userAddressLocation={null}
               showAllCities={true}
             />
           </div>
