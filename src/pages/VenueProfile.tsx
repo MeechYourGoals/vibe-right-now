@@ -6,13 +6,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { mockLocations, mockPosts } from "@/mock/data";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, VerifiedIcon, Clock, ExternalLink } from "lucide-react";
+import { MapPin, VerifiedIcon, Clock, ExternalLink, Grid2X2, ListIcon, PlusCircle } from "lucide-react";
 import PostCard from "@/components/PostCard";
 import VenuePost from "@/components/VenuePost";
 import CameraButton from "@/components/CameraButton";
 import Header from "@/components/Header";
 import { mockComments } from "@/mock/data";
-import { Comment } from "@/types";
+import { Comment, Post } from "@/types";
+import { toast } from "@/hooks/use-toast";
 
 // Helper function to get official ticket URLs for sports venues
 const getOfficialTicketUrl = (venueId: string) => {
@@ -32,6 +33,8 @@ const getOfficialTicketUrl = (venueId: string) => {
 const VenueProfile = () => {
   const { id } = useParams<{ id: string }>();
   const [activeTab, setActiveTab] = useState("ugv");
+  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
+  const [isFollowing, setIsFollowing] = useState(false);
   
   // Find the venue from mock data
   const venue = mockLocations.find(location => location.id === id);
@@ -45,6 +48,23 @@ const VenueProfile = () => {
   // Function to get comments for a post
   const getPostComments = (postId: string): Comment[] => {
     return mockComments.filter(comment => comment.postId === postId);
+  };
+
+  // Function to toggle following status
+  const handleFollowToggle = () => {
+    setIsFollowing(!isFollowing);
+    
+    if (isFollowing) {
+      toast({
+        title: "Unfollowed",
+        description: `You are no longer following ${venue?.name}`,
+      });
+    } else {
+      toast({
+        title: "Following!",
+        description: `You are now following ${venue?.name}`,
+      });
+    }
   };
   
   // Check if venue exists
@@ -94,7 +114,15 @@ const VenueProfile = () => {
                 </div>
               </div>
               
-              <div className="flex flex-col items-end">
+              <div className="flex flex-col items-end gap-2">
+                <Button 
+                  variant={isFollowing ? "default" : "outline"}
+                  onClick={handleFollowToggle}
+                  className={isFollowing ? "bg-primary" : ""}
+                >
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  {isFollowing ? "Following" : "Follow"}
+                </Button>
                 <Button variant="default" className="bg-gradient-vibe">Check In</Button>
                 {venue.type === "sports" && officialTicketUrl && (
                   <a 
@@ -122,18 +150,47 @@ const VenueProfile = () => {
           
           {/* Venue Tabs */}
           <Tabs defaultValue="ugv" value={activeTab} onValueChange={setActiveTab} className="mb-6">
-            <TabsList className="grid grid-cols-2 w-full">
-              <TabsTrigger value="ugv">User Vibes</TabsTrigger>
-              <TabsTrigger value="vgv">Venue Vibes</TabsTrigger>
-            </TabsList>
+            <div className="flex justify-between items-center mb-2">
+              <TabsList className="grid grid-cols-2 w-[200px]">
+                <TabsTrigger value="ugv">User Vibes</TabsTrigger>
+                <TabsTrigger value="vgv">Venue Vibes</TabsTrigger>
+              </TabsList>
+              
+              {activeTab === "ugv" && (
+                <div className="flex gap-2">
+                  <Button 
+                    variant={viewMode === "list" ? "default" : "outline"} 
+                    size="sm"
+                    onClick={() => setViewMode("list")}
+                  >
+                    <ListIcon className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    variant={viewMode === "grid" ? "default" : "outline"} 
+                    size="sm"
+                    onClick={() => setViewMode("grid")}
+                  >
+                    <Grid2X2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+            </div>
             
             <TabsContent value="ugv" className="mt-4 space-y-4">
               {venuePosts.length > 0 ? (
-                <PostCard 
-                  posts={venuePosts} 
-                  locationPostCount={venuePosts.length}
-                  getComments={getPostComments} 
-                />
+                viewMode === "list" ? (
+                  <PostCard 
+                    posts={venuePosts} 
+                    locationPostCount={venuePosts.length}
+                    getComments={getPostComments} 
+                  />
+                ) : (
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {venuePosts.map((post) => (
+                      <PostGridItem key={post.id} post={post} />
+                    ))}
+                  </div>
+                )
               ) : (
                 <div className="text-center py-10">
                   <h3 className="text-xl font-semibold mb-2">No user vibes yet</h3>
@@ -163,6 +220,68 @@ const VenueProfile = () => {
       
       <CameraButton />
     </div>
+  );
+};
+
+// Grid item component for grid view
+interface PostGridItemProps {
+  post: Post;
+}
+
+const PostGridItem = ({ post }: PostGridItemProps) => {
+  const [liked, setLiked] = useState(false);
+  
+  const handleLike = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setLiked(!liked);
+  };
+
+  return (
+    <Link to={`/post/${post.id}`} className="group relative block aspect-square overflow-hidden rounded-lg">
+      {post.media[0]?.type === "image" ? (
+        <img 
+          src={post.media[0].url}
+          alt={`Post by ${post.user.username}`}
+          className="h-full w-full object-cover transition-transform group-hover:scale-105"
+        />
+      ) : post.media[0]?.type === "video" ? (
+        <video
+          src={post.media[0].url}
+          className="h-full w-full object-cover"
+          poster="https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
+        />
+      ) : (
+        <div className="flex h-full w-full items-center justify-center bg-muted">
+          <p className="p-2 text-center text-sm">{post.content.slice(0, 100)}{post.content.length > 100 ? '...' : ''}</p>
+        </div>
+      )}
+      
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="absolute bottom-0 left-0 right-0 p-3">
+          <div className="flex items-center gap-2">
+            <Avatar className="h-6 w-6 border border-white">
+              <AvatarImage src={post.user.avatar} alt={post.user.name} />
+              <AvatarFallback>{post.user.name[0]}</AvatarFallback>
+            </Avatar>
+            <span className="text-xs font-medium text-white">@{post.user.username}</span>
+          </div>
+          <div className="mt-2 flex justify-between items-center">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleLike} 
+              className="h-8 px-2 text-white hover:bg-black/20"
+            >
+              <Heart className={`h-4 w-4 ${liked ? 'fill-red-500 text-red-500' : ''}`} />
+              <span className="ml-1">{post.likes + (liked ? 1 : 0)}</span>
+            </Button>
+            <span className="text-xs text-white">
+              {formatDistanceToNow(new Date(post.timestamp), { addSuffix: true })}
+            </span>
+          </div>
+        </div>
+      </div>
+    </Link>
   );
 };
 

@@ -6,7 +6,7 @@ import { formatDistanceToNow } from "date-fns";
 import { 
   Heart, MessageSquare, Clock, MapPin, VerifiedIcon, Users, 
   ChevronDown, ChevronUp, User as UserIcon, MoreHorizontal, 
-  Image, Eye 
+  Image, Eye, PlusCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -20,6 +20,7 @@ import {
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import CommentList from "@/components/CommentList";
 import { mockUsers } from "@/mock/data";
+import { toast } from "@/hooks/use-toast";
 
 interface PostCardProps {
   posts: Post[];
@@ -37,10 +38,12 @@ const PostCard = ({ posts, locationPostCount = 1, getComments }: PostCardProps) 
   const [showAllUsers, setShowAllUsers] = useState(false);
   const [expandedMedia, setExpandedMedia] = useState<string | null>(null);
   const [showAllPosts, setShowAllPosts] = useState(false);
+  const [followedVenues, setFollowedVenues] = useState<Record<string, boolean>>({});
 
   // Use the first post for location information
   const mainPost = posts[0];
   const location = mainPost.location;
+  const isSinglePost = posts.length === 1;
 
   const handleLike = (postId: string) => {
     const isLiked = likedPosts[postId] || false;
@@ -58,6 +61,23 @@ const PostCard = ({ posts, locationPostCount = 1, getComments }: PostCardProps) 
       ...showComments, 
       [postId]: !showComments[postId] 
     });
+  };
+
+  const handleFollowVenue = () => {
+    const isFollowed = followedVenues[location.id] || false;
+    setFollowedVenues({ ...followedVenues, [location.id]: !isFollowed });
+    
+    if (isFollowed) {
+      toast({
+        title: "Unfollowed",
+        description: `You are no longer following ${location.name}`,
+      });
+    } else {
+      toast({
+        title: "Following!",
+        description: `You are now following ${location.name}`,
+      });
+    }
   };
 
   // Get a list of all media from displayed posts
@@ -138,6 +158,7 @@ const PostCard = ({ posts, locationPostCount = 1, getComments }: PostCardProps) 
   const displayedPosts = showAllPosts ? posts : posts.slice(0, 4);
   const hasMorePosts = posts.length > 4;
   const allMedia = getAllMedia();
+  const isFollowed = followedVenues[location.id] || false;
 
   return (
     <Card className="vibe-card overflow-hidden mb-4">
@@ -169,7 +190,17 @@ const PostCard = ({ posts, locationPostCount = 1, getComments }: PostCardProps) 
           </div>
 
           {/* User/post count and expiration (on the right side) */}
-          <div className="flex flex-col items-end">
+          <div className="flex flex-col items-end gap-2">
+            <Button
+              variant={isFollowed ? "default" : "outline"}
+              size="sm"
+              className={isFollowed ? "bg-primary text-primary-foreground" : ""}
+              onClick={handleFollowVenue}
+            >
+              <PlusCircle className="h-4 w-4 mr-1" />
+              {isFollowed ? "Following" : "Follow"}
+            </Button>
+            
             <div className="flex items-center text-sm text-muted-foreground">
               <Clock className="h-3 w-3 mr-1" />
               <span>Posts expire in {getHoursRemaining(mainPost.expiresAt)}h</span>
@@ -258,7 +289,10 @@ const PostCard = ({ posts, locationPostCount = 1, getComments }: PostCardProps) 
             <Carousel className="w-full">
               <CarouselContent>
                 {allMedia.map((item, index) => (
-                  <CarouselItem key={`${item.postId}-${index}`} className="md:basis-1/2 lg:basis-1/3">
+                  <CarouselItem 
+                    key={`${item.postId}-${index}`} 
+                    className={isSinglePost ? "basis-full" : "md:basis-1/2 lg:basis-1/3"}
+                  >
                     <div className="relative group rounded-lg overflow-hidden aspect-square">
                       {item.media.type === "image" ? (
                         <img
