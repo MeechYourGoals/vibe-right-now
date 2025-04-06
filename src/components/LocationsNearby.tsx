@@ -49,6 +49,10 @@ const LocationsNearby = () => {
     navigate(`/venue/${location.id}`);
   };
   
+  const handleCitySelect = (cityName: string) => {
+    navigate(`/explore?q=${encodeURIComponent(cityName)}`);
+  };
+  
   const toggleMapExpansion = () => {
     setIsMapExpanded(!isMapExpanded);
     
@@ -78,6 +82,7 @@ const LocationsNearby = () => {
               searchedCity=""
               mapStyle={mapStyle}
               onLocationSelect={handleLocationSelect}
+              showAllCities={true}
             />
           </div>
         </div>

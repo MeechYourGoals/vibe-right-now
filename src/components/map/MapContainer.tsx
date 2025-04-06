@@ -20,6 +20,7 @@ interface MapContainerProps {
   onCloseLocation: () => void;
   nearbyCount: number;
   onToggleDistances: () => void;
+  showAllCities?: boolean;
 }
 
 const MapContainer = ({
@@ -35,7 +36,8 @@ const MapContainer = ({
   onLocationSelect,
   onCloseLocation,
   nearbyCount,
-  onToggleDistances
+  onToggleDistances,
+  showAllCities = true
 }: MapContainerProps) => {
   if (loading) {
     return (
@@ -58,6 +60,7 @@ const MapContainer = ({
         onLocationSelect={onLocationSelect}
         showDistances={showDistances}
         userAddressLocation={userAddressLocation}
+        showAllCities={showAllCities}
       />
       
       {isExpanded && selectedLocation && (

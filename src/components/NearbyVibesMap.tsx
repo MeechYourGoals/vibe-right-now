@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
@@ -119,7 +118,6 @@ const NearbyVibesMap = () => {
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-bold">Nearby Vibes</h2>
         <div className="flex gap-2">
-          {/* Map Controls */}
           <MapControls 
             isExpanded={isMapExpanded}
             mapStyle={mapStyle}
@@ -127,7 +125,6 @@ const NearbyVibesMap = () => {
             onToggleExpand={toggleMapExpansion}
           />
           
-          {/* Address Search */}
           {!isMapExpanded && (
             <AddressSearchPopover
               isOpen={isAddressPopoverOpen}
@@ -135,13 +132,12 @@ const NearbyVibesMap = () => {
               onSearch={handleAddressSearch}
               onUseCurrentLocation={handleUseCurrentLocation}
               loading={effectiveLoading}
-              hasUserLocation={true} // Always show the current location option
+              hasUserLocation={true}
             />
           )}
         </div>
       </div>
       
-      {/* Map Container */}
       <MapContainer
         loading={effectiveLoading}
         isExpanded={isMapExpanded}
@@ -156,9 +152,9 @@ const NearbyVibesMap = () => {
         onCloseLocation={() => setSelectedLocation(null)}
         nearbyCount={nearbyLocations.length}
         onToggleDistances={() => setShowDistances(false)}
+        showAllCities={!searchedCity}
       />
       
-      {/* Nearby Locations List */}
       <NearbyLocationsList
         locations={nearbyLocations}
         isExpanded={isMapExpanded}

@@ -4,6 +4,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Location } from '@/types';
+import CityMarkers from './city-markers/CityMarkers';
 
 // Fix the default marker icon issue in Leaflet
 import iconRetinaUrl from 'leaflet/dist/images/marker-icon-2x.png';
@@ -47,6 +48,7 @@ interface OpenStreetMapProps {
   showDistances?: boolean;
   userAddressLocation?: [number, number] | null;
   onLocationSelect?: (location: Location) => void;
+  showAllCities?: boolean;
 }
 
 const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
@@ -57,7 +59,8 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
   selectedLocation = null,
   showDistances = false,
   userAddressLocation = null,
-  onLocationSelect = () => {}
+  onLocationSelect = () => {},
+  showAllCities = true
 }) => {
   // Set up default center based on user location or first location or default to LA
   const defaultCenter: [number, number] = userLocation
@@ -122,19 +125,28 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
     shadowSize: [41, 41]
   });
 
+  // Determine if we should show global view
+  const startZoom = locations.length > 1 ? 10 : searchedCity ? 13 : 3;
+  const initialCenter: [number, number] = searchedCity ? effectiveCenter : [20, 0]; // Global view center
+
   return (
     <MapContainer 
       style={{ height: '100%', width: '100%' }}
-      center={effectiveCenter}
-      zoom={locations.length > 1 ? 10 : 13}
+      center={initialCenter}
+      zoom={startZoom}
       scrollWheelZoom={false}
+      worldCopyJump={true}
     >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       
-      <MapCenterChanger center={effectiveCenter} />
+      {!searchedCity && showAllCities ? (
+        <CityMarkers />
+      ) : (
+        <MapCenterChanger center={effectiveCenter} />
+      )}
       
       {/* User Location Marker */}
       {(userLocation || userAddressLocation) && (

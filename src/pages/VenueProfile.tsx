@@ -107,6 +107,7 @@ const VenueProfile = () => {
               searchedCity={venue.city}
               mapStyle="default"
               onLocationSelect={() => {}}
+              showAllCities={!venue.city}
             />
           </div>
         </div>
@@ -189,6 +190,7 @@ const VenueProfile = () => {
                 searchedCity={venue.city}
                 mapStyle="default"
                 onLocationSelect={() => {}}
+                showAllCities={false}
               />
               <div className="absolute bottom-2 right-2">
                 <Button size="sm" variant="secondary" onClick={toggleMapExpansion}>
