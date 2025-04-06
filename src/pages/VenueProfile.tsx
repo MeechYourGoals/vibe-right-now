@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
@@ -8,7 +9,7 @@ import { mockLocations, mockPosts } from "@/mock/data";
 import { Badge } from "@/components/ui/badge";
 import { 
   MapPin, VerifiedIcon, Clock, ExternalLink, Grid2X2, 
-  ListIcon, PlusCircle, Heart
+  ListIcon, PlusCircle, Heart, Map, Maximize, Minimize
 } from "lucide-react";
 import PostCard from "@/components/PostCard";
 import VenuePost from "@/components/VenuePost";
@@ -17,6 +18,7 @@ import Header from "@/components/Header";
 import { mockComments } from "@/mock/data";
 import { Comment, Post } from "@/types";
 import { toast } from "@/hooks/use-toast";
+import GoogleMap from "@/components/map/GoogleMap";
 
 const getOfficialTicketUrl = (venueId: string) => {
   const ticketUrls: Record<string, string> = {
@@ -36,6 +38,7 @@ const VenueProfile = () => {
   const [activeTab, setActiveTab] = useState("ugv");
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [isFollowing, setIsFollowing] = useState(false);
+  const [isMapExpanded, setIsMapExpanded] = useState(false);
   
   const venue = mockLocations.find(location => location.id === id);
   const venuePosts = mockPosts.filter(post => post.location.id === id);
@@ -61,6 +64,17 @@ const VenueProfile = () => {
     }
   };
   
+  const toggleMapExpansion = () => {
+    setIsMapExpanded(!isMapExpanded);
+    
+    // Trigger map resize after state update
+    setTimeout(() => {
+      if (window.resizeMap) {
+        window.resizeMap();
+      }
+    }, 10);
+  };
+  
   if (!venue) {
     return (
       <div className="min-h-screen bg-background">
@@ -77,6 +91,27 @@ const VenueProfile = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
+      
+      {isMapExpanded && (
+        <div className="fixed inset-0 z-50 bg-background p-4">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-bold">{venue.name} Location</h2>
+            <Button variant="ghost" size="sm" className="gap-1" onClick={toggleMapExpansion}>
+              <Minimize className="h-4 w-4" />
+              Close Map
+            </Button>
+          </div>
+          <div className="h-[85vh] rounded-lg overflow-hidden">
+            <GoogleMap
+              userLocation={null}
+              locations={[venue]}
+              searchedCity={venue.city}
+              mapStyle="default"
+              onLocationSelect={() => {}}
+            />
+          </div>
+        </div>
+      )}
       
       <main className="container py-6">
         <div className="max-w-4xl mx-auto">
@@ -98,6 +133,15 @@ const VenueProfile = () => {
                   <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
                     <MapPin className="h-4 w-4" />
                     <span>{venue.address}, {venue.city}, {venue.state}</span>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-6 p-0 hover:bg-transparent hover:text-primary"
+                      onClick={toggleMapExpansion}
+                    >
+                      <Map className="h-4 w-4" />
+                      <span className="ml-1 text-xs">View Map</span>
+                    </Button>
                   </div>
                   <div className="flex flex-wrap gap-2 mt-2">
                     <Badge variant="outline" className="bg-muted/30">{venue.type}</Badge>
@@ -136,6 +180,23 @@ const VenueProfile = () => {
                   <Clock className="h-3 w-3 mr-1" />
                   Posts expire in 24h
                 </p>
+              </div>
+            </div>
+            
+            {/* Mini map preview */}
+            <div className="mt-4 h-48 rounded-md overflow-hidden relative">
+              <GoogleMap
+                userLocation={null}
+                locations={[venue]}
+                searchedCity={venue.city}
+                mapStyle="default"
+                onLocationSelect={() => {}}
+              />
+              <div className="absolute bottom-2 right-2">
+                <Button size="sm" variant="secondary" onClick={toggleMapExpansion}>
+                  <Maximize className="h-4 w-4 mr-1" />
+                  Expand
+                </Button>
               </div>
             </div>
           </div>

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -15,7 +14,7 @@ import {
 import { mockLocations } from "@/mock/locations";
 import { Location } from "@/types";
 import { useNavigate, useLocation } from "react-router-dom";
-import MapboxMap from "./map/MapboxMap";
+import GoogleMap from "./map/GoogleMap";
 import LocationDetailsSidebar from "./map/LocationDetailsSidebar";
 import LocationCard from "./map/LocationCard";
 import { filterLocationsByDistance } from "@/utils/locationUtils";
@@ -26,12 +25,6 @@ import {
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import mapboxgl from 'mapbox-gl';
-
-// Use the Mapbox token from MapboxMap to ensure consistency
-// Temporary Mapbox token - in production, this should be stored in environment variables
-const MAPBOX_TOKEN = 'pk.eyJ1IjoiZXhhbXBsZXVzZXIiLCJhIjoiY2xyMXp5eWJoMDJ1bTJpcGV3ZXRiZms5dCJ9.hMHS6RL9nNpwqMYlXn8l5A';
-mapboxgl.accessToken = MAPBOX_TOKEN;
 
 const NearbyVibesMap = () => {
   const [userLocation, setUserLocation] = useState<GeolocationCoordinates | null>(null);
@@ -48,12 +41,10 @@ const NearbyVibesMap = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Extract city from URL search params, if available
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const q = params.get('q') || '';
     
-    // Try to extract city from search query (assuming format like "City, State")
     if (q) {
       const city = q.split(',')[0].trim();
       setSearchedCity(city);
@@ -62,15 +53,12 @@ const NearbyVibesMap = () => {
     }
   }, [location]);
   
-  // Get user location and nearby venues
   useEffect(() => {
-    // Get user location
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           setUserLocation(position.coords);
           
-          // Filter locations within 10 miles of user
           const nearbyVenues = filterLocationsByDistance(
             mockLocations,
             position.coords.latitude,
@@ -83,13 +71,11 @@ const NearbyVibesMap = () => {
         },
         (error) => {
           console.error("Error getting location:", error);
-          // Use all locations as fallback
           setNearbyLocations(mockLocations);
           setLoading(false);
         }
       );
     } else {
-      // Use all locations as fallback
       setNearbyLocations(mockLocations);
       setLoading(false);
     }
@@ -103,7 +89,6 @@ const NearbyVibesMap = () => {
     setIsMapExpanded(!isMapExpanded);
     setSelectedLocation(null);
     
-    // Trigger map resize after state update
     setTimeout(() => {
       if (window.resizeMap) {
         window.resizeMap();
@@ -132,9 +117,8 @@ const NearbyVibesMap = () => {
     try {
       setLoading(true);
       
-      // Use Mapbox Geocoding API to convert address to coordinates
       const response = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(address)}.json?access_token=${mapboxgl.accessToken}`
+        `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=AIzaSyDIwf3LDvHPDNR3A5s1jWu_-o4Zat4f6TY`
       );
       
       if (!response.ok) {
@@ -143,15 +127,14 @@ const NearbyVibesMap = () => {
       
       const data = await response.json();
       
-      if (data.features && data.features.length > 0) {
-        const [lng, lat] = data.features[0].center;
-        setUserAddressLocation([lng, lat]);
+      if (data.results && data.results.length > 0) {
+        const location = data.results[0].geometry.location;
+        setUserAddressLocation([location.lng, location.lat]);
         setShowDistances(true);
         setIsAddressPopoverOpen(false);
         
         toast.success("Address found! Showing distances on the map");
         
-        // If map is expanded, zoom to the new location
         if (isMapExpanded && window.resizeMap) {
           window.resizeMap();
         }
@@ -272,7 +255,7 @@ const NearbyVibesMap = () => {
         </div>
       ) : (
         <div className={`relative ${isMapExpanded ? "h-[85vh]" : "h-60"} rounded-lg overflow-hidden transition-all`}>
-          <MapboxMap 
+          <GoogleMap
             userLocation={userLocation}
             locations={nearbyLocations}
             searchedCity={searchedCity}
@@ -282,7 +265,6 @@ const NearbyVibesMap = () => {
             userAddressLocation={userAddressLocation}
           />
           
-          {/* Selected location detail sidebar */}
           {isMapExpanded && selectedLocation && (
             <LocationDetailsSidebar
               location={selectedLocation}
@@ -330,7 +312,6 @@ const NearbyVibesMap = () => {
   );
 };
 
-// Add window.resizeMap for TypeScript
 declare global {
   interface Window {
     resizeMap?: () => void;
