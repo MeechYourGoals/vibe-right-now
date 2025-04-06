@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
@@ -18,7 +17,7 @@ import Header from "@/components/Header";
 import { mockComments } from "@/mock/data";
 import { Comment, Post } from "@/types";
 import { toast } from "@/hooks/use-toast";
-import GoogleMap from "@/components/map/GoogleMap";
+import MapboxMap from "@/components/map/MapboxMap";
 
 const getOfficialTicketUrl = (venueId: string) => {
   const ticketUrls: Record<string, string> = {
@@ -67,7 +66,6 @@ const VenueProfile = () => {
   const toggleMapExpansion = () => {
     setIsMapExpanded(!isMapExpanded);
     
-    // Trigger map resize after state update
     setTimeout(() => {
       if (window.resizeMap) {
         window.resizeMap();
@@ -102,7 +100,7 @@ const VenueProfile = () => {
             </Button>
           </div>
           <div className="h-[85vh] rounded-lg overflow-hidden">
-            <GoogleMap
+            <MapboxMap
               userLocation={null}
               locations={[venue]}
               searchedCity={venue.city}
@@ -183,9 +181,8 @@ const VenueProfile = () => {
               </div>
             </div>
             
-            {/* Mini map preview */}
             <div className="mt-4 h-48 rounded-md overflow-hidden relative">
-              <GoogleMap
+              <MapboxMap
                 userLocation={null}
                 locations={[venue]}
                 searchedCity={venue.city}

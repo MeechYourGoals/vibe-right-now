@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Post, Comment } from "@/types";
@@ -40,7 +39,6 @@ const PostCard = ({ posts, locationPostCount = 1, getComments }: PostCardProps) 
   const [showAllPosts, setShowAllPosts] = useState(false);
   const [followedVenues, setFollowedVenues] = useState<Record<string, boolean>>({});
 
-  // Use the first post for location information
   const mainPost = posts[0];
   const location = mainPost.location;
   const isSinglePost = posts.length === 1;
@@ -80,7 +78,6 @@ const PostCard = ({ posts, locationPostCount = 1, getComments }: PostCardProps) 
     }
   };
 
-  // Get a list of all media from displayed posts
   const getAllMedia = () => {
     const displayPosts = showAllPosts ? posts : posts.slice(0, 4);
     const allMedia: { postId: string; media: Post['media'][0]; user: Post['user'] }[] = [];
@@ -98,39 +95,32 @@ const PostCard = ({ posts, locationPostCount = 1, getComments }: PostCardProps) 
     return allMedia;
   };
 
-  // Format when the post was created
   const formatTime = (timestamp: string) => {
     return formatDistanceToNow(new Date(timestamp), { addSuffix: true });
   };
 
-  // Calculate time remaining before expiration for a post
   const getHoursRemaining = (expiresAt: string) => {
     const now = new Date();
     const expiry = new Date(expiresAt);
     return Math.max(0, Math.floor((expiry.getTime() - now.getTime()) / (1000 * 60 * 60)));
   };
 
-  // Generate a list of random users who have vibed at this location
   const getRandomUsers = (count: number) => {
     const shuffled = [...mockUsers].sort(() => 0.5 - Math.random());
     return shuffled.slice(0, count);
   };
 
-  // Get list of users who have vibed here
   const generateLocationUsers = () => {
     const count = locationPostCount > 100 ? 100 : locationPostCount;
     return getRandomUsers(count);
   };
 
-  // Get a preview of users who have vibed here
   const previewUsers = generateLocationUsers().slice(0, 5);
   const allUsers = generateLocationUsers();
 
-  // Determine location type categories for badges
   const getLocationCategories = () => {
     const mainType = location.type;
     
-    // Add secondary categories for certain location types
     const secondaryTypes = [];
     
     if (mainType === "event") {
@@ -164,7 +154,6 @@ const PostCard = ({ posts, locationPostCount = 1, getComments }: PostCardProps) 
     <Card className="vibe-card overflow-hidden mb-4">
       <CardHeader className="p-4 pb-0">
         <div className="flex justify-between items-start">
-          {/* Location information (on the left side) */}
           <div className="flex items-center gap-2">
             <Avatar>
               <AvatarImage 
@@ -189,7 +178,6 @@ const PostCard = ({ posts, locationPostCount = 1, getComments }: PostCardProps) 
             </div>
           </div>
 
-          {/* User/post count and expiration (on the right side) */}
           <div className="flex flex-col items-end gap-2">
             <Button
               variant={isFollowed ? "default" : "outline"}
@@ -213,8 +201,8 @@ const PostCard = ({ posts, locationPostCount = 1, getComments }: PostCardProps) 
                     <Users className="h-3 w-3 mr-1" />
                     <span className="font-medium">
                       {locationPostCount > 100 
-                        ? "100+ people vibed here in last 24hrs"  
-                        : `${locationPostCount} people vibed here in last 24hrs`}
+                        ? "100+ people visited here in last 24hrs"  
+                        : `${locationPostCount} people visited here in last 24hrs`}
                     </span>
                     {isOpen ? (
                       <ChevronUp className="h-3 w-3 ml-1" />
@@ -225,9 +213,8 @@ const PostCard = ({ posts, locationPostCount = 1, getComments }: PostCardProps) 
                 </CollapsibleTrigger>
                 <CollapsibleContent className="text-sm mt-1">
                   <div className="flex flex-col gap-2">
-                    {/* Users who made these posts */}
                     <div className="mt-1">
-                      <h4 className="text-xs font-medium mb-2">Recent Vibers:</h4>
+                      <h4 className="text-xs font-medium mb-2">Recent Visitors:</h4>
                       <div className="space-y-1 max-h-40 overflow-y-auto">
                         {previewUsers.map((user, index) => (
                           <div key={index} className="flex items-center">
@@ -283,7 +270,6 @@ const PostCard = ({ posts, locationPostCount = 1, getComments }: PostCardProps) 
           ))}
         </div>
         
-        {/* All media from different posts */}
         <div className="mb-4">
           <div className="relative">
             <Carousel className="w-full">
@@ -327,7 +313,6 @@ const PostCard = ({ posts, locationPostCount = 1, getComments }: PostCardProps) 
           </div>
         </div>
 
-        {/* Individual posts */}
         <div className="space-y-4">
           {displayedPosts.map((post) => (
             <div key={post.id} className="border-t pt-3 first:border-t-0 first:pt-0">
@@ -416,12 +401,11 @@ const PostCard = ({ posts, locationPostCount = 1, getComments }: PostCardProps) 
         </Button>
       </CardFooter>
       
-      {/* Modal for showing all users who vibed here */}
       {showAllUsers && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowAllUsers(false)}>
           <div className="bg-background rounded-lg max-w-md w-full max-h-[80vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
             <div className="p-4 border-b flex justify-between items-center">
-              <h3 className="font-bold">People who vibed at {location.name}</h3>
+              <h3 className="font-bold">People who visited {location.name}</h3>
               <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setShowAllUsers(false)}>×</Button>
             </div>
             <div className="p-4 overflow-y-auto max-h-[calc(80vh-4rem)]">

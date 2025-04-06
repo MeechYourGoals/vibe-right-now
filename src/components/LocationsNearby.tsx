@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MapPin, ArrowRight, VerifiedIcon, Navigation } from "lucide-react";
-import GoogleMap from "./map/GoogleMap";
+import MapboxMap from "./map/MapboxMap";
 import { Location } from "@/types";
 
 const LocationsNearby = () => {
@@ -46,7 +46,7 @@ const LocationsNearby = () => {
             </Button>
           </div>
           <div className="h-[85vh] rounded-lg overflow-hidden">
-            <GoogleMap
+            <MapboxMap
               userLocation={null}
               locations={nearbyLocations}
               searchedCity=""

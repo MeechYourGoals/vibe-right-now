@@ -14,6 +14,7 @@ import MyPlaces from "./pages/MyPlaces";
 import PinnedVibes from "./pages/PinnedVibes";
 import UserPointsPage from "./pages/UserPoints";
 import Settings from "./pages/Settings";
+import VLMChatBox from "./components/VLMChatBox";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +37,7 @@ const App = () => (
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <VLMChatBox />
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>

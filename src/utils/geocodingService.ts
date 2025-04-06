@@ -8,8 +8,9 @@ export async function geocodeAddress(address: string) {
   }
   
   try {
+    // Using Nominatim (OpenStreetMap) for geocoding - no API key required
     const response = await fetch(
-      `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=AIzaSyDIwf3LDvHPDNR3A5s1jWu_-o4Zat4f6TY`
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`
     );
     
     if (!response.ok) {
@@ -18,9 +19,9 @@ export async function geocodeAddress(address: string) {
     
     const data = await response.json();
     
-    if (data.results && data.results.length > 0) {
-      const location = data.results[0].geometry.location;
-      return [location.lng, location.lat] as [number, number];
+    if (data && data.length > 0) {
+      // Nominatim returns lon/lat (not lat/lng)
+      return [parseFloat(data[0].lon), parseFloat(data[0].lat)] as [number, number];
     } else {
       toast.error("Address not found. Please try again with a more specific address.");
       return null;
