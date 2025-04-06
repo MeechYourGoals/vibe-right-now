@@ -2,7 +2,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Compass } from "lucide-react";
-import OpenStreetMap from "./OpenStreetMap"; // Changed import from MapboxMap to OpenStreetMap
+import OpenStreetMap from "./OpenStreetMap";
 import LocationDetailsSidebar from "./LocationDetailsSidebar";
 import { Location } from "@/types";
 
@@ -48,7 +48,7 @@ const MapContainer = ({
   }
   
   return (
-    <div className={`relative ${isExpanded ? "h-[85vh]" : "h-60"} rounded-lg overflow-hidden transition-all`}>
+    <div className={`relative ${isExpanded ? "h-[85vh]" : "h-60"} rounded-lg overflow-hidden transition-all`} style={{ zIndex: 1 }}>
       <OpenStreetMap
         userLocation={userLocation}
         locations={locations}

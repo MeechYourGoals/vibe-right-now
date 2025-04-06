@@ -42,7 +42,7 @@ const AddressSearchPopover = ({
           View Distance
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 z-[100]">
+      <PopoverContent className="w-80 z-[9999]">
         <form onSubmit={handleSubmit} className="space-y-3">
           <h4 className="font-medium">Enter your address</h4>
           <p className="text-xs text-muted-foreground">
