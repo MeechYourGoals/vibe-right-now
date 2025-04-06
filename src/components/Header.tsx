@@ -58,11 +58,11 @@ const Header = () => {
         <div className="container flex h-16 items-center">
           <div className="mr-4 flex">
             <Link to="/" className="flex items-center space-x-2">
-              <span className="text-xl font-bold relative">
+              <span className="text-xl font-bold">
                 <span className={`inline-block vibe-gradient-text transition-opacity duration-500 ease-in-out ${isAnimating ? 'opacity-0' : 'opacity-100'}`}>
                   {currentVWord}
                 </span>
-                <span className="text-transparent vibe-gradient-text"> Right Now</span>
+                <span className="vibe-gradient-text"> Right Now</span>
               </span>
             </Link>
           </div>
