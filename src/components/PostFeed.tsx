@@ -1,8 +1,9 @@
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { mockPosts, mockComments } from "@/mock/data";
 import PostCard from "@/components/PostCard";
 import SearchVibes from "@/components/SearchVibes";
+import { Post } from "@/types";
 
 const PostFeed = () => {
   const [filter, setFilter] = useState("all");
@@ -33,6 +34,28 @@ const PostFeed = () => {
     
     return true;
   });
+
+  // Group posts by location
+  const postsGroupedByLocation = useMemo(() => {
+    const groupedPosts: Record<string, Post[]> = {};
+    
+    filteredPosts.forEach(post => {
+      const locationId = post.location.id;
+      if (!groupedPosts[locationId]) {
+        groupedPosts[locationId] = [];
+      }
+      groupedPosts[locationId].push(post);
+    });
+    
+    // Sort each location's posts by timestamp (most recent first)
+    Object.keys(groupedPosts).forEach(locationId => {
+      groupedPosts[locationId].sort((a, b) => 
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      );
+    });
+    
+    return groupedPosts;
+  }, [filteredPosts]);
 
   // Calculate the number of posts per location in the last 24 hours
   // For demo purposes, add variation to the counts
@@ -82,13 +105,13 @@ const PostFeed = () => {
       <SearchVibes onSearch={handleSearch} />
 
       <div className="p-4 space-y-4">
-        {filteredPosts.length > 0 ? (
-          filteredPosts.map((post) => (
+        {Object.keys(postsGroupedByLocation).length > 0 ? (
+          Object.entries(postsGroupedByLocation).map(([locationId, posts]) => (
             <PostCard 
-              key={post.id} 
-              post={post} 
-              locationPostCount={locationPostCounts[post.location.id]}
-              comments={getPostComments(post.id)}
+              key={locationId} 
+              posts={posts} 
+              locationPostCount={locationPostCounts[locationId]}
+              getComments={getPostComments}
             />
           ))
         ) : (
