@@ -18,6 +18,7 @@ import { mockComments } from "@/mock/data";
 import { Comment, Post } from "@/types";
 import { toast } from "@/hooks/use-toast";
 import MapboxMap from "@/components/map/MapboxMap";
+import OpenStreetMap from "@/components/map/OpenStreetMap";
 
 const getOfficialTicketUrl = (venueId: string) => {
   const ticketUrls: Record<string, string> = {
@@ -100,7 +101,7 @@ const VenueProfile = () => {
             </Button>
           </div>
           <div className="h-[85vh] rounded-lg overflow-hidden">
-            <MapboxMap
+            <OpenStreetMap
               userLocation={null}
               locations={[venue]}
               searchedCity={venue.city}
@@ -182,7 +183,7 @@ const VenueProfile = () => {
             </div>
             
             <div className="mt-4 h-48 rounded-md overflow-hidden relative">
-              <MapboxMap
+              <OpenStreetMap
                 userLocation={null}
                 locations={[venue]}
                 searchedCity={venue.city}
