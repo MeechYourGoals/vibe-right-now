@@ -3,31 +3,77 @@
 export const PerplexityService = {
   async searchPerplexity(query: string): Promise<string> {
     try {
-      // Note: In a real implementation, this would call a Supabase Edge Function with a Perplexity API key
-      // For now, we'll simulate the response
       console.log('Searching Perplexity for:', query);
       
-      // Check if query is about local events
+      // Temporary API key input solution (for demonstration)
+      let apiKey = localStorage.getItem('perplexityApiKey');
+      
+      if (!apiKey) {
+        // If no API key is found, ask the user for one and store it
+        apiKey = prompt('Please enter your Perplexity API key to enable search functionality:');
+        if (apiKey) {
+          localStorage.setItem('perplexityApiKey', apiKey);
+        } else {
+          return "I need a Perplexity API key to search for information. Please refresh and try again with a valid API key.";
+        }
+      }
+      
+      // Call the Perplexity API
+      const response = await fetch('https://api.perplexity.ai/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'llama-3.1-sonar-small-128k-online',
+          messages: [
+            {
+              role: 'system',
+              content: 'You are a helpful city guide assistant that provides detailed, accurate, and relevant information about events, venues, restaurants, and attractions in specific cities. Focus on current and upcoming events, popular venues, and interesting places to visit. Be concise but informative.'
+            },
+            {
+              role: 'user',
+              content: query
+            }
+          ],
+          temperature: 0.2,
+          top_p: 0.9,
+          max_tokens: 1000,
+          search_domain_filter: [],
+          search_recency_filter: 'month',
+          frequency_penalty: 1,
+          presence_penalty: 0
+        }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Perplexity API error:', errorData);
+        throw new Error(`API call failed with status: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      const searchResult = result.choices[0]?.message?.content || 
+                           "I couldn't find specific information for your query. Could you try being more specific?";
+      
+      return searchResult;
+    } catch (error) {
+      console.error('Error searching Perplexity:', error);
+      
+      // Fallback for API errors or connectivity issues
       if (query.toLowerCase().includes("going on in") || 
           query.toLowerCase().includes("events in") || 
           query.toLowerCase().includes("happening in")) {
         
-        // Extract city name if possible
+        // Extract city name if possible for a more relevant fallback
         const cityMatch = query.match(/in ([a-zA-Z\s]+)($|\?|\.)/i);
         const city = cityMatch ? cityMatch[1].trim() : "the area";
         
-        return `Based on my search, here are some exciting events happening in ${city} tonight:\n\n` +
-               `1. "Summer Music Festival" at Downtown Park - Live performances starting at 7PM\n` +
-               `2. "Art Gallery Opening" at Metropolitan Museum - New exhibition from 6-9PM\n` +
-               `3. "Food Truck Rally" at Civic Center - Various food options from 5-10PM\n\n` +
-               `Would you like more details about any of these events?`;
+        return `I'm currently having trouble connecting to my search service for information about ${city}. This could be due to an invalid API key or network issues. Please check your API key and try again later.`;
       }
       
-      // For other types of questions, provide a helpful response
-      return `I found this information for you: ${query} is a great question! Based on my search, there are several interesting answers. The most relevant information suggests that this is something many people are curious about. Would you like more specific details?`;
-    } catch (error) {
-      console.error('Error searching Perplexity:', error);
-      return "I'm having trouble connecting to my search service right now. Could you try again in a moment?";
+      return "I'm having trouble connecting to my search service right now. This could be due to an invalid API key or network issues. Please check your API key and try again later.";
     }
   }
 };

@@ -1,7 +1,7 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { MessageSquare, X, Minimize, Maximize } from 'lucide-react';
+import { MessageSquare, X, Minimize, Maximize, Key } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Message } from './types';
 import MessageList from './MessageList';
@@ -11,6 +11,13 @@ import { updateTrendingLocations } from '@/utils/trendingLocationsUpdater';
 import { Location } from '@/types';
 import { getLocationsByCity, getTrendingLocationsForCity } from '@/mock/cityLocations';
 import { cityCoordinates } from '@/utils/cityLocations';
+import { 
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Input } from '@/components/ui/input';
+import { toast } from 'sonner';
 
 const VernonChat = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -25,7 +32,30 @@ const VernonChat = () => {
   ]);
   const [isTyping, setIsTyping] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  const [apiKey, setApiKey] = useState<string | null>(localStorage.getItem('perplexityApiKey'));
+  const [isApiKeyPopoverOpen, setIsApiKeyPopoverOpen] = useState(false);
+  const [apiKeyInput, setApiKeyInput] = useState('');
   
+  useEffect(() => {
+    // Check for API key on component mount
+    const storedApiKey = localStorage.getItem('perplexityApiKey');
+    if (storedApiKey) {
+      setApiKey(storedApiKey);
+    }
+  }, []);
+  
+  const saveApiKey = () => {
+    if (apiKeyInput.trim()) {
+      localStorage.setItem('perplexityApiKey', apiKeyInput);
+      setApiKey(apiKeyInput);
+      setApiKeyInput('');
+      setIsApiKeyPopoverOpen(false);
+      toast.success('API key saved successfully');
+    } else {
+      toast.error('Please enter a valid API key');
+    }
+  };
+
   const handleSendMessage = async (inputValue: string) => {
     // Add user message
     const userMessage: Message = {
@@ -86,20 +116,19 @@ const VernonChat = () => {
           // Update trending locations with these events
           updateTrendingLocations(cityInfo.name, getTrendingLocationsForCity(cityInfo.name));
           
-          // Customize the response to include references to the actual locations
-          const locationResponse = generateLocationResponse(cityInfo.name, cityLocations);
+          // Send the Perplexity response but also add local venue data
+          const combinedResponse = `${responseText}\n\n**Local Venues in our Database:**\n${generateLocationResponse(cityInfo.name, cityLocations)}`;
           
-          // Add response about events in the city
           const aiMessage: Message = {
             id: (Date.now() + 1).toString(),
-            text: locationResponse || responseText,
+            text: combinedResponse,
             sender: 'ai',
             timestamp: new Date()
           };
           
           setMessages(prev => [...prev, aiMessage]);
         } else {
-          // Fall back to standard response
+          // Fall back to just the Perplexity response
           const aiMessage: Message = {
             id: (Date.now() + 1).toString(),
             text: responseText,
@@ -125,7 +154,7 @@ const VernonChat = () => {
       
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: "I'm having trouble finding that information right now. Could you try again in a moment?",
+        text: "I'm having trouble finding that information right now. Could you try again in a moment? Make sure you've provided a valid Perplexity API key.",
         sender: 'ai',
         timestamp: new Date()
       };
@@ -148,7 +177,7 @@ const VernonChat = () => {
     const attractions = locations.filter(loc => loc.type === "attraction");
     const others = locations.filter(loc => loc.type === "other");
     
-    let response = `Here's what's happening in ${cityName} right now:\n\n`;
+    let response = `Here are some interesting places in ${cityName} from our database:\n\n`;
     
     if (sportVenues.length > 0) {
       response += `🏟️ **Sports:** ${sportVenues.map(v => v.name).join(", ")}.\n\n`;
@@ -173,8 +202,6 @@ const VernonChat = () => {
     if (others.length > 0) {
       response += `🏋️ **Other Activities:** ${others.map(v => v.name).join(", ")}.\n\n`;
     }
-    
-    response += `These are all trending in ${cityName} right now. You can check the map to see their exact locations. Would you like more details about any specific place?`;
     
     return response;
   };
@@ -209,6 +236,31 @@ const VernonChat = () => {
           <h3 className="text-sm font-medium">Vernon (Vibe Assistant)</h3>
         </div>
         <div className="flex gap-1">
+          {/* API Key Popover */}
+          <Popover open={isApiKeyPopoverOpen} onOpenChange={setIsApiKeyPopoverOpen}>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-6 w-6" title="Set API Key">
+                <Key className="h-4 w-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-64 p-3">
+              <div className="space-y-2">
+                <h4 className="text-sm font-medium">Perplexity API Key</h4>
+                <p className="text-xs text-muted-foreground">Enter your API key for better search results</p>
+                <Input
+                  type="password"
+                  placeholder="Enter API key"
+                  value={apiKeyInput}
+                  onChange={(e) => setApiKeyInput(e.target.value)}
+                  className="text-xs"
+                />
+                <div className="flex justify-end">
+                  <Button size="sm" onClick={saveApiKey}>Save</Button>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+          
           <Button variant="ghost" size="icon" className="h-6 w-6" onClick={toggleMinimize}>
             {isMinimized ? <Maximize className="h-4 w-4" /> : <Minimize className="h-4 w-4" />}
           </Button>
