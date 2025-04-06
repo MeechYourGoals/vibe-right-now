@@ -8,6 +8,7 @@ import MessageList from './MessageList';
 import MessageInput from './MessageInput';
 import { PerplexityService } from '@/services/PerplexityService';
 import { updateTrendingLocations } from '@/utils/trendingLocationsUpdater';
+import { Location } from '@/types';
 
 const VernonChat = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -49,13 +50,16 @@ const VernonChat = () => {
         const city = cityMatch ? cityMatch[1].trim() : "your area";
         
         // Mock events that would be extracted from the Perplexity response
-        const events = [
+        const events: Location[] = [
           {
             id: `event-${Date.now()}-1`,
             name: "Summer Music Festival",
             address: "Downtown Park",
             city: city,
             state: "CA",
+            country: "USA",
+            lat: 34.0522,
+            lng: -118.2437,
             type: "event",
             verified: true
           },
@@ -65,6 +69,9 @@ const VernonChat = () => {
             address: "Metropolitan Museum", 
             city: city,
             state: "CA",
+            country: "USA",
+            lat: 34.0522,
+            lng: -118.2437,
             type: "attraction",
             verified: true
           },
@@ -74,6 +81,9 @@ const VernonChat = () => {
             address: "Civic Center",
             city: city,
             state: "CA",
+            country: "USA",
+            lat: 34.0522,
+            lng: -118.2437,
             type: "event",
             verified: false
           }
