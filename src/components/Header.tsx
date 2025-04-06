@@ -30,21 +30,19 @@ const Header = () => {
     const interval = setInterval(() => {
       setIsAnimating(true);
       
-      // Wait for exit animation to complete before changing word
+      // Wait for fade-out to complete before changing word
       setTimeout(() => {
         setCurrentVWord(prevWord => {
           const currentIndex = vWords.indexOf(prevWord);
           const nextIndex = (currentIndex + 1) % vWords.length;
           return vWords[nextIndex];
         });
-      }, 500); // Half the animation duration
-      
-      // Reset animation state after full animation cycle
-      setTimeout(() => {
+        
+        // Reset animation state for fade-in
         setIsAnimating(false);
-      }, 1000); // Full animation duration
+      }, 500); // Half a second for transition
       
-    }, 4000); // Change word every 4 seconds
+    }, 5000); // Change word every 5 seconds
     
     return () => clearInterval(interval);
   }, []);
@@ -60,8 +58,8 @@ const Header = () => {
         <div className="container flex h-16 items-center">
           <div className="mr-4 flex">
             <Link to="/" className="flex items-center space-x-2">
-              <span className="text-xl font-bold relative overflow-hidden">
-                <span className={`inline-block transition-transform duration-500 ease-in-out ${isAnimating ? 'transform -translate-y-full opacity-0' : ''}`}>
+              <span className="text-xl font-bold relative">
+                <span className={`inline-block transition-opacity duration-500 ease-in-out ${isAnimating ? 'opacity-0' : 'opacity-100'}`}>
                   {currentVWord}
                 </span>
                 <span className="text-transparent vibe-gradient-text"> Right Now</span>
