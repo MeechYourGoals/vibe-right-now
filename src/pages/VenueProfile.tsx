@@ -11,6 +11,8 @@ import PostCard from "@/components/PostCard";
 import VenuePost from "@/components/VenuePost";
 import CameraButton from "@/components/CameraButton";
 import Header from "@/components/Header";
+import { mockComments } from "@/mock/data";
+import { Comment } from "@/types";
 
 // Helper function to get official ticket URLs for sports venues
 const getOfficialTicketUrl = (venueId: string) => {
@@ -39,6 +41,11 @@ const VenueProfile = () => {
 
   // Get official ticket URL if this is a sports venue
   const officialTicketUrl = venue?.type === "sports" ? getOfficialTicketUrl(id || "") : "";
+
+  // Function to get comments for a post
+  const getPostComments = (postId: string): Comment[] => {
+    return mockComments.filter(comment => comment.postId === postId);
+  };
   
   // Check if venue exists
   if (!venue) {
@@ -122,7 +129,11 @@ const VenueProfile = () => {
             
             <TabsContent value="ugv" className="mt-4 space-y-4">
               {venuePosts.length > 0 ? (
-                venuePosts.map((post) => <PostCard key={post.id} post={post} />)
+                <PostCard 
+                  posts={venuePosts} 
+                  locationPostCount={venuePosts.length}
+                  getComments={getPostComments} 
+                />
               ) : (
                 <div className="text-center py-10">
                   <h3 className="text-xl font-semibold mb-2">No user vibes yet</h3>
