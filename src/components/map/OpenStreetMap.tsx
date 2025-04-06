@@ -15,9 +15,9 @@ delete L.Icon.Default.prototype._getIconUrl;
 
 // Setup default icon
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl: iconRetinaUrl,
-  iconUrl: iconUrl,
-  shadowUrl: shadowUrl,
+  iconRetinaUrl: iconRetinaUrl.src || iconRetinaUrl,
+  iconUrl: iconUrl.src || iconUrl,
+  shadowUrl: shadowUrl.src || shadowUrl,
   iconSize: [25, 41],
   iconAnchor: [12, 41],
   popupAnchor: [1, -34],

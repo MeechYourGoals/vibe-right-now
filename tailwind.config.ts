@@ -1,12 +1,14 @@
 
-/** @type {import('tailwindcss').Config} */
-module.exports = {
+import type { Config } from "tailwindcss";
+import { fontFamily } from "tailwindcss/defaultTheme";
+
+const config = {
   darkMode: ["class"],
   content: [
-    "./pages/**/*.{ts,tsx}",
-    "./components/**/*.{ts,tsx}",
-    "./app/**/*.{ts,tsx}",
-    "./src/**/*.{ts,tsx}",
+    './pages/**/*.{ts,tsx}',
+    './components/**/*.{ts,tsx}',
+    './app/**/*.{ts,tsx}',
+    './src/**/*.{ts,tsx}',
   ],
   prefix: "",
   theme: {
@@ -18,6 +20,19 @@ module.exports = {
       },
     },
     extend: {
+      backgroundImage: {
+        "gradient-vibe": "linear-gradient(to right, var(--tw-gradient-stops))",
+      },
+      backgroundSize: {
+        "size-200": "200% 200%",
+      },
+      backgroundPosition: {
+        "pos-0": "0% 0%",
+        "pos-100": "100% 100%",
+      },
+      scale: {
+        "102": "1.02",
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -58,54 +73,37 @@ module.exports = {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      fontFamily: {
+        sans: ["var(--font-sans)", ...fontFamily.sans],
+      },
       keyframes: {
         "accordion-down": {
-          from: { height: 0 },
+          from: { height: "0" },
           to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
           from: { height: "var(--radix-accordion-content-height)" },
-          to: { height: 0 },
-        },
-        "pulse-slow": {
-          '0%, 100%': {
-            opacity: 1,
-            transform: 'scale(1)',
-          },
-          '50%': {
-            opacity: 0.8,
-            transform: 'scale(1.05)',
-          },
+          to: { height: "0" },
         },
         "pulse-gradient": {
-          '0%, 100%': {
-            backgroundPosition: '0% 50%',
+          "0%, 100%": { 
+            backgroundPosition: "0% 50%",
+            backgroundSize: "200% 200%",
           },
-          '50%': {
-            backgroundPosition: '100% 50%',
+          "50%": { 
+            backgroundPosition: "100% 50%",
+            backgroundSize: "200% 200%",
           },
         },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "pulse-slow": "pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite",
-        "pulse-gradient": "pulse-gradient 3s ease infinite",
-      },
-      backgroundImage: {
-        "gradient-vibe": "linear-gradient(90deg, hsl(175, 70%, 41%) 0%, hsl(196, 80%, 40%) 50%, hsl(340, 90%, 65%) 100%)",
-      },
-      backgroundSize: {
-        "size-200": "200% 200%",
-      },
-      backgroundPosition: {
-        "pos-0": "0% 0%",
-        "pos-100": "100% 100%",
-      },
-      scale: {
-        "102": "1.02",
+        "pulse-gradient": "pulse-gradient 3s ease-in-out infinite",
       },
     },
   },
   plugins: [require("tailwindcss-animate")],
-}
+} satisfies Config;
+
+export default config;
