@@ -31,11 +31,11 @@ export function ThemeProvider({
 }: ThemeProviderProps) {
   const [theme, setTheme] = React.useState<Theme>(defaultTheme);
   
-  // Initialize theme from localStorage
+  // Initialize theme from localStorage on mount only
   React.useEffect(() => {
     try {
       const storedTheme = localStorage.getItem(storageKey);
-      if (storedTheme) {
+      if (storedTheme && (storedTheme === "dark" || storedTheme === "light" || storedTheme === "system")) {
         setTheme(storedTheme as Theme);
       }
     } catch (error) {
@@ -60,20 +60,21 @@ export function ThemeProvider({
     root.classList.add(theme);
   }, [theme]);
 
-  const value = React.useMemo(() => {
-    return {
+  // Create a memoized value to prevent unnecessary re-renders
+  const value = React.useMemo(
+    () => ({
       theme,
       setTheme: (newTheme: Theme) => {
         try {
           localStorage.setItem(storageKey, newTheme);
-          setTheme(newTheme);
         } catch (error) {
           console.error("Error setting theme:", error);
-          setTheme(newTheme);
         }
+        setTheme(newTheme);
       },
-    };
-  }, [theme, storageKey]);
+    }),
+    [theme, storageKey]
+  );
 
   return (
     <ThemeProviderContext.Provider {...props} value={value}>
