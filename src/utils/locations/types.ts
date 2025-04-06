@@ -9,3 +9,12 @@ export interface CityCoordinates {
   lat: number;
   lng: number;
 }
+
+// Map-related types
+export type MapStyle = "default" | "terrain" | "satellite";
+
+export interface MapReferencePoint {
+  lat: number;
+  lng: number;
+}
+
