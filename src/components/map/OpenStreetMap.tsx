@@ -85,11 +85,48 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
     };
   }, []);
 
+  // Setup icons
+  const blueIcon = new L.Icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+  });
+
+  const redIcon = new L.Icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+  });
+
+  const goldIcon = new L.Icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-gold.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+  });
+
+  const greenIcon = new L.Icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+  });
+
   return (
     <MapContainer 
-      center={effectiveCenter} 
-      zoom={locations.length > 1 ? 10 : 13} 
       style={{ height: '100%', width: '100%' }}
+      center={effectiveCenter}
+      zoom={locations.length > 1 ? 10 : 13} 
       attributionControl={false}
     >
       <TileLayer
@@ -104,17 +141,10 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
         <Marker 
           position={
             userAddressLocation 
-              ? [userAddressLocation[1], userAddressLocation[0]] 
+              ? userAddressLocation 
               : [userLocation!.latitude, userLocation!.longitude]
           }
-          icon={new L.Icon({
-            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
-            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-            iconSize: [25, 41],
-            iconAnchor: [12, 41],
-            popupAnchor: [1, -34],
-            shadowSize: [41, 41]
-          })}
+          icon={blueIcon}
         >
           <Popup>
             {userAddressLocation ? 'Your Address Location' : 'Your Current Location'}
@@ -130,18 +160,13 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
           eventHandlers={{
             click: () => onLocationSelect(location)
           }}
-          icon={new L.Icon({
-            iconUrl: location.id === selectedLocation?.id
-              ? 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png'
-              : location.verified 
-                ? 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-gold.png'
-                : 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
-            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-            iconSize: [25, 41],
-            iconAnchor: [12, 41],
-            popupAnchor: [1, -34],
-            shadowSize: [41, 41]
-          })}
+          icon={
+            location.id === selectedLocation?.id
+            ? redIcon
+            : location.verified 
+              ? goldIcon
+              : greenIcon
+          }
         >
           <Popup>
             <div className="font-semibold">{location.name}</div>
