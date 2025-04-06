@@ -5,17 +5,21 @@ import { Button } from "@/components/ui/button";
 import { mockLocations } from "@/mock/data";
 import { Link } from "react-router-dom";
 import { Star, ExternalLink } from "lucide-react";
+import { Location as AppLocation } from "@/types";
 
+// Define a local interface that matches the structure of the mockLocations data
 interface Location {
   id: string;
   name: string;
-  description: string;
-  type: string[];
-  imageUrl: string;
   address: string;
-  rating: number;
-  priceRange: string;
-  tags: string[];
+  city: string;
+  state?: string;
+  country: string;
+  lat: number;
+  lng: number;
+  type: string;
+  verified: boolean;
+  imageUrl?: string; // Making this optional since we'll add fallbacks
 }
 
 const RecommendedForYou = () => {
@@ -28,7 +32,7 @@ const RecommendedForYou = () => {
       .sort(() => 0.5 - Math.random())
       .slice(0, 3);
     
-    setRecommendations(randomLocations);
+    setRecommendations(randomLocations as Location[]);
   }, []);
 
   if (recommendations.length === 0) {
@@ -48,7 +52,7 @@ const RecommendedForYou = () => {
           <div key={location.id} className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
               <img 
-                src={location.imageUrl} 
+                src={location.imageUrl || "/placeholder.svg"} 
                 alt={location.name} 
                 className="w-full h-full object-cover"
               />
@@ -58,7 +62,7 @@ const RecommendedForYou = () => {
                 {location.name}
               </h3>
               <p className="text-xs text-muted-foreground truncate">
-                {location.type.join(", ")}
+                {location.type}
               </p>
             </div>
             <Button size="sm" variant="ghost" asChild className="flex-shrink-0">
