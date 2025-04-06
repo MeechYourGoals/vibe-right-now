@@ -3,7 +3,7 @@ import { Layout } from "@/components/Layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Award, TrendingUp, MapPin, Calendar, Clock, CheckCircle2 } from "lucide-react";
+import { Award, TrendingUp, MapPin, Calendar, Clock, CheckCircle2, Ticket } from "lucide-react";
 
 const UserPointsPage = () => {
   return (
@@ -146,6 +146,36 @@ const UserPointsPage = () => {
                       reward: "Free Drink at Partner Bars", 
                       cost: 300, 
                       description: "One complimentary drink at select locations", 
+                      available: true 
+                    },
+                    { 
+                      reward: "Trevor Noah Comedy Show", 
+                      cost: 700, 
+                      description: "Comps at Long Beach Terrace Theater", 
+                      available: true 
+                    },
+                    { 
+                      reward: "Resort Day Pass", 
+                      cost: 850, 
+                      description: "Free pass at Waikiki Beach Hilton", 
+                      available: true 
+                    },
+                    { 
+                      reward: "Dodgers Game Discount", 
+                      cost: 600, 
+                      description: "30% off tickets at Dodger Stadium", 
+                      available: true 
+                    },
+                    { 
+                      reward: "Boxing Class", 
+                      cost: 400, 
+                      description: "Free 1st class at Punch Club Boxing & Fitness", 
+                      available: true 
+                    },
+                    { 
+                      reward: "Beyoncé Concert Discount", 
+                      cost: 900, 
+                      description: "15% off Cowboy Carter Tour at SoFi Stadium", 
                       available: true 
                     },
                     { 
