@@ -77,11 +77,33 @@ module.exports = {
             transform: 'scale(1.05)',
           },
         },
+        "pulse-gradient": {
+          '0%, 100%': {
+            backgroundPosition: '0% 50%',
+          },
+          '50%': {
+            backgroundPosition: '100% 50%',
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "pulse-slow": "pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+        "pulse-gradient": "pulse-gradient 3s ease infinite",
+      },
+      backgroundImage: {
+        "gradient-vibe": "linear-gradient(90deg, hsl(175, 70%, 41%) 0%, hsl(196, 80%, 40%) 50%, hsl(340, 90%, 65%) 100%)",
+      },
+      backgroundSize: {
+        "size-200": "200% 200%",
+      },
+      backgroundPosition: {
+        "pos-0": "0% 0%",
+        "pos-100": "100% 100%",
+      },
+      scale: {
+        "102": "1.02",
       },
     },
   },

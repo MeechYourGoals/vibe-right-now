@@ -125,11 +125,14 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
   return (
     <MapContainer 
       style={{ height: '100%', width: '100%' }}
-      center={effectiveCenter}
-      zoom={locations.length > 1 ? 10 : 13} 
-      attributionControl={false}
+      // For react-leaflet v3+, the center and zoom are initial values only
+      // Changes to these values after mounting do not affect the map
+      // That's why we use the MapCenterChanger component
+      defaultCenter={effectiveCenter}
+      defaultZoom={locations.length > 1 ? 10 : 13} 
     >
       <TileLayer
+        // These are the correct props for TileLayer in react-leaflet v3+
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
@@ -139,11 +142,13 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
       {/* User Location Marker */}
       {(userLocation || userAddressLocation) && (
         <Marker 
+          // The position prop is correctly typed for Marker
           position={
             userAddressLocation 
               ? userAddressLocation 
               : [userLocation!.latitude, userLocation!.longitude]
           }
+          // Using the icon prop on Marker component
           icon={blueIcon}
         >
           <Popup>
