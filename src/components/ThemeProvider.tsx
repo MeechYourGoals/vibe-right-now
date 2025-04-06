@@ -30,18 +30,24 @@ export function ThemeProvider({
   ...props
 }: ThemeProviderProps) {
   const [theme, setTheme] = React.useState<Theme>(defaultTheme);
-  
+
   // Initialize theme from localStorage on mount only
   React.useEffect(() => {
-    try {
-      const storedTheme = localStorage.getItem(storageKey);
-      if (storedTheme && (storedTheme === "dark" || storedTheme === "light" || storedTheme === "system")) {
-        setTheme(storedTheme as Theme);
+    const getThemeFromStorage = () => {
+      try {
+        const storedTheme = localStorage.getItem(storageKey);
+        if (storedTheme === "dark" || storedTheme === "light" || storedTheme === "system") {
+          return storedTheme as Theme;
+        }
+        return defaultTheme;
+      } catch (error) {
+        console.error("Error accessing localStorage:", error);
+        return defaultTheme;
       }
-    } catch (error) {
-      console.error("Error accessing localStorage:", error);
-    }
-  }, [storageKey]);
+    };
+
+    setTheme(getThemeFromStorage());
+  }, [storageKey, defaultTheme]);
 
   // Update document classes when theme changes
   React.useEffect(() => {
@@ -60,20 +66,23 @@ export function ThemeProvider({
     root.classList.add(theme);
   }, [theme]);
 
+  // Handle theme changes and storage
+  const handleSetTheme = React.useCallback((newTheme: Theme) => {
+    try {
+      localStorage.setItem(storageKey, newTheme);
+    } catch (error) {
+      console.error("Error setting theme:", error);
+    }
+    setTheme(newTheme);
+  }, [storageKey]);
+
   // Create a memoized value to prevent unnecessary re-renders
   const value = React.useMemo(
     () => ({
       theme,
-      setTheme: (newTheme: Theme) => {
-        try {
-          localStorage.setItem(storageKey, newTheme);
-        } catch (error) {
-          console.error("Error setting theme:", error);
-        }
-        setTheme(newTheme);
-      },
+      setTheme: handleSetTheme,
     }),
-    [theme, storageKey]
+    [theme, handleSetTheme]
   );
 
   return (
