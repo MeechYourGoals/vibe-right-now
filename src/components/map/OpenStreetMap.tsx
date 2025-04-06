@@ -1,95 +1,85 @@
-
-import React, { useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Location } from '@/types';
+import { cityCoordinates } from '@/utils/locations';
 import CityMarkers from './city-markers/CityMarkers';
 
-// Fix the default marker icon issue in Leaflet
-import iconRetinaUrl from 'leaflet/dist/images/marker-icon-2x.png';
-import iconUrl from 'leaflet/dist/images/marker-icon.png';
-import shadowUrl from 'leaflet/dist/images/marker-shadow.png';
-
-// Delete default markers
-delete L.Icon.Default.prototype._getIconUrl;
-
-// Setup default icon
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: iconRetinaUrl,
-  iconUrl: iconUrl,
-  shadowUrl: shadowUrl,
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  tooltipAnchor: [16, -28],
-  shadowSize: [41, 41]
-});
-
-interface MapCenterChangerProps {
-  center: [number, number];
-}
-
-// Component to update map center when props change
-const MapCenterChanger = ({ center }: MapCenterChangerProps) => {
-  const map = useMap();
-  useEffect(() => {
-    map.setView(center, map.getZoom());
-  }, [center, map]);
-  return null;
-};
-
+// Define the component properties
 interface OpenStreetMapProps {
   userLocation: GeolocationCoordinates | null;
   locations: Location[];
   searchedCity: string;
-  mapStyle?: string;
-  selectedLocation?: Location | null;
+  mapStyle: "default" | "terrain" | "satellite";
+  selectedLocation: Location | null;
+  onLocationSelect: (location: Location) => void;
   showDistances?: boolean;
-  userAddressLocation?: [number, number] | null;
-  onLocationSelect?: (location: Location) => void;
+  userAddressLocation: [number, number] | null;
   showAllCities?: boolean;
 }
 
+// Function to calculate distance between two coordinates
+const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+  const R = 6371; // Radius of the Earth in kilometers
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const distance = R * c; // Distance in kilometers
+  return distance * 0.621371; // Convert to miles
+};
+
+// Helper component to recenter the map based on props
+function MapRecenter({ center, zoom }: { center: [number, number]; zoom: number }) {
+  const map = useMap();
+  useEffect(() => {
+    map.setView(center, zoom);
+  }, [center, zoom, map]);
+  return null;
+}
+
+// Main OpenStreetMap component
 const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
   userLocation,
   locations,
   searchedCity,
-  mapStyle = 'default',
-  selectedLocation = null,
+  mapStyle,
+  selectedLocation,
+  onLocationSelect,
   showDistances = false,
-  userAddressLocation = null,
-  onLocationSelect = () => {},
+  userAddressLocation,
   showAllCities = true
 }) => {
-  // Set up default center based on user location or first location or default to LA
-  const defaultCenter: [number, number] = userLocation
-    ? [userLocation.latitude, userLocation.longitude]
-    : locations.length > 0
-      ? [locations[0].lat, locations[0].lng]
-      : [34.0522, -118.2437]; // Los Angeles default
-      
-  const effectiveCenter = userAddressLocation || defaultCenter;
-  
-  // Resize handler
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      window.resizeMap = () => {
-        setTimeout(() => {
-          window.dispatchEvent(new Event('resize'));
-        }, 100);
-      };
-    }
-    
-    return () => {
-      if (typeof window !== 'undefined') {
-        window.resizeMap = undefined;
-      }
-    };
-  }, []);
+  // Determine map center based on available location data
+  let mapCenter: [number, number] = [34.0522, -118.2437]; // Default to Los Angeles
+  let zoom = 10;
 
-  // Setup icons
-  const blueIcon = new L.Icon({
+  if (userLocation) {
+    mapCenter = [userLocation.latitude, userLocation.longitude];
+    zoom = 12;
+  } else if (userAddressLocation) {
+    mapCenter = userAddressLocation;
+    zoom = 12;
+  } else if (searchedCity && cityCoordinates[searchedCity.toLowerCase()]) {
+    const city = cityCoordinates[searchedCity.toLowerCase()];
+    mapCenter = [city.lat, city.lng];
+    zoom = 12;
+  }
+
+  // Determine the tile layer URL based on the selected map style
+  let tileLayerUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+  if (mapStyle === 'terrain') {
+    tileLayerUrl = 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png';
+  } else if (mapStyle === 'satellite') {
+    tileLayerUrl = 'https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}';
+  }
+
+  // Custom icon for the user's location
+  const userIcon = new L.Icon({
     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
     iconSize: [25, 41],
@@ -98,7 +88,8 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
     shadowSize: [41, 41]
   });
 
-  const redIcon = new L.Icon({
+  // Custom icon for the selected location
+  const selectedLocationIcon = new L.Icon({
     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
     iconSize: [25, 41],
@@ -107,16 +98,8 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
     shadowSize: [41, 41]
   });
 
-  const goldIcon = new L.Icon({
-    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-gold.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41]
-  });
-
-  const greenIcon = new L.Icon({
+  // Custom icon for other locations
+  const locationIcon = new L.Icon({
     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
     iconSize: [25, 41],
@@ -125,74 +108,76 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
     shadowSize: [41, 41]
   });
 
-  // Determine if we should show global view
-  const startZoom = locations.length > 1 ? 10 : searchedCity ? 13 : 3;
-  const initialCenter: [number, number] = searchedCity ? effectiveCenter : [20, 0]; // Global view center
-
   return (
-    <MapContainer 
-      style={{ height: '100%', width: '100%' }}
-      center={initialCenter}
-      zoom={startZoom}
+    <MapContainer
+      style={{ height: "100%", width: "100%" }}
+      center={mapCenter}
+      zoom={zoom}
       scrollWheelZoom={false}
-      worldCopyJump={true}
     >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        url={tileLayerUrl}
+        subdomains={['mt0', 'mt1', 'mt2', 'mt3']}
       />
       
-      {!searchedCity && showAllCities ? (
-        <CityMarkers />
-      ) : (
-        <MapCenterChanger center={effectiveCenter} />
+      <MapRecenter center={mapCenter} zoom={zoom} />
+
+      {/* Show city markers if showAllCities is true and no specific city is searched */}
+      {showAllCities && !searchedCity && (
+        <CityMarkers onCitySelect={(cityName) => console.log(`City selected: ${cityName}`)} />
       )}
-      
-      {/* User Location Marker */}
-      {(userLocation || userAddressLocation) && (
-        <Marker 
-          position={
-            userAddressLocation 
-              ? userAddressLocation 
-              : [userLocation!.latitude, userLocation!.longitude]
-          }
-          icon={blueIcon}
-        >
-          <Popup>
-            {userAddressLocation ? 'Your Address Location' : 'Your Current Location'}
-          </Popup>
+
+      {/* User location marker */}
+      {userLocation && (
+        <Marker position={[userLocation.latitude, userLocation.longitude]} icon={userIcon}>
+          <Popup>You are here</Popup>
         </Marker>
       )}
-      
-      {/* Location Markers */}
-      {locations.map((location) => (
-        <Marker
-          key={location.id}
-          position={[location.lat, location.lng]}
-          eventHandlers={{
-            click: () => onLocationSelect(location)
-          }}
-          icon={
-            location.id === selectedLocation?.id
-            ? redIcon
-            : location.verified 
-              ? goldIcon
-              : greenIcon
-          }
-        >
-          <Popup>
-            <div className="font-semibold">{location.name}</div>
-            <div>{location.address}</div>
-            <div>{location.city}, {location.state}</div>
-            <button 
-              className="mt-2 px-2 py-1 bg-primary text-white text-xs rounded"
-              onClick={() => onLocationSelect(location)}
-            >
-              View Details
-            </button>
-          </Popup>
-        </Marker>
-      ))}
+
+      {/* Location markers */}
+      {locations.map((location) => {
+        const isSelected = selectedLocation?.id === location.id;
+        const icon = isSelected ? selectedLocationIcon : locationIcon;
+        
+        let distance: number | null = null;
+        if (showDistances && userLocation) {
+          distance = calculateDistance(
+            userLocation.latitude,
+            userLocation.longitude,
+            location.lat,
+            location.lng
+          );
+        } else if (showDistances && userAddressLocation) {
+          distance = calculateDistance(
+            userAddressLocation[0],
+            userAddressLocation[1],
+            location.lat,
+            location.lng
+          );
+        }
+        
+        return (
+          <Marker
+            key={location.id}
+            position={[location.lat, location.lng]}
+            icon={icon}
+            eventHandlers={{
+              click: () => {
+                onLocationSelect(location);
+              },
+            }}
+          >
+            <Popup>
+              <div>
+                <h3>{location.name}</h3>
+                <p>{location.address}, {location.city}</p>
+                {distance !== null && <p>Distance: {distance.toFixed(2)} miles</p>}
+              </div>
+            </Popup>
+          </Marker>
+        );
+      })}
     </MapContainer>
   );
 };
