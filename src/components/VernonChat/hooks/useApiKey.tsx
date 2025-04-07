@@ -1,36 +1,16 @@
 import { useState, useEffect } from 'react';
 
 export const useApiKey = () => {
-  const [apiKey, setApiKey] = useState<string>('');
-  const [apiKeyInput, setApiKeyInput] = useState<string>('');
+  // We don't need apiKey storage anymore, but will keep the structure
+  // to avoid breaking the components that depend on it
   const [isApiKeyPopoverOpen, setIsApiKeyPopoverOpen] = useState(false);
   
-  // Load API key from localStorage on component mount
-  useEffect(() => {
-    const savedApiKey = localStorage.getItem('huggingfaceApiKey');
-    if (savedApiKey) {
-      setApiKey(savedApiKey);
-    } else {
-      // Only show the API key popover if there's no saved key
-      setIsApiKeyPopoverOpen(true);
-    }
-  }, []);
-  
-  // Save API key to localStorage
-  const saveApiKey = () => {
-    if (apiKeyInput.trim()) {
-      localStorage.setItem('huggingfaceApiKey', apiKeyInput.trim());
-      setApiKey(apiKeyInput.trim());
-      setIsApiKeyPopoverOpen(false);
-    }
-  };
-  
   return {
-    apiKey,
+    apiKey: 'no-api-key-needed', // Hardcode a dummy value
     isApiKeyPopoverOpen,
     setIsApiKeyPopoverOpen,
-    apiKeyInput,
-    setApiKeyInput,
-    saveApiKey
+    apiKeyInput: '',
+    setApiKeyInput: () => {}, // No-op function
+    saveApiKey: () => {} // No-op function
   };
 };

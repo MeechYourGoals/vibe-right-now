@@ -4,18 +4,11 @@ import MessageList from './MessageList';
 import MessageInput from './MessageInput';
 import ChatHeader from './ChatHeader';
 import ChatButton from './ChatButton';
-import { useApiKey } from './hooks/useApiKey';
 import { useChat } from './hooks/useChat';
 
 const VernonChat = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
-  
-  // We still use the hook but only for state management
-  const {
-    isApiKeyPopoverOpen,
-    setIsApiKeyPopoverOpen
-  } = useApiKey();
   
   const {
     messages,

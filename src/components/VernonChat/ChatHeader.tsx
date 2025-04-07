@@ -8,8 +8,6 @@ interface ChatHeaderProps {
   isMinimized: boolean;
   toggleMinimize: () => void;
   closeChat: () => void;
-  isApiKeyPopoverOpen?: boolean;
-  setIsApiKeyPopoverOpen?: (isOpen: boolean) => void;
 }
 
 const ChatHeader: React.FC<ChatHeaderProps> = ({
