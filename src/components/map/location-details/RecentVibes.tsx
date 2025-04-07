@@ -1,48 +1,35 @@
 
 import { Location } from "@/types";
 import VenuePost from "@/components/VenuePost";
-import { mockPosts } from "@/mock/data";
+import { getMediaForLocation } from "@/utils/map/locationMediaUtils";
+import { getLocationVibes } from "@/utils/locationUtils";
 
 interface RecentVibesProps {
   location: Location;
 }
 
 const RecentVibes = ({ location }: RecentVibesProps) => {
-  // Get media for the location
-  const getMediaForLocation = (location: Location) => {
-    // Return appropriate media based on location type and name
-    const imageMap: Record<string, string> = {
-      // Sports venues
-      "30": "https://images.unsplash.com/photo-1504450758481-7338eba7524a?q=80&w=1000&auto=format&fit=crop",  // Lakers
-      "31": "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?q=80&w=1000&auto=format&fit=crop",  // Rams
-      "32": "https://images.unsplash.com/photo-1566577134624-d9b13555e288?q=80&w=1000&auto=format&fit=crop",  // Dodgers
-      "33": "https://images.unsplash.com/photo-1459865264687-595d652de67e?q=80&w=1000&auto=format&fit=crop",  // LA Galaxy
-      "34": "https://images.unsplash.com/photo-1530915872-13619796d013?q=80&w=1000&auto=format&fit=crop",    // Volleyball
-      "35": "https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?q=80&w=1000&auto=format&fit=crop",  // Golf
-    };
-
-    // Default media based on type if no specific image is available
-    const typeDefaultMedia: Record<string, string> = {
-      "restaurant": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=1000&auto=format&fit=crop",
-      "bar": "https://images.unsplash.com/photo-1572116469696-31de0f17cc34?q=80&w=1000&auto=format&fit=crop",
-      "event": "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=1000&auto=format&fit=crop",
-      "attraction": "https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?q=80&w=1000&auto=format&fit=crop",
-      "sports": "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?q=80&w=1000&auto=format&fit=crop",
-      "other": "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=1000&auto=format&fit=crop",
-    };
-
-    return {
-      type: "image" as const,
-      url: imageMap[location.id] || typeDefaultMedia[location.type] || `https://source.unsplash.com/random/800x600/?${location.type},${location.city}`
-    };
-  };
-
-  // Find vibes for a specific location
-  const getLocationVibes = (locationId: string) => {
-    return mockPosts.filter(post => post.location.id === locationId).slice(0, 2);
-  };
-
   const locationVibes = getLocationVibes(location.id);
+  
+  // Generate relevant venue content for different location types
+  const getVenueContent = (locationType: string, locationName: string): string => {
+    switch (locationType) {
+      case "restaurant":
+        return `Today's special: ${locationName === "Artisan Coffee House" ? "Fresh brewed Ethiopian coffee and homemade pastries!" : "Chef's signature dish with seasonal ingredients!"}`;
+      case "bar":
+        return `Happy hour tonight from 5-7PM! ${locationName.includes("Rooftop") ? "Enjoy amazing views with your cocktails." : "Live DJ starting at 9PM!"}`;
+      case "event":
+        return `Tickets still available for ${locationName}! Use code VIBES for 10% off your purchase.`;
+      case "sports":
+        return locationName.includes("Lakers") ? "Lakers tickets for tonight's game are going fast! Premium seats still available." : 
+               locationName.includes("Golf") ? "Perfect weather for golfing today! Tee times available." : 
+               "Game day is here! Come early for special fan activities.";
+      case "attraction":
+        return `Beat the crowds! Current wait time is only 15 minutes for ${locationName}.`;
+      default:
+        return `Don't miss our special event at ${locationName} today!`;
+    }
+  };
   
   return (
     <>
@@ -59,7 +46,20 @@ const RecentVibes = ({ location }: RecentVibesProps) => {
             />
           ))
         ) : (
-          <p className="text-sm text-muted-foreground">No recent vibes for this location.</p>
+          <>
+            <VenuePost
+              venue={location}
+              content={getVenueContent(location.type, location.name)}
+              media={getMediaForLocation(location)}
+              timestamp={new Date().toISOString()}
+            />
+            <VenuePost
+              venue={location}
+              content={`Check out what's happening at ${location.name}! ${location.type === "restaurant" ? "Our new menu is now available." : location.type === "bar" ? "New signature cocktails just added!" : "Special offers for VRN users!"}"`}
+              media={getMediaForLocation(location)}
+              timestamp={new Date(Date.now() - 3600000).toISOString()}
+            />
+          </>
         )}
       </div>
     </>

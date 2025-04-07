@@ -64,6 +64,7 @@ const NearbyVibesMap = () => {
   };
 
   const handleLocationClick = (locationId: string) => {
+    // Navigate directly to the venue page
     navigate(`/venue/${locationId}`);
   };
 

@@ -1,6 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Location } from "@/types";
+import { useNavigate } from "react-router-dom";
 
 interface LocationActionsProps {
   location: Location;
@@ -8,6 +9,8 @@ interface LocationActionsProps {
 }
 
 const LocationActions = ({ location, onViewVibes }: LocationActionsProps) => {
+  const navigate = useNavigate();
+  
   // Helper function to get ride service URL
   const getRideServiceUrl = (place: Location) => {
     // Simulate a partnership with Uber
@@ -55,9 +58,14 @@ const LocationActions = ({ location, onViewVibes }: LocationActionsProps) => {
     return "Website";
   };
 
+  const handleViewVibes = () => {
+    // Navigate directly to the venue's page
+    navigate(`/venue/${location.id}`);
+  };
+
   return (
     <div className="space-y-2 mb-4">
-      <Button className="w-full" onClick={() => onViewVibes(location.id)}>
+      <Button className="w-full" onClick={handleViewVibes}>
         View All Vibes
       </Button>
       <div className="flex gap-2">

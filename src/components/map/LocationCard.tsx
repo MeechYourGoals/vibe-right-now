@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { MapPin } from "lucide-react";
 import { Location } from "@/types";
 import { getRideServiceUrl, getOfficialUrl, getActionButtonText } from "@/utils/locationUtils";
+import { useNavigate } from "react-router-dom";
 
 interface LocationCardProps {
   location: Location;
@@ -11,6 +12,12 @@ interface LocationCardProps {
 }
 
 const LocationCard = ({ location, onViewVibes }: LocationCardProps) => {
+  const navigate = useNavigate();
+
+  const handleViewVibes = () => {
+    navigate(`/venue/${location.id}`);
+  };
+
   return (
     <Card className="hover:bg-muted/20 transition-colors">
       <CardContent className="p-3">
@@ -24,7 +31,7 @@ const LocationCard = ({ location, onViewVibes }: LocationCardProps) => {
             variant="outline" 
             size="sm" 
             className="w-full h-7 text-xs"
-            onClick={() => onViewVibes(location.id)}
+            onClick={handleViewVibes}
           >
             View Vibes
           </Button>
