@@ -6,6 +6,17 @@ export interface User {
   avatar: string;
 }
 
+export interface BusinessHours {
+  monday: string;
+  tuesday: string;
+  wednesday: string;
+  thursday: string;
+  friday: string;
+  saturday: string;
+  sunday: string;
+  isOpen24Hours?: boolean;
+}
+
 export interface Location {
   id: string;
   name: string;
@@ -17,6 +28,7 @@ export interface Location {
   lng: number;
   type: "restaurant" | "bar" | "event" | "attraction" | "sports" | "other";
   verified: boolean;
+  hours?: BusinessHours;
 }
 
 export interface Media {

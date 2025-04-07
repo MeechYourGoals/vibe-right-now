@@ -1,11 +1,12 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MapPin, Share2 } from "lucide-react";
+import { MapPin, Share2, Clock } from "lucide-react";
 import { Location } from "@/types";
 import { getRideServiceUrl, getOfficialUrl, getActionButtonText } from "@/utils/locationUtils";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { generateBusinessHours, getTodaysHours } from "@/utils/businessHoursUtils";
 
 interface LocationCardProps {
   location: Location;
@@ -37,6 +38,13 @@ const shareVenue = (location: Location) => {
 const LocationCard = ({ location, onViewVibes }: LocationCardProps) => {
   const navigate = useNavigate();
 
+  // Ensure location has hours
+  if (!location.hours) {
+    location.hours = generateBusinessHours(location);
+  }
+  
+  const todaysHours = getTodaysHours(location);
+
   const handleViewVibes = () => {
     navigate(`/venue/${location.id}`);
   };
@@ -58,6 +66,10 @@ const LocationCard = ({ location, onViewVibes }: LocationCardProps) => {
         <div className="text-xs text-muted-foreground flex items-center mt-1">
           <MapPin className="h-3 w-3 mr-1" />
           <span className="truncate">{location.city}</span>
+        </div>
+        <div className="text-xs text-muted-foreground flex items-center mt-1">
+          <Clock className="h-3 w-3 mr-1" />
+          <span className="truncate">{todaysHours}</span>
         </div>
         <div className="mt-2 flex flex-col gap-2">
           <Button 

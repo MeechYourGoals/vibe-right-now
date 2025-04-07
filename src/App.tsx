@@ -1,47 +1,44 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Suspense, lazy } from "react";
+import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import Index from "./pages/Index";
-import Explore from "./pages/Explore";
-import VenueProfile from "./pages/VenueProfile";
-import NotFound from "./pages/NotFound";
-import ProfileBio from "./pages/ProfileBio";
-import MyPlaces from "./pages/MyPlaces";
-import PinnedVibes from "./pages/PinnedVibes";
-import UserPointsPage from "./pages/UserPoints";
-import Settings from "./pages/Settings";
-import VernonChat from "./components/VernonChat";
 
-const queryClient = new QueryClient();
+// Lazy-loaded components
+const Index = lazy(() => import("@/pages/Index"));
+const Explore = lazy(() => import("@/pages/Explore"));
+const MyPlaces = lazy(() => import("@/pages/MyPlaces"));
+const Settings = lazy(() => import("@/pages/Settings"));
+const NotFound = lazy(() => import("@/pages/NotFound"));
+const UserPoints = lazy(() => import("@/pages/UserPoints"));
+const PinnedVibes = lazy(() => import("@/pages/PinnedVibes"));
+const VenueProfile = lazy(() => import("@/pages/VenueProfile"));
+const ProfileBio = lazy(() => import("@/pages/ProfileBio"));
+const UserProfile = lazy(() => import("@/pages/UserProfile"));
 
-const App = () => (
-  <ThemeProvider defaultTheme="dark">
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
+function App() {
+  return (
+    <ThemeProvider defaultTheme="light" storageKey="vibe-theme">
+      <BrowserRouter>
+        <Suspense fallback={<div className="h-screen w-screen flex items-center justify-center">Loading...</div>}>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/explore" element={<Explore />} />
-            <Route path="/venue/:id" element={<VenueProfile />} />
-            <Route path="/profile/bio" element={<ProfileBio />} />
-            <Route path="/profile/places" element={<MyPlaces />} />
-            <Route path="/profile/pinned" element={<PinnedVibes />} />
-            <Route path="/profile/points" element={<UserPointsPage />} />
+            <Route path="/explore/:city" element={<Explore />} />
+            <Route path="/my-places" element={<MyPlaces />} />
             <Route path="/settings" element={<Settings />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="/points" element={<UserPoints />} />
+            <Route path="/pinned" element={<PinnedVibes />} />
+            <Route path="/venue/:id" element={<VenueProfile />} />
+            <Route path="/profile" element={<ProfileBio />} />
+            <Route path="/user/:username" element={<UserProfile />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
-          <VernonChat />
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
-  </ThemeProvider>
-);
+        </Suspense>
+        <Toaster />
+      </BrowserRouter>
+    </ThemeProvider>
+  );
+}
 
 export default App;

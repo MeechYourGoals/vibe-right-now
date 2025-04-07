@@ -20,6 +20,8 @@ import { Comment, Post, Location as VenueLocation } from "@/types";
 import { toast } from "@/hooks/use-toast";
 import MapboxMap from "@/components/map/MapboxMap";
 import OpenStreetMap from "@/components/map/OpenStreetMap";
+import BusinessHours from "@/components/BusinessHours";
+import { generateBusinessHours } from "@/utils/businessHoursUtils";
 
 // Function to get official ticket URL
 const getOfficialTicketUrl = (venueId: string) => {
@@ -43,6 +45,12 @@ const VenueProfile = () => {
   const [isMapExpanded, setIsMapExpanded] = useState(false);
   
   const venue = mockLocations.find(location => location.id === id);
+  
+  // Ensure venue has hours
+  if (venue && !venue.hours) {
+    venue.hours = generateBusinessHours(venue);
+  }
+  
   const venuePosts = mockPosts.filter(post => post.location.id === id);
   const officialTicketUrl = venue?.type === "sports" ? getOfficialTicketUrl(id || "") : "";
 
@@ -218,6 +226,9 @@ const VenueProfile = () => {
                     <Badge variant="outline" className="bg-muted/30">{venue.type}</Badge>
                     <Badge variant="outline" className="bg-primary/20">Open Now</Badge>
                   </div>
+                  
+                  {/* Add Business Hours component */}
+                  <BusinessHours venue={venue} />
                 </div>
               </div>
               
