@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -11,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { User, Bookmark, MapPin, Award, UserCircle, LogIn, Settings, Mail, GithubIcon } from "lucide-react";
+import { User, Bookmark, MapPin, Award, UserCircle, LogIn, Settings, Mail, GithubIcon, BarChart } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AuthDialog } from "@/components/AuthDialog";
 
@@ -131,6 +132,12 @@ const Header = () => {
                       <Link to="/settings">
                         <Settings className="mr-2 h-4 w-4" />
                         <span>Settings</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/data-insights">
+                        <BarChart className="mr-2 h-4 w-4" />
+                        <span>Data Insights</span>
                       </Link>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
