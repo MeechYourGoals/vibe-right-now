@@ -1,9 +1,8 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useIsMobile } from "@/hooks/use-mobile";
-import UserPoints from "@/components/UserPoints";
+import UserPoints from "@/components/user-points";
 import { 
   DropdownMenu,
   DropdownMenuContent,
