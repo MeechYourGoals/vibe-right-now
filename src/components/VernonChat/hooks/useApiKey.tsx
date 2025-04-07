@@ -1,31 +1,31 @@
+
 import { useState, useEffect } from 'react';
-import { toast } from 'sonner';
 
 export const useApiKey = () => {
-  const [apiKey, setApiKey] = useState<string | null>(localStorage.getItem('perplexityApiKey'));
+  const [apiKey, setApiKey] = useState<string>('');
+  const [apiKeyInput, setApiKeyInput] = useState<string>('');
   const [isApiKeyPopoverOpen, setIsApiKeyPopoverOpen] = useState(false);
-  const [apiKeyInput, setApiKeyInput] = useState('');
   
+  // Load API key from localStorage on component mount
   useEffect(() => {
-    // Check for API key on component mount
-    const storedApiKey = localStorage.getItem('perplexityApiKey');
-    if (storedApiKey) {
-      setApiKey(storedApiKey);
+    const savedApiKey = localStorage.getItem('huggingfaceApiKey');
+    if (savedApiKey) {
+      setApiKey(savedApiKey);
+    } else {
+      // Only show the API key popover if there's no saved key
+      setIsApiKeyPopoverOpen(true);
     }
   }, []);
   
+  // Save API key to localStorage
   const saveApiKey = () => {
     if (apiKeyInput.trim()) {
-      localStorage.setItem('perplexityApiKey', apiKeyInput);
-      setApiKey(apiKeyInput);
-      setApiKeyInput('');
+      localStorage.setItem('huggingfaceApiKey', apiKeyInput.trim());
+      setApiKey(apiKeyInput.trim());
       setIsApiKeyPopoverOpen(false);
-      toast.success('API key saved successfully');
-    } else {
-      toast.error('Please enter a valid API key');
     }
   };
-
+  
   return {
     apiKey,
     isApiKeyPopoverOpen,

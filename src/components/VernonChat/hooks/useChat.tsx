@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { Message } from '../types';
-import { PerplexityService } from '@/services/PerplexityService';
+import { HuggingChatService } from '@/services/HuggingChatService';
 import { updateTrendingLocations } from '@/utils/trendingLocationsUpdater';
 import { getLocationsByCity, getTrendingLocationsForCity } from '@/mock/cityLocations';
 import { cityCoordinates } from '@/utils/locations';
@@ -10,7 +10,7 @@ export const useChat = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: "Hi there! I'm Vernon (Vern for short), your Vibe Language Model assistant. I can help you discover venues, events, and answer general questions too. What would you like to know?",
+      text: "Hi there! I'm VeRNon (Vern for short), your Vibe Language Model assistant. I can help you discover venues, events, and answer general questions too. What would you like to know?",
       sender: 'ai',
       timestamp: new Date()
     }
@@ -72,8 +72,8 @@ export const useChat = () => {
     setIsSearching(true);
     
     try {
-      // Get response from Perplexity
-      const responseText = await PerplexityService.searchPerplexity(inputValue);
+      // Get response from HuggingChat instead of Perplexity
+      const responseText = await HuggingChatService.searchHuggingChat(inputValue);
       
       // Parse city if the query was about events or places in a specific city
       let detectedCity = "";

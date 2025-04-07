@@ -38,7 +38,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
           <AvatarImage src="/placeholder.svg" />
           <AvatarFallback className="bg-amber-500 text-white">V</AvatarFallback>
         </Avatar>
-        <h3 className="text-sm font-medium">Vernon (Vibe Assistant)</h3>
+        <h3 className="text-sm font-medium">VeRNon (Vibe Assistant)</h3>
       </div>
       <div className="flex gap-1">
         <Popover open={isApiKeyPopoverOpen} onOpenChange={setIsApiKeyPopoverOpen}>
@@ -49,9 +49,9 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
           </PopoverTrigger>
           <PopoverContent className="w-80">
             <div className="space-y-2">
-              <h4 className="font-medium text-sm">Perplexity API Key</h4>
+              <h4 className="font-medium text-sm">HuggingFace API Key</h4>
               <p className="text-xs text-muted-foreground">
-                Enter your Perplexity API key to enable Vernon to search for real-time information.
+                Enter your HuggingFace API key to enable VeRNon to search for real-time information.
               </p>
               <div className="flex gap-2">
                 <Input
@@ -64,7 +64,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
                 <Button size="sm" onClick={saveApiKey}>Save</Button>
               </div>
               <p className="text-xs text-muted-foreground">
-                Your API key is stored locally and only used for Perplexity API calls.
+                Your API key is stored locally and only used for HuggingFace API calls.
               </p>
             </div>
           </PopoverContent>

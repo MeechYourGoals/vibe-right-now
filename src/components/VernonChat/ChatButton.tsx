@@ -11,9 +11,9 @@ const ChatButton: React.FC<ChatButtonProps> = ({ onClick }) => {
   return (
     <Button 
       onClick={onClick}
-      className="fixed left-6 bottom-6 w-16 h-16 rounded-full shadow-lg bg-amber-500 hover:bg-amber-600 text-white flex items-center justify-center p-0 z-10"
+      className="fixed left-6 bottom-6 w-12 h-12 rounded-full shadow-lg bg-amber-500 hover:bg-amber-600 text-white flex items-center justify-center p-0 z-10"
     >
-      <MessageSquare className="h-7 w-7" />
+      <MessageSquare className="h-5 w-5" />
     </Button>
   );
 };
