@@ -12,9 +12,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { User, Bookmark, MapPin, Award, UserCircle, LogIn, Settings, Mail, GithubIcon, BarChart } from "lucide-react";
+import { User, Bookmark, MapPin, Award, UserCircle, LogIn, Settings, Mail, GithubIcon, BarChart, Headphones } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AuthDialog } from "@/components/AuthDialog";
+import VernonConciergeDialog from "./VernonConcierge/VernonConciergeDialog";
 
 // Array of V-words to cycle through
 const vWords = ["Vibe", "Vacation", "Vlog", "Visit", "Voyage", "Venture"];
@@ -24,6 +25,7 @@ const Header = () => {
   const [currentVWord, setCurrentVWord] = useState(vWords[0]);
   const [isAnimating, setIsAnimating] = useState(false);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const [showConciergeDialog, setShowConciergeDialog] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
 
   useEffect(() => {
@@ -127,6 +129,13 @@ const Header = () => {
                         <span>Points</span>
                       </Link>
                     </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      className="cursor-pointer"
+                      onSelect={() => setShowConciergeDialog(true)}
+                    >
+                      <Headphones className="mr-2 h-4 w-4" />
+                      <span>Vernon Concierge</span>
+                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
                       <Link to="/settings">
@@ -155,6 +164,11 @@ const Header = () => {
         onOpenChange={setShowAuthDialog} 
         mode={authMode} 
         onModeChange={setAuthMode} 
+      />
+
+      <VernonConciergeDialog
+        open={showConciergeDialog}
+        onOpenChange={setShowConciergeDialog}
       />
     </>
   );

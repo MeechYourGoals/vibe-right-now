@@ -19,7 +19,7 @@ const DataInsights = lazy(() => import("@/pages/DataInsights"));
 
 function App() {
   return (
-    <ThemeProvider defaultTheme="light" storageKey="vibe-theme">
+    <ThemeProvider defaultTheme="dark" storageKey="vibe-theme">
       <BrowserRouter>
         <Suspense fallback={<div className="h-screen w-screen flex items-center justify-center">Loading...</div>}>
           <Routes>
