@@ -3,7 +3,11 @@ import { Location } from "@/types";
 import VenuePost from "@/components/VenuePost";
 import { getMediaForLocation } from "@/utils/map/locationMediaUtils";
 import { getLocationVibes } from "@/utils/locationUtils";
-import { isWithinThreeMonths } from "@/mock/time-utils";
+import { 
+  isWithinThreeMonths, 
+  getDaySpecificContent, 
+  getDaySpecificImageUrl
+} from "@/mock/time-utils";
 
 interface RecentVibesProps {
   location: Location;
@@ -13,24 +17,23 @@ const RecentVibes = ({ location }: RecentVibesProps) => {
   const locationVibes = getLocationVibes(location.id)
     .filter(vibe => isWithinThreeMonths(vibe.timestamp));
   
-  // Generate relevant venue content for different location types
-  const getVenueContent = (locationType: string, locationName: string): string => {
-    switch (locationType) {
-      case "restaurant":
-        return `Today's special: ${locationName === "Artisan Coffee House" ? "Fresh brewed Ethiopian coffee and homemade pastries!" : "Chef's signature dish with seasonal ingredients!"}`;
-      case "bar":
-        return `Happy hour tonight from 5-7PM! ${locationName.includes("Rooftop") ? "Enjoy amazing views with your cocktails." : "Live DJ starting at 9PM!"}`;
-      case "event":
-        return `Tickets still available for ${locationName}! Use code VIBES for 10% off your purchase.`;
-      case "sports":
-        return locationName.includes("Lakers") ? "Lakers tickets for tonight's game are going fast! Premium seats still available." : 
-               locationName.includes("Golf") ? "Perfect weather for golfing today! Tee times available." : 
-               "Game day is here! Come early for special fan activities.";
-      case "attraction":
-        return `Beat the crowds! Current wait time is only 15 minutes for ${locationName}.`;
-      default:
-        return `Don't miss our special event at ${locationName} today!`;
-    }
+  // Get current day of week to show content for today
+  const today = new Date();
+  const dayOfWeek = today.getDay();
+  
+  // Get content specific to today's day of week
+  const todayContent = getDaySpecificContent(location.type, dayOfWeek);
+  const todayImage = {
+    type: "image" as const,
+    url: getDaySpecificImageUrl(location.type, dayOfWeek)
+  };
+  
+  // Get content for another day (2 days earlier)
+  const previousDay = (dayOfWeek - 2 + 7) % 7; // Ensure it's a positive number
+  const previousContent = getDaySpecificContent(location.type, previousDay);
+  const previousImage = {
+    type: "image" as const,
+    url: getDaySpecificImageUrl(location.type, previousDay)
   };
   
   return (
@@ -53,17 +56,17 @@ const RecentVibes = ({ location }: RecentVibesProps) => {
             <div className="border-2 border-amber-500/50 rounded-lg overflow-hidden">
               <VenuePost
                 venue={location}
-                content={getVenueContent(location.type, location.name)}
-                media={getMediaForLocation(location)}
+                content={todayContent}
+                media={todayImage}
                 timestamp={new Date().toISOString()}
               />
             </div>
             <div className="border-2 border-amber-500/50 rounded-lg overflow-hidden">
               <VenuePost
                 venue={location}
-                content={`Check out what's happening at ${location.name}! ${location.type === "restaurant" ? "Our new menu is now available." : location.type === "bar" ? "New signature cocktails just added!" : "Special offers for VRN users!"}`}
-                media={getMediaForLocation(location)}
-                timestamp={new Date(Date.now() - 3600000).toISOString()}
+                content={previousContent}
+                media={previousImage}
+                timestamp={new Date(Date.now() - 3600000 * 48).toISOString()}
               />
             </div>
           </>

@@ -1,5 +1,5 @@
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Minimize } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,11 @@ import Header from "@/components/Header";
 import { Comment, Post } from "@/types";
 import OpenStreetMap from "@/components/map/OpenStreetMap";
 import { generateBusinessHours } from "@/utils/businessHoursUtils";
-import { isPostFromDayOfWeek, isWithinThreeMonths } from "@/mock/time-utils";
+import { 
+  isPostFromDayOfWeek, 
+  isWithinThreeMonths,
+  createDaySpecificVenuePosts
+} from "@/mock/time-utils";
 import { getVenueContent } from "@/utils/venue/venueContentHelpers";
 import DayOfWeekFilter from "@/components/venue/DayOfWeekFilter";
 import VenueProfileHeader from "@/components/venue/VenueProfileHeader";
@@ -36,24 +40,10 @@ const VenueProfile = () => {
     );
   }, [id]);
 
+  // Generate venue-specific posts for each day of the week
   const generatedVenuePosts = useMemo(() => {
     if (!venue) return [];
-    
-    const firstVenuePost = {
-      content: getVenueContent(venue, true).content,
-      media: { type: "image", url: getVenueContent(venue, true).mediaUrl } as any,
-      timestamp: new Date().toISOString(),
-      isVenuePost: true,
-    };
-    
-    const secondVenuePost = {
-      content: getVenueContent(venue, false).content,
-      media: { type: "image", url: getVenueContent(venue, false).mediaUrl } as any,
-      timestamp: new Date(Date.now() - 3600000 * 6).toISOString(),
-      isVenuePost: true,
-    };
-    
-    return [firstVenuePost, secondVenuePost];
+    return createDaySpecificVenuePosts(venue);
   }, [venue]);
 
   const filteredPosts = useMemo(() => {
@@ -69,30 +59,14 @@ const VenueProfile = () => {
   const allPosts = useMemo(() => {
     if (!venue) return [];
     
-    const venuePostsFormatted = generatedVenuePosts.map((post, index) => ({
-      id: `venue-post-${index}`,
-      user: { 
-        id: 'venue',
-        name: venue?.name || 'Venue',
-        username: venue?.name?.toLowerCase().replace(/\s+/g, '') || 'venue',
-        avatar: `https://source.unsplash.com/random/200x200/?${venue?.type}`
-      },
-      location: venue,
-      content: post.content,
-      media: [post.media],
-      timestamp: post.timestamp,
-      expiresAt: new Date(new Date(post.timestamp).setMonth(new Date(post.timestamp).getMonth() + 3)).toISOString(),
-      likes: Math.floor(Math.random() * 100) + 20,
-      comments: Math.floor(Math.random() * 20),
-      isVenuePost: true,
-    })) as Post[];
-    
+    // Filter venue-specific posts by selected days
     const filteredVenuePosts = selectedDays.length === 0 
-      ? venuePostsFormatted 
-      : venuePostsFormatted.filter(post => 
+      ? generatedVenuePosts 
+      : generatedVenuePosts.filter(post => 
           selectedDays.includes(new Date(post.timestamp).getDay())
         );
     
+    // Combine and sort all posts by timestamp
     const combined = [...filteredPosts, ...filteredVenuePosts].sort((a, b) => 
       new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     );

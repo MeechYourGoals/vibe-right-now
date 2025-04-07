@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { CalendarDays } from "lucide-react";
 
 export const DAYS_OF_WEEK = [
@@ -30,6 +31,11 @@ const DayOfWeekFilter: React.FC<DayOfWeekFilterProps> = ({
         <h3 className="text-sm font-medium flex items-center">
           <CalendarDays className="h-4 w-4 mr-2" />
           Filter by day of week
+          {selectedDays.length > 0 && (
+            <Badge variant="secondary" className="ml-2">
+              {selectedDays.length} selected
+            </Badge>
+          )}
         </h3>
         
         {selectedDays.length > 0 && (

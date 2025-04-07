@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Link } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
-import { Heart } from "lucide-react";
+import { Heart, Calendar } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,7 +21,11 @@ const PostGridItem: React.FC<PostGridItemProps> = ({ post, isVenuePost = false }
     setLiked(!liked);
   };
 
-  const dayOfWeek = new Date(post.timestamp).toLocaleDateString('en-US', { weekday: 'long' });
+  // Get the day of the week
+  const date = new Date(post.timestamp);
+  const dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'long' });
+  const dayOnly = dayOfWeek.substring(0, 3);
+  const timeString = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
 
   return (
     <Link 
@@ -55,9 +59,12 @@ const PostGridItem: React.FC<PostGridItemProps> = ({ post, isVenuePost = false }
               <AvatarImage src={post.user.avatar} alt={post.user.name} />
               <AvatarFallback>{post.user.name[0]}</AvatarFallback>
             </Avatar>
-            <div className="flex items-center">
+            <div className="flex items-center gap-1">
               {isVenuePost && <Badge className="bg-amber-500 text-[0.6rem] mr-1">Venue</Badge>}
-              <Badge variant="outline" className="text-[0.6rem] bg-black/30 text-white border-white/20">{dayOfWeek}</Badge>
+              <Badge variant="outline" className="text-[0.6rem] bg-black/30 text-white border-white/20 flex items-center">
+                <Calendar className="h-3 w-3 mr-0.5" />
+                {dayOnly}
+              </Badge>
             </div>
           </div>
           
@@ -76,7 +83,7 @@ const PostGridItem: React.FC<PostGridItemProps> = ({ post, isVenuePost = false }
               <span className="ml-1">{post.likes + (liked ? 1 : 0)}</span>
             </Button>
             <span className="text-xs text-white">
-              {formatDistanceToNow(new Date(post.timestamp), { addSuffix: true })}
+              {timeString}
             </span>
           </div>
         </div>
