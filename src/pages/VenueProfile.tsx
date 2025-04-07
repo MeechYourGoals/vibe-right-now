@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
@@ -15,11 +16,12 @@ import VenuePost from "@/components/VenuePost";
 import CameraButton from "@/components/CameraButton";
 import Header from "@/components/Header";
 import { mockComments } from "@/mock/data";
-import { Comment, Post } from "@/types";
+import { Comment, Post, Location as VenueLocation } from "@/types";
 import { toast } from "@/hooks/use-toast";
 import MapboxMap from "@/components/map/MapboxMap";
 import OpenStreetMap from "@/components/map/OpenStreetMap";
 
+// Function to get official ticket URL
 const getOfficialTicketUrl = (venueId: string) => {
   const ticketUrls: Record<string, string> = {
     "30": "https://www.axs.com/events/crypto-com-arena",
@@ -74,7 +76,7 @@ const VenueProfile = () => {
     }, 10);
   };
   
-  const getVenueContent = (venue: Location, isFirstPost: boolean): { content: string, mediaUrl: string } => {
+  const getVenueContent = (venue: VenueLocation, isFirstPost: boolean): { content: string, mediaUrl: string } => {
     let content = "";
     let mediaUrl = "";
     
