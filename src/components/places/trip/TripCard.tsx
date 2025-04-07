@@ -4,7 +4,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Calendar, MapPin, Plus, User } from "lucide-react";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { Link } from "react-router-dom";
 
 interface TripCardProps {
@@ -37,7 +37,7 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onInvite }) => {
         <div className="flex items-center text-sm mb-3">
           <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
           <span>
-            {format(new Date(trip.startDate), "MMM d")} - {format(new Date(trip.endDate), "MMM d, yyyy")}
+            {format(parseISO(trip.startDate), "MMM d")} - {format(parseISO(trip.endDate), "MMM d, yyyy")}
           </span>
         </div>
         

@@ -9,8 +9,8 @@ interface Trip {
   name: string;
   destination: string;
   description: string;
-  startDate: Date;
-  endDate: Date;
+  startDate: string; // Changed from Date to string to fix the type error
+  endDate: string; // Changed from Date to string to fix the type error
   collaborators: {
     id: string;
     name: string;
@@ -40,12 +40,7 @@ export const useTripManager = (): UseTripManagerReturn => {
     if (storedTrips) {
       try {
         // Parse dates correctly
-        const parsedTrips = JSON.parse(storedTrips, (key, value) => {
-          if (key === 'startDate' || key === 'endDate') {
-            return new Date(value);
-          }
-          return value;
-        });
+        const parsedTrips = JSON.parse(storedTrips);
         setTrips(parsedTrips);
       } catch (err) {
         console.error('Error parsing stored trips:', err);
@@ -68,11 +63,12 @@ export const useTripManager = (): UseTripManagerReturn => {
         name: "Summer in Paris",
         destination: "Paris, France",
         description: "Family vacation exploring the City of Light",
-        startDate: new Date(2025, 6, 15),
-        endDate: new Date(2025, 6, 22),
+        startDate: "2025-07-15",
+        endDate: "2025-07-22",
         collaborators: [
           { id: "1", name: mockUsers[0].name, avatar: mockUsers[0].avatar },
-          { id: "2", name: mockUsers[1].name, avatar: mockUsers[1].avatar },
+          { id: "2", name: "Mom", avatar: mockUsers[1].avatar },
+          { id: "3", name: "Stacy", avatar: mockUsers[2].avatar },
         ],
         savedPlaces: 8
       },
@@ -81,12 +77,28 @@ export const useTripManager = (): UseTripManagerReturn => {
         name: "Tokyo Adventure",
         destination: "Tokyo, Japan",
         description: "Exploring Japanese culture and cuisine",
-        startDate: new Date(2025, 9, 5),
-        endDate: new Date(2025, 9, 15),
+        startDate: "2025-10-05",
+        endDate: "2025-10-15",
         collaborators: [
           { id: "1", name: mockUsers[0].name, avatar: mockUsers[0].avatar },
+          { id: "4", name: "Dave", avatar: mockUsers[3].avatar },
+          { id: "5", name: "Alex", avatar: mockUsers[4].avatar },
         ],
         savedPlaces: 5
+      },
+      {
+        id: "3",
+        name: "Bali Getaway",
+        destination: "Bali, Indonesia",
+        description: "Beach relaxation and cultural exploration",
+        startDate: "2025-12-10",
+        endDate: "2025-12-20",
+        collaborators: [
+          { id: "1", name: mockUsers[0].name, avatar: mockUsers[0].avatar },
+          { id: "6", name: "Emma", avatar: mockUsers[5].avatar },
+          { id: "7", name: "Mike", avatar: mockUsers[6].avatar },
+        ],
+        savedPlaces: 6
       }
     ];
   };
@@ -107,8 +119,8 @@ export const useTripManager = (): UseTripManagerReturn => {
       name: tripData.name,
       destination: tripData.destination,
       description: tripData.description,
-      startDate: tripData.dateRange.from,
-      endDate: tripData.dateRange.to,
+      startDate: tripData.dateRange.from.toISOString().split('T')[0],
+      endDate: tripData.dateRange.to.toISOString().split('T')[0],
       collaborators: [
         { id: "1", name: mockUsers[0].name, avatar: mockUsers[0].avatar },
       ],
