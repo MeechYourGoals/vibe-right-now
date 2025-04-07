@@ -17,6 +17,7 @@ const VenueProfile = lazy(() => import("@/pages/VenueProfile"));
 const ProfileBio = lazy(() => import("@/pages/ProfileBio"));
 const UserProfile = lazy(() => import("@/pages/UserProfile"));
 const DataInsights = lazy(() => import("@/pages/DataInsights"));
+const TripDetails = lazy(() => import("@/components/places/TripDetails"));
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
             <Route path="/explore" element={<Explore />} />
             <Route path="/explore/:city" element={<Explore />} />
             <Route path="/my-places" element={<MyPlaces />} />
+            <Route path="/my-places/trip/:tripId" element={<TripDetails />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/points" element={<UserPoints />} />
             <Route path="/pinned" element={<PinnedVibes />} />
