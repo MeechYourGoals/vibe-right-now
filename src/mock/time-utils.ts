@@ -1,5 +1,5 @@
 
-import { Post } from "@/types";
+import { Post, Location } from "@/types";
 import { addMonths, format, subDays, subHours, subMinutes } from "date-fns";
 
 // Generate a time in the recent past (N days ago)

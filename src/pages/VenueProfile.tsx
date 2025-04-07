@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { mockLocations, mockPosts, mockComments } from "@/mock/data";
 import CameraButton from "@/components/CameraButton";
 import Header from "@/components/Header";
-import { Comment, Post } from "@/types";
+import { Comment, Post, Location as VenueLocation } from "@/types"; // Import as VenueLocation to avoid conflicts
 import OpenStreetMap from "@/components/map/OpenStreetMap";
 import { generateBusinessHours } from "@/utils/businessHoursUtils";
 import { 
