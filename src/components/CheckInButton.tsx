@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { 
   Dialog, 
@@ -11,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { Location } from "@/types";
-import { FileUpload, Upload, Check, Loader2 } from "lucide-react";
+import { Upload, Check, Loader2 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Label } from "@/components/ui/label";
 import { calculateDistance } from "@/components/map/common/DistanceCalculator";
@@ -31,7 +30,6 @@ const CheckInButton = ({ venue }: CheckInButtonProps) => {
   const [distance, setDistance] = useState<string | null>(null);
   const [isCheckingLocation, setIsCheckingLocation] = useState(false);
 
-  // Check if user is within 200 feet (approx 0.038 miles) of venue
   useEffect(() => {
     if (userLocation && venue) {
       const distanceStr = calculateDistance(
@@ -42,11 +40,9 @@ const CheckInButton = ({ venue }: CheckInButtonProps) => {
       );
       
       setDistance(distanceStr);
-      // Convert distance string back to number for comparison
       const distanceValue = parseFloat(distanceStr.split(" ")[0]);
       const unit = distanceStr.split(" ")[1];
       
-      // 0.038 miles is approximately 200 feet
       setIsInRange(unit === "mi" && distanceValue <= 0.038);
     }
   }, [userLocation, venue]);
@@ -82,7 +78,6 @@ const CheckInButton = ({ venue }: CheckInButtonProps) => {
   };
 
   const handleUploadReceipt = () => {
-    // Simulate file upload
     setIsUploading(true);
     const interval = setInterval(() => {
       setUploadProgress((prev) => {
@@ -98,20 +93,16 @@ const CheckInButton = ({ venue }: CheckInButtonProps) => {
   };
 
   const handleConfirmCheckIn = () => {
-    // Points calculation: base 10 points, 3x (30 points) if receipt uploaded
     const pointsEarned = hasReceipt ? 30 : 10;
     
     setIsCheckedIn(true);
     setIsOpen(false);
     
-    // Show success toast with points
     toast({
       title: "Checked in successfully!",
       description: `You earned ${pointsEarned} points at ${venue.name}`,
       variant: "default"
     });
-    
-    // In a real app, we would send the check-in data to the server here
   };
 
   return (
@@ -193,7 +184,7 @@ const CheckInButton = ({ venue }: CheckInButtonProps) => {
                     className="w-full" 
                     onClick={handleUploadReceipt}
                   >
-                    <FileUpload className="h-4 w-4 mr-2" />
+                    <Upload className="h-4 w-4 mr-2" />
                     Upload Receipt (3x points)
                   </Button>
                 )}
