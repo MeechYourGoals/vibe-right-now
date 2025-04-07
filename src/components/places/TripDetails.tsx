@@ -10,6 +10,7 @@ import { TripHeader } from "./trip/TripHeader";
 import { TripPlaceCard } from "./trip/TripPlaceCard";
 import { AddPlaceDialog } from "./trip/AddPlaceDialog";
 import { EmptyPlaceState } from "./trip/EmptyPlaceState";
+import { TripCommentsWall } from "./trip/TripCommentsWall";
 import { useTripPlaces } from "./trip/useTripPlaces";
 
 // Mock colors for users
@@ -97,6 +98,13 @@ const TripDetails = () => {
             ))}
           </div>
         )}
+        
+        {/* Trip Comments Wall */}
+        <TripCommentsWall 
+          tripId={tripId} 
+          collaborators={trip.collaborators}
+          userColors={userColors}
+        />
       </div>
     </Layout>
   );

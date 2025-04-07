@@ -30,6 +30,7 @@ function App() {
             <Route path="/explore/:city" element={<Explore />} />
             <Route path="/my-places" element={<MyPlaces />} />
             <Route path="/my-places/trip/:tripId" element={<TripDetails />} />
+            <Route path="/trip/:tripId" element={<TripDetails />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/points" element={<UserPoints />} />
             <Route path="/pinned" element={<PinnedVibes />} />
