@@ -21,6 +21,8 @@ const PostGridItem: React.FC<PostGridItemProps> = ({ post, isVenuePost = false }
     setLiked(!liked);
   };
 
+  const dayOfWeek = new Date(post.timestamp).toLocaleDateString('en-US', { weekday: 'long' });
+
   return (
     <Link 
       to={`/post/${post.id}`} 
@@ -46,18 +48,23 @@ const PostGridItem: React.FC<PostGridItemProps> = ({ post, isVenuePost = false }
         </div>
       )}
       
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
         <div className="absolute bottom-0 left-0 right-0 p-3">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-between gap-2">
             <Avatar className="h-6 w-6 border border-white">
               <AvatarImage src={post.user.avatar} alt={post.user.name} />
               <AvatarFallback>{post.user.name[0]}</AvatarFallback>
             </Avatar>
-            <span className="text-xs font-medium text-white">
-              @{post.user.username}
-              {isVenuePost && <Badge className="ml-1 bg-amber-500 text-[0.6rem]">Venue</Badge>}
-            </span>
+            <div className="flex items-center">
+              {isVenuePost && <Badge className="bg-amber-500 text-[0.6rem] mr-1">Venue</Badge>}
+              <Badge variant="outline" className="text-[0.6rem] bg-black/30 text-white border-white/20">{dayOfWeek}</Badge>
+            </div>
           </div>
+          
+          <p className="mt-1 text-xs text-white line-clamp-2 overflow-hidden">
+            {post.content.slice(0, 60)}{post.content.length > 60 ? '...' : ''}
+          </p>
+          
           <div className="mt-2 flex justify-between items-center">
             <Button 
               variant="ghost" 

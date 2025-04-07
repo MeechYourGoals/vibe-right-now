@@ -10,7 +10,7 @@ export const useChat = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: "Hi there! I'm VeRNon (Vern for short), your Vibe Language Model assistant. I can help you discover venues, events, and answer general questions too. What would you like to know?",
+      text: "Hi there! I'm VeRNon, your Vibe guide. I can help you discover cool places, events happening tonight, or answer questions about specific venues. What are you looking for?",
       sender: 'ai',
       timestamp: new Date()
     }
@@ -29,31 +29,33 @@ export const useChat = () => {
     const attractions = locations.filter(loc => loc.type === "attraction");
     const others = locations.filter(loc => loc.type === "other");
     
-    let response = `Here are some interesting places in ${cityName} from our database:\n\n`;
+    let response = `Here are some places with great vibes in ${cityName} right now:\n\n`;
     
     if (sportVenues.length > 0) {
-      response += `🏟️ **Sports:** ${sportVenues.map(v => `[${v.name}](https://${v.name.toLowerCase().replace(/\s+/g, '')}.com)`).join(", ")}.\n\n`;
+      response += `🏟️ **Sports:** ${sportVenues.map(v => `[${v.name}](/explore?q=${encodeURIComponent(v.name)})`).join(", ")}.\n\n`;
     }
     
     if (bars.length > 0) {
-      response += `🍸 **Nightlife:** ${bars.map(v => `[${v.name}](https://${v.name.toLowerCase().replace(/\s+/g, '')}.com)`).join(", ")}.\n\n`;
+      response += `🍸 **Nightlife:** ${bars.map(v => `[${v.name}](/explore?q=${encodeURIComponent(v.name)})`).join(", ")}.\n\n`;
     }
     
     if (restaurants.length > 0) {
-      response += `🍽️ **Dining:** ${restaurants.map(v => `[${v.name}](https://${v.name.toLowerCase().replace(/\s+/g, '')}.com)`).join(", ")}.\n\n`;
+      response += `🍽️ **Dining:** ${restaurants.map(v => `[${v.name}](/explore?q=${encodeURIComponent(v.name)})`).join(", ")}.\n\n`;
     }
     
     if (events.length > 0) {
-      response += `🎭 **Events:** ${events.map(v => `[${v.name}](https://ticketmaster.com/event/${v.id})`).join(", ")}.\n\n`;
+      response += `🎭 **Events:** ${events.map(v => `[${v.name}](/explore?q=${encodeURIComponent(v.name)})`).join(", ")}.\n\n`;
     }
     
     if (attractions.length > 0) {
-      response += `🏛️ **Attractions:** ${attractions.map(v => `[${v.name}](https://${v.name.toLowerCase().replace(/\s+/g, '')}.com)`).join(", ")}.\n\n`;
+      response += `🏛️ **Attractions:** ${attractions.map(v => `[${v.name}](/explore?q=${encodeURIComponent(v.name)})`).join(", ")}.\n\n`;
     }
     
     if (others.length > 0) {
-      response += `🏋️ **Other Activities:** ${others.map(v => `[${v.name}](https://${v.name.toLowerCase().replace(/\s+/g, '')}.com)`).join(", ")}.\n\n`;
+      response += `🏋️ **Other Activities:** ${others.map(v => `[${v.name}](/explore?q=${encodeURIComponent(v.name)})`).join(", ")}.\n\n`;
     }
+    
+    response += "Each place has recent vibes posted by users who are there right now. Click on any venue to see what it's really like tonight!";
     
     return response;
   };
@@ -118,8 +120,13 @@ export const useChat = () => {
           // Update trending locations with these events
           updateTrendingLocations(cityInfo.name, getTrendingLocationsForCity(cityInfo.name));
           
-          // Send the search response but also add local venue data
-          const combinedResponse = `${responseText}\n\n**Local Venues in our Database:**\n${generateLocationResponse(cityInfo.name, cityLocations)}`;
+          // Create a personable response
+          let combinedResponse = responseText;
+          
+          // If the response already includes venue information, don't add duplicate data
+          if (!responseText.includes("**Nightlife**") && !responseText.includes("**Restaurants**")) {
+            combinedResponse = `${responseText}\n\n${generateLocationResponse(cityInfo.name, cityLocations)}`;
+          }
           
           const aiMessage: Message = {
             id: (Date.now() + 1).toString(),
@@ -156,7 +163,7 @@ export const useChat = () => {
       
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: "I'm having trouble finding that information right now. Could you try again in a moment?",
+        text: "I'm having trouble finding that information right now. Could you try asking your question again?",
         sender: 'ai',
         timestamp: new Date()
       };

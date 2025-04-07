@@ -51,7 +51,7 @@ const DayOfWeekFilter: React.FC<DayOfWeekFilterProps> = ({
             variant={selectedDays.includes(day.value) ? "default" : "outline"}
             size="sm"
             onClick={() => onDayToggle(day.value)}
-            className={selectedDays.includes(day.value) ? "bg-primary" : ""}
+            className={`${selectedDays.includes(day.value) ? "bg-primary" : ""} transition-colors`}
           >
             {day.name.substring(0, 3)}
           </Button>
