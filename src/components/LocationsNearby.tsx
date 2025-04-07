@@ -45,7 +45,7 @@ const LocationsNearby = () => {
   
   const handleLocationSelect = (location: Location) => {
     setSelectedLocation(location);
-    // Navigate to location page
+    // Navigate to venue page
     navigate(`/venue/${location.id}`);
   };
   
@@ -118,10 +118,12 @@ const LocationsNearby = () => {
                     {location.city}, {location.state || location.country}
                   </div>
                 </div>
-                <Button variant="outline" size="sm" asChild>
-                  <a href={`/venue/${location.id}`}>
-                    View Vibes
-                  </a>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => navigate(`/venue/${location.id}`)}
+                >
+                  View Vibes
                 </Button>
               </div>
             ))}
@@ -129,12 +131,10 @@ const LocationsNearby = () => {
           <Button 
             variant="link" 
             className="mt-4 p-0 h-auto text-primary flex items-center" 
-            asChild
+            onClick={() => navigate('/explore')}
           >
-            <a href="/explore">
-              <span>Explore all locations</span>
-              <ArrowRight className="h-4 w-4 ml-1" />
-            </a>
+            <span>Explore all locations</span>
+            <ArrowRight className="h-4 w-4 ml-1" />
           </Button>
         </CardContent>
       </Card>

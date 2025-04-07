@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Map, X, ChevronDown, User, Building, CalendarDays, MapPin, Star } from "lucide-react";
@@ -36,10 +37,10 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
   const [searchCategory, setSearchCategory] = useState("all");
   const [showUserSuggestions, setShowUserSuggestions] = useState(false);
   const [showPlaceSuggestions, setShowPlaceSuggestions] = useState(false);
-  
-  // Add new state for city suggestions
   const [citySuggestions, setCitySuggestions] = useState<string[]>([]);
   const [showCitySuggestions, setShowCitySuggestions] = useState(false);
+  
+  const location = useLocation();
 
   const filters = [
     "Restaurants",
@@ -53,25 +54,31 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
     "Ticketed Events"
   ];
 
-  // Sample users to display in the dropdown
   const suggestedUsers = mockUsers.slice(0, 5);
   
-  // Featured premium places to display in the dropdown
   const premiumPlaces = mockLocations
     .filter(location => location.verified)
     .slice(0, 5)
     .map(location => ({
       ...location,
-      isPremium: true // Mark these locations as premium for styling
+      isPremium: true
     }));
     
-  // Get all city names from cityCoordinates
   const allCities = Object.values(cityCoordinates).map(city => 
     `${city.name}${city.state ? `, ${city.state}` : ''}, ${city.country}`
   );
 
   useEffect(() => {
-    // Show user suggestions when "users" tab is selected and hide when another tab is selected
+    const params = new URLSearchParams(location.search);
+    const q = params.get('q');
+    
+    if (q) {
+      setSearchQuery(q);
+      setSearchCategory("places");
+    }
+  }, [location.search]);
+
+  useEffect(() => {
     if (searchCategory === "users") {
       setShowUserSuggestions(true);
       setShowPlaceSuggestions(false);
@@ -104,7 +111,6 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
 
   const handleCategoryChange = (category: string) => {
     setSearchCategory(category);
-    // Auto-search when changing between all/places/users tabs
     onSearch(searchQuery, selectedFilter, category);
   };
 
@@ -120,16 +126,14 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
     onSearch(placeName, selectedFilter, searchCategory);
   };
   
-  // Function to handle city autocomplete
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchQuery(value);
     
-    // Only show city suggestions if we're in the places tab
     if (searchCategory === 'places' && value.length > 1) {
       const filtered = allCities.filter(city => 
         city.toLowerCase().includes(value.toLowerCase())
-      ).slice(0, 5); // Limit to 5 suggestions
+      ).slice(0, 5);
       
       setCitySuggestions(filtered);
       setShowCitySuggestions(filtered.length > 0);
@@ -138,7 +142,6 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
     }
   };
   
-  // Function to handle selection of a city suggestion
   const handleCitySelect = (city: string) => {
     setSearchQuery(city);
     setCitySuggestions([]);
@@ -146,7 +149,6 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
     onSearch(city, selectedFilter, searchCategory);
   };
 
-  // Function to handle clicks on the input field
   const handleInputClick = () => {
     if (searchCategory === "users") {
       setShowUserSuggestions(true);
@@ -214,7 +216,6 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
         </div>
       </div>
 
-      {/* City Suggestions Dropdown */}
       <Collapsible open={showCitySuggestions && searchCategory === "places"} className="w-full">
         <CollapsibleContent className="overflow-hidden">
           <Card className="mt-1 w-full p-2 shadow-md border border-border">
@@ -239,7 +240,6 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
         </CollapsibleContent>
       </Collapsible>
 
-      {/* User Suggestions Dropdown */}
       <Collapsible open={showUserSuggestions && searchCategory === "users"} className="w-full">
         <CollapsibleContent className="overflow-hidden">
           <Card className="mt-1 w-full p-2 shadow-md border border-border">
@@ -266,7 +266,6 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
         </CollapsibleContent>
       </Collapsible>
 
-      {/* Places Suggestions Dropdown - Premium Venues */}
       <Collapsible open={showPlaceSuggestions && searchCategory === "places"} className="w-full">
         <CollapsibleContent className="overflow-hidden">
           <Card className="mt-1 w-full p-2 shadow-md border border-border">

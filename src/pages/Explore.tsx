@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import { mockLocations } from "@/mock/data";
 import { Card, CardContent } from "@/components/ui/card";
@@ -123,6 +123,27 @@ const Explore = () => {
   const [filteredLocations, setFilteredLocations] = useState(mockLocations);
   const [locationTags, setLocationTags] = useState<Record<string, string[]>>({});
   
+  const location = useLocation();
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const q = params.get('q');
+    
+    if (q) {
+      setSearchQuery(q);
+      
+      const parts = q.split(',');
+      const city = parts[0].trim();
+      const state = parts.length > 1 ? parts[1].trim() : "";
+      
+      setSearchedCity(city);
+      setSearchedState(state);
+      
+      handleSearch(q, "All", "places");
+    }
+  }, [location.search]);
+  
   useEffect(() => {
     const tagsMap: Record<string, string[]> = {};
     mockLocations.forEach(location => {
@@ -175,6 +196,12 @@ const Explore = () => {
     }
     
     setFilteredLocations(results);
+    
+    if (query) {
+      navigate(`/explore?q=${encodeURIComponent(query)}`, { replace: true });
+    } else {
+      navigate('/explore', { replace: true });
+    }
   };
 
   const handleTabChange = (value: string) => {

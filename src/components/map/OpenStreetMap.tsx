@@ -14,9 +14,9 @@ interface OpenStreetMapProps {
   searchedCity: string;
   mapStyle: "default" | "terrain" | "satellite";
   onLocationSelect: (location: Location) => void;
-  selectedLocation?: Location | null; // Make optional
+  selectedLocation?: Location | null;
   showDistances?: boolean;
-  userAddressLocation?: [number, number] | null; // Make optional
+  userAddressLocation?: [number, number] | null;
   showAllCities?: boolean;
 }
 
@@ -76,7 +76,7 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
   if (mapStyle === 'terrain') {
     tileLayerUrl = 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png';
   } else if (mapStyle === 'satellite') {
-    tileLayerUrl = 'https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}';
+    tileLayerUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
   }
 
   // Custom icon for the user's location
@@ -125,7 +125,7 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
 
       {/* Show city markers if showAllCities is true and no specific city is searched */}
       {showAllCities && !searchedCity && (
-        <CityMarkers onCitySelect={(cityName) => console.log(`City selected: ${cityName}`)} />
+        <CityMarkers />
       )}
 
       {/* User location marker */}
@@ -173,6 +173,13 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
                 <h3>{location.name}</h3>
                 <p>{location.address}, {location.city}</p>
                 {distance !== null && <p>Distance: {distance.toFixed(2)} miles</p>}
+                <Button
+                  size="sm"
+                  className="mt-2 w-full"
+                  onClick={() => window.location.href = `/venue/${location.id}`}
+                >
+                  View Venue
+                </Button>
               </div>
             </Popup>
           </Marker>

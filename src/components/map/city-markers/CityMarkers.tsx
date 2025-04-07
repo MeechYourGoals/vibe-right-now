@@ -26,10 +26,10 @@ const CityMarkers: React.FC<CityMarkersProps> = ({ onCitySelect }) => {
   const handleCityClick = (cityName: string) => {
     if (onCitySelect) {
       onCitySelect(cityName);
-    } else {
-      // Navigate to explore page with city as query param
-      navigate(`/explore?q=${encodeURIComponent(cityName)}`);
     }
+    
+    // Navigate to explore page with city as query param
+    navigate(`/explore?q=${encodeURIComponent(cityName)}`);
   };
   
   return (
