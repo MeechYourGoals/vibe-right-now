@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { mockUsers } from "@/mock/data";
+import { DateRange } from "react-day-picker";
 
 interface Trip {
   id: string;
@@ -66,10 +67,7 @@ const TripsList: React.FC = () => {
   const [newTripName, setNewTripName] = useState("");
   const [newTripDestination, setNewTripDestination] = useState("");
   const [newTripDescription, setNewTripDescription] = useState("");
-  const [dateRange, setDateRange] = useState<{
-    from: Date | undefined;
-    to: Date | undefined;
-  }>({
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: undefined,
     to: undefined,
   });
@@ -78,7 +76,7 @@ const TripsList: React.FC = () => {
   const [inviteEmail, setInviteEmail] = useState("");
   
   const handleCreateTrip = () => {
-    if (!newTripName || !newTripDestination || !dateRange.from || !dateRange.to) {
+    if (!newTripName || !newTripDestination || !dateRange?.from || !dateRange?.to) {
       toast.error("Please fill in all required fields");
       return;
     }
@@ -187,11 +185,11 @@ const TripsList: React.FC = () => {
                       variant="outline"
                       className={cn(
                         "w-full justify-start text-left font-normal",
-                        !dateRange.from && "text-muted-foreground"
+                        !dateRange?.from && "text-muted-foreground"
                       )}
                     >
                       <Calendar className="mr-2 h-4 w-4" />
-                      {dateRange.from ? (
+                      {dateRange?.from ? (
                         dateRange.to ? (
                           <>
                             {format(dateRange.from, "LLL dd, y")} - {format(dateRange.to, "LLL dd, y")}
