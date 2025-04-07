@@ -4,6 +4,7 @@ export interface User {
   username: string;
   name: string;
   avatar: string;
+  points?: number;
 }
 
 export interface BusinessHours {
@@ -55,4 +56,25 @@ export interface Comment {
   content: string;
   timestamp: string;
   vibedHere: boolean;
+}
+
+export interface CheckIn {
+  id: string;
+  userId: string;
+  locationId: string;
+  timestamp: string;
+  receiptUploaded: boolean;
+  pointsEarned: number;
+}
+
+export interface VenueInsights {
+  visitorCount: number;
+  checkInCount: number;
+  receiptUploads: number;
+  discountRedemptions: number;
+  mediaUploads: {
+    photos: number;
+    videos: number;
+  };
+  impressions: number;
 }

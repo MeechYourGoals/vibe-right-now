@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
@@ -22,8 +21,8 @@ import MapboxMap from "@/components/map/MapboxMap";
 import OpenStreetMap from "@/components/map/OpenStreetMap";
 import BusinessHours from "@/components/BusinessHours";
 import { generateBusinessHours } from "@/utils/businessHoursUtils";
+import CheckInButton from "@/components/CheckInButton";
 
-// Function to get official ticket URL
 const getOfficialTicketUrl = (venueId: string) => {
   const ticketUrls: Record<string, string> = {
     "30": "https://www.axs.com/events/crypto-com-arena",
@@ -46,7 +45,6 @@ const VenueProfile = () => {
   
   const venue = mockLocations.find(location => location.id === id);
   
-  // Ensure venue has hours
   if (venue && !venue.hours) {
     venue.hours = generateBusinessHours(venue);
   }
@@ -84,7 +82,7 @@ const VenueProfile = () => {
     }, 10);
   };
   
-  const getVenueContent = (venue: VenueLocation, isFirstPost: boolean): { content: string, mediaUrl: string } => {
+  const getVenueContent = (venue: VenueLocation, isFirstPost: boolean) => {
     let content = "";
     let mediaUrl = "";
     
@@ -227,7 +225,6 @@ const VenueProfile = () => {
                     <Badge variant="outline" className="bg-primary/20">Open Now</Badge>
                   </div>
                   
-                  {/* Add Business Hours component */}
                   <BusinessHours venue={venue} />
                 </div>
               </div>
@@ -241,7 +238,9 @@ const VenueProfile = () => {
                   <PlusCircle className="h-4 w-4 mr-2" />
                   {isFollowing ? "Following" : "Follow"}
                 </Button>
-                <Button variant="default" className="bg-gradient-vibe">Check In</Button>
+                
+                <CheckInButton venue={venue} />
+                
                 {venue.type === "sports" && officialTicketUrl && (
                   <a 
                     href={officialTicketUrl} 

@@ -15,6 +15,7 @@ const PinnedVibes = lazy(() => import("@/pages/PinnedVibes"));
 const VenueProfile = lazy(() => import("@/pages/VenueProfile"));
 const ProfileBio = lazy(() => import("@/pages/ProfileBio"));
 const UserProfile = lazy(() => import("@/pages/UserProfile"));
+const DataInsights = lazy(() => import("@/pages/DataInsights"));
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
             <Route path="/venue/:id" element={<VenueProfile />} />
             <Route path="/profile" element={<ProfileBio />} />
             <Route path="/user/:username" element={<UserProfile />} />
+            <Route path="/data-insights" element={<DataInsights />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
