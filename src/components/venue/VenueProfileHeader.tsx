@@ -1,118 +1,101 @@
 
-import React, { useState } from 'react';
-import { MapPin, VerifiedIcon, Map, ExternalLink } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Building, MapPin, Phone, Globe, Clock, StarIcon, VerifiedIcon, DollarSign } from "lucide-react";
+import { Location } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Location } from "@/types";
-import BusinessHours from "@/components/BusinessHours";
-import CheckInButton from "@/components/CheckInButton";
-import { toast } from "@/hooks/use-toast";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 
 interface VenueProfileHeaderProps {
   venue: Location;
   onMapExpand: () => void;
 }
 
-const getOfficialTicketUrl = (venueId: string) => {
-  const ticketUrls: Record<string, string> = {
-    "30": "https://www.axs.com/events/crypto-com-arena",
-    "31": "https://www.therams.com/tickets/",
-    "32": "https://www.mlb.com/dodgers/tickets",
-    "33": "https://www.lagalaxy.com/tickets/",
-    "34": "https://www.vbusa.org/tickets",
-    "35": "https://wmphoenixopen.com/tickets/",
-  };
+// Function to determine price tier (1-4) based on venue properties
+const getPriceTier = (venue: Location): number => {
+  // In a real app, this would be part of the venue data
+  // For now, let's create a simple algorithm based on the venue type and other properties
+  const basePrice = {
+    restaurant: 2,
+    bar: 2,
+    event: 3,
+    attraction: 2,
+    sports: 3,
+    other: 2
+  }[venue.type] || 2;
   
-  return ticketUrls[venueId] || "";
+  // Randomize slightly based on venue id to make it look more natural
+  const idSum = venue.id.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
+  let adjustment = (idSum % 3) - 1; // -1, 0, or 1
+  
+  // Ensure price is between 1 and 4
+  return Math.max(1, Math.min(4, basePrice + adjustment));
 };
 
-const VenueProfileHeader: React.FC<VenueProfileHeaderProps> = ({ venue, onMapExpand }) => {
-  const [isFollowing, setIsFollowing] = useState(false);
-  
-  const handleFollowToggle = () => {
-    setIsFollowing(!isFollowing);
-    
-    if (isFollowing) {
-      toast({
-        title: "Unfollowed",
-        description: `You are no longer following ${venue.name}`,
-      });
-    } else {
-      toast({
-        title: "Following!",
-        description: `You are now following ${venue.name}`,
-      });
-    }
-  };
-  
-  const officialTicketUrl = venue.type === "sports" ? getOfficialTicketUrl(venue.id) : "";
-
+// Function to render dollar signs based on price tier
+const renderPriceTier = (tier: number) => {
+  const dollars = Array(tier).fill('$').join('');
   return (
-    <div className="flex items-start justify-between">
-      <div className="flex items-center gap-4">
-        <Avatar className="h-16 w-16 border-2 border-primary">
-          <AvatarImage src={`https://source.unsplash.com/random/200x200/?${venue.type}`} alt={venue.name} />
-          <AvatarFallback>{venue.name[0]}</AvatarFallback>
-        </Avatar>
+    <span className="flex items-center">
+      <span className={`font-semibold ${tier > 2 ? 'text-amber-500' : 'text-green-600'}`}>{dollars}</span>
+      <span className="text-muted-foreground ml-1">
+        {Array(4 - tier).fill('$').join('')}
+      </span>
+    </span>
+  );
+};
+
+const VenueProfileHeader = ({ venue, onMapExpand }: VenueProfileHeaderProps) => {
+  const priceTier = getPriceTier(venue);
+  
+  return (
+    <div className="mb-4">
+      <div className="flex justify-between items-start">
+        <h1 className="text-2xl md:text-3xl font-bold flex items-center">
+          {venue.name}
+          {venue.verified && (
+            <VerifiedIcon className="h-5 w-5 ml-2 text-primary" />
+          )}
+        </h1>
         
-        <div>
-          <h1 className="text-2xl font-bold flex items-center">
-            {venue.name}
-            {venue.verified && (
-              <VerifiedIcon className="h-5 w-5 ml-2 text-primary" />
-            )}
-          </h1>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-            <MapPin className="h-4 w-4" />
-            <span>{venue.address}, {venue.city}, {venue.state}</span>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="h-6 p-0 hover:bg-transparent hover:text-primary"
-              onClick={onMapExpand}
-            >
-              <Map className="h-4 w-4" />
-              <span className="ml-1 text-xs">View Map</span>
-            </Button>
+        <div className="flex flex-col items-end">
+          <div className="flex gap-2 mb-1">
+            <Badge variant="outline" className="capitalize">{venue.type}</Badge>
+            <HoverCard>
+              <HoverCardTrigger asChild>
+                <div className="cursor-help">{renderPriceTier(priceTier)}</div>
+              </HoverCardTrigger>
+              <HoverCardContent className="w-auto p-2">
+                <p className="text-sm">Price level: {priceTier}/4</p>
+              </HoverCardContent>
+            </HoverCard>
           </div>
-          <div className="flex flex-wrap gap-2 mt-2">
-            <Badge variant="outline" className="bg-muted/30">{venue.type}</Badge>
-            <Badge variant="outline" className="bg-primary/20">Open Now</Badge>
+          <div className="flex items-center text-sm text-muted-foreground">
+            <MapPin className="h-4 w-4 mr-1" />
+            <span>
+              {venue.address}, {venue.city}, {venue.state}
+            </span>
           </div>
-          
-          <BusinessHours venue={venue} />
         </div>
       </div>
       
-      <div className="flex flex-col items-end gap-2">
-        <Button 
-          variant={isFollowing ? "default" : "outline"}
-          onClick={handleFollowToggle}
-          className={isFollowing ? "bg-primary" : ""}
-        >
-          {isFollowing ? "Following" : "Follow"}
+      <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-2">
+        <Button variant="outline" className="flex justify-start">
+          <Phone className="h-4 w-4 mr-2" /> Call Venue
         </Button>
-        
-        <CheckInButton venue={venue} />
-        
-        {venue.type === "sports" && officialTicketUrl && (
-          <a 
-            href={officialTicketUrl} 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className="mt-2"
-          >
-            <Button 
-              variant="outline" 
-              className="bg-amber-500/20 text-amber-500 border-amber-500/50 hover:bg-amber-500/30"
-            >
-              <ExternalLink className="h-4 w-4 mr-2" />
-              Buy Tickets Direct
-            </Button>
-          </a>
-        )}
+        <Button variant="outline" className="flex justify-start">
+          <Globe className="h-4 w-4 mr-2" /> Website
+        </Button>
+        <Button variant="outline" className="flex justify-start">
+          <Clock className="h-4 w-4 mr-2" /> View Hours
+        </Button>
+        <Button variant="outline" className="flex justify-start" onClick={onMapExpand}>
+          <MapPin className="h-4 w-4 mr-2" /> Directions
+        </Button>
       </div>
+
+      {venue.hours && venue.hours.isOpen24Hours && (
+        <Badge className="mt-2 bg-green-500 hover:bg-green-600">Open 24 Hours</Badge>
+      )}
     </div>
   );
 };

@@ -1,5 +1,5 @@
 
-import { Zap, Lightbulb, BarChart } from "lucide-react";
+import { Zap, Lightbulb, BarChart, Award } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -51,10 +51,10 @@ const AiMarketerSuggestions = () => {
           
           <div className="p-3 bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800/30 rounded-lg">
             <div className="flex justify-between items-start mb-1">
-              <h4 className="font-medium text-purple-800 dark:text-purple-300">Customer Retention</h4>
+              <h4 className="font-medium text-purple-800 dark:text-purple-300">Brand Awareness</h4>
               <Badge variant="outline" className="bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300">Critical</Badge>
             </div>
-            <p className="text-sm text-purple-700 dark:text-purple-400">Only 22% of customers return within 30 days. Implement a loyalty program to increase repeat business.</p>
+            <p className="text-sm text-purple-700 dark:text-purple-400">Your iconic Pink Flamingo mascot appears in 45% of visitor photos. Consider featuring it more prominently in your branding and merchandise.</p>
             <div className="mt-2 flex justify-end">
               <Button variant="outline" size="sm" className="text-xs h-7 px-2">Implement</Button>
             </div>

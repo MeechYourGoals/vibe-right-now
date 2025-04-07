@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useToast } from "@/hooks/use-toast";
-import { Car, MapPin, User, Shield, Ticket, Tag, UserCheck, BellRing, Bell, Fingerprint, EyeOff, Eye, Lock, Store } from "lucide-react";
+import { Car, MapPin, User, Shield, Ticket, Tag, UserCheck, BellRing, Bell, Fingerprint, EyeOff, Eye, Lock, Store, HeartHandshake, Users, Building, Briefcase, Moon } from "lucide-react";
 
 const PREFERENCE_TAGS = [
   "Cozy", "High Energy", "Locally Owned", "Clubs", "Lounges", 
@@ -19,7 +19,9 @@ const PREFERENCE_TAGS = [
   "Family Friendly", "Date Night", "Physical Adventure", 
   "Differently Abled Accessible", "Fine Dining", "Casual", 
   "Budget Friendly", "Luxury", "Pet Friendly", "Live Music",
-  "Art", "Theater", "Shopping", "Sightseeing", "Historic"
+  "Art", "Theater", "Shopping", "Sightseeing", "Historic",
+  "LGBTQ+ Friendly", "Good for Groups", "Tourist Attraction", 
+  "Business Appropriate", "After Hours"
 ];
 
 const TICKETING_PLATFORMS = [
@@ -32,6 +34,14 @@ const TICKETING_PLATFORMS = [
   { name: "Other", id: "other" }
 ];
 
+const PREFERENCE_CATEGORIES = [
+  { name: "LGBTQ+ Friendly", icon: HeartHandshake, id: "lgbtq" },
+  { name: "Good for Groups", icon: Users, id: "groups" },
+  { name: "Tourist Attraction", icon: Building, id: "tourist" },
+  { name: "Business Appropriate", icon: Briefcase, id: "business" },
+  { name: "After Hours", icon: Moon, id: "after-hours" },
+];
+
 const Settings = () => {
   const { toast } = useToast();
   const [selectedPreferences, setSelectedPreferences] = useState<string[]>([]);
@@ -40,6 +50,13 @@ const Settings = () => {
   const [defaultRideService, setDefaultRideService] = useState<string>("uber");
   const [activeTab, setActiveTab] = useState("preferences");
   const [otherPlatform, setOtherPlatform] = useState("");
+  const [categoryPreferences, setCategoryPreferences] = useState<Record<string, boolean>>({
+    lgbtq: false,
+    groups: false,
+    tourist: false,
+    business: false,
+    'after-hours': false
+  });
 
   const handleSaveSettings = () => {
     toast({
@@ -58,6 +75,13 @@ const Settings = () => {
 
   const handlePreferenceToggle = (value: string[]) => {
     setSelectedPreferences(value);
+  };
+
+  const handleCategoryToggle = (category: string) => {
+    setCategoryPreferences(prev => ({
+      ...prev,
+      [category]: !prev[category]
+    }));
   };
 
   return (
@@ -119,6 +143,26 @@ const Settings = () => {
                     ))}
                   </ToggleGroup>
                 </div>
+                
+                <div className="mb-6">
+                  <h3 className="font-medium mb-3">Venue Categories</h3>
+                  <div className="space-y-3">
+                    {PREFERENCE_CATEGORIES.map(category => (
+                      <div key={category.id} className="flex items-center justify-between">
+                        <div className="flex items-center">
+                          <category.icon className="h-4 w-4 mr-2" />
+                          <Label htmlFor={`category-${category.id}`}>{category.name}</Label>
+                        </div>
+                        <Switch 
+                          id={`category-${category.id}`}
+                          checked={categoryPreferences[category.id]}
+                          onCheckedChange={() => handleCategoryToggle(category.id)}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
                 <Button onClick={handleSaveSettings}>Save Preferences</Button>
               </CardContent>
             </Card>

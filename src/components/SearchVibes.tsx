@@ -61,7 +61,7 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
     .slice(0, 5)
     .map(location => ({
       ...location,
-      isPremium: true
+      isPremium: Math.random() > 0.4
     }));
     
   const allCities = Object.values(cityCoordinates).map(city => 
@@ -271,28 +271,25 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
           <Card className="mt-1 w-full p-2 shadow-md border border-border">
             <div className="space-y-1">
               <p className="text-xs text-muted-foreground px-2 py-1 flex items-center">
-                Premium Venues <Star className="h-3 w-3 text-amber-500 ml-1 fill-amber-500" />
+                Featured Venues <Star className="h-3 w-3 text-amber-500 ml-1 fill-amber-500" />
               </p>
               {premiumPlaces.map((place) => (
                 <div 
                   key={place.id} 
-                  className="flex items-center gap-2 p-2 hover:bg-amber-100/10 rounded-md cursor-pointer bg-amber-500/20 border border-amber-500/30 my-1"
+                  className={`flex items-center gap-2 p-2 hover:bg-muted rounded-md cursor-pointer my-1 ${place.isPremium ? 'bg-amber-500/10 border border-amber-500/30' : ''}`}
                   onClick={() => handlePlaceSelect(place.name)}
                 >
-                  <div className="h-8 w-8 flex items-center justify-center rounded-md bg-amber-500/30">
-                    <MapPin className="h-4 w-4 text-amber-500" />
+                  <div className={`h-8 w-8 flex items-center justify-center rounded-md ${place.isPremium ? 'bg-amber-500/20' : 'bg-primary/10'}`}>
+                    <MapPin className={`h-4 w-4 ${place.isPremium ? 'text-amber-500' : 'text-primary'}`} />
                   </div>
                   <div className="flex flex-col flex-1">
                     <span className="text-sm font-medium flex items-center">
                       {place.name}
-                      <Star className="h-3 w-3 text-amber-500 ml-1 fill-amber-500" />
+                      {place.isPremium && <Star className="h-3 w-3 text-amber-500 ml-1 fill-amber-500" />}
                     </span>
                     <span className="text-xs text-muted-foreground">
                       {place.city}, {place.state}
                     </span>
-                  </div>
-                  <div className="text-xs px-1.5 py-0.5 rounded bg-amber-500/30 text-amber-500 font-medium">
-                    Premium
                   </div>
                 </div>
               ))}
