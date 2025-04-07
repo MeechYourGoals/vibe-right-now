@@ -4,6 +4,8 @@ import { mockPosts, mockComments } from "@/mock/data";
 import PostCard from "@/components/PostCard";
 import SearchVibes from "@/components/SearchVibes";
 import { Post } from "@/types";
+import { isWithinThreeMonths } from "@/mock/time-utils";
+import { Badge } from "@/components/ui/badge";
 
 const PostFeed = () => {
   const [filter, setFilter] = useState("all");
@@ -18,22 +20,29 @@ const PostFeed = () => {
     }
   };
 
-  const filteredPosts = mockPosts.filter((post) => {
-    if (filter !== "all" && post.location.type !== filter) {
-      return false;
-    }
-    
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      return (
-        post.location.name.toLowerCase().includes(query) ||
-        post.location.city.toLowerCase().includes(query) ||
-        post.content.toLowerCase().includes(query)
-      );
-    }
-    
-    return true;
-  });
+  // First, filter posts to only show those from the past 3 months
+  const recentPosts = useMemo(() => {
+    return mockPosts.filter(post => isWithinThreeMonths(post.timestamp));
+  }, []);
+
+  const filteredPosts = useMemo(() => {
+    return recentPosts.filter((post) => {
+      if (filter !== "all" && post.location.type !== filter) {
+        return false;
+      }
+      
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        return (
+          post.location.name.toLowerCase().includes(query) ||
+          post.location.city.toLowerCase().includes(query) ||
+          post.content.toLowerCase().includes(query)
+        );
+      }
+      
+      return true;
+    });
+  }, [recentPosts, filter, searchQuery]);
 
   // Group posts by location
   const postsGroupedByLocation = useMemo(() => {
@@ -57,7 +66,7 @@ const PostFeed = () => {
     return groupedPosts;
   }, [filteredPosts]);
 
-  // Calculate the number of posts per location in the last 24 hours
+  // Calculate the number of posts per location
   // For demo purposes, add variation to the counts
   const locationPostCounts = (() => {
     const counts: Record<string, number> = {};
@@ -102,7 +111,10 @@ const PostFeed = () => {
 
   return (
     <div className="max-w-3xl mx-auto">
-      <SearchVibes onSearch={handleSearch} />
+      <div className="flex items-center justify-between mb-4">
+        <SearchVibes onSearch={handleSearch} />
+        <Badge variant="outline" className="bg-muted/30">Posts from last 3 months</Badge>
+      </div>
 
       <div className="p-4 space-y-4">
         {Object.keys(postsGroupedByLocation).length > 0 ? (

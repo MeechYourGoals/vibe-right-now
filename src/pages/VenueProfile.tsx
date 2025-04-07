@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Link, useParams } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,7 +8,8 @@ import { mockLocations, mockPosts } from "@/mock/data";
 import { Badge } from "@/components/ui/badge";
 import { 
   MapPin, VerifiedIcon, Clock, ExternalLink, Grid2X2, 
-  ListIcon, PlusCircle, Heart, Map, Maximize, Minimize
+  ListIcon, PlusCircle, Heart, Map, Maximize, Minimize,
+  CalendarDays
 } from "lucide-react";
 import PostCard from "@/components/PostCard";
 import VenuePost from "@/components/VenuePost";
@@ -22,6 +23,17 @@ import OpenStreetMap from "@/components/map/OpenStreetMap";
 import BusinessHours from "@/components/BusinessHours";
 import { generateBusinessHours } from "@/utils/businessHoursUtils";
 import CheckInButton from "@/components/CheckInButton";
+import { isPostFromDayOfWeek, isWithinThreeMonths } from "@/mock/time-utils";
+
+const DAYS_OF_WEEK = [
+  { name: "Sunday", value: 0 },
+  { name: "Monday", value: 1 },
+  { name: "Tuesday", value: 2 },
+  { name: "Wednesday", value: 3 },
+  { name: "Thursday", value: 4 },
+  { name: "Friday", value: 5 },
+  { name: "Saturday", value: 6 },
+];
 
 const getOfficialTicketUrl = (venueId: string) => {
   const ticketUrls: Record<string, string> = {
@@ -38,10 +50,11 @@ const getOfficialTicketUrl = (venueId: string) => {
 
 const VenueProfile = () => {
   const { id } = useParams<{ id: string }>();
-  const [activeTab, setActiveTab] = useState("ugv");
+  const [activeTab, setActiveTab] = useState("all");
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [isFollowing, setIsFollowing] = useState(false);
   const [isMapExpanded, setIsMapExpanded] = useState(false);
+  const [selectedDays, setSelectedDays] = useState<number[]>([]);
   
   const venue = mockLocations.find(location => location.id === id);
   
@@ -49,7 +62,75 @@ const VenueProfile = () => {
     venue.hours = generateBusinessHours(venue);
   }
   
-  const venuePosts = mockPosts.filter(post => post.location.id === id);
+  const venuePosts = useMemo(() => {
+    return mockPosts.filter(post => 
+      post.location.id === id && 
+      isWithinThreeMonths(post.timestamp)
+    );
+  }, [id]);
+
+  const generatedVenuePosts = useMemo(() => {
+    if (!venue) return [];
+    
+    const firstVenuePost = {
+      content: getVenueContent(venue, true).content,
+      media: { type: "image", url: getVenueContent(venue, true).mediaUrl } as any,
+      timestamp: new Date().toISOString(),
+      isVenuePost: true,
+    };
+    
+    const secondVenuePost = {
+      content: getVenueContent(venue, false).content,
+      media: { type: "image", url: getVenueContent(venue, false).mediaUrl } as any,
+      timestamp: new Date(Date.now() - 3600000 * 6).toISOString(),
+      isVenuePost: true,
+    };
+    
+    return [firstVenuePost, secondVenuePost];
+  }, [venue]);
+
+  const filteredPosts = useMemo(() => {
+    if (selectedDays.length === 0) {
+      return venuePosts;
+    }
+    
+    return venuePosts.filter(post => 
+      selectedDays.includes(new Date(post.timestamp).getDay())
+    );
+  }, [venuePosts, selectedDays]);
+
+  const allPosts = useMemo(() => {
+    const venuePostsFormatted = generatedVenuePosts.map((post, index) => ({
+      id: `venue-post-${index}`,
+      user: { 
+        id: 'venue',
+        name: venue?.name || 'Venue',
+        username: venue?.name?.toLowerCase().replace(/\s+/g, '') || 'venue',
+        avatar: `https://source.unsplash.com/random/200x200/?${venue?.type}`
+      },
+      location: venue!,
+      content: post.content,
+      media: [post.media],
+      timestamp: post.timestamp,
+      expiresAt: new Date(new Date(post.timestamp).setMonth(new Date(post.timestamp).getMonth() + 3)).toISOString(),
+      likes: Math.floor(Math.random() * 100) + 20,
+      comments: Math.floor(Math.random() * 20),
+      isVenuePost: true,
+    })) as Post[];
+    
+    const filteredVenuePosts = selectedDays.length === 0 
+      ? venuePostsFormatted 
+      : venuePostsFormatted.filter(post => 
+          selectedDays.includes(new Date(post.timestamp).getDay())
+        );
+    
+    const combined = [...filteredPosts, ...filteredVenuePosts].sort((a, b) => 
+      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+    
+    return combined;
+  }, [filteredPosts, venue, generatedVenuePosts, selectedDays]);
+
   const officialTicketUrl = venue?.type === "sports" ? getOfficialTicketUrl(id || "") : "";
 
   const getPostComments = (postId: string): Comment[] => {
@@ -80,6 +161,16 @@ const VenueProfile = () => {
         window.resizeMap();
       }
     }, 10);
+  };
+  
+  const toggleDaySelection = (dayIndex: number) => {
+    setSelectedDays(prev => {
+      if (prev.includes(dayIndex)) {
+        return prev.filter(day => day !== dayIndex);
+      } else {
+        return [...prev, dayIndex];
+      }
+    });
   };
   
   const getVenueContent = (venue: VenueLocation, isFirstPost: boolean) => {
@@ -284,14 +375,49 @@ const VenueProfile = () => {
             </div>
           </div>
           
-          <Tabs defaultValue="ugv" value={activeTab} onValueChange={setActiveTab} className="mb-6">
+          <div className="mb-4">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-medium flex items-center">
+                <CalendarDays className="h-4 w-4 mr-2" />
+                Filter by day of week
+              </h3>
+              
+              {selectedDays.length > 0 && (
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setSelectedDays([])}
+                  className="h-7 px-2 text-xs"
+                >
+                  Clear filters
+                </Button>
+              )}
+            </div>
+            
+            <div className="flex flex-wrap gap-2">
+              {DAYS_OF_WEEK.map((day) => (
+                <Button
+                  key={day.value}
+                  variant={selectedDays.includes(day.value) ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => toggleDaySelection(day.value)}
+                  className={selectedDays.includes(day.value) ? "bg-primary" : ""}
+                >
+                  {day.name.substring(0, 3)}
+                </Button>
+              ))}
+            </div>
+          </div>
+          
+          <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="mb-6">
             <div className="flex justify-between items-center mb-2">
-              <TabsList className="grid grid-cols-2 w-[200px]">
+              <TabsList className="grid grid-cols-3 w-[300px]">
+                <TabsTrigger value="all">All Posts</TabsTrigger>
                 <TabsTrigger value="ugv">User Vibes</TabsTrigger>
                 <TabsTrigger value="vgv">Venue Vibes</TabsTrigger>
               </TabsList>
               
-              {activeTab === "ugv" && (
+              {(activeTab === "ugv" || activeTab === "all") && (
                 <div className="flex gap-2">
                   <Button 
                     variant={viewMode === "list" ? "default" : "outline"} 
@@ -311,17 +437,60 @@ const VenueProfile = () => {
               )}
             </div>
             
+            <TabsContent value="all" className="mt-4 space-y-4">
+              {allPosts.length > 0 ? (
+                viewMode === "list" ? (
+                  <div className="space-y-4">
+                    {allPosts.map((post) => (
+                      post.isVenuePost ? (
+                        <div key={post.id} className="border-2 border-amber-500/50 rounded-lg overflow-hidden">
+                          <VenuePost 
+                            venue={post.location}
+                            content={post.content}
+                            media={post.media[0]}
+                            timestamp={post.timestamp}
+                          />
+                        </div>
+                      ) : (
+                        <PostCard 
+                          key={post.id}
+                          posts={[post]} 
+                          locationPostCount={1}
+                          getComments={getPostComments} 
+                        />
+                      )
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {allPosts.map((post) => (
+                      <PostGridItem 
+                        key={post.id} 
+                        post={post} 
+                        isVenuePost={!!post.isVenuePost} 
+                      />
+                    ))}
+                  </div>
+                )
+              ) : (
+                <div className="text-center py-10">
+                  <h3 className="text-xl font-semibold mb-2">No posts available</h3>
+                  <p className="text-muted-foreground">Try adjusting your filters or check back later!</p>
+                </div>
+              )}
+            </TabsContent>
+            
             <TabsContent value="ugv" className="mt-4 space-y-4">
-              {venuePosts.length > 0 ? (
+              {filteredPosts.length > 0 ? (
                 viewMode === "list" ? (
                   <PostCard 
-                    posts={venuePosts} 
-                    locationPostCount={venuePosts.length}
+                    posts={filteredPosts} 
+                    locationPostCount={filteredPosts.length}
                     getComments={getPostComments} 
                   />
                 ) : (
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {venuePosts.map((post) => (
+                    {filteredPosts.map((post) => (
                       <PostGridItem key={post.id} post={post} />
                     ))}
                   </div>
@@ -336,18 +505,28 @@ const VenueProfile = () => {
             </TabsContent>
             
             <TabsContent value="vgv" className="mt-4 space-y-4">
-              <VenuePost 
-                venue={venue}
-                content={getVenueContent(venue, true).content}
-                media={{ type: "image", url: getVenueContent(venue, true).mediaUrl }}
-                timestamp={new Date().toISOString()}
-              />
-              <VenuePost 
-                venue={venue}
-                content={getVenueContent(venue, false).content}
-                media={{ type: "image", url: getVenueContent(venue, false).mediaUrl }}
-                timestamp={new Date(Date.now() - 3600000 * 6).toISOString()}
-              />
+              {generatedVenuePosts.length > 0 ? (
+                generatedVenuePosts
+                  .filter(post => 
+                    selectedDays.length === 0 || 
+                    selectedDays.includes(new Date(post.timestamp).getDay())
+                  )
+                  .map((post, index) => (
+                    <div key={index} className="border-2 border-amber-500/50 rounded-lg overflow-hidden">
+                      <VenuePost 
+                        venue={venue}
+                        content={post.content}
+                        media={post.media}
+                        timestamp={post.timestamp}
+                      />
+                    </div>
+                  ))
+              ) : (
+                <div className="text-center py-10">
+                  <h3 className="text-xl font-semibold mb-2">No venue posts available</h3>
+                  <p className="text-muted-foreground">Check back later for updates from this venue!</p>
+                </div>
+              )}
             </TabsContent>
           </Tabs>
         </div>
@@ -360,9 +539,10 @@ const VenueProfile = () => {
 
 interface PostGridItemProps {
   post: Post;
+  isVenuePost?: boolean;
 }
 
-const PostGridItem = ({ post }: PostGridItemProps) => {
+const PostGridItem = ({ post, isVenuePost = false }: PostGridItemProps) => {
   const [liked, setLiked] = useState(false);
   
   const handleLike = (e: React.MouseEvent) => {
@@ -371,7 +551,12 @@ const PostGridItem = ({ post }: PostGridItemProps) => {
   };
 
   return (
-    <Link to={`/post/${post.id}`} className="group relative block aspect-square overflow-hidden rounded-lg">
+    <Link 
+      to={`/post/${post.id}`} 
+      className={`group relative block aspect-square overflow-hidden rounded-lg ${
+        isVenuePost ? 'ring-2 ring-amber-500' : ''
+      }`}
+    >
       {post.media[0]?.type === "image" ? (
         <img 
           src={post.media[0].url}
@@ -397,7 +582,10 @@ const PostGridItem = ({ post }: PostGridItemProps) => {
               <AvatarImage src={post.user.avatar} alt={post.user.name} />
               <AvatarFallback>{post.user.name[0]}</AvatarFallback>
             </Avatar>
-            <span className="text-xs font-medium text-white">@{post.user.username}</span>
+            <span className="text-xs font-medium text-white">
+              @{post.user.username}
+              {isVenuePost && <Badge className="ml-1 bg-amber-500 text-[0.6rem]">Venue</Badge>}
+            </span>
           </div>
           <div className="mt-2 flex justify-between items-center">
             <Button 
