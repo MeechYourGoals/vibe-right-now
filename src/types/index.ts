@@ -80,6 +80,8 @@ export interface User {
   bio?: string;
   createdAt?: Date;
   updatedAt?: Date;
+  isCelebrity?: boolean;
+  verified?: boolean;
 }
 
 export interface Post {

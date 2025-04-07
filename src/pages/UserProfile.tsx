@@ -4,13 +4,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Calendar, Users, Award, Heart, MessageSquare, Grid2X2, ListIcon, Share2 } from "lucide-react";
+import { MapPin, Calendar, Users, Award, Heart, MessageSquare, Grid2X2, ListIcon, Share2, CheckCircle } from "lucide-react";
 import Header from "@/components/Header";
 import PostCard from "@/components/PostCard";
 import { mockUsers, mockPosts, mockComments } from "@/mock/data";
 import { User, Comment, Post } from "@/types";
 import { formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
+
+// Define the VerifiedIcon component
+const VerifiedIcon = ({ className }: { className?: string }) => {
+  return <CheckCircle className={className} />;
+};
 
 const UserProfile = () => {
   const { username } = useParams<{ username: string }>();
