@@ -131,6 +131,23 @@
   .fade-out {
     @apply transition-opacity duration-500 ease-in-out opacity-0;
   }
+  
+  /* New animation classes */
+  .animate-entrance {
+    @apply transition-all duration-500 transform;
+  }
+  
+  .hover-scale {
+    @apply transition-transform duration-300 hover:scale-105;
+  }
+  
+  .hover-brightness {
+    @apply transition-all duration-300 hover:brightness-110;
+  }
+  
+  .interactive-element {
+    @apply transition-all duration-300 hover:text-primary cursor-pointer;
+  }
 }
 
 .animate-pulse-slow {
@@ -153,4 +170,20 @@
   50% {
     opacity: 0;
   }
+}
+
+/* New entrance animation */
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-up-animation {
+  animation: slide-up 0.5s ease-out forwards;
 }
