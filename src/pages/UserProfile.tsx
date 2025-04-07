@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -67,6 +66,27 @@ const UserProfile = () => {
     }
   };
 
+  const getUserBio = () => {
+    if (!user) return "";
+    
+    if (user.bio) {
+      return user.bio;
+    }
+    
+    // Generate bios based on username patterns
+    if (user.username.includes("food") || user.username.includes("chef") || user.username.includes("coffee")) {
+      return "Foodie exploring the best culinary experiences around the world. Always on the hunt for hidden gems and authentic flavors. 🍜🍷✨";
+    } else if (user.username.includes("travel") || user.username.includes("explorer") || user.username.includes("wanderer")) {
+      return "Travel enthusiast with a passion for discovering new cultures and hidden spots. 30 countries and counting! 🌍✈️🧳";
+    } else if (user.username.includes("party") || user.username.includes("club") || user.username.includes("fest")) {
+      return "Nightlife connoisseur and music lover. Finding the best clubs, festivals, and dance floors wherever I go. 🎵🥂🕺";
+    } else if (user.username.includes("sport") || user.username.includes("fitness")) {
+      return "Sports fanatic and fitness enthusiast. Always looking for the next adrenaline rush and active experiences. 🏈🏀⚽";
+    } else {
+      return "Always seeking the next great vibe! Foodie, music lover, and adventure seeker exploring one city at a time. 🌮🎵✨";
+    }
+  };
+
   if (!user) {
     return (
       <div className="min-h-screen bg-background">
@@ -95,27 +115,37 @@ const UserProfile = () => {
               <div className="flex-1">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h1 className="text-2xl font-bold">{user.name}</h1>
+                    <h1 className="text-2xl font-bold flex items-center gap-2">
+                      {user.name}
+                      {user.verified && <VerifiedIcon className="h-5 w-5 text-primary" />}
+                    </h1>
                     <p className="text-muted-foreground">@{user.username}</p>
                     
                     <div className="flex flex-wrap items-center gap-4 mt-2">
                       <div className="flex items-center text-sm">
                         <Users className="h-4 w-4 mr-2" />
-                        <span>10.2K Followers</span>
+                        <span>{user.isCelebrity ? Math.floor(Math.random() * 90 + 10) + "M" : Math.floor(Math.random() * 900 + 100) + "K"} Followers</span>
                       </div>
                       <div className="flex items-center text-sm">
                         <Calendar className="h-4 w-4 mr-2" />
-                        <span>Joined Aug 2023</span>
+                        <span>Joined {user.isCelebrity ? "Jan 2020" : "Aug 2023"}</span>
                       </div>
                       <div className="flex items-center text-sm">
                         <MapPin className="h-4 w-4 mr-2" />
-                        <span>Los Angeles, CA</span>
+                        <span>{user.isCelebrity ? "Los Angeles, CA" : "New York, NY"}</span>
                       </div>
                     </div>
                     
                     <div className="mt-4 flex flex-wrap gap-2">
+                      {user.isCelebrity && (
+                        <Badge variant="outline" className="bg-blue-500/20 text-blue-500">Verified</Badge>
+                      )}
                       <Badge variant="outline" className="bg-primary/20">Top Vibe Creator</Badge>
-                      <Badge variant="outline" className="bg-purple-500/20 text-purple-600">VIP Member</Badge>
+                      {user.isCelebrity ? (
+                        <Badge variant="outline" className="bg-rose-500/20 text-rose-500">Celebrity</Badge>
+                      ) : (
+                        <Badge variant="outline" className="bg-purple-500/20 text-purple-600">VIP Member</Badge>
+                      )}
                       <Badge variant="outline" className="bg-amber-500/20 text-amber-600">
                         <Award className="h-3 w-3 mr-1" />
                         <span>Vibe Enthusiast</span>
@@ -145,9 +175,7 @@ const UserProfile = () => {
                 </div>
                 
                 <p className="mt-4 text-sm">
-                  {user.id === "1" 
-                    ? "Always seeking the next great vibe! Foodie, music lover, and adventure seeker exploring one city at a time. 🌮🎵✨" 
-                    : "Capturing the best vibes in every city. Coffee enthusiast, travel addict, and nightlife connoisseur. Let's connect! 📸🌃"}
+                  {getUserBio()}
                 </p>
               </div>
             </div>
