@@ -11,13 +11,10 @@ const VernonChat = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   
+  // We still use the hook but only for state management
   const {
-    apiKey,
     isApiKeyPopoverOpen,
-    setIsApiKeyPopoverOpen,
-    apiKeyInput,
-    setApiKeyInput,
-    saveApiKey
+    setIsApiKeyPopoverOpen
   } = useApiKey();
   
   const {
@@ -44,11 +41,6 @@ const VernonChat = () => {
         isMinimized={isMinimized}
         toggleMinimize={toggleMinimize}
         closeChat={() => setIsOpen(false)}
-        isApiKeyPopoverOpen={isApiKeyPopoverOpen}
-        setIsApiKeyPopoverOpen={setIsApiKeyPopoverOpen}
-        apiKeyInput={apiKeyInput}
-        setApiKeyInput={setApiKeyInput}
-        saveApiKey={saveApiKey}
       />
       
       {!isMinimized && (
