@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { VerifiedIcon, Clock, MapPin, Share2, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
+import VenueActionButton from "./venue/VenueActionButton";
 
 interface VenuePostProps {
   venue: Location;
@@ -185,6 +186,12 @@ const VenuePost = ({ venue, content, media, timestamp }: VenuePostProps) => {
         </div>
         
         <div className="flex gap-2 w-full">
+          <VenueActionButton 
+            venue={venue} 
+            variant="outline" 
+            className="flex-1"
+          />
+          
           <a 
             href={rideUrl} 
             target="_blank" 

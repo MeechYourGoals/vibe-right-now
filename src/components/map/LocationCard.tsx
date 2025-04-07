@@ -7,6 +7,7 @@ import { getRideServiceUrl, getOfficialUrl, getActionButtonText } from "@/utils/
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { generateBusinessHours, getTodaysHours } from "@/utils/businessHoursUtils";
+import VenueActionButton from "@/components/venue/VenueActionButton";
 
 interface LocationCardProps {
   location: Location;
@@ -80,6 +81,13 @@ const LocationCard = ({ location, onViewVibes }: LocationCardProps) => {
           >
             View Vibes
           </Button>
+          
+          <VenueActionButton 
+            venue={location} 
+            size="sm"
+            className="w-full h-7 text-xs"
+          />
+          
           <a 
             href={getRideServiceUrl(location)} 
             target="_blank" 
