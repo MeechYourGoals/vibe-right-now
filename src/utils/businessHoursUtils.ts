@@ -91,7 +91,10 @@ export const isVenueOpen = (venue: Location): boolean => {
   if (!venue.hours) return false;
   
   const now = new Date();
-  const day = now.toLocaleDateString('en-US', { weekday: 'lowercase' });
+  // Get the current day of the week (0 = Sunday, 1 = Monday, etc.)
+  const dayIndex = now.getDay();
+  const days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+  const day = days[dayIndex];
   
   // Handle 24-hour venues
   if (venue.hours.isOpen24Hours) return true;
@@ -107,7 +110,10 @@ export const isVenueOpen = (venue: Location): boolean => {
   if (hoursStr === "Closed" || hoursStr === "Varies by event") return false;
   
   // Parse hours string like "11:00 AM - 10:00 PM"
-  const [openStr, closeStr] = hoursStr.split(" - ");
+  const hoursParts = String(hoursStr).split(" - ");
+  if (hoursParts.length !== 2) return false;
+  
+  const [openStr, closeStr] = hoursParts;
   
   // Convert to 24-hour format for easier comparison
   const convertTo24Hour = (timeStr: string): number => {
@@ -132,10 +138,13 @@ export const getTodaysHours = (venue: Location): string => {
   if (!venue.hours) return "Hours not available";
   
   const now = new Date();
-  const day = now.toLocaleDateString('en-US', { weekday: 'lowercase' });
+  // Get the current day of the week (0 = Sunday, 1 = Monday, etc.)
+  const dayIndex = now.getDay();
+  const days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+  const day = days[dayIndex];
   
   // Handle 24-hour venues
   if (venue.hours.isOpen24Hours) return "Open 24 Hours";
   
-  return venue.hours[day as keyof BusinessHours];
+  return venue.hours[day as keyof BusinessHours] as string;
 };
