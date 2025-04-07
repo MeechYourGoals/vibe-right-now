@@ -10,10 +10,10 @@ interface ChatButtonProps {
 const ChatButton: React.FC<ChatButtonProps> = ({ onClick }) => {
   return (
     <Button 
-      className="fixed left-6 bottom-6 h-12 w-12 rounded-full bg-amber-500 hover:bg-amber-600 text-white shadow-lg animate-pulse-slow"
       onClick={onClick}
+      className="fixed left-6 bottom-6 w-16 h-16 rounded-full shadow-lg bg-amber-500 hover:bg-amber-600 text-white flex items-center justify-center p-0 z-10"
     >
-      <MessageSquare />
+      <MessageSquare className="h-7 w-7" />
     </Button>
   );
 };

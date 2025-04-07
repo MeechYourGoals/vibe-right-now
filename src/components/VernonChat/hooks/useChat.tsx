@@ -1,6 +1,7 @@
+
 import { useState } from 'react';
 import { Message } from '../types';
-import { SimpleSearchService } from '@/services/SimpleSearchService';
+import { PerplexityService } from '@/services/PerplexityService';
 import { updateTrendingLocations } from '@/utils/trendingLocationsUpdater';
 import { getLocationsByCity, getTrendingLocationsForCity } from '@/mock/cityLocations';
 import { cityCoordinates } from '@/utils/locations';
@@ -31,27 +32,27 @@ export const useChat = () => {
     let response = `Here are some interesting places in ${cityName} from our database:\n\n`;
     
     if (sportVenues.length > 0) {
-      response += `🏟️ **Sports:** ${sportVenues.map(v => v.name).join(", ")}.\n\n`;
+      response += `🏟️ **Sports:** ${sportVenues.map(v => `[${v.name}](https://${v.name.toLowerCase().replace(/\s+/g, '')}.com)`).join(", ")}.\n\n`;
     }
     
     if (bars.length > 0) {
-      response += `🍸 **Nightlife:** ${bars.map(v => v.name).join(", ")}.\n\n`;
+      response += `🍸 **Nightlife:** ${bars.map(v => `[${v.name}](https://${v.name.toLowerCase().replace(/\s+/g, '')}.com)`).join(", ")}.\n\n`;
     }
     
     if (restaurants.length > 0) {
-      response += `🍽️ **Dining:** ${restaurants.map(v => v.name).join(", ")}.\n\n`;
+      response += `🍽️ **Dining:** ${restaurants.map(v => `[${v.name}](https://${v.name.toLowerCase().replace(/\s+/g, '')}.com)`).join(", ")}.\n\n`;
     }
     
     if (events.length > 0) {
-      response += `🎭 **Events:** ${events.map(v => v.name).join(", ")}.\n\n`;
+      response += `🎭 **Events:** ${events.map(v => `[${v.name}](https://ticketmaster.com/event/${v.id})`).join(", ")}.\n\n`;
     }
     
     if (attractions.length > 0) {
-      response += `🏛️ **Attractions:** ${attractions.map(v => v.name).join(", ")}.\n\n`;
+      response += `🏛️ **Attractions:** ${attractions.map(v => `[${v.name}](https://${v.name.toLowerCase().replace(/\s+/g, '')}.com)`).join(", ")}.\n\n`;
     }
     
     if (others.length > 0) {
-      response += `🏋️ **Other Activities:** ${others.map(v => v.name).join(", ")}.\n\n`;
+      response += `🏋️ **Other Activities:** ${others.map(v => `[${v.name}](https://${v.name.toLowerCase().replace(/\s+/g, '')}.com)`).join(", ")}.\n\n`;
     }
     
     return response;
@@ -71,8 +72,8 @@ export const useChat = () => {
     setIsSearching(true);
     
     try {
-      // Get response from our simple search service
-      const responseText = await SimpleSearchService.searchForCityInfo(inputValue);
+      // Get response from Perplexity
+      const responseText = await PerplexityService.searchPerplexity(inputValue);
       
       // Parse city if the query was about events or places in a specific city
       let detectedCity = "";

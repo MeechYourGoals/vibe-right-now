@@ -7,6 +7,7 @@ import DiscountLocations from "@/components/DiscountLocations";
 import CameraButton from "@/components/CameraButton";
 import NearbyVibesMap from "@/components/NearbyVibesMap";
 import RecommendedForYou from "@/components/RecommendedForYou";
+import VernonChat from "@/components/VernonChat";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const Index = () => {
@@ -37,6 +38,7 @@ const Index = () => {
       </main>
       
       <CameraButton />
+      <VernonChat />
     </Layout>
   );
 };
