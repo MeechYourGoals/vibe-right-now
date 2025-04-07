@@ -1,5 +1,6 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Calendar, MapPin, UserPlus, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -31,33 +32,65 @@ interface Trip {
 }
 
 const TripsList: React.FC = () => {
-  const [trips, setTrips] = useState<Trip[]>([
-    {
-      id: "1",
-      name: "Summer in Paris",
-      destination: "Paris, France",
-      description: "Family vacation exploring the City of Light",
-      startDate: new Date(2025, 6, 15),
-      endDate: new Date(2025, 6, 22),
-      collaborators: [
-        { id: "1", name: mockUsers[0].name, avatar: mockUsers[0].avatar },
-        { id: "2", name: mockUsers[1].name, avatar: mockUsers[1].avatar },
-      ],
-      savedPlaces: 8
-    },
-    {
-      id: "2",
-      name: "Tokyo Adventure",
-      destination: "Tokyo, Japan",
-      description: "Exploring Japanese culture and cuisine",
-      startDate: new Date(2025, 9, 5),
-      endDate: new Date(2025, 9, 15),
-      collaborators: [
-        { id: "1", name: mockUsers[0].name, avatar: mockUsers[0].avatar },
-      ],
-      savedPlaces: 5
+  const navigate = useNavigate();
+  const [trips, setTrips] = useState<Trip[]>([]);
+  
+  useEffect(() => {
+    // Check localStorage for trips data
+    const storedTrips = localStorage.getItem('trips');
+    if (storedTrips) {
+      try {
+        // Parse dates correctly
+        const parsedTrips = JSON.parse(storedTrips, (key, value) => {
+          if (key === 'startDate' || key === 'endDate') {
+            return new Date(value);
+          }
+          return value;
+        });
+        setTrips(parsedTrips);
+      } catch (err) {
+        console.error('Error parsing stored trips:', err);
+        // Fallback to default trips
+        setTrips(getDefaultTrips());
+      }
+    } else {
+      // Use default trips
+      const defaultTrips = getDefaultTrips();
+      setTrips(defaultTrips);
+      // Save to localStorage
+      localStorage.setItem('trips', JSON.stringify(defaultTrips));
     }
-  ]);
+  }, []);
+  
+  const getDefaultTrips = (): Trip[] => {
+    return [
+      {
+        id: "1",
+        name: "Summer in Paris",
+        destination: "Paris, France",
+        description: "Family vacation exploring the City of Light",
+        startDate: new Date(2025, 6, 15),
+        endDate: new Date(2025, 6, 22),
+        collaborators: [
+          { id: "1", name: mockUsers[0].name, avatar: mockUsers[0].avatar },
+          { id: "2", name: mockUsers[1].name, avatar: mockUsers[1].avatar },
+        ],
+        savedPlaces: 8
+      },
+      {
+        id: "2",
+        name: "Tokyo Adventure",
+        destination: "Tokyo, Japan",
+        description: "Exploring Japanese culture and cuisine",
+        startDate: new Date(2025, 9, 5),
+        endDate: new Date(2025, 9, 15),
+        collaborators: [
+          { id: "1", name: mockUsers[0].name, avatar: mockUsers[0].avatar },
+        ],
+        savedPlaces: 5
+      }
+    ];
+  };
   
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
@@ -94,7 +127,11 @@ const TripsList: React.FC = () => {
       savedPlaces: 0
     };
     
-    setTrips([...trips, newTrip]);
+    const updatedTrips = [...trips, newTrip];
+    setTrips(updatedTrips);
+    
+    // Save to localStorage
+    localStorage.setItem('trips', JSON.stringify(updatedTrips));
     
     // Reset form
     setNewTripName("");
@@ -112,14 +149,49 @@ const TripsList: React.FC = () => {
       return;
     }
     
+    // Find the trip
+    const trip = trips.find(t => t.id === selectedTripId);
+    if (trip) {
+      // In a real app, this would send an email invitation
+      // For now, we'll just simulate adding a user
+      const updatedTrips = trips.map(t => {
+        if (t.id === selectedTripId) {
+          // Add a mock user
+          const newCollaborator = {
+            id: (t.collaborators.length + 1).toString(),
+            name: `Invited User ${t.collaborators.length + 1}`,
+            avatar: mockUsers[Math.floor(Math.random() * mockUsers.length)].avatar
+          };
+          
+          return {
+            ...t,
+            collaborators: [...t.collaborators, newCollaborator]
+          };
+        }
+        return t;
+      });
+      
+      setTrips(updatedTrips);
+      localStorage.setItem('trips', JSON.stringify(updatedTrips));
+    }
+    
     toast.success(`Invitation sent to ${inviteEmail}`);
     setInviteEmail("");
     setIsInviteDialogOpen(false);
   };
   
   const handleDeleteTrip = (tripId: string) => {
-    setTrips(trips.filter(trip => trip.id !== tripId));
+    const updatedTrips = trips.filter(trip => trip.id !== tripId);
+    setTrips(updatedTrips);
+    
+    // Save to localStorage
+    localStorage.setItem('trips', JSON.stringify(updatedTrips));
+    
     toast.success("Trip deleted successfully");
+  };
+  
+  const handleViewTrip = (tripId: string) => {
+    navigate(`/trip/${tripId}`);
   };
   
   return (
@@ -335,9 +407,7 @@ const TripsList: React.FC = () => {
                 <Button 
                   className="w-full" 
                   variant="outline"
-                  onClick={() => {
-                    toast.success("Feature coming soon!");
-                  }}
+                  onClick={() => handleViewTrip(trip.id)}
                 >
                   View Trip
                 </Button>
