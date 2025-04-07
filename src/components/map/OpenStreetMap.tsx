@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
@@ -6,6 +5,7 @@ import 'leaflet/dist/leaflet.css';
 import { Location } from '@/types';
 import { cityCoordinates } from '@/utils/locations';
 import CityMarkers from './city-markers/CityMarkers';
+import { Button } from '@/components/ui/button';
 
 // Define the component properties
 interface OpenStreetMapProps {
