@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { VerifiedIcon, Clock, MapPin, Share2, ExternalLink } from "lucide-react";
+import { toast } from "sonner";
 
 interface VenuePostProps {
   venue: Location;
@@ -48,6 +49,28 @@ const getOfficialTicketUrl = (venueId: string) => {
 // Helper function to get ride service URL
 const getRideServiceUrl = (place: Location) => {
   return `https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[formatted_address]=${encodeURIComponent(`${place.address}, ${place.city}, ${place.state}`)}`;
+};
+
+// Helper function to share a venue
+const shareVenue = (venue: Location) => {
+  if (navigator.share) {
+    navigator.share({
+      title: `Check out ${venue.name} on Vibe Right Now!`,
+      text: `I found ${venue.name} in ${venue.city} on Vibe Right Now and thought you might be interested!`,
+      url: `${window.location.origin}/venue/${venue.id}`
+    })
+    .then(() => toast.success("Shared successfully!"))
+    .catch((error) => {
+      console.error('Error sharing:', error);
+      toast.error("Couldn't share. Try copying the link instead.");
+    });
+  } else {
+    // Fallback for browsers that don't support navigator.share
+    const url = `${window.location.origin}/venue/${venue.id}`;
+    navigator.clipboard.writeText(url)
+      .then(() => toast.success("Link copied to clipboard!"))
+      .catch(() => toast.error("Couldn't copy link. Please try again."));
+  }
 };
 
 const VenuePost = ({ venue, content, media, timestamp }: VenuePostProps) => {
@@ -142,12 +165,21 @@ const VenuePost = ({ venue, content, media, timestamp }: VenuePostProps) => {
       </CardContent>
       <CardFooter className="p-4 pt-0 flex flex-col gap-2">
         <div className="flex justify-between w-full">
-          <Button variant="ghost" size="sm" className="flex items-center gap-1">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="flex items-center gap-1"
+            onClick={() => shareVenue(venue)}
+          >
             <Share2 className="h-4 w-4" />
             <span>Share</span>
           </Button>
           
-          <Button variant="default" size="sm">
+          <Button 
+            variant="default" 
+            size="sm" 
+            onClick={() => window.location.href = `/venue/${venue.id}`}
+          >
             View Event
           </Button>
         </div>

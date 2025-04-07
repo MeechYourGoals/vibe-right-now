@@ -2,11 +2,35 @@
 import { Button } from "@/components/ui/button";
 import { Location } from "@/types";
 import { useNavigate } from "react-router-dom";
+import { Share2 } from "lucide-react";
+import { toast } from "sonner";
 
 interface LocationActionsProps {
   location: Location;
   onViewVibes: (locationId: string) => void;
 }
+
+// Helper function to share a venue
+const shareVenue = (location: Location) => {
+  if (navigator.share) {
+    navigator.share({
+      title: `Check out ${location.name} on Vibe Right Now!`,
+      text: `I found ${location.name} in ${location.city} on Vibe Right Now and thought you might be interested!`,
+      url: `${window.location.origin}/venue/${location.id}`
+    })
+    .then(() => toast.success("Shared successfully!"))
+    .catch((error) => {
+      console.error('Error sharing:', error);
+      toast.error("Couldn't share. Try copying the link instead.");
+    });
+  } else {
+    // Fallback for browsers that don't support navigator.share
+    const url = `${window.location.origin}/venue/${location.id}`;
+    navigator.clipboard.writeText(url)
+      .then(() => toast.success("Link copied to clipboard!"))
+      .catch(() => toast.error("Couldn't copy link. Please try again."));
+  }
+};
 
 const LocationActions = ({ location, onViewVibes }: LocationActionsProps) => {
   const navigate = useNavigate();
@@ -65,9 +89,19 @@ const LocationActions = ({ location, onViewVibes }: LocationActionsProps) => {
 
   return (
     <div className="space-y-2 mb-4">
-      <Button className="w-full" onClick={handleViewVibes}>
-        View All Vibes
-      </Button>
+      <div className="flex gap-2">
+        <Button className="flex-1" onClick={handleViewVibes}>
+          View All Vibes
+        </Button>
+        <Button 
+          variant="outline" 
+          className="px-2" 
+          onClick={() => shareVenue(location)}
+          title="Share this venue"
+        >
+          <Share2 className="h-4 w-4" />
+        </Button>
+      </div>
       <div className="flex gap-2">
         <a 
           href={getRideServiceUrl(location)} 

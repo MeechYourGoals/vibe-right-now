@@ -3,9 +3,11 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Location } from '@/types';
-import { cityCoordinates } from '@/utils/locations';
+import { cityCoordinates } from '@/utils/locations/cityDatabase';
 import CityMarkers from './city-markers/CityMarkers';
 import { Button } from '@/components/ui/button';
+import { Share2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 // Define the component properties
 interface OpenStreetMapProps {
@@ -32,6 +34,28 @@ const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: numbe
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   const distance = R * c; // Distance in kilometers
   return distance * 0.621371; // Convert to miles
+};
+
+// Helper function to share a venue
+const shareVenue = (location: Location) => {
+  if (navigator.share) {
+    navigator.share({
+      title: `Check out ${location.name} on Vibe Right Now!`,
+      text: `I found ${location.name} in ${location.city} on Vibe Right Now and thought you might be interested!`,
+      url: `${window.location.origin}/venue/${location.id}`
+    })
+    .then(() => toast.success("Shared successfully!"))
+    .catch((error) => {
+      console.error('Error sharing:', error);
+      toast.error("Couldn't share. Try copying the link instead.");
+    });
+  } else {
+    // Fallback for browsers that don't support navigator.share
+    const url = `${window.location.origin}/venue/${location.id}`;
+    navigator.clipboard.writeText(url)
+      .then(() => toast.success("Link copied to clipboard!"))
+      .catch(() => toast.error("Couldn't copy link. Please try again."));
+  }
 };
 
 // Helper component to recenter the map based on props
@@ -173,13 +197,24 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
                 <h3>{location.name}</h3>
                 <p>{location.address}, {location.city}</p>
                 {distance !== null && <p>Distance: {distance.toFixed(2)} miles</p>}
-                <Button
-                  size="sm"
-                  className="mt-2 w-full"
-                  onClick={() => window.location.href = `/venue/${location.id}`}
-                >
-                  View Venue
-                </Button>
+                <div className="flex gap-2 mt-2">
+                  <Button
+                    size="sm"
+                    className="flex-1"
+                    onClick={() => window.location.href = `/venue/${location.id}`}
+                  >
+                    View Venue
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="px-2"
+                    onClick={() => shareVenue(location)}
+                    title="Share this venue"
+                  >
+                    <Share2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </Popup>
           </Marker>
