@@ -104,25 +104,25 @@ const Header = () => {
                     <DropdownMenuSeparator />
                     
                     <DropdownMenuItem asChild>
-                      <Link to="/profile/bio">
+                      <Link to="/profile">
                         <User className="mr-2 h-4 w-4" />
                         <span>Bio</span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link to="/profile/places">
+                      <Link to="/my-places">
                         <MapPin className="mr-2 h-4 w-4" />
                         <span>My Places</span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link to="/profile/pinned">
+                      <Link to="/pinned">
                         <Bookmark className="mr-2 h-4 w-4" />
                         <span>Pinned</span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link to="/profile/points">
+                      <Link to="/points">
                         <Award className="mr-2 h-4 w-4" />
                         <span>Points</span>
                       </Link>
