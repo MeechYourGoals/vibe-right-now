@@ -1,0 +1,53 @@
+
+import { Users, CalendarIcon, Receipt, Tag, Eye } from "lucide-react";
+import InsightMetricCard from "./InsightMetricCard";
+import { VenueInsights } from "@/types";
+
+interface MetricsOverviewProps {
+  insights: VenueInsights;
+  timeframe: string;
+}
+
+const MetricsOverview = ({ insights, timeframe }: MetricsOverviewProps) => {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <InsightMetricCard
+        title="Total Visitors"
+        value={insights.visitorCount}
+        icon={Users}
+        iconColor="text-blue-500"
+        changePercentage={12}
+        timeframe={timeframe}
+      />
+      
+      <InsightMetricCard
+        title="Check-ins"
+        value={insights.checkInCount}
+        icon={CalendarIcon}
+        iconColor="text-green-500"
+        changePercentage={8}
+        timeframe={timeframe}
+      />
+      
+      <InsightMetricCard
+        title="Receipt Uploads"
+        value={insights.receiptUploads}
+        icon={Receipt}
+        iconColor="text-amber-500"
+        changePercentage={23}
+        timeframe={timeframe}
+      />
+      
+      <InsightMetricCard
+        title="Discounts Redeemed"
+        value={insights.discountRedemptions}
+        icon={Tag}
+        iconColor="text-purple-500"
+        changePercentage={5}
+        timeframe={timeframe}
+      />
+    </div>
+  );
+};
+
+export default MetricsOverview;
