@@ -1,58 +1,25 @@
+
 import { useState, useMemo } from "react";
-import { Link, useParams } from "react-router-dom";
-import { formatDistanceToNow } from "date-fns";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useParams } from "react-router-dom";
+import { Minimize } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { mockLocations, mockPosts } from "@/mock/data";
-import { Badge } from "@/components/ui/badge";
-import { 
-  MapPin, VerifiedIcon, Clock, ExternalLink, Grid2X2, 
-  ListIcon, PlusCircle, Heart, Map, Maximize, Minimize,
-  CalendarDays
-} from "lucide-react";
-import PostCard from "@/components/PostCard";
-import VenuePost from "@/components/VenuePost";
+import { mockLocations, mockPosts, mockComments } from "@/mock/data";
 import CameraButton from "@/components/CameraButton";
 import Header from "@/components/Header";
-import { mockComments } from "@/mock/data";
-import { Comment, Post, Location as VenueLocation } from "@/types";
-import { toast } from "@/hooks/use-toast";
-import MapboxMap from "@/components/map/MapboxMap";
+import { Comment, Post } from "@/types";
 import OpenStreetMap from "@/components/map/OpenStreetMap";
-import BusinessHours from "@/components/BusinessHours";
 import { generateBusinessHours } from "@/utils/businessHoursUtils";
-import CheckInButton from "@/components/CheckInButton";
 import { isPostFromDayOfWeek, isWithinThreeMonths } from "@/mock/time-utils";
-
-const DAYS_OF_WEEK = [
-  { name: "Sunday", value: 0 },
-  { name: "Monday", value: 1 },
-  { name: "Tuesday", value: 2 },
-  { name: "Wednesday", value: 3 },
-  { name: "Thursday", value: 4 },
-  { name: "Friday", value: 5 },
-  { name: "Saturday", value: 6 },
-];
-
-const getOfficialTicketUrl = (venueId: string) => {
-  const ticketUrls: Record<string, string> = {
-    "30": "https://www.axs.com/events/crypto-com-arena",
-    "31": "https://www.therams.com/tickets/",
-    "32": "https://www.mlb.com/dodgers/tickets",
-    "33": "https://www.lagalaxy.com/tickets/",
-    "34": "https://www.vbusa.org/tickets",
-    "35": "https://wmphoenixopen.com/tickets/",
-  };
-  
-  return ticketUrls[venueId] || "";
-};
+import { getVenueContent } from "@/utils/venue/venueContentHelpers";
+import DayOfWeekFilter from "@/components/venue/DayOfWeekFilter";
+import VenueProfileHeader from "@/components/venue/VenueProfileHeader";
+import VenueMap from "@/components/venue/VenueMap";
+import VenuePostsContent from "@/components/venue/VenuePostsContent";
 
 const VenueProfile = () => {
   const { id } = useParams<{ id: string }>();
   const [activeTab, setActiveTab] = useState("all");
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
-  const [isFollowing, setIsFollowing] = useState(false);
   const [isMapExpanded, setIsMapExpanded] = useState(false);
   const [selectedDays, setSelectedDays] = useState<number[]>([]);
   
@@ -100,6 +67,8 @@ const VenueProfile = () => {
   }, [venuePosts, selectedDays]);
 
   const allPosts = useMemo(() => {
+    if (!venue) return [];
+    
     const venuePostsFormatted = generatedVenuePosts.map((post, index) => ({
       id: `venue-post-${index}`,
       user: { 
@@ -108,7 +77,7 @@ const VenueProfile = () => {
         username: venue?.name?.toLowerCase().replace(/\s+/g, '') || 'venue',
         avatar: `https://source.unsplash.com/random/200x200/?${venue?.type}`
       },
-      location: venue!,
+      location: venue,
       content: post.content,
       media: [post.media],
       timestamp: post.timestamp,
@@ -131,28 +100,10 @@ const VenueProfile = () => {
     return combined;
   }, [filteredPosts, venue, generatedVenuePosts, selectedDays]);
 
-  const officialTicketUrl = venue?.type === "sports" ? getOfficialTicketUrl(id || "") : "";
-
   const getPostComments = (postId: string): Comment[] => {
     return mockComments.filter(comment => comment.postId === postId);
   };
 
-  const handleFollowToggle = () => {
-    setIsFollowing(!isFollowing);
-    
-    if (isFollowing) {
-      toast({
-        title: "Unfollowed",
-        description: `You are no longer following ${venue?.name}`,
-      });
-    } else {
-      toast({
-        title: "Following!",
-        description: `You are now following ${venue?.name}`,
-      });
-    }
-  };
-  
   const toggleMapExpansion = () => {
     setIsMapExpanded(!isMapExpanded);
     
@@ -163,7 +114,7 @@ const VenueProfile = () => {
     }, 10);
   };
   
-  const toggleDaySelection = (dayIndex: number) => {
+  const handleDayToggle = (dayIndex: number) => {
     setSelectedDays(prev => {
       if (prev.includes(dayIndex)) {
         return prev.filter(day => day !== dayIndex);
@@ -173,71 +124,8 @@ const VenueProfile = () => {
     });
   };
   
-  const getVenueContent = (venue: VenueLocation, isFirstPost: boolean) => {
-    let content = "";
-    let mediaUrl = "";
-    
-    if (venue.type === "restaurant") {
-      if (isFirstPost) {
-        content = `Today's special: ${venue.name.includes("Bakery") ? "Fresh baked sourdough and pastries!" : "Chef's tasting menu featuring seasonal ingredients from local farms!"}`;
-        mediaUrl = "https://images.unsplash.com/photo-1621871349328-f970545757e4?q=80&w=1000&auto=format&fit=crop";
-      } else {
-        content = `Join us for Happy Hour! Half off appetizers from 4-6pm today.`;
-        mediaUrl = "https://images.unsplash.com/photo-1551632436-cbf8dd35adfa?q=80&w=1000&auto=format&fit=crop";
-      }
-    } else if (venue.type === "bar") {
-      if (isFirstPost) {
-        content = `Tonight: Live DJ set from 9PM! ${venue.name.includes("Rooftop") ? "Enjoy amazing views with your cocktails." : "No cover charge before 10PM."}`;
-        mediaUrl = "https://images.unsplash.com/photo-1566417713940-fe7c737a9ef2?q=80&w=1000&auto=format&fit=crop";
-      } else {
-        content = `New signature cocktail menu launching today! Come try our seasonal specials.`;
-        mediaUrl = "https://images.unsplash.com/photo-1551024709-8f23befc6f87?q=80&w=1000&auto=format&fit=crop";
-      }
-    } else if (venue.type === "event") {
-      if (isFirstPost) {
-        content = `Tickets for ${venue.name} are going fast! Use code VIBECITY for 15% off your purchase.`;
-        mediaUrl = "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?q=80&w=1000&auto=format&fit=crop";
-      } else {
-        content = `VIP packages still available! Includes exclusive merch and early entry.`;
-        mediaUrl = "https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?q=80&w=1000&auto=format&fit=crop";
-      }
-    } else if (venue.type === "sports") {
-      if (isFirstPost) {
-        if (venue.name.includes("Lakers")) {
-          content = "Game day! Gates open 90 minutes before tipoff. Arrive early to watch warmups and get player autographs!";
-          mediaUrl = "https://images.unsplash.com/photo-1504450758481-7338eba7524a?q=80&w=1000&auto=format&fit=crop";
-        } else if (venue.name.includes("Golf")) {
-          content = "Perfect conditions today for the WM Phoenix Open! The 16th hole stadium is already filling up.";
-          mediaUrl = "https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?q=80&w=1000&auto=format&fit=crop";
-        } else {
-          content = "Game day is here! Come early for special fan activities and giveaways at the main entrance.";
-          mediaUrl = "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?q=80&w=1000&auto=format&fit=crop";
-        }
-      } else {
-        content = "Tickets are still available for today's game! Buy online to skip the box office lines.";
-        mediaUrl = venue.name.includes("Soccer") || venue.name.includes("Galaxy") 
-          ? "https://images.unsplash.com/photo-1459865264687-595d652de67e?q=80&w=1000&auto=format&fit=crop"
-          : "https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=1000&auto=format&fit=crop";
-      }
-    } else if (venue.type === "attraction") {
-      if (isFirstPost) {
-        content = `Beat the crowds! Current wait time is only 15 minutes for ${venue.name}.`;
-        mediaUrl = "https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?q=80&w=1000&auto=format&fit=crop";
-      } else {
-        content = `Special photo opportunity available today at ${venue.name}! Tag us in your pics for a chance to be featured.`;
-        mediaUrl = "https://images.unsplash.com/photo-1533105079780-92b9be482077?q=80&w=1000&auto=format&fit=crop";
-      }
-    } else {
-      if (isFirstPost) {
-        content = `Today at ${venue.name}: Special event for our members! Check in at the front desk for details.`;
-        mediaUrl = "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=1000&auto=format&fit=crop";
-      } else {
-        content = `Don't miss our limited time offer! Valid only through this weekend.`;
-        mediaUrl = "https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=1000&auto=format&fit=crop";
-      }
-    }
-    
-    return { content, mediaUrl };
+  const clearDayFilters = () => {
+    setSelectedDays([]);
   };
 
   if (!venue) {
@@ -284,326 +172,33 @@ const VenueProfile = () => {
       <main className="container py-6">
         <div className="max-w-4xl mx-auto">
           <div className="glass-effect p-6 rounded-xl mb-6">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-4">
-                <Avatar className="h-16 w-16 border-2 border-primary">
-                  <AvatarImage src={`https://source.unsplash.com/random/200x200/?${venue.type}`} alt={venue.name} />
-                  <AvatarFallback>{venue.name[0]}</AvatarFallback>
-                </Avatar>
-                
-                <div>
-                  <h1 className="text-2xl font-bold flex items-center">
-                    {venue.name}
-                    {venue.verified && (
-                      <VerifiedIcon className="h-5 w-5 ml-2 text-primary" />
-                    )}
-                  </h1>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-                    <MapPin className="h-4 w-4" />
-                    <span>{venue.address}, {venue.city}, {venue.state}</span>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="h-6 p-0 hover:bg-transparent hover:text-primary"
-                      onClick={toggleMapExpansion}
-                    >
-                      <Map className="h-4 w-4" />
-                      <span className="ml-1 text-xs">View Map</span>
-                    </Button>
-                  </div>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    <Badge variant="outline" className="bg-muted/30">{venue.type}</Badge>
-                    <Badge variant="outline" className="bg-primary/20">Open Now</Badge>
-                  </div>
-                  
-                  <BusinessHours venue={venue} />
-                </div>
-              </div>
-              
-              <div className="flex flex-col items-end gap-2">
-                <Button 
-                  variant={isFollowing ? "default" : "outline"}
-                  onClick={handleFollowToggle}
-                  className={isFollowing ? "bg-primary" : ""}
-                >
-                  <PlusCircle className="h-4 w-4 mr-2" />
-                  {isFollowing ? "Following" : "Follow"}
-                </Button>
-                
-                <CheckInButton venue={venue} />
-                
-                {venue.type === "sports" && officialTicketUrl && (
-                  <a 
-                    href={officialTicketUrl} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className="mt-2"
-                  >
-                    <Button 
-                      variant="outline" 
-                      className="bg-amber-500/20 text-amber-500 border-amber-500/50 hover:bg-amber-500/30"
-                    >
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      Buy Tickets Direct
-                    </Button>
-                  </a>
-                )}
-                <p className="text-xs text-muted-foreground mt-2 flex items-center">
-                  <Clock className="h-3 w-3 mr-1" />
-                  Posts expire in 24h
-                </p>
-              </div>
-            </div>
-            
-            <div className="mt-4 h-48 rounded-md overflow-hidden relative">
-              <OpenStreetMap
-                userLocation={null}
-                locations={[venue]}
-                searchedCity={venue.city}
-                mapStyle="default"
-                selectedLocation={null}
-                userAddressLocation={null}
-                onLocationSelect={() => {}}
-                showAllCities={false}
-              />
-              <div className="absolute bottom-2 right-2">
-                <Button size="sm" variant="secondary" onClick={toggleMapExpansion}>
-                  <Maximize className="h-4 w-4 mr-1" />
-                  Expand
-                </Button>
-              </div>
-            </div>
+            <VenueProfileHeader venue={venue} onMapExpand={toggleMapExpansion} />
+            <VenueMap venue={venue} onExpand={toggleMapExpansion} />
           </div>
           
-          <div className="mb-4">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-medium flex items-center">
-                <CalendarDays className="h-4 w-4 mr-2" />
-                Filter by day of week
-              </h3>
-              
-              {selectedDays.length > 0 && (
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={() => setSelectedDays([])}
-                  className="h-7 px-2 text-xs"
-                >
-                  Clear filters
-                </Button>
-              )}
-            </div>
-            
-            <div className="flex flex-wrap gap-2">
-              {DAYS_OF_WEEK.map((day) => (
-                <Button
-                  key={day.value}
-                  variant={selectedDays.includes(day.value) ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => toggleDaySelection(day.value)}
-                  className={selectedDays.includes(day.value) ? "bg-primary" : ""}
-                >
-                  {day.name.substring(0, 3)}
-                </Button>
-              ))}
-            </div>
-          </div>
+          <DayOfWeekFilter 
+            selectedDays={selectedDays} 
+            onDayToggle={handleDayToggle} 
+            onClearFilters={clearDayFilters} 
+          />
           
-          <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="mb-6">
-            <div className="flex justify-between items-center mb-2">
-              <TabsList className="grid grid-cols-3 w-[300px]">
-                <TabsTrigger value="all">All Posts</TabsTrigger>
-                <TabsTrigger value="ugv">User Vibes</TabsTrigger>
-                <TabsTrigger value="vgv">Venue Vibes</TabsTrigger>
-              </TabsList>
-              
-              {(activeTab === "ugv" || activeTab === "all") && (
-                <div className="flex gap-2">
-                  <Button 
-                    variant={viewMode === "list" ? "default" : "outline"} 
-                    size="sm"
-                    onClick={() => setViewMode("list")}
-                  >
-                    <ListIcon className="h-4 w-4" />
-                  </Button>
-                  <Button 
-                    variant={viewMode === "grid" ? "default" : "outline"} 
-                    size="sm"
-                    onClick={() => setViewMode("grid")}
-                  >
-                    <Grid2X2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              )}
-            </div>
-            
-            <TabsContent value="all" className="mt-4 space-y-4">
-              {allPosts.length > 0 ? (
-                viewMode === "list" ? (
-                  <div className="space-y-4">
-                    {allPosts.map((post) => (
-                      post.isVenuePost ? (
-                        <div key={post.id} className="border-2 border-amber-500/50 rounded-lg overflow-hidden">
-                          <VenuePost 
-                            venue={post.location}
-                            content={post.content}
-                            media={post.media[0]}
-                            timestamp={post.timestamp}
-                          />
-                        </div>
-                      ) : (
-                        <PostCard 
-                          key={post.id}
-                          posts={[post]} 
-                          locationPostCount={1}
-                          getComments={getPostComments} 
-                        />
-                      )
-                    ))}
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {allPosts.map((post) => (
-                      <PostGridItem 
-                        key={post.id} 
-                        post={post} 
-                        isVenuePost={!!post.isVenuePost} 
-                      />
-                    ))}
-                  </div>
-                )
-              ) : (
-                <div className="text-center py-10">
-                  <h3 className="text-xl font-semibold mb-2">No posts available</h3>
-                  <p className="text-muted-foreground">Try adjusting your filters or check back later!</p>
-                </div>
-              )}
-            </TabsContent>
-            
-            <TabsContent value="ugv" className="mt-4 space-y-4">
-              {filteredPosts.length > 0 ? (
-                viewMode === "list" ? (
-                  <PostCard 
-                    posts={filteredPosts} 
-                    locationPostCount={filteredPosts.length}
-                    getComments={getPostComments} 
-                  />
-                ) : (
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {filteredPosts.map((post) => (
-                      <PostGridItem key={post.id} post={post} />
-                    ))}
-                  </div>
-                )
-              ) : (
-                <div className="text-center py-10">
-                  <h3 className="text-xl font-semibold mb-2">No user vibes yet</h3>
-                  <p className="text-muted-foreground">Be the first to post a vibe here!</p>
-                  <Button className="mt-4 bg-gradient-vibe">Post a Vibe</Button>
-                </div>
-              )}
-            </TabsContent>
-            
-            <TabsContent value="vgv" className="mt-4 space-y-4">
-              {generatedVenuePosts.length > 0 ? (
-                generatedVenuePosts
-                  .filter(post => 
-                    selectedDays.length === 0 || 
-                    selectedDays.includes(new Date(post.timestamp).getDay())
-                  )
-                  .map((post, index) => (
-                    <div key={index} className="border-2 border-amber-500/50 rounded-lg overflow-hidden">
-                      <VenuePost 
-                        venue={venue}
-                        content={post.content}
-                        media={post.media}
-                        timestamp={post.timestamp}
-                      />
-                    </div>
-                  ))
-              ) : (
-                <div className="text-center py-10">
-                  <h3 className="text-xl font-semibold mb-2">No venue posts available</h3>
-                  <p className="text-muted-foreground">Check back later for updates from this venue!</p>
-                </div>
-              )}
-            </TabsContent>
-          </Tabs>
+          <VenuePostsContent
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+            allPosts={allPosts}
+            filteredPosts={filteredPosts}
+            generatedVenuePosts={generatedVenuePosts}
+            selectedDays={selectedDays}
+            venue={venue}
+            getPostComments={getPostComments}
+          />
         </div>
       </main>
       
       <CameraButton />
     </div>
-  );
-};
-
-interface PostGridItemProps {
-  post: Post;
-  isVenuePost?: boolean;
-}
-
-const PostGridItem = ({ post, isVenuePost = false }: PostGridItemProps) => {
-  const [liked, setLiked] = useState(false);
-  
-  const handleLike = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setLiked(!liked);
-  };
-
-  return (
-    <Link 
-      to={`/post/${post.id}`} 
-      className={`group relative block aspect-square overflow-hidden rounded-lg ${
-        isVenuePost ? 'ring-2 ring-amber-500' : ''
-      }`}
-    >
-      {post.media[0]?.type === "image" ? (
-        <img 
-          src={post.media[0].url}
-          alt={`Post by ${post.user.username}`}
-          className="h-full w-full object-cover transition-transform group-hover:scale-105"
-        />
-      ) : post.media[0]?.type === "video" ? (
-        <video
-          src={post.media[0].url}
-          className="h-full w-full object-cover"
-          poster="https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-        />
-      ) : (
-        <div className="flex h-full w-full items-center justify-center bg-muted">
-          <p className="p-2 text-center text-sm">{post.content.slice(0, 100)}{post.content.length > 100 ? '...' : ''}</p>
-        </div>
-      )}
-      
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-        <div className="absolute bottom-0 left-0 right-0 p-3">
-          <div className="flex items-center gap-2">
-            <Avatar className="h-6 w-6 border border-white">
-              <AvatarImage src={post.user.avatar} alt={post.user.name} />
-              <AvatarFallback>{post.user.name[0]}</AvatarFallback>
-            </Avatar>
-            <span className="text-xs font-medium text-white">
-              @{post.user.username}
-              {isVenuePost && <Badge className="ml-1 bg-amber-500 text-[0.6rem]">Venue</Badge>}
-            </span>
-          </div>
-          <div className="mt-2 flex justify-between items-center">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={handleLike} 
-              className="h-8 px-2 text-white hover:bg-black/20"
-            >
-              <Heart className={`h-4 w-4 ${liked ? 'fill-red-500 text-red-500' : ''}`} />
-              <span className="ml-1">{post.likes + (liked ? 1 : 0)}</span>
-            </Button>
-            <span className="text-xs text-white">
-              {formatDistanceToNow(new Date(post.timestamp), { addSuffix: true })}
-            </span>
-          </div>
-        </div>
-      </div>
-    </Link>
   );
 };
 

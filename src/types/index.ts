@@ -1,4 +1,3 @@
-
 export interface NavItem {
   title: string;
   href: string;
@@ -93,6 +92,7 @@ export interface Post {
   expiresAt: string;
   likes: number;
   comments: number;
+  isVenuePost?: boolean;
 }
 
 export interface Comment {
