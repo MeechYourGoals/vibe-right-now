@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Calendar, MapPin, Plus, User } from "lucide-react";
+import { Calendar, MapPin, Plus, User, Trash2 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { Link } from "react-router-dom";
 
@@ -21,13 +21,26 @@ interface TripCardProps {
     }>;
   };
   onInvite: (tripId: string) => void;
+  onDeleteTrip?: (tripId: string) => void;
 }
 
-export const TripCard: React.FC<TripCardProps> = ({ trip, onInvite }) => {
+export const TripCard: React.FC<TripCardProps> = ({ trip, onInvite, onDeleteTrip }) => {
   return (
     <Card key={trip.id} className="slide-up-animation">
       <CardHeader className="pb-2">
-        <CardTitle className="text-xl">{trip.name}</CardTitle>
+        <div className="flex justify-between">
+          <CardTitle className="text-xl">{trip.name}</CardTitle>
+          {onDeleteTrip && (
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-8 w-8 text-muted-foreground hover:text-destructive"
+              onClick={() => onDeleteTrip(trip.id)}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
         <div className="flex items-center text-sm text-muted-foreground">
           <MapPin className="h-3 w-3 mr-1" />
           <span>{trip.destination}</span>

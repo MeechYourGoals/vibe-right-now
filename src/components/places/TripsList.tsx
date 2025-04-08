@@ -41,8 +41,8 @@ const TripsList: React.FC = () => {
             <TripCard 
               key={trip.id} 
               trip={trip} 
+              onInvite={(tripId) => inviteUserToTrip(tripId, window.prompt("Enter email to invite:") || "")}
               onDeleteTrip={deleteTrip}
-              onInviteUser={inviteUserToTrip}
             />
           ))}
         </div>
