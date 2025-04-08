@@ -12,34 +12,57 @@ const AnalyticsFileUpload = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [showResults, setShowResults] = useState(false);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
   const { toast } = useToast();
   
   const handleFileChange = (file: File) => {
     setFile(file);
     setShowResults(false);
+    setAnalysisError(null);
   };
   
   const handleUpload = () => {
     if (!file) return;
     
     setIsUploading(true);
+    setAnalysisError(null);
     
     // Simulate upload process
     setTimeout(() => {
       setIsUploading(false);
       setIsAnalyzing(true);
       
-      // Simulate AI analysis
+      // Simulate AI analysis with potential for random errors (for demonstration purposes)
       setTimeout(() => {
-        setIsAnalyzing(false);
-        setShowResults(true);
+        const simulateError = Math.random() > 0.8; // 20% chance of error for demonstration
         
-        toast({
-          title: "Analysis Complete",
-          description: "Your financial data has been analyzed successfully",
-        });
+        setIsAnalyzing(false);
+        
+        if (simulateError) {
+          setAnalysisError("Unable to process the file format. Please ensure you're uploading valid financial data.");
+          setShowResults(false);
+          
+          toast({
+            title: "Analysis Failed",
+            description: "There was an error analyzing your data",
+            variant: "destructive",
+          });
+        } else {
+          setShowResults(true);
+          setAnalysisError(null);
+          
+          toast({
+            title: "Analysis Complete",
+            description: "Your financial data has been analyzed successfully",
+          });
+        }
       }, 3000);
     }, 2000);
+  };
+  
+  const handleRetryAnalysis = () => {
+    if (!file) return;
+    handleUpload();
   };
   
   return (
@@ -66,7 +89,13 @@ const AnalyticsFileUpload = () => {
             />
           )}
           
-          {showResults && <AnalysisResults />}
+          {(showResults || isAnalyzing || analysisError) && (
+            <AnalysisResults 
+              isLoading={isAnalyzing}
+              error={analysisError}
+              onRetry={handleRetryAnalysis}
+            />
+          )}
         </CardContent>
       </Card>
     </div>
