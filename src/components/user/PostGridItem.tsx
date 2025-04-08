@@ -55,7 +55,7 @@ const PostGridItem = ({ post }: PostGridItemProps) => {
               onClick={navigateToUserProfile}
             >
               <AvatarImage src={post.user.avatar} alt={post.user.name} />
-              <AvatarFallback>{post.user.name[0]}</AvatarFallback>
+              <AvatarFallback>{post.user.name.charAt(0)}</AvatarFallback>
             </Avatar>
             <span 
               className="text-xs font-medium text-white cursor-pointer hover:underline"

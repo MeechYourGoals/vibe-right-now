@@ -322,7 +322,7 @@ const PostCard = ({ posts, locationPostCount = 1, getComments }: PostCardProps) 
                   <AvatarFallback>{post.user.name.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
-                  <Link to={`/user/${post.user.id}`} className="text-sm font-medium hover:underline">
+                  <Link to={`/user/${post.user.username}`} className="text-sm font-medium hover:underline">
                     @{post.user.username}
                   </Link>
                   <div className="text-xs text-muted-foreground">{formatTime(post.timestamp)}</div>
@@ -411,7 +411,7 @@ const PostCard = ({ posts, locationPostCount = 1, getComments }: PostCardProps) 
             <div className="p-4 overflow-y-auto max-h-[calc(80vh-4rem)]">
               <div className="grid gap-2">
                 {allUsers.map((user, index) => (
-                  <Link key={index} to={`/user/${user.id}`} className="flex items-center p-2 hover:bg-muted rounded-md">
+                  <Link key={index} to={`/user/${user.username}`} className="flex items-center p-2 hover:bg-muted rounded-md">
                     <Avatar className="h-8 w-8 mr-2">
                       <AvatarImage src={user.avatar} alt={user.name} />
                       <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
