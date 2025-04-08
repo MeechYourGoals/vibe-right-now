@@ -15,15 +15,30 @@ interface VenuePostProps {
     url: string;
   };
   timestamp: string;
+  sourceUrl?: string; // URL to the original post on external platform
+  sourcePlatform?: string; // Name of the source platform
 }
 
-const VenuePost = ({ venue, content, media, timestamp }: VenuePostProps) => {
+const VenuePost = ({ 
+  venue, 
+  content, 
+  media, 
+  timestamp, 
+  sourceUrl, 
+  sourcePlatform 
+}: VenuePostProps) => {
   const officialTicketUrl = venue.type === "sports" ? getOfficialTicketUrl(venue.id) : "";
+  const isExternalContent = !!sourceUrl;
 
   return (
-    <Card className="vibe-card overflow-hidden">
+    <Card className={`vibe-card overflow-hidden ${isExternalContent ? 'border-blue-500/50' : ''}`}>
       <CardHeader className="p-4 pb-0">
-        <VenuePostHeader venue={venue} timestamp={timestamp} />
+        <VenuePostHeader 
+          venue={venue} 
+          timestamp={timestamp} 
+          isExternalContent={isExternalContent}
+          sourcePlatform={sourcePlatform}
+        />
       </CardHeader>
       <CardContent className="p-4">
         <VenuePostContent 
@@ -34,7 +49,12 @@ const VenuePost = ({ venue, content, media, timestamp }: VenuePostProps) => {
         />
       </CardContent>
       <CardFooter className="p-4 pt-0 flex flex-col gap-2">
-        <VenuePostFooter venue={venue} officialTicketUrl={officialTicketUrl} />
+        <VenuePostFooter 
+          venue={venue} 
+          officialTicketUrl={officialTicketUrl}
+          sourceUrl={sourceUrl}
+          sourcePlatform={sourcePlatform}
+        />
       </CardFooter>
     </Card>
   );
