@@ -3,10 +3,11 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MapPin, ArrowRight, VerifiedIcon, Navigation } from "lucide-react";
+import { MapPin, ArrowRight, Navigation } from "lucide-react";
 import OpenStreetMap from "./map/OpenStreetMap";
 import { Location } from "@/types";
 import { getNearbyLocations } from "@/mock/cityLocations";
+import VerifiedIcon from "@/components/icons/VerifiedIcon";
 
 const LocationsNearby = () => {
   const navigate = useNavigate();

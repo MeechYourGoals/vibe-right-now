@@ -6,9 +6,10 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Ticket, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const DiscountLocations = () => {
+  const navigate = useNavigate();
   // Filter posts with discount offers (posts 29-32 are our discount posts)
   const discountPosts = mockPosts.filter(post => 
     ["29", "30", "31", "32"].includes(post.id)
@@ -53,10 +54,13 @@ const DiscountLocations = () => {
                   </div>
                 </div>
               </div>
-              <Button variant="ghost" size="sm" className="h-8" asChild>
-                <Link to={`/venue/${post.location.id}`}>
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-8" 
+                onClick={() => navigate(`/venue/${post.location.id}`)}
+              >
+                <ArrowRight className="h-4 w-4" />
               </Button>
             </div>
           ))}

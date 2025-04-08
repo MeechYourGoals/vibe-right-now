@@ -7,6 +7,7 @@ import { mockUsers, mockPosts, mockComments } from "@/mock/data";
 import { User, Comment, Post } from "@/types";
 import UserProfileHeader from "@/components/user/UserProfileHeader";
 import ProfileTabs from "@/components/user/ProfileTabs";
+import VerifiedIcon from "@/components/icons/VerifiedIcon";
 
 const UserProfile = () => {
   const { username } = useParams<{ username: string }>();

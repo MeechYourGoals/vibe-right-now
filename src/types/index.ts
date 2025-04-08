@@ -1,3 +1,4 @@
+
 export interface NavItem {
   title: string;
   href: string;
@@ -82,6 +83,10 @@ export interface User {
   updatedAt?: Date;
   isCelebrity?: boolean;
   verified?: boolean;
+  followers?: number;
+  following?: number;
+  places?: number;
+  isPrivate?: boolean;
 }
 
 export interface Post {
