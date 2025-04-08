@@ -19,7 +19,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    if (inputValue.trim() && !isTyping) {
+    if (inputValue.trim() && !isTyping && !disabled) {
       onSendMessage(inputValue);
       setInputValue('');
     }
