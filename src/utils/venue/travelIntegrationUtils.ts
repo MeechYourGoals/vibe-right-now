@@ -38,7 +38,7 @@ export const getPriceComparisons = (venue: Location): PriceComparison[] => {
     .reduce((sum, char) => sum + char.charCodeAt(0), 0) % 100 + 50;
 
   // Mock price comparisons with slight variations
-  return [
+  const comparisons: PriceComparison[] = [
     {
       site: "booking",
       price: Math.round(basePrice * 1.05),
@@ -65,7 +65,9 @@ export const getPriceComparisons = (venue: Location): PriceComparison[] => {
       price: Math.round(basePrice * 0.98),
       url: `https://www.expedia.com/Hotel-Search?destination=${encodeURIComponent(venue.city)}`,
     },
-  ].sort((a, b) => a.price - b.price); // Sort by price, lowest first
+  ];
+  
+  return comparisons.sort((a, b) => a.price - b.price); // Sort by price, lowest first
 };
 
 // Get logo URL for travel sites
