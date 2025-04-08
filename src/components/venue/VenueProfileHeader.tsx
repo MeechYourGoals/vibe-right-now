@@ -1,4 +1,5 @@
 
+import { useState } from "react";
 import { Building, MapPin, Phone, Globe, Clock, Video, Star, DollarSign } from "lucide-react";
 import { Location } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -7,7 +8,6 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/h
 import BusinessHours from "@/components/BusinessHours";
 import VenueActionButton from "./VenueActionButton";
 import { getOfficialUrl, getActionButtonText } from "@/utils/locationUtils";
-import { useState } from "react";
 
 interface VenueProfileHeaderProps {
   venue: Location;

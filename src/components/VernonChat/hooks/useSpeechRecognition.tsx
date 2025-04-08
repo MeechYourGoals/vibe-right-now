@@ -34,14 +34,14 @@ export const useSpeechRecognition = () => {
           clearTimeout(silenceTimer.current);
         }
         
-        // Set new silence timer for 2 seconds
+        // Set new silence timer for 2 seconds - automatically process after 2 seconds of silence
         silenceTimer.current = setTimeout(() => {
           if (isListening && newTranscript.trim()) {
-            // Only process if we have a valid transcript
-            setIsListening(false);
+            // Only process if we have a valid transcript and we were listening
+            stopListening();
             setIsProcessing(true);
           }
-        }, 2000);
+        }, 2000); // Reduced to 2 seconds as requested
       };
       
       speechRecognition.current.onend = () => {

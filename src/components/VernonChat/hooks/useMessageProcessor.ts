@@ -10,6 +10,7 @@ import {
   detectCityInQuery, 
   isLocationOrEventQuery 
 } from '../utils/locationResponseGenerator';
+import { PerplexityService } from '@/services/PerplexityService';
 
 export const useMessageProcessor = (isProPlan: boolean = false, isVenueMode: boolean = false) => {
   const [isTyping, setIsTyping] = useState(false);
@@ -33,8 +34,14 @@ export const useMessageProcessor = (isProPlan: boolean = false, isVenueMode: boo
         // Process venue-specific queries
         responseText = await processVenueQuery(inputValue, isProPlan);
       } else {
-        // Get response from HuggingChat
-        responseText = await HuggingChatService.searchHuggingChat(inputValue);
+        // Try to get response from Perplexity first for more accurate information
+        try {
+          responseText = await PerplexityService.searchPerplexity(inputValue);
+        } catch (error) {
+          console.error('Error with Perplexity search, falling back to HuggingChat:', error);
+          // Get response from HuggingChat as fallback
+          responseText = await HuggingChatService.searchHuggingChat(inputValue);
+        }
         
         // Parse city if the query was about events or places in a specific city
         const detectedCity = detectCityInQuery(inputValue);
@@ -57,11 +64,14 @@ export const useMessageProcessor = (isProPlan: boolean = false, isVenueMode: boo
               combinedResponse = `${responseText}\n\n${generateLocationResponse(cityInfo.name, cityLocations)}`;
             }
             
+            // Clean the response to remove formatting markers
+            combinedResponse = cleanResponseText(combinedResponse);
+            
             const aiMessage = createAIMessage(combinedResponse);
             setMessages(prev => [...prev, aiMessage]);
           } else {
             // Fall back to just the search response
-            const aiMessage = createAIMessage(responseText);
+            const aiMessage = createAIMessage(cleanResponseText(responseText));
             setMessages(prev => [...prev, aiMessage]);
           }
           
@@ -73,7 +83,7 @@ export const useMessageProcessor = (isProPlan: boolean = false, isVenueMode: boo
       }
       
       // Standard response if not a city/venue query or is a venue mode query
-      const aiMessage = createAIMessage(responseText);
+      const aiMessage = createAIMessage(cleanResponseText(responseText));
       setMessages(prev => [...prev, aiMessage]);
     } catch (error) {
       console.error('Error getting AI response:', error);
@@ -83,6 +93,24 @@ export const useMessageProcessor = (isProPlan: boolean = false, isVenueMode: boo
       setIsTyping(false);
       setIsSearching(false);
     }
+  };
+
+  // Clean response text to remove markdown formatting
+  const cleanResponseText = (text: string): string => {
+    // Remove category headers like "<strong>Category</strong>: " or "**Category**: "
+    const categories = ['Live Entertainment', 'Nightlife', 'Food', 'Restaurants', 'Events', 'Attractions'];
+    let cleanedText = text;
+    
+    categories.forEach(category => {
+      // Remove patterns like "<strong>Category</strong>: " or "**Category**: "
+      const patternWithHtmlTags = new RegExp(`<strong>${category}<\/strong>:\\s*`, 'gi');
+      const patternWithMarkdown = new RegExp(`\\*\\*${category}\\*\\*:\\s*`, 'gi');
+      
+      cleanedText = cleanedText.replace(patternWithHtmlTags, '');
+      cleanedText = cleanedText.replace(patternWithMarkdown, '');
+    });
+    
+    return cleanedText;
   };
 
   // Process venue-specific queries

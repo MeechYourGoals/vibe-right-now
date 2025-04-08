@@ -36,16 +36,38 @@ export const getPreferredVoice = (voices: SpeechSynthesisVoice[]): SpeechSynthes
 
 // Process text to make it sound more natural
 export const processTextForNaturalSpeech = (text: string): string => {
-  return text
+  // Remove HTML tags first
+  let processedText = text.replace(/<[^>]*>/g, '');
+  
+  // Remove strong tags and other formatting that might cause issues
+  processedText = processedText.replace(/<\/?strong>/g, '');
+  processedText = processedText.replace(/\*\*/g, '');
+  
+  // Replace patterns that might appear in search results
+  const categories = ['Live Entertainment', 'Nightlife', 'Food', 'Restaurants', 'Events', 'Attractions'];
+  categories.forEach(category => {
+    // Remove patterns like "<strong>Category</strong>: " or "Category: "
+    const patternWithTags = new RegExp(`<strong>${category}<\/strong>:\\s*`, 'gi');
+    const patternWithoutTags = new RegExp(`${category}:\\s*`, 'gi');
+    
+    processedText = processedText.replace(patternWithTags, '');
+    processedText = processedText.replace(patternWithoutTags, '');
+  });
+  
+  // Add natural pauses and inflection for better prosody
+  return processedText
     .replace(/\./g, '. ')
     .replace(/\,/g, ', ')
     .replace(/\!/g, '! ')
     .replace(/\?/g, '? ')
-    // Add SSML-like breathing pauses for more natural sound
-    .replace(/([.!?])\s+/g, '$1 <break time="500ms"/> ')
-    .replace(/(,|;)\s+/g, '$1 <break time="300ms"/> ')
-    // Remove the SSML-like tags before actual synthesis
-    .replace(/<break time="(\d+)ms"\/>/g, '');
+    // Add breathing pauses for more natural sound
+    .replace(/([.!?])\s+/g, '$1 <break time="600ms"/> ')
+    .replace(/(,|;)\s+/g, '$1 <break time="400ms"/> ')
+    // Add emphasis on certain words for more expressive speech
+    .replace(/\b(fantastic|amazing|incredible|excellent|awesome)\b/gi, '<emphasis>$1</emphasis>')
+    // Remove the SSML-like tags before actual synthesis since browser speech API doesn't support them
+    .replace(/<break time="(\d+)ms"\/>/g, '')
+    .replace(/<emphasis>(.*?)<\/emphasis>/g, '$1');
 };
 
 // Configure utterance for more natural sounding speech
@@ -54,15 +76,17 @@ export const configureUtteranceForNaturalSpeech = (
   text: string
 ): void => {
   // Optimize for more natural sounding speech
-  utterance.rate = 0.92; // Slightly slower than default
-  utterance.pitch = 1.0; // Natural pitch
+  utterance.rate = 0.9; // Slightly slower for more natural cadence
+  utterance.pitch = 1.05; // Slightly higher pitch for more energetic sound
   utterance.volume = 1.0;
   
   // Add more expression with pitch variations for questions and exclamations
   if (text.includes('?')) {
-    utterance.pitch = 1.1; // Slightly higher pitch for questions
+    utterance.pitch = 1.15; // Higher pitch for questions
+    utterance.rate = 0.85; // Slightly slower for questions
   } else if (text.includes('!')) {
-    utterance.pitch = 1.2; // Higher pitch for exclamations
+    utterance.pitch = 1.25; // Higher pitch for exclamations
+    utterance.rate = 0.88; // Slightly slower for emphasis
   }
 };
 
