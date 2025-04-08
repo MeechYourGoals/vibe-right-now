@@ -4,6 +4,9 @@ import { Location } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import BusinessHours from "@/components/BusinessHours";
+import VenueActionButton from "./VenueActionButton";
+import { getOfficialUrl, getActionButtonText } from "@/utils/locationUtils";
 
 interface VenueProfileHeaderProps {
   venue: Location;
@@ -78,6 +81,8 @@ const VenueProfileHeader = ({ venue, onMapExpand }: VenueProfileHeaderProps) => 
         </div>
       </div>
       
+      <BusinessHours venue={venue} />
+      
       <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-2">
         <Button variant="outline" className="flex justify-start">
           <Phone className="h-4 w-4 mr-2" /> Call Venue
@@ -85,12 +90,17 @@ const VenueProfileHeader = ({ venue, onMapExpand }: VenueProfileHeaderProps) => 
         <Button variant="outline" className="flex justify-start">
           <Globe className="h-4 w-4 mr-2" /> Website
         </Button>
-        <Button variant="outline" className="flex justify-start">
-          <Clock className="h-4 w-4 mr-2" /> View Hours
-        </Button>
-        <Button variant="outline" className="flex justify-start" onClick={onMapExpand}>
-          <MapPin className="h-4 w-4 mr-2" /> Directions
-        </Button>
+        <VenueActionButton venue={venue} variant="outline" className="flex justify-start" />
+        <a 
+          href={getOfficialUrl(venue)} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="flex-1"
+        >
+          <Button variant="outline" className="w-full flex justify-start">
+            <Clock className="h-4 w-4 mr-2" /> {getActionButtonText(venue.type)}
+          </Button>
+        </a>
       </div>
 
       {venue.hours && venue.hours.isOpen24Hours && (
