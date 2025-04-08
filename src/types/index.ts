@@ -1,4 +1,3 @@
-
 export interface NavItem {
   title: string;
   href: string;
@@ -63,6 +62,7 @@ export interface Location {
   type: "restaurant" | "bar" | "event" | "attraction" | "sports" | "other";
   verified: boolean;
   hours?: BusinessHours;
+  logo?: string;
 }
 
 export interface Media {
