@@ -9,7 +9,7 @@ export const useChat = (isProPlan: boolean = false, isVenueMode: boolean = false
     ? {
         id: '1',
         text: "Hi there! I'm VeRNon for Venues, your business insights assistant. I can help you understand your venue metrics, customer trends, and marketing performance. What would you like to know about your venue's performance?",
-        sender: 'ai',
+        sender: 'ai' as const,
         timestamp: new Date()
       }
     : INITIAL_MESSAGE;

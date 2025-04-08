@@ -27,19 +27,19 @@ const DataInsights = () => {
         return null;
       case 'plus':
         return (
-          <Badge variant="outline" className="ml-2 bg-blue-500/10 text-blue-500 border-blue-200">
+          <Badge variant="outline" className="ml-2 bg-blue-600/20 text-blue-500 dark:text-blue-400 border-blue-300">
             Plus
           </Badge>
         );
       case 'premium':
         return (
-          <Badge variant="outline" className="ml-2 bg-purple-500/10 text-purple-500 border-purple-200">
+          <Badge variant="outline" className="ml-2 bg-purple-600/20 text-purple-600 dark:text-purple-400 border-purple-300">
             Premium
           </Badge>
         );
       case 'pro':
         return (
-          <Badge variant="outline" className="ml-2 bg-amber-500/10 text-amber-500 border-amber-200">
+          <Badge variant="outline" className="ml-2 bg-amber-600/20 text-amber-600 dark:text-amber-400 border-amber-300">
             Pro
           </Badge>
         );
@@ -62,21 +62,21 @@ const DataInsights = () => {
               {subscriptionTier === 'standard' && (
                 <div className="flex gap-2">
                   <Button 
-                    className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
+                    className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white"
                     onClick={() => handleUpgrade('plus')}
                   >
                     <Crown className="mr-2 h-4 w-4" />
                     Upgrade to Plus
                   </Button>
                   <Button 
-                    className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700"
+                    className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white"
                     onClick={() => handleUpgrade('premium')}
                   >
                     <Crown className="mr-2 h-4 w-4" />
                     Upgrade to Premium
                   </Button>
                   <Button 
-                    className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
+                    className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white"
                     onClick={() => handleUpgrade('pro')}
                   >
                     <Crown className="mr-2 h-4 w-4" />
@@ -88,14 +88,14 @@ const DataInsights = () => {
               {subscriptionTier === 'plus' && (
                 <div className="flex gap-2">
                   <Button 
-                    className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700"
+                    className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white"
                     onClick={() => handleUpgrade('premium')}
                   >
                     <Crown className="mr-2 h-4 w-4" />
                     Upgrade to Premium
                   </Button>
                   <Button 
-                    className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
+                    className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white"
                     onClick={() => handleUpgrade('pro')}
                   >
                     <Crown className="mr-2 h-4 w-4" />
@@ -106,7 +106,7 @@ const DataInsights = () => {
               
               {subscriptionTier === 'premium' && (
                 <Button 
-                  className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
+                  className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white"
                   onClick={() => handleUpgrade('pro')}
                 >
                   <Crown className="mr-2 h-4 w-4" />

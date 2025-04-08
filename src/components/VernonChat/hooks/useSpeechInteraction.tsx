@@ -212,9 +212,19 @@ export const useSpeechInteraction = () => {
       .replace(/\./g, '. ')
       .replace(/\,/g, ', ')
       .replace(/\!/g, '! ')
-      .replace(/\?/g, '? ');
+      .replace(/\?/g, '? ')
+      // Add SSML-like breathing pauses for more natural sound
+      .replace(/([.!?])\s+/g, '$1 <break time="500ms"/> ')
+      .replace(/(,|;)\s+/g, '$1 <break time="300ms"/> ');
     
-    utterance.text = processedText;
+    utterance.text = processedText.replace(/<break time="(\d+)ms"\/>/g, '');
+    
+    // Add more expression with pitch variations for questions and exclamations
+    if (text.includes('?')) {
+      utterance.pitch = 1.1; // Slightly higher pitch for questions
+    } else if (text.includes('!')) {
+      utterance.pitch = 1.2; // Higher pitch for exclamations
+    }
     
     speechSynthesis.current.speak(utterance);
   };

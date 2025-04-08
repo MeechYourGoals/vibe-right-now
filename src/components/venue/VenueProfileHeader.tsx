@@ -1,5 +1,5 @@
 
-import { Building, MapPin, Phone, Globe, Clock, StarIcon, VerifiedIcon, DollarSign } from "lucide-react";
+import { Building, MapPin, Phone, Globe, Clock, Video, Star, DollarSign } from "lucide-react";
 import { Location } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -7,6 +7,7 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/h
 import BusinessHours from "@/components/BusinessHours";
 import VenueActionButton from "./VenueActionButton";
 import { getOfficialUrl, getActionButtonText } from "@/utils/locationUtils";
+import { useState } from "react";
 
 interface VenueProfileHeaderProps {
   venue: Location;
@@ -67,6 +68,15 @@ const getRSVPButtonText = (venue: Location): string => {
 
 const VenueProfileHeader = ({ venue, onMapExpand }: VenueProfileHeaderProps) => {
   const priceTier = getPriceTier(venue);
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [showLivestream, setShowLivestream] = useState(false);
+  
+  // Simulate livestreaming capability for Pro users (random venues would have it)
+  const hasLivestream = venue.id.charCodeAt(0) % 3 === 0;
+  
+  const toggleLivestream = () => {
+    setShowLivestream(!showLivestream);
+  };
   
   return (
     <div className="mb-4">
@@ -74,7 +84,18 @@ const VenueProfileHeader = ({ venue, onMapExpand }: VenueProfileHeaderProps) => 
         <h1 className="text-2xl md:text-3xl font-bold flex items-center">
           {venue.name}
           {venue.verified && (
-            <VerifiedIcon className="h-5 w-5 ml-2 text-primary" />
+            <div className="ml-2 text-primary">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-badge-check"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"></path><path d="m9 12 2 2 4-4"></path></svg>
+            </div>
+          )}
+          {hasLivestream && (
+            <Badge variant="outline" className="ml-2 bg-red-500/10 text-red-500 border-red-300 cursor-pointer" onClick={toggleLivestream}>
+              <span className="relative flex h-2 w-2 mr-1">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+              </span>
+              LIVE
+            </Badge>
           )}
         </h1>
         
@@ -98,6 +119,25 @@ const VenueProfileHeader = ({ venue, onMapExpand }: VenueProfileHeaderProps) => 
           </div>
         </div>
       </div>
+      
+      {showLivestream && hasLivestream && (
+        <div className="mt-4 bg-black aspect-video rounded-md flex items-center justify-center relative">
+          <div className="absolute top-2 right-2 z-10">
+            <Badge variant="outline" className="bg-red-500 text-white border-red-700">
+              <span className="relative flex h-2 w-2 mr-1">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+              </span>
+              LIVE
+            </Badge>
+          </div>
+          <div className="text-center text-white">
+            <Video className="h-10 w-10 mx-auto mb-2 opacity-50" />
+            <p className="text-sm opacity-70">Live stream from {venue.name}</p>
+            <p className="text-xs mt-1 opacity-50">Viewers: {Math.floor(Math.random() * 100) + 10}</p>
+          </div>
+        </div>
+      )}
       
       <BusinessHours venue={venue} />
       

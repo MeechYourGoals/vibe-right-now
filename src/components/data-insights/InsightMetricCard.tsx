@@ -20,17 +20,24 @@ const InsightMetricCard = ({
   changePercentage, 
   timeframe 
 }: InsightMetricCardProps) => {
+  // Function to determine the badge background color based on iconColor
+  const getBadgeClass = (color: string) => {
+    const colorName = color.split('-')[0].split('text-')[1] || color;
+    
+    return `bg-${colorName}-100 dark:bg-${colorName}-900/30 ${color} border-${colorName}-300 dark:border-${colorName}-700`;
+  };
+  
   return (
-    <Card>
+    <Card className="border-2 shadow-sm hover:shadow-md transition-shadow">
       <CardHeader className="pb-2">
-        <CardDescription>{title}</CardDescription>
+        <CardDescription className="text-foreground/80 font-medium">{title}</CardDescription>
         <CardTitle className="text-2xl flex items-center">
           <Icon className={`h-5 w-5 mr-2 ${iconColor}`} />
           {value}
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <Badge variant="outline" className={`bg-${iconColor.split('-')[0]}-500/10 ${iconColor}`}>
+        <Badge variant="outline" className={`${getBadgeClass(iconColor)}`}>
           +{changePercentage}% from last {timeframe}
         </Badge>
       </CardContent>

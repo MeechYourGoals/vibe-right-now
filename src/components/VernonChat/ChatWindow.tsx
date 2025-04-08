@@ -80,7 +80,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
         isMinimized={isMinimized}
         toggleMinimize={toggleMinimize}
         closeChat={closeChat}
-        isVenueMode={isVenueMode}
       />
     );
   }
@@ -91,7 +90,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
         isMinimized={isMinimized}
         toggleMinimize={toggleMinimize}
         closeChat={closeChat}
-        isVenueMode={isVenueMode}
       />
       <MessageList
         messages={messages}

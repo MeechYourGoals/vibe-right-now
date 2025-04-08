@@ -4,19 +4,22 @@ import ChatButton from './ChatButton';
 import ChatWindow from './ChatWindow';
 import { useChat } from './hooks/useChat';
 import { Button } from '@/components/ui/button';
-import { Settings, Building2 } from 'lucide-react';
+import { Settings, Building2, Moon, Sun } from 'lucide-react';
 import { 
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
+import { useTheme } from '@/components/ThemeProvider';
+import { toast } from 'sonner';
 
 const VernonChat = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [isVenueMode, setIsVenueMode] = useState(false);
   const [isProPlan, setIsProPlan] = useState(false); // Simulate pro plan status
+  const { theme, setTheme } = useTheme();
   
   const {
     messages,
@@ -49,6 +52,10 @@ const VernonChat = () => {
     setIsProPlan(!isProPlan);
     toast.success(isProPlan ? 'Switched to Basic Plan' : 'Pro Plan Features Activated');
   };
+
+  const toggleTheme = () => {
+    setTheme(theme === 'light' ? 'dark' : 'light');
+  };
   
   if (!isOpen) {
     return (
@@ -70,6 +77,14 @@ const VernonChat = () => {
           setIsVenueMode(false);
           setIsOpen(true);
         }} />
+        <Button 
+          variant="outline" 
+          className="h-12 w-12 rounded-full" 
+          onClick={toggleTheme}
+          title={theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
+        >
+          {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+        </Button>
       </div>
     );
   }
@@ -102,6 +117,9 @@ const VernonChat = () => {
             <DropdownMenuItem onClick={toggleProPlan}>
               {isProPlan ? 'Disable Pro Features' : 'Enable Pro Features'}
             </DropdownMenuItem>
+            <DropdownMenuItem onClick={toggleTheme}>
+              {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -120,7 +138,5 @@ const VernonChat = () => {
     </div>
   );
 };
-
-import { toast } from 'sonner';
 
 export default VernonChat;
