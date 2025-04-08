@@ -9,6 +9,9 @@ import { Link } from "react-router-dom";
 import { TripPlace } from "../TripPlace";
 
 export const TripPlaceCard = ({ placeItem }: { placeItem: TripPlace }) => {
+  // Create username from name for profile linking - strip spaces and lowercase
+  const getUsername = (name: string) => name.toLowerCase().replace(/\s+/g, '_');
+  
   return (
     <Card>
       <CardContent className="p-4">
@@ -52,7 +55,7 @@ export const TripPlaceCard = ({ placeItem }: { placeItem: TripPlace }) => {
                 </div>
                 
                 <Link 
-                  to={`/user/${placeItem.addedBy.name.toLowerCase().replace(' ', '_')}`} 
+                  to={`/user/${getUsername(placeItem.addedBy.name)}`} 
                   className="flex items-center text-xs text-muted-foreground hover:underline"
                 >
                   <span>by {placeItem.addedBy.name}</span>

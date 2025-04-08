@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { Heart, Calendar } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -15,10 +15,17 @@ interface PostGridItemProps {
 
 const PostGridItem: React.FC<PostGridItemProps> = ({ post, isVenuePost = false }) => {
   const [liked, setLiked] = useState(false);
+  const navigate = useNavigate();
   
   const handleLike = (e: React.MouseEvent) => {
     e.preventDefault();
     setLiked(!liked);
+  };
+  
+  const navigateToUserProfile = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigate(`/user/${post.user.username}`);
   };
 
   // Get the day of the week
@@ -55,7 +62,10 @@ const PostGridItem: React.FC<PostGridItemProps> = ({ post, isVenuePost = false }
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
         <div className="absolute bottom-0 left-0 right-0 p-3">
           <div className="flex items-center justify-between gap-2">
-            <Avatar className="h-6 w-6 border border-white">
+            <Avatar 
+              className="h-6 w-6 border border-white cursor-pointer" 
+              onClick={navigateToUserProfile}
+            >
               <AvatarImage src={post.user.avatar} alt={post.user.name} />
               <AvatarFallback>{post.user.name[0]}</AvatarFallback>
             </Avatar>
@@ -82,8 +92,11 @@ const PostGridItem: React.FC<PostGridItemProps> = ({ post, isVenuePost = false }
               <Heart className={`h-4 w-4 ${liked ? 'fill-red-500 text-red-500' : ''}`} />
               <span className="ml-1">{post.likes + (liked ? 1 : 0)}</span>
             </Button>
-            <span className="text-xs text-white">
-              {timeString}
+            <span 
+              className="text-xs text-white hover:underline cursor-pointer"
+              onClick={navigateToUserProfile}
+            >
+              @{post.user.username}
             </span>
           </div>
         </div>

@@ -26,8 +26,11 @@ const UserProfile = () => {
   const [placesTabValue, setPlacesTabValue] = useState("visited");
   
   useEffect(() => {
+    console.log("Looking for username:", username);
     // Find the user based on the username from the URL
     const foundUser = mockUsers.find((user) => user.username === username);
+    console.log("Found user:", foundUser);
+    
     if (foundUser) {
       setUser(foundUser);
       // Find posts by this user
@@ -77,6 +80,7 @@ const UserProfile = () => {
   };
 
   // Determine if user profile is private (based on user ID for deterministic results)
+  // Make user ID even = private, odd = public for consistent results
   const isPrivateProfile = user ? user.isPrivate || parseInt(user.id) % 2 === 0 : false;
 
   if (!user) {

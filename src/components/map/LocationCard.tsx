@@ -1,3 +1,4 @@
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MapPin, Share2, Clock } from "lucide-react";
@@ -10,7 +11,7 @@ import VenueActionButton from "@/components/venue/VenueActionButton";
 
 interface LocationCardProps {
   location: Location;
-  onViewVibes: (locationId: string) => void;
+  onViewVibes?: (locationId: string) => void;
 }
 
 // Helper function to share a venue
@@ -46,7 +47,11 @@ const LocationCard = ({ location, onViewVibes }: LocationCardProps) => {
   const todaysHours = getTodaysHours(location);
 
   const handleViewVibes = () => {
-    navigate(`/venue/${location.id}`);
+    if (onViewVibes) {
+      onViewVibes(location.id);
+    } else {
+      navigate(`/venue/${location.id}`);
+    }
   };
 
   return (
