@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Heart } from "lucide-react";
@@ -12,10 +13,18 @@ interface PostGridItemProps {
 
 const PostGridItem = ({ post }: PostGridItemProps) => {
   const [liked, setLiked] = useState(false);
+  const navigate = useNavigate();
   
   const handleLike = (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     setLiked(!liked);
+  };
+  
+  const navigateToUserProfile = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigate(`/user/${post.user.username}`);
   };
 
   return (
@@ -41,11 +50,19 @@ const PostGridItem = ({ post }: PostGridItemProps) => {
       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
         <div className="absolute bottom-0 left-0 right-0 p-3">
           <div className="flex items-center gap-2">
-            <Avatar className="h-6 w-6 border border-white">
+            <Avatar 
+              className="h-6 w-6 border border-white cursor-pointer hover:ring-2 hover:ring-primary transition-all"
+              onClick={navigateToUserProfile}
+            >
               <AvatarImage src={post.user.avatar} alt={post.user.name} />
               <AvatarFallback>{post.user.name[0]}</AvatarFallback>
             </Avatar>
-            <span className="text-xs font-medium text-white">@{post.user.username}</span>
+            <span 
+              className="text-xs font-medium text-white cursor-pointer hover:underline"
+              onClick={navigateToUserProfile}
+            >
+              @{post.user.username}
+            </span>
           </div>
           <div className="mt-2 flex justify-between items-center">
             <Button 
