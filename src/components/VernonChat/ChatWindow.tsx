@@ -15,6 +15,7 @@ interface ChatWindowProps {
   isTyping: boolean;
   isSearching: boolean;
   onSendMessage: (message: string) => void;
+  isVenueMode?: boolean;
 }
 
 const ChatWindow: React.FC<ChatWindowProps> = ({
@@ -25,7 +26,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   messages,
   isTyping,
   isSearching,
-  onSendMessage
+  onSendMessage,
+  isVenueMode = false
 }) => {
   const {
     isListening,
@@ -78,6 +80,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
         isMinimized={isMinimized}
         toggleMinimize={toggleMinimize}
         closeChat={closeChat}
+        isVenueMode={isVenueMode}
       />
     );
   }
@@ -88,6 +91,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
         isMinimized={isMinimized}
         toggleMinimize={toggleMinimize}
         closeChat={closeChat}
+        isVenueMode={isVenueMode}
       />
       <MessageList
         messages={messages}

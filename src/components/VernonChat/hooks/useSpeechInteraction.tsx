@@ -11,6 +11,8 @@ export const useSpeechInteraction = () => {
   const speechRecognition = useRef<SpeechRecognition | null>(null);
   const speechSynthesis = useRef<SpeechSynthesis | null>(null);
   const currentUtterance = useRef<SpeechSynthesisUtterance | null>(null);
+  const silenceTimer = useRef<NodeJS.Timeout | null>(null);
+  const lastSpeechTime = useRef<number>(0);
   
   // Initialize speech recognition and synthesis
   useEffect(() => {
@@ -28,6 +30,21 @@ export const useSpeechInteraction = () => {
           .join('');
         
         setTranscript(transcript);
+        lastSpeechTime.current = Date.now();
+        
+        // Reset silence timer on new speech
+        if (silenceTimer.current) {
+          clearTimeout(silenceTimer.current);
+        }
+        
+        // Set new silence timer for 2 seconds
+        silenceTimer.current = setTimeout(() => {
+          if (isListening && transcript.trim()) {
+            // Only process if we have a valid transcript
+            setIsListening(false);
+            setIsProcessing(true);
+          }
+        }, 2000);
       };
       
       speechRecognition.current.onend = () => {
@@ -56,6 +73,10 @@ export const useSpeechInteraction = () => {
     return () => {
       stopListening();
       stopSpeaking();
+      
+      if (silenceTimer.current) {
+        clearTimeout(silenceTimer.current);
+      }
     };
   }, []);
   
@@ -89,6 +110,7 @@ export const useSpeechInteraction = () => {
       speechRecognition.current?.start();
       setIsListening(true);
       setTranscript('');
+      lastSpeechTime.current = Date.now();
       toast.success('Voice mode activated. Start speaking...');
     } catch (error) {
       console.error('Error starting speech recognition:', error);
@@ -105,6 +127,11 @@ export const useSpeechInteraction = () => {
       }
     }
     setIsListening(false);
+    
+    if (silenceTimer.current) {
+      clearTimeout(silenceTimer.current);
+      silenceTimer.current = null;
+    }
   };
   
   const stopSpeaking = () => {
@@ -139,7 +166,20 @@ export const useSpeechInteraction = () => {
     // Get available voices
     const voices = speechSynthesis.current.getVoices();
     
-    // Try to find a good male English voice
+    // Try to find a good male English voice with natural sounding characteristics
+    const preferredVoices = [
+      'Google UK English Male',
+      'Microsoft David - English (United States)',
+      'Microsoft Mark - English (United States)',
+      'Alex',  // macOS voice
+    ];
+    
+    // Look for one of our preferred voices first
+    const naturalVoice = voices.find(voice => 
+      preferredVoices.some(preferred => voice.name.includes(preferred))
+    );
+    
+    // Try to find a good male English voice as fallback
     const maleVoice = voices.find(
       voice => voice.lang.includes('en') && 
                (voice.name.includes('Male') || 
@@ -154,16 +194,27 @@ export const useSpeechInteraction = () => {
       voice => voice.lang.includes('en')
     );
     
-    if (maleVoice) {
+    if (naturalVoice) {
+      utterance.voice = naturalVoice;
+    } else if (maleVoice) {
       utterance.voice = maleVoice;
     } else if (englishVoice) {
       utterance.voice = englishVoice;
     }
     
     // Optimize for more natural sounding speech
-    utterance.rate = 0.95; // Slightly slower than default
-    utterance.pitch = 0.95; // Slightly deeper voice
+    utterance.rate = 0.92; // Slightly slower than default
+    utterance.pitch = 1.0; // Natural pitch
     utterance.volume = 1.0;
+    
+    // Add slight pauses at punctuation to sound more natural
+    const processedText = text
+      .replace(/\./g, '. ')
+      .replace(/\,/g, ', ')
+      .replace(/\!/g, '! ')
+      .replace(/\?/g, '? ');
+    
+    utterance.text = processedText;
     
     speechSynthesis.current.speak(utterance);
   };
