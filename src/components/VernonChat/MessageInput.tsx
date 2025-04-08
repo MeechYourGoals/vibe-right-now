@@ -25,11 +25,21 @@ const MessageInput: React.FC<MessageInputProps> = ({
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Allow sending message with Enter key
+    if (e.key === 'Enter' && !e.shiftKey && inputValue.trim() && !isTyping && !disabled) {
+      e.preventDefault();
+      onSendMessage(inputValue);
+      setInputValue('');
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit} className="flex-1 flex">
       <Input
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
+        onKeyDown={handleKeyDown}
         placeholder="Ask Vernon anything..."
         className="flex-1 mr-2"
         disabled={isTyping || disabled}

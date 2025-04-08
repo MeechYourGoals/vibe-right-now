@@ -47,6 +47,24 @@ const renderPriceTier = (tier: number) => {
   );
 };
 
+// Function to get the appropriate RSVP button text based on venue type
+const getRSVPButtonText = (venue: Location): string => {
+  switch (venue.type) {
+    case 'restaurant':
+      return 'Make Reservation';
+    case 'bar':
+      return 'Book Table';
+    case 'event':
+      return 'Buy Tickets';
+    case 'sports':
+      return 'Get Tickets';
+    case 'attraction':
+      return 'Get Passes';
+    default:
+      return 'RSVP';
+  }
+};
+
 const VenueProfileHeader = ({ venue, onMapExpand }: VenueProfileHeaderProps) => {
   const priceTier = getPriceTier(venue);
   
@@ -90,7 +108,9 @@ const VenueProfileHeader = ({ venue, onMapExpand }: VenueProfileHeaderProps) => 
         <Button variant="outline" className="flex justify-start">
           <Globe className="h-4 w-4 mr-2" /> Website
         </Button>
-        <VenueActionButton venue={venue} variant="outline" className="flex justify-start" />
+        <Button variant="outline" className="flex justify-start">
+          <Clock className="h-4 w-4 mr-2" /> Want to Visit
+        </Button>
         <a 
           href={getOfficialUrl(venue)} 
           target="_blank" 
@@ -98,7 +118,7 @@ const VenueProfileHeader = ({ venue, onMapExpand }: VenueProfileHeaderProps) => 
           className="flex-1"
         >
           <Button variant="outline" className="w-full flex justify-start">
-            <Clock className="h-4 w-4 mr-2" /> {getActionButtonText(venue.type)}
+            <Clock className="h-4 w-4 mr-2" /> {getRSVPButtonText(venue)}
           </Button>
         </a>
       </div>

@@ -15,9 +15,11 @@ const VernonChat = () => {
   const [isListening, setIsListening] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [transcript, setTranscript] = useState('');
+  const [isSpeaking, setIsSpeaking] = useState(false);
   
   const speechRecognition = useRef<SpeechRecognition | null>(null);
   const speechSynthesis = useRef<SpeechSynthesis | null>(null);
+  const currentUtterance = useRef<SpeechSynthesisUtterance | null>(null);
   
   const {
     messages,
@@ -68,12 +70,8 @@ const VernonChat = () => {
     
     // Clean up
     return () => {
-      if (speechRecognition.current) {
-        speechRecognition.current.stop();
-      }
-      if (speechSynthesis.current) {
-        speechSynthesis.current.cancel();
-      }
+      stopListening();
+      stopSpeaking();
     };
   }, []);
   
@@ -87,6 +85,13 @@ const VernonChat = () => {
     }
   }, [messages, isTyping, isListening]);
   
+  // Effect to stop speaking when chat is closed
+  useEffect(() => {
+    if (!isOpen) {
+      stopSpeaking();
+    }
+  }, [isOpen]);
+  
   const toggleListening = () => {
     if (!speechRecognition.current) {
       toast.error('Speech recognition is not supported in your browser');
@@ -95,6 +100,7 @@ const VernonChat = () => {
     
     if (isListening) {
       stopListening();
+      stopSpeaking();
     } else {
       startListening();
     }
@@ -113,7 +119,13 @@ const VernonChat = () => {
   };
   
   const stopListening = () => {
-    speechRecognition.current?.stop();
+    if (speechRecognition.current) {
+      try {
+        speechRecognition.current.stop();
+      } catch (error) {
+        console.error('Error stopping speech recognition:', error);
+      }
+    }
     setIsListening(false);
     
     if (transcript.trim()) {
@@ -128,6 +140,16 @@ const VernonChat = () => {
     }
   };
   
+  const stopSpeaking = () => {
+    if (speechSynthesis.current) {
+      speechSynthesis.current.cancel();
+      setIsSpeaking(false);
+      if (currentUtterance.current) {
+        currentUtterance.current = null;
+      }
+    }
+  };
+  
   const speakResponse = (text: string) => {
     if (!speechSynthesis.current) {
       console.error('Speech synthesis not available');
@@ -135,24 +157,45 @@ const VernonChat = () => {
     }
     
     // Cancel any ongoing speech
-    speechSynthesis.current.cancel();
+    stopSpeaking();
     
     const utterance = new SpeechSynthesisUtterance(text);
+    currentUtterance.current = utterance;
+    
+    utterance.onstart = () => setIsSpeaking(true);
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = (event) => {
+      console.error('Speech synthesis error:', event);
+      setIsSpeaking(false);
+    }
     
     // Get available voices
     const voices = speechSynthesis.current.getVoices();
     
-    // Try to find a good English voice
-    const englishVoice = voices.find(
-      voice => voice.lang.includes('en') && voice.name.includes('Google') || voice.name.includes('Samantha')
+    // Try to find a good male English voice
+    const maleVoice = voices.find(
+      voice => voice.lang.includes('en') && 
+               (voice.name.includes('Male') || 
+                voice.name.includes('Daniel') || 
+                voice.name.includes('David') || 
+                voice.name.includes('James') || 
+                voice.name.includes('George'))
     );
     
-    if (englishVoice) {
+    // If no specific male voice found, fallback to any English voice
+    const englishVoice = voices.find(
+      voice => voice.lang.includes('en')
+    );
+    
+    if (maleVoice) {
+      utterance.voice = maleVoice;
+    } else if (englishVoice) {
       utterance.voice = englishVoice;
     }
     
-    utterance.rate = 1.0;
-    utterance.pitch = 1.0;
+    // Optimize for more natural sounding speech
+    utterance.rate = 0.95; // Slightly slower than default
+    utterance.pitch = 0.95; // Slightly deeper voice
     utterance.volume = 1.0;
     
     speechSynthesis.current.speak(utterance);
@@ -160,6 +203,12 @@ const VernonChat = () => {
   
   const toggleMinimize = () => {
     setIsMinimized(!isMinimized);
+  };
+  
+  const closeChat = () => {
+    setIsOpen(false);
+    stopListening();
+    stopSpeaking();
   };
   
   if (!isOpen) {
@@ -174,12 +223,7 @@ const VernonChat = () => {
       <ChatHeader 
         isMinimized={isMinimized}
         toggleMinimize={toggleMinimize}
-        closeChat={() => {
-          setIsOpen(false);
-          if (isListening) {
-            stopListening();
-          }
-        }}
+        closeChat={closeChat}
       />
       
       {!isMinimized && (
