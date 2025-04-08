@@ -52,6 +52,7 @@ const TripDetails = () => {
     handleAddPlace
   } = useTripPlaces({
     tripId,
+    // Make sure we provide default values when trip is null
     collaborators: trip?.collaborators || [],
     userColors
   });

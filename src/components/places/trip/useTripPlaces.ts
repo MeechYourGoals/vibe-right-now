@@ -28,11 +28,17 @@ export const useTripPlaces = ({ tripId, collaborators, userColors }: UseTripPlac
     if (storedPlaces) {
       setPlaces(storedPlaces);
     } else {
-      // Generate mock places based on trip ID
-      const mockPlaces = generateMockPlacesForTrip(tripId, collaborators, userColors);
-      
-      setPlaces(mockPlaces);
-      savePlaces(tripId, mockPlaces);
+      try {
+        // Generate mock places based on trip ID
+        const mockPlaces = generateMockPlacesForTrip(tripId, collaborators, userColors);
+        
+        setPlaces(mockPlaces);
+        savePlaces(tripId, mockPlaces);
+      } catch (error) {
+        console.error('Error generating mock places:', error);
+        // Fallback to empty array if there's an error
+        setPlaces([]);
+      }
     }
   }, [tripId, collaborators, userColors]);
 
@@ -43,18 +49,27 @@ export const useTripPlaces = ({ tripId, collaborators, userColors }: UseTripPlac
   };
   
   const handleAddPlace = (selectedPlace: Location, notes: string) => {
-    if (!tripId) return;
+    if (!tripId || !userColors || userColors.length === 0) {
+      toast.error("Cannot add place: missing trip information");
+      return;
+    }
 
-    // Get the first user (current user) color
-    const userColor = userColors[0].color;
+    // Get the first user (current user) color - with fallback
+    const userColor = userColors[0]?.color || "#3b82f6";
+    
+    // Make sure there's at least one collaborator
+    if (!collaborators || collaborators.length === 0) {
+      toast.error("Cannot add place: missing collaborator information");
+      return;
+    }
     
     const newPlace: TripPlace = {
       id: `place_${Date.now()}`,
       place: selectedPlace,
       addedBy: {
         id: "1", // Current user ID
-        name: collaborators[0].name,
-        avatar: collaborators[0].avatar,
+        name: collaborators[0].name || "Current User",
+        avatar: collaborators[0].avatar || "",
         colorCode: userColor
       },
       notes: notes,
