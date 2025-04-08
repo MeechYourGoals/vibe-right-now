@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Building, MapPin, Phone, Globe, Clock, Video, Star, DollarSign } from "lucide-react";
 import { Location } from "@/types";
@@ -8,11 +7,7 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/h
 import BusinessHours from "@/components/BusinessHours";
 import VenueActionButton from "./VenueActionButton";
 import { getOfficialUrl, getActionButtonText } from "@/utils/locationUtils";
-
-interface VenueProfileHeaderProps {
-  venue: Location;
-  onMapExpand: () => void;
-}
+import { isEligibleForPriceComparison, getPriceComparisons } from "@/utils/venue/travelIntegrationUtils";
 
 // Function to determine price tier (1-4) based on venue properties
 const getPriceTier = (venue: Location): number => {
@@ -66,10 +61,11 @@ const getRSVPButtonText = (venue: Location): string => {
   }
 };
 
-const VenueProfileHeader = ({ venue, onMapExpand }: VenueProfileHeaderProps) => {
+const VenueProfileHeader = ({ venue, onMapExpand }: { venue: Location, onMapExpand: () => void }) => {
   const priceTier = getPriceTier(venue);
   const [isStreaming, setIsStreaming] = useState(false);
   const [showLivestream, setShowLivestream] = useState(false);
+  const [showComparisons, setShowComparisons] = useState(false);
   
   // Simulate livestreaming capability for Pro users (random venues would have it)
   const hasLivestream = venue.id.charCodeAt(0) % 3 === 0;
@@ -77,6 +73,13 @@ const VenueProfileHeader = ({ venue, onMapExpand }: VenueProfileHeaderProps) => 
   const toggleLivestream = () => {
     setShowLivestream(!showLivestream);
   };
+  
+  // Check if the venue is eligible for price comparisons
+  const isEligible = isEligibleForPriceComparison(venue);
+  const priceComparisons = isEligible ? getPriceComparisons(venue) : [];
+  
+  // Determine if we show the "Compare Prices" badge
+  const showCompareButton = priceComparisons.length > 0;
   
   return (
     <div className="mb-4">
@@ -95,6 +98,12 @@ const VenueProfileHeader = ({ venue, onMapExpand }: VenueProfileHeaderProps) => 
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
               </span>
               LIVE
+            </Badge>
+          )}
+          {showCompareButton && (
+            <Badge variant="outline" className="ml-2 bg-blue-500/10 text-blue-500 border-blue-300 cursor-pointer" onClick={() => setShowComparisons(!showComparisons)}>
+              <DollarSign className="h-3 w-3 mr-1" />
+              Compare Prices
             </Badge>
           )}
         </h1>
@@ -135,6 +144,44 @@ const VenueProfileHeader = ({ venue, onMapExpand }: VenueProfileHeaderProps) => 
             <Video className="h-10 w-10 mx-auto mb-2 opacity-50" />
             <p className="text-sm opacity-70">Live stream from {venue.name}</p>
             <p className="text-xs mt-1 opacity-50">Viewers: {Math.floor(Math.random() * 100) + 10}</p>
+          </div>
+        </div>
+      )}
+      
+      {showComparisons && showCompareButton && (
+        <div className="mt-4 bg-muted/20 border rounded-lg p-3">
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="font-medium">Price Comparisons</h3>
+            <Button variant="ghost" size="sm" onClick={() => setShowComparisons(false)}>Close</Button>
+          </div>
+          <div className="space-y-2">
+            {priceComparisons.map((comparison) => (
+              <a 
+                key={comparison.site} 
+                href={comparison.url} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="flex items-center justify-between p-2 hover:bg-muted rounded-md transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="text-sm font-medium capitalize">
+                    {comparison.site}
+                  </div>
+                  {comparison.discount && (
+                    <Badge className="bg-green-500 text-xs">
+                      {comparison.discount}% OFF
+                    </Badge>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-bold">${comparison.price}</span>
+                  <Globe className="h-3 w-3 text-muted-foreground" />
+                </div>
+              </a>
+            ))}
+            <div className="text-xs text-center text-muted-foreground pt-2">
+              Prices may vary. Compare rates before booking.
+            </div>
           </div>
         </div>
       )}

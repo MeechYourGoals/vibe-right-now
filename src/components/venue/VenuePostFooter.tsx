@@ -3,6 +3,7 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Share2, ExternalLink } from "lucide-react";
 import VenueActionButton from "./VenueActionButton";
+import TravelSiteComparison from "./TravelSiteComparison";
 import { Location } from "@/types";
 import { 
   shareVenue, 
@@ -11,6 +12,7 @@ import {
   getActionButtonText,
   shouldShowExternalActionButton
 } from "@/utils/venue/venuePostUtils";
+import { isEligibleForPriceComparison } from "@/utils/venue/travelIntegrationUtils";
 
 interface VenuePostFooterProps {
   venue: Location;
@@ -20,9 +22,14 @@ interface VenuePostFooterProps {
 const VenuePostFooter: React.FC<VenuePostFooterProps> = ({ venue, officialTicketUrl }) => {
   const rideUrl = getRideServiceUrl(venue);
   const showExternalButton = shouldShowExternalActionButton(venue, officialTicketUrl);
+  const showPriceComparison = isEligibleForPriceComparison(venue);
 
   return (
     <>
+      {showPriceComparison && (
+        <TravelSiteComparison venue={venue} />
+      )}
+      
       <div className="flex justify-between w-full">
         <Button 
           variant="ghost" 

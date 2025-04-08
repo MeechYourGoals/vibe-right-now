@@ -1,5 +1,6 @@
 
 import { Location } from "@/types";
+import { isEligibleForPriceComparison } from "@/utils/venue/travelIntegrationUtils";
 
 // Helper function to get ride service URL
 export const getRideServiceUrl = (place: Location) => {
@@ -12,6 +13,26 @@ export const getRideServiceUrl = (place: Location) => {
 
 // Helper function to get official ticket or venue URL
 export const getOfficialUrl = (place: Location) => {
+  // First check if this is a travel-eligible venue
+  if (isEligibleForPriceComparison(place)) {
+    const siteMap = {
+      "attraction": "https://www.viator.com/",
+      "hotel": "https://www.booking.com/",
+      "resort": "https://www.expedia.com/"
+    };
+    
+    // Determine the best site based on venue type or name
+    let bestSite = "https://www.tripadvisor.com/";
+    
+    if (place.name.toLowerCase().includes("hotel") || place.id.includes("hotel")) {
+      bestSite = "https://www.booking.com/";
+    } else if (place.name.toLowerCase().includes("tour") || place.type === "attraction") {
+      bestSite = "https://www.viator.com/";
+    }
+    
+    return `${bestSite}search?q=${encodeURIComponent(place.name)}`;
+  }
+  
   // For sports venues, we would typically have specific ticket platform partnerships
   if (place.type === "sports") {
     // Use the same logic as in VenuePost to get ticket URLs
@@ -45,5 +66,6 @@ export const getOfficialUrl = (place: Location) => {
 export const getActionButtonText = (type: string) => {
   if (type === "restaurant") return "Reservations";
   if (type === "sports" || type === "event") return "Tickets";
+  if (type === "attraction") return "Book Now"; 
   return "Website";
 };
