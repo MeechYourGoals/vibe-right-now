@@ -54,6 +54,15 @@ export const processTextForNaturalSpeech = (text: string): string => {
     processedText = processedText.replace(patternWithoutTags, '');
   });
   
+  // Convert numbers to words for more natural speech
+  processedText = processedText.replace(/\b(\d+)\b/g, (match, number) => {
+    // Only convert small numbers, leave larger ones as digits
+    if (parseInt(number) < 100) {
+      return convertNumberToWords(parseInt(number));
+    }
+    return match;
+  });
+  
   // Add natural pauses and inflection for better prosody
   return processedText
     .replace(/\./g, '. ')
@@ -70,23 +79,43 @@ export const processTextForNaturalSpeech = (text: string): string => {
     .replace(/<emphasis>(.*?)<\/emphasis>/g, '$1');
 };
 
+// Convert numbers to words for more natural pronunciation
+function convertNumberToWords(num: number): string {
+  const ones = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine',
+                'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen',
+                'seventeen', 'eighteen', 'nineteen'];
+  const tens = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
+  
+  if (num < 20) return ones[num];
+  
+  const digit = num % 10;
+  if (num < 100) return tens[Math.floor(num / 10)] + (digit ? '-' + ones[digit] : '');
+  
+  return num.toString();
+}
+
 // Configure utterance for more natural sounding speech
 export const configureUtteranceForNaturalSpeech = (
   utterance: SpeechSynthesisUtterance, 
   text: string
 ): void => {
   // Optimize for more natural sounding speech
-  utterance.rate = 0.9; // Slightly slower for more natural cadence
+  utterance.rate = 0.92; // Slightly slower for more natural cadence
   utterance.pitch = 1.05; // Slightly higher pitch for more energetic sound
   utterance.volume = 1.0;
   
-  // Add more expression with pitch variations for questions and exclamations
+  // Add more expression with pitch and rate variations for different sentence types
   if (text.includes('?')) {
     utterance.pitch = 1.15; // Higher pitch for questions
     utterance.rate = 0.85; // Slightly slower for questions
   } else if (text.includes('!')) {
     utterance.pitch = 1.25; // Higher pitch for exclamations
     utterance.rate = 0.88; // Slightly slower for emphasis
+  }
+  
+  // For longer texts, use a slightly faster rate to maintain engagement
+  if (text.length > 200) {
+    utterance.rate = Math.min(utterance.rate + 0.05, 1.0);
   }
 };
 
@@ -98,6 +127,7 @@ export const initializeSpeechRecognition = (): SpeechRecognition | null => {
     const recognition = new SpeechRecognition();
     recognition.continuous = true;
     recognition.interimResults = true;
+    recognition.lang = 'en-US'; // Ensure English recognition for accuracy
     return recognition;
   }
   
@@ -107,7 +137,18 @@ export const initializeSpeechRecognition = (): SpeechRecognition | null => {
 
 export const initializeSpeechSynthesis = (): SpeechSynthesis | null => {
   if ('speechSynthesis' in window) {
-    return window.speechSynthesis;
+    // Force initialize voices if available
+    const synth = window.speechSynthesis;
+    synth.getVoices(); // Trigger voice loading
+    
+    // For iOS Safari, we need to speak a silent utterance to initialize the voices
+    if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+      const silentUtterance = new SpeechSynthesisUtterance('');
+      silentUtterance.volume = 0;
+      synth.speak(silentUtterance);
+    }
+    
+    return synth;
   }
   
   console.error('Speech synthesis not supported');
