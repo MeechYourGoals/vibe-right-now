@@ -14,6 +14,7 @@ import { useTheme } from '@/components/ThemeProvider';
 import { toast } from 'sonner';
 import ChatSettings from './components/ChatSettings';
 import { useElevenLabsConversation } from './hooks/useElevenLabsConversation';
+import { ElevenLabsService } from '@/services/ElevenLabsService';
 
 const VernonChat = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -33,7 +34,8 @@ const VernonChat = () => {
     interimTranscript,
     connectToAgent,
     toggleListening,
-    sendTextMessage
+    sendTextMessage,
+    processVoiceInput
   } = useElevenLabsConversation(isVenueMode);
   
   const toggleMinimize = () => {
@@ -82,10 +84,26 @@ const VernonChat = () => {
     }
   }, [isOpen, isConnected, connectToAgent]);
   
+  // Check for ElevenLabs API key and prompt if not available
+  useEffect(() => {
+    if (isOpen && !ElevenLabsService.hasApiKey()) {
+      promptForElevenLabsKey();
+    }
+  }, [isOpen]);
+  
   // Handle opening chat
   const handleOpenChat = (mode: boolean = false) => {
     setIsVenueMode(mode);
     setIsOpen(true);
+  };
+  
+  // Prompt for ElevenLabs API key
+  const promptForElevenLabsKey = () => {
+    const apiKey = prompt('Enter your Eleven Labs API key for improved voice quality:');
+    if (apiKey) {
+      ElevenLabsService.setApiKey(apiKey);
+      toast.success('Voice settings updated. Reload to apply changes.');
+    }
   };
   
   if (!isOpen) {
@@ -123,12 +141,7 @@ const VernonChat = () => {
       {/* Settings component */}
       <ChatSettings 
         useElevenLabs={true}
-        promptForElevenLabsKey={() => {
-          const apiKey = prompt('Enter your Eleven Labs API key for improved voice quality:');
-          if (apiKey) {
-            toast.success('Voice settings updated. Reload to apply changes.');
-          }
-        }}
+        promptForElevenLabsKey={promptForElevenLabsKey}
         isListening={isListening}
         toggleListening={toggleListening}
         isVenueMode={isVenueMode}

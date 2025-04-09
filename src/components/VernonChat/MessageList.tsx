@@ -33,7 +33,7 @@ const MessageList: React.FC<MessageListProps> = ({
       {isTyping && <TypingIndicator isSearching={isSearching} />}
       
       {/* This div serves as a marker for scrolling to the bottom */}
-      <div ref={messagesEndRef} />
+      <div ref={messagesEndRef} className="h-1" />
     </div>
   );
 };

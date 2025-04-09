@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Mic, MicOff, Loader2, Send } from 'lucide-react';
 import MessageInput from './MessageInput';
@@ -48,9 +48,17 @@ const ChatControls: React.FC<ChatControlsProps> = ({
   const handleSendVoiceTranscript = () => {
     if (transcript.trim() && !isProcessing) {
       onSendMessage(transcript);
+      setInputValue('');
       toggleListening(); // This will stop listening
     }
   };
+
+  // Clear input value when transcript is processed
+  useEffect(() => {
+    if (isProcessing && transcript) {
+      setInputValue('');
+    }
+  }, [isProcessing, transcript]);
 
   return (
     <div className="border-t p-3">
@@ -94,7 +102,7 @@ const ChatControls: React.FC<ChatControlsProps> = ({
         <MessageInput 
           onSendMessage={handleSendMessage} 
           isTyping={isTyping}
-          disabled={isListening && isProcessing}
+          disabled={isProcessing}
           value={inputValue}
           onChange={handleInputChange}
         />
