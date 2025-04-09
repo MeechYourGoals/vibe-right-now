@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import ChatHeader from './ChatHeader';
 import MessageList from './MessageList';
 import ChatControls from './ChatControls';
-import { useSpeechInteraction } from './hooks/useSpeechInteraction';
+import { useSpeechInteraction } from './hooks/speechInteraction';
 import { Message } from './types';
 import VoiceIndicator from './components/VoiceIndicator';
 import ChatSettings from './components/ChatSettings';
