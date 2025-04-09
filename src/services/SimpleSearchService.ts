@@ -296,7 +296,7 @@ function getEventWebsite(city: string, type: string = "festival"): string {
   }
   
   if (type === "conference") {
-    if (cityLower.includes("san francisco") || cityLower === "sf")) {
+    if (cityLower.includes("san francisco") || cityLower === "sf") {
       return "https://www.salesforce.com/dreamforce";
     } else if (cityLower.includes("las vegas")) {
       return "https://www.ces.tech";
@@ -480,7 +480,7 @@ function getCitySpecificAttraction(city: string): string {
     return "Empire State Building";
   } else if (cityLower.includes("chicago")) {
     return "Willis Tower Skydeck";
-  } else if (cityLower.includes("los angeles") || cityLower === "la")) {
+  } else if (cityLower.includes("los angeles") || cityLower === "la") {
     return "Hollywood Walk of Fame";
   } else if (cityLower.includes("san francisco") || cityLower === "sf") {
     return "Golden Gate Bridge";
