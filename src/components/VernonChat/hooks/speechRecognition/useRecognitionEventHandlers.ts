@@ -69,7 +69,8 @@ export const useRecognitionEventHandlers = ({
   
   // Handle errors from speech recognition
   const handleError = useCallback((event: SpeechRecognitionErrorEvent) => {
-    handleSpeechRecognitionError(event);
+    // Fix: Pass event.error (string) instead of the whole event object
+    handleSpeechRecognitionError(event.error);
     
     // If we've restarted too many times, stop trying
     if (restartAttempts.current >= 3) {
