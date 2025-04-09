@@ -3,9 +3,8 @@ import { useCallback } from 'react';
 import { 
   getPreferredVoice, 
   processTextForNaturalSpeech, 
-  configureUtteranceForNaturalSpeech
+  configureUtteranceForNaturalSpeech 
 } from '../../utils/speech';
-import { speakSentenceBySequence } from './speechSynthesisUtils';
 
 interface UseBrowserSpeechSynthesisProps {
   speechSynthesis: React.MutableRefObject<SpeechSynthesis | null>;
@@ -74,12 +73,11 @@ export const useBrowserSpeechSynthesis = ({
     
     if (sentences.length > 1 && sentences.length < 20) {
       // For medium-length responses, speak sentence by sentence with pauses
-      const speechState = {
+      speakSentenceBySequence(sentences, 0, speechSynthesis.current, voices, {
         isSpeaking,
         setIsSpeaking,
         currentlyPlayingText
-      };
-      speakSentenceBySequence(sentences, 0, speechSynthesis.current, voices, speechState);
+      });
     } else {
       // For short or very long responses, speak all at once
       utterance.text = processedText;
@@ -92,3 +90,58 @@ export const useBrowserSpeechSynthesis = ({
   
   return { speakWithBrowserSynthesis };
 };
+
+// Helper function to speak sentences sequentially
+function speakSentenceBySequence(
+  sentences: string[], 
+  index: number, 
+  speechSynthesis: SpeechSynthesis,
+  voices: SpeechSynthesisVoice[],
+  speechState: {
+    isSpeaking: boolean,
+    setIsSpeaking: (value: boolean) => void,
+    currentlyPlayingText: React.MutableRefObject<string | null>
+  }
+): void {
+  if (!speechSynthesis || index >= sentences.length) {
+    return;
+  }
+  
+  const { setIsSpeaking, currentlyPlayingText } = speechState;
+  const sentence = sentences[index];
+  const utterance = new SpeechSynthesisUtterance(sentence);
+  
+  // Select voice
+  const preferredVoice = getPreferredVoice(voices);
+  if (preferredVoice) {
+    utterance.voice = preferredVoice;
+  }
+  
+  // Configure utterance properties
+  configureUtteranceForNaturalSpeech(utterance, sentence);
+  
+  // Handle events
+  utterance.onstart = () => {
+    if (index === 0) {
+      setIsSpeaking(true);
+    }
+  };
+  
+  utterance.onend = () => {
+    // Move to next sentence
+    if (index < sentences.length - 1) {
+      speakSentenceBySequence(sentences, index + 1, speechSynthesis, voices, speechState);
+    } else {
+      setIsSpeaking(false);
+      currentlyPlayingText.current = null;
+    }
+  };
+  
+  utterance.onerror = () => {
+    setIsSpeaking(false);
+    currentlyPlayingText.current = null;
+  };
+  
+  // Speak the current sentence
+  speechSynthesis.speak(utterance);
+}

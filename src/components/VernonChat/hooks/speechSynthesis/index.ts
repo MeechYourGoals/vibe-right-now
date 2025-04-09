@@ -2,6 +2,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSpeechSynthesisVoices } from './useSpeechSynthesisVoices';
 import { useElevenLabsVoice } from './useElevenLabsVoice';
+import { useVoiceEffects } from '../voiceEffects';
+import { 
+  getPreferredVoice, 
+  processTextForNaturalSpeech, 
+  configureUtteranceForNaturalSpeech 
+} from '../../utils/speech';
 
 export const useSpeechSynthesis = () => {
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -139,3 +145,8 @@ export const useSpeechSynthesis = () => {
     promptForElevenLabsKey
   };
 };
+
+export * from './useSpeechSynthesisVoices';
+export * from './useElevenLabsVoice';
+export * from './useBrowserSpeechSynthesis';
+export * from './useElevenLabsSpeech';
