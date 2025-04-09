@@ -17,6 +17,7 @@ const Settings = () => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("preferences");
   const [isVenueMode, setIsVenueMode] = useState(false);
+  const [subscriptionTier, setSubscriptionTier] = useState<'standard' | 'plus' | 'premium' | 'pro'>('standard');
 
   const handleSaveSettings = () => {
     toast({
@@ -41,26 +42,66 @@ const Settings = () => {
     });
   };
 
+  // Helper function to upgrade subscription tier
+  const upgradeTier = (tier: 'standard' | 'plus' | 'premium' | 'pro') => {
+    setSubscriptionTier(tier);
+    toast({
+      title: `Upgraded to ${tier.charAt(0).toUpperCase() + tier.slice(1)}`,
+      description: `Your subscription has been upgraded to ${tier}.`,
+    });
+  };
+
   return (
     <Layout>
       <div className="container py-8">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">Settings</h1>
           
-          <div className="flex items-center space-x-2">
-            <Label htmlFor="mode-toggle" className="flex items-center gap-2">
-              <User className={`h-4 w-4 ${!isVenueMode ? "text-primary" : "text-muted-foreground"}`} />
-              <span className={!isVenueMode ? "font-medium" : "text-muted-foreground"}>User</span>
-            </Label>
-            <Switch 
-              id="mode-toggle" 
-              checked={isVenueMode} 
-              onCheckedChange={toggleMode} 
-            />
-            <Label htmlFor="mode-toggle" className="flex items-center gap-2">
-              <Building2 className={`h-4 w-4 ${isVenueMode ? "text-primary" : "text-muted-foreground"}`} />
-              <span className={isVenueMode ? "font-medium" : "text-muted-foreground"}>Venue</span>
-            </Label>
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex items-center space-x-2">
+              <Label htmlFor="mode-toggle" className="flex items-center gap-2">
+                <User className={`h-4 w-4 ${!isVenueMode ? "text-primary" : "text-muted-foreground"}`} />
+                <span className={!isVenueMode ? "font-medium" : "text-muted-foreground"}>User</span>
+              </Label>
+              <Switch 
+                id="mode-toggle" 
+                checked={isVenueMode} 
+                onCheckedChange={toggleMode} 
+              />
+              <Label htmlFor="mode-toggle" className="flex items-center gap-2">
+                <Building2 className={`h-4 w-4 ${isVenueMode ? "text-primary" : "text-muted-foreground"}`} />
+                <span className={isVenueMode ? "font-medium" : "text-muted-foreground"}>Venue</span>
+              </Label>
+            </div>
+            
+            {isVenueMode && (
+              <div className="flex items-center gap-2 text-xs">
+                <button 
+                  onClick={() => upgradeTier('standard')}
+                  className={`px-2 py-1 rounded ${subscriptionTier === 'standard' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}
+                >
+                  Standard
+                </button>
+                <button 
+                  onClick={() => upgradeTier('plus')}
+                  className={`px-2 py-1 rounded ${subscriptionTier === 'plus' ? 'bg-blue-500 text-white' : 'bg-muted'}`}
+                >
+                  Plus
+                </button>
+                <button 
+                  onClick={() => upgradeTier('premium')}
+                  className={`px-2 py-1 rounded ${subscriptionTier === 'premium' ? 'bg-purple-500 text-white' : 'bg-muted'}`}
+                >
+                  Premium
+                </button>
+                <button 
+                  onClick={() => upgradeTier('pro')}
+                  className={`px-2 py-1 rounded ${subscriptionTier === 'pro' ? 'bg-amber-500 text-white' : 'bg-muted'}`}
+                >
+                  Pro
+                </button>
+              </div>
+            )}
           </div>
         </div>
         
@@ -104,7 +145,11 @@ const Settings = () => {
           </TabsList>
           
           <TabsContent value="preferences" className="space-y-6">
-            <PreferencesTab onSave={handleSaveSettings} isVenueMode={isVenueMode} />
+            <PreferencesTab 
+              onSave={handleSaveSettings} 
+              isVenueMode={isVenueMode} 
+              subscriptionTier={subscriptionTier}
+            />
           </TabsContent>
           
           <TabsContent value="privacy" className="space-y-6">
