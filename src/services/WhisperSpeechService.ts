@@ -1,10 +1,12 @@
 
-import { pipeline } from '@huggingface/transformers';
+import { pipeline, type ProgressCallback } from '@huggingface/transformers';
+import { createAudioElement } from '@/components/VernonChat/hooks/speechSynthesis/speechSynthesisUtils';
 
-// Cache for initialized models to prevent reloading
+// Store models and initialization state
 let speechRecognitionModel = null;
 let speechSynthesisVoice = null;
 let modelLoadingPromise = null;
+let audioElement = null;
 
 interface TextToSpeechOptions {
   rate?: number;
@@ -14,61 +16,78 @@ interface TextToSpeechOptions {
 
 export class WhisperSpeechService {
   // Initialize speech recognition model (only once)
-  public static async initSpeechRecognition() {
+  public static async initSpeechRecognition(): Promise<any> {
+    // If already initialized or initializing, return existing promise
+    if (speechRecognitionModel) {
+      return Promise.resolve(speechRecognitionModel);
+    }
+    
+    if (modelLoadingPromise) {
+      return modelLoadingPromise;
+    }
+    
     try {
-      if (speechRecognitionModel) {
-        return speechRecognitionModel;
-      }
+      console.log('Initializing speech recognition model');
       
-      if (modelLoadingPromise) {
-        return await modelLoadingPromise;
-      }
-      
-      console.log('Initializing Whisper speech recognition model...');
+      // Create pipeline for speech recognition using Whisper
       modelLoadingPromise = pipeline(
         'automatic-speech-recognition',
         'onnx-community/whisper-tiny.en',
-        { progress_callback: (progress: number) => console.log(`Loading model: ${Math.round(progress * 100)}%`) }
+        { 
+          progress_callback: ((progressInfo: any) => {
+            if (typeof progressInfo === 'number') {
+              console.log(`Loading model: ${Math.round(progressInfo * 100)}%`);
+            } else if (progressInfo && typeof progressInfo.progress === 'number') {
+              console.log(`Loading model: ${Math.round(progressInfo.progress * 100)}%`);
+            } else {
+              console.log('Loading model:', progressInfo);
+            }
+          }) as ProgressCallback
+        }
       );
       
       speechRecognitionModel = await modelLoadingPromise;
-      modelLoadingPromise = null;
-      console.log('Whisper speech recognition model loaded successfully');
-      
+      console.log('Whisper model initialized successfully');
       return speechRecognitionModel;
     } catch (error) {
-      console.error('Error initializing Whisper speech recognition:', error);
+      console.error('Error initializing speech recognition model:', error);
       modelLoadingPromise = null;
       throw error;
     }
   }
   
-  // Convert speech to text using Whisper
-  public static async speechToText(audioBlob: Blob): Promise<string> {
+  // Initialize voices array
+  public static async initVoices(): Promise<any[]> {
     try {
-      console.log('Processing speech with Whisper...');
-      const model = await this.initSpeechRecognition();
-      
-      // Convert blob to correct format
-      const audioArrayBuffer = await audioBlob.arrayBuffer();
-      
-      // Transcribe audio using Whisper
-      const result = await model(audioArrayBuffer, {
-        chunk_length_s: 30,
-        stride_length_s: 5,
-        language: 'en',
-        return_timestamps: false
-      });
-      
-      console.log('Whisper transcription result:', result);
-      return result.text || '';
+      // For simplicity, we'll just use browser's built-in voices
+      if ('speechSynthesis' in window) {
+        // Force voice loading
+        window.speechSynthesis.getVoices();
+        
+        return new Promise((resolve) => {
+          // Wait for voices to load
+          setTimeout(() => {
+            const voices = window.speechSynthesis.getVoices();
+            resolve(voices);
+          }, 100);
+        });
+      }
+      return [];
     } catch (error) {
-      console.error('Error in Whisper speech-to-text:', error);
-      return '';
+      console.error('Error initializing voices:', error);
+      return [];
     }
   }
   
-  // Use browser's built-in speech synthesis for text-to-speech
+  // Create audio element for playback if it doesn't exist
+  private static getAudioElement(): HTMLAudioElement {
+    if (!audioElement) {
+      audioElement = new Audio();
+    }
+    return audioElement;
+  }
+  
+  // Coqui TTS integration for text-to-speech
   public static textToSpeech(text: string, options: TextToSpeechOptions = {}): Promise<boolean> {
     return new Promise((resolve) => {
       if (!text || text.trim() === '') {
@@ -76,90 +95,122 @@ export class WhisperSpeechService {
         return;
       }
       
-      if (!('speechSynthesis' in window)) {
-        console.error('Speech synthesis not supported in this browser');
-        resolve(false);
-        return;
-      }
-      
       try {
-        // Cancel any ongoing speech
-        window.speechSynthesis.cancel();
+        // Get or create audio element
+        const audio = this.getAudioElement();
         
-        // Create new utterance
-        const utterance = new SpeechSynthesisUtterance(text);
+        // Encode text for URL
+        const encodedText = encodeURIComponent(text);
         
-        // Set a nice male voice if available
-        if (!speechSynthesisVoice) {
-          const voices = window.speechSynthesis.getVoices();
-          speechSynthesisVoice = voices.find(
-            (voice) => (
-              voice.name.includes('Male') || 
-              voice.name.includes('Daniel') || 
-              voice.name.includes('David') ||
-              voice.name.includes('Mark')
-            ) && voice.lang.includes('en')
-          ) || voices.find(voice => voice.lang.includes('en'));
-        }
+        // URL for the Coqui TTS server - using localhost for development
+        // In production, this would be your hosted Coqui TTS server URL
+        const ttsServerUrl = 'http://localhost:5002/api/tts';
         
-        if (speechSynthesisVoice) {
-          utterance.voice = speechSynthesisVoice;
-        }
+        // Create URL with text parameter
+        const requestUrl = `${ttsServerUrl}?text=${encodedText}`;
         
-        // Configure speech properties
-        utterance.rate = options.rate || 1.0;
-        utterance.pitch = options.pitch || 1.0;
-        utterance.volume = options.volume || 1.0;
+        // Setup event handlers
+        audio.onplay = () => {
+          console.log('Playing audio from Coqui TTS');
+        };
         
-        // Setup callbacks
-        utterance.onend = () => {
+        audio.onended = () => {
+          console.log('Coqui TTS audio playback completed');
           resolve(true);
         };
         
-        utterance.onerror = (event) => {
-          console.error('Speech synthesis error:', event);
+        audio.onerror = (error) => {
+          console.error('Error playing Coqui TTS audio:', error);
+          // Fall back to browser speech synthesis on error
+          this.fallbackToBrowserSpeech(text, options);
           resolve(false);
         };
         
-        // Start speaking
-        window.speechSynthesis.speak(utterance);
+        // Make request to Coqui TTS server
+        fetch(requestUrl)
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`Coqui TTS server error: ${response.status}`);
+            }
+            return response.blob();
+          })
+          .then(audioBlob => {
+            const audioUrl = URL.createObjectURL(audioBlob);
+            audio.src = audioUrl;
+            audio.play().catch(error => {
+              console.error('Error playing audio:', error);
+              this.fallbackToBrowserSpeech(text, options);
+              resolve(false);
+            });
+          })
+          .catch(error => {
+            console.error('Error fetching from Coqui TTS server:', error);
+            // Fall back to browser speech synthesis
+            this.fallbackToBrowserSpeech(text, options);
+            resolve(false);
+          });
       } catch (error) {
-        console.error('Error with browser speech synthesis:', error);
+        console.error('Error in Coqui TTS:', error);
+        // Fall back to browser speech synthesis
+        this.fallbackToBrowserSpeech(text, options);
         resolve(false);
       }
     });
   }
   
-  // Helper function to initialize voice list
-  public static initVoices(): Promise<SpeechSynthesisVoice[]> {
-    return new Promise((resolve) => {
-      if (!('speechSynthesis' in window)) {
-        resolve([]);
-        return;
-      }
+  // Fallback to browser's built-in speech synthesis
+  private static fallbackToBrowserSpeech(text: string, options: TextToSpeechOptions = {}): void {
+    console.log('Falling back to browser speech synthesis');
+    
+    if (!('speechSynthesis' in window)) {
+      console.error('Browser speech synthesis not supported');
+      return;
+    }
+    
+    try {
+      const utterance = new SpeechSynthesisUtterance(text);
       
-      // Get voices on load
-      const getVoices = () => {
-        const voices = window.speechSynthesis.getVoices();
-        if (voices.length > 0) {
-          resolve(voices);
-        } else {
-          setTimeout(getVoices, 100);
+      // Apply options
+      if (options.rate) utterance.rate = options.rate;
+      if (options.pitch) utterance.pitch = options.pitch;
+      if (options.volume) utterance.volume = options.volume;
+      
+      // Select a voice if available
+      const voices = window.speechSynthesis.getVoices();
+      if (voices && voices.length > 0) {
+        // Try to find a good English voice
+        const preferredVoice = voices.find(voice => 
+          voice.lang.includes('en-') && 
+          (voice.name.includes('Google') || voice.name.includes('Female'))
+        );
+        
+        if (preferredVoice) {
+          utterance.voice = preferredVoice;
         }
-      };
-      
-      // Chrome loads voices asynchronously
-      if (window.speechSynthesis.onvoiceschanged !== undefined) {
-        window.speechSynthesis.onvoiceschanged = getVoices;
       }
       
-      // Try immediately in case voices are already loaded
-      getVoices();
-    });
+      // Speak the text
+      window.speechSynthesis.cancel(); // Cancel any ongoing speech
+      window.speechSynthesis.speak(utterance);
+    } catch (error) {
+      console.error('Error in browser speech fallback:', error);
+    }
   }
   
-  // Check if the service is available in this browser
-  public static isAvailable(): boolean {
-    return 'speechSynthesis' in window && window.AudioContext !== undefined;
+  // Method to transcribe audio blobs (for local Whisper integration)
+  public static async transcribeAudio(audioBlob: Blob): Promise<string> {
+    try {
+      // Make sure model is initialized
+      if (!speechRecognitionModel) {
+        await this.initSpeechRecognition();
+      }
+      
+      // Process audio with Whisper
+      const result = await speechRecognitionModel(audioBlob);
+      return result.text || '';
+    } catch (error) {
+      console.error('Error transcribing audio with Whisper:', error);
+      return '';
+    }
   }
 }

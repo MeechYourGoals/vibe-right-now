@@ -70,11 +70,11 @@ export const useSpeakResponse = ({
       }
     }
     
-    console.log('Speaking with built-in browser synthesis');
+    console.log('Speaking with Coqui TTS or browser fallback');
     
     let speechSuccess = false;
     
-    // Try to use WhisperSpeechService's text-to-speech first
+    // Try to use Coqui TTS through WhisperSpeechService
     try {
       speechSuccess = await WhisperSpeechService.textToSpeech(text);
       if (speechSuccess) {
@@ -85,10 +85,10 @@ export const useSpeakResponse = ({
         return;
       }
     } catch (error) {
-      console.error('WhisperSpeechService speech failed, falling back to browser synthesis:', error);
+      console.error('Coqui TTS speech failed, falling back to browser synthesis:', error);
     }
     
-    // If WhisperSpeechService failed, fall back to browser's speech synthesis
+    // If Coqui TTS failed, fall back to browser's speech synthesis
     try {
       speechSuccess = await speakWithBrowser(text, voices);
       
