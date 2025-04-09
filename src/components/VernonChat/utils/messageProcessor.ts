@@ -1,15 +1,12 @@
 
 import { Message } from '../types';
-import { createUserMessage, createAIMessage, createErrorMessage } from './messageFactory';
-import { extractPaginationParams } from './pagination';
-import { handleVenueQuery } from './handlers/venueQueryHandler';
-import { handleSearchQuery } from './handlers/searchQueryHandler';
-import { handleBookingQuery } from './handlers/bookingQueryHandler';
+import { processQuery } from './handlers';
+import { createMessage } from './messageFactory';
 
-export interface MessageProcessorProps {
+interface ProcessMessageOptions {
   isVenueMode: boolean;
   isProPlan: boolean;
-  updatePaginationState: (params: Record<string, number>) => Record<string, number>;
+  updatePaginationState: (options: any) => void;
   setIsTyping: (isTyping: boolean) => void;
   setIsSearching: (isSearching: boolean) => void;
 }
@@ -17,54 +14,38 @@ export interface MessageProcessorProps {
 export const processMessageInput = async (
   inputValue: string,
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>,
-  { 
-    isVenueMode, 
-    isProPlan, 
-    updatePaginationState,
-    setIsTyping,
-    setIsSearching 
-  }: MessageProcessorProps
+  options: ProcessMessageOptions
 ) => {
-  const userMessage = createUserMessage(inputValue);
-  setMessages(prev => [...prev, userMessage]);
+  const { isVenueMode, isProPlan, updatePaginationState, setIsTyping, setIsSearching } = options;
   
+  // Add user message
+  const userMessage = createMessage('user', inputValue);
+  setMessages(prevMessages => [...prevMessages, userMessage]);
+  
+  // Set typing state
   setIsTyping(true);
-  setIsSearching(true);
   
   try {
-    // Extract pagination parameters from the query
-    const paginationParams = extractPaginationParams(inputValue);
+    // Process the user query
+    const { responseText, paginationData } = await processQuery(inputValue, isVenueMode, isProPlan, setIsSearching);
     
-    // Update pagination state
-    const updatedPaginationState = updatePaginationState(paginationParams);
-    
-    // Handle booking requests first
-    const isBookingHandled = await handleBookingQuery(inputValue, setMessages);
-    if (isBookingHandled) {
-      // Booking was handled, so we're done
-      setIsTyping(false);
-      setIsSearching(false);
-      return;
+    // Update pagination state if needed
+    if (paginationData) {
+      updatePaginationState(paginationData);
     }
     
-    // Process the message based on mode
-    let responseText = '';
-    
-    if (isVenueMode) {
-      // Handle venue-specific queries
-      responseText = await handleVenueQuery(inputValue, isProPlan);
-    } else {
-      // Handle general search queries
-      responseText = await handleSearchQuery(inputValue, updatedPaginationState);
-    }
-    
-    // Create and add the AI message with the response
-    const aiMessage = createAIMessage(responseText);
-    setMessages(prev => [...prev, aiMessage]);
+    // Add assistant response
+    const assistantMessage = createMessage('assistant', responseText);
+    setMessages(prevMessages => [...prevMessages, assistantMessage]);
   } catch (error) {
-    console.error('Error getting AI response:', error);
-    const errorMessage = createErrorMessage();
-    setMessages(prev => [...prev, errorMessage]);
+    console.error('Error processing message:', error);
+    
+    // Add error message
+    const errorMessage = createMessage(
+      'assistant', 
+      'I apologize, but I encountered an error processing your request. Please try again or ask something else.'
+    );
+    setMessages(prevMessages => [...prevMessages, errorMessage]);
   } finally {
     setIsTyping(false);
     setIsSearching(false);
