@@ -8,6 +8,7 @@ import VernonThemeToggle from './components/VernonThemeToggle';
 import VernonModeButtons from './components/VernonModeButtons';
 import { useElevenLabsConversation } from './hooks/useElevenLabsConversation';
 import { WhisperSpeechService } from '@/services/WhisperSpeechService';
+import { CoquiTTSService } from '@/services/CoquiTTSService';
 
 const VernonChat = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -34,18 +35,34 @@ const VernonChat = () => {
     speakResponse
   } = useElevenLabsConversation(isVenueMode);
   
-  // Initialize Whisper model when the component mounts
+  // Initialize speech services when the component mounts
   useEffect(() => {
     setIsModelLoading(true);
+    
+    // Initialize Whisper for speech recognition (still needed for STT)
     WhisperSpeechService.initSpeechRecognition()
       .then(() => {
-        console.log('Whisper model initialized successfully');
-        setIsModelLoading(false);
+        console.log('Whisper speech recognition model initialized successfully');
       })
       .catch(error => {
         console.error('Error initializing Whisper model:', error);
-        setIsModelLoading(false);
         toast.error('Could not load speech recognition model. Voice features may be limited.');
+      });
+    
+    // Initialize Coqui TTS service
+    CoquiTTSService.init()
+      .then(available => {
+        if (available) {
+          console.log('Coqui TTS service is ready');
+        } else {
+          console.warn('Coqui TTS service unavailable, will use browser fallback');
+        }
+        setIsModelLoading(false);
+      })
+      .catch(error => {
+        console.error('Error initializing Coqui TTS service:', error);
+        toast.error('Could not connect to Coqui TTS server. Using browser speech instead.');
+        setIsModelLoading(false);
       });
   }, []);
   

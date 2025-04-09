@@ -1,6 +1,6 @@
 
 import { useCallback } from 'react';
-import { WhisperSpeechService } from '@/services/WhisperSpeechService';
+import { CoquiTTSService } from '@/services/CoquiTTSService';
 import { SimpleSearchService } from '@/services/SimpleSearchService';
 
 interface UseSpeakResponseProps {
@@ -53,7 +53,7 @@ export const useSpeakResponse = ({
             // If search was successful and yielded results, speak those instead
             if (searchResult && searchResult.trim() !== '') {
               // Speak the search result instead
-              WhisperSpeechService.textToSpeech(searchResult)
+              CoquiTTSService.textToSpeech(searchResult)
                 .then(success => {
                   if (success) {
                     console.log('Speaking search result response');
@@ -74,9 +74,9 @@ export const useSpeakResponse = ({
     
     let speechSuccess = false;
     
-    // Try to use Coqui TTS through WhisperSpeechService
+    // Try to use Coqui TTS first
     try {
-      speechSuccess = await WhisperSpeechService.textToSpeech(text);
+      speechSuccess = await CoquiTTSService.textToSpeech(text);
       if (speechSuccess) {
         // Mark intro as played if this is the first message
         if (!introHasPlayed.current && text.includes("I'm VeRNon")) {

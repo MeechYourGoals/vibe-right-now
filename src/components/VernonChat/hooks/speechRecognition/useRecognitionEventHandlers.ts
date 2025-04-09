@@ -1,3 +1,4 @@
+
 import { useEffect } from 'react';
 import { handleSpeechRecognitionError } from '../../utils/speech/recognition';
 
@@ -10,7 +11,6 @@ interface RecognitionEventHandlersProps {
   restartAttempts: React.MutableRefObject<number>;
   previousInterims: React.MutableRefObject<string[]>;
   resetSilenceTimer: () => void;
-  useElevenLabsASR?: boolean;
 }
 
 // Hook to set up event handlers for speech recognition

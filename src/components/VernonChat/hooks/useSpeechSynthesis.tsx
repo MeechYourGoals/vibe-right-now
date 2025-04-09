@@ -2,7 +2,7 @@
 import { useEffect } from 'react';
 import { useSpeechSynthesisCore } from './speechSynthesis/useSpeechSynthesisCore';
 import { useSpeakResponse } from './speechSynthesis/useSpeakResponse';
-import { WhisperSpeechService } from '@/services/WhisperSpeechService';
+import { CoquiTTSService } from '@/services/CoquiTTSService';
 
 export const useSpeechSynthesis = () => {
   // Get core speech synthesis functionality
@@ -27,11 +27,22 @@ export const useSpeechSynthesis = () => {
     voices
   });
   
-  // Preload the Whisper model when the hook is first used
+  // Initialize Coqui TTS when the hook is first used
   useEffect(() => {
-    WhisperSpeechService.initSpeechRecognition()
-      .then(() => console.log('Whisper model loaded successfully'))
-      .catch(error => console.error('Error loading Whisper model:', error));
+    // Configure Coqui TTS with the server URL
+    // You can change this to your actual server URL as needed
+    CoquiTTSService.configure('http://localhost:5002');
+    
+    // Initialize the service
+    CoquiTTSService.init()
+      .then((available) => {
+        if (available) {
+          console.log('Coqui TTS server connected successfully');
+        } else {
+          console.warn('Coqui TTS server not available, will use browser fallback');
+        }
+      })
+      .catch(error => console.error('Error initializing Coqui TTS:', error));
   }, []);
   
   // Cleanup on unmount
@@ -48,7 +59,6 @@ export const useSpeechSynthesis = () => {
   }, []);
   
   // Add dummy implementations for properties needed by other components
-  // These are stubs that replaced the ElevenLabs functionality
   const useElevenLabs = false;
   const promptForElevenLabsKey = () => Promise.resolve(false);
   
