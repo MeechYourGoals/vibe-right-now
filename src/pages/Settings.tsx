@@ -12,6 +12,7 @@ import PrivacyTab from "./settings/PrivacyTab";
 import TransportationTab from "./settings/TransportationTab";
 import TicketingTab from "./settings/TicketingTab";
 import AccountTab from "./settings/AccountTab";
+import VenueManagementTab from "./settings/VenueManagementTab";
 
 const Settings = () => {
   const { toast } = useToast();
@@ -159,13 +160,11 @@ const Settings = () => {
           {isVenueMode ? (
             <>
               <TabsContent value="management" className="space-y-6">
-                <div className="bg-card p-6 rounded-lg border shadow-sm">
-                  <h2 className="text-xl font-semibold mb-4">Venue Management</h2>
-                  <p className="text-muted-foreground mb-4">
-                    Configure settings for managing your venue, including staff access, hours of operation, and more.
-                  </p>
-                  {/* Venue management settings would go here */}
-                </div>
+                <VenueManagementTab 
+                  onSave={handleSaveSettings} 
+                  isVenueMode={isVenueMode} 
+                  subscriptionTier={subscriptionTier} 
+                />
               </TabsContent>
               
               <TabsContent value="marketing" className="space-y-6">
