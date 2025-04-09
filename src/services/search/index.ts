@@ -1,4 +1,5 @@
 
 import { SimpleSearchService } from './SimpleSearchService';
+import { SearchService } from './SearchService';
 
-export { SimpleSearchService };
+export { SimpleSearchService, SearchService };
