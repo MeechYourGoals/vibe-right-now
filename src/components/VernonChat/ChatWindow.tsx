@@ -6,7 +6,7 @@ import ChatControls from './ChatControls';
 import { useSpeechInteraction } from './hooks/useSpeechInteraction';
 import { Message } from './types';
 import { Button } from '@/components/ui/button';
-import { Mic, Settings } from 'lucide-react';
+import { Mic, MicOff, Settings } from 'lucide-react';
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -55,20 +55,22 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
 
   // Effect to read AI responses in voice mode
   useEffect(() => {
-    if (messages.length > 0 && !isTyping && (isListening || isSpeaking)) {
+    if (messages.length > 0 && !isTyping && isSpeaking === false) {
       const lastMessage = messages[messages.length - 1];
-      if (lastMessage.sender === 'ai') {
+      if (lastMessage.sender === 'ai' && (isListening || isProcessing)) {
+        // Only speak if we were in voice mode (listening or processing voice)
         speakResponse(lastMessage.text);
       }
     }
-  }, [messages, isTyping, isListening, isSpeaking, speakResponse]);
+  }, [messages, isTyping, isSpeaking, isListening, isProcessing, speakResponse]);
 
   // Effect to stop speaking when chat is closed
   useEffect(() => {
     if (!isOpen) {
       stopSpeaking();
+      stopListening();
     }
-  }, [isOpen, stopSpeaking]);
+  }, [isOpen, stopSpeaking, stopListening]);
 
   // Handle sending voice transcript as a message
   useEffect(() => {
@@ -117,23 +119,35 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
               {useElevenLabs ? "Update Eleven Labs API Key" : "Set Eleven Labs API Key"}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={toggleListening}>
-              {isListening ? "Stop Listening" : "Start Voice Input"}
+              {isListening ? "Stop Voice Input" : "Start Voice Input"}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
       
       {/* Voice Active Indicator */}
-      {(isListening || isSpeaking) && (
-        <div className="absolute left-3 top-3 z-10">
-          <div className="flex items-center gap-1.5">
-            <Mic className={`h-3.5 w-3.5 ${isListening ? 'text-red-500 animate-pulse' : isSpeaking ? 'text-blue-500' : 'text-muted-foreground'}`} />
+      <div className="absolute left-3 top-3 z-10">
+        <div className="flex items-center gap-1.5">
+          <Button
+            variant="ghost"
+            size="icon"
+            className={`h-7 w-7 rounded-full ${isListening ? 'bg-red-100 hover:bg-red-200' : isSpeaking ? 'bg-blue-100 hover:bg-blue-200' : 'bg-transparent'}`}
+            onClick={toggleListening}
+            title={isListening ? "Stop Listening" : "Start Voice Input"}
+          >
+            {isListening ? (
+              <MicOff className="h-3.5 w-3.5 text-red-600" />
+            ) : (
+              <Mic className={`h-3.5 w-3.5 ${isSpeaking ? 'text-blue-600' : 'text-muted-foreground'}`} />
+            )}
+          </Button>
+          {(isListening || isSpeaking) && (
             <span className="text-xs font-medium">
               {isListening ? 'Listening...' : isSpeaking ? 'Speaking...' : ''}
             </span>
-          </div>
+          )}
         </div>
-      )}
+      </div>
       
       <MessageList
         messages={messages}

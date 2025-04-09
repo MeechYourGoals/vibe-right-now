@@ -27,32 +27,19 @@ export const useSpeechInteraction = () => {
     promptForElevenLabsKey
   } = useSpeechSynthesis();
   
-  // Check if this is the first time using voice features
+  // Initialize voice with default API key
   useEffect(() => {
     if (!voiceSetupComplete) {
-      const hasSeenVoicePrompt = localStorage.getItem('hasSeenVoicePrompt');
-      
-      if (!hasSeenVoicePrompt && !ElevenLabsService.hasApiKey()) {
-        // Set a small delay to show the prompt after component mounts
-        const promptTimer = setTimeout(() => {
-          const useElevenLabsVoice = window.confirm(
-            'Would you like to enable higher quality voice with Eleven Labs? ' +
-            'You\'ll need an API key from elevenlabs.io (free tier available).'
-          );
-          
-          if (useElevenLabsVoice) {
-            promptForElevenLabsKey();
-          }
-          
-          localStorage.setItem('hasSeenVoicePrompt', 'true');
-        }, 2000);
-        
-        return () => clearTimeout(promptTimer);
+      // Check if API key exists, if not, use the default one
+      if (!ElevenLabsService.hasApiKey()) {
+        // This will use the default API key from the service
+        ElevenLabsService.getApiKey();
+        console.log('Using default Eleven Labs API key');
       }
       
       setVoiceSetupComplete(true);
     }
-  }, [voiceSetupComplete, promptForElevenLabsKey]);
+  }, [voiceSetupComplete]);
   
   const toggleListening = () => {
     if (!navigator.mediaDevices) {
@@ -65,8 +52,17 @@ export const useSpeechInteraction = () => {
       stopListening();
       stopSpeaking(); // Also stop any ongoing speech
     } else {
-      // If not listening, start
-      startListening();
+      // Request microphone permission first
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(() => {
+          // If permission granted, start listening
+          startListening();
+          toast.success('Voice mode activated. Start speaking...');
+        })
+        .catch(error => {
+          console.error('Microphone permission denied:', error);
+          toast.error('Microphone access required for voice mode');
+        });
     }
   };
   

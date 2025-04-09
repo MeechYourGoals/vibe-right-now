@@ -7,7 +7,7 @@ import {
 } from '../utils/speechUtils';
 
 export const useSpeechRecognition = () => {
-  // Default to listening when component mounts but don't start immediately
+  // Default to not listening when component mounts
   const [isListening, setIsListening] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [transcript, setTranscript] = useState('');
@@ -29,7 +29,6 @@ export const useSpeechRecognition = () => {
         speechRecognition.current.interimResults = true;
         
         speechRecognition.current.onresult = (event) => {
-          console.log('Speech recognition result received', event);
           // Get both interim and final results
           let finalTranscript = '';
           let currentInterimTranscript = '';
@@ -57,14 +56,14 @@ export const useSpeechRecognition = () => {
             clearTimeout(silenceTimer.current);
           }
           
-          // Set new silence timer for 1 second - automatically process after 1 second of silence
+          // Set new silence timer for 2 seconds - automatically process after 2 seconds of silence
           silenceTimer.current = setTimeout(() => {
             if (isListening && (finalTranscript.trim() || transcript.trim())) {
               // Only process if we have a valid transcript and we were listening
               stopListening();
               setIsProcessing(true);
             }
-          }, 1000); // 1 second of silence detection
+          }, 2000); // 2 seconds of silence detection
         };
         
         speechRecognition.current.onend = () => {
@@ -128,19 +127,9 @@ export const useSpeechRecognition = () => {
       setIsListening(true);
       lastSpeechTime.current = Date.now();
       
-      // Force request microphone access to ensure permissions
-      navigator.mediaDevices.getUserMedia({ audio: true })
-        .then(() => {
-          // Only try to start if speechRecognition is available
-          speechRecognition.current?.start();
-          console.log('Started speech recognition successfully');
-          toast.success('Voice mode activated. Start speaking...');
-        })
-        .catch(err => {
-          console.error('Microphone access denied:', err);
-          toast.error('Please allow microphone access to use voice features');
-          setIsListening(false);
-        });
+      // Start speech recognition
+      speechRecognition.current.start();
+      console.log('Started speech recognition successfully');
     } catch (error) {
       console.error('Error starting speech recognition:', error);
       setIsListening(false);
@@ -172,7 +161,7 @@ export const useSpeechRecognition = () => {
       setIsProcessing(true);
       
       // Return the transcript for further processing
-      const currentTranscript = transcript;
+      const currentTranscript = transcript.trim();
       setTranscript('');
       setInterimTranscript('');
       
