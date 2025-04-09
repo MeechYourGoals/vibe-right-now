@@ -34,6 +34,7 @@ export const useElevenLabsSpeech = ({
       currentlyPlayingText.current = text;
       
       // Request to convert text to speech
+      console.log('Requesting Eleven Labs text-to-speech with Adam voice');
       const audioData = await ElevenLabsService.textToSpeech(text);
       
       if (!audioData || !audioElement.current) {
