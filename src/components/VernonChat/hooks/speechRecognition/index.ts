@@ -44,9 +44,7 @@ export const useSpeechRecognition = (): SpeechRecognitionHookReturn => {
     isListening,
     restartAttempts,
     previousInterims,
-    resetSilenceTimer,
-    // No longer using ElevenLabs ASR
-    useElevenLabsASR: false
+    resetSilenceTimer
   });
   
   // Listening controls (start/stop)
@@ -63,7 +61,6 @@ export const useSpeechRecognition = (): SpeechRecognitionHookReturn => {
     setInterimTranscript,
     restartAttempts,
     clearSilenceTimer,
-    // Use local Whisper instead of ElevenLabs
     useLocalWhisper,
     mediaRecorder,
     audioChunks

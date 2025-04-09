@@ -1,8 +1,7 @@
 
-import { useRef } from 'react';
-import { toast } from 'sonner';
+import { useCallback } from 'react';
 
-interface ListeningControlsProps {
+export interface ListeningControlsProps {
   speechRecognition: React.MutableRefObject<SpeechRecognition | null>;
   initialized: boolean;
   isListening: boolean;
@@ -12,11 +11,12 @@ interface ListeningControlsProps {
   setInterimTranscript: React.Dispatch<React.SetStateAction<string>>;
   restartAttempts: React.MutableRefObject<number>;
   clearSilenceTimer: () => void;
-  useLocalWhisper?: boolean;
-  mediaRecorder?: React.MutableRefObject<MediaRecorder | null>;
-  audioChunks?: React.MutableRefObject<Blob[]>;
+  useLocalWhisper: boolean;
+  mediaRecorder: React.MutableRefObject<MediaRecorder | null>;
+  audioChunks: React.MutableRefObject<Blob[]>;
 }
 
+// Hook for controlling the listening state
 export const useListeningControls = ({
   speechRecognition,
   initialized,
@@ -27,116 +27,108 @@ export const useListeningControls = ({
   setInterimTranscript,
   restartAttempts,
   clearSilenceTimer,
-  useLocalWhisper = false,
-  mediaRecorder = { current: null },
-  audioChunks = { current: [] }
+  useLocalWhisper,
+  mediaRecorder,
+  audioChunks
 }: ListeningControlsProps) => {
-  
-  // Recording interval for Whisper
-  const recordingInterval = useRef<number | null>(null);
-  
-  // Listen for Whisper transcription events
-  useRef(() => {
-    const handleWhisperTranscription = (event: CustomEvent) => {
-      const { transcription } = event.detail;
-      if (transcription) {
-        setTranscript(transcription);
-        setInterimTranscript('');
-        
-        // Process the transcription
-        setIsProcessing(true);
-      }
-    };
-    
-    window.addEventListener('whisperTranscription', 
-      handleWhisperTranscription as EventListener);
-    
-    return () => {
-      window.removeEventListener('whisperTranscription', 
-        handleWhisperTranscription as EventListener);
-    };
-  });
-  
-  const startListening = () => {
+  // Start listening for speech
+  const startListening = useCallback(() => {
     if (!initialized) {
-      toast.error("Speech recognition isn't available. Please try again later.");
+      console.error('Speech recognition not initialized yet');
       return;
     }
     
     if (isListening) {
-      console.log('Already listening, no need to start again');
+      console.log('Already listening');
       return;
     }
     
-    // Reset state
-    restartAttempts.current = 0;
-    setIsListening(true);
-    
     try {
-      if (useLocalWhisper && mediaRecorder.current) {
+      // Clear any existing transcript
+      setTranscript('');
+      setInterimTranscript('');
+      setIsListening(true);
+      
+      if (useLocalWhisper) {
         // Start recording for Whisper
-        audioChunks.current = []; // Clear previous audio chunks
-        mediaRecorder.current.start();
-        console.log('Started recording for Whisper');
-        
-        // Set up recording interval - record chunks every 5 seconds for better real-time transcription
-        recordingInterval.current = window.setInterval(() => {
-          if (mediaRecorder.current && mediaRecorder.current.state === 'recording') {
-            // Stop current recording and start a new one to process chunks
-            mediaRecorder.current.stop();
-            
-            // Small delay to let the onstop event process
-            setTimeout(() => {
-              if (isListening && mediaRecorder.current) {
-                mediaRecorder.current.start();
-              }
-            }, 100);
-          }
-        }, 5000); // Process every 5 seconds
-      } else if (speechRecognition.current) {
-        // Start browser's speech recognition
-        speechRecognition.current.start();
-        console.log('Started browser speech recognition');
+        if (mediaRecorder.current && mediaRecorder.current.state !== 'recording') {
+          // Clear any previous chunks
+          audioChunks.current = [];
+          console.log('Starting audio recording for Whisper');
+          mediaRecorder.current.start(1000); // Collect data every second
+        } else {
+          console.error('Media recorder not initialized properly');
+          setIsListening(false);
+        }
+      } else {
+        // Use the browser's speech recognition
+        if (speechRecognition.current) {
+          console.log('Starting browser speech recognition');
+          speechRecognition.current.start();
+          restartAttempts.current = 0;
+        } else {
+          console.error('Speech recognition not available');
+          setIsListening(false);
+        }
       }
     } catch (error) {
       console.error('Error starting speech recognition:', error);
       setIsListening(false);
-      toast.error("Couldn't start voice recognition. Please try again.");
     }
-  };
+  }, [
+    initialized,
+    isListening,
+    setIsListening,
+    setTranscript,
+    setInterimTranscript,
+    speechRecognition,
+    restartAttempts,
+    useLocalWhisper,
+    mediaRecorder,
+    audioChunks
+  ]);
   
-  const stopListening = () => {
-    // Clear any silence detection timers
+  // Stop listening for speech
+  const stopListening = useCallback(() => {
     clearSilenceTimer();
-    
-    // Clear recording interval if active
-    if (recordingInterval.current) {
-      clearInterval(recordingInterval.current);
-      recordingInterval.current = null;
-    }
     
     if (!isListening) {
       return;
     }
     
-    setIsListening(false);
-    
     try {
-      if (useLocalWhisper && mediaRecorder.current) {
+      setIsListening(false);
+      
+      if (useLocalWhisper) {
         // Stop recording for Whisper
-        if (mediaRecorder.current.state === 'recording') {
+        if (mediaRecorder.current && mediaRecorder.current.state === 'recording') {
+          console.log('Stopping audio recording for Whisper');
           mediaRecorder.current.stop();
-          console.log('Stopped recording for Whisper');
+          setIsProcessing(true);
         }
-      } else if (speechRecognition.current) {
-        // Stop browser's speech recognition
-        speechRecognition.current.stop();
-        console.log('Stopped browser speech recognition');
+      } else {
+        // Stop the browser's speech recognition
+        if (speechRecognition.current) {
+          console.log('Stopping browser speech recognition');
+          try {
+            speechRecognition.current.abort();
+          } catch (error) {
+            console.error('Error stopping speech recognition:', error);
+          }
+        }
       }
     } catch (error) {
-      console.error('Error stopping speech recognition:', error);
+      console.error('Error in stopListening:', error);
     }
-  };
+  }, [
+    isListening,
+    setIsListening,
+    speechRecognition,
+    clearSilenceTimer,
+    useLocalWhisper,
+    mediaRecorder,
+    setIsProcessing
+  ]);
   
   return {
     startListening,

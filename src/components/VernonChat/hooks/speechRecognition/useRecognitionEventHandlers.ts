@@ -1,7 +1,5 @@
-
-import { useCallback, useEffect } from 'react';
-import { handleSpeechRecognitionError } from '../../utils/speech';
-import { toast } from 'sonner';
+import { useEffect } from 'react';
+import { handleSpeechRecognitionError } from '../../utils/speech/recognition';
 
 interface RecognitionEventHandlersProps {
   speechRecognition: React.MutableRefObject<SpeechRecognition | null>;
@@ -12,9 +10,10 @@ interface RecognitionEventHandlersProps {
   restartAttempts: React.MutableRefObject<number>;
   previousInterims: React.MutableRefObject<string[]>;
   resetSilenceTimer: () => void;
-  useElevenLabsASR: boolean;
+  useElevenLabsASR?: boolean;
 }
 
+// Hook to set up event handlers for speech recognition
 export const useRecognitionEventHandlers = ({
   speechRecognition,
   setTranscript,
@@ -24,130 +23,132 @@ export const useRecognitionEventHandlers = ({
   restartAttempts,
   previousInterims,
   resetSilenceTimer,
-  useElevenLabsASR
 }: RecognitionEventHandlersProps) => {
-  // Handle results from speech recognition
-  const handleResult = useCallback((event: SpeechRecognitionEvent) => {
-    // Reset silence timer since we're getting input
-    resetSilenceTimer();
-    
-    // Process interim results
-    const interimTranscripts: string[] = [];
-    const finalTranscripts: string[] = [];
-    
-    for (let i = event.resultIndex; i < event.results.length; i++) {
-      const transcript = event.results[i][0].transcript;
-      
-      if (event.results[i].isFinal) {
-        finalTranscripts.push(transcript);
-      } else {
-        interimTranscripts.push(transcript);
-      }
-    }
-    
-    // Update previous interims for comparison
-    if (interimTranscripts.length > 0) {
-      previousInterims.current = interimTranscripts;
-    }
-    
-    // Set interim transcript
-    if (interimTranscripts.length > 0) {
-      const formattedInterim = interimTranscripts.join(' ');
-      setInterimTranscript(formattedInterim);
-    }
-    
-    // Set final transcript if we have any
-    if (finalTranscripts.length > 0) {
-      const newTranscriptText = finalTranscripts.join(' ');
-      setTranscript(prev => {
-        // Only add if not empty or duplicate
-        return prev.endsWith(newTranscriptText) ? prev : `${prev} ${newTranscriptText}`.trim();
-      });
-      setInterimTranscript('');
-    }
-  }, [setTranscript, setInterimTranscript, previousInterims, resetSilenceTimer]);
-  
-  // Handle errors from speech recognition
-  const handleError = useCallback((event: SpeechRecognitionErrorEvent) => {
-    // Fix: Pass event.error (string) instead of the whole event object
-    handleSpeechRecognitionError(event.error);
-    
-    // If we've restarted too many times, stop trying
-    if (restartAttempts.current >= 3) {
-      toast.error("Voice recognition doesn't seem to be working. Please try again later.");
-      setIsListening(false);
-      return;
-    }
-    
-    // Try to restart
-    if (isListening && speechRecognition.current) {
-      restartAttempts.current += 1;
-      speechRecognition.current.abort();
-      setTimeout(() => {
-        if (isListening && speechRecognition.current) {
-          speechRecognition.current.start();
-        }
-      }, 100);
-    }
-  }, [isListening, speechRecognition, setIsListening, restartAttempts]);
-  
-  // Set up event listeners
   useEffect(() => {
-    if (!useElevenLabsASR && speechRecognition.current) {
-      // Standard browser speech recognition event handlers
-      speechRecognition.current.onresult = handleResult;
-      speechRecognition.current.onerror = handleError;
-      
-      speechRecognition.current.onend = () => {
-        // Auto-restart if still in listening mode
-        if (isListening) {
-          speechRecognition.current?.start();
-        }
-      };
-    }
+    if (!speechRecognition.current || !isListening) return;
     
-    // For Eleven Labs Scribe
-    if (useElevenLabsASR) {
-      // Set up custom event listener for Eleven Labs transcription
-      const handleElevenLabsTranscription = (event: CustomEvent) => {
-        const { transcription } = event.detail;
-        // Reset silence timer since we're getting input
-        resetSilenceTimer();
-        
-        // Set transcript
-        setTranscript(prev => {
-          const newText = transcription.trim();
-          // Only add if not empty or duplicate
-          return prev.endsWith(newText) ? prev : `${prev} ${newText}`.trim();
-        });
-        setInterimTranscript('');
-      };
+    const recognition = speechRecognition.current;
+    
+    // On speech recognition start
+    recognition.onstart = () => {
+      console.log('Speech recognition started');
+      setIsListening(true);
+      // Reset the restart attempts counter when recognition starts successfully
+      restartAttempts.current = 0;
+    };
+    
+    // On speech recognition end
+    recognition.onend = () => {
+      console.log('Speech recognition ended');
       
-      // Add event listener for Eleven Labs transcription
-      window.addEventListener('elevenLabsTranscription', handleElevenLabsTranscription as EventListener);
-      
-      // Cleanup
-      return () => {
-        window.removeEventListener('elevenLabsTranscription', handleElevenLabsTranscription as EventListener);
-      };
-    } else {
-      // Cleanup for browser speech recognition
-      return () => {
-        if (speechRecognition.current) {
-          speechRecognition.current.onresult = null;
-          speechRecognition.current.onerror = null;
-          speechRecognition.current.onend = null;
+      // If still supposed to be listening, restart
+      if (isListening) {
+        // If too many restart attempts, just give up to avoid infinite loops
+        if (restartAttempts.current > 5) {
+          console.error('Too many speech recognition restart attempts, stopping');
+          setIsListening(false);
+          return;
         }
-      };
-    }
+        
+        console.log(`Restarting speech recognition (attempt ${restartAttempts.current + 1})`);
+        restartAttempts.current += 1;
+        
+        // Short delay before restarting
+        setTimeout(() => {
+          try {
+            recognition.start();
+          } catch (error) {
+            console.error('Error restarting speech recognition:', error);
+            setIsListening(false);
+          }
+        }, 300);
+      } else {
+        setIsListening(false);
+      }
+    };
+    
+    // On speech recognition error
+    recognition.onerror = (event) => {
+      const errorEvent = event as SpeechRecognitionErrorEvent;
+      handleSpeechRecognitionError(errorEvent.error);
+      
+      // Some errors are recoverable, like no-speech, but others indicate
+      // a more serious issue that might require user action
+      if (errorEvent.error === 'not-allowed' || 
+          errorEvent.error === 'service-not-allowed') {
+        console.error('Speech recognition permission denied or service not available');
+        setIsListening(false);
+      }
+    };
+    
+    // On speech recognition results
+    recognition.onresult = (event) => {
+      resetSilenceTimer(); // Reset silence timer when we get results
+      
+      const resultEvent = event as SpeechRecognitionEvent;
+      let interimTranscript = '';
+      let finalTranscript = '';
+      
+      // Process results
+      for (let i = resultEvent.resultIndex; i < resultEvent.results.length; i++) {
+        const transcript = resultEvent.results[i][0].transcript;
+        
+        if (resultEvent.results[i].isFinal) {
+          finalTranscript += transcript;
+        } else {
+          interimTranscript += transcript;
+        }
+      }
+      
+      // Update state with any final transcript parts
+      if (finalTranscript !== '') {
+        console.log('Got final transcript:', finalTranscript);
+        setTranscript(prev => {
+          // If we already have text and the new text doesn't start with a space,
+          // add a space to maintain proper spacing between sentences
+          if (prev && !finalTranscript.startsWith(' ')) {
+            return `${prev} ${finalTranscript}`;
+          }
+          return prev + finalTranscript;
+        });
+        
+        // Reset any interim transcripts being tracked
+        previousInterims.current = [];
+      }
+      
+      // Update state with interim transcript
+      if (interimTranscript !== '') {
+        console.log('Got interim transcript:', interimTranscript);
+        
+        // Track interim transcripts to detect "stuck" recognition
+        previousInterims.current.push(interimTranscript);
+        
+        // Only keep the last 5 interim transcripts
+        if (previousInterims.current.length > 5) {
+          previousInterims.current.shift();
+        }
+        
+        setInterimTranscript(interimTranscript);
+      } else {
+        setInterimTranscript('');
+      }
+    };
+    
+    // Cleanup function
+    return () => {
+      recognition.onstart = null;
+      recognition.onend = null;
+      recognition.onerror = null;
+      recognition.onresult = null;
+    };
   }, [
-    speechRecognition,
-    handleResult,
-    handleError,
-    isListening,
-    useElevenLabsASR,
-    setTranscript,
-    setInterimTranscript,
+    speechRecognition, 
+    isListening, 
+    setIsListening, 
+    setTranscript, 
+    setInterimTranscript, 
+    restartAttempts,
+    previousInterims,
     resetSilenceTimer
   ]);
 };

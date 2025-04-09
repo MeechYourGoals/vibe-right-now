@@ -15,6 +15,22 @@ interface TextToSpeechOptions {
 }
 
 export class WhisperSpeechService {
+  // Check if browser supports the required APIs for Whisper
+  public static isAvailable(): boolean {
+    try {
+      // Check if we have the required browser APIs for audio recording and processing
+      return !!(
+        navigator.mediaDevices &&
+        navigator.mediaDevices.getUserMedia &&
+        window.AudioContext &&
+        window.MediaRecorder
+      );
+    } catch (error) {
+      console.error('Error checking Whisper availability:', error);
+      return false;
+    }
+  }
+  
   // Initialize speech recognition model (only once)
   public static async initSpeechRecognition(): Promise<any> {
     // If already initialized or initializing, return existing promise
@@ -195,6 +211,12 @@ export class WhisperSpeechService {
     } catch (error) {
       console.error('Error in browser speech fallback:', error);
     }
+  }
+  
+  // Method to transcribe audio blobs (for local Whisper integration)
+  // This is the method we're adding to fix the error
+  public static async speechToText(audioBlob: Blob): Promise<string> {
+    return this.transcribeAudio(audioBlob);
   }
   
   // Method to transcribe audio blobs (for local Whisper integration)
