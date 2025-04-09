@@ -1,5 +1,5 @@
 
-import { ElevenLabsBase, ElevenLabsOptions, ScribeTranscriptionOptions } from './base';
+import { ElevenLabsBase } from './base';
 import { ElevenLabsTextToSpeech } from './textToSpeech';
 import { ElevenLabsSpeechToText } from './speechToText';
 import { ElevenLabsVoiceManagement } from './voiceManagement';
@@ -27,4 +27,4 @@ export class ElevenLabsService {
 }
 
 // Re-export types
-export type { ElevenLabsOptions, ScribeTranscriptionOptions };
+export type { ElevenLabsOptions, ScribeTranscriptionOptions } from './base';

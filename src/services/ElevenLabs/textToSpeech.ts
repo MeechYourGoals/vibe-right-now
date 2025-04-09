@@ -33,8 +33,8 @@ export class ElevenLabsTextToSpeech {
           text,
           model_id: modelId,
           voice_settings: options.voice_settings || {
-            stability: 0.75,  // Increased for more stable output
-            similarity_boost: 0.75  // Balanced for natural sound
+            stability: 0.8,  // Increased for more stable output
+            similarity_boost: 0.7  // Balanced for natural sound
           }
         })
       });
