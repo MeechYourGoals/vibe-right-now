@@ -5,99 +5,110 @@ export const PerplexityService = {
     try {
       console.log('Searching for:', query);
       
-      // Try using multiple free services with fallbacks
+      // First try DuckDuckGo JSONP API - most reliable free option
       try {
-        // First try using DuckDuckGo API (doesn't require authentication)
-        const ddgResponse = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json`, {
+        // Use direct JSONP callback approach for DuckDuckGo
+        const response = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&callback=&pretty=1`, {
           method: 'GET',
           headers: {
-            'Content-Type': 'application/json',
+            'Accept': 'application/json',
           },
         });
         
-        if (ddgResponse.ok) {
-          const data = await ddgResponse.json();
-          if (data.AbstractText) {
-            return `Here's what I found about "${query}":\n\n${data.AbstractText}`;
+        if (response.ok) {
+          const text = await response.text();
+          // Strip JSONP callback if present
+          const jsonStr = text.replace(/^[^{]*/, '').replace(/[^}]*$/, '');
+          
+          try {
+            const data = JSON.parse(jsonStr);
+            
+            if (data.Abstract && data.Abstract.length > 10) {
+              return `Here's what I found about "${query}":\n\n${data.Abstract}`;
+            } else if (data.RelatedTopics && data.RelatedTopics.length > 0) {
+              let resultText = `Here's what I found about "${query}":\n\n`;
+              
+              // Extract information from related topics
+              for (let i = 0; i < Math.min(3, data.RelatedTopics.length); i++) {
+                const topic = data.RelatedTopics[i];
+                if (topic.Text) {
+                  resultText += `${topic.Text}\n\n`;
+                }
+              }
+              
+              return resultText;
+            }
+          } catch (err) {
+            console.error('Error parsing DuckDuckGo response:', err);
           }
         }
       } catch (error) {
-        console.log('DuckDuckGo search failed, trying next service:', error);
+        console.log('DuckDuckGo search failed, trying alternative method:', error);
       }
       
-      // Try using You.com search API as fallback (free tier)
+      // Try Brave Search API as a good alternative
       try {
-        const youResponse = await fetch(`https://you.com/api/streamingSearch?q=${encodeURIComponent(query)}&page=1&count=10`);
-        
-        if (youResponse.ok) {
-          const data = await youResponse.json();
-          if (data.results && data.results.length > 0) {
-            let resultText = `Here's what I found about "${query}":\n\n`;
-            
-            // Extract and combine the top 3 results
-            const topResults = data.results.slice(0, 3);
-            topResults.forEach((result: any, index: number) => {
-              resultText += `${index + 1}. ${result.title}\n${result.snippet}\n\n`;
-            });
-            
-            return resultText;
-          }
-        }
-      } catch (error) {
-        console.log('You.com search failed, trying next service:', error);
-      }
-      
-      // Try using Brave Search API as another alternative
-      try {
-        const braveResponse = await fetch(`https://search.brave.com/api/search?q=${encodeURIComponent(query)}`);
+        // Use a CORS proxy for Brave Search to avoid CORS issues
+        const proxyUrl = 'https://api.allorigins.win/get?url=';
+        const braveUrl = `https://search.brave.com/api/search?q=${encodeURIComponent(query)}&format=json`;
+        const braveResponse = await fetch(proxyUrl + encodeURIComponent(braveUrl));
         
         if (braveResponse.ok) {
-          const data = await braveResponse.json();
-          if (data.results && data.results.length > 0) {
-            let resultText = `Here's what I found about "${query}":\n\n`;
-            
-            data.results.slice(0, 3).forEach((result: any, index: number) => {
-              resultText += `${index + 1}. ${result.title}\n${result.description || result.snippet || ''}\n\n`;
-            });
-            
-            return resultText;
+          const proxyData = await braveResponse.json();
+          if (proxyData.contents) {
+            try {
+              const data = JSON.parse(proxyData.contents);
+              if (data.results && data.results.length > 0) {
+                let resultText = `Here's what I found about "${query}":\n\n`;
+                
+                data.results.slice(0, 3).forEach((result: any, index: number) => {
+                  resultText += `${index + 1}. ${result.title}\n${result.description || ''}\n\n`;
+                });
+                
+                return resultText;
+              }
+            } catch (e) {
+              console.error('Error parsing Brave search results:', e);
+            }
           }
         }
       } catch (error) {
-        console.log('Brave search failed, trying fallback service:', error);
+        console.log('Brave search failed, trying next service:', error);
       }
       
-      // Final fallback - use a direct Wikipedia request (usually works reliably)
-      return await useFallbackWikipediaService(query);
+      // Try Wikipedia API directly - most widely accessible
+      try {
+        const wikiResponse = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`, {
+          method: 'GET',
+        });
+        
+        if (wikiResponse.ok) {
+          const data = await wikiResponse.json();
+          if (data.extract && data.extract.length > 0) {
+            return `Here's what I found about "${query}":\n\n${data.extract}`;
+          }
+        }
+      } catch (error) {
+        console.log('Wikipedia search failed, trying fallback service:', error);
+      }
+      
+      // Try SimpleSearchService as the final fallback
+      const simpleFallbackResult = await SimpleSearchService.searchForCityInfo(query);
+      if (simpleFallbackResult) {
+        return simpleFallbackResult;
+      }
+      
+      // Ultimate fallback if all services fail
+      return "I'm sorry, but I'm currently having trouble accessing search information. I can still help with general questions or recommendations based on information I already have.";
     } catch (error) {
-      console.error('Error searching:', error);
+      console.error('Error in search services:', error);
       return await useFallbackLocalService(query);
     }
   }
 };
 
-// Fallback service that uses Wikipedia when online services fail
-async function useFallbackWikipediaService(query: string): Promise<string> {
-  try {
-    // Try a direct Wikipedia request as last resort
-    const wikiResponse = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`, {
-      method: 'GET',
-    });
-    
-    if (wikiResponse.ok) {
-      const data = await wikiResponse.json();
-      if (data.extract) {
-        return `Here's what I found about "${query}":\n\n${data.extract}`;
-      }
-    }
-    
-    // If Wikipedia fails, fall back to local service
-    return useFallbackLocalService(query);
-  } catch (error) {
-    console.error('Wikipedia fallback failed:', error);
-    return useFallbackLocalService(query);
-  }
-}
+// Simple Search Service - imported locally so it's available
+import { SimpleSearchService } from './SimpleSearchService';
 
 // Fallback service that uses local knowledge when online services fail
 function useFallbackLocalService(query: string): string {

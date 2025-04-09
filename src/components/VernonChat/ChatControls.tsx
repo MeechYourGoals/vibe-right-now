@@ -51,7 +51,11 @@ const ChatControls: React.FC<ChatControlsProps> = ({
 
   return (
     <div className="border-t p-3">
-      <ChatTranscript transcript={displayTranscript} isVisible={isListening || transcript.length > 0} />
+      <ChatTranscript 
+        transcript={displayTranscript} 
+        isVisible={isListening || transcript.length > 0}
+        isListening={isListening} 
+      />
       
       <div className="flex items-center">
         <Button
@@ -60,6 +64,7 @@ const ChatControls: React.FC<ChatControlsProps> = ({
           className="mr-2 h-9 w-9 rounded-full"
           onClick={toggleListening}
           disabled={isProcessing}
+          title={isListening ? "Stop Listening" : "Start Listening"}
         >
           {isProcessing ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -77,6 +82,7 @@ const ChatControls: React.FC<ChatControlsProps> = ({
             className="mr-2 h-9 w-9 rounded-full"
             onClick={handleSendVoiceTranscript}
             disabled={isProcessing}
+            title="Send Voice Message"
           >
             <Send className="h-4 w-4" />
           </Button>

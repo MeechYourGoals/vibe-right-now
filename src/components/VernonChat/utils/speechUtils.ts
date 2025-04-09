@@ -12,26 +12,30 @@ export const getPreferredVoice = (voices: SpeechSynthesisVoice[]): SpeechSynthes
   ];
   
   // Look for one of our preferred voices first
-  const naturalVoice = voices.find(voice => 
+  let naturalVoice = voices.find(voice => 
     preferredVoices.some(preferred => voice.name.includes(preferred))
   );
   
-  // Try to find a good male English voice as fallback
-  const maleVoice = voices.find(
-    voice => voice.lang.includes('en') && 
-             (voice.name.includes('Male') || 
-              voice.name.includes('Daniel') || 
-              voice.name.includes('David') || 
-              voice.name.includes('James') || 
-              voice.name.includes('George'))
-  );
+  // If none of our preferred voices are found, look for a good male English voice
+  if (!naturalVoice) {
+    naturalVoice = voices.find(
+      voice => voice.lang.includes('en') && 
+               (voice.name.includes('Male') || 
+                voice.name.includes('Daniel') || 
+                voice.name.includes('David') || 
+                voice.name.includes('James') || 
+                voice.name.includes('George'))
+    );
+  }
   
   // If no specific male voice found, fallback to any English voice
-  const englishVoice = voices.find(
-    voice => voice.lang.includes('en')
-  );
+  if (!naturalVoice) {
+    naturalVoice = voices.find(
+      voice => voice.lang.includes('en')
+    );
+  }
   
-  return naturalVoice || maleVoice || englishVoice;
+  return naturalVoice;
 };
 
 // Process text to make it sound more natural
@@ -64,7 +68,7 @@ export const processTextForNaturalSpeech = (text: string): string => {
   });
   
   // Add natural pauses and inflection for better prosody
-  return processedText
+  processedText = processedText
     .replace(/\./g, '. ')
     .replace(/\,/g, ', ')
     .replace(/\!/g, '! ')
@@ -77,6 +81,8 @@ export const processTextForNaturalSpeech = (text: string): string => {
     // Remove the SSML-like tags before actual synthesis since browser speech API doesn't support them
     .replace(/<break time="(\d+)ms"\/>/g, '')
     .replace(/<emphasis>(.*?)<\/emphasis>/g, '$1');
+    
+  return processedText;
 };
 
 // Convert numbers to words for more natural pronunciation
@@ -125,9 +131,15 @@ export const initializeSpeechRecognition = (): SpeechRecognition | null => {
   if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
+    
+    // Configure recognition settings
     recognition.continuous = true;
     recognition.interimResults = true;
     recognition.lang = 'en-US'; // Ensure English recognition for accuracy
+    
+    // Give some extra time for processing
+    recognition.maxAlternatives = 1;
+    
     return recognition;
   }
   
@@ -157,5 +169,22 @@ export const initializeSpeechSynthesis = (): SpeechSynthesis | null => {
 
 export const handleSpeechRecognitionError = (error: string): void => {
   console.error('Speech recognition error', error);
-  toast.error(`Microphone error: ${error}`);
+  
+  // Don't show aborted errors to user as they happen when we stop listening intentionally
+  if (error !== 'aborted') {
+    let errorMessage = 'Microphone error';
+    
+    // Provide more specific error messages
+    if (error === 'not-allowed') {
+      errorMessage = 'Microphone access denied. Please enable microphone permissions.';
+    } else if (error === 'network') {
+      errorMessage = 'Network error occurred during voice recognition.';
+    } else if (error === 'no-speech') {
+      errorMessage = 'No speech detected. Please try again.';
+    } else {
+      errorMessage = `Microphone error: ${error}`;
+    }
+    
+    toast.error(errorMessage);
+  }
 };

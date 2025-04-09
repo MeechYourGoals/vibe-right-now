@@ -29,9 +29,11 @@ export const useSpeechInteraction = () => {
     }
     
     if (isListening) {
+      // If currently listening, stop
       stopListening();
-      stopSpeaking();
+      stopSpeaking(); // Also stop any ongoing speech
     } else {
+      // If not listening, start
       startListening();
     }
   };
