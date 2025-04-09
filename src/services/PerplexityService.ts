@@ -1,3 +1,5 @@
+import { SimpleSearchService } from './SimpleSearchService';
+import { SwirlSearchService } from './SwirlSearchService';
 
 // Service to interact with search APIs and AI-assisted search
 export const PerplexityService = {
@@ -5,7 +7,23 @@ export const PerplexityService = {
     try {
       console.log('Searching for:', query);
       
-      // Try using OpenAI's search capabilities first (most comprehensive)
+      // Try using Swirl first (local search engine)
+      try {
+        // Check if Swirl is available
+        const isSwirlAvailable = await SwirlSearchService.isAvailable();
+        
+        if (isSwirlAvailable) {
+          console.log('Swirl is available, using it for search');
+          const swirlResult = await SwirlSearchService.search(query);
+          if (swirlResult) {
+            return swirlResult;
+          }
+        }
+      } catch (error) {
+        console.log('Swirl search failed, trying alternative methods:', error);
+      }
+      
+      // Try using OpenAI's search capabilities (most comprehensive)
       try {
         const openAIResult = await fetchOpenAIResults(query);
         if (openAIResult) {
@@ -281,12 +299,7 @@ function useFallbackLocalService(query: string): string {
   return "I'm sorry, but I'm currently unable to access search information. I can still help with general questions or recommendations based on information I already have available.";
 }
 
-// Import the SimpleSearchService
-import { SimpleSearchService } from './SimpleSearchService';
-
-/**
- * Generate category-specific fallback responses
- */
+// Generate category-specific fallback responses
 function generateCategorySpecificFallback(city: string, category: string): string {
   switch (category) {
     case "concerts":

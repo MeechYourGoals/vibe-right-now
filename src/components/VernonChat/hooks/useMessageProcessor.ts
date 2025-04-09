@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Message } from '../types';
 import { HuggingChatService } from '@/services/HuggingChatService';
@@ -11,6 +12,7 @@ import {
   detectCategoryInQuery
 } from '../utils/locationResponseGenerator';
 import { PerplexityService } from '@/services/PerplexityService';
+import { SwirlSearchService } from '@/services/SwirlSearchService';
 import { processVenueQuery } from '../utils/venueQueryProcessor';
 import { cleanResponseText } from '../utils/responseFormatter';
 import { cityCoordinates } from '@/utils/locations';
@@ -118,9 +120,23 @@ export const useMessageProcessor = (isProPlan: boolean = false, isVenueMode: boo
         responseText = await processVenueQuery(inputValue, isProPlan);
       } else {
         try {
-          responseText = await PerplexityService.searchPerplexity(inputValue);
+          // First try Swirl search if it's available
+          const isSwirlAvailable = await SwirlSearchService.isAvailable();
+          
+          if (isSwirlAvailable) {
+            console.log('Using Swirl search engine for query');
+            try {
+              responseText = await SwirlSearchService.search(inputValue);
+            } catch (swirlError) {
+              console.error('Error with Swirl search, falling back to Perplexity:', swirlError);
+              responseText = await PerplexityService.searchPerplexity(inputValue);
+            }
+          } else {
+            // If Swirl is not available, use Perplexity
+            responseText = await PerplexityService.searchPerplexity(inputValue);
+          }
         } catch (error) {
-          console.error('Error with search service, falling back to HuggingChat:', error);
+          console.error('Error with search services, falling back to HuggingChat:', error);
           responseText = await HuggingChatService.searchHuggingChat(inputValue);
         }
         
