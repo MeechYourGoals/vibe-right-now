@@ -9,6 +9,7 @@ interface ChatControlsProps {
   isListening: boolean;
   isProcessing: boolean;
   transcript: string;
+  interimTranscript?: string;
   toggleListening: () => void;
   onSendMessage: (message: string) => void;
   isTyping: boolean;
@@ -18,6 +19,7 @@ const ChatControls: React.FC<ChatControlsProps> = ({
   isListening,
   isProcessing,
   transcript,
+  interimTranscript = '',
   toggleListening,
   onSendMessage,
   isTyping
@@ -44,9 +46,12 @@ const ChatControls: React.FC<ChatControlsProps> = ({
     }
   };
 
+  // Combine transcript and interim transcript for display
+  const displayTranscript = transcript + (isListening ? ' ' + interimTranscript : '');
+
   return (
     <div className="border-t p-3">
-      <ChatTranscript transcript={transcript} isVisible={isListening} />
+      <ChatTranscript transcript={displayTranscript} isVisible={isListening || transcript.length > 0} />
       
       <div className="flex items-center">
         <Button
@@ -65,7 +70,7 @@ const ChatControls: React.FC<ChatControlsProps> = ({
           )}
         </Button>
         
-        {isListening && transcript.trim() && (
+        {(isListening && transcript.trim()) && (
           <Button
             variant="default"
             size="icon"

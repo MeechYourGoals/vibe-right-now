@@ -7,9 +7,11 @@ import {
 } from '../utils/speechUtils';
 
 export const useSpeechRecognition = () => {
-  const [isListening, setIsListening] = useState(false);
+  // Default to listening when component mounts
+  const [isListening, setIsListening] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
   const [transcript, setTranscript] = useState('');
+  const [interimTranscript, setInterimTranscript] = useState(''); // Real-time transcript
   
   const speechRecognition = useRef<SpeechRecognition | null>(null);
   const silenceTimer = useRef<NodeJS.Timeout | null>(null);
@@ -21,12 +23,26 @@ export const useSpeechRecognition = () => {
     
     if (speechRecognition.current) {
       speechRecognition.current.onresult = (event) => {
-        const newTranscript = Array.from(event.results)
-          .map(result => result[0])
-          .map(result => result.transcript)
-          .join('');
+        // Get both interim and final results
+        let finalTranscript = '';
+        let currentInterimTranscript = '';
         
-        setTranscript(newTranscript);
+        for (let i = 0; i < event.results.length; i++) {
+          if (event.results[i].isFinal) {
+            finalTranscript += event.results[i][0].transcript;
+          } else {
+            currentInterimTranscript += event.results[i][0].transcript;
+          }
+        }
+        
+        // Set interim transcript for real-time display
+        setInterimTranscript(currentInterimTranscript);
+        
+        // If we have final transcript, add it to the complete transcript
+        if (finalTranscript) {
+          setTranscript(prevTranscript => prevTranscript + ' ' + finalTranscript);
+        }
+        
         lastSpeechTime.current = Date.now();
         
         // Reset silence timer on new speech
@@ -34,14 +50,14 @@ export const useSpeechRecognition = () => {
           clearTimeout(silenceTimer.current);
         }
         
-        // Set new silence timer for 1.5 seconds - automatically process after 1.5 seconds of silence
+        // Set new silence timer for 1 second - automatically process after 1 second of silence
         silenceTimer.current = setTimeout(() => {
-          if (isListening && newTranscript.trim()) {
+          if (isListening && (finalTranscript.trim() || transcript.trim())) {
             // Only process if we have a valid transcript and we were listening
             stopListening();
             setIsProcessing(true);
           }
-        }, 1500); // Reduced to 1.5 seconds for more responsive experience
+        }, 1000); // Reduced to 1 second for more responsive experience
       };
       
       speechRecognition.current.onend = () => {
@@ -58,6 +74,14 @@ export const useSpeechRecognition = () => {
         handleSpeechRecognitionError(event.error);
         setIsListening(false);
       };
+      
+      // Start listening by default
+      try {
+        speechRecognition.current.start();
+        toast.success('Voice mode activated. Start speaking...');
+      } catch (error) {
+        console.error('Error starting speech recognition on mount:', error);
+      }
     }
     
     // Clean up
@@ -86,6 +110,7 @@ export const useSpeechRecognition = () => {
       speechRecognition.current?.start();
       setIsListening(true);
       setTranscript('');
+      setInterimTranscript('');
       lastSpeechTime.current = Date.now();
       toast.success('Voice mode activated. Start speaking...');
     } catch (error) {
@@ -117,6 +142,7 @@ export const useSpeechRecognition = () => {
       // Return the transcript for further processing
       const currentTranscript = transcript;
       setTranscript('');
+      setInterimTranscript('');
       
       return currentTranscript;
     }
@@ -128,6 +154,7 @@ export const useSpeechRecognition = () => {
     isProcessing,
     setIsProcessing,
     transcript,
+    interimTranscript,
     startListening,
     stopListening,
     processTranscript

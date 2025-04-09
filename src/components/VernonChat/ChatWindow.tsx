@@ -34,6 +34,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
     isProcessing,
     setIsProcessing,
     transcript,
+    interimTranscript,
     toggleListening,
     stopListening,
     stopSpeaking,
@@ -100,6 +101,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
         isListening={isListening}
         isProcessing={isProcessing}
         transcript={transcript}
+        interimTranscript={interimTranscript}
         toggleListening={toggleListening}
         onSendMessage={onSendMessage}
         isTyping={isTyping}

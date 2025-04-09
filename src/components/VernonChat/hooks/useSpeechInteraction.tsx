@@ -10,6 +10,7 @@ export const useSpeechInteraction = () => {
     isProcessing,
     setIsProcessing,
     transcript,
+    interimTranscript,
     startListening,
     stopListening,
     processTranscript
@@ -48,6 +49,7 @@ export const useSpeechInteraction = () => {
     isProcessing,
     setIsProcessing,
     transcript,
+    interimTranscript,
     isSpeaking,
     toggleListening,
     stopListening,
