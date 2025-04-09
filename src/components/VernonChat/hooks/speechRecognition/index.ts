@@ -1,100 +1,66 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import { useRecognitionSetup } from './useRecognitionSetup';
-import { useSilenceDetection } from './useSilenceDetection';
 import { useRecognitionEventHandlers } from './useRecognitionEventHandlers';
 import { useListeningControls } from './useListeningControls';
 import { useTranscriptProcessor } from './useTranscriptProcessor';
+import { useSilenceDetection } from './useSilenceDetection';
 import { SpeechRecognitionHookReturn } from './types';
 
+// Main hook that composes other hooks for speech recognition functionality
 export const useSpeechRecognition = (): SpeechRecognitionHookReturn => {
-  // State for speech recognition
   const [isListening, setIsListening] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [transcript, setTranscript] = useState('');
-  const [interimTranscript, setInterimTranscript] = useState(''); // Real-time transcript
+  const [interimTranscript, setInterimTranscript] = useState('');
   
-  // Set up recognition
-  const {
-    speechRecognition,
+  // Setup speech recognition
+  const { 
+    speechRecognition, 
+    initialized,
     restartAttempts,
     previousInterims
   } = useRecognitionSetup();
   
-  // Handle silence detection
-  const handleSilenceDetected = useCallback(() => {
-    if (isListening && (transcript.trim() || interimTranscript.trim())) {
-      // Only process if we have a valid transcript and we were listening
-      console.log('Silence detected, stopping listening');
-      stopListening();
-      setIsProcessing(true);
-    }
-  }, [isListening, transcript, interimTranscript]);
-  
-  const {
-    resetSilenceTimer,
-    clearSilenceTimer,
-  } = useSilenceDetection({
-    onSilenceDetected: handleSilenceDetected,
-    silenceDuration: 1200 // 1.2 seconds of silence
-  });
-  
-  // Set up event handlers
-  const { setupEventHandlers } = useRecognitionEventHandlers({
+  // Set up event handlers for speech recognition
+  useRecognitionEventHandlers({
     speechRecognition,
-    isListening,
-    setIsListening,
-    restartAttempts,
     setTranscript,
     setInterimTranscript,
-    previousInterims,
-    resetSilenceTimer
+    setIsListening,
+    isListening,
+    restartAttempts,
+    previousInterims
   });
   
-  // Initialize event handlers when recognition is set up
-  useEffect(() => {
-    if (speechRecognition.current) {
-      setupEventHandlers();
-    }
-  }, [setupEventHandlers]);
-  
-  // Listening controls
-  const {
-    startListening,
-    stopListening
+  // Listening controls (start/stop)
+  const { 
+    startListening, 
+    stopListening 
   } = useListeningControls({
     speechRecognition,
+    initialized,
     isListening,
     setIsListening,
-    setTranscript,
-    setInterimTranscript,
-    restartAttempts,
-    previousInterims,
-    clearSilenceTimer
-  });
-  
-  // Transcript processor
-  const { processTranscript } = useTranscriptProcessor({
-    transcript,
     setIsProcessing,
     setTranscript,
-    setInterimTranscript
+    setInterimTranscript,
+    restartAttempts
   });
   
-  // Clean up
-  useEffect(() => {
-    return () => {
-      if (speechRecognition.current) {
-        try {
-          speechRecognition.current.stop();
-        } catch (error) {
-          console.error('Error cleaning up speech recognition:', error);
-        }
-      }
-      
-      clearSilenceTimer();
-    };
-  }, [clearSilenceTimer]);
+  // Silence detection for auto-stopping
+  useSilenceDetection({
+    speechRecognition,
+    isListening,
+    interimTranscript,
+    stopListening
+  });
+  
+  // Process the transcript
+  const { processTranscript } = useTranscriptProcessor({
+    transcript,
+    setTranscript
+  });
   
   return {
     isListening,
@@ -107,6 +73,3 @@ export const useSpeechRecognition = (): SpeechRecognitionHookReturn => {
     processTranscript
   };
 };
-
-// Re-export for backward compatibility
-export * from './types';
