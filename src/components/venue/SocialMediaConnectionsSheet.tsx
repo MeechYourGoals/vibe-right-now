@@ -24,12 +24,15 @@ const SocialMediaConnectionsSheet: React.FC<SocialMediaConnectionsSheetProps> = 
 }) => {
   const [activeTab, setActiveTab] = useState<'connect' | 'settings'>('connect');
   const [apiKeys, setApiKeys] = useState<SocialMediaApiKeys>({
-    facebook: '',
     instagram: '',
-    twitter: '',
     tiktok: '',
     yelp: '',
+    tripadvisor: '',
+    foursquare: '',
     google: '',
+    franki: '',
+    other: '',
+    otherUrl: ''
   });
   
   const handleSaveApiKeys = (keys: SocialMediaApiKeys) => {
@@ -41,7 +44,10 @@ const SocialMediaConnectionsSheet: React.FC<SocialMediaConnectionsSheetProps> = 
     if (onConnectedPlatformsChange) {
       const connectedPlatforms: Record<string, boolean> = {};
       Object.keys(keys).forEach(key => {
-        connectedPlatforms[key] = !!keys[key as keyof SocialMediaApiKeys];
+        // Skip otherUrl as it's not a platform
+        if (key !== 'otherUrl') {
+          connectedPlatforms[key] = !!keys[key as keyof SocialMediaApiKeys];
+        }
       });
       onConnectedPlatformsChange(connectedPlatforms);
     }
