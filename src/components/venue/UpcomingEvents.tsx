@@ -1,82 +1,18 @@
 
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { CalendarDays, Calendar, Users, Clock } from "lucide-react";
-
-const events = [
-  {
-    id: 1,
-    title: "Friday Night DJ Set",
-    date: "2025-04-11",
-    time: "9:00 PM - 2:00 AM",
-    attendees: 134,
-    status: "upcoming"
-  },
-  {
-    id: 2,
-    title: "Saturday Brunch Special",
-    date: "2025-04-12",
-    time: "11:00 AM - 3:00 PM",
-    attendees: 87,
-    status: "upcoming"
-  },
-  {
-    id: 3,
-    title: "Wine Tasting Event",
-    date: "2025-04-15",
-    time: "6:00 PM - 9:00 PM",
-    attendees: 42,
-    status: "upcoming"
-  }
-];
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import EventHeader from "./events/EventHeader";
+import EventsList from "./events/EventsList";
+import { upcomingEvents } from "./events/eventsData";
 
 const UpcomingEvents = () => {
   return (
     <Card className="bg-amber-950 text-white">
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="flex items-center text-amber-100">
-          <CalendarDays className="mr-2 h-5 w-5 text-amber-400" />
-          Upcoming Events
-        </CardTitle>
-        <Button variant="outline" size="sm" className="border-amber-700 text-amber-100 hover:bg-amber-900 hover:text-white">
-          <Calendar className="mr-2 h-4 w-4" />
-          Create Event
-        </Button>
+        <EventHeader />
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          {events.map(event => (
-            <div key={event.id} className="flex flex-col space-y-2 pb-4 border-b border-amber-800 last:border-0">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="font-semibold text-amber-100">{event.title}</h3>
-                  <div className="flex items-center text-sm text-amber-200 mt-1">
-                    <Calendar className="mr-1 h-3 w-3" />
-                    <span>{event.date}</span>
-                    <Clock className="ml-2 mr-1 h-3 w-3" />
-                    <span>{event.time}</span>
-                  </div>
-                </div>
-                <Badge variant="outline" className="bg-amber-900 text-amber-100 border-amber-700">
-                  {event.attendees} RSVP
-                </Badge>
-              </div>
-              <div className="flex items-center justify-between mt-2">
-                <div className="flex items-center text-sm text-amber-200">
-                  <Users className="mr-1 h-3 w-3" />
-                  <span>{event.attendees} attendees</span>
-                </div>
-                <Button variant="outline" size="sm" className="border-amber-700 text-amber-100 hover:bg-amber-900 hover:text-white">Manage</Button>
-              </div>
-            </div>
-          ))}
-          
-          <Button variant="ghost" size="sm" className="w-full text-amber-200 hover:text-white hover:bg-amber-900">
-            View All Events
-          </Button>
-        </div>
+        <EventsList events={upcomingEvents} />
       </CardContent>
     </Card>
   );
