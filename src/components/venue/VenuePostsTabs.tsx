@@ -1,14 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
-import { Button } from "@/components/ui/button";
-import { Grid2X2, ListIcon, Settings } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Sheet, SheetTrigger } from "@/components/ui/sheet";
+import { Tabs } from "@/components/ui/tabs";
 import { Post, Comment, Location } from "@/types";
-import VenuePostsAllTab from './tabs/VenuePostsAllTab';
-import VenuePostsVrnTab from './tabs/VenuePostsVrnTab';
-import VenuePostsExternalTab from './tabs/VenuePostsExternalTab';
-import SocialMediaConnectionsSheet from './SocialMediaConnectionsSheet';
+import VenuePostsTabsHeader from './tabs/VenuePostsTabsHeader';
+import VenuePostsTabsContent from './tabs/VenuePostsTabsContent';
 
 interface VenuePostsTabsProps {
   activeTab: string;
@@ -88,73 +83,26 @@ const VenuePostsTabs: React.FC<VenuePostsTabsProps> = ({
   
   return (
     <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="mb-6">
-      <div className="flex justify-between items-center mb-2">
-        <TabsList className="grid grid-cols-3 w-[300px]">
-          <TabsTrigger value="all">All Posts</TabsTrigger>
-          <TabsTrigger value="vrn">VRN Content</TabsTrigger>
-          <TabsTrigger value="external">External</TabsTrigger>
-        </TabsList>
-        
-        <div className="flex gap-2">
-          <Button 
-            variant={viewMode === "list" ? "default" : "outline"} 
-            size="sm"
-            onClick={() => setViewMode("list")}
-          >
-            <ListIcon className="h-4 w-4" />
-          </Button>
-          <Button 
-            variant={viewMode === "grid" ? "default" : "outline"} 
-            size="sm"
-            onClick={() => setViewMode("grid")}
-          >
-            <Grid2X2 className="h-4 w-4" />
-          </Button>
-          
-          {activeTab === 'external' && (
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="outline" size="sm" data-trigger="connections">
-                  <Settings className="h-4 w-4 mr-1" />
-                  Connections
-                </Button>
-              </SheetTrigger>
-              <SocialMediaConnectionsSheet 
-                onConnectedPlatformsChange={setConnectedPlatforms} 
-              />
-            </Sheet>
-          )}
-        </div>
-      </div>
+      <VenuePostsTabsHeader 
+        activeTab={activeTab}
+        viewMode={viewMode}
+        setViewMode={setViewMode}
+        onConnectedPlatformsChange={setConnectedPlatforms}
+      />
       
-      <TabsContent value="all" className="mt-4 space-y-4">
-        <VenuePostsAllTab 
-          posts={allPosts} 
-          venue={venue} 
-          viewMode={viewMode} 
-          getComments={getPostComments} 
-        />
-      </TabsContent>
-      
-      <TabsContent value="vrn" className="mt-4 space-y-4">
-        <VenuePostsVrnTab
-          filteredVenuePosts={filteredVenuePosts}
-          filteredPosts={filteredPosts}
-          venue={venue}
-          viewMode={viewMode}
-          getComments={getPostComments}
-        />
-      </TabsContent>
-      
-      <TabsContent value="external" className="mt-4">
-        <VenuePostsExternalTab
-          venueName={venue.name}
-          connectedPlatforms={connectedPlatforms}
-          subscriptionTier={subscriptionTier}
-          canEmbed={canEmbed}
-          onUpgradeSubscription={handleUpgradeSubscription}
-        />
-      </TabsContent>
+      <VenuePostsTabsContent 
+        activeTab={activeTab}
+        allPosts={allPosts}
+        filteredPosts={filteredPosts}
+        filteredVenuePosts={filteredVenuePosts}
+        venue={venue}
+        viewMode={viewMode}
+        getPostComments={getPostComments}
+        subscriptionTier={subscriptionTier}
+        canEmbed={canEmbed}
+        connectedPlatforms={connectedPlatforms}
+        onUpgradeSubscription={handleUpgradeSubscription}
+      />
     </Tabs>
   );
 };
