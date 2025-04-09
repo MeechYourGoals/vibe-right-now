@@ -115,9 +115,9 @@ const DataInsights = () => {
               )}
             </div>
             
-            <TabsList className="mb-4">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="analytics">
+            <TabsList className="mb-4 bg-amber-900">
+              <TabsTrigger value="overview" className="data-[state=active]:bg-amber-700 data-[state=active]:text-white">Overview</TabsTrigger>
+              <TabsTrigger value="analytics" className="data-[state=active]:bg-amber-700 data-[state=active]:text-white">
                 <div className="flex items-center">
                   <ChartBar className="mr-2 h-4 w-4" />
                   Analytics
@@ -127,6 +127,7 @@ const DataInsights = () => {
               <TabsTrigger 
                 value="advertising" 
                 disabled={subscriptionTier === 'standard' || subscriptionTier === 'plus'}
+                className="data-[state=active]:bg-amber-700 data-[state=active]:text-white"
               >
                 <div className="flex items-center">
                   Advertising
