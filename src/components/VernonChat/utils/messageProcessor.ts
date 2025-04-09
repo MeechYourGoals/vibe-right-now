@@ -1,7 +1,7 @@
 
 import { Message } from '../types';
-import { processQuery } from '../utils/handlers/index';
-import { createUserMessage, createAssistantMessage } from './messageFactory';
+import { processQuery } from './handlers';
+import { createMessage } from './messageFactory';
 
 interface ProcessMessageOptions {
   isVenueMode: boolean;
@@ -19,7 +19,7 @@ export const processMessageInput = async (
   const { isVenueMode, isProPlan, updatePaginationState, setIsTyping, setIsSearching } = options;
   
   // Add user message
-  const userMessage = createUserMessage(inputValue);
+  const userMessage = createMessage('user', inputValue);
   setMessages(prevMessages => [...prevMessages, userMessage]);
   
   // Set typing state
@@ -35,13 +35,14 @@ export const processMessageInput = async (
     }
     
     // Add assistant response
-    const assistantMessage = createAssistantMessage(responseText);
+    const assistantMessage = createMessage('assistant', responseText);
     setMessages(prevMessages => [...prevMessages, assistantMessage]);
   } catch (error) {
     console.error('Error processing message:', error);
     
     // Add error message
-    const errorMessage = createAssistantMessage(
+    const errorMessage = createMessage(
+      'assistant', 
       'I apologize, but I encountered an error processing your request. Please try again or ask something else.'
     );
     setMessages(prevMessages => [...prevMessages, errorMessage]);

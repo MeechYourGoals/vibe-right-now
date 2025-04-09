@@ -7,7 +7,6 @@ import { processVenueQuery } from '../venueQueryProcessor';
 export const handleVenueQuery = async (
   inputValue: string, 
   isProPlan: boolean
-): Promise<{ responseText: string, paginationData: any | null }> => {
-  const responseText = await processVenueQuery(inputValue, isProPlan);
-  return { responseText, paginationData: null };
+): Promise<string> => {
+  return await processVenueQuery(inputValue, isProPlan);
 };
