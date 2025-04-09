@@ -8,6 +8,7 @@ import {
   PaginationNext,
   PaginationPrevious
 } from '@/components/ui/pagination';
+import { Button } from '@/components/ui/button';
 
 interface PaginatedResultsProps {
   category: string;
@@ -59,23 +60,33 @@ const PaginatedResults: React.FC<PaginatedResultsProps> = ({
         <Pagination>
           <PaginationContent>
             <PaginationItem>
-              <PaginationPrevious 
+              <Button
                 onClick={handlePrevious}
                 disabled={currentPage === 1}
-              />
+                size="sm"
+                variant="outline"
+                className="h-8 w-8 p-0"
+              >
+                <PaginationPrevious className="h-4 w-4" />
+              </Button>
             </PaginationItem>
             
             <PaginationItem>
-              <span className="text-sm">
+              <span className="text-sm px-2">
                 Page {currentPage} of {totalPages}
               </span>
             </PaginationItem>
             
             <PaginationItem>
-              <PaginationNext 
+              <Button
                 onClick={handleNext}
                 disabled={currentPage === totalPages}
-              />
+                size="sm"
+                variant="outline"
+                className="h-8 w-8 p-0"
+              >
+                <PaginationNext className="h-4 w-4" />
+              </Button>
             </PaginationItem>
           </PaginationContent>
         </Pagination>

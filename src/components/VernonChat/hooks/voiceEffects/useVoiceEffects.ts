@@ -2,8 +2,13 @@
 import { useEffect } from 'react';
 import { Message } from '../../types';
 
+// Extending the Message type with the spoken property
+interface MessageWithSpoken extends Message {
+  spoken?: boolean;
+}
+
 type UseVoiceEffectsProps = {
-  messages: Message[];
+  messages: MessageWithSpoken[];
   isTyping: boolean;
   isSpeaking: boolean;
   isListening: boolean;
@@ -69,7 +74,7 @@ export const useVoiceEffects = ({
       
       // Only speak if messages exist, not typing, not processing, and not already speaking
       if (messages.length > 0 && !isTyping && !isProcessing && !isSpeaking) {
-        const lastMessage = messages[messages.length - 1];
+        const lastMessage = messages[messages.length - 1] as MessageWithSpoken;
         
         // Only speak AI messages, not user ones
         if (lastMessage.sender === 'ai' && !lastMessage.spoken) {
@@ -77,7 +82,7 @@ export const useVoiceEffects = ({
           
           // Mark this message as spoken to avoid repeating
           const updatedMessages = [...messages];
-          updatedMessages[updatedMessages.length - 1] = {
+          (updatedMessages[updatedMessages.length - 1] as MessageWithSpoken) = {
             ...lastMessage,
             spoken: true
           };
