@@ -39,8 +39,8 @@ const CameraButton = () => {
     toast({
       title: "Vibe Posted",
       description: availableToPin 
-        ? `Your vibe has been posted and is available for venues to pin! (${pointsEarned}x points)` 
-        : `Your vibe has been posted! (${pointsEarned}x points)`,
+        ? `Your vibe has been posted and is available for venues to pin for up to 90 days! (${pointsEarned}x points)` 
+        : `Your vibe has been posted and will be visible for 1 week! (${pointsEarned}x points)`,
     });
   };
 
@@ -75,7 +75,7 @@ const CameraButton = () => {
           <DialogHeader>
             <DialogTitle className="text-xl font-bold vibe-gradient-text">Post a Vibe</DialogTitle>
             <DialogDescription>
-              Share the vibe at your current location. Your post will be visible for 24 hours.
+              Share the vibe at your current location. Your post will be visible for 1 week by default.
             </DialogDescription>
           </DialogHeader>
           
@@ -165,7 +165,7 @@ const CameraButton = () => {
                   <span className="ml-2 reward-badge">3x Points</span>
                 </Label>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Make your vibe available for venues to pin and feature on their profile
+                  Make your vibe available for venues to pin for up to 90 days
                 </p>
               </div>
             </div>

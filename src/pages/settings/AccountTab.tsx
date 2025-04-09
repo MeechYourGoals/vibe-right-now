@@ -1,100 +1,113 @@
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { BellRing, Bell, UserCheck, Store, Lock } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
-interface AccountTabProps {
+export interface AccountTabProps {
   onSave: () => void;
+  isVenueMode?: boolean;
 }
 
-const AccountTab = ({ onSave }: AccountTabProps) => {
+const AccountTab = ({ onSave, isVenueMode = false }: AccountTabProps) => {
+  const [emailNotifications, setEmailNotifications] = useState(true);
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
+  
   return (
-    <>
-      <Card>
-        <CardHeader>
-          <CardTitle>Account Settings</CardTitle>
-          <CardDescription>
-            Manage your account preferences and security
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="display-name">Display Name</Label>
-              <Input id="display-name" placeholder="Your display name" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="Your email" />
-            </div>
-          </div>
-          
-          <div className="space-y-2">
-            <Label>Notification Preferences</Label>
-            <div className="pt-2 space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <BellRing className="h-4 w-4" />
-                  <Label htmlFor="notifications-all">All Notifications</Label>
-                </div>
-                <Switch id="notifications-all" />
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Bell className="h-4 w-4" />
-                  <Label htmlFor="notifications-events">Event Updates</Label>
-                </div>
-                <Switch id="notifications-events" defaultChecked />
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <UserCheck className="h-4 w-4" />
-                  <Label htmlFor="notifications-follows">New Followers</Label>
-                </div>
-                <Switch id="notifications-follows" defaultChecked />
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Store className="h-4 w-4" />
-                  <Label htmlFor="notifications-venue-follows">Venue Follows</Label>
-                </div>
-                <Switch id="notifications-venue-follows" defaultChecked />
-              </div>
-            </div>
-          </div>
-          
-          <Button onClick={onSave}>Save Account Settings</Button>
-        </CardContent>
-      </Card>
+    <div className="bg-card p-6 rounded-lg border shadow-sm">
+      <h2 className="text-xl font-semibold mb-4">Account Settings</h2>
       
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-destructive">Danger Zone</CardTitle>
-          <CardDescription>
-            Actions here cannot be undone
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="confirm-deletion" className="flex items-center text-destructive">
-              <Lock className="h-4 w-4 mr-2" />
-              Delete Account
-            </Label>
-            <div className="pt-2 flex gap-2">
-              <Input 
-                id="confirm-deletion" 
-                placeholder="Type 'delete' to confirm" 
-                className="max-w-xs"
-              />
-              <Button variant="destructive">Delete Account</Button>
+      <div className="space-y-6">
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium">Profile</h3>
+          <div className="grid gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="display-name">Display Name</Label>
+              <Input id="display-name" defaultValue="Jane Smith" />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" type="email" defaultValue="jane.smith@example.com" />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="username">Username</Label>
+              <Input id="username" defaultValue="janesmith" />
             </div>
           </div>
-        </CardContent>
-      </Card>
-    </>
+        </div>
+        
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium">Security</h3>
+          <div className="grid gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="current-password">Current Password</Label>
+              <Input id="current-password" type="password" />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="new-password">New Password</Label>
+              <Input id="new-password" type="password" />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="confirm-password">Confirm New Password</Label>
+              <Input id="confirm-password" type="password" />
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="two-factor">Two-factor Authentication</Label>
+                <div className="text-xs text-muted-foreground">
+                  Add an extra layer of security to your account
+                </div>
+              </div>
+              <Switch
+                id="two-factor"
+                checked={twoFactorEnabled}
+                onCheckedChange={setTwoFactorEnabled}
+              />
+            </div>
+          </div>
+        </div>
+        
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium">Notifications</h3>
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="email-notifications">Email Notifications</Label>
+              <div className="text-xs text-muted-foreground">
+                Receive email notifications for {isVenueMode ? "venue" : "account"} activity
+              </div>
+            </div>
+            <Switch
+              id="email-notifications"
+              checked={emailNotifications}
+              onCheckedChange={setEmailNotifications}
+            />
+          </div>
+        </div>
+        
+        {isVenueMode && (
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium">Venue Account Details</h3>
+            <div className="grid gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="business-name">Business Name</Label>
+                <Input id="business-name" defaultValue="My Awesome Venue" />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="business-email">Business Email</Label>
+                <Input id="business-email" type="email" defaultValue="contact@awesomevenue.com" />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="business-phone">Business Phone</Label>
+                <Input id="business-phone" type="tel" defaultValue="(555) 123-4567" />
+              </div>
+            </div>
+          </div>
+        )}
+        
+        <Button onClick={onSave} className="w-full">Save Changes</Button>
+      </div>
+    </div>
   );
 };
 

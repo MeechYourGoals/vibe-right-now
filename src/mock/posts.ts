@@ -20,7 +20,7 @@ export const mockPosts: Post[] = [
       },
     ],
     timestamp: getRecentTime(1),
-    expiresAt: getExpiryTime(getRecentTime(1)),
+    expiresAt: getExpiryTime(getRecentTime(1), true), // Pinned post (90 days)
     likes: 42,
     comments: 7,
   },
