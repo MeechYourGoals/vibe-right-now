@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
@@ -80,9 +79,6 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
   userAddressLocation = null, // Default value
   showAllCities = true
 }) => {
-  // State for hover effects on markers
-  const [hoveredLocationId, setHoveredLocationId] = useState<string | null>(null);
-  
   // Determine map center based on available location data
   let mapCenter: [number, number] = [34.0522, -118.2437]; // Default to Los Angeles
   let zoom = 10;
@@ -100,77 +96,54 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
   }
 
   // Determine the tile layer URL based on the selected map style
-  let tileLayerUrl = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
-  let tileLayerAttribution = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
-  
+  let tileLayerUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
   if (mapStyle === 'terrain') {
-    tileLayerUrl = 'https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}{r}.png';
-    tileLayerAttribution = 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+    tileLayerUrl = 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png';
   } else if (mapStyle === 'satellite') {
     tileLayerUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
-    tileLayerAttribution = 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community';
   }
-
-  // Create custom icon factory for locations
-  const createCustomIcon = (type: string, isSelected: boolean, isHovered: boolean) => {
-    // Determine color based on location type
-    let markerColor = "#6b66ff"; // Default blue for generic locations
-    if (type === 'restaurant') markerColor = "#ff6b6b"; // Red for restaurants
-    else if (type === 'bar') markerColor = "#6b66ff"; // Blue for bars
-    else if (type === 'sports') markerColor = "#66ff6b"; // Green for sports
-    else if (type === 'event' || type === 'attraction') markerColor = "#ffbb66"; // Orange for events/attractions
-    
-    // Modify size and shadow for selected or hovered markers
-    const size = isSelected || isHovered ? 32 : 28;
-    const iconUrl = `data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="${markerColor}" stroke="%23FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"%3E%3Cpath d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"%3E%3C/path%3E%3Ccircle cx="12" cy="10" r="3"%3E%3C/circle%3E%3C/svg%3E`;
-    
-    return new L.Icon({
-      iconUrl: iconUrl,
-      iconSize: [size, size],
-      iconAnchor: [size/2, size],
-      popupAnchor: [0, -size],
-      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-      shadowSize: [41, 41],
-      shadowAnchor: [12, 41]
-    });
-  };
 
   // Custom icon for the user's location
   const userIcon = new L.Icon({
-    iconUrl: `data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="%239b87f5" stroke="%23FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"%3E%3Ccircle cx="12" cy="12" r="10"%3E%3C/circle%3E%3Ccircle cx="12" cy="12" r="3"%3E%3C/circle%3E%3C/svg%3E`,
-    iconSize: [32, 32],
-    iconAnchor: [16, 16],
-    popupAnchor: [0, -16],
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-    shadowSize: [41, 41],
-    shadowAnchor: [12, 41]
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+  });
+
+  // Custom icon for the selected location
+  const selectedLocationIcon = new L.Icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+  });
+
+  // Custom icon for other locations
+  const locationIcon = new L.Icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
   });
 
   return (
     <MapContainer
-      style={{ 
-        height: "100%", 
-        width: "100%", 
-        borderRadius: "0.5rem",
-        boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)"
-      }}
+      style={{ height: "100%", width: "100%" }}
       center={mapCenter}
       zoom={zoom}
       scrollWheelZoom={false}
-      zoomControl={false} // We'll add custom-positioned zoom controls
     >
       <TileLayer
-        attribution={tileLayerAttribution}
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url={tileLayerUrl}
       />
-      
-      {/* Add zoom control to bottom right */}
-      <div className="leaflet-bottom leaflet-right">
-        <div className="leaflet-control-zoom leaflet-bar leaflet-control" style={{margin: "10px"}}>
-          <a className="leaflet-control-zoom-in" href="#" title="Zoom in" role="button" aria-label="Zoom in"></a>
-          <a className="leaflet-control-zoom-out" href="#" title="Zoom out" role="button" aria-label="Zoom out"></a>
-        </div>
-      </div>
       
       <MapRecenter center={mapCenter} zoom={zoom} />
 
@@ -182,19 +155,14 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
       {/* User location marker */}
       {userLocation && (
         <Marker position={[userLocation.latitude, userLocation.longitude]} icon={userIcon}>
-          <Popup className="custom-popup">
-            <div className="px-1 py-1">
-              <p className="font-medium text-center">You are here</p>
-            </div>
-          </Popup>
+          <Popup>You are here</Popup>
         </Marker>
       )}
 
       {/* Location markers */}
       {locations.map((location) => {
         const isSelected = selectedLocation?.id === location.id;
-        const isHovered = hoveredLocationId === location.id;
-        const icon = createCustomIcon(location.type, isSelected, isHovered);
+        const icon = isSelected ? selectedLocationIcon : locationIcon;
         
         let distance: number | null = null;
         if (showDistances && userLocation) {
@@ -222,25 +190,17 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
               click: () => {
                 onLocationSelect(location);
               },
-              mouseover: () => setHoveredLocationId(location.id),
-              mouseout: () => setHoveredLocationId(null)
             }}
           >
-            <Popup className="custom-popup">
-              <div className="p-1">
-                <h3 className="font-semibold text-base">{location.name}</h3>
-                <p className="text-sm text-muted-foreground">{location.address}, {location.city}</p>
-                {distance !== null && (
-                  <p className="text-sm mt-1 font-medium">
-                    <span className="inline-block px-2 py-0.5 bg-primary/10 text-primary rounded-full">
-                      {distance.toFixed(1)} miles away
-                    </span>
-                  </p>
-                )}
-                <div className="flex gap-2 mt-3">
+            <Popup>
+              <div>
+                <h3>{location.name}</h3>
+                <p>{location.address}, {location.city}</p>
+                {distance !== null && <p>Distance: {distance.toFixed(2)} miles</p>}
+                <div className="flex gap-2 mt-2">
                   <Button
                     size="sm"
-                    className="flex-1 bg-primary hover:bg-primary/90"
+                    className="flex-1"
                     onClick={() => window.location.href = `/venue/${location.id}`}
                   >
                     View Venue
@@ -249,10 +209,7 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
                     size="sm"
                     variant="outline"
                     className="px-2"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      shareVenue(location);
-                    }}
+                    onClick={() => shareVenue(location)}
                     title="Share this venue"
                   >
                     <Share2 className="h-4 w-4" />
@@ -263,43 +220,6 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
           </Marker>
         );
       })}
-
-      {/* Add global styles for Leaflet customization */}
-      <style jsx global>{`
-        .leaflet-container {
-          font-family: var(--font-sans);
-        }
-        
-        .custom-popup .leaflet-popup-content-wrapper {
-          border-radius: 0.5rem;
-          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        }
-        
-        .custom-popup .leaflet-popup-content {
-          margin: 0.5rem;
-          min-width: 200px;
-        }
-        
-        .custom-popup .leaflet-popup-tip {
-          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        }
-        
-        .leaflet-control-zoom a {
-          background-color: white;
-          color: #333;
-          border: 1px solid rgba(0,0,0,0.2);
-          font-size: 18px;
-          height: 30px;
-          width: 30px;
-          line-height: 30px;
-          border-radius: 4px;
-          margin-bottom: 5px;
-        }
-        
-        .leaflet-control-zoom a:hover {
-          background-color: #f4f4f5;
-        }
-      `}</style>
     </MapContainer>
   );
 };
