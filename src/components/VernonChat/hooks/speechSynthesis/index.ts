@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useBrowserSpeechSynthesis } from './useBrowserSpeechSynthesis';
 import { useElevenLabsSpeech } from './useElevenLabsSpeech';
+import { setupSpeechSynthesis, createAudioElement } from './speechSynthesisUtils';
 import { toast } from 'sonner';
 
 export const useSpeechSynthesis = () => {
@@ -13,6 +14,11 @@ export const useSpeechSynthesis = () => {
   const currentUtterance = useRef<SpeechSynthesisUtterance | null>(null);
   const audioElement = useRef<HTMLAudioElement | null>(null);
   const currentlyPlayingText = useRef<string | null>(null);
+  
+  // Helper function to check for Eleven Labs API key - moved to the top to avoid conflicts
+  const checkElevenLabsApiKey = (): boolean => {
+    return !!localStorage.getItem('elevenLabsApiKey');
+  };
   
   // Initialize services
   useEffect(() => {
@@ -37,8 +43,8 @@ export const useSpeechSynthesis = () => {
     }
     
     // Check if Eleven Labs API key is available
-    const hasKey = localStorage.getItem('elevenLabsApiKey') !== null;
-    setUseElevenLabs(hasKey);
+    const hasElevenLabsKey = checkElevenLabsApiKey();
+    setUseElevenLabs(hasElevenLabsKey);
     
     return () => {
       if (audioElement.current) {
@@ -106,7 +112,7 @@ export const useSpeechSynthesis = () => {
   // Eleven Labs speech synthesis
   const { 
     speakWithElevenLabs, 
-    hasElevenLabsApiKey, 
+    hasElevenLabsApiKey: elevenLabsHasApiKey, // Renamed to avoid conflict
     promptForElevenLabsKey 
   } = useElevenLabsSpeech({
     audioElement,
