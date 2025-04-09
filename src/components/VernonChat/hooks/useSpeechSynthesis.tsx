@@ -47,9 +47,17 @@ export const useSpeechSynthesis = () => {
     };
   }, []);
   
+  // Add dummy implementations for properties needed by other components
+  // These are stubs that replaced the ElevenLabs functionality
+  const useElevenLabs = false;
+  const promptForElevenLabsKey = () => Promise.resolve(false);
+  
   return {
     isSpeaking,
     speakResponse,
-    stopSpeaking
+    stopSpeaking,
+    // Include these properties to prevent TypeScript errors
+    useElevenLabs,
+    promptForElevenLabsKey
   };
 };

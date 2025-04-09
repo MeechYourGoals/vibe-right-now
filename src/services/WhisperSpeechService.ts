@@ -6,6 +6,12 @@ let speechRecognitionModel = null;
 let speechSynthesisVoice = null;
 let modelLoadingPromise = null;
 
+interface TextToSpeechOptions {
+  rate?: number;
+  pitch?: number;
+  volume?: number;
+}
+
 export class WhisperSpeechService {
   // Initialize speech recognition model (only once)
   public static async initSpeechRecognition() {
@@ -22,7 +28,7 @@ export class WhisperSpeechService {
       modelLoadingPromise = pipeline(
         'automatic-speech-recognition',
         'onnx-community/whisper-tiny.en',
-        { progress_callback: (progress) => console.log(`Loading model: ${Math.round(progress * 100)}%`) }
+        { progress_callback: (progress: number) => console.log(`Loading model: ${Math.round(progress * 100)}%`) }
       );
       
       speechRecognitionModel = await modelLoadingPromise;
@@ -63,7 +69,7 @@ export class WhisperSpeechService {
   }
   
   // Use browser's built-in speech synthesis for text-to-speech
-  public static textToSpeech(text: string, options = {}): Promise<boolean> {
+  public static textToSpeech(text: string, options: TextToSpeechOptions = {}): Promise<boolean> {
     return new Promise((resolve) => {
       if (!text || text.trim() === '') {
         resolve(false);

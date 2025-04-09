@@ -20,7 +20,7 @@ export const useSpeechRecognition = (): SpeechRecognitionHookReturn => {
     initialized,
     restartAttempts,
     previousInterims,
-    useElevenLabsASR,
+    useLocalWhisper,
     mediaRecorder,
     audioChunks
   } = useRecognitionSetup();
@@ -45,7 +45,8 @@ export const useSpeechRecognition = (): SpeechRecognitionHookReturn => {
     restartAttempts,
     previousInterims,
     resetSilenceTimer,
-    useElevenLabsASR
+    // No longer using ElevenLabs ASR
+    useElevenLabsASR: false
   });
   
   // Listening controls (start/stop)
@@ -62,7 +63,8 @@ export const useSpeechRecognition = (): SpeechRecognitionHookReturn => {
     setInterimTranscript,
     restartAttempts,
     clearSilenceTimer,
-    useElevenLabsASR,
+    // Use local Whisper instead of ElevenLabs
+    useLocalWhisper,
     mediaRecorder,
     audioChunks
   });

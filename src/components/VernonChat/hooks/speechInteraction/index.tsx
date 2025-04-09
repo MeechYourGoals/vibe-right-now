@@ -1,7 +1,7 @@
 
 import { useEffect } from 'react';
 import { useSpeechRecognition } from '../speechRecognition';
-import { useSpeechSynthesis } from '../speechSynthesis';
+import { useSpeechSynthesis } from '../useSpeechSynthesis';
 import { useVoiceInit } from './useVoiceInit';
 import { useListeningToggle } from './useListeningToggle';
 import { useInterruptionHandler } from './useInterruptionHandler';
@@ -25,6 +25,7 @@ export const useSpeechInteraction = () => {
     isSpeaking,
     speakResponse,
     stopSpeaking,
+    // These are now added to the return object in useSpeechSynthesis
     useElevenLabs,
     promptForElevenLabsKey
   } = useSpeechSynthesis();

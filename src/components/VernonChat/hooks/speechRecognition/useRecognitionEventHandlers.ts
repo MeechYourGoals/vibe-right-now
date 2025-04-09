@@ -12,7 +12,7 @@ interface RecognitionEventHandlersProps {
   restartAttempts: React.MutableRefObject<number>;
   previousInterims: React.MutableRefObject<string[]>;
   resetSilenceTimer: () => void;
-  useElevenLabsASR?: boolean;
+  useElevenLabsASR: boolean;
 }
 
 export const useRecognitionEventHandlers = ({
@@ -24,7 +24,7 @@ export const useRecognitionEventHandlers = ({
   restartAttempts,
   previousInterims,
   resetSilenceTimer,
-  useElevenLabsASR = false
+  useElevenLabsASR
 }: RecognitionEventHandlersProps) => {
   // Handle results from speech recognition
   const handleResult = useCallback((event: SpeechRecognitionEvent) => {
