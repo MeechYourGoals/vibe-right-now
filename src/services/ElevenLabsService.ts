@@ -1,4 +1,3 @@
-
 // Eleven Labs API integration
 // This service handles text-to-speech and speech-to-text conversion using Eleven Labs API
 
@@ -21,6 +20,7 @@ interface ScribeTranscriptionOptions {
 export class ElevenLabsService {
   private static apiKey: string | null = null;
   private static defaultApiKey: string = 'sk_236c24971a353bfa897b2c150b2d256ae65e352b405e3e4f';
+  private static defaultVoiceId: string = 'pNInz6obpgDQGcFmaJgB'; // Adam voice - consistent male voice
   
   // Set API key
   public static setApiKey(apiKey: string) {
@@ -66,12 +66,9 @@ export class ElevenLabsService {
     }
     
     try {
-      // Default options - using premium voices
-      const defaultVoiceId = 'pNInz6obpgDQGcFmaJgB'; // Adam voice
-      const defaultModel = 'eleven_multilingual_v2';
-      
-      const voiceId = options.voice_id || defaultVoiceId;
-      const modelId = options.model_id || defaultModel;
+      // Use the Adam voice by default for a consistent male voice
+      const voiceId = options.voice_id || this.defaultVoiceId;
+      const modelId = options.model_id || 'eleven_multilingual_v2';
       
       const url = `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`;
       

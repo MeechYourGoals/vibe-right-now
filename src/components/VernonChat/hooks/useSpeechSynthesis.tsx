@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from 'react';
 import { 
   getPreferredVoice, 
@@ -17,23 +18,26 @@ export const useSpeechSynthesis = () => {
   const currentUtterance = useRef<SpeechSynthesisUtterance | null>(null);
   const audioElement = useRef<HTMLAudioElement | null>(null);
   const currentlyPlayingText = useRef<string | null>(null);
+  const introHasPlayed = useRef<boolean>(false);
   
   // Initialize audio element for Eleven Labs playback
   useEffect(() => {
-    audioElement.current = new Audio();
-    
-    // Set up event handlers
-    if (audioElement.current) {
-      audioElement.current.onplay = () => setIsSpeaking(true);
-      audioElement.current.onended = () => {
-        setIsSpeaking(false);
-        currentlyPlayingText.current = null;
-      };
-      audioElement.current.onerror = () => {
-        console.error('Audio playback error');
-        setIsSpeaking(false);
-        currentlyPlayingText.current = null;
-      };
+    if (!audioElement.current) {
+      audioElement.current = new Audio();
+      
+      // Set up event handlers
+      if (audioElement.current) {
+        audioElement.current.onplay = () => setIsSpeaking(true);
+        audioElement.current.onended = () => {
+          setIsSpeaking(false);
+          currentlyPlayingText.current = null;
+        };
+        audioElement.current.onerror = () => {
+          console.error('Audio playback error');
+          setIsSpeaking(false);
+          currentlyPlayingText.current = null;
+        };
+      }
     }
     
     // Check if Eleven Labs API key is available and set useElevenLabs
@@ -42,6 +46,8 @@ export const useSpeechSynthesis = () => {
     
     return () => {
       if (audioElement.current) {
+        audioElement.current.pause();
+        audioElement.current.src = '';
         audioElement.current.onplay = null;
         audioElement.current.onended = null;
         audioElement.current.onerror = null;
@@ -102,6 +108,7 @@ export const useSpeechSynthesis = () => {
       // Stop any currently playing speech first
       stopSpeaking();
       
+      // Set state to speaking and track current text
       setIsSpeaking(true);
       currentlyPlayingText.current = text;
       
@@ -188,24 +195,17 @@ export const useSpeechSynthesis = () => {
     
     // Process text for more natural sound
     const processedText = processTextForNaturalSpeech(text);
+    utterance.text = processedText;
     
-    // Split long responses into sentences for more natural pauses
-    const sentences = processedText.match(/[^.!?]+[.!?]+/g) || [processedText];
+    // Configure other utterance properties
+    configureUtteranceForNaturalSpeech(utterance, processedText);
     
-    if (sentences.length > 1 && sentences.length < 20) {
-      // For medium-length responses, speak sentence by sentence with pauses
-      speakSentenceBySequence(sentences, 0);
-    } else {
-      // For short or very long responses, speak all at once
-      utterance.text = processedText;
-      configureUtteranceForNaturalSpeech(utterance, processedText);
-      
-      // Finally, speak the text
-      speechSynthesis.current.speak(utterance);
-    }
+    // Finally, speak the text
+    speechSynthesis.current.speak(utterance);
   };
   
   const speakResponse = async (text: string): Promise<void> => {
+    // Avoid speaking empty text
     if (!text || text.trim() === '') {
       console.log('Empty text provided, not speaking');
       return;
@@ -217,91 +217,29 @@ export const useSpeechSynthesis = () => {
       return;
     }
     
-    // Stop any ongoing speech first
+    // Always stop any ongoing speech first to prevent overlapping voices
     stopSpeaking();
     
-    // Try to use Eleven Labs if available, fall back to browser synthesis
+    console.log('Speaking with ElevenLabs:', useElevenLabs);
+    
+    // Try to use Eleven Labs if available
     if (useElevenLabs) {
-      const success = await speakWithElevenLabs(text);
-      if (success) return;
-      
-      // If Eleven Labs fails, fall back to browser synthesis
-      console.log('Falling back to browser speech synthesis');
-    }
-    
-    // Use browser's speech synthesis as fallback
-    if (speechSynthesis.current) {
-      const utterance = new SpeechSynthesisUtterance(text);
-      
-      // Select a preferred voice
-      const preferredVoice = getPreferredVoice(voices.length > 0 ? voices : (speechSynthesis.current.getVoices() || []));
-      if (preferredVoice) {
-        utterance.voice = preferredVoice;
+      try {
+        const success = await speakWithElevenLabs(text);
+        if (success) {
+          // Mark intro as played if this is the first message
+          if (!introHasPlayed.current && text.includes("I'm VeRNon")) {
+            introHasPlayed.current = true;
+          }
+          return;
+        }
+      } catch (error) {
+        console.error('ElevenLabs speech failed, falling back to browser synthesis:', error);
       }
-      
-      // Set up event handlers
-      utterance.onstart = () => setIsSpeaking(true);
-      utterance.onend = () => {
-        setIsSpeaking(false);
-        currentlyPlayingText.current = null;
-      };
-      utterance.onerror = () => {
-        setIsSpeaking(false);
-        currentlyPlayingText.current = null;
-      };
-      
-      // Set text and speak
-      utterance.text = processTextForNaturalSpeech(text);
-      configureUtteranceForNaturalSpeech(utterance, text);
-      
-      currentlyPlayingText.current = text;
-      currentUtterance.current = utterance;
-      speechSynthesis.current.speak(utterance);
-    }
-  };
-  
-  const speakSentenceBySequence = (sentences: string[], index: number): void => {
-    if (!speechSynthesis.current || index >= sentences.length) {
-      return;
     }
     
-    const sentence = sentences[index];
-    const utterance = new SpeechSynthesisUtterance(sentence);
-    
-    // Select voice
-    const preferredVoice = getPreferredVoice(voices.length > 0 ? voices : (speechSynthesis.current.getVoices() || []));
-    if (preferredVoice) {
-      utterance.voice = preferredVoice;
-    }
-    
-    // Configure utterance properties
-    configureUtteranceForNaturalSpeech(utterance, sentence);
-    
-    // Handle events
-    utterance.onstart = () => {
-      if (index === 0) {
-        setIsSpeaking(true);
-      }
-    };
-    
-    utterance.onend = () => {
-      // Move to next sentence
-      if (index < sentences.length - 1) {
-        speakSentenceBySequence(sentences, index + 1);
-      } else {
-        setIsSpeaking(false);
-        currentlyPlayingText.current = null;
-      }
-    };
-    
-    utterance.onerror = (event) => {
-      console.error('Speech synthesis error:', event);
-      setIsSpeaking(false);
-      currentlyPlayingText.current = null;
-    };
-    
-    // Speak the current sentence
-    speechSynthesis.current.speak(utterance);
+    // Fallback to browser's speech synthesis
+    speakWithBrowserSynthesis(text);
   };
   
   const promptForElevenLabsKey = (): void => {

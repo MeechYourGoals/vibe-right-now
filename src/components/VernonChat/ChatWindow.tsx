@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ChatHeader from './ChatHeader';
 import MessageList from './MessageList';
 import ChatControls from './ChatControls';
@@ -35,6 +35,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
 }) => {
   const [introMessageSpoken, setIntroMessageSpoken] = useState(false);
   const [introAttempted, setIntroAttempted] = useState(false);
+  const introTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   
   const {
     isListening,
@@ -56,14 +57,32 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
     speakIntroOnce
   } = useSpeechInteraction();
 
+  // Cancel any previous intro attempts on unmount
+  useEffect(() => {
+    return () => {
+      if (introTimeout.current) {
+        clearTimeout(introTimeout.current);
+      }
+    };
+  }, []);
+
   // Trigger intro speech when chat is opened for the first time
   useEffect(() => {
     if (isOpen && messages.length > 0 && !introMessageSpoken && !introAttempted) {
       setIntroAttempted(true);
       console.log('Attempting to speak intro message on first open');
       
+      // Clear any previous timeout
+      if (introTimeout.current) {
+        clearTimeout(introTimeout.current);
+      }
+      
       // Try to speak the intro with a small delay to ensure everything is loaded
-      const timer = setTimeout(() => {
+      introTimeout.current = setTimeout(() => {
+        // Make sure we're not already speaking something
+        stopSpeaking();
+        
+        // Now try to speak the intro
         speakIntroOnce(messages[0].text)
           .then(success => {
             if (success) {
@@ -71,10 +90,13 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
               setIntroMessageSpoken(true);
               markIntroAsSpoken();
             } else {
-              console.warn('Failed to speak intro message');
-              // Try one more time with a different approach
+              console.warn('Failed to speak intro message with speakIntroOnce');
+              
+              // Try one more time with direct speakResponse
+              console.log('Attempting direct speak response for intro');
               speakResponse(messages[0].text)
                 .then(() => {
+                  console.log('Direct speak response for intro completed');
                   setIntroMessageSpoken(true);
                   markIntroAsSpoken();
                 })
@@ -90,9 +112,13 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
           });
       }, 1000);
       
-      return () => clearTimeout(timer);
+      return () => {
+        if (introTimeout.current) {
+          clearTimeout(introTimeout.current);
+        }
+      };
     }
-  }, [isOpen, messages, introMessageSpoken, introAttempted, speakIntroOnce, markIntroAsSpoken, speakResponse]);
+  }, [isOpen, messages, introMessageSpoken, introAttempted, speakIntroOnce, markIntroAsSpoken, speakResponse, stopSpeaking]);
 
   // Use the custom hook to manage voice interaction effects
   useVoiceEffects({
