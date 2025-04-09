@@ -1,7 +1,6 @@
-
 import { useState, useMemo } from "react";
 import { mockPosts, mockComments } from "@/mock/data";
-import PostCard from "@/components/PostCard";
+import { PostCard } from "@/components/post";
 import SearchVibes from "@/components/SearchVibes";
 import { Post } from "@/types";
 import { isWithinThreeMonths } from "@/mock/time-utils";
