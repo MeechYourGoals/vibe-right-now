@@ -16,9 +16,9 @@ import { Info, Shield, CreditCard, Check } from "lucide-react";
 const MarketplaceTerms: React.FC = () => {
   return (
     <div className="space-y-4">
-      <Alert className="bg-amber-950 border-amber-800 text-amber-100">
+      <Alert className="bg-amber-900 border-amber-800 text-amber-100">
         <Info className="h-4 w-4 text-amber-400" />
-        <AlertTitle className="text-amber-100">Platform Fee Information</AlertTitle>
+        <AlertTitle className="text-amber-50 font-medium">Platform Fee Information</AlertTitle>
         <AlertDescription className="text-amber-200">
           VRN charges a 3% platform fee on all successful marketplace transactions.
           This covers payment processing, escrow services, and dispute resolution.
