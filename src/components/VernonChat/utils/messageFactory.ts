@@ -1,33 +1,30 @@
 
 import { Message } from '../types';
+import { v4 as uuidv4 } from 'uuid';
 
-/**
- * Message factory to create consistent message objects
- */
-export const createUserMessage = (text: string): Message => ({
-  id: Date.now().toString(),
-  text,
-  sender: 'user',
-  timestamp: new Date()
-});
+export const createUserMessage = (content: string): Message => {
+  return {
+    id: uuidv4(),
+    role: 'user',
+    content,
+    timestamp: new Date().toISOString()
+  };
+};
 
-export const createAIMessage = (text: string): Message => ({
-  id: (Date.now() + 1).toString(),
-  text,
-  sender: 'ai',
-  timestamp: new Date()
-});
+export const createAssistantMessage = (content: string): Message => {
+  return {
+    id: uuidv4(),
+    role: 'assistant',
+    content,
+    timestamp: new Date().toISOString()
+  };
+};
 
-export const createErrorMessage = (): Message => ({
-  id: (Date.now() + 1).toString(),
-  text: "I'm having trouble finding that information right now. Could you try asking your question again?",
-  sender: 'ai',
-  timestamp: new Date()
-});
-
-export const INITIAL_MESSAGE: Message = {
-  id: '1',
-  text: "Hi there! I'm VeRNon, your Vibe guide. I can help you discover cool places, events happening tonight, or answer questions about specific venues. What are you looking for?",
-  sender: 'ai',
-  timestamp: new Date()
+// For backward compatibility
+export const createMessage = (role: 'user' | 'assistant', content: string): Message => {
+  if (role === 'user') {
+    return createUserMessage(content);
+  } else {
+    return createAssistantMessage(content);
+  }
 };
