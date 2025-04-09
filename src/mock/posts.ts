@@ -23,6 +23,7 @@ export const mockPosts: Post[] = [
     expiresAt: getExpiryTime(getRecentTime(1), true), // Pinned post (90 days)
     likes: 42,
     comments: 7,
+    isPinned: true,
   },
   {
     id: "2",
@@ -91,6 +92,7 @@ export const mockPosts: Post[] = [
     expiresAt: getExpiryTime(getRecentTime(1.5)),
     likes: 56,
     comments: 11,
+    isPinned: true,
   },
   {
     id: "6",
@@ -171,6 +173,7 @@ export const mockPosts: Post[] = [
     expiresAt: getExpiryTime(getRecentTime(0.1)),
     likes: 256,
     comments: 42,
+    isPinned: true,
   },
   {
     id: "11",

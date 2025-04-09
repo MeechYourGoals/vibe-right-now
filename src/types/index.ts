@@ -1,4 +1,3 @@
-
 export interface NavItem {
   title: string;
   href: string;
@@ -97,12 +96,16 @@ export interface Post {
   user: User;
   location: Location;
   content: string;
-  media: Media[];
+  media: {
+    type: string;
+    url: string;
+  }[];
   timestamp: string;
   expiresAt: string;
   likes: number;
   comments: number;
   isVenuePost?: boolean;
+  isPinned?: boolean;
 }
 
 export interface Comment {

@@ -1,9 +1,12 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import VenuePost from "@/components/VenuePost";
 import PostCard from "@/components/PostCard";
 import PostGridItem from "@/components/venue/PostGridItem";
 import { Post, Comment, Location } from "@/types";
+import { getTimeGroup, formatTimeAgo } from "@/mock/time-utils";
+import { Badge } from "@/components/ui/badge";
+import { PinIcon } from "lucide-react";
 
 interface VenuePostsListProps {
   posts: Post[];
@@ -18,6 +21,37 @@ const VenuePostsList: React.FC<VenuePostsListProps> = ({
   viewMode, 
   getComments 
 }) => {
+  // Group posts by time period
+  const groupedPosts = useMemo(() => {
+    if (!posts.length) return [];
+    
+    // First sort by timestamp (most recent first)
+    const sortedPosts = [...posts].sort((a, b) => 
+      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+    
+    // Then group by time period
+    const groups: {title: string; key: string; posts: Post[]}[] = [
+      { title: 'Last 24 Hours', key: 'recent', posts: [] },
+      { title: 'This Week', key: 'week', posts: [] },
+      { title: 'This Month', key: 'month', posts: [] },
+      { title: 'Older', key: 'older', posts: [] },
+      { title: 'Pinned Posts', key: 'pinned', posts: [] },
+    ];
+    
+    sortedPosts.forEach(post => {
+      if (post.isPinned) {
+        groups.find(g => g.key === 'pinned')?.posts.push(post);
+      } else {
+        const timeGroup = getTimeGroup(post.timestamp);
+        groups.find(g => g.key === timeGroup)?.posts.push(post);
+      }
+    });
+    
+    // Filter out empty groups
+    return groups.filter(group => group.posts.length > 0);
+  }, [posts]);
+  
   if (posts.length === 0) {
     return (
       <div className="text-center py-10">
@@ -27,43 +61,62 @@ const VenuePostsList: React.FC<VenuePostsListProps> = ({
     );
   }
 
-  if (viewMode === "list") {
-    return (
-      <div className="space-y-4">
-        {posts.map((post) => (
-          post.isVenuePost ? (
-            <div key={post.id} className="border-2 border-amber-500/50 rounded-lg overflow-hidden">
-              <VenuePost 
-                venue={post.location}
-                content={post.content}
-                media={post.media[0]}
-                timestamp={post.timestamp}
-              />
+  return (
+    <div className="space-y-8">
+      {groupedPosts.map(group => (
+        <div key={group.key} className="space-y-4">
+          <h3 className="text-lg font-medium">{group.title}</h3>
+          
+          {viewMode === "list" ? (
+            <div className="space-y-4">
+              {group.posts.map((post) => (
+                <div key={post.id} className="relative">
+                  {post.isPinned && (
+                    <div className="absolute top-2 right-2 z-10">
+                      <Badge variant="outline" className="bg-amber-500/10 text-amber-500 border-amber-300 flex items-center">
+                        <PinIcon className="h-3 w-3 mr-1" />
+                        Pinned
+                      </Badge>
+                    </div>
+                  )}
+                  <div className={`${post.isVenuePost ? 'border-2 border-amber-500/50 rounded-lg overflow-hidden' : ''}`}>
+                    {post.isVenuePost ? (
+                      <VenuePost 
+                        venue={post.location}
+                        content={post.content}
+                        media={post.media[0]}
+                        timestamp={post.timestamp}
+                        timeAgo={formatTimeAgo(post.timestamp)}
+                      />
+                    ) : (
+                      <PostCard 
+                        key={post.id}
+                        posts={[post]} 
+                        locationPostCount={1}
+                        getComments={getComments}
+                        showTimeAgo={true}
+                      />
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
           ) : (
-            <PostCard 
-              key={post.id}
-              posts={[post]} 
-              locationPostCount={1}
-              getComments={getComments} 
-            />
-          )
-        ))}
-      </div>
-    );
-  } else {
-    return (
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        {posts.map((post) => (
-          <PostGridItem 
-            key={post.id} 
-            post={post} 
-            isVenuePost={!!post.isVenuePost} 
-          />
-        ))}
-      </div>
-    );
-  }
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {group.posts.map((post) => (
+                <PostGridItem 
+                  key={post.id} 
+                  post={post} 
+                  isVenuePost={!!post.isVenuePost}
+                  timeAgo={formatTimeAgo(post.timestamp)}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
 };
 
 export default VenuePostsList;

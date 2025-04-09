@@ -17,6 +17,7 @@ interface VenuePostProps {
   timestamp: string;
   sourceUrl?: string; // URL to the original post on external platform
   sourcePlatform?: string; // Name of the source platform
+  timeAgo?: string; // Time elapsed since posting
 }
 
 const VenuePost = ({ 
@@ -25,7 +26,8 @@ const VenuePost = ({
   media, 
   timestamp, 
   sourceUrl, 
-  sourcePlatform 
+  sourcePlatform,
+  timeAgo
 }: VenuePostProps) => {
   const officialTicketUrl = venue.type === "sports" ? getOfficialTicketUrl(venue.id) : "";
   const isExternalContent = !!sourceUrl;
@@ -38,6 +40,7 @@ const VenuePost = ({
           timestamp={timestamp} 
           isExternalContent={isExternalContent}
           sourcePlatform={sourcePlatform}
+          timeAgo={timeAgo}
         />
       </CardHeader>
       <CardContent className="p-4">

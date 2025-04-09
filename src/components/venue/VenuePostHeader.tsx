@@ -1,83 +1,81 @@
 
-import React from 'react';
-import { formatDistanceToNow } from 'date-fns';
-import { MapPin, Calendar, ExternalLink } from 'lucide-react';
+import React from "react";
+import { Link } from "react-router-dom";
+import { formatDistance } from "date-fns";
+import { ExternalLink, VerifiedIcon } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Location } from '@/types';
-import { Badge } from '@/components/ui/badge';
+import { Badge } from "@/components/ui/badge";
+import { Location } from "@/types";
 
 interface VenuePostHeaderProps {
   venue: Location;
   timestamp: string;
   isExternalContent?: boolean;
   sourcePlatform?: string;
+  timeAgo?: string;
 }
 
 const VenuePostHeader: React.FC<VenuePostHeaderProps> = ({ 
   venue, 
-  timestamp,
+  timestamp, 
   isExternalContent = false,
-  sourcePlatform
+  sourcePlatform,
+  timeAgo
 }) => {
-  const formattedTime = formatDistanceToNow(new Date(timestamp), { addSuffix: true });
+  const formattedDate = new Date(timestamp).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  });
   
-  // Create venue avatar fallback from the first letter of name
-  const avatarFallback = venue.name.charAt(0).toUpperCase();
-  
-  // For image, use a placeholder based on venue type
-  const getVenueAvatarUrl = () => {
-    if (venue.logo) return venue.logo;
-    
-    const typeMap: Record<string, string> = {
-      restaurant: 'restaurant',
-      bar: 'bar',
-      event: 'event',
-      attraction: 'attraction',
-      sports: 'stadium',
-    };
-    
-    const venueType = typeMap[venue.type] || 'building';
-    return `https://source.unsplash.com/64x64/?${venueType}`;
-  };
+  const formattedTime = new Date(timestamp).toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit'
+  });
 
   return (
-    <div className="flex items-start gap-3">
-      <Avatar className="h-9 w-9">
-        <AvatarImage src={getVenueAvatarUrl()} alt={venue.name} />
-        <AvatarFallback>{avatarFallback}</AvatarFallback>
-      </Avatar>
-      
-      <div className="flex-1">
-        <div className="flex items-start justify-between">
-          <div>
-            <h3 className="font-medium text-sm flex items-center">
+    <div className="flex justify-between items-start gap-4">
+      <div className="flex items-center gap-3">
+        <Link to={`/venue/${venue.id}`}>
+          <Avatar className="h-10 w-10 border">
+            <AvatarImage 
+              src={`https://source.unsplash.com/100x100/?${venue.type},venue,${venue.name}`} 
+              alt={venue.name} 
+            />
+            <AvatarFallback>{venue.name.charAt(0)}</AvatarFallback>
+          </Avatar>
+        </Link>
+        
+        <div>
+          <div className="flex items-center gap-1.5">
+            <Link to={`/venue/${venue.id}`} className="font-medium hover:underline">
               {venue.name}
-              {venue.verified && (
-                <span className="ml-1 text-primary">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-badge-check"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"></path><path d="m9 12 2 2 4-4"></path></svg>
-                </span>
-              )}
-            </h3>
-            <div className="flex items-center text-xs text-muted-foreground gap-1">
-              <MapPin className="h-3 w-3" />
-              <span>{venue.address}, {venue.city}</span>
-            </div>
+            </Link>
+            
+            {venue.verified && (
+              <VerifiedIcon className="h-4 w-4 text-blue-500" />
+            )}
+            
+            {isExternalContent && (
+              <Badge variant="secondary" className="text-xs flex items-center gap-1">
+                <ExternalLink className="h-3 w-3" />
+                {sourcePlatform || 'External'}
+              </Badge>
+            )}
           </div>
           
-          <div className="text-xs text-muted-foreground flex items-center">
-            <Calendar className="h-3 w-3 mr-1" />
+          <div className="flex items-center text-xs text-muted-foreground">
+            <span>{formattedDate}</span>
+            <span className="mx-1">•</span>
             <span>{formattedTime}</span>
+            {timeAgo && (
+              <>
+                <span className="mx-1">•</span>
+                <span>{timeAgo}</span>
+              </>
+            )}
           </div>
         </div>
-        
-        {isExternalContent && (
-          <div className="mt-1">
-            <Badge variant="outline" className="text-xs bg-blue-500/10 text-blue-500 border-blue-300 flex items-center gap-1">
-              <ExternalLink className="h-3 w-3" />
-              {sourcePlatform ? `From ${sourcePlatform}` : 'External Content'}
-            </Badge>
-          </div>
-        )}
       </div>
     </div>
   );

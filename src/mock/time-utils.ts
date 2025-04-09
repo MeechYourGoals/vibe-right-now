@@ -34,6 +34,49 @@ export const isWithinThreeMonths = (timestamp: string): boolean => {
   return then >= threeMonthsAgo && then <= now;
 };
 
+// Determine which time group a post belongs to
+export const getTimeGroup = (timestamp: string): 'recent' | 'week' | 'month' | 'older' => {
+  const now = new Date();
+  const postDate = new Date(timestamp);
+  
+  const hoursDiff = (now.getTime() - postDate.getTime()) / (1000 * 60 * 60);
+  
+  if (hoursDiff <= 24) {
+    return 'recent'; // Last 24 hours
+  } else if (hoursDiff <= 168) { // 7 days * 24 hours
+    return 'week'; // Last week
+  } else if (hoursDiff <= 720) { // ~30 days * 24 hours
+    return 'month'; // Last month
+  } else {
+    return 'older'; // Older than a month
+  }
+};
+
+// Format a timestamp as "X time ago"
+export const formatTimeAgo = (timestamp: string): string => {
+  const now = new Date();
+  const postDate = new Date(timestamp);
+  
+  const hoursDiff = (now.getTime() - postDate.getTime()) / (1000 * 60 * 60);
+  
+  if (hoursDiff < 1) {
+    const minutesDiff = Math.floor(hoursDiff * 60);
+    return `${minutesDiff} minute${minutesDiff !== 1 ? 's' : ''} ago`;
+  } else if (hoursDiff < 24) {
+    const hours = Math.floor(hoursDiff);
+    return `${hours} hour${hours !== 1 ? 's' : ''} ago`;
+  } else if (hoursDiff < 168) { // 7 days
+    const days = Math.floor(hoursDiff / 24);
+    return `${days} day${days !== 1 ? 's' : ''} ago`;
+  } else if (hoursDiff < 720) { // 30 days
+    const weeks = Math.floor(hoursDiff / 168);
+    return `${weeks} week${weeks !== 1 ? 's' : ''} ago`;
+  } else {
+    const months = Math.floor(hoursDiff / 720);
+    return `${months} month${months !== 1 ? 's' : ''} ago`;
+  }
+};
+
 // Generate content specific to a day of the week for a venue type
 export const getDaySpecificContent = (venueType: string, dayOfWeek: number): string => {
   const contents = {

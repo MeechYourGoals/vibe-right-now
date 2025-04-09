@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
-import { Heart, Calendar } from "lucide-react";
+import { Heart, Calendar, Pin } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,9 +11,10 @@ import { Post } from "@/types";
 interface PostGridItemProps {
   post: Post;
   isVenuePost?: boolean;
+  timeAgo?: string;
 }
 
-const PostGridItem: React.FC<PostGridItemProps> = ({ post, isVenuePost = false }) => {
+const PostGridItem: React.FC<PostGridItemProps> = ({ post, isVenuePost = false, timeAgo }) => {
   const [liked, setLiked] = useState(false);
   const navigate = useNavigate();
   
@@ -59,6 +60,15 @@ const PostGridItem: React.FC<PostGridItemProps> = ({ post, isVenuePost = false }
         </div>
       )}
       
+      {post.isPinned && (
+        <div className="absolute top-2 right-2 z-10">
+          <Badge variant="outline" className="bg-amber-500/10 text-amber-500 border-amber-300 flex items-center">
+            <Pin className="h-3 w-3 mr-1" />
+            Pinned
+          </Badge>
+        </div>
+      )}
+      
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
         <div className="absolute bottom-0 left-0 right-0 p-3">
           <div className="flex items-center justify-between gap-2">
@@ -73,7 +83,7 @@ const PostGridItem: React.FC<PostGridItemProps> = ({ post, isVenuePost = false }
               {isVenuePost && <Badge className="bg-amber-500 text-[0.6rem] mr-1">Venue</Badge>}
               <Badge variant="outline" className="text-[0.6rem] bg-black/30 text-white border-white/20 flex items-center">
                 <Calendar className="h-3 w-3 mr-0.5" />
-                {dayOnly}
+                {timeAgo || dayOnly}
               </Badge>
             </div>
           </div>
