@@ -1,29 +1,26 @@
+
 import React, { useState } from "react";
-import { TabsContent } from "@/components/ui/tabs";
 import { PostCard } from "@/components/post";
 import { Skeleton } from "@/components/ui/skeleton";
 import PostGridItem from "./PostGridItem";
 import { mockPosts, mockComments } from "@/mock/data";
-import { Post } from "@/types";
+import { Post, Comment } from "@/types";
 import { isWithinThreeMonths } from "@/mock/time-utils";
 
 interface ProfileTabContentProps {
-  tab: string;
-  userId: string;
+  activeTab: string;
   viewMode: "list" | "grid";
+  userPosts: Post[];
+  getComments: (postId: string) => Comment[];
 }
 
-const ProfileTabContent: React.FC<ProfileTabContentProps> = ({ tab, userId, viewMode }) => {
+const ProfileTabContent: React.FC<ProfileTabContentProps> = ({ 
+  activeTab, 
+  viewMode, 
+  userPosts, 
+  getComments 
+}) => {
   const [isLoading, setIsLoading] = useState(false);
-
-  // Filter posts to only show those from the past 3 months
-  const recentPosts = React.useMemo(() => {
-    return mockPosts.filter(post => isWithinThreeMonths(post.timestamp));
-  }, []);
-
-  const userPosts = React.useMemo(() => {
-    return recentPosts.filter(post => post.user.id === userId);
-  }, [userId, recentPosts]);
 
   // Group posts by location
   const postsGroupedByLocation = React.useMemo(() => {
@@ -57,13 +54,8 @@ const ProfileTabContent: React.FC<ProfileTabContentProps> = ({ tab, userId, view
     return counts;
   }, [userPosts]);
 
-  // Get post comments
-  const getPostComments = (postId: string) => {
-    return mockComments.filter(comment => comment.postId === postId);
-  };
-
   return (
-    <TabsContent value={tab} className="space-y-4">
+    <div className="space-y-4">
       {isLoading ? (
         <div className={viewMode === "list" ? "space-y-4" : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"}>
           {Array.from({ length: 6 }).map((_, i) => (
@@ -89,7 +81,7 @@ const ProfileTabContent: React.FC<ProfileTabContentProps> = ({ tab, userId, view
                   key={locationId} 
                   posts={posts} 
                   locationPostCount={locationPostCounts[locationId]}
-                  getComments={getPostComments}
+                  getComments={getComments}
                 />
               ))
             ) : (
@@ -111,7 +103,7 @@ const ProfileTabContent: React.FC<ProfileTabContentProps> = ({ tab, userId, view
           )}
         </>
       )}
-    </TabsContent>
+    </div>
   );
 };
 
