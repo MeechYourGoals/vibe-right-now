@@ -18,7 +18,7 @@ const AdvertisingTab = ({ isPremium }: AdvertisingTabProps) => {
       <div className="flex items-center justify-center py-12">
         <Card className="max-w-md">
           <CardHeader>
-            <CardTitle className="flex items-center text-amber-500">
+            <CardTitle className="flex items-center text-premium-primary">
               <Award className="h-5 w-5 mr-2" />
               Premium Marketing Suite
             </CardTitle>
@@ -29,7 +29,7 @@ const AdvertisingTab = ({ isPremium }: AdvertisingTabProps) => {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <div className="flex items-start">
-                <Zap className="h-5 w-5 mr-2 text-amber-500 mt-0.5" />
+                <Zap className="h-5 w-5 mr-2 text-premium-primary mt-0.5" />
                 <div>
                   <h4 className="font-medium">AI-powered marketing recommendations</h4>
                   <p className="text-sm text-muted-foreground">Get personalized suggestions based on your venue's unique data</p>
@@ -37,7 +37,7 @@ const AdvertisingTab = ({ isPremium }: AdvertisingTabProps) => {
               </div>
               
               <div className="flex items-start">
-                <TrendingUp className="h-5 w-5 mr-2 text-amber-500 mt-0.5" />
+                <TrendingUp className="h-5 w-5 mr-2 text-premium-primary mt-0.5" />
                 <div>
                   <h4 className="font-medium">Industry benchmarks and insights</h4>
                   <p className="text-sm text-muted-foreground">See how your venue compares to competitors and industry leaders</p>
@@ -45,7 +45,7 @@ const AdvertisingTab = ({ isPremium }: AdvertisingTabProps) => {
               </div>
               
               <div className="flex items-start">
-                <Target className="h-5 w-5 mr-2 text-amber-500 mt-0.5" />
+                <Target className="h-5 w-5 mr-2 text-premium-primary mt-0.5" />
                 <div>
                   <h4 className="font-medium">Advanced discount code tracking</h4>
                   <p className="text-sm text-muted-foreground">Measure the effectiveness of your promotions in real-time</p>
@@ -53,7 +53,7 @@ const AdvertisingTab = ({ isPremium }: AdvertisingTabProps) => {
               </div>
             </div>
             
-            <Button className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600">
+            <Button className="w-full bg-gradient-to-r from-premium-primary to-premium-secondary hover:from-green-600 hover:to-blue-600">
               Upgrade to Premium
             </Button>
           </CardContent>
@@ -64,9 +64,9 @@ const AdvertisingTab = ({ isPremium }: AdvertisingTabProps) => {
 
   return (
     <div className="space-y-6">
-      <Alert className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/40 dark:to-indigo-950/40 border-blue-200 dark:border-blue-800/50">
-        <AlertTitle className="text-blue-800 dark:text-blue-300">Marketing Suite Enabled</AlertTitle>
-        <AlertDescription className="text-blue-700 dark:text-blue-400">
+      <Alert className="bg-gradient-to-r from-blue-50 to-green-50 dark:from-blue-950/40 dark:to-green-950/40 border-premium-secondary dark:border-premium-primary/50">
+        <AlertTitle className="text-premium-dark dark:text-premium-light">Marketing Suite Enabled</AlertTitle>
+        <AlertDescription className="text-premium-dark/80 dark:text-premium-light/80">
           Your premium account includes access to all AI-powered marketing tools and industry-standard templates.
         </AlertDescription>
       </Alert>
@@ -80,7 +80,7 @@ const AdvertisingTab = ({ isPremium }: AdvertisingTabProps) => {
       <DiscountCodeAnalysis />
       
       <div className="flex justify-center">
-        <Button className="bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 hover:to-blue-600">
+        <Button className="bg-gradient-to-r from-premium-primary to-premium-secondary hover:from-green-600 hover:to-blue-600">
           Schedule Marketing Consultation
         </Button>
       </div>

@@ -40,7 +40,7 @@ const QuickActions = ({ onTierChange, currentTier }: QuickActionsProps) => {
         
         {currentTier === 'standard' && (
           <Button 
-            className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white"
+            className="w-full bg-gradient-to-r from-plus-primary to-plus-secondary hover:from-purple-600 hover:to-teal-600 text-white"
             onClick={() => onTierChange('plus')}
           >
             Upgrade to Plus

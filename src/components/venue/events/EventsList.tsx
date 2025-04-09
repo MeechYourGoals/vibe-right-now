@@ -18,7 +18,7 @@ const EventsList = ({ events }: EventsListProps) => {
       <Button 
         variant="ghost" 
         size="sm" 
-        className="w-full text-amber-200 hover:text-white hover:bg-amber-900"
+        className="w-full text-pro-light hover:text-white hover:bg-pro-dark"
       >
         View All Events
       </Button>

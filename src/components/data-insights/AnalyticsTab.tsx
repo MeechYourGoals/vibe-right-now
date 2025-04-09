@@ -10,6 +10,13 @@ interface AnalyticsTabProps {
 
 const AnalyticsTab = ({ isPremium, subscriptionTier }: AnalyticsTabProps) => {
   const isPro = subscriptionTier === 'pro';
+  const isPlus = subscriptionTier === 'plus';
+  const isPremiumTier = subscriptionTier === 'premium';
+  
+  // Define appropriate theme class based on subscription tier
+  const themeClass = isPro ? 'pro-theme' : 
+                   isPremiumTier ? 'premium-theme' : 
+                   isPlus ? 'plus-theme' : 'standard-theme';
   
   if (!isPremium) {
     return (
@@ -20,7 +27,7 @@ const AnalyticsTab = ({ isPremium, subscriptionTier }: AnalyticsTabProps) => {
   }
   
   return (
-    <div className="space-y-6">
+    <div className={`space-y-6 ${themeClass}`}>
       <AnalyticsTabContent isPremium={isPremium} isPro={isPro} />
     </div>
   );

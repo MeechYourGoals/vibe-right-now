@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 import { fontFamily } from "tailwindcss/defaultTheme";
 
@@ -22,6 +21,9 @@ const config = {
     extend: {
       backgroundImage: {
         "gradient-vibe": "linear-gradient(to right, var(--tw-gradient-stops))",
+        "gradient-pro": "linear-gradient(to right, from-amber-500 to-orange-500)",
+        "gradient-premium": "linear-gradient(to right, from-green-500 to-blue-500)",
+        "gradient-plus": "linear-gradient(to right, from-purple-500 to-teal-500)",
       },
       backgroundSize: {
         "size-200": "200% 200%",
@@ -67,6 +69,33 @@ const config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        pro: {
+          primary: "#f59e0b",
+          secondary: "#d97706",
+          light: "#fcd34d",
+          dark: "#92400e",
+          accent: "#fb923c",
+          "bg-dark": "#7c2d12",
+          "bg-light": "#fdba74"
+        },
+        premium: {
+          primary: "#10b981",
+          secondary: "#0ea5e9",
+          light: "#a7f3d0",
+          dark: "#065f46",
+          accent: "#38bdf8",
+          "bg-dark": "#0c4a6e",
+          "bg-light": "#bae6fd"
+        },
+        plus: {
+          primary: "#8b5cf6",
+          secondary: "#14b8a6",
+          light: "#c4b5fd",
+          dark: "#5b21b6",
+          accent: "#5eead4",
+          "bg-dark": "#0f766e",
+          "bg-light": "#d8b4fe"
+        }
       },
       borderRadius: {
         lg: "var(--radius)",

@@ -7,7 +7,7 @@ import { upcomingEvents } from "./events/eventsData";
 
 const UpcomingEvents = () => {
   return (
-    <Card className="bg-amber-950 text-white">
+    <Card className="bg-pro-bg-dark text-white">
       <CardHeader className="flex flex-row items-center justify-between">
         <EventHeader />
       </CardHeader>

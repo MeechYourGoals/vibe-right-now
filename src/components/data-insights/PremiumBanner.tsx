@@ -47,7 +47,7 @@ const PremiumBanner = ({ onUpgrade }: PremiumBannerProps) => {
             <div className="mt-6 text-center">
               <p className="text-lg font-medium mb-4">$29.99/month</p>
               <Button 
-                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
+                className="bg-gradient-to-r from-plus-primary to-plus-secondary hover:from-purple-600 hover:to-teal-600"
                 onClick={() => onUpgrade('plus')}
               >
                 <CreditCard className="mr-2 h-4 w-4" />
@@ -75,7 +75,7 @@ const PremiumBanner = ({ onUpgrade }: PremiumBannerProps) => {
             <div className="mt-6 text-center">
               <p className="text-lg font-medium mb-4">$49.99/month</p>
               <Button 
-                className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700"
+                className="bg-gradient-to-r from-premium-primary to-premium-secondary hover:from-green-600 hover:to-blue-600"
                 onClick={() => onUpgrade('premium')}
               >
                 <CreditCard className="mr-2 h-4 w-4" />
@@ -103,7 +103,7 @@ const PremiumBanner = ({ onUpgrade }: PremiumBannerProps) => {
             <div className="mt-6 text-center">
               <p className="text-lg font-medium mb-4">$99.99/month</p>
               <Button 
-                className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
+                className="bg-gradient-to-r from-pro-primary to-pro-secondary hover:from-amber-600 hover:to-orange-600"
                 onClick={() => onUpgrade('pro')}
               >
                 <CreditCard className="mr-2 h-4 w-4" />

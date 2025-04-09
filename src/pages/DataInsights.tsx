@@ -62,21 +62,21 @@ const DataInsights = () => {
               {subscriptionTier === 'standard' && (
                 <div className="flex gap-2">
                   <Button 
-                    className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white"
+                    className="bg-gradient-to-r from-plus-primary to-plus-secondary hover:from-purple-600 hover:to-teal-600 text-white"
                     onClick={() => handleUpgrade('plus')}
                   >
                     <Crown className="mr-2 h-4 w-4" />
                     Upgrade to Plus
                   </Button>
                   <Button 
-                    className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white"
+                    className="bg-gradient-to-r from-premium-primary to-premium-secondary hover:from-green-600 hover:to-blue-600 text-white"
                     onClick={() => handleUpgrade('premium')}
                   >
                     <Crown className="mr-2 h-4 w-4" />
                     Upgrade to Premium
                   </Button>
                   <Button 
-                    className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white"
+                    className="bg-gradient-to-r from-pro-primary to-pro-secondary hover:from-amber-700 hover:to-orange-700 text-white"
                     onClick={() => handleUpgrade('pro')}
                   >
                     <Crown className="mr-2 h-4 w-4" />
@@ -88,14 +88,14 @@ const DataInsights = () => {
               {subscriptionTier === 'plus' && (
                 <div className="flex gap-2">
                   <Button 
-                    className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white"
+                    className="bg-gradient-to-r from-premium-primary to-premium-secondary hover:from-green-600 hover:to-blue-600 text-white"
                     onClick={() => handleUpgrade('premium')}
                   >
                     <Crown className="mr-2 h-4 w-4" />
                     Upgrade to Premium
                   </Button>
                   <Button 
-                    className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white"
+                    className="bg-gradient-to-r from-pro-primary to-pro-secondary hover:from-amber-700 hover:to-orange-700 text-white"
                     onClick={() => handleUpgrade('pro')}
                   >
                     <Crown className="mr-2 h-4 w-4" />
@@ -106,7 +106,7 @@ const DataInsights = () => {
               
               {subscriptionTier === 'premium' && (
                 <Button 
-                  className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white"
+                  className="bg-gradient-to-r from-pro-primary to-pro-secondary hover:from-amber-700 hover:to-orange-700 text-white"
                   onClick={() => handleUpgrade('pro')}
                 >
                   <Crown className="mr-2 h-4 w-4" />
@@ -115,9 +115,9 @@ const DataInsights = () => {
               )}
             </div>
             
-            <TabsList className="mb-4 bg-amber-900">
-              <TabsTrigger value="overview" className="data-[state=active]:bg-amber-700 data-[state=active]:text-white">Overview</TabsTrigger>
-              <TabsTrigger value="analytics" className="data-[state=active]:bg-amber-700 data-[state=active]:text-white">
+            <TabsList className="mb-4 bg-neutral-800">
+              <TabsTrigger value="overview" className="data-[state=active]:bg-neutral-700 data-[state=active]:text-white">Overview</TabsTrigger>
+              <TabsTrigger value="analytics" className="data-[state=active]:bg-neutral-700 data-[state=active]:text-white">
                 <div className="flex items-center">
                   <ChartBar className="mr-2 h-4 w-4" />
                   Analytics
@@ -127,7 +127,7 @@ const DataInsights = () => {
               <TabsTrigger 
                 value="advertising" 
                 disabled={subscriptionTier === 'standard' || subscriptionTier === 'plus'}
-                className="data-[state=active]:bg-amber-700 data-[state=active]:text-white"
+                className="data-[state=active]:bg-neutral-700 data-[state=active]:text-white"
               >
                 <div className="flex items-center">
                   Advertising

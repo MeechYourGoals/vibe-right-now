@@ -8,13 +8,13 @@ const EventHeader = () => {
   return (
     <div className="flex items-center justify-between">
       <CardTitle className="flex items-center text-amber-100">
-        <CalendarDays className="mr-2 h-5 w-5 text-amber-400" />
+        <CalendarDays className="mr-2 h-5 w-5 text-pro-light" />
         Upcoming Events
       </CardTitle>
       <Button 
         variant="outline" 
         size="sm" 
-        className="border-amber-700 text-amber-100 hover:bg-amber-900 hover:text-white"
+        className="border-pro-dark text-amber-100 hover:bg-pro-dark hover:text-white"
       >
         <Calendar className="mr-2 h-4 w-4" />
         Create Event
