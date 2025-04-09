@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ChatButton from './ChatButton';
 import ChatWindow from './ChatWindow';
 import { useChat } from './hooks/useChat';
@@ -57,6 +57,13 @@ const VernonChat = () => {
     setTheme(theme === 'light' ? 'dark' : 'light');
   };
   
+  // Use effect to handle playing intro speech when chat is first opened
+  useEffect(() => {
+    if (isOpen) {
+      console.log('Chat opened, ready for intro speech if needed');
+    }
+  }, [isOpen]);
+  
   if (!isOpen) {
     return (
       <div className="fixed left-6 bottom-6 flex flex-col gap-2">
@@ -91,7 +98,7 @@ const VernonChat = () => {
   
   return (
     <div 
-      className={`fixed left-6 bottom-6 bg-card border rounded-lg shadow-lg transition-all duration-200 z-40
+      className={`fixed left-6 bottom-32 bg-card border rounded-lg shadow-lg transition-all duration-200 z-40
       ${isMinimized ? 'w-64 h-12' : 'w-80 h-96'}
       ${isVenueMode ? 'border-amber-300' : 'border-primary-100'}`}
     >

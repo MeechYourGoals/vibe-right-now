@@ -17,6 +17,10 @@ export const useRecognitionSetup = () => {
     const hasElevenLabsKey = ElevenLabsService.hasApiKey();
     // Prefer Eleven Labs ASR if API key is available
     setUseElevenLabsASR(hasElevenLabsKey);
+    
+    // Log for debugging
+    console.log('Eleven Labs API key available:', hasElevenLabsKey);
+    console.log('Using Eleven Labs ASR:', useElevenLabsASR);
   }, []);
   
   // Initialize speech recognition
@@ -25,6 +29,7 @@ export const useRecognitionSetup = () => {
       if (useElevenLabsASR) {
         // Set up audio recording for Eleven Labs Scribe
         setupAudioRecording();
+        console.log('Setting up Eleven Labs Scribe audio recording');
       } else {
         // Fall back to browser's speech recognition
         speechRecognition.current = initializeSpeechRecognition();
@@ -34,6 +39,9 @@ export const useRecognitionSetup = () => {
           speechRecognition.current.continuous = true;
           speechRecognition.current.interimResults = true;
           setInitialized(true);
+          console.log('Browser speech recognition initialized');
+        } else {
+          console.error('Failed to initialize browser speech recognition');
         }
       }
     }
@@ -42,6 +50,7 @@ export const useRecognitionSetup = () => {
   // Setup audio recording for Eleven Labs Scribe
   const setupAudioRecording = async () => {
     try {
+      console.log('Requesting microphone access for Eleven Labs Scribe');
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       
       mediaRecorder.current = new MediaRecorder(stream);
@@ -53,31 +62,49 @@ export const useRecognitionSetup = () => {
       };
       
       mediaRecorder.current.onstop = async () => {
+        console.log('Audio recording stopped, processing with Eleven Labs Scribe');
         // Process audio with Eleven Labs Scribe
+        if (audioChunks.current.length === 0) {
+          console.warn('No audio chunks collected');
+          return;
+        }
+        
         const audioBlob = new Blob(audioChunks.current, { type: 'audio/wav' });
         audioChunks.current = []; // Reset for next recording
         
         // Convert Blob to ArrayBuffer
         const arrayBuffer = await audioBlob.arrayBuffer();
         
-        // Use Eleven Labs Scribe for transcription
-        const transcription = await ElevenLabsService.speechToText(arrayBuffer, {
-          language: 'en', // Default to English
-        });
+        console.log('Sending audio to Eleven Labs Scribe, size:', arrayBuffer.byteLength);
         
-        if (transcription) {
-          // Dispatch custom event with transcription
-          const event = new CustomEvent('elevenLabsTranscription', {
-            detail: { transcription }
+        // Use Eleven Labs Scribe for transcription
+        try {
+          const transcription = await ElevenLabsService.speechToText(arrayBuffer, {
+            language: 'en', // Default to English
           });
-          window.dispatchEvent(event);
+          
+          console.log('Received transcription from Eleven Labs Scribe:', transcription);
+          
+          if (transcription) {
+            // Dispatch custom event with transcription
+            const event = new CustomEvent('elevenLabsTranscription', {
+              detail: { transcription }
+            });
+            window.dispatchEvent(event);
+          } else {
+            console.warn('Empty transcription received from Eleven Labs Scribe');
+          }
+        } catch (error) {
+          console.error('Error with Eleven Labs transcription:', error);
         }
       };
       
       setInitialized(true);
+      console.log('Eleven Labs Scribe audio recording setup complete');
     } catch (error) {
-      console.error('Error setting up audio recording:', error);
+      console.error('Error setting up audio recording for Eleven Labs Scribe:', error);
       // Fall back to browser's speech recognition
+      console.log('Falling back to browser speech recognition');
       speechRecognition.current = initializeSpeechRecognition();
       
       if (speechRecognition.current) {

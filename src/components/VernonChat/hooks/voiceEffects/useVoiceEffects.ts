@@ -1,5 +1,5 @@
 
-import { useRef } from 'react';
+import { useEffect } from 'react';
 import { Message } from '../../types';
 import { useIntroMessages } from './useIntroMessages';
 import { useAiResponseReader } from './useAiResponseReader';
@@ -18,10 +18,10 @@ interface UseVoiceEffectsProps {
   setIntroMessageSpoken: (value: boolean) => void;
   speakIntroOnce: (text: string) => Promise<void>;
   markIntroAsSpoken: () => void;
-  speakResponse: (text: string) => Promise<void>;
+  speakResponse: (text: string) => Promise<boolean>;
   stopSpeaking: () => void;
   stopListening: () => void;
-  processTranscript: () => string;
+  processTranscript: () => void;
   onSendMessage: (message: string) => void;
   isOpen: boolean;
 }
@@ -45,7 +45,6 @@ export const useVoiceEffects = ({
   onSendMessage,
   isOpen
 }: UseVoiceEffectsProps) => {
-  // Use the individual hooks for specific effects
   
   // Handle intro message speech
   useIntroMessages({
@@ -58,29 +57,47 @@ export const useVoiceEffects = ({
     markIntroAsSpoken
   });
   
-  // Handle reading AI responses
+  // Play AI's latest response message
   useAiResponseReader({
     messages,
     isTyping,
+    speakResponse,
     isSpeaking,
-    isListening,
-    speakResponse
+    isOpen
   });
   
-  // Handle transcript processing and sending
+  // Handle transcript processing when stopping listening
   useTranscriptProcessor({
     isListening,
     isProcessing,
-    isTyping,
     setIsProcessing,
     processTranscript,
     onSendMessage
   });
   
-  // Handle close effects
+  // Handle effects when closing chat
   useCloseEffects({
     isOpen,
     stopSpeaking,
     stopListening
   });
+  
+  // Play intro message when chat first opens (if not already played)
+  useEffect(() => {
+    if (isOpen && messages.length > 0 && !introMessageSpoken && isFirstInteraction) {
+      const introMessage = messages[0];
+      console.log('Attempting to speak intro message on chat open:', introMessage.text);
+      
+      // Speak the intro message with a small delay to ensure audio context is ready
+      setTimeout(() => {
+        speakIntroOnce(introMessage.text).then(() => {
+          console.log('Intro message spoken successfully');
+          markIntroAsSpoken();
+          setIntroMessageSpoken(true);
+        }).catch(err => {
+          console.error('Error speaking intro:', err);
+        });
+      }, 500);
+    }
+  }, [isOpen, messages, introMessageSpoken, isFirstInteraction, speakIntroOnce, markIntroAsSpoken, setIntroMessageSpoken]);
 };

@@ -1,3 +1,4 @@
+
 import { useRef } from 'react';
 import { toast } from 'sonner';
 
@@ -31,6 +32,9 @@ export const useListeningControls = ({
   audioChunks = { current: [] }
 }: ListeningControlsProps) => {
   
+  // Recording interval for Eleven Labs Scribe
+  const recordingInterval = useRef<number | null>(null);
+  
   const startListening = () => {
     if (!initialized) {
       toast.error("Speech recognition isn't available. Please try again later.");
@@ -52,6 +56,21 @@ export const useListeningControls = ({
         audioChunks.current = []; // Clear previous audio chunks
         mediaRecorder.current.start();
         console.log('Started recording for Eleven Labs Scribe');
+        
+        // Set up recording interval - record chunks every 5 seconds for better real-time transcription
+        recordingInterval.current = window.setInterval(() => {
+          if (mediaRecorder.current && mediaRecorder.current.state === 'recording') {
+            // Stop current recording and start a new one to process chunks
+            mediaRecorder.current.stop();
+            
+            // Small delay to let the onstop event process
+            setTimeout(() => {
+              if (isListening && mediaRecorder.current) {
+                mediaRecorder.current.start();
+              }
+            }, 100);
+          }
+        }, 5000); // Process every 5 seconds
       } else if (speechRecognition.current) {
         // Start browser's speech recognition
         speechRecognition.current.start();
@@ -67,6 +86,12 @@ export const useListeningControls = ({
   const stopListening = () => {
     // Clear any silence detection timers
     clearSilenceTimer();
+    
+    // Clear recording interval if active
+    if (recordingInterval.current) {
+      clearInterval(recordingInterval.current);
+      recordingInterval.current = null;
+    }
     
     if (!isListening) {
       return;

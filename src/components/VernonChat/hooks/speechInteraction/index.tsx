@@ -5,6 +5,7 @@ import { useSpeechSynthesis } from '../speechSynthesis';
 import { useVoiceInit } from './useVoiceInit';
 import { useListeningToggle } from './useListeningToggle';
 import { useInterruptionHandler } from './useInterruptionHandler';
+import { INITIAL_MESSAGE } from '../../utils/messageFactory';
 
 export const useSpeechInteraction = () => {
   // Set up speech recognition
@@ -54,6 +55,14 @@ export const useSpeechInteraction = () => {
     stopSpeaking
   });
   
+  // Attempt to speak intro message when component mounts
+  useEffect(() => {
+    if (isFirstInteraction && !hasSpokenIntro) {
+      console.log('Attempting to speak initial intro message on mount');
+      speakIntroOnce(INITIAL_MESSAGE.text);
+    }
+  }, [isFirstInteraction, hasSpokenIntro, speakIntroOnce]);
+  
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -62,9 +71,12 @@ export const useSpeechInteraction = () => {
     };
   }, [stopListening, stopSpeaking]);
   
-  // Custom speakIntroOnce that uses the internal speakResponse
-  const handleSpeakIntroOnce = (introMessage: string) => {
-    return speakIntroOnce(speakResponse, introMessage);
+  // Custom speakIntroOnce wrapper for backwards compatibility
+  const handleSpeakIntroOnce = async (introMessage: string) => {
+    return speakResponse(introMessage).then(() => {
+      markIntroAsSpoken();
+      return true;
+    });
   };
   
   return {

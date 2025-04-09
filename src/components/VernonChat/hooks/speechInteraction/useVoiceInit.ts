@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ElevenLabsService } from '@/services/ElevenLabsService';
 
 export const useVoiceInit = () => {
@@ -7,6 +7,7 @@ export const useVoiceInit = () => {
   const [hasSpokenIntro, setHasSpokenIntro] = useState(false);
   const [isFirstInteraction, setIsFirstInteraction] = useState(true);
   const [introPlayed, setIntroPlayed] = useState(false);
+  const introAttempted = useRef(false);
   
   // Initialize voice with Eleven Labs API key
   useEffect(() => {
@@ -25,12 +26,50 @@ export const useVoiceInit = () => {
   };
 
   // Function to speak the intro only once when toggling to listening mode for the first time
-  const speakIntroOnce = (speakResponse: (text: string) => Promise<void>, introMessage: string) => {
-    if (!introPlayed && isFirstInteraction && !hasSpokenIntro) {
-      setIntroPlayed(true);
-      return speakResponse(introMessage);
+  const speakIntroOnce = async (introMessage: string) => {
+    console.log('Attempting to speak intro:', introMessage);
+    console.log('Intro state:', { introPlayed, isFirstInteraction, hasSpokenIntro, introAttempted: introAttempted.current });
+    
+    if (!introPlayed && isFirstInteraction && !hasSpokenIntro && !introAttempted.current) {
+      // Mark as attempted to prevent multiple attempts
+      introAttempted.current = true;
+      
+      try {
+        // Generate intro speech
+        const audioData = await ElevenLabsService.textToSpeech(introMessage);
+        
+        if (audioData) {
+          // Create audio element
+          const audio = new Audio();
+          const blob = new Blob([audioData], { type: 'audio/mpeg' });
+          const url = URL.createObjectURL(blob);
+          
+          audio.src = url;
+          
+          // Play intro speech
+          await audio.play();
+          
+          // Clean up on end
+          audio.onended = () => {
+            URL.revokeObjectURL(url);
+            setIntroPlayed(true);
+            setHasSpokenIntro(true);
+          };
+          
+          // Set timeout as fallback
+          setTimeout(() => {
+            setIntroPlayed(true);
+            setHasSpokenIntro(true);
+          }, 10000); // 10 second fallback
+          
+          return true;
+        }
+      } catch (error) {
+        console.error('Error speaking intro:', error);
+      }
     }
-    return Promise.resolve();
+    
+    return false;
   };
   
   return {

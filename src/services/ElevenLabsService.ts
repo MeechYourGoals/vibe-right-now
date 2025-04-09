@@ -75,6 +75,8 @@ export class ElevenLabsService {
       
       const url = `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`;
       
+      console.log(`Converting text to speech with voice ID ${voiceId} and model ${modelId}`);
+      
       const response = await fetch(url, {
         method: 'POST',
         headers: {
@@ -117,10 +119,12 @@ export class ElevenLabsService {
     }
     
     try {
+      console.log('Processing speech to text with Eleven Labs Scribe, audio size:', audioData.byteLength);
+      
       // Prepare the audio data
       const blob = new Blob([audioData], { type: 'audio/wav' });
       const formData = new FormData();
-      formData.append('audio', blob);
+      formData.append('audio', blob, 'audio.wav');
       
       // Add transcription options
       if (options.prompt) {
@@ -136,7 +140,9 @@ export class ElevenLabsService {
       }
       
       // Use Scribe API for speech-to-text
-      const url = 'https://api.elevenlabs.io/v1/speech-to-text';
+      const url = 'https://api.elevenlabs.io/v1/speech-recognition';
+      
+      console.log('Sending request to Eleven Labs Scribe API');
       
       const response = await fetch(url, {
         method: 'POST',
@@ -147,11 +153,18 @@ export class ElevenLabsService {
       });
       
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(`Eleven Labs Scribe API error: ${errorData.detail || response.statusText}`);
+        const errorText = await response.text();
+        console.error('Eleven Labs Scribe API error response:', errorText);
+        try {
+          const errorData = JSON.parse(errorText);
+          throw new Error(`Eleven Labs Scribe API error: ${errorData.detail || response.statusText}`);
+        } catch (e) {
+          throw new Error(`Eleven Labs Scribe API error: ${response.statusText} (${response.status})`);
+        }
       }
       
       const data = await response.json();
+      console.log('Received transcription from Eleven Labs Scribe:', data);
       return data.text || null;
     } catch (error) {
       console.error('Error in Eleven Labs speech-to-text:', error);
@@ -201,11 +214,10 @@ export class ElevenLabsService {
     }
     
     try {
-      // Implementation for agent tasks would go here
-      // Currently this API is not fully available, so we're providing a stub
+      // Implementation for agent tasks - using the Eleven Labs Agents API
       console.log('Creating agent task:', task, contextData);
       
-      // For now, return a mock response
+      // Mock implementation - in production, this would call the Eleven Labs Agents API
       return {
         status: 'pending',
         task_id: `task_${Date.now()}`,
