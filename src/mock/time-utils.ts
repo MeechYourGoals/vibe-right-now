@@ -1,6 +1,5 @@
-
 import { Post, Location } from "@/types";
-import { addMonths, format, subDays, subHours, subMinutes } from "date-fns";
+import { addMonths, addWeeks, addDays, addHours, format, subDays, subHours, subMinutes } from "date-fns";
 
 // Generate a time in the recent past (N days ago)
 export const getRecentTime = (daysAgo: number): string => {
@@ -32,10 +31,26 @@ export const getRecentTimeForDayOfWeek = (dayOfWeek: number): string => {
   return date.toISOString();
 };
 
-// Generate an expiry time for venue posts (3 months from post date)
+// Generate a varied expiry time for posts
 export const getExpiryTime = (postTime: string): string => {
   const postDate = new Date(postTime);
-  return addMonths(postDate, 3).toISOString();
+  
+  // Generate a random number to determine expiry type
+  const randomValue = Math.random();
+  
+  if (randomValue < 0.25) {
+    // 25% chance: short expiry (4-12 hours)
+    return addHours(postDate, Math.floor(Math.random() * 8) + 4).toISOString();
+  } else if (randomValue < 0.5) {
+    // 25% chance: medium-short expiry (1-6 days)
+    return addDays(postDate, Math.floor(Math.random() * 5) + 1).toISOString();
+  } else if (randomValue < 0.75) {
+    // 25% chance: medium expiry (1-3 weeks)
+    return addWeeks(postDate, Math.floor(Math.random() * 3) + 1).toISOString();
+  } else {
+    // 25% chance: long expiry (1-3 months)
+    return addMonths(postDate, Math.floor(Math.random() * 3) + 1).toISOString();
+  }
 };
 
 // Check if a post is from a specific day of the week

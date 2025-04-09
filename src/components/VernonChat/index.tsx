@@ -14,6 +14,7 @@ import {
 import { useTheme } from '@/components/ThemeProvider';
 import { toast } from 'sonner';
 import { ElevenLabsService } from '@/services/ElevenLabsService';
+import ChatSettings from './components/ChatSettings';
 
 const VernonChat = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -37,14 +38,9 @@ const VernonChat = () => {
     setIsOpen(false);
   };
 
-  const switchToVenueMode = () => {
-    setIsVenueMode(true);
-    // Reset chat when switching modes
-    window.location.reload();
-  };
-
-  const switchToUserMode = () => {
-    setIsVenueMode(false);
+  const toggleVenueMode = () => {
+    setIsVenueMode(!isVenueMode);
+    toast.success(!isVenueMode ? 'Switched to Venue Mode' : 'Switched to User Mode');
     // Reset chat when switching modes
     window.location.reload();
   };
@@ -125,34 +121,15 @@ const VernonChat = () => {
       ${isMinimized ? 'w-64 h-12' : 'w-80 h-96'}
       ${isVenueMode ? 'border-amber-300' : 'border-primary-100'}`}
     >
-      {/* Settings button */}
-      <div className="absolute right-14 top-3 z-50">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-6 w-6">
-              <Settings className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {isProPlan && (
-              <>
-                <DropdownMenuItem onClick={switchToUserMode} disabled={!isVenueMode}>
-                  Switch to User Mode
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={switchToVenueMode} disabled={isVenueMode}>
-                  Switch to Venue Mode
-                </DropdownMenuItem>
-              </>
-            )}
-            <DropdownMenuItem onClick={toggleProPlan}>
-              {isProPlan ? 'Disable Pro Features' : 'Enable Pro Features'}
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={toggleTheme}>
-              {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+      {/* Settings component */}
+      <ChatSettings 
+        useElevenLabs={true}
+        promptForElevenLabsKey={() => {}}
+        isListening={false}
+        toggleListening={() => {}}
+        isVenueMode={isVenueMode}
+        toggleVenueMode={toggleVenueMode}
+      />
       
       <ChatWindow
         isOpen={isOpen}

@@ -1,26 +1,34 @@
 
 import React from 'react';
-import { Settings } from 'lucide-react';
+import { Settings, Building2, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { 
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel
 } from '@/components/ui/dropdown-menu';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 
 interface ChatSettingsProps {
   useElevenLabs: boolean;
   promptForElevenLabsKey: () => void;
   isListening: boolean;
   toggleListening: () => void;
+  isVenueMode?: boolean;
+  toggleVenueMode?: () => void;
 }
 
 const ChatSettings: React.FC<ChatSettingsProps> = ({
   useElevenLabs,
   promptForElevenLabsKey,
   isListening,
-  toggleListening
+  toggleListening,
+  isVenueMode = false,
+  toggleVenueMode
 }) => {
   return (
     <div className="absolute right-3 top-3 z-10">
@@ -31,12 +39,41 @@ const ChatSettings: React.FC<ChatSettingsProps> = ({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
+          <DropdownMenuLabel>Voice Settings</DropdownMenuLabel>
           <DropdownMenuItem onClick={promptForElevenLabsKey}>
             {useElevenLabs ? "Update Eleven Labs API Key" : "Set Eleven Labs API Key"}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={toggleListening}>
             {isListening ? "Stop Voice Input" : "Start Voice Input"}
           </DropdownMenuItem>
+          
+          {toggleVenueMode && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel>Mode</DropdownMenuLabel>
+              <DropdownMenuItem>
+                <div className="flex items-center justify-between w-full">
+                  <div className="flex items-center gap-2">
+                    {isVenueMode ? (
+                      <>
+                        <Building2 className="h-4 w-4 mr-1 text-primary" />
+                        <span>Venue Mode</span>
+                      </>
+                    ) : (
+                      <>
+                        <User className="h-4 w-4 mr-1 text-primary" />
+                        <span>User Mode</span>
+                      </>
+                    )}
+                  </div>
+                  <Switch 
+                    checked={isVenueMode}
+                    onCheckedChange={toggleVenueMode}
+                  />
+                </div>
+              </DropdownMenuItem>
+            </>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
