@@ -1,10 +1,9 @@
-
 import { 
   getPreferredVoice, 
   processTextForNaturalSpeech, 
   configureUtteranceForNaturalSpeech,
   initializeSpeechSynthesis 
-} from '../../utils/speechUtils';
+} from '../../utils/speech';
 
 export interface SpeechState {
   isSpeaking: boolean;

@@ -5,7 +5,7 @@ import {
   processTextForNaturalSpeech, 
   configureUtteranceForNaturalSpeech,
   initializeSpeechSynthesis
-} from '../utils/speechUtils';
+} from '../utils/speech';
 import { ElevenLabsService } from '@/services/ElevenLabsService';
 import { toast } from 'sonner';
 
