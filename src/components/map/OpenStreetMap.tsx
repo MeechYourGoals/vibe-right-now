@@ -69,7 +69,6 @@ const OpenStreetMap: React.FC<OpenStreetMapProps> = ({
       center={mapCenter}
       zoom={zoom}
       scrollWheelZoom={false}
-      zoomControl={false} // We'll add custom-positioned zoom controls
     >
       <TileLayer
         attribution={tileLayerAttribution}

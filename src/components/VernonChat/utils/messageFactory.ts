@@ -2,6 +2,14 @@
 import { Message } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 
+// Define initial message constant
+export const INITIAL_MESSAGE: Message = {
+  id: '1',
+  role: 'assistant',
+  content: "Hi there! I'm VeRNon, your assistant. How can I help you today?",
+  timestamp: new Date().toISOString()
+};
+
 export const createUserMessage = (content: string): Message => {
   return {
     id: uuidv4(),
@@ -19,6 +27,9 @@ export const createAssistantMessage = (content: string): Message => {
     timestamp: new Date().toISOString()
   };
 };
+
+// Alias for createAssistantMessage to fix existing imports
+export const createAIMessage = createAssistantMessage;
 
 // For backward compatibility
 export const createMessage = (role: 'user' | 'assistant', content: string): Message => {
