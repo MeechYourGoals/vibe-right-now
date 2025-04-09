@@ -20,7 +20,6 @@ export const useRecognitionSetup = () => {
     
     // Log for debugging
     console.log('Eleven Labs API key available:', hasElevenLabsKey);
-    console.log('Using Eleven Labs ASR:', useElevenLabsASR);
   }, []);
   
   // Initialize speech recognition
@@ -53,7 +52,9 @@ export const useRecognitionSetup = () => {
       console.log('Requesting microphone access for Eleven Labs Scribe');
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       
-      mediaRecorder.current = new MediaRecorder(stream);
+      mediaRecorder.current = new MediaRecorder(stream, {
+        mimeType: 'audio/webm' // Using webm for better compatibility
+      });
       
       mediaRecorder.current.ondataavailable = (event) => {
         if (event.data.size > 0) {
@@ -69,17 +70,13 @@ export const useRecognitionSetup = () => {
           return;
         }
         
-        const audioBlob = new Blob(audioChunks.current, { type: 'audio/wav' });
-        audioChunks.current = []; // Reset for next recording
-        
-        // Convert Blob to ArrayBuffer
-        const arrayBuffer = await audioBlob.arrayBuffer();
-        
-        console.log('Sending audio to Eleven Labs Scribe, size:', arrayBuffer.byteLength);
+        // Combine all chunks into a single blob
+        const audioBlob = new Blob(audioChunks.current, { type: 'audio/webm' });
+        console.log('Audio blob created, size:', audioBlob.size);
         
         // Use Eleven Labs Scribe for transcription
         try {
-          const transcription = await ElevenLabsService.speechToText(arrayBuffer, {
+          const transcription = await ElevenLabsService.speechToText(audioBlob, {
             language: 'en', // Default to English
           });
           
@@ -97,6 +94,9 @@ export const useRecognitionSetup = () => {
         } catch (error) {
           console.error('Error with Eleven Labs transcription:', error);
         }
+        
+        // Reset chunks for next recording
+        audioChunks.current = [];
       };
       
       setInitialized(true);

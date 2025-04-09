@@ -1,6 +1,6 @@
 
 // Eleven Labs API integration
-// This service handles text-to-speech conversion using Eleven Labs API
+// This service handles text-to-speech and speech-to-text conversion using Eleven Labs API
 
 interface ElevenLabsOptions {
   voice_id?: string;
@@ -108,7 +108,7 @@ export class ElevenLabsService {
   
   // Speech to text using Eleven Labs Scribe API (latest ASR model)
   public static async speechToText(
-    audioData: ArrayBuffer,
+    audioData: ArrayBuffer | Blob,
     options: ScribeTranscriptionOptions = {}
   ): Promise<string | null> {
     const apiKey = this.getApiKey();
@@ -119,26 +119,28 @@ export class ElevenLabsService {
     }
     
     try {
-      console.log('Processing speech to text with Eleven Labs Scribe, audio size:', audioData.byteLength);
+      console.log('Processing speech to text with Eleven Labs Scribe, audio size:', 
+        audioData instanceof ArrayBuffer ? audioData.byteLength : audioData.size);
       
       // Prepare the audio data
-      const blob = new Blob([audioData], { type: 'audio/wav' });
       const formData = new FormData();
-      formData.append('audio', blob, 'audio.wav');
       
-      // Add transcription options
-      if (options.prompt) {
-        formData.append('prompt', options.prompt);
+      if (audioData instanceof Blob) {
+        formData.append('file', audioData, 'audio.wav');
+      } else {
+        const blob = new Blob([audioData], { type: 'audio/wav' });
+        formData.append('file', blob, 'audio.wav');
       }
       
+      // Add transcription options
       if (options.language) {
         formData.append('language', options.language);
       }
       
-      if (options.expected_format) {
-        formData.append('expected_format', options.expected_format);
+      if (options.prompt) {
+        formData.append('prompt', options.prompt);
       }
-      
+
       // Use Scribe API for speech-to-text
       const url = 'https://api.elevenlabs.io/v1/speech-recognition';
       

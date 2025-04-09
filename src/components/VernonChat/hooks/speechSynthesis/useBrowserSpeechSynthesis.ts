@@ -1,147 +1,95 @@
 
-import { useCallback } from 'react';
+import { useCallback, useState, useRef } from 'react';
 import { 
   getPreferredVoice, 
   processTextForNaturalSpeech, 
   configureUtteranceForNaturalSpeech 
 } from '../../utils/speech';
 
-interface UseBrowserSpeechSynthesisProps {
-  speechSynthesis: React.MutableRefObject<SpeechSynthesis | null>;
-  voices: SpeechSynthesisVoice[];
-  currentUtterance: React.MutableRefObject<SpeechSynthesisUtterance | null>;
-  isSpeaking: boolean;
-  setIsSpeaking: (value: boolean) => void;
-  currentlyPlayingText: React.MutableRefObject<string | null>;
-  stopSpeaking: () => void;
-}
-
-export const useBrowserSpeechSynthesis = ({
-  speechSynthesis,
-  voices,
-  currentUtterance,
-  isSpeaking,
-  setIsSpeaking,
-  currentlyPlayingText,
-  stopSpeaking
-}: UseBrowserSpeechSynthesisProps) => {
+export const useBrowserSpeechSynthesis = () => {
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const currentUtterance = useRef<SpeechSynthesisUtterance | null>(null);
   
-  const speakWithBrowserSynthesis = useCallback((text: string): void => {
-    if (!speechSynthesis.current) {
+  const synth = typeof window !== 'undefined' ? window.speechSynthesis : null;
+  
+  // Function to speak using browser's speech synthesis
+  const speakWithBrowser = useCallback(async (text: string, voices: SpeechSynthesisVoice[]): Promise<boolean> => {
+    if (!synth) {
       console.error('Speech synthesis not available');
-      return;
-    }
-    
-    // Don't repeat the same text if it's already playing
-    if (isSpeaking && currentlyPlayingText.current === text) {
-      console.log('This text is already being spoken, skipping duplicate');
-      return;
+      return false;
     }
     
     // Cancel any ongoing speech
-    stopSpeaking();
+    synth.cancel();
     
-    const utterance = new SpeechSynthesisUtterance();
+    console.log('Speaking with browser speech synthesis:', text);
+    
+    // Create utterance
+    const utterance = new SpeechSynthesisUtterance(text);
     currentUtterance.current = utterance;
-    currentlyPlayingText.current = text;
     
-    utterance.onstart = () => setIsSpeaking(true);
-    utterance.onend = () => {
-      setIsSpeaking(false);
-      currentlyPlayingText.current = null;
-    };
-    utterance.onerror = (event) => {
-      console.error('Speech synthesis error:', event);
-      setIsSpeaking(false);
-      currentlyPlayingText.current = null;
-    };
-    
-    // Select a preferred voice
-    const preferredVoice = getPreferredVoice(voices.length > 0 ? voices : speechSynthesis.current.getVoices());
-    if (preferredVoice) {
-      utterance.voice = preferredVoice;
-      console.log('Using voice:', preferredVoice.name);
-    } else {
-      console.log('No preferred voice found, using default');
-    }
-    
-    // Process text for more natural sound
-    const processedText = processTextForNaturalSpeech(text);
-    
-    // Split long responses into sentences for more natural pauses
-    const sentences = processedText.match(/[^.!?]+[.!?]+/g) || [processedText];
-    
-    if (sentences.length > 1 && sentences.length < 20) {
-      // For medium-length responses, speak sentence by sentence with pauses
-      speakSentenceBySequence(sentences, 0, speechSynthesis.current, voices, {
-        isSpeaking,
-        setIsSpeaking,
-        currentlyPlayingText
-      });
-    } else {
-      // For short or very long responses, speak all at once
+    return new Promise((resolve) => {
+      // Select a preferred voice
+      const preferredVoice = getPreferredVoice(voices);
+      if (preferredVoice) {
+        utterance.voice = preferredVoice;
+        console.log('Using voice:', preferredVoice.name);
+      } else {
+        console.log('No preferred voice found, using default');
+      }
+      
+      // Process text for more natural sound
+      const processedText = processTextForNaturalSpeech(text);
       utterance.text = processedText;
+      
+      // Configure other utterance properties
       configureUtteranceForNaturalSpeech(utterance, processedText);
       
-      // Finally, speak the text
-      speechSynthesis.current.speak(utterance);
-    }
-  }, [speechSynthesis, voices, currentUtterance, isSpeaking, currentlyPlayingText, stopSpeaking, setIsSpeaking]);
+      // Set up event handlers
+      utterance.onstart = () => {
+        console.log('Browser speech started');
+        setIsSpeaking(true);
+      };
+      
+      utterance.onend = () => {
+        console.log('Browser speech ended');
+        setIsSpeaking(false);
+        resolve(true);
+      };
+      
+      utterance.onerror = (event) => {
+        console.error('Browser speech error:', event);
+        setIsSpeaking(false);
+        resolve(false);
+      };
+      
+      // Speak the utterance
+      synth.speak(utterance);
+      
+      // Workaround for Chrome issue where onend doesn't fire
+      if (utterance.voice && utterance.voice.name.includes('Google')) {
+        const estimatedDuration = text.length * 50; // Rough estimate: 50ms per character
+        setTimeout(() => {
+          if (isSpeaking) {
+            setIsSpeaking(false);
+            resolve(true);
+          }
+        }, estimatedDuration);
+      }
+    });
+  }, [synth, isSpeaking]);
   
-  return { speakWithBrowserSynthesis };
-};
-
-// Helper function to speak sentences sequentially
-function speakSentenceBySequence(
-  sentences: string[], 
-  index: number, 
-  speechSynthesis: SpeechSynthesis,
-  voices: SpeechSynthesisVoice[],
-  speechState: {
-    isSpeaking: boolean,
-    setIsSpeaking: (value: boolean) => void,
-    currentlyPlayingText: React.MutableRefObject<string | null>
-  }
-): void {
-  if (!speechSynthesis || index >= sentences.length) {
-    return;
-  }
-  
-  const { setIsSpeaking, currentlyPlayingText } = speechState;
-  const sentence = sentences[index];
-  const utterance = new SpeechSynthesisUtterance(sentence);
-  
-  // Select voice
-  const preferredVoice = getPreferredVoice(voices);
-  if (preferredVoice) {
-    utterance.voice = preferredVoice;
-  }
-  
-  // Configure utterance properties
-  configureUtteranceForNaturalSpeech(utterance, sentence);
-  
-  // Handle events
-  utterance.onstart = () => {
-    if (index === 0) {
-      setIsSpeaking(true);
-    }
-  };
-  
-  utterance.onend = () => {
-    // Move to next sentence
-    if (index < sentences.length - 1) {
-      speakSentenceBySequence(sentences, index + 1, speechSynthesis, voices, speechState);
-    } else {
+  // Cancel speech
+  const cancelSpeech = useCallback(() => {
+    if (synth) {
+      synth.cancel();
       setIsSpeaking(false);
-      currentlyPlayingText.current = null;
     }
-  };
+  }, [synth]);
   
-  utterance.onerror = () => {
-    setIsSpeaking(false);
-    currentlyPlayingText.current = null;
+  return {
+    isSpeaking,
+    speakWithBrowser,
+    cancelSpeech
   };
-  
-  // Speak the current sentence
-  speechSynthesis.speak(utterance);
-}
+};

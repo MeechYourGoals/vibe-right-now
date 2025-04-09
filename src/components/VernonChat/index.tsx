@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useTheme } from '@/components/ThemeProvider';
 import { toast } from 'sonner';
+import { ElevenLabsService } from '@/services/ElevenLabsService';
 
 const VernonChat = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -57,10 +58,32 @@ const VernonChat = () => {
     setTheme(theme === 'light' ? 'dark' : 'light');
   };
   
-  // Use effect to handle playing intro speech when chat is first opened
+  // Ensure ElevenLabs API key is set on component mount
+  useEffect(() => {
+    // Check if ElevenLabs API key is available
+    if (!ElevenLabsService.hasApiKey()) {
+      console.log('Setting default Eleven Labs API key');
+      // Set default API key if not available
+      ElevenLabsService.setApiKey('sk_236c24971a353bfa897b2c150b2d256ae65e352b405e3e4f');
+    }
+  }, []);
+  
+  // When user opens chat, prepare for speech
   useEffect(() => {
     if (isOpen) {
-      console.log('Chat opened, ready for intro speech if needed');
+      // Force initialize speech synthesis
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.getVoices();
+        
+        // For iOS Safari, we need to speak a silent utterance to initialize the voices
+        if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+          const silentUtterance = new SpeechSynthesisUtterance('');
+          silentUtterance.volume = 0;
+          window.speechSynthesis.speak(silentUtterance);
+        }
+      }
+      
+      console.log('Chat opened, ready for intro speech');
     }
   }, [isOpen]);
   

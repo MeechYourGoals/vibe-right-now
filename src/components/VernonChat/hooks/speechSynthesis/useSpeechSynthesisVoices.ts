@@ -5,25 +5,25 @@ export const useSpeechSynthesisVoices = () => {
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   
   useEffect(() => {
-    // Function to get voices from speech synthesis
-    const getVoices = () => {
-      if (typeof window !== 'undefined' && window.speechSynthesis) {
+    // Function to set available voices
+    const setAvailableVoices = () => {
+      if ('speechSynthesis' in window) {
         const availableVoices = window.speechSynthesis.getVoices();
         setVoices(availableVoices);
       }
     };
     
-    // Get voices immediately if they're already loaded
-    getVoices();
+    // Set voices right away if already loaded
+    setAvailableVoices();
     
-    // Add event listener for when voices are loaded asynchronously
-    if (typeof window !== 'undefined' && window.speechSynthesis) {
-      window.speechSynthesis.onvoiceschanged = getVoices;
+    // Set up event listener for when voices are loaded asynchronously
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.onvoiceschanged = setAvailableVoices;
     }
     
-    // Clean up
+    // Cleanup
     return () => {
-      if (typeof window !== 'undefined' && window.speechSynthesis) {
+      if ('speechSynthesis' in window) {
         window.speechSynthesis.onvoiceschanged = null;
       }
     };
