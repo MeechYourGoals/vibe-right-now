@@ -5,6 +5,9 @@ export const SimpleSearchService = {
   async searchForCityInfo(query: string): Promise<string> {
     console.log('Using simple search service with query:', query);
     
+    // Log that search is happening regardless of speech synthesis
+    console.log('Search service is being called - this should work even if speech fails');
+    
     // Check which type of query this might be
     if (query.toLowerCase().includes('restaurant') || 
         query.toLowerCase().includes('food') || 

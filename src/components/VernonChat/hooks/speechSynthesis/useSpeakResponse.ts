@@ -42,11 +42,13 @@ export const useSpeakResponse = ({
     
     console.log('Speaking with ElevenLabs:', useElevenLabs);
     
+    let speechSuccess = false;
+    
     // Try to use Eleven Labs if available
     if (useElevenLabs) {
       try {
-        const success = await speakWithElevenLabs(text);
-        if (success) {
+        speechSuccess = await speakWithElevenLabs(text);
+        if (speechSuccess) {
           // Mark intro as played if this is the first message
           if (!introHasPlayed.current && text.includes("I'm VeRNon")) {
             introHasPlayed.current = true;
@@ -58,8 +60,21 @@ export const useSpeakResponse = ({
       }
     }
     
-    // Fallback to browser's speech synthesis
-    await speakWithBrowser(text, voices);
+    // If ElevenLabs failed or is not enabled, fall back to browser's speech synthesis
+    try {
+      speechSuccess = await speakWithBrowser(text, voices);
+      
+      // Mark intro as played if this is the first message (even if using browser speech)
+      if (speechSuccess && !introHasPlayed.current && text.includes("I'm VeRNon")) {
+        introHasPlayed.current = true;
+      }
+    } catch (error) {
+      console.error('Browser speech synthesis failed:', error);
+      // Even if speech fails completely, we continue with the app's functionality
+      // This ensures web searches still work even if speech fails
+    }
+    
+    // The function completes regardless of speech success to ensure conversation flow continues
   }, [
     isSpeaking, 
     currentlyPlayingText, 

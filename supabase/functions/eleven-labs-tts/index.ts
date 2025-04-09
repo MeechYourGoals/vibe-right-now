@@ -34,7 +34,9 @@ serve(async (req) => {
       );
     }
 
-    console.log(`Converting text to speech: "${text.substring(0, 50)}..." with voice ${voiceId}`);
+    // Reduce text length if it's too long to save credits
+    const reducedText = reduceLongText(text);
+    console.log(`Converting text to speech: "${reducedText.substring(0, 50)}..." with voice ${voiceId}`);
 
     // Call Eleven Labs API
     const elevenLabsResponse = await fetch(
@@ -46,7 +48,7 @@ serve(async (req) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          text,
+          text: reducedText,
           model_id: model,
           voice_settings: {
             stability: 0.5,
@@ -58,11 +60,38 @@ serve(async (req) => {
 
     if (!elevenLabsResponse.ok) {
       const errorText = await elevenLabsResponse.text();
+      let errorData;
+      try {
+        errorData = JSON.parse(errorText);
+      } catch (e) {
+        errorData = { detail: errorText };
+      }
+      
+      // Special handling for quota exceeded errors
+      if (errorData?.detail?.status === 'quota_exceeded') {
+        console.log('ElevenLabs quota exceeded, returning error with specific code');
+        return new Response(
+          JSON.stringify({ 
+            error: 'quota_exceeded', 
+            message: 'ElevenLabs quota exceeded',
+            details: errorData?.detail
+          }),
+          { 
+            status: 429, 
+            headers: { 
+              ...corsHeaders, 
+              'Content-Type': 'application/json',
+              'X-Error-Type': 'quota_exceeded' 
+            } 
+          }
+        );
+      }
+      
       console.error(`ElevenLabs API error: ${errorText}`);
       return new Response(
         JSON.stringify({ 
           error: 'Error calling ElevenLabs API', 
-          details: errorText,
+          details: errorData || errorText,
           status: elevenLabsResponse.status 
         }),
         { status: elevenLabsResponse.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -87,3 +116,30 @@ serve(async (req) => {
     );
   }
 });
+
+// Helper function to reduce long text
+function reduceLongText(text: string): string {
+  // If text is less than 500 characters, return as is
+  if (text.length < 500) return text;
+  
+  // For longer text, truncate while trying to maintain complete sentences
+  const sentences = text.match(/[^.!?]+[.!?]+/g) || [];
+  let result = '';
+  let totalChars = 0;
+  const charLimit = 800;
+  
+  for (const sentence of sentences) {
+    if (totalChars + sentence.length > charLimit) {
+      break;
+    }
+    result += sentence;
+    totalChars += sentence.length;
+  }
+  
+  // Add an ellipsis if we truncated the text
+  if (result.length < text.length) {
+    result = result.trim() + '...';
+  }
+  
+  return result;
+}

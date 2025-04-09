@@ -14,6 +14,10 @@ export class ElevenLabsTextToSpeech {
       return null;
     }
     
+    // Reduce text length if it's too long to save credits
+    // This will truncate long texts to around 150 words to stay within credit limits
+    const reducedText = ElevenLabsTextToSpeech.reduceLongText(text);
+    
     try {
       // Always use the Adam voice by default - consistent male voice
       const voiceId = options.voice_id || ElevenLabsBase.getDefaultVoiceId();
@@ -22,6 +26,7 @@ export class ElevenLabsTextToSpeech {
       const url = `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`;
       
       console.log(`Converting text to speech with voice ID ${voiceId} and model ${modelId}`);
+      console.log(`Text length before reduction: ${text.length}, after: ${reducedText.length}`);
       
       const response = await fetch(url, {
         method: 'POST',
@@ -30,7 +35,7 @@ export class ElevenLabsTextToSpeech {
           'xi-api-key': apiKey
         },
         body: JSON.stringify({
-          text,
+          text: reducedText,
           model_id: modelId,
           voice_settings: options.voice_settings || {
             stability: 0.8,
@@ -40,8 +45,21 @@ export class ElevenLabsTextToSpeech {
       });
       
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(`Eleven Labs API error: ${errorData.detail || response.statusText}`);
+        const errorText = await response.text();
+        let errorData;
+        try {
+          errorData = JSON.parse(errorText);
+        } catch (e) {
+          errorData = { detail: errorText };
+        }
+        
+        // Check specifically for quota exceeded error
+        if (errorData?.detail?.status === 'quota_exceeded') {
+          console.warn('ElevenLabs quota exceeded, returning null to trigger fallback to browser speech');
+          return null;
+        }
+        
+        throw new Error(`Eleven Labs API error: ${JSON.stringify(errorData?.detail || response.statusText)}`);
       }
       
       // Return audio as ArrayBuffer
@@ -50,5 +68,32 @@ export class ElevenLabsTextToSpeech {
       console.error('Error in Eleven Labs text-to-speech:', error);
       return null;
     }
+  }
+  
+  // Helper method to reduce text length to save credits
+  private static reduceLongText(text: string): string {
+    // If text is less than 500 characters, return as is
+    if (text.length < 500) return text;
+    
+    // For longer text, truncate while trying to maintain complete sentences
+    const sentences = text.match(/[^.!?]+[.!?]+/g) || [];
+    let result = '';
+    let totalChars = 0;
+    const charLimit = 800;
+    
+    for (const sentence of sentences) {
+      if (totalChars + sentence.length > charLimit) {
+        break;
+      }
+      result += sentence;
+      totalChars += sentence.length;
+    }
+    
+    // Add an ellipsis if we truncated the text
+    if (result.length < text.length) {
+      result = result.trim() + '...';
+    }
+    
+    return result;
   }
 }

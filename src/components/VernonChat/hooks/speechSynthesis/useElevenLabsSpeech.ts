@@ -1,6 +1,7 @@
 
 import { useCallback } from 'react';
 import { ElevenLabsService } from '@/services/ElevenLabsService';
+import { toast } from '@/hooks/use-toast';
 
 interface UseElevenLabsSpeechProps {
   audioElement: React.MutableRefObject<HTMLAudioElement | null>;
@@ -39,6 +40,7 @@ export const useElevenLabsSpeech = ({
       
       if (!audioData || !audioElement.current) {
         console.error('Failed to get audio from Eleven Labs or audio element not available');
+        // If failed, don't show error toast as the browser speech synthesis will take over
         setIsSpeaking(false);
         currentlyPlayingText.current = null;
         return false;
@@ -69,7 +71,21 @@ export const useElevenLabsSpeech = ({
         return false;
       }
     } catch (error) {
-      console.error('Error with Eleven Labs speech synthesis:', error);
+      if (error instanceof Error && error.message.includes('quota_exceeded')) {
+        console.warn('ElevenLabs quota exceeded, falling back to browser speech');
+        // Show toast only once per session
+        if (!localStorage.getItem('elevenlabs_quota_notified')) {
+          toast({
+            title: "Voice Synthesis Fallback",
+            description: "Your ElevenLabs quota has been exceeded. Using browser voice instead.",
+            duration: 5000,
+          });
+          localStorage.setItem('elevenlabs_quota_notified', 'true');
+        }
+      } else {
+        console.error('Error with Eleven Labs speech synthesis:', error);
+      }
+      
       setIsSpeaking(false);
       currentlyPlayingText.current = null;
       return false;
