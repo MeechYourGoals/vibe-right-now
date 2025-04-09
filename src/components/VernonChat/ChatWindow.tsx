@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import ChatHeader from './ChatHeader';
 import MessageList from './MessageList';
 import ChatControls from './ChatControls';
@@ -52,26 +52,49 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
     useElevenLabs,
     promptForElevenLabsKey,
     hasSpokenIntro,
-    markIntroAsSpoken
+    markIntroAsSpoken,
+    isFirstInteraction
   } = useSpeechInteraction();
 
-  // Effect to read AI responses in voice mode
+  const lastProcessedMessageRef = useRef<string | null>(null);
+  const isPlayingIntroRef = useRef(false);
+
+  // Effect to handle intro message speech only once per session
   useEffect(() => {
-    if (messages.length > 0 && !isTyping && isSpeaking === false) {
-      // Only speak the intro message (first AI message) if it hasn't been spoken yet
-      if (messages[0].sender === 'ai' && !hasSpokenIntro) {
-        speakResponse(messages[0].text);
+    if (messages.length > 0 && messages[0].sender === 'ai' && !hasSpokenIntro && isListening && !isPlayingIntroRef.current) {
+      // Only speak the intro if this is the first time we've toggled listening
+      isPlayingIntroRef.current = true;
+      speakResponse(messages[0].text).then(() => {
         markIntroAsSpoken();
-        return;
-      }
-      
-      // For any other messages, only speak if we were in voice mode
+        isPlayingIntroRef.current = false;
+      });
+    }
+  }, [messages, hasSpokenIntro, isListening, speakResponse, markIntroAsSpoken]);
+
+  // Effect to read AI responses in voice mode (except the intro which is handled separately)
+  useEffect(() => {
+    if (messages.length > 0 && !isTyping && !isSpeaking && isListening) {
       const lastMessage = messages[messages.length - 1];
-      if (lastMessage.sender === 'ai' && lastMessage !== messages[0] && (isListening || isProcessing)) {
-        speakResponse(lastMessage.text);
+      
+      // Skip the intro message which is handled separately
+      if (lastMessage.sender === 'ai' && lastMessage !== messages[0]) {
+        // Check if we've already processed this message to avoid repetition
+        if (lastProcessedMessageRef.current !== lastMessage.id) {
+          lastProcessedMessageRef.current = lastMessage.id;
+          speakResponse(lastMessage.text);
+        }
       }
     }
-  }, [messages, isTyping, isSpeaking, isListening, isProcessing, speakResponse, hasSpokenIntro, markIntroAsSpoken]);
+  }, [messages, isTyping, isSpeaking, isListening, speakResponse]);
+
+  // Effect to handle user interruption
+  useEffect(() => {
+    if (isSpeaking && isListening && interimTranscript.trim().length > 5) {
+      // If we're speaking but the user starts talking (with at least a few words),
+      // stop the current speech to listen to them
+      stopSpeaking();
+    }
+  }, [isSpeaking, isListening, interimTranscript, stopSpeaking]);
 
   // Effect to stop speaking when chat is closed
   useEffect(() => {

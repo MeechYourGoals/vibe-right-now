@@ -8,6 +8,7 @@ import { ElevenLabsService } from '@/services/ElevenLabsService';
 export const useSpeechInteraction = () => {
   const [voiceSetupComplete, setVoiceSetupComplete] = useState(false);
   const [hasSpokenIntro, setHasSpokenIntro] = useState(false);
+  const [isFirstInteraction, setIsFirstInteraction] = useState(true);
   
   const {
     isListening,
@@ -51,13 +52,14 @@ export const useSpeechInteraction = () => {
     if (isListening) {
       // If currently listening, stop
       stopListening();
-      stopSpeaking(); // Also stop any ongoing speech
+      stopSpeaking(); // Also stop any ongoing speech when user toggles off
     } else {
       // Request microphone permission first
       navigator.mediaDevices.getUserMedia({ audio: true })
         .then(() => {
           // If permission granted, start listening
           startListening();
+          setIsFirstInteraction(false); // No longer the first interaction once user toggles listening
           toast.success('Voice mode activated. Start speaking...');
         })
         .catch(error => {
@@ -67,7 +69,7 @@ export const useSpeechInteraction = () => {
     }
   };
   
-  // Mark intro as spoken
+  // Mark intro as spoken and track it has been spoken
   const markIntroAsSpoken = () => {
     setHasSpokenIntro(true);
   };
@@ -95,6 +97,7 @@ export const useSpeechInteraction = () => {
     useElevenLabs,
     promptForElevenLabsKey,
     hasSpokenIntro,
-    markIntroAsSpoken
+    markIntroAsSpoken,
+    isFirstInteraction
   };
 };

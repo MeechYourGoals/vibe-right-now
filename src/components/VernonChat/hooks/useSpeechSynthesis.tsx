@@ -98,6 +98,9 @@ export const useSpeechSynthesis = () => {
         return true;
       }
       
+      // Stop any currently playing speech first
+      stopSpeaking();
+      
       setIsSpeaking(true);
       currentlyPlayingText.current = text;
       
@@ -197,6 +200,11 @@ export const useSpeechSynthesis = () => {
   };
   
   const speakResponse = async (text: string): Promise<void> => {
+    if (!text || text.trim() === '') {
+      console.log('Empty text provided, not speaking');
+      return;
+    }
+    
     // Don't repeat the same text if it's already playing
     if (isSpeaking && currentlyPlayingText.current === text) {
       console.log('This text is already being spoken, skipping duplicate');
@@ -217,6 +225,16 @@ export const useSpeechSynthesis = () => {
     
     // Use browser's speech synthesis
     speakWithBrowserSynthesis(text);
+    
+    // Return a promise that resolves when speaking is done
+    return new Promise((resolve) => {
+      const checkInterval = setInterval(() => {
+        if (!isSpeaking) {
+          clearInterval(checkInterval);
+          resolve();
+        }
+      }, 100);
+    });
   };
   
   // Function to speak sentences one by one for more natural cadence

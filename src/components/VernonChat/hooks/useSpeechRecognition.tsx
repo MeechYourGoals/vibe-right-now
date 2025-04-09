@@ -50,7 +50,12 @@ export const useSpeechRecognition = () => {
           
           // If we have final transcript, add it to the complete transcript
           if (finalTranscript) {
-            setTranscript(prevTranscript => prevTranscript + ' ' + finalTranscript);
+            setTranscript(prevTranscript => {
+              return (prevTranscript.trim() + ' ' + finalTranscript).trim();
+            });
+            
+            // Clear interim transcript when we get a final result
+            setInterimTranscript('');
           }
           
           lastSpeechTime.current = Date.now();
@@ -60,14 +65,14 @@ export const useSpeechRecognition = () => {
             clearTimeout(silenceTimer.current);
           }
           
-          // Set new silence timer for 2 seconds - automatically process after 2 seconds of silence
+          // Set new silence timer for 1.5 seconds - automatically process after 1.5 seconds of silence
           silenceTimer.current = setTimeout(() => {
             if (isListening && (finalTranscript.trim() || transcript.trim())) {
               // Only process if we have a valid transcript and we were listening
               stopListening();
               setIsProcessing(true);
             }
-          }, 2000); // 2 seconds of silence detection
+          }, 1500); // 1.5 seconds of silence detection (reduced from 2)
         };
         
         speechRecognition.current.onend = () => {
