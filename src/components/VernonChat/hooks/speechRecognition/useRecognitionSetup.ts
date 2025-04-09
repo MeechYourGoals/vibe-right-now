@@ -1,6 +1,5 @@
-
 import { useRef, useEffect, useState } from 'react';
-import { initializeSpeechRecognition } from '../../utils/speechUtils';
+import { initializeSpeechRecognition } from '../../utils/speech';
 
 export const useRecognitionSetup = () => {
   const [initialized, setInitialized] = useState(false);

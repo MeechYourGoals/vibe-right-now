@@ -4,7 +4,7 @@ import {
   getPreferredVoice, 
   processTextForNaturalSpeech, 
   configureUtteranceForNaturalSpeech
-} from '../../utils/speechUtils';
+} from '../../utils/speech';
 import { speakSentenceBySequence } from './speechSynthesisUtils';
 
 interface UseBrowserSpeechSynthesisProps {

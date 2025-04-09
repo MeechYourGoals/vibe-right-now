@@ -1,6 +1,6 @@
 
 import { useCallback } from 'react';
-import { handleSpeechRecognitionError } from '../../utils/speechUtils';
+import { handleSpeechRecognitionError } from '../../utils/speech';
 import { toast } from 'sonner';
 
 interface RecognitionEventHandlersProps {
