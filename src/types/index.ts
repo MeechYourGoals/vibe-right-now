@@ -1,3 +1,4 @@
+
 export interface NavItem {
   title: string;
   href: string;
@@ -63,6 +64,8 @@ export interface Location {
   verified: boolean;
   hours?: BusinessHours;
   logo?: string;
+  description?: string;
+  // We don't add tags here since we're handling categorization differently
 }
 
 export interface Media {

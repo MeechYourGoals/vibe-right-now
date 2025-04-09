@@ -68,8 +68,11 @@ export const useMessageProcessor = (isProPlan: boolean = false, isVenueMode: boo
             } else if (detectedCategory === "dining") {
               cityLocations = cityLocations.filter(loc => loc.type === "restaurant");
             } else if (detectedCategory === "concerts") {
+              // Modified to avoid using the "concert" type and tags property
               cityLocations = cityLocations.filter(loc => 
-                loc.type === "concert" || (loc.type === "event" && loc.tags?.includes("music"))
+                loc.name.toLowerCase().includes("concert") || 
+                loc.name.toLowerCase().includes("music") ||
+                (loc.type === "event" && loc.name.toLowerCase().includes("festival"))
               );
             } else if (detectedCategory === "events") {
               cityLocations = cityLocations.filter(loc => loc.type === "event");
@@ -127,4 +130,3 @@ export const useMessageProcessor = (isProPlan: boolean = false, isVenueMode: boo
     processMessage
   };
 };
-

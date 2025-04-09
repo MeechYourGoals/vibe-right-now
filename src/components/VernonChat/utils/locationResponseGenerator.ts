@@ -1,10 +1,11 @@
 
 import { cityCoordinates } from '@/utils/locations';
+import { Location } from '@/types';
 
 /**
  * Generate a natural language response about locations in a city with multiple options per category
  */
-export const generateLocationResponse = (cityName: string, locations: any[]): string => {
+export const generateLocationResponse = (cityName: string, locations: Location[]): string => {
   if (locations.length === 0) return "";
   
   // Group locations by type
@@ -12,9 +13,14 @@ export const generateLocationResponse = (cityName: string, locations: any[]): st
   const bars = locations.filter(loc => loc.type === "bar");
   const restaurants = locations.filter(loc => loc.type === "restaurant");
   const events = locations.filter(loc => loc.type === "event");
-  const concerts = locations.filter(loc => loc.type === "concert" || (loc.type === "event" && loc.tags?.includes("music")));
+  // Handle concerts by filtering events that have music in their name or description
+  const concerts = locations.filter(loc => 
+    loc.name.toLowerCase().includes("concert") || 
+    loc.name.toLowerCase().includes("music") ||
+    (loc.type === "event" && loc.name.toLowerCase().includes("festival"))
+  );
   const attractions = locations.filter(loc => loc.type === "attraction");
-  const others = locations.filter(loc => !["sports", "bar", "restaurant", "event", "attraction", "concert"].includes(loc.type));
+  const others = locations.filter(loc => !["sports", "bar", "restaurant", "event", "attraction"].includes(loc.type));
   
   // Create category results object with properly formatted links
   const categoryResults: Record<string, string[]> = {};
@@ -125,4 +131,3 @@ export const detectCategoryInQuery = (inputValue: string): string => {
   // No specific category detected
   return "";
 }
-
