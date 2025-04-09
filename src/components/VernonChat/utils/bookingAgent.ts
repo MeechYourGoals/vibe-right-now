@@ -79,7 +79,12 @@ export const BookingAgent = {
       if (ElevenLabsService.hasApiKey()) {
         try {
           // This would use the actual ElevenLabs agent API when available
-          const agentResponse = await ElevenLabsService.createAgentTask('book_venue', details);
+          // Fix here: The createAgentTask expects an AgentTaskRequest object, not two separate arguments
+          const agentResponse = await ElevenLabsService.createAgentTask({
+            task: 'book_venue',
+            user_id: 'user_' + Date.now(),
+            conversation_id: 'conv_' + Date.now()
+          });
           
           if (agentResponse) {
             return {
