@@ -1,5 +1,5 @@
 
-import { Crown, CreditCard, Star, ChartBar, BarChart3, FileText } from "lucide-react";
+import { Crown, CreditCard, Star, ChartBar, BarChart3, FileText, Instagram, Phone } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -39,8 +39,8 @@ const PremiumBanner = ({ onUpgrade }: PremiumBannerProps) => {
                 <p className="text-sm text-muted-foreground">Create and manage special offers to attract more customers</p>
               </div>
               <div className="flex flex-col items-center text-center p-4 rounded-lg bg-white dark:bg-amber-950/40 shadow-sm">
-                <h3 className="font-semibold mb-2">Basic Analytics</h3>
-                <p className="text-sm text-muted-foreground">Access foundational insights about your venue's performance</p>
+                <h3 className="font-semibold mb-2">Social Media Links</h3>
+                <p className="text-sm text-muted-foreground">Link to your external platforms like Yelp, TikTok, Instagram, and more</p>
               </div>
             </div>
             
@@ -67,8 +67,8 @@ const PremiumBanner = ({ onUpgrade }: PremiumBannerProps) => {
                 <p className="text-sm text-muted-foreground">Create targeted promotions and track their performance in real-time</p>
               </div>
               <div className="flex flex-col items-center text-center p-4 rounded-lg bg-white dark:bg-amber-950/40 shadow-sm">
-                <h3 className="font-semibold mb-2">Vernon Concierge</h3>
-                <p className="text-sm text-muted-foreground">Get personalized suggestions from our AI concierge service</p>
+                <h3 className="font-semibold mb-2">Weekly Content Import</h3>
+                <p className="text-sm text-muted-foreground">Automatically import and display your content from Yelp, Google, TikTok, Instagram, and more</p>
               </div>
             </div>
             
@@ -95,8 +95,8 @@ const PremiumBanner = ({ onUpgrade }: PremiumBannerProps) => {
                 <p className="text-sm text-muted-foreground">Your venue automatically highlighted in trending and recommended sections</p>
               </div>
               <div className="flex flex-col items-center text-center p-4 rounded-lg bg-white dark:bg-amber-950/40 shadow-sm">
-                <h3 className="font-semibold mb-2">Priority Support</h3>
-                <p className="text-sm text-muted-foreground">Get dedicated support and monthly marketing consultations</p>
+                <h3 className="font-semibold mb-2">Curated Content Import</h3>
+                <p className="text-sm text-muted-foreground">AI selects and imports your most flattering content from all social platforms weekly</p>
               </div>
             </div>
             

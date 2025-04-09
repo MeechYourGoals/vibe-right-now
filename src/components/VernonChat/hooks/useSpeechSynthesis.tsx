@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from 'react';
 import { 
   getPreferredVoice, 
@@ -12,7 +11,7 @@ import { toast } from 'sonner';
 export const useSpeechSynthesis = () => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
-  const [useElevenLabs, setUseElevenLabs] = useState(false);
+  const [useElevenLabs, setUseElevenLabs] = useState(true); // Default to using ElevenLabs
   
   const speechSynthesis = useRef<SpeechSynthesis | null>(initializeSpeechSynthesis());
   const currentUtterance = useRef<SpeechSynthesisUtterance | null>(null);
@@ -24,18 +23,20 @@ export const useSpeechSynthesis = () => {
     audioElement.current = new Audio();
     
     // Set up event handlers
-    audioElement.current.onplay = () => setIsSpeaking(true);
-    audioElement.current.onended = () => {
-      setIsSpeaking(false);
-      currentlyPlayingText.current = null;
-    };
-    audioElement.current.onerror = () => {
-      console.error('Audio playback error');
-      setIsSpeaking(false);
-      currentlyPlayingText.current = null;
-    };
+    if (audioElement.current) {
+      audioElement.current.onplay = () => setIsSpeaking(true);
+      audioElement.current.onended = () => {
+        setIsSpeaking(false);
+        currentlyPlayingText.current = null;
+      };
+      audioElement.current.onerror = () => {
+        console.error('Audio playback error');
+        setIsSpeaking(false);
+        currentlyPlayingText.current = null;
+      };
+    }
     
-    // Check if Eleven Labs API key is available
+    // Check if Eleven Labs API key is available and set useElevenLabs
     const hasElevenLabsKey = ElevenLabsService.hasApiKey();
     setUseElevenLabs(hasElevenLabsKey);
     
@@ -107,8 +108,8 @@ export const useSpeechSynthesis = () => {
       // Request to convert text to speech
       const audioData = await ElevenLabsService.textToSpeech(text);
       
-      if (!audioData) {
-        console.error('Failed to get audio from Eleven Labs');
+      if (!audioData || !audioElement.current) {
+        console.error('Failed to get audio from Eleven Labs or audio element not available');
         setIsSpeaking(false);
         currentlyPlayingText.current = null;
         return false;
@@ -119,8 +120,9 @@ export const useSpeechSynthesis = () => {
       const url = URL.createObjectURL(blob);
       
       // Set audio source and play
-      if (audioElement.current) {
-        audioElement.current.src = url;
+      audioElement.current.src = url;
+      
+      try {
         await audioElement.current.play();
         
         // Clean up blob URL after playback
@@ -130,9 +132,13 @@ export const useSpeechSynthesis = () => {
           currentlyPlayingText.current = null;
         };
         return true;
+      } catch (error) {
+        console.error('Error playing audio:', error);
+        URL.revokeObjectURL(url);
+        setIsSpeaking(false);
+        currentlyPlayingText.current = null;
+        return false;
       }
-      
-      return false;
     } catch (error) {
       console.error('Error with Eleven Labs speech synthesis:', error);
       setIsSpeaking(false);
@@ -172,7 +178,7 @@ export const useSpeechSynthesis = () => {
     };
     
     // Select a preferred voice
-    const preferredVoice = getPreferredVoice(voices.length > 0 ? voices : speechSynthesis.current.getVoices());
+    const preferredVoice = getPreferredVoice(voices.length > 0 ? voices : (speechSynthesis.current.getVoices() || []));
     if (preferredVoice) {
       utterance.voice = preferredVoice;
       console.log('Using voice:', preferredVoice.name);
@@ -223,21 +229,37 @@ export const useSpeechSynthesis = () => {
       console.log('Falling back to browser speech synthesis');
     }
     
-    // Use browser's speech synthesis
-    speakWithBrowserSynthesis(text);
-    
-    // Return a promise that resolves when speaking is done
-    return new Promise((resolve) => {
-      const checkInterval = setInterval(() => {
-        if (!isSpeaking) {
-          clearInterval(checkInterval);
-          resolve();
-        }
-      }, 100);
-    });
+    // Use browser's speech synthesis as fallback
+    if (speechSynthesis.current) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      
+      // Select a preferred voice
+      const preferredVoice = getPreferredVoice(voices.length > 0 ? voices : (speechSynthesis.current.getVoices() || []));
+      if (preferredVoice) {
+        utterance.voice = preferredVoice;
+      }
+      
+      // Set up event handlers
+      utterance.onstart = () => setIsSpeaking(true);
+      utterance.onend = () => {
+        setIsSpeaking(false);
+        currentlyPlayingText.current = null;
+      };
+      utterance.onerror = () => {
+        setIsSpeaking(false);
+        currentlyPlayingText.current = null;
+      };
+      
+      // Set text and speak
+      utterance.text = processTextForNaturalSpeech(text);
+      configureUtteranceForNaturalSpeech(utterance, text);
+      
+      currentlyPlayingText.current = text;
+      currentUtterance.current = utterance;
+      speechSynthesis.current.speak(utterance);
+    }
   };
   
-  // Function to speak sentences one by one for more natural cadence
   const speakSentenceBySequence = (sentences: string[], index: number): void => {
     if (!speechSynthesis.current || index >= sentences.length) {
       return;
@@ -247,7 +269,7 @@ export const useSpeechSynthesis = () => {
     const utterance = new SpeechSynthesisUtterance(sentence);
     
     // Select voice
-    const preferredVoice = getPreferredVoice(voices.length > 0 ? voices : speechSynthesis.current.getVoices());
+    const preferredVoice = getPreferredVoice(voices.length > 0 ? voices : (speechSynthesis.current.getVoices() || []));
     if (preferredVoice) {
       utterance.voice = preferredVoice;
     }
@@ -282,7 +304,6 @@ export const useSpeechSynthesis = () => {
     speechSynthesis.current.speak(utterance);
   };
   
-  // Function to prompt for Eleven Labs API key
   const promptForElevenLabsKey = (): void => {
     const apiKey = prompt('Enter your Eleven Labs API key for improved voice quality:');
     if (apiKey) {

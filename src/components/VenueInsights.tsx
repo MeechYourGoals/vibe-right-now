@@ -1,44 +1,72 @@
 
-import { useState } from "react";
-import { Download } from "lucide-react";
+import React, { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import MetricsOverview from "./data-insights/MetricsOverview";
-import VisitorEngagementChart from "./data-insights/VisitorEngagementChart";
-import MediaEngagementChart from "./data-insights/MediaEngagementChart";
-import ReceiptDiscountChart from "./data-insights/ReceiptDiscountChart";
-import { generateWeeklyData, monthlyData, currentInsights } from "@/utils/insightsData";
+import QuickActions from "@/components/venue/QuickActions";
+import PerformanceMetrics from "@/components/venue/PerformanceMetrics";
+import MediaEngagementChart from "@/components/data-insights/MediaEngagementChart";
+import AudienceInsights from "@/components/venue/AudienceInsights";
+import UpcomingEvents from "@/components/venue/UpcomingEvents";
+import VernonVenueAssistant from "@/components/venue/VernonVenueAssistant";
+import CompetitorAnalysis from "@/components/venue/CompetitorAnalysis";
+import SocialMediaIntegration from "@/components/venue/SocialMediaIntegration";
 
 const VenueInsights = () => {
-  const [timeframe, setTimeframe] = useState("week");
-  const weeklyData = generateWeeklyData();
+  const [subscriptionTier, setSubscriptionTier] = useState<'standard' | 'plus' | 'premium' | 'pro'>('standard');
+  
+  // Function to simulate upgrading subscription
+  const upgradeSubscription = (tier: string) => {
+    setSubscriptionTier(tier as 'standard' | 'plus' | 'premium' | 'pro');
+  };
   
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-3xl font-bold">Venue Insights</h2>
-        <Button variant="outline" className="gap-2">
-          <Download className="h-4 w-4" />
-          Export Data
-        </Button>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="md:col-span-2">
+          <PerformanceMetrics />
+        </div>
+        <div>
+          <QuickActions onTierChange={upgradeSubscription} currentTier={subscriptionTier} />
+        </div>
       </div>
       
-      <p className="text-muted-foreground">
-        Track how users are engaging with your venue on Vibe Right Now
-      </p>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Media Engagement</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <MediaEngagementChart />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Audience Insights</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <AudienceInsights />
+          </CardContent>
+        </Card>
+      </div>
       
-      <MetricsOverview insights={currentInsights} timeframe={timeframe} />
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <VisitorEngagementChart 
-          weeklyData={weeklyData} 
-          monthlyData={monthlyData} 
-          onTimeframeChange={setTimeframe} 
+      <div className="grid grid-cols-1 gap-6">
+        <SocialMediaIntegration 
+          subscriptionTier={subscriptionTier} 
+          venueName="The Rooftop" 
         />
-        
-        <MediaEngagementChart data={weeklyData} />
       </div>
       
-      <ReceiptDiscountChart data={timeframe === "week" ? weeklyData : monthlyData} timeframe={timeframe} />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <UpcomingEvents />
+        </div>
+        <div>
+          <VernonVenueAssistant />
+        </div>
+      </div>
+      
+      <CompetitorAnalysis />
     </div>
   );
 };

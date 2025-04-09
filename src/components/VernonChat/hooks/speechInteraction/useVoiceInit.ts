@@ -1,11 +1,18 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSpeechSynthesis } from '../speechSynthesis';
 
 export const useVoiceInit = () => {
   const [hasSpokenIntro, setHasSpokenIntro] = useState(false);
   const [isFirstInteraction, setIsFirstInteraction] = useState(true);
   const { speakResponse } = useSpeechSynthesis();
+  
+  // Force greet the user on first mount
+  useEffect(() => {
+    if (isFirstInteraction && !hasSpokenIntro) {
+      console.log('Attempting auto-speak intro on first mount');
+    }
+  }, [isFirstInteraction, hasSpokenIntro]);
   
   const markIntroAsSpoken = () => {
     setHasSpokenIntro(true);

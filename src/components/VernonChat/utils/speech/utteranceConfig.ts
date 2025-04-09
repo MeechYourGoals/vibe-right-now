@@ -1,25 +1,62 @@
 
-// Configure utterance for more natural sounding speech
+// Utility functions for utterance configuration
+
+/**
+ * Configures utterance properties for more natural speech
+ * @param utterance The SpeechSynthesisUtterance to configure
+ * @param text The original text being spoken
+ */
 export const configureUtteranceForNaturalSpeech = (
   utterance: SpeechSynthesisUtterance, 
   text: string
 ): void => {
-  // Optimize for more natural sounding speech
-  utterance.rate = 0.92; // Slightly slower for more natural cadence
-  utterance.pitch = 1.05; // Slightly higher pitch for more energetic sound
-  utterance.volume = 1.0;
+  // Base configuration
+  utterance.rate = 1.0;  // Normal speaking rate
+  utterance.pitch = 1.0; // Normal pitch
+  utterance.volume = 1.0; // Full volume
   
-  // Add more expression with pitch and rate variations for different sentence types
+  // Adjust for question marks
   if (text.includes('?')) {
-    utterance.pitch = 1.15; // Higher pitch for questions
-    utterance.rate = 0.85; // Slightly slower for questions
-  } else if (text.includes('!')) {
-    utterance.pitch = 1.25; // Higher pitch for exclamations
-    utterance.rate = 0.88; // Slightly slower for emphasis
+    utterance.pitch = 1.1; // Slightly higher pitch for questions
   }
   
-  // For longer texts, use a slightly faster rate to maintain engagement
-  if (text.length > 200) {
-    utterance.rate = Math.min(utterance.rate + 0.05, 1.0);
+  // Adjust for exclamations
+  if (text.includes('!')) {
+    utterance.rate = 1.1; // Slightly faster for exclamations
+    utterance.volume = 1.0; // Louder for emphasis
   }
+  
+  // Adjust for longer text
+  if (text.length > 100) {
+    utterance.rate = 0.95; // Slightly slower for longer text
+  }
+  
+  // Adjust for greeting patterns
+  if (/^(hi|hello|hey|greetings|welcome)/i.test(text)) {
+    utterance.pitch = 1.05; // Slightly higher pitch for greetings
+    utterance.rate = 0.95;  // Slightly slower for greetings
+  }
+};
+
+/**
+ * Adds SSML (Speech Synthesis Markup Language) tags to text
+ * @param text The text to add SSML to
+ * @returns Text with SSML tags
+ */
+export const addSSMLTags = (text: string): string => {
+  // Only add SSML if the platform supports it
+  if (!text || typeof text !== 'string') return text;
+  
+  let ssmlText = text;
+  
+  // Add pause after periods
+  ssmlText = ssmlText.replace(/\.\s+/g, '. <break time="500ms"/> ');
+  
+  // Add emphasis to important words
+  ssmlText = ssmlText.replace(
+    /\b(important|note|warning|critical|remember)\b/gi, 
+    '<emphasis>$1</emphasis>'
+  );
+  
+  return ssmlText;
 };

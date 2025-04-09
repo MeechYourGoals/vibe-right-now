@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ChatHeader from './ChatHeader';
 import MessageList from './MessageList';
 import ChatControls from './ChatControls';
@@ -54,6 +54,25 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
     speakIntroOnce
   } = useSpeechInteraction();
 
+  // Trigger intro speech when chat is opened for the first time
+  useEffect(() => {
+    if (isOpen && messages.length > 0 && isFirstInteraction && !introMessageSpoken) {
+      // Try to speak the intro with a small delay to ensure everything is loaded
+      const timer = setTimeout(() => {
+        speakIntroOnce(messages[0].text)
+          .then(success => {
+            if (success) {
+              setIntroMessageSpoken(true);
+              markIntroAsSpoken();
+            }
+          })
+          .catch(err => console.error('Error during intro speech:', err));
+      }, 500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, messages, isFirstInteraction, introMessageSpoken, speakIntroOnce, markIntroAsSpoken]);
+
   // Use the custom hook to manage voice interaction effects
   useVoiceEffects({
     messages,
@@ -65,7 +84,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
     isFirstInteraction,
     introMessageSpoken,
     setIntroMessageSpoken,
-    speakIntroOnce,  // This is now correctly typed as Promise<boolean>
+    speakIntroOnce,
     markIntroAsSpoken,
     speakResponse,
     stopSpeaking,
