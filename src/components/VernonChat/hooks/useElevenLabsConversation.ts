@@ -1,30 +1,87 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { ElevenLabsService } from '@/services/ElevenLabs';
+import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
 import { Message } from '../types';
-import { createUserMessage, createAIMessage } from '../utils/messageFactory';
+import { createUserMessage, createAIMessage, INITIAL_MESSAGE } from '../utils/messageFactory';
 
-// Default agent ID for Vernon - replace with your actual agent ID
-const DEFAULT_AGENT_ID = 'gbn7fVf2h51EFh4Cx9mb';
+// Default Eleven Labs voice ID for Vernon (Roger voice)
+const DEFAULT_VOICE_ID = 'CwhRBWXzGAHq8TQ4Fs17';
 
 export const useElevenLabsConversation = (isVenueMode = false) => {
-  const [isConnecting, setIsConnecting] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [conversationId, setConversationId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [transcript, setTranscript] = useState('');
   const [interimTranscript, setInterimTranscript] = useState('');
   
-  const webSocket = useRef<WebSocket | null>(null);
-  const mediaRecorder = useRef<MediaRecorder | null>(null);
   const audioContext = useRef<AudioContext | null>(null);
   const audioQueue = useRef<ArrayBuffer[]>([]);
   const audioElement = useRef<HTMLAudioElement | null>(null);
   const isPlaying = useRef<boolean>(false);
+  const recognition = useRef<SpeechRecognition | null>(null);
+  
+  // Initialize Speech Recognition
+  const initSpeechRecognition = useCallback(() => {
+    if (!recognition.current && window.SpeechRecognition || window.webkitSpeechRecognition) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognition.current = new SpeechRecognition();
+      
+      if (recognition.current) {
+        recognition.current.continuous = true;
+        recognition.current.interimResults = true;
+        
+        recognition.current.onresult = (event) => {
+          let interimTranscript = '';
+          let finalTranscript = '';
+          
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            const transcript = event.results[i][0].transcript;
+            if (event.results[i].isFinal) {
+              finalTranscript += transcript;
+            } else {
+              interimTranscript += transcript;
+            }
+          }
+          
+          if (interimTranscript) {
+            setInterimTranscript(interimTranscript);
+          }
+          
+          if (finalTranscript) {
+            setTranscript(finalTranscript);
+            
+            // Process complete transcript
+            if (isListening) {
+              processVoiceInput(finalTranscript);
+            }
+          }
+        };
+        
+        recognition.current.onerror = (event) => {
+          console.error('Speech recognition error', event.error);
+          if (event.error === 'not-allowed') {
+            toast.error('Microphone access denied. Please allow microphone access to use voice features.');
+          }
+          stopListening();
+        };
+        
+        recognition.current.onend = () => {
+          if (isListening) {
+            // Attempt to restart if it was supposed to be listening
+            try {
+              recognition.current?.start();
+            } catch (error) {
+              console.error('Failed to restart speech recognition', error);
+              setIsListening(false);
+            }
+          }
+        };
+      }
+    }
+  }, [isListening]);
   
   // Initialize audio context and element
   useEffect(() => {
@@ -52,16 +109,25 @@ export const useElevenLabsConversation = (isVenueMode = false) => {
       }
     }
     
+    // Initialize speech recognition
+    initSpeechRecognition();
+    
+    // Initialize with welcome message
+    setMessages([
+      createAIMessage(isVenueMode
+        ? "Hi there! I'm Vernon for Venues, your business insights assistant. I can help you understand your venue metrics, customer trends, and marketing performance. What would you like to know about your venue's performance?"
+        : "Hi there! I'm Vernon, your Vibe guide. I can help you discover cool places, events happening tonight, or answer questions about specific venues. What are you looking for?")
+    ]);
+    
     return () => {
-      // Cleanup
-      disconnectFromAgent();
+      stopListening();
       
       if (audioElement.current) {
         audioElement.current.pause();
         audioElement.current.src = '';
       }
     };
-  }, []);
+  }, [isVenueMode, initSpeechRecognition]);
   
   // Play the next audio in queue
   const playNextAudio = useCallback(() => {
@@ -89,166 +155,67 @@ export const useElevenLabsConversation = (isVenueMode = false) => {
     });
   }, []);
   
-  // Connect to ElevenLabs agent
-  const connectToAgent = useCallback(async (agentId: string = DEFAULT_AGENT_ID) => {
-    if (isConnected || isConnecting) {
-      console.log('Already connected or connecting');
-      return;
-    }
+  // Process voice input and get AI response
+  const processVoiceInput = useCallback((transcript: string) => {
+    if (!transcript.trim()) return;
     
-    setIsConnecting(true);
+    // Add user message
+    const userMessage = createUserMessage(transcript);
+    setMessages(prev => [...prev, userMessage]);
     
-    try {
-      // Get signed URL for the agent
-      const signedUrl = await ElevenLabsService.getSignedUrl(agentId);
+    // Generate AI response (in a real app, this would call an API)
+    setTimeout(() => {
+      // Sample responses - in a real app, these would come from your AI service
+      let aiResponse = "";
       
-      if (!signedUrl) {
-        throw new Error('Failed to get signed URL for agent');
+      if (transcript.toLowerCase().includes("hello") || transcript.toLowerCase().includes("hi")) {
+        aiResponse = "Hello! How can I help you today?";
+      } else if (transcript.toLowerCase().includes("venues")) {
+        aiResponse = "I can recommend several popular venues in your area. What type of venue are you looking for?";
+      } else if (transcript.toLowerCase().includes("restaurant")) {
+        aiResponse = "There are several great restaurants nearby. Would you like me to list some options?";
+      } else if (transcript.toLowerCase().includes("event")) {
+        aiResponse = "I found some exciting events happening soon. Would you like me to share the details?";
+      } else {
+        aiResponse = "That's interesting! Can you tell me more about what you're looking for?";
       }
       
-      // Create WebSocket connection
-      webSocket.current = new WebSocket(signedUrl);
+      const aiMessage = createAIMessage(aiResponse);
+      setMessages(prev => [...prev, aiMessage]);
       
-      webSocket.current.onopen = () => {
-        console.log('Connected to ElevenLabs agent');
-        setIsConnected(true);
-        setIsConnecting(false);
-        
-        // Get microphone access
-        navigator.mediaDevices.getUserMedia({ audio: true })
-          .then(stream => {
-            // Setup media recorder
-            mediaRecorder.current = new MediaRecorder(stream, {
-              mimeType: 'audio/webm'
-            });
-            
-            mediaRecorder.current.ondataavailable = event => {
-              if (event.data.size > 0 && webSocket.current?.readyState === WebSocket.OPEN) {
-                webSocket.current.send(event.data);
-              }
-            };
-            
-            // Ready to start conversation
-            console.log('Microphone access granted, ready for conversation');
-          })
-          .catch(error => {
-            console.error('Error accessing microphone:', error);
-            toast.error('Could not access microphone. Please check permissions.');
-          });
-      };
-      
-      webSocket.current.onmessage = (event) => {
-        // Handle incoming message
-        const data = event.data;
-        
-        if (data instanceof Blob) {
-          // Audio data
-          data.arrayBuffer().then(buffer => {
-            audioQueue.current.push(buffer);
-            if (!isPlaying.current) {
-              playNextAudio();
-            }
-          });
-        } else {
-          // Text message
-          try {
-            const message = JSON.parse(data);
-            
-            if (message.conversation_id && !conversationId) {
-              setConversationId(message.conversation_id);
-            }
-            
-            if (message.text) {
-              // Add AI message to chat
-              setMessages(prevMessages => [
-                ...prevMessages,
-                createAIMessage(message.text)
-              ]);
-            }
-            
-            if (message.transcription) {
-              if (message.is_final) {
-                setTranscript(message.transcription);
-                setInterimTranscript('');
-                
-                // Add user message to chat
-                setMessages(prevMessages => [
-                  ...prevMessages,
-                  createUserMessage(message.transcription)
-                ]);
-              } else {
-                setInterimTranscript(message.transcription);
-              }
-            }
-          } catch (error) {
-            console.error('Error parsing WebSocket message:', error, data);
-          }
-        }
-      };
-      
-      webSocket.current.onclose = () => {
-        console.log('Disconnected from ElevenLabs agent');
-        setIsConnected(false);
-        setIsConnecting(false);
-        stopListening();
-      };
-      
-      webSocket.current.onerror = (error) => {
-        console.error('WebSocket error:', error);
-        toast.error('Connection error. Please try again.');
-        setIsConnected(false);
-        setIsConnecting(false);
-      };
-    } catch (error) {
-      console.error('Error connecting to ElevenLabs agent:', error);
-      toast.error('Failed to connect to voice service. Please try again.');
-      setIsConnecting(false);
-    }
-  }, [isConnected, isConnecting, playNextAudio]);
-  
-  // Disconnect from ElevenLabs agent
-  const disconnectFromAgent = useCallback(() => {
-    stopListening();
-    
-    if (webSocket.current) {
-      if (webSocket.current.readyState === WebSocket.OPEN) {
-        webSocket.current.close();
-      }
-      webSocket.current = null;
-    }
-    
-    setIsConnected(false);
-    setConversationId(null);
+      // In a real implementation, this would use ElevenLabs API to convert text to speech
+      // For now, we'll use the Web Speech API for demonstration
+      speakResponse(aiResponse);
+    }, 1000);
   }, []);
   
   // Start listening to user
   const startListening = useCallback(() => {
-    if (!isConnected || !mediaRecorder.current) {
-      console.log('Cannot start listening: not connected or media recorder not ready');
-      return;
+    if (!recognition.current) {
+      initSpeechRecognition();
     }
     
     try {
+      recognition.current?.start();
       setIsListening(true);
-      
-      // Start recording in chunks to send real-time audio
-      mediaRecorder.current.start(250);
-      
+      setIsConnected(true);
       console.log('Started listening');
     } catch (error) {
       console.error('Error starting to listen:', error);
       setIsListening(false);
     }
-  }, [isConnected]);
+  }, [initSpeechRecognition]);
   
   // Stop listening to user
   const stopListening = useCallback(() => {
-    if (mediaRecorder.current && mediaRecorder.current.state === 'recording') {
-      mediaRecorder.current.stop();
+    try {
+      recognition.current?.stop();
+    } catch (error) {
+      console.error('Error stopping recognition:', error);
     }
     
     setIsListening(false);
-    console.log('Stopped listening');
+    setInterimTranscript('');
   }, []);
   
   // Toggle listening state
@@ -256,71 +223,83 @@ export const useElevenLabsConversation = (isVenueMode = false) => {
     if (isListening) {
       stopListening();
     } else {
-      if (!isConnected) {
-        // Auto-connect if not already connected
-        connectToAgent().then(() => {
-          // Start listening after a small delay to ensure connection is established
-          setTimeout(() => startListening(), 500);
-        });
-      } else {
-        startListening();
-      }
+      startListening();
     }
-  }, [isListening, isConnected, connectToAgent, startListening, stopListening]);
+  }, [isListening, startListening, stopListening]);
   
-  // Send a text message to the agent
-  const sendTextMessage = useCallback((text: string) => {
-    if (!isConnected || !webSocket.current || webSocket.current.readyState !== WebSocket.OPEN) {
-      console.log('Cannot send message: not connected');
+  // Speak response using Web Speech API
+  const speakResponse = useCallback((text: string) => {
+    if (!text) return;
+    
+    // If browser supports Speech Synthesis
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(text);
       
-      // Auto-connect and send after connected
-      connectToAgent().then(() => {
-        // Add slight delay to ensure connection is established
-        setTimeout(() => {
-          if (webSocket.current?.readyState === WebSocket.OPEN) {
-            const textMessage = {
-              type: 'text',
-              text
-            };
-            webSocket.current.send(JSON.stringify(textMessage));
-            
-            // Add user message to chat immediately
-            setMessages(prevMessages => [
-              ...prevMessages,
-              createUserMessage(text)
-            ]);
-          }
-        }, 500);
-      });
-      return;
+      // Get available voices
+      const voices = window.speechSynthesis.getVoices();
+      
+      // Try to find a natural male voice
+      const preferredVoice = voices.find(voice => 
+        voice.name.includes('Google UK English Male') || 
+        voice.name.includes('Daniel') ||
+        voice.name.includes('Microsoft David')
+      );
+      
+      if (preferredVoice) {
+        utterance.voice = preferredVoice;
+      }
+      
+      // Adjust for more natural speech
+      utterance.rate = 0.9;  // Slightly slower
+      utterance.pitch = 1.0; // Normal pitch
+      
+      // Set event handlers
+      utterance.onstart = () => setIsSpeaking(true);
+      utterance.onend = () => setIsSpeaking(false);
+      utterance.onerror = () => setIsSpeaking(false);
+      
+      // Cancel any ongoing speech
+      window.speechSynthesis.cancel();
+      
+      // Speak the text
+      window.speechSynthesis.speak(utterance);
     }
-    
-    const textMessage = {
-      type: 'text',
-      text
-    };
-    
-    webSocket.current.send(JSON.stringify(textMessage));
-    
-    // Add user message to chat immediately
-    setMessages(prevMessages => [
-      ...prevMessages,
-      createUserMessage(text)
-    ]);
-  }, [isConnected, connectToAgent]);
+  }, []);
   
-  // Initialize with intro message
-  useEffect(() => {
-    // Set initial welcome message
-    setMessages([
-      createAIMessage(isVenueMode
-        ? "Hi there! I'm VeRNon for Venues, your business insights assistant. I can help you understand your venue metrics, customer trends, and marketing performance. What would you like to know about your venue's performance?"
-        : "Hi there! I'm VeRNon, your Vibe guide. I can help you discover cool places, events happening tonight, or answer questions about specific venues. What are you looking for?")
-    ]);
-  }, [isVenueMode]);
+  // Send a text message
+  const sendTextMessage = useCallback((text: string) => {
+    if (!text.trim()) return;
+    
+    // Add user message
+    const userMessage = createUserMessage(text);
+    setMessages(prev => [...prev, userMessage]);
+    
+    // Process the message (similar to voice input processing)
+    setTimeout(() => {
+      // Sample responses - in a real app, these would come from your AI service
+      let aiResponse = "";
+      
+      if (text.toLowerCase().includes("hello") || text.toLowerCase().includes("hi")) {
+        aiResponse = "Hello! How can I help you today?";
+      } else if (text.toLowerCase().includes("venues")) {
+        aiResponse = "I can recommend several popular venues in your area. What type of venue are you looking for?";
+      } else if (text.toLowerCase().includes("restaurant")) {
+        aiResponse = "There are several great restaurants nearby. Would you like me to list some options?";
+      } else if (text.toLowerCase().includes("event")) {
+        aiResponse = "I found some exciting events happening soon. Would you like me to share the details?";
+      } else {
+        aiResponse = "That's interesting! Can you tell me more about what you're looking for?";
+      }
+      
+      const aiMessage = createAIMessage(aiResponse);
+      setMessages(prev => [...prev, aiMessage]);
+      
+      // Speak the response
+      speakResponse(aiResponse);
+    }, 1000);
+  }, [speakResponse]);
   
   return {
-    isConnecting,
     isConnected,
     isSpeaking,
     isListening,
@@ -328,9 +307,7 @@ export const useElevenLabsConversation = (isVenueMode = false) => {
     messages,
     transcript,
     interimTranscript,
-    conversationId,
-    connectToAgent,
-    disconnectFromAgent,
+    connectToAgent: () => setIsConnected(true), // Simplified for demo
     startListening,
     stopListening,
     toggleListening,

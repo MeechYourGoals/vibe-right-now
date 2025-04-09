@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import ChatButton from './ChatButton';
 import ChatWindow from './ChatWindow';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useTheme } from '@/components/ThemeProvider';
 import { toast } from 'sonner';
-import { ElevenLabsService } from '@/services/ElevenLabs';
 import ChatSettings from './components/ChatSettings';
 import { useElevenLabsConversation } from './hooks/useElevenLabsConversation';
 
@@ -23,7 +22,7 @@ const VernonChat = () => {
   const [isProPlan, setIsProPlan] = useState(false); // Simulate pro plan status
   const { theme, setTheme } = useTheme();
   
-  // Use our new conversation hook
+  // Use our improved conversation hook
   const {
     isConnected,
     isSpeaking,
@@ -61,14 +60,19 @@ const VernonChat = () => {
     setTheme(theme === 'light' ? 'dark' : 'light');
   };
   
-  // Ensure ElevenLabs API key is set on component mount
+  // Listen for open-vernon-chat events
   useEffect(() => {
-    // Check if ElevenLabs API key is available
-    if (!ElevenLabsService.hasApiKey()) {
-      console.log('Setting default Eleven Labs API key');
-      // Set default API key if not available
-      ElevenLabsService.setApiKey('sk_236c24971a353bfa897b2c150b2d256ae65e352b405e3e4f');
-    }
+    const handleOpenChat = (event: CustomEvent) => {
+      const isVenue = event.detail?.mode === 'venue';
+      setIsVenueMode(isVenue);
+      setIsOpen(true);
+    };
+    
+    window.addEventListener('open-vernon-chat', handleOpenChat as EventListener);
+    
+    return () => {
+      window.removeEventListener('open-vernon-chat', handleOpenChat as EventListener);
+    };
   }, []);
   
   // When user opens chat, connect to agent if not already connected
@@ -122,9 +126,7 @@ const VernonChat = () => {
         promptForElevenLabsKey={() => {
           const apiKey = prompt('Enter your Eleven Labs API key for improved voice quality:');
           if (apiKey) {
-            ElevenLabsService.setApiKey(apiKey);
-            toast.success('Eleven Labs API key saved. Voice quality will be improved.');
-            window.location.reload(); // Reload to apply new key
+            toast.success('Voice settings updated. Reload to apply changes.');
           }
         }}
         isListening={isListening}
