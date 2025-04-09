@@ -84,7 +84,7 @@ const VenuePostsList: React.FC<VenuePostsListProps> = ({
                       <VenuePost 
                         venue={post.location}
                         content={post.content}
-                        media={post.media[0]}
+                        media={post.media[0] as {type: "image" | "video"; url: string}}
                         timestamp={post.timestamp}
                         timeAgo={formatTimeAgo(post.timestamp)}
                       />
@@ -94,7 +94,6 @@ const VenuePostsList: React.FC<VenuePostsListProps> = ({
                         posts={[post]} 
                         locationPostCount={1}
                         getComments={getComments}
-                        showTimeAgo={true}
                       />
                     )}
                   </div>

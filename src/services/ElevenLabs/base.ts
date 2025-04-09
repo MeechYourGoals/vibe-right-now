@@ -20,8 +20,8 @@ export interface ScribeTranscriptionOptions {
 export class ElevenLabsBase {
   private static apiKey: string | null = null;
   private static defaultApiKey: string = 'sk_236c24971a353bfa897b2c150b2d256ae65e352b405e3e4f';
-  // Explicitly set to Adam voice ID for consistent male voice
-  private static defaultVoiceId: string = 'pNInz6obpgDQGcFmaJgB'; // Adam voice - consistent male voice
+  // Adam voice ID - consistent male voice
+  private static defaultVoiceId: string = 'pNInz6obpgDQGcFmaJgB';
   
   // Set API key
   public static setApiKey(apiKey: string) {

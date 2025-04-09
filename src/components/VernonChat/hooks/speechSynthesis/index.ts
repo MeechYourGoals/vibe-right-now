@@ -3,11 +3,11 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { useSpeechSynthesisVoices } from './useSpeechSynthesisVoices';
 import { useElevenLabsVoice } from './useElevenLabsVoice';
 import { useBrowserSpeechSynthesis } from './useBrowserSpeechSynthesis';
-import { ElevenLabsService } from '@/services/ElevenLabsService';
+import { ElevenLabsService } from '@/services/ElevenLabs';
 
 export const useSpeechSynthesis = () => {
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [useElevenLabs, setUseElevenLabs] = useState(true);
+  const [useElevenLabs, setUseElevenLabs] = useState(true);  // Default to using ElevenLabs
   const currentlyPlayingText = useRef<string | null>(null);
   const audioElement = useRef<HTMLAudioElement | null>(null);
   
@@ -141,8 +141,7 @@ export const useSpeechSynthesis = () => {
     // Always stop any ongoing speech first
     stopSpeaking();
     
-    console.log('Speaking with ElevenLabs:', useElevenLabs);
-    
+    // Prioritize ElevenLabs for best voice quality
     if (useElevenLabs && isElevenLabsReady) {
       try {
         const success = await speakWithElevenLabs(text);
@@ -164,17 +163,11 @@ export const useSpeechSynthesis = () => {
     voices
   ]);
   
-  // Toggle ElevenLabs usage
-  const toggleElevenLabs = useCallback(() => {
-    setUseElevenLabs(prev => !prev);
-  }, []);
-  
   return {
     isSpeaking,
     speakResponse,
     stopSpeaking,
     useElevenLabs,
-    toggleElevenLabs,
     promptForElevenLabsKey
   };
 };

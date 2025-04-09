@@ -4,7 +4,7 @@ import ChatButton from './ChatButton';
 import ChatWindow from './ChatWindow';
 import { useChat } from './hooks/useChat';
 import { Button } from '@/components/ui/button';
-import { Settings, Building2, Moon, Sun } from 'lucide-react';
+import { Building2, Moon, Sun } from 'lucide-react';
 import { 
   DropdownMenu,
   DropdownMenuContent,

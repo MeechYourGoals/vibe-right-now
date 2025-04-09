@@ -15,8 +15,8 @@ export class ElevenLabsTextToSpeech {
     }
     
     try {
-      // Always use the Adam voice by default for a consistent male voice
-      const voiceId = options.voice_id || ElevenLabsBase.getDefaultVoiceId();
+      // Always use the Adam voice by default - consistent male voice
+      const voiceId = options.voice_id || 'pNInz6obpgDQGcFmaJgB'; // Adam voice ID
       const modelId = options.model_id || 'eleven_multilingual_v2';
       
       const url = `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`;
@@ -33,8 +33,8 @@ export class ElevenLabsTextToSpeech {
           text,
           model_id: modelId,
           voice_settings: options.voice_settings || {
-            stability: 0.8,  // Increased for more stable output
-            similarity_boost: 0.7  // Balanced for natural sound
+            stability: 0.8,
+            similarity_boost: 0.7
           }
         })
       });
