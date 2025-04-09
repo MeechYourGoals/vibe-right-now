@@ -11,7 +11,7 @@ const MarketingTab = ({ subscriptionTier }: MarketingTabProps) => {
     <div className="space-y-6">
       <InfluencerMarketplace subscriptionTier={subscriptionTier} />
       
-      <Card>
+      <Card className="bg-gray-100 dark:bg-gray-800">
         <CardHeader>
           <CardTitle>Marketing Settings</CardTitle>
           <CardDescription>

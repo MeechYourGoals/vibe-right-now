@@ -34,13 +34,13 @@ const events = [
 
 const UpcomingEvents = () => {
   return (
-    <Card>
+    <Card className="bg-gray-900 text-white">
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="flex items-center">
-          <CalendarDays className="mr-2 h-5 w-5" />
+        <CardTitle className="flex items-center text-gray-100">
+          <CalendarDays className="mr-2 h-5 w-5 text-primary" />
           Upcoming Events
         </CardTitle>
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" className="border-gray-600 text-gray-200 hover:bg-gray-800 hover:text-white">
           <Calendar className="mr-2 h-4 w-4" />
           Create Event
         </Button>
@@ -48,32 +48,32 @@ const UpcomingEvents = () => {
       <CardContent>
         <div className="space-y-4">
           {events.map(event => (
-            <div key={event.id} className="flex flex-col space-y-2 pb-4 border-b last:border-0">
+            <div key={event.id} className="flex flex-col space-y-2 pb-4 border-b border-gray-700 last:border-0">
               <div className="flex justify-between items-start">
                 <div>
-                  <h3 className="font-semibold">{event.title}</h3>
-                  <div className="flex items-center text-sm text-muted-foreground mt-1">
+                  <h3 className="font-semibold text-gray-100">{event.title}</h3>
+                  <div className="flex items-center text-sm text-gray-300 mt-1">
                     <Calendar className="mr-1 h-3 w-3" />
                     <span>{event.date}</span>
                     <Clock className="ml-2 mr-1 h-3 w-3" />
                     <span>{event.time}</span>
                   </div>
                 </div>
-                <Badge variant="outline" className="bg-green-100 text-green-700 border-green-200">
+                <Badge variant="outline" className="bg-green-900 text-green-100 border-green-700">
                   {event.attendees} RSVP
                 </Badge>
               </div>
               <div className="flex items-center justify-between mt-2">
-                <div className="flex items-center text-sm">
+                <div className="flex items-center text-sm text-gray-300">
                   <Users className="mr-1 h-3 w-3" />
                   <span>{event.attendees} attendees</span>
                 </div>
-                <Button variant="outline" size="sm">Manage</Button>
+                <Button variant="outline" size="sm" className="border-gray-600 text-gray-200 hover:bg-gray-800 hover:text-white">Manage</Button>
               </div>
             </div>
           ))}
           
-          <Button variant="ghost" size="sm" className="w-full">
+          <Button variant="ghost" size="sm" className="w-full text-gray-300 hover:text-white hover:bg-gray-800">
             View All Events
           </Button>
         </div>
