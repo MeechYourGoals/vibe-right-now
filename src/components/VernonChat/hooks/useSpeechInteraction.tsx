@@ -7,6 +7,7 @@ import { ElevenLabsService } from '@/services/ElevenLabsService';
 
 export const useSpeechInteraction = () => {
   const [voiceSetupComplete, setVoiceSetupComplete] = useState(false);
+  const [hasSpokenIntro, setHasSpokenIntro] = useState(false);
   
   const {
     isListening,
@@ -66,6 +67,11 @@ export const useSpeechInteraction = () => {
     }
   };
   
+  // Mark intro as spoken
+  const markIntroAsSpoken = () => {
+    setHasSpokenIntro(true);
+  };
+  
   // Effect to clean up resources
   useEffect(() => {
     return () => {
@@ -87,6 +93,8 @@ export const useSpeechInteraction = () => {
     speakResponse,
     processTranscript,
     useElevenLabs,
-    promptForElevenLabsKey
+    promptForElevenLabsKey,
+    hasSpokenIntro,
+    markIntroAsSpoken
   };
 };

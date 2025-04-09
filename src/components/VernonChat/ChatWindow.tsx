@@ -50,19 +50,28 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
     speakResponse,
     processTranscript,
     useElevenLabs,
-    promptForElevenLabsKey
+    promptForElevenLabsKey,
+    hasSpokenIntro,
+    markIntroAsSpoken
   } = useSpeechInteraction();
 
   // Effect to read AI responses in voice mode
   useEffect(() => {
     if (messages.length > 0 && !isTyping && isSpeaking === false) {
+      // Only speak the intro message (first AI message) if it hasn't been spoken yet
+      if (messages[0].sender === 'ai' && !hasSpokenIntro) {
+        speakResponse(messages[0].text);
+        markIntroAsSpoken();
+        return;
+      }
+      
+      // For any other messages, only speak if we were in voice mode
       const lastMessage = messages[messages.length - 1];
-      if (lastMessage.sender === 'ai' && (isListening || isProcessing)) {
-        // Only speak if we were in voice mode (listening or processing voice)
+      if (lastMessage.sender === 'ai' && lastMessage !== messages[0] && (isListening || isProcessing)) {
         speakResponse(lastMessage.text);
       }
     }
-  }, [messages, isTyping, isSpeaking, isListening, isProcessing, speakResponse]);
+  }, [messages, isTyping, isSpeaking, isListening, isProcessing, speakResponse, hasSpokenIntro, markIntroAsSpoken]);
 
   // Effect to stop speaking when chat is closed
   useEffect(() => {

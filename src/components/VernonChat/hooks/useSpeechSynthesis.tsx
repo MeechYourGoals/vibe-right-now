@@ -17,6 +17,7 @@ export const useSpeechSynthesis = () => {
   const speechSynthesis = useRef<SpeechSynthesis | null>(initializeSpeechSynthesis());
   const currentUtterance = useRef<SpeechSynthesisUtterance | null>(null);
   const audioElement = useRef<HTMLAudioElement | null>(null);
+  const currentlyPlayingText = useRef<string | null>(null);
   
   // Initialize audio element for Eleven Labs playback
   useEffect(() => {
@@ -24,10 +25,14 @@ export const useSpeechSynthesis = () => {
     
     // Set up event handlers
     audioElement.current.onplay = () => setIsSpeaking(true);
-    audioElement.current.onended = () => setIsSpeaking(false);
+    audioElement.current.onended = () => {
+      setIsSpeaking(false);
+      currentlyPlayingText.current = null;
+    };
     audioElement.current.onerror = () => {
       console.error('Audio playback error');
       setIsSpeaking(false);
+      currentlyPlayingText.current = null;
     };
     
     // Check if Eleven Labs API key is available
@@ -74,18 +79,27 @@ export const useSpeechSynthesis = () => {
       audioElement.current.pause();
       audioElement.current.currentTime = 0;
       setIsSpeaking(false);
+      currentlyPlayingText.current = null;
     } else if (speechSynthesis.current) {
       speechSynthesis.current.cancel();
       setIsSpeaking(false);
       if (currentUtterance.current) {
         currentUtterance.current = null;
       }
+      currentlyPlayingText.current = null;
     }
   };
   
   const speakWithElevenLabs = async (text: string): Promise<boolean> => {
     try {
+      // Don't repeat the same text if it's already playing
+      if (isSpeaking && currentlyPlayingText.current === text) {
+        console.log('This text is already being spoken, skipping duplicate');
+        return true;
+      }
+      
       setIsSpeaking(true);
+      currentlyPlayingText.current = text;
       
       // Request to convert text to speech
       const audioData = await ElevenLabsService.textToSpeech(text);
@@ -93,6 +107,7 @@ export const useSpeechSynthesis = () => {
       if (!audioData) {
         console.error('Failed to get audio from Eleven Labs');
         setIsSpeaking(false);
+        currentlyPlayingText.current = null;
         return false;
       }
       
@@ -109,6 +124,7 @@ export const useSpeechSynthesis = () => {
         audioElement.current.onended = () => {
           URL.revokeObjectURL(url);
           setIsSpeaking(false);
+          currentlyPlayingText.current = null;
         };
         return true;
       }
@@ -117,6 +133,7 @@ export const useSpeechSynthesis = () => {
     } catch (error) {
       console.error('Error with Eleven Labs speech synthesis:', error);
       setIsSpeaking(false);
+      currentlyPlayingText.current = null;
       return false;
     }
   };
@@ -127,17 +144,28 @@ export const useSpeechSynthesis = () => {
       return;
     }
     
+    // Don't repeat the same text if it's already playing
+    if (isSpeaking && currentlyPlayingText.current === text) {
+      console.log('This text is already being spoken, skipping duplicate');
+      return;
+    }
+    
     // Cancel any ongoing speech
     stopSpeaking();
     
     const utterance = new SpeechSynthesisUtterance();
     currentUtterance.current = utterance;
+    currentlyPlayingText.current = text;
     
     utterance.onstart = () => setIsSpeaking(true);
-    utterance.onend = () => setIsSpeaking(false);
+    utterance.onend = () => {
+      setIsSpeaking(false);
+      currentlyPlayingText.current = null;
+    };
     utterance.onerror = (event) => {
       console.error('Speech synthesis error:', event);
       setIsSpeaking(false);
+      currentlyPlayingText.current = null;
     };
     
     // Select a preferred voice
@@ -169,6 +197,12 @@ export const useSpeechSynthesis = () => {
   };
   
   const speakResponse = async (text: string): Promise<void> => {
+    // Don't repeat the same text if it's already playing
+    if (isSpeaking && currentlyPlayingText.current === text) {
+      console.log('This text is already being spoken, skipping duplicate');
+      return;
+    }
+    
     // Stop any ongoing speech first
     stopSpeaking();
     
@@ -216,12 +250,14 @@ export const useSpeechSynthesis = () => {
         speakSentenceBySequence(sentences, index + 1);
       } else {
         setIsSpeaking(false);
+        currentlyPlayingText.current = null;
       }
     };
     
     utterance.onerror = (event) => {
       console.error('Speech synthesis error:', event);
       setIsSpeaking(false);
+      currentlyPlayingText.current = null;
     };
     
     // Speak the current sentence

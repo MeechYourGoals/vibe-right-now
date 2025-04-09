@@ -59,8 +59,8 @@ export class ElevenLabsService {
     }
     
     try {
-      // Default options
-      const defaultVoiceId = 'pNInz6obpgDQGcFmaJgB'; // Adam voice (free tier)
+      // Default options - using premium voices
+      const defaultVoiceId = 'pNInz6obpgDQGcFmaJgB'; // Adam voice
       const defaultModel = 'eleven_monolingual_v1';
       
       const voiceId = options.voice_id || defaultVoiceId;
@@ -78,8 +78,8 @@ export class ElevenLabsService {
           text,
           model_id: modelId,
           voice_settings: options.voice_settings || {
-            stability: 0.5,
-            similarity_boost: 0.75
+            stability: 0.6,
+            similarity_boost: 0.85
           }
         })
       });

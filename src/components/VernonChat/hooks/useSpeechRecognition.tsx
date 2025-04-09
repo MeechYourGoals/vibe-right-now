@@ -17,6 +17,7 @@ export const useSpeechRecognition = () => {
   const silenceTimer = useRef<NodeJS.Timeout | null>(null);
   const lastSpeechTime = useRef<number>(0);
   const isInitialized = useRef<boolean>(false);
+  const restartAttempts = useRef<number>(0);
   
   // Initialize speech recognition
   useEffect(() => {
@@ -40,6 +41,9 @@ export const useSpeechRecognition = () => {
               currentInterimTranscript += event.results[i][0].transcript;
             }
           }
+          
+          // Reset restart attempts since we're getting results
+          restartAttempts.current = 0;
           
           // Set interim transcript for real-time display
           setInterimTranscript(currentInterimTranscript);
@@ -71,8 +75,16 @@ export const useSpeechRecognition = () => {
           if (isListening) {
             // Only try to restart if we're supposed to be listening
             try {
-              speechRecognition.current?.start();
-              console.log('Restarted speech recognition');
+              // Limit restart attempts to prevent infinite loops
+              if (restartAttempts.current < 3) {
+                restartAttempts.current += 1;
+                speechRecognition.current?.start();
+                console.log('Restarted speech recognition, attempt:', restartAttempts.current);
+              } else {
+                console.log('Max restart attempts reached, stopping recognition');
+                setIsListening(false);
+                toast.error('Voice recognition stopped due to repeated failures. Please try again.');
+              }
             } catch (error) {
               console.error('Error restarting speech recognition:', error);
               setIsListening(false);
@@ -83,7 +95,11 @@ export const useSpeechRecognition = () => {
         speechRecognition.current.onerror = (event) => {
           console.error('Speech recognition error:', event);
           handleSpeechRecognitionError(event.error);
-          setIsListening(false);
+          
+          // Don't set isListening to false for "no-speech" errors to allow continued listening
+          if (event.error !== 'no-speech') {
+            setIsListening(false);
+          }
         };
         
         isInitialized.current = true;
@@ -122,6 +138,7 @@ export const useSpeechRecognition = () => {
       // Reset transcript when starting fresh
       setTranscript('');
       setInterimTranscript('');
+      restartAttempts.current = 0;
       
       // Set state before actually starting recognition
       setIsListening(true);
@@ -130,12 +147,23 @@ export const useSpeechRecognition = () => {
       // Start speech recognition
       speechRecognition.current.start();
       console.log('Started speech recognition successfully');
+      
+      // Set a timeout to detect if no speech is being captured
+      setTimeout(() => {
+        // If still listening but no interim or final transcript after 5 seconds, something might be wrong
+        if (isListening && !transcript && !interimTranscript) {
+          console.log('No speech detected after 5 seconds, checking microphone...');
+          // Don't automatically stop - just notify the user
+          toast.info('No speech detected. Please make sure your microphone is working.');
+        }
+      }, 5000);
+      
     } catch (error) {
       console.error('Error starting speech recognition:', error);
       setIsListening(false);
       toast.error('Failed to start voice recognition. Please try again.');
     }
-  }, [isListening]);
+  }, [isListening, transcript, interimTranscript]);
   
   const stopListening = useCallback(() => {
     if (speechRecognition.current) {
