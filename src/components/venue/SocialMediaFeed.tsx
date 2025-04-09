@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Loader2, Instagram, ExternalLink, RefreshCw } from "lucide-react";
+import { Loader2, Instagram, ExternalLink, RefreshCw, Link as LinkIcon } from "lucide-react";
 import SocialMediaPost from './SocialMediaPost';
 import { SocialMediaService, SocialMediaPost as SocialMediaPostType, SocialMediaApiKeys } from '@/services/SocialMediaService';
 
@@ -77,6 +77,29 @@ const SocialMediaFeed: React.FC<SocialMediaFeedProps> = ({ venueName, apiKeys })
     return posts.filter(post => post.source === platform).length;
   };
 
+  // Get the direct URL for a platform based on venue name
+  const getPlatformUrl = (platform: string) => {
+    const encodedName = encodeURIComponent(venueName);
+    switch (platform) {
+      case 'instagram':
+        return `https://www.instagram.com/explore/tags/${encodedName.replace(/\s+/g, '')}`;
+      case 'tiktok':
+        return `https://www.tiktok.com/search?q=${encodedName}`;
+      case 'yelp':
+        return `https://www.yelp.com/search?find_desc=${encodedName}`;
+      case 'tripadvisor':
+        return `https://www.tripadvisor.com/Search?q=${encodedName}`;
+      case 'google':
+        return `https://www.google.com/search?q=${encodedName}+reviews`;
+      case 'foursquare':
+        return `https://foursquare.com/explore?q=${encodedName}`;
+      case 'franki':
+        return `https://www.franki.io/search?term=${encodedName}`;
+      default:
+        return `https://www.google.com/search?q=${encodedName}`;
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -120,6 +143,21 @@ const SocialMediaFeed: React.FC<SocialMediaFeedProps> = ({ venueName, apiKeys })
               </div>
             ) : filterPostsByPlatform(platform.id).length > 0 ? (
               <div className="space-y-4">
+                {platform.id !== 'all' && (
+                  <div className="flex justify-between items-center mb-4 p-2 bg-muted/20 rounded-lg">
+                    <p className="text-sm">Showing content from {platform.name}</p>
+                    <a 
+                      href={getPlatformUrl(platform.id)} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="flex items-center text-xs text-primary hover:underline"
+                    >
+                      <LinkIcon className="h-3 w-3 mr-1" />
+                      Visit {platform.name}
+                    </a>
+                  </div>
+                )}
+                
                 {filterPostsByPlatform(platform.id).map(post => (
                   <SocialMediaPost 
                     key={post.id} 
@@ -138,7 +176,7 @@ const SocialMediaFeed: React.FC<SocialMediaFeedProps> = ({ venueName, apiKeys })
                 </p>
                 <Button variant="outline" asChild>
                   <a 
-                    href={`https://${platform.id === 'all' ? 'instagram' : platform.id}.com`} 
+                    href={getPlatformUrl(platform.id === 'all' ? 'google' : platform.id)} 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="inline-flex items-center"

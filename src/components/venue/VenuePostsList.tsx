@@ -79,10 +79,10 @@ const VenuePostsList: React.FC<VenuePostsListProps> = ({
                       </Badge>
                     </div>
                   )}
-                  <div className={`${post.isVenuePost ? 'border-2 border-amber-500/50 rounded-lg overflow-hidden' : ''}`}>
+                  <div className={`overflow-hidden rounded-lg border ${getBorderClass(post)}`}>
                     {post.isVenuePost ? (
                       <VenuePost 
-                        venue={post.location}
+                        venue={venue}
                         content={post.content}
                         media={post.media[0] as {type: "image" | "video"; url: string}}
                         timestamp={post.timestamp}
@@ -116,6 +116,20 @@ const VenuePostsList: React.FC<VenuePostsListProps> = ({
       ))}
     </div>
   );
+};
+
+// Helper function to determine border class based on post type
+const getBorderClass = (post: Post): string => {
+  if (post.isPinned) {
+    return "border-amber-500";
+  }
+  if (post.isVenuePost) {
+    return "border-amber-500/50";
+  }
+  if (post.isExternalPost) {
+    return "border-blue-500/50";
+  }
+  return ""; // Regular border for user posts
 };
 
 export default VenuePostsList;

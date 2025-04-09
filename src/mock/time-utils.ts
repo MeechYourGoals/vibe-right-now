@@ -137,27 +137,71 @@ export const isPostFromDayOfWeek = (timestamp: string, targetDayOfWeek: number):
 };
 
 // Create day-specific venue posts
-export const createDaySpecificVenuePosts = (venueId: string, venueType: string): any[] => {
-  const posts = [];
+export function createDaySpecificVenuePosts(venueId: string, venueType: string = 'venue') {
+  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  
+  // Get the current date
   const now = new Date();
+  const currentDay = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
   
-  // Create a post for each day of the week
-  for (let i = 0; i < 7; i++) {
+  // Create posts for each day of the week, with the current day being most recent
+  return days.map((day, index) => {
+    // Create a date for this day (going backward from today)
+    const daysAgo = (index + 7 - currentDay) % 7;
     const postDate = new Date();
-    postDate.setDate(now.getDate() - ((now.getDay() - i + 7) % 7));
+    postDate.setDate(now.getDate() - daysAgo);
     
-    posts.push({
-      id: `${venueId}-day-${i}`,
-      venueId: venueId,
-      content: getDaySpecificContent(venueType, i),
-      timestamp: postDate.toISOString(),
-      isPinned: Math.random() > 0.7, // 30% chance of being pinned
-      media: {
-        type: "image",
-        url: getDaySpecificImageUrl(venueType, i)
-      }
-    });
-  }
-  
-  return posts;
-};
+    const timestamp = postDate.toISOString();
+    
+    // Generate content specific to the day and venue type
+    let content = `${day} at this ${venueType || 'venue'} is amazing! `;
+    
+    if (index === currentDay) {
+      content += "Today's special deals and events are not to be missed!";
+    } else if (index === (currentDay + 1) % 7) {
+      content += "Join us tomorrow for exclusive offers and entertainment!";
+    } else if (index === (currentDay + 6) % 7) {
+      content += "Yesterday was incredible, but we've got even more planned for the rest of the week!";
+    } else {
+      content += `Make sure to check out our ${day.toLowerCase()} specials and offers!`;
+    }
+    
+    // Add venue-specific content based on type
+    if (venueType === 'restaurant') {
+      content += ` Our chef's ${day} specials are always a hit with regulars and new guests alike.`;
+    } else if (venueType === 'bar' || venueType === 'nightlife') {
+      content += ` ${day} nights feature special cocktails and our resident DJ spinning the best tracks.`;
+    } else if (venueType === 'event') {
+      content += ` ${day}'s schedule is packed with activities for everyone to enjoy.`;
+    } else if (venueType === 'attraction') {
+      content += ` ${day} is the perfect day to experience all we have to offer, with shorter lines and special guided tours.`;
+    }
+    
+    return {
+      id: `venue-${venueId}-${day.toLowerCase()}`,
+      content,
+      user: {
+        id: `venue-admin-${venueId}`,
+        name: "Venue Admin",
+        username: `venue${venueId}admin`,
+        avatar: `https://source.unsplash.com/random/100x100/?profile,${venueId}`
+      },
+      location: {
+        id: venueId,
+        type: venueType || 'venue', // Ensure a default type
+        // Other location properties will be filled in by the component
+      },
+      media: [
+        {
+          type: "image",
+          url: `https://source.unsplash.com/random/800x800/?${venueType || 'venue'},${day.toLowerCase()}`
+        }
+      ],
+      timestamp,
+      likes: Math.floor(Math.random() * 50) + 5,
+      comments: Math.floor(Math.random() * 10),
+      isVenuePost: true,
+      isPinned: index === currentDay, // Pin the current day's post
+    };
+  });
+}

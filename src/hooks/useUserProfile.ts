@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { User, Post, Location, Comment } from "@/types";
 import { mockUsers, mockPosts, mockComments, mockLocations } from "@/mock/data";
@@ -12,24 +11,42 @@ export const useUserProfile = (username: string | undefined) => {
   
   useEffect(() => {
     console.log("Looking for username:", username);
-    // Find the user based on the username from the URL
-    const foundUser = mockUsers.find((user) => user.username === username);
+    
+    // Find user by username or id (for backward compatibility)
+    const isUserId = username && !isNaN(Number(username));
+    
+    let foundUser: User | undefined;
+    
+    if (isUserId) {
+      // If it's an ID, look for a user with that ID
+      foundUser = mockUsers.find((user) => user.id === username);
+    } else {
+      // Otherwise look for a user with that username
+      foundUser = mockUsers.find((user) => user.username === username);
+    }
+    
     console.log("Found user:", foundUser);
     
     if (foundUser) {
       setUser(foundUser);
+      
       // Find posts by this user
-      const foundPosts = mockPosts.filter((post) => post.user.id === foundUser.id);
+      const foundPosts = mockPosts.filter((post) => {
+        return post.user.id === foundUser?.id || post.user.username === foundUser?.username;
+      });
       setUserPosts(foundPosts);
       
       // Get random venues as "followed venues"
       const randomVenues = mockLocations
+        .filter(location => !!location.type) // Ensure location type is defined
         .sort(() => 0.5 - Math.random())
         .slice(0, Math.floor(Math.random() * 6) + 3);
       setFollowedVenues(randomVenues);
       
       // Get random venues for "visited" and "want to visit" sections
-      const allLocations = [...mockLocations].sort(() => 0.5 - Math.random());
+      const allLocations = [...mockLocations]
+        .filter(location => !!location.type) // Ensure location type is defined
+        .sort(() => 0.5 - Math.random());
       
       // First 5 locations for visited places
       setVisitedPlaces(allLocations.slice(0, 5));

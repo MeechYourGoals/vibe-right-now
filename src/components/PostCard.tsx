@@ -41,6 +41,12 @@ const PostCard = ({ posts, locationPostCount = 1, getComments }: PostCardProps) 
   const [followedVenues, setFollowedVenues] = useState<Record<string, boolean>>({});
 
   const mainPost = posts[0];
+  // Ensure location is defined before using it
+  if (!mainPost || !mainPost.location) {
+    console.error("Post or location is undefined:", mainPost);
+    return null;
+  }
+
   const location = mainPost.location;
   const isSinglePost = posts.length === 1;
 
@@ -114,8 +120,11 @@ const PostCard = ({ posts, locationPostCount = 1, getComments }: PostCardProps) 
   const allUsers = generateLocationUsers();
 
   const getLocationCategories = () => {
-    const mainType = location.type;
+    if (!location || !location.type) {
+      return ['venue']; // Default if location type is missing
+    }
     
+    const mainType = location.type;
     const secondaryTypes = [];
     
     if (mainType === "event") {
