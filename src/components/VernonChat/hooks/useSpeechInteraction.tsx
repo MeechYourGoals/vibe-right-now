@@ -9,6 +9,7 @@ export const useSpeechInteraction = () => {
   const [voiceSetupComplete, setVoiceSetupComplete] = useState(false);
   const [hasSpokenIntro, setHasSpokenIntro] = useState(false);
   const [isFirstInteraction, setIsFirstInteraction] = useState(true);
+  const [introPlayed, setIntroPlayed] = useState(false);
   
   const {
     isListening,
@@ -29,16 +30,12 @@ export const useSpeechInteraction = () => {
     promptForElevenLabsKey
   } = useSpeechSynthesis();
   
-  // Initialize voice with default API key
+  // Initialize voice with Eleven Labs API key
   useEffect(() => {
     if (!voiceSetupComplete) {
-      // Check if API key exists, if not, use the default one
-      if (!ElevenLabsService.hasApiKey()) {
-        // This will use the default API key from the service
-        ElevenLabsService.getApiKey();
-        console.log('Using default Eleven Labs API key');
-      }
-      
+      // Use the provided API key
+      ElevenLabsService.setApiKey('sk_236c24971a353bfa897b2c150b2d256ae65e352b405e3e4f');
+      console.log('Using Eleven Labs API key');
       setVoiceSetupComplete(true);
     }
   }, [voiceSetupComplete]);
@@ -72,7 +69,27 @@ export const useSpeechInteraction = () => {
   // Mark intro as spoken and track it has been spoken
   const markIntroAsSpoken = () => {
     setHasSpokenIntro(true);
+    setIntroPlayed(true);
   };
+
+  // Function to speak the intro only once when toggling to listening mode for the first time
+  const speakIntroOnce = (introMessage: string) => {
+    if (!introPlayed && isFirstInteraction && isListening) {
+      setIntroPlayed(true);
+      return speakResponse(introMessage);
+    }
+    return Promise.resolve();
+  };
+  
+  // Effect to handle user interruption
+  useEffect(() => {
+    if (isSpeaking && isListening && interimTranscript.trim().length > 3) {
+      // If we're speaking but the user starts talking (with just a few words),
+      // stop the current speech to listen to them
+      console.log('User interrupted, stopping speech');
+      stopSpeaking();
+    }
+  }, [isSpeaking, isListening, interimTranscript, stopSpeaking]);
   
   // Effect to clean up resources
   useEffect(() => {
@@ -98,6 +115,7 @@ export const useSpeechInteraction = () => {
     promptForElevenLabsKey,
     hasSpokenIntro,
     markIntroAsSpoken,
-    isFirstInteraction
+    isFirstInteraction,
+    speakIntroOnce
   };
 };

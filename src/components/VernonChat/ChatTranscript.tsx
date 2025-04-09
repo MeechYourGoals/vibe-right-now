@@ -22,7 +22,7 @@ const ChatTranscript: React.FC<ChatTranscriptProps> = ({
           {isListening ? 'Listening...' : 'Transcript:'}
         </span>
       </div>
-      <p className="text-sm">
+      <p className="text-sm truncate">
         {transcript || (isListening ? 'Speak now...' : 'No speech detected')}
       </p>
     </div>

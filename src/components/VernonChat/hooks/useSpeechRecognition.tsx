@@ -18,6 +18,7 @@ export const useSpeechRecognition = () => {
   const lastSpeechTime = useRef<number>(0);
   const isInitialized = useRef<boolean>(false);
   const restartAttempts = useRef<number>(0);
+  const previousInterims = useRef<string[]>([]);
   
   // Initialize speech recognition
   useEffect(() => {
@@ -34,18 +35,27 @@ export const useSpeechRecognition = () => {
           let finalTranscript = '';
           let currentInterimTranscript = '';
           
-          for (let i = 0; i < event.results.length; i++) {
-            if (event.results[i].isFinal) {
-              finalTranscript += event.results[i][0].transcript;
+          // Look only at the most recent result
+          const resultIndex = event.results.length - 1;
+          if (resultIndex >= 0) {
+            const result = event.results[resultIndex];
+            
+            if (result.isFinal) {
+              finalTranscript = result[0].transcript;
+              // Clear previous interims when we get a final result
+              previousInterims.current = [];
             } else {
-              currentInterimTranscript += event.results[i][0].transcript;
+              currentInterimTranscript = result[0].transcript;
+              
+              // Store this interim result
+              previousInterims.current = [currentInterimTranscript];
             }
           }
           
           // Reset restart attempts since we're getting results
           restartAttempts.current = 0;
           
-          // Set interim transcript for real-time display
+          // Set interim transcript for real-time display - only show the current phrase
           setInterimTranscript(currentInterimTranscript);
           
           // If we have final transcript, add it to the complete transcript
@@ -72,7 +82,7 @@ export const useSpeechRecognition = () => {
               stopListening();
               setIsProcessing(true);
             }
-          }, 1500); // 1.5 seconds of silence detection (reduced from 2)
+          }, 1200); // 1.2 seconds of silence detection (reduced for faster response)
         };
         
         speechRecognition.current.onend = () => {
@@ -143,6 +153,7 @@ export const useSpeechRecognition = () => {
       // Reset transcript when starting fresh
       setTranscript('');
       setInterimTranscript('');
+      previousInterims.current = [];
       restartAttempts.current = 0;
       
       // Set state before actually starting recognition
@@ -189,6 +200,7 @@ export const useSpeechRecognition = () => {
     }
   }, []);
   
+  // Get the current complete transcript for processing
   const processTranscript = useCallback(() => {
     if (transcript.trim()) {
       setIsProcessing(true);

@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Mic, MicOff, Loader2, Send } from 'lucide-react';
 import MessageInput from './MessageInput';
@@ -24,6 +24,40 @@ const ChatControls: React.FC<ChatControlsProps> = ({
   onSendMessage,
   isTyping
 }) => {
+  const [inputValue, setInputValue] = useState('');
+  const [autoSubmitTimeout, setAutoSubmitTimeout] = useState<NodeJS.Timeout | null>(null);
+
+  // Effect to handle auto-submission of transcript
+  useEffect(() => {
+    if (transcript) {
+      // Set the input value to the transcript
+      setInputValue(transcript);
+      
+      // Clear any existing timeout
+      if (autoSubmitTimeout) {
+        clearTimeout(autoSubmitTimeout);
+      }
+      
+      // Set a timeout to auto-submit after a short delay
+      const timeout = setTimeout(() => {
+        if (transcript.trim() && !isTyping) {
+          onSendMessage(transcript);
+          // Clear input after sending
+          setInputValue('');
+        }
+      }, 200);
+      
+      setAutoSubmitTimeout(timeout);
+    }
+    
+    // Clean up timeout on unmount
+    return () => {
+      if (autoSubmitTimeout) {
+        clearTimeout(autoSubmitTimeout);
+      }
+    };
+  }, [transcript, isTyping, onSendMessage]);
+
   // Add effect for handling Enter key to submit voice transcript
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -49,11 +83,24 @@ const ChatControls: React.FC<ChatControlsProps> = ({
   // Combine transcript and interim transcript for display
   const displayTranscript = transcript + (isListening ? ' ' + interimTranscript : '');
 
+  // Handle input change from keyboard typing
+  const handleInputChange = (value: string) => {
+    setInputValue(value);
+  };
+
+  // Handle manual send from the input field
+  const handleSendMessage = (message: string) => {
+    if (message.trim() && !isTyping) {
+      onSendMessage(message);
+      setInputValue('');
+    }
+  };
+
   return (
     <div className="border-t p-3">
       <ChatTranscript 
         transcript={displayTranscript} 
-        isVisible={isListening || transcript.length > 0}
+        isVisible={isListening || interimTranscript.length > 0}
         isListening={isListening} 
       />
       
@@ -89,9 +136,11 @@ const ChatControls: React.FC<ChatControlsProps> = ({
         )}
         
         <MessageInput 
-          onSendMessage={onSendMessage} 
+          onSendMessage={handleSendMessage} 
           isTyping={isTyping}
-          disabled={isListening}
+          disabled={isListening && isProcessing}
+          value={inputValue}
+          onChange={handleInputChange}
         />
       </div>
     </div>
