@@ -14,8 +14,8 @@ import {
 import { PerplexityService } from '@/services/PerplexityService';
 import { processVenueQuery } from '../utils/venueQueryProcessor';
 import { cleanResponseText } from '../utils/responseFormatter';
-import { useFallbackLocalService } from '../utils/searchServiceFallback';
 import { cityCoordinates } from '@/utils/locations';
+import { BookingAgent } from '../utils/bookingAgent';
 
 export const useMessageProcessor = (isProPlan: boolean = false, isVenueMode: boolean = false) => {
   const [isTyping, setIsTyping] = useState(false);
@@ -35,11 +35,35 @@ export const useMessageProcessor = (isProPlan: boolean = false, isVenueMode: boo
     try {
       let responseText = '';
       
+      // Check if this is a booking request
+      if (BookingAgent.isBookingRequest(inputValue)) {
+        const bookingDetails = BookingAgent.extractBookingDetails(inputValue);
+        
+        if (bookingDetails) {
+          // Send an initial response while processing
+          const processingMessage = createAIMessage("I'm working on your booking request, please wait a moment...");
+          setMessages(prev => [...prev, processingMessage]);
+          
+          // Attempt to book
+          const bookingResult = await BookingAgent.bookVenue(bookingDetails);
+          const confirmationText = BookingAgent.generateBookingConfirmation(bookingResult);
+          
+          // Update the processing message with the confirmation
+          setMessages(prev => prev.map(msg => 
+            msg.id === processingMessage.id ? {...msg, text: confirmationText} : msg
+          ));
+          
+          setIsTyping(false);
+          setIsSearching(false);
+          return;
+        }
+      }
+      
       if (isVenueMode) {
         // Process venue-specific queries
         responseText = await processVenueQuery(inputValue, isProPlan);
       } else {
-        // Try to get response from our search service
+        // Try to get response from search service
         try {
           responseText = await PerplexityService.searchPerplexity(inputValue);
         } catch (error) {

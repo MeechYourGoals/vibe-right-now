@@ -1,16 +1,19 @@
-
-import { useCallback } from 'react';
+import { useRef } from 'react';
+import { toast } from 'sonner';
 
 interface ListeningControlsProps {
   speechRecognition: React.MutableRefObject<SpeechRecognition | null>;
   initialized: boolean;
   isListening: boolean;
-  setIsListening: (value: boolean) => void;
-  setIsProcessing: (value: boolean) => void;
-  setTranscript: (value: string) => void;
-  setInterimTranscript: (value: string) => void;
+  setIsListening: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsProcessing: React.Dispatch<React.SetStateAction<boolean>>;
+  setTranscript: React.Dispatch<React.SetStateAction<string>>;
+  setInterimTranscript: React.Dispatch<React.SetStateAction<string>>;
   restartAttempts: React.MutableRefObject<number>;
-  clearSilenceTimer?: () => void;
+  clearSilenceTimer: () => void;
+  useElevenLabsASR?: boolean;
+  mediaRecorder?: React.MutableRefObject<MediaRecorder | null>;
+  audioChunks?: React.MutableRefObject<Blob[]>;
 }
 
 export const useListeningControls = ({
@@ -22,13 +25,15 @@ export const useListeningControls = ({
   setTranscript,
   setInterimTranscript,
   restartAttempts,
-  clearSilenceTimer
+  clearSilenceTimer,
+  useElevenLabsASR = false,
+  mediaRecorder = { current: null },
+  audioChunks = { current: [] }
 }: ListeningControlsProps) => {
   
-  // Start listening for speech
-  const startListening = useCallback(() => {
-    if (!initialized || !speechRecognition.current) {
-      console.error('Speech recognition not initialized');
+  const startListening = () => {
+    if (!initialized) {
+      toast.error("Speech recognition isn't available. Please try again later.");
       return;
     }
     
@@ -37,44 +42,54 @@ export const useListeningControls = ({
       return;
     }
     
-    try {
-      speechRecognition.current.start();
-      setIsListening(true);
-      restartAttempts.current = 0;
-      console.log('Started listening');
-    } catch (error) {
-      console.error('Error starting speech recognition:', error);
-    }
-  }, [initialized, isListening, setIsListening, speechRecognition, restartAttempts]);
-  
-  // Stop listening and process the transcript
-  const stopListening = useCallback(() => {
-    if (!speechRecognition.current) return;
+    // Reset state
+    restartAttempts.current = 0;
+    setIsListening(true);
     
     try {
-      // Clear any silence detection timers
-      if (clearSilenceTimer) {
-        clearSilenceTimer();
+      if (useElevenLabsASR && mediaRecorder.current) {
+        // Start recording for Eleven Labs Scribe
+        audioChunks.current = []; // Clear previous audio chunks
+        mediaRecorder.current.start();
+        console.log('Started recording for Eleven Labs Scribe');
+      } else if (speechRecognition.current) {
+        // Start browser's speech recognition
+        speechRecognition.current.start();
+        console.log('Started browser speech recognition');
       }
-      
-      // Stop recognition
-      speechRecognition.current.stop();
-      console.log('Stopped listening');
-      
-      // Update state based on if there is a transcript to process
-      if (isListening) {
-        setIsListening(false);
-        
-        // Only set processing if we have some text to process
-        if (speechRecognition.current) {
-          setIsProcessing(true);
+    } catch (error) {
+      console.error('Error starting speech recognition:', error);
+      setIsListening(false);
+      toast.error("Couldn't start voice recognition. Please try again.");
+    }
+  };
+  
+  const stopListening = () => {
+    // Clear any silence detection timers
+    clearSilenceTimer();
+    
+    if (!isListening) {
+      return;
+    }
+    
+    setIsListening(false);
+    
+    try {
+      if (useElevenLabsASR && mediaRecorder.current) {
+        // Stop recording for Eleven Labs Scribe
+        if (mediaRecorder.current.state === 'recording') {
+          mediaRecorder.current.stop();
+          console.log('Stopped recording for Eleven Labs Scribe');
         }
+      } else if (speechRecognition.current) {
+        // Stop browser's speech recognition
+        speechRecognition.current.stop();
+        console.log('Stopped browser speech recognition');
       }
     } catch (error) {
       console.error('Error stopping speech recognition:', error);
-      setIsListening(false);
     }
-  }, [speechRecognition, isListening, setIsListening, setIsProcessing, clearSilenceTimer]);
+  };
   
   return {
     startListening,

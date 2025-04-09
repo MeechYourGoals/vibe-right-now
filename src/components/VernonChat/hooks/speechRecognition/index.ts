@@ -19,13 +19,16 @@ export const useSpeechRecognition = (): SpeechRecognitionHookReturn => {
     speechRecognition, 
     initialized,
     restartAttempts,
-    previousInterims
+    previousInterims,
+    useElevenLabsASR,
+    mediaRecorder,
+    audioChunks
   } = useRecognitionSetup();
 
   // Set up silence detection for auto-stopping
   const { resetSilenceTimer, clearSilenceTimer } = useSilenceDetection({
     onSilenceDetected: () => {
-      if (isListening && speechRecognition.current) {
+      if (isListening) {
         console.log('Silence detected, stopping listening');
         stopListening();
       }
@@ -41,7 +44,8 @@ export const useSpeechRecognition = (): SpeechRecognitionHookReturn => {
     isListening,
     restartAttempts,
     previousInterims,
-    resetSilenceTimer
+    resetSilenceTimer,
+    useElevenLabsASR
   });
   
   // Listening controls (start/stop)
@@ -57,7 +61,10 @@ export const useSpeechRecognition = (): SpeechRecognitionHookReturn => {
     setTranscript,
     setInterimTranscript,
     restartAttempts,
-    clearSilenceTimer
+    clearSilenceTimer,
+    useElevenLabsASR,
+    mediaRecorder,
+    audioChunks
   });
   
   // Process the transcript

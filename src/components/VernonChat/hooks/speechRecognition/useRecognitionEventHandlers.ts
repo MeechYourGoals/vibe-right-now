@@ -1,125 +1,152 @@
 
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { handleSpeechRecognitionError } from '../../utils/speech';
 import { toast } from 'sonner';
 
 interface RecognitionEventHandlersProps {
   speechRecognition: React.MutableRefObject<SpeechRecognition | null>;
+  setTranscript: React.Dispatch<React.SetStateAction<string>>;
+  setInterimTranscript: React.Dispatch<React.SetStateAction<string>>;
+  setIsListening: React.Dispatch<React.SetStateAction<boolean>>;
   isListening: boolean;
-  setIsListening: (value: boolean) => void;
   restartAttempts: React.MutableRefObject<number>;
-  setTranscript: (value: string | ((prev: string) => string)) => void;
-  setInterimTranscript: (value: string) => void;
   previousInterims: React.MutableRefObject<string[]>;
   resetSilenceTimer: () => void;
+  useElevenLabsASR?: boolean;
 }
 
 export const useRecognitionEventHandlers = ({
   speechRecognition,
-  isListening,
-  setIsListening,
-  restartAttempts,
   setTranscript,
   setInterimTranscript,
+  setIsListening,
+  isListening,
+  restartAttempts,
   previousInterims,
   resetSilenceTimer,
+  useElevenLabsASR = false
 }: RecognitionEventHandlersProps) => {
-  
-  // Handle speech recognition results
-  const setupResultHandler = useCallback(() => {
-    if (!speechRecognition.current) return;
+  // Handle results from speech recognition
+  const handleResult = useCallback((event: SpeechRecognitionEvent) => {
+    // Reset silence timer since we're getting input
+    resetSilenceTimer();
     
-    speechRecognition.current.onresult = (event) => {
-      // Get both interim and final results
-      let finalTranscript = '';
-      let currentInterimTranscript = '';
+    // Process interim results
+    const interimTranscripts: string[] = [];
+    const finalTranscripts: string[] = [];
+    
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const transcript = event.results[i][0].transcript;
       
-      // Look only at the most recent result
-      const resultIndex = event.results.length - 1;
-      if (resultIndex >= 0) {
-        const result = event.results[resultIndex];
-        
-        if (result.isFinal) {
-          finalTranscript = result[0].transcript;
-          // Clear previous interims when we get a final result
-          previousInterims.current = [];
-        } else {
-          currentInterimTranscript = result[0].transcript;
-          
-          // Store this interim result
-          previousInterims.current = [currentInterimTranscript];
-        }
+      if (event.results[i].isFinal) {
+        finalTranscripts.push(transcript);
+      } else {
+        interimTranscripts.push(transcript);
       }
+    }
+    
+    // Update previous interims for comparison
+    if (interimTranscripts.length > 0) {
+      previousInterims.current = interimTranscripts;
+    }
+    
+    // Set interim transcript
+    if (interimTranscripts.length > 0) {
+      const formattedInterim = interimTranscripts.join(' ');
+      setInterimTranscript(formattedInterim);
+    }
+    
+    // Set final transcript if we have any
+    if (finalTranscripts.length > 0) {
+      const newTranscriptText = finalTranscripts.join(' ');
+      setTranscript(prev => {
+        // Only add if not empty or duplicate
+        return prev.endsWith(newTranscriptText) ? prev : `${prev} ${newTranscriptText}`.trim();
+      });
+      setInterimTranscript('');
+    }
+  }, [setTranscript, setInterimTranscript, previousInterims, resetSilenceTimer]);
+  
+  // Handle errors from speech recognition
+  const handleError = useCallback((event: SpeechRecognitionErrorEvent) => {
+    handleSpeechRecognitionError(event);
+    
+    // If we've restarted too many times, stop trying
+    if (restartAttempts.current >= 3) {
+      toast.error("Voice recognition doesn't seem to be working. Please try again later.");
+      setIsListening(false);
+      return;
+    }
+    
+    // Try to restart
+    if (isListening && speechRecognition.current) {
+      restartAttempts.current += 1;
+      speechRecognition.current.abort();
+      setTimeout(() => {
+        if (isListening && speechRecognition.current) {
+          speechRecognition.current.start();
+        }
+      }, 100);
+    }
+  }, [isListening, speechRecognition, setIsListening, restartAttempts]);
+  
+  // Set up event listeners
+  useEffect(() => {
+    if (!useElevenLabsASR && speechRecognition.current) {
+      // Standard browser speech recognition event handlers
+      speechRecognition.current.onresult = handleResult;
+      speechRecognition.current.onerror = handleError;
       
-      // Reset restart attempts since we're getting results
-      restartAttempts.current = 0;
-      
-      // Set interim transcript for real-time display - only show the current phrase
-      setInterimTranscript(currentInterimTranscript);
-      
-      // If we have final transcript, add it to the complete transcript
-      if (finalTranscript) {
-        setTranscript(prevTranscript => {
-          return (prevTranscript.trim() + ' ' + finalTranscript).trim();
+      speechRecognition.current.onend = () => {
+        // Auto-restart if still in listening mode
+        if (isListening) {
+          speechRecognition.current?.start();
+        }
+      };
+    }
+    
+    // For Eleven Labs Scribe
+    if (useElevenLabsASR) {
+      // Set up custom event listener for Eleven Labs transcription
+      const handleElevenLabsTranscription = (event: CustomEvent) => {
+        const { transcription } = event.detail;
+        // Reset silence timer since we're getting input
+        resetSilenceTimer();
+        
+        // Set transcript
+        setTranscript(prev => {
+          const newText = transcription.trim();
+          // Only add if not empty or duplicate
+          return prev.endsWith(newText) ? prev : `${prev} ${newText}`.trim();
         });
-        
-        // Clear interim transcript when we get a final result
         setInterimTranscript('');
-      }
+      };
       
-      // Reset silence timer on new speech
-      resetSilenceTimer();
-    };
-  }, [setTranscript, setInterimTranscript, restartAttempts, previousInterims, resetSilenceTimer]);
-  
-  // Handle end event
-  const setupEndHandler = useCallback(() => {
-    if (!speechRecognition.current) return;
-    
-    speechRecognition.current.onend = () => {
-      console.log('Speech recognition ended');
-      if (isListening) {
-        // Only try to restart if we're supposed to be listening
-        try {
-          // Limit restart attempts to prevent infinite loops
-          if (restartAttempts.current < 3) {
-            restartAttempts.current += 1;
-            speechRecognition.current?.start();
-            console.log('Restarted speech recognition, attempt:', restartAttempts.current);
-          } else {
-            console.log('Max restart attempts reached, stopping recognition');
-            setIsListening(false);
-            toast.error('Voice recognition stopped due to repeated failures. Please try again.');
-          }
-        } catch (error) {
-          console.error('Error restarting speech recognition:', error);
-          setIsListening(false);
+      // Add event listener for Eleven Labs transcription
+      window.addEventListener('elevenLabsTranscription', handleElevenLabsTranscription as EventListener);
+      
+      // Cleanup
+      return () => {
+        window.removeEventListener('elevenLabsTranscription', handleElevenLabsTranscription as EventListener);
+      };
+    } else {
+      // Cleanup for browser speech recognition
+      return () => {
+        if (speechRecognition.current) {
+          speechRecognition.current.onresult = null;
+          speechRecognition.current.onerror = null;
+          speechRecognition.current.onend = null;
         }
-      }
-    };
-  }, [isListening, setIsListening, restartAttempts]);
-  
-  // Handle error event
-  const setupErrorHandler = useCallback(() => {
-    if (!speechRecognition.current) return;
-    
-    speechRecognition.current.onerror = (event) => {
-      console.error('Speech recognition error:', event);
-      handleSpeechRecognitionError(event.error);
-      
-      // Don't set isListening to false for "no-speech" errors to allow continued listening
-      if (event.error !== 'no-speech') {
-        setIsListening(false);
-      }
-    };
-  }, [setIsListening]);
-  
-  // Setup all event handlers
-  const setupEventHandlers = useCallback(() => {
-    setupResultHandler();
-    setupEndHandler();
-    setupErrorHandler();
-  }, [setupResultHandler, setupEndHandler, setupErrorHandler]);
-  
-  return { setupEventHandlers };
+      };
+    }
+  }, [
+    speechRecognition,
+    handleResult,
+    handleError,
+    isListening,
+    useElevenLabsASR,
+    setTranscript,
+    setInterimTranscript,
+    resetSilenceTimer
+  ]);
 };
