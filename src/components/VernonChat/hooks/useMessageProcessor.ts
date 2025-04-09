@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Message } from '../types';
 import { HuggingChatService } from '@/services/HuggingChatService';
@@ -17,15 +16,57 @@ import { cleanResponseText } from '../utils/responseFormatter';
 import { cityCoordinates } from '@/utils/locations';
 import { BookingAgent } from '../utils/bookingAgent';
 
+const extractPaginationParams = (query: string): Record<string, number> => {
+  const params: Record<string, number> = {};
+  
+  const categoryPageRegex = /(?:page\s*(\d+)\s*(?:of|for)\s*([a-z]+))|(?:([a-z]+)\s*page\s*(\d+))/i;
+  const match = query.match(categoryPageRegex);
+  
+  if (match) {
+    const page = parseInt(match[1] || match[4], 10);
+    const category = (match[2] || match[3]).toLowerCase();
+    
+    if (!isNaN(page) && category) {
+      params[category] = page;
+    }
+  }
+  
+  if (query.toLowerCase().includes("next page")) {
+    params._nextPage = 2;
+    
+    const categories = ["sports", "events", "dining", "restaurants", "nightlife", "bars", "attractions", "concerts"];
+    for (const category of categories) {
+      if (query.toLowerCase().includes(category)) {
+        params[category] = 2;
+        break;
+      }
+    }
+  }
+  
+  if (query.toLowerCase().includes("previous page") || query.toLowerCase().includes("prev page")) {
+    params._prevPage = 1;
+    
+    const categories = ["sports", "events", "dining", "restaurants", "nightlife", "bars", "attractions", "concerts"];
+    for (const category of categories) {
+      if (query.toLowerCase().includes(category)) {
+        params[category] = 1;
+        break;
+      }
+    }
+  }
+  
+  return params;
+};
+
 export const useMessageProcessor = (isProPlan: boolean = false, isVenueMode: boolean = false) => {
   const [isTyping, setIsTyping] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  const [currentPaginationState, setCurrentPaginationState] = useState<Record<string, number>>({});
 
   const processMessage = async (
     inputValue: string,
     setMessages: React.Dispatch<React.SetStateAction<Message[]>>
   ) => {
-    // Add user message
     const userMessage = createUserMessage(inputValue);
     setMessages(prev => [...prev, userMessage]);
     
@@ -35,20 +76,36 @@ export const useMessageProcessor = (isProPlan: boolean = false, isVenueMode: boo
     try {
       let responseText = '';
       
-      // Check if this is a booking request
+      const paginationParams = extractPaginationParams(inputValue);
+      
+      let updatedPaginationState = { ...currentPaginationState };
+      
+      Object.keys(paginationParams).forEach(key => {
+        if (key === '_nextPage') {
+          Object.keys(updatedPaginationState).forEach(category => {
+            updatedPaginationState[category] = (updatedPaginationState[category] || 1) + 1;
+          });
+        } else if (key === '_prevPage') {
+          Object.keys(updatedPaginationState).forEach(category => {
+            updatedPaginationState[category] = Math.max(1, (updatedPaginationState[category] || 1) - 1);
+          });
+        } else {
+          updatedPaginationState[key] = paginationParams[key];
+        }
+      });
+      
+      setCurrentPaginationState(updatedPaginationState);
+      
       if (BookingAgent.isBookingRequest(inputValue)) {
         const bookingDetails = BookingAgent.extractBookingDetails(inputValue);
         
         if (bookingDetails) {
-          // Send an initial response while processing
           const processingMessage = createAIMessage("I'm working on your booking request, please wait a moment...");
           setMessages(prev => [...prev, processingMessage]);
           
-          // Attempt to book
           const bookingResult = await BookingAgent.bookVenue(bookingDetails);
           const confirmationText = BookingAgent.generateBookingConfirmation(bookingResult);
           
-          // Update the processing message with the confirmation
           setMessages(prev => prev.map(msg => 
             msg.id === processingMessage.id ? {...msg, text: confirmationText} : msg
           ));
@@ -57,34 +114,24 @@ export const useMessageProcessor = (isProPlan: boolean = false, isVenueMode: boo
           setIsSearching(false);
           return;
         }
-      }
-      
-      if (isVenueMode) {
-        // Process venue-specific queries
+      } else if (isVenueMode) {
         responseText = await processVenueQuery(inputValue, isProPlan);
       } else {
-        // Try to get response from search service
         try {
           responseText = await PerplexityService.searchPerplexity(inputValue);
         } catch (error) {
           console.error('Error with search service, falling back to HuggingChat:', error);
-          // Get response from HuggingChat as fallback
           responseText = await HuggingChatService.searchHuggingChat(inputValue);
         }
         
-        // Parse city if the query was about events or places in a specific city
         const detectedCity = detectCityInQuery(inputValue);
         
-        // If city was detected and the query seems to be about locations or events
         if (detectedCity && isLocationOrEventQuery(inputValue)) {
-          // Get locations for the detected city
           const cityInfo = cityCoordinates[detectedCity];
           let cityLocations = getLocationsByCity(cityInfo.name);
           
-          // Check if query is about a specific category
           const detectedCategory = detectCategoryInQuery(inputValue);
           if (detectedCategory && cityLocations.length > 0) {
-            // Filter locations by category if specified
             if (detectedCategory === "sports") {
               cityLocations = cityLocations.filter(loc => loc.type === "sports");
             } else if (detectedCategory === "nightlife") {
@@ -92,7 +139,6 @@ export const useMessageProcessor = (isProPlan: boolean = false, isVenueMode: boo
             } else if (detectedCategory === "dining") {
               cityLocations = cityLocations.filter(loc => loc.type === "restaurant");
             } else if (detectedCategory === "concerts") {
-              // Modified to avoid using the "concert" type and tags property
               cityLocations = cityLocations.filter(loc => 
                 loc.name.toLowerCase().includes("concert") || 
                 loc.name.toLowerCase().includes("music") ||
@@ -106,36 +152,29 @@ export const useMessageProcessor = (isProPlan: boolean = false, isVenueMode: boo
           }
           
           if (cityLocations.length > 0) {
-            // Update trending locations with these events
             updateTrendingLocations(cityInfo.name, getTrendingLocationsForCity(cityInfo.name));
             
-            // Create a personable response
             let combinedResponse = responseText;
             
-            // If the response already includes venue information, don't add duplicate data
             if (!responseText.includes("Nightlife:") && !responseText.includes("Dining:")) {
-              combinedResponse = `${responseText}\n\n${generateLocationResponse(cityInfo.name, cityLocations)}`;
+              combinedResponse = `${responseText}\n\n${generateLocationResponse(cityInfo.name, cityLocations, updatedPaginationState)}`;
             }
             
-            // Clean the response to remove formatting markers
             combinedResponse = cleanResponseText(combinedResponse);
             
             const aiMessage = createAIMessage(combinedResponse);
             setMessages(prev => [...prev, aiMessage]);
           } else {
-            // Fall back to just the search response
             const aiMessage = createAIMessage(cleanResponseText(responseText));
             setMessages(prev => [...prev, aiMessage]);
           }
           
-          // End processing here since we've already set messages
           setIsTyping(false);
           setIsSearching(false);
           return;
         }
       }
       
-      // Standard response if not a city/venue query or is a venue mode query
       const aiMessage = createAIMessage(cleanResponseText(responseText));
       setMessages(prev => [...prev, aiMessage]);
     } catch (error) {

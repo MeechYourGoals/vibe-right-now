@@ -65,7 +65,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
     isFirstInteraction,
     introMessageSpoken,
     setIntroMessageSpoken,
-    speakIntroOnce,
+    speakIntroOnce,  // This is now correctly typed as Promise<boolean>
     markIntroAsSpoken,
     speakResponse,
     stopSpeaking,

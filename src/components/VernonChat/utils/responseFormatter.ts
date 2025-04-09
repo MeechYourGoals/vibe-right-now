@@ -1,73 +1,45 @@
 
-/**
- * Utilities for formatting and cleaning responses
- */
-
-// Clean response text to remove markdown formatting and symbols
-export const cleanResponseText = (text: string): string => {
-  let cleanedText = text;
-  
-  // Remove category headers with HTML tags like "<strong>Category</strong>: "
-  cleanedText = cleanedText.replace(/<strong>(.*?)<\/strong>:\s*/gi, '$1: ');
-  
-  // Remove category headers with markdown like "**Category**: "
-  cleanedText = cleanedText.replace(/\*\*(.*?)\*\*:\s*/gi, '$1: ');
-  
-  // Remove emoji symbols at the start of lines
-  cleanedText = cleanedText.replace(/^[^\w\s]+ /gm, '');
-  
-  // Remove emoji symbols before categories
-  const categories = ['Live Entertainment', 'Nightlife', 'Food', 'Dining', 'Restaurants', 
-                     'Events', 'Attractions', 'Sports', 'Concerts', 'Other', 'Activities'];
-  
-  categories.forEach(category => {
-    // Remove patterns like "🍸 Category: " or "🎭 Category: "
-    const emojiPattern = new RegExp(`[^\\w\\s]+ ${category}:`, 'gi');
-    cleanedText = cleanedText.replace(emojiPattern, `${category}:`);
-  });
-  
-  return cleanedText;
-};
+import { paginateItems, createPaginationLinks, formatPaginatedCategoryResults } from '@/services/search/paginationUtils';
 
 /**
- * Format location response with multiple options per category
+ * Formats the response from location data into a readable format with categories
  */
-export const formatLocationResponse = (cityName: string, categoryResults: Record<string, string[]>): string => {
+export const formatLocationResponse = (
+  cityName: string, 
+  categoryResults: Record<string, string[]>,
+  paginationParams: Record<string, number> = {}
+): string => {
   if (Object.keys(categoryResults).length === 0) return "";
   
-  let response = `Here are some places with great vibes in ${cityName} right now:\n\n`;
+  let response = `Here's what's happening in ${cityName}:\n\n`;
   
-  // Add each category with its venues
-  if (categoryResults.sports && categoryResults.sports.length > 0) {
-    response += `Sports: ${categoryResults.sports.join(", ")}.\n\n`;
-  }
-  
-  if (categoryResults.nightlife && categoryResults.nightlife.length > 0) {
-    response += `Nightlife: ${categoryResults.nightlife.join(", ")}.\n\n`;
-  }
-  
-  if (categoryResults.dining && categoryResults.dining.length > 0) {
-    response += `Dining: ${categoryResults.dining.join(", ")}.\n\n`;
-  }
-  
-  if (categoryResults.concerts && categoryResults.concerts.length > 0) {
-    response += `Concerts: ${categoryResults.concerts.join(", ")}.\n\n`;
-  }
-  
-  if (categoryResults.events && categoryResults.events.length > 0) {
-    response += `Events: ${categoryResults.events.join(", ")}.\n\n`;
-  }
-  
-  if (categoryResults.attractions && categoryResults.attractions.length > 0) {
-    response += `Attractions: ${categoryResults.attractions.join(", ")}.\n\n`;
-  }
-  
-  if (categoryResults.other && categoryResults.other.length > 0) {
-    response += `Other Activities: ${categoryResults.other.join(", ")}.\n\n`;
-  }
-  
-  response += "Each place has recent vibes posted by users who are there right now. Click on any venue to see what it's really like tonight!";
+  // Loop through each category
+  Object.keys(categoryResults).forEach(category => {
+    const items = categoryResults[category];
+    if (items && items.length > 0) {
+      // Get the current page for this category (default to 1)
+      const currentPage = paginationParams[category] || 1;
+      
+      // Add category header with total count
+      let displayCategory = category.charAt(0).toUpperCase() + category.slice(1);
+      response += `**${displayCategory}** (${items.length} options)\n\n`;
+      
+      // Format the paginated results for this category
+      response += formatPaginatedCategoryResults(category, items, currentPage);
+      
+      response += '\n\n';
+    }
+  });
   
   return response;
 };
 
+/**
+ * Clean response text by removing certain markdown formatting
+ */
+export const cleanResponseText = (text: string): string => {
+  // Clean any double line breaks or excessive spacing
+  return text
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+};

@@ -1,11 +1,15 @@
-
 import { cityCoordinates } from '@/utils/locations';
 import { Location } from '@/types';
+import { formatLocationResponse } from './responseFormatter';
 
 /**
  * Generate a natural language response about locations in a city with multiple options per category
  */
-export const generateLocationResponse = (cityName: string, locations: Location[]): string => {
+export const generateLocationResponse = (
+  cityName: string, 
+  locations: Location[],
+  paginationParams: Record<string, number> = {}
+): string => {
   if (locations.length === 0) return "";
   
   // Group locations by type
@@ -57,9 +61,8 @@ export const generateLocationResponse = (cityName: string, locations: Location[]
     categoryResults.other = others.map(v => `[${v.name}](/explore?q=${encodeURIComponent(v.name)})`);
   }
   
-  // Use the new formatter function to create the response
-  const { formatLocationResponse } = require('./responseFormatter');
-  return formatLocationResponse(cityName, categoryResults);
+  // Use the formatLocationResponse function to create the response with pagination
+  return formatLocationResponse(cityName, categoryResults, paginationParams);
 };
 
 /**
