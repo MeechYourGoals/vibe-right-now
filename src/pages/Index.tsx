@@ -26,15 +26,26 @@ const Index = () => {
             <PostFeed />
           </div>
           
-          {!isMobile && (
+          {!isMobile ? (
             <div className="w-full md:w-1/4 space-y-6">
               <NearbyVibesMap />
               <RecommendedForYou />
               <TrendingLocations />
               <DiscountLocations />
             </div>
-          )}
+          ) : null}
         </div>
+        
+        {/* Add mobile sidebar content below the main feed on mobile */}
+        {isMobile && (
+          <div className="mt-8 space-y-6">
+            <h2 className="text-xl font-bold mb-4 vibe-gradient-text">Around You</h2>
+            <NearbyVibesMap />
+            <RecommendedForYou />
+            <TrendingLocations />
+            <DiscountLocations />
+          </div>
+        )}
       </main>
       
       <CameraButton />

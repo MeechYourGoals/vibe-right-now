@@ -1,6 +1,6 @@
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import VernonChat from "@/components/VernonChat";
@@ -20,6 +20,34 @@ const DataInsights = lazy(() => import("@/pages/DataInsights"));
 const TripDetails = lazy(() => import("@/components/places/TripDetails"));
 
 function App() {
+  // Add a useEffect to handle mobile view adjustments
+  useEffect(() => {
+    // Set viewport meta tag to ensure proper scaling on mobile devices
+    const viewportMeta = document.querySelector('meta[name="viewport"]');
+    if (viewportMeta) {
+      viewportMeta.setAttribute(
+        'content',
+        'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover'
+      );
+    }
+    
+    // Add a class to the body for mobile-specific styling if needed
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        document.body.classList.add('is-mobile');
+      } else {
+        document.body.classList.remove('is-mobile');
+      }
+    };
+    
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vibe-theme">
       <BrowserRouter>

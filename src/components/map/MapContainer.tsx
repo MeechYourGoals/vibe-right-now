@@ -5,6 +5,7 @@ import { Compass } from "lucide-react";
 import OpenStreetMap from "./OpenStreetMap";
 import LocationDetailsSidebar from "./LocationDetailsSidebar";
 import { Location } from "@/types";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface MapContainerProps {
   loading: boolean;
@@ -39,9 +40,11 @@ const MapContainer = ({
   onToggleDistances,
   showAllCities = true
 }: MapContainerProps) => {
+  const isMobile = useIsMobile();
+  
   if (loading) {
     return (
-      <div className={`bg-muted/20 rounded-lg flex items-center justify-center ${isExpanded ? "h-[85vh]" : "h-60"}`}>
+      <div className={`bg-muted/20 rounded-lg flex items-center justify-center ${isExpanded ? "h-[85vh]" : isMobile ? "h-40" : "h-60"}`}>
         <div className="animate-spin">
           <Compass className="h-8 w-8 text-muted-foreground" />
         </div>
@@ -50,7 +53,7 @@ const MapContainer = ({
   }
   
   return (
-    <div className={`relative ${isExpanded ? "h-[85vh]" : "h-60"} rounded-lg overflow-hidden transition-all`} style={{ zIndex: 1 }}>
+    <div className={`relative ${isExpanded ? "h-[85vh]" : isMobile ? "h-40" : "h-60"} rounded-lg overflow-hidden transition-all`} style={{ zIndex: 1 }}>
       <OpenStreetMap
         userLocation={userLocation}
         locations={locations}
