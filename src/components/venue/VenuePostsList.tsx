@@ -1,7 +1,7 @@
 
 import React, { useMemo } from 'react';
 import VenuePost from "@/components/VenuePost";
-import PostCard from "@/components/PostCard";
+import PostCard from "@/components/post/PostCard";
 import PostGridItem from "@/components/venue/PostGridItem";
 import { Post, Comment, Location } from "@/types";
 import { getTimeGroup, formatTimeAgo } from "@/mock/time-utils";
