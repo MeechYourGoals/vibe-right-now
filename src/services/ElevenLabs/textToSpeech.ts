@@ -16,7 +16,7 @@ export class ElevenLabsTextToSpeech {
     
     try {
       // Always use the Adam voice by default - consistent male voice
-      const voiceId = options.voice_id || 'pNInz6obpgDQGcFmaJgB'; // Adam voice ID
+      const voiceId = options.voice_id || ElevenLabsBase.getDefaultVoiceId();
       const modelId = options.model_id || 'eleven_multilingual_v2';
       
       const url = `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`;

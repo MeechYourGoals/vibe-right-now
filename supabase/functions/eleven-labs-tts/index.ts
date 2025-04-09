@@ -2,7 +2,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const ELEVEN_LABS_API_KEY = Deno.env.get('ELEVEN_LABS_API_KEY') || '';
-const DEFAULT_VOICE_ID = "EXAVITQu4vr4xnSDxMaL"; // Sarah voice ID
+const DEFAULT_VOICE_ID = "pNInz6obpgDQGcFmaJgB"; // Adam voice ID
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
