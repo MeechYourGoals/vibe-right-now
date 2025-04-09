@@ -35,7 +35,7 @@ export const useSpeechInteraction = () => {
     markIntroAsSpoken,
     isFirstInteraction,
     setIsFirstInteraction,
-    speakIntroOnce
+    speakIntroOnce: voiceInitSpeakIntroOnce
   } = useVoiceInit();
   
   // Set up listening toggle
@@ -61,7 +61,7 @@ export const useSpeechInteraction = () => {
       console.log('Attempting to speak initial intro message on mount');
       speakIntroOnce(INITIAL_MESSAGE.text);
     }
-  }, [isFirstInteraction, hasSpokenIntro, speakIntroOnce]);
+  }, [isFirstInteraction, hasSpokenIntro]);
   
   // Cleanup on unmount
   useEffect(() => {
@@ -71,12 +71,16 @@ export const useSpeechInteraction = () => {
     };
   }, [stopListening, stopSpeaking]);
   
-  // Custom speakIntroOnce wrapper for backwards compatibility
-  const handleSpeakIntroOnce = async (introMessage: string) => {
-    return speakResponse(introMessage).then(() => {
+  // Custom speakIntroOnce wrapper that returns a Promise<boolean>
+  const speakIntroOnce = async (introMessage: string): Promise<boolean> => {
+    try {
+      await voiceInitSpeakIntroOnce(introMessage);
       markIntroAsSpoken();
       return true;
-    });
+    } catch (error) {
+      console.error('Error in speakIntroOnce:', error);
+      return false;
+    }
   };
   
   return {
@@ -96,6 +100,6 @@ export const useSpeechInteraction = () => {
     hasSpokenIntro,
     markIntroAsSpoken,
     isFirstInteraction,
-    speakIntroOnce: handleSpeakIntroOnce
+    speakIntroOnce
   };
 };

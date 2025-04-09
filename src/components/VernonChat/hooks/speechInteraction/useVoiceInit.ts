@@ -26,7 +26,7 @@ export const useVoiceInit = () => {
   };
 
   // Function to speak the intro only once when toggling to listening mode for the first time
-  const speakIntroOnce = async (introMessage: string) => {
+  const speakIntroOnce = async (introMessage: string): Promise<void> => {
     console.log('Attempting to speak intro:', introMessage);
     console.log('Intro state:', { introPlayed, isFirstInteraction, hasSpokenIntro, introAttempted: introAttempted.current });
     
@@ -61,15 +61,11 @@ export const useVoiceInit = () => {
             setIntroPlayed(true);
             setHasSpokenIntro(true);
           }, 10000); // 10 second fallback
-          
-          return true;
         }
       } catch (error) {
         console.error('Error speaking intro:', error);
       }
     }
-    
-    return false;
   };
   
   return {

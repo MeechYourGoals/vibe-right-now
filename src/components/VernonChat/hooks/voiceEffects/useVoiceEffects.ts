@@ -16,7 +16,7 @@ interface UseVoiceEffectsProps {
   isFirstInteraction: boolean;
   introMessageSpoken: boolean;
   setIntroMessageSpoken: (value: boolean) => void;
-  speakIntroOnce: (text: string) => Promise<void>;
+  speakIntroOnce: (text: string) => Promise<boolean>;
   markIntroAsSpoken: () => void;
   speakResponse: (text: string) => Promise<boolean>;
   stopSpeaking: () => void;
