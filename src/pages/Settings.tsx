@@ -1,18 +1,18 @@
 
 import { useState } from "react";
 import { Layout } from "@/components/Layout";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Tag, Shield, Car, Ticket, User, Building2 } from "lucide-react";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 
+import SettingsHeader from "@/components/settings/SettingsHeader";
+import SettingsTabs from "@/components/settings/SettingsTabs";
 import PreferencesTab from "./settings/PreferencesTab";
 import PrivacyTab from "./settings/PrivacyTab";
 import TransportationTab from "./settings/TransportationTab";
 import TicketingTab from "./settings/TicketingTab";
 import AccountTab from "./settings/AccountTab";
 import VenueManagementTab from "./settings/VenueManagementTab";
+import MarketingTab from "./settings/MarketingTab";
 
 const Settings = () => {
   const { toast } = useToast();
@@ -55,95 +55,15 @@ const Settings = () => {
   return (
     <Layout>
       <div className="container py-8">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Settings</h1>
-          
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="flex items-center space-x-2">
-              <Label htmlFor="mode-toggle" className="flex items-center gap-2">
-                <User className={`h-4 w-4 ${!isVenueMode ? "text-primary" : "text-muted-foreground"}`} />
-                <span className={!isVenueMode ? "font-medium" : "text-muted-foreground"}>User</span>
-              </Label>
-              <Switch 
-                id="mode-toggle" 
-                checked={isVenueMode} 
-                onCheckedChange={toggleMode} 
-              />
-              <Label htmlFor="mode-toggle" className="flex items-center gap-2">
-                <Building2 className={`h-4 w-4 ${isVenueMode ? "text-primary" : "text-muted-foreground"}`} />
-                <span className={isVenueMode ? "font-medium" : "text-muted-foreground"}>Venue</span>
-              </Label>
-            </div>
-            
-            {isVenueMode && (
-              <div className="flex items-center gap-2 text-xs">
-                <button 
-                  onClick={() => upgradeTier('standard')}
-                  className={`px-2 py-1 rounded ${subscriptionTier === 'standard' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}
-                >
-                  Standard
-                </button>
-                <button 
-                  onClick={() => upgradeTier('plus')}
-                  className={`px-2 py-1 rounded ${subscriptionTier === 'plus' ? 'bg-blue-500 text-white' : 'bg-muted'}`}
-                >
-                  Plus
-                </button>
-                <button 
-                  onClick={() => upgradeTier('premium')}
-                  className={`px-2 py-1 rounded ${subscriptionTier === 'premium' ? 'bg-purple-500 text-white' : 'bg-muted'}`}
-                >
-                  Premium
-                </button>
-                <button 
-                  onClick={() => upgradeTier('pro')}
-                  className={`px-2 py-1 rounded ${subscriptionTier === 'pro' ? 'bg-amber-500 text-white' : 'bg-muted'}`}
-                >
-                  Pro
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
+        <SettingsHeader 
+          isVenueMode={isVenueMode}
+          onModeToggle={toggleMode}
+          subscriptionTier={subscriptionTier}
+          onTierChange={upgradeTier}
+        />
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="mb-6 grid grid-cols-3 md:grid-cols-5 gap-2">
-            <TabsTrigger value="preferences" className="flex items-center gap-2">
-              <Tag className="h-4 w-4" />
-              <span className="hidden md:inline">Preferences</span>
-            </TabsTrigger>
-            <TabsTrigger value="privacy" className="flex items-center gap-2">
-              <Shield className="h-4 w-4" />
-              <span className="hidden md:inline">Privacy</span>
-            </TabsTrigger>
-            {isVenueMode ? (
-              <>
-                <TabsTrigger value="management" className="flex items-center gap-2">
-                  <Building2 className="h-4 w-4" />
-                  <span className="hidden md:inline">Management</span>
-                </TabsTrigger>
-                <TabsTrigger value="marketing" className="flex items-center gap-2">
-                  <Ticket className="h-4 w-4" />
-                  <span className="hidden md:inline">Marketing</span>
-                </TabsTrigger>
-              </>
-            ) : (
-              <>
-                <TabsTrigger value="transportation" className="flex items-center gap-2">
-                  <Car className="h-4 w-4" />
-                  <span className="hidden md:inline">Transportation</span>
-                </TabsTrigger>
-                <TabsTrigger value="ticketing" className="flex items-center gap-2">
-                  <Ticket className="h-4 w-4" />
-                  <span className="hidden md:inline">Ticketing</span>
-                </TabsTrigger>
-              </>
-            )}
-            <TabsTrigger value="account" className="flex items-center gap-2">
-              <User className="h-4 w-4" />
-              <span className="hidden md:inline">Account</span>
-            </TabsTrigger>
-          </TabsList>
+          <SettingsTabs activeTab={activeTab} isVenueMode={isVenueMode} />
           
           <TabsContent value="preferences" className="space-y-6">
             <PreferencesTab 
@@ -168,13 +88,7 @@ const Settings = () => {
               </TabsContent>
               
               <TabsContent value="marketing" className="space-y-6">
-                <div className="bg-card p-6 rounded-lg border shadow-sm">
-                  <h2 className="text-xl font-semibold mb-4">Marketing Settings</h2>
-                  <p className="text-muted-foreground mb-4">
-                    Manage marketing campaigns, promotions, and customer engagement settings.
-                  </p>
-                  {/* Marketing settings would go here */}
-                </div>
+                <MarketingTab subscriptionTier={subscriptionTier} />
               </TabsContent>
             </>
           ) : (
