@@ -11,9 +11,11 @@ import UpcomingEvents from "@/components/venue/UpcomingEvents";
 import VernonVenueAssistant from "@/components/venue/VernonVenueAssistant";
 import CompetitorAnalysis from "@/components/venue/CompetitorAnalysis";
 import SocialMediaIntegration from "@/components/venue/SocialMediaIntegration";
+import { generateWeeklyData } from "@/utils/insightsData";
 
 const VenueInsights = () => {
   const [subscriptionTier, setSubscriptionTier] = useState<'standard' | 'plus' | 'premium' | 'pro'>('standard');
+  const mediaData = generateWeeklyData();
   
   // Function to simulate upgrading subscription
   const upgradeSubscription = (tier: string) => {
@@ -37,7 +39,7 @@ const VenueInsights = () => {
             <CardTitle>Media Engagement</CardTitle>
           </CardHeader>
           <CardContent>
-            <MediaEngagementChart />
+            <MediaEngagementChart data={mediaData} />
           </CardContent>
         </Card>
         <Card>
