@@ -4,10 +4,6 @@ import { Message } from '../types';
 import { ElevenLabsService } from '@/services/ElevenLabsService';
 import { useInterruptionHandler } from './speechInteraction/useInterruptionHandler';
 
-interface UseElevenLabsConversationProps {
-  isVenueMode?: boolean;
-}
-
 export const useElevenLabsConversation = (isVenueMode: boolean = false) => {
   const [isConnected, setIsConnected] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -76,9 +72,13 @@ export const useElevenLabsConversation = (isVenueMode: boolean = false) => {
         
         // Get speech from ElevenLabs
         ElevenLabsService.textToSpeech(text)
-          .then(audioUrl => {
+          .then(audioData => {
             if (elevenLabsAudioRef.current) {
-              elevenLabsAudioRef.current.src = audioUrl;
+              // Create blob URL from ArrayBuffer for audio element
+              const blob = new Blob([audioData], { type: 'audio/mpeg' });
+              const url = URL.createObjectURL(blob);
+              elevenLabsAudioRef.current.src = url;
+              
               elevenLabsAudioRef.current.play().catch(error => {
                 console.error('Error playing ElevenLabs audio:', error);
                 setIsSpeaking(false);
@@ -173,11 +173,11 @@ export const useElevenLabsConversation = (isVenueMode: boolean = false) => {
     const initialMessages: Message[] = [
       {
         id: '1',
-        role: 'assistant',
         text: isVenueMode 
           ? 'Hello! I\'m Vernon, your venue assistant. How can I help you with venue management, customer data analytics, or marketing strategies today?' 
           : 'Hi there! I\'m Vernon, your personal assistant. How can I help you find the perfect venue, event, or experience today?',
-        timestamp: new Date().toISOString(),
+        sender: 'ai',
+        timestamp: new Date()
       },
     ];
     
@@ -269,9 +269,9 @@ export const useElevenLabsConversation = (isVenueMode: boolean = false) => {
     // Add user message
     const userMessage: Message = {
       id: Date.now().toString(),
-      role: 'user',
       text: input,
-      timestamp: new Date().toISOString(),
+      sender: 'user',
+      timestamp: new Date()
     };
     
     setMessages(prevMessages => [...prevMessages, userMessage]);
@@ -283,9 +283,9 @@ export const useElevenLabsConversation = (isVenueMode: boolean = false) => {
       // Add assistant message
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
-        role: 'assistant',
         text: responseText,
-        timestamp: new Date().toISOString(),
+        sender: 'ai',
+        timestamp: new Date()
       };
       
       setMessages(prevMessages => [...prevMessages, assistantMessage]);

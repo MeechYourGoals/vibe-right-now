@@ -1,3 +1,4 @@
+
 import { useState, useMemo, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Minimize } from "lucide-react";
@@ -18,6 +19,13 @@ import DayOfWeekFilter from "@/components/venue/DayOfWeekFilter";
 import VenueProfileHeader from "@/components/venue/VenueProfileHeader";
 import VenueMap from "@/components/venue/VenueMap";
 import VenuePostsContent from "@/components/venue/VenuePostsContent";
+
+// Define an extended Post type that includes venue-specific properties
+interface ExtendedPost extends Post {
+  isVenuePost?: boolean;
+  isPinned?: boolean;
+  isExternalPost?: boolean;
+}
 
 const VenueProfile = () => {
   const { id } = useParams<{ id: string }>();
@@ -42,7 +50,13 @@ const VenueProfile = () => {
   // Generate venue-specific posts for each day of the week
   const generatedVenuePosts = useMemo(() => {
     if (!venue) return [];
-    return createDaySpecificVenuePosts(venue.id, venue.type);
+    const posts = createDaySpecificVenuePosts(venue.id, venue.type) as ExtendedPost[];
+    
+    // Ensure each generated post has all required Post properties
+    return posts.map(post => ({
+      ...post,
+      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days from now
+    })) as Post[];
   }, [venue]);
 
   const filteredPosts = useMemo(() => {

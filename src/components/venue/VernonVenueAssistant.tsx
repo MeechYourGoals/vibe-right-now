@@ -20,7 +20,7 @@ const VernonVenueAssistant = () => {
   };
   
   return (
-    <Card className="border-2 border-amber-300 bg-gradient-to-br from-amber-50 to-white dark:from-amber-800 dark:to-background">
+    <Card className="border-2 border-amber-300 bg-gradient-to-br from-amber-50 to-white dark:from-amber-900/50 dark:to-background">
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center text-amber-800 dark:text-amber-200">
           <Bot className="mr-2 h-5 w-5" />

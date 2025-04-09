@@ -17,7 +17,7 @@ export const getVenueContent = (venueId: string): { venue: Location | null, post
   if (!venue.type) {
     // Default to a general type if not specified
     console.warn(`Venue ${venue.name} has no type. Setting default type.`);
-    venue.type = determineVenueType(venue.name);
+    venue.type = determineVenueType(venue.name) as "restaurant" | "bar" | "event" | "attraction" | "sports" | "other";
   }
   
   // Create posts for the venue based on its characteristics
@@ -31,44 +31,44 @@ export const getVenueContent = (venueId: string): { venue: Location | null, post
 };
 
 // Determine the most likely venue type based on name
-export const determineVenueType = (venueName: string = ''): string => {
+export const determineVenueType = (venueName: string = ''): "restaurant" | "bar" | "event" | "attraction" | "sports" | "other" => {
   const name = venueName.toLowerCase();
   
   if (name.includes('restaurant') || name.includes('cafe') || name.includes('bistro') || 
       name.includes('grill') || name.includes('steakhouse') || name.includes('pizza')) {
-    return 'restaurant';
+    return "restaurant";
   }
   
   if (name.includes('bar') || name.includes('pub') || name.includes('lounge') || 
       name.includes('club') || name.includes('tavern')) {
-    return 'bar';
+    return "bar";
   }
   
   if (name.includes('hotel') || name.includes('resort') || name.includes('inn') || 
       name.includes('suites')) {
-    return 'hotel';
+    return "bar"; // Changed from 'hotel' to a supported type
   }
   
   if (name.includes('theater') || name.includes('cinema') || name.includes('theatre')) {
-    return 'entertainment';
+    return "attraction"; // Changed from 'entertainment' to a supported type
   }
   
   if (name.includes('stadium') || name.includes('arena') || name.includes('park') || 
       name.includes('field') || name.includes('center')) {
-    return 'sports';
+    return "sports";
   }
   
   if (name.includes('museum') || name.includes('gallery') || name.includes('exhibit')) {
-    return 'attraction';
+    return "attraction";
   }
   
   if (name.includes('festival') || name.includes('concert') || name.includes('show') || 
       name.includes('fair')) {
-    return 'event';
+    return "event";
   }
   
   // Default venue type
-  return 'venue';
+  return "other";
 };
 
 // Ensure a post has proper location data
@@ -92,26 +92,23 @@ export const getVenueTags = (venue: Location): string[] => {
   
   // Add relevant tags based on venue type
   switch(venue.type) {
-    case 'restaurant':
+    case "restaurant":
       tags.push('food', 'dining');
       break;
-    case 'bar':
+    case "bar":
       tags.push('drinks', 'nightlife');
       break;
-    case 'hotel':
-      tags.push('lodging', 'accommodation');
-      break;
-    case 'sports':
+    case "sports":
       tags.push('stadium', 'athletics');
       break;
-    case 'event':
+    case "event":
       tags.push('entertainment', 'experience');
       break;
-    case 'attraction':
+    case "attraction":
       tags.push('tourism', 'sightseeing');
       break;
-    case 'entertainment':
-      tags.push('leisure', 'recreation');
+    case "other":
+      tags.push('venue', 'location');
       break;
   }
   
