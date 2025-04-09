@@ -29,9 +29,6 @@ const renderLinks = (text: string) => {
   const elements: React.ReactNode[] = [];
   let currentIndex = 0;
   
-  let matches = text.match(linkRegex) || [];
-  let matchIndex = 0;
-  
   for (let i = 0; i < parts.length; i++) {
     if (i % 3 === 0) {
       // This is text before/after/between links
@@ -71,14 +68,8 @@ const renderLinks = (text: string) => {
 
 // Function to process the message text and convert it to React elements
 const processMessageText = (text: string) => {
-  // Process bold text with **text**
-  const boldRegex = /\*\*([^*]+)\*\*/g;
-  let processedText = text.replace(boldRegex, '<strong>$1</strong>');
-  
-  // Convert emoji indicators to actual emojis if needed
-  
   // Process links and other text formatting
-  return renderLinks(processedText);
+  return renderLinks(text);
 };
 
 const MessageItem: React.FC<MessageItemProps> = ({ message }) => {

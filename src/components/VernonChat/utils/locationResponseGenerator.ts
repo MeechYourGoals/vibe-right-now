@@ -2,47 +2,58 @@
 import { cityCoordinates } from '@/utils/locations';
 
 /**
- * Generate a natural language response about locations in a city
+ * Generate a natural language response about locations in a city with multiple options per category
  */
 export const generateLocationResponse = (cityName: string, locations: any[]): string => {
   if (locations.length === 0) return "";
   
+  // Group locations by type
   const sportVenues = locations.filter(loc => loc.type === "sports");
   const bars = locations.filter(loc => loc.type === "bar");
   const restaurants = locations.filter(loc => loc.type === "restaurant");
   const events = locations.filter(loc => loc.type === "event");
+  const concerts = locations.filter(loc => loc.type === "concert" || (loc.type === "event" && loc.tags?.includes("music")));
   const attractions = locations.filter(loc => loc.type === "attraction");
-  const others = locations.filter(loc => loc.type === "other");
+  const others = locations.filter(loc => !["sports", "bar", "restaurant", "event", "attraction", "concert"].includes(loc.type));
   
-  let response = `Here are some places with great vibes in ${cityName} right now:\n\n`;
+  // Create category results object with properly formatted links
+  const categoryResults: Record<string, string[]> = {};
   
   if (sportVenues.length > 0) {
-    response += `🏟️ **Sports:** ${sportVenues.map(v => `[${v.name}](/explore?q=${encodeURIComponent(v.name)})`).join(", ")}.\n\n`;
+    categoryResults.sports = sportVenues.map(v => `[${v.name}](/explore?q=${encodeURIComponent(v.name)})`);
   }
   
   if (bars.length > 0) {
-    response += `🍸 **Nightlife:** ${bars.map(v => `[${v.name}](/explore?q=${encodeURIComponent(v.name)})`).join(", ")}.\n\n`;
+    categoryResults.nightlife = bars.map(v => `[${v.name}](/explore?q=${encodeURIComponent(v.name)})`);
   }
   
   if (restaurants.length > 0) {
-    response += `🍽️ **Dining:** ${restaurants.map(v => `[${v.name}](/explore?q=${encodeURIComponent(v.name)})`).join(", ")}.\n\n`;
+    categoryResults.dining = restaurants.map(v => `[${v.name}](/explore?q=${encodeURIComponent(v.name)})`);
+  }
+  
+  if (concerts.length > 0) {
+    categoryResults.concerts = concerts.map(v => `[${v.name}](/explore?q=${encodeURIComponent(v.name)})`);
   }
   
   if (events.length > 0) {
-    response += `🎭 **Events:** ${events.map(v => `[${v.name}](/explore?q=${encodeURIComponent(v.name)})`).join(", ")}.\n\n`;
+    // Filter out any events already listed in concerts
+    const nonConcertEvents = events.filter(e => !concerts.some(c => c.id === e.id));
+    if (nonConcertEvents.length > 0) {
+      categoryResults.events = nonConcertEvents.map(v => `[${v.name}](/explore?q=${encodeURIComponent(v.name)})`);
+    }
   }
   
   if (attractions.length > 0) {
-    response += `🏛️ **Attractions:** ${attractions.map(v => `[${v.name}](/explore?q=${encodeURIComponent(v.name)})`).join(", ")}.\n\n`;
+    categoryResults.attractions = attractions.map(v => `[${v.name}](/explore?q=${encodeURIComponent(v.name)})`);
   }
   
   if (others.length > 0) {
-    response += `🏋️ **Other Activities:** ${others.map(v => `[${v.name}](/explore?q=${encodeURIComponent(v.name)})`).join(", ")}.\n\n`;
+    categoryResults.other = others.map(v => `[${v.name}](/explore?q=${encodeURIComponent(v.name)})`);
   }
   
-  response += "Each place has recent vibes posted by users who are there right now. Click on any venue to see what it's really like tonight!";
-  
-  return response;
+  // Use the new formatter function to create the response
+  const { formatLocationResponse } = require('./responseFormatter');
+  return formatLocationResponse(cityName, categoryResults);
 };
 
 /**
@@ -81,9 +92,37 @@ export const isLocationOrEventQuery = (inputValue: string): boolean => {
   const locationEventKeywords = [
     "going on", "events", "places", "happening", 
     "visit", "things to do", "nightlife", "restaurants",
-    "bars", "clubs", "attractions", "activities"
+    "bars", "clubs", "attractions", "activities",
+    "concerts", "shows", "performances", "sports",
+    "games", "dining", "eat", "drink"
   ];
   
   const inputLower = inputValue.toLowerCase();
   return locationEventKeywords.some(keyword => inputLower.includes(keyword));
 };
+
+/**
+ * Helper function to detect specific category request in query
+ */
+export const detectCategoryInQuery = (inputValue: string): string => {
+  const inputLower = inputValue.toLowerCase();
+  
+  // Check for category-specific queries
+  if (inputLower.includes("concert") || inputLower.includes("music") || inputLower.includes("show")) {
+    return "concerts";
+  } else if (inputLower.includes("sport") || inputLower.includes("game") || inputLower.includes("match")) {
+    return "sports";
+  } else if (inputLower.includes("restaurant") || inputLower.includes("dining") || inputLower.includes("eat")) {
+    return "dining";
+  } else if (inputLower.includes("bar") || inputLower.includes("club") || inputLower.includes("drink") || inputLower.includes("nightlife")) {
+    return "nightlife";
+  } else if (inputLower.includes("attraction") || inputLower.includes("sight") || inputLower.includes("landmark")) {
+    return "attractions";
+  } else if (inputLower.includes("event") || inputLower.includes("happening")) {
+    return "events";
+  }
+  
+  // No specific category detected
+  return "";
+}
+

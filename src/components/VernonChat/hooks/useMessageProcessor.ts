@@ -8,7 +8,8 @@ import { createUserMessage, createAIMessage, createErrorMessage } from '../utils
 import { 
   generateLocationResponse, 
   detectCityInQuery, 
-  isLocationOrEventQuery 
+  isLocationOrEventQuery,
+  detectCategoryInQuery
 } from '../utils/locationResponseGenerator';
 import { PerplexityService } from '@/services/PerplexityService';
 import { processVenueQuery } from '../utils/venueQueryProcessor';
@@ -54,7 +55,28 @@ export const useMessageProcessor = (isProPlan: boolean = false, isVenueMode: boo
         if (detectedCity && isLocationOrEventQuery(inputValue)) {
           // Get locations for the detected city
           const cityInfo = cityCoordinates[detectedCity];
-          const cityLocations = getLocationsByCity(cityInfo.name);
+          let cityLocations = getLocationsByCity(cityInfo.name);
+          
+          // Check if query is about a specific category
+          const detectedCategory = detectCategoryInQuery(inputValue);
+          if (detectedCategory && cityLocations.length > 0) {
+            // Filter locations by category if specified
+            if (detectedCategory === "sports") {
+              cityLocations = cityLocations.filter(loc => loc.type === "sports");
+            } else if (detectedCategory === "nightlife") {
+              cityLocations = cityLocations.filter(loc => loc.type === "bar");
+            } else if (detectedCategory === "dining") {
+              cityLocations = cityLocations.filter(loc => loc.type === "restaurant");
+            } else if (detectedCategory === "concerts") {
+              cityLocations = cityLocations.filter(loc => 
+                loc.type === "concert" || (loc.type === "event" && loc.tags?.includes("music"))
+              );
+            } else if (detectedCategory === "events") {
+              cityLocations = cityLocations.filter(loc => loc.type === "event");
+            } else if (detectedCategory === "attractions") {
+              cityLocations = cityLocations.filter(loc => loc.type === "attraction");
+            }
+          }
           
           if (cityLocations.length > 0) {
             // Update trending locations with these events
@@ -64,7 +86,7 @@ export const useMessageProcessor = (isProPlan: boolean = false, isVenueMode: boo
             let combinedResponse = responseText;
             
             // If the response already includes venue information, don't add duplicate data
-            if (!responseText.includes("**Nightlife**") && !responseText.includes("**Restaurants**")) {
+            if (!responseText.includes("Nightlife:") && !responseText.includes("Dining:")) {
               combinedResponse = `${responseText}\n\n${generateLocationResponse(cityInfo.name, cityLocations)}`;
             }
             
@@ -105,3 +127,4 @@ export const useMessageProcessor = (isProPlan: boolean = false, isVenueMode: boo
     processMessage
   };
 };
+
