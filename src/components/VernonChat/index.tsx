@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import ChatButton from './ChatButton';
 import ChatWindow from './ChatWindow';
-import { useChat } from './hooks/useChat';
 import { Button } from '@/components/ui/button';
 import { Building2, Moon, Sun } from 'lucide-react';
 import { 
@@ -13,8 +12,9 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useTheme } from '@/components/ThemeProvider';
 import { toast } from 'sonner';
-import { ElevenLabsService } from '@/services/ElevenLabsService';
+import { ElevenLabsService } from '@/services/ElevenLabs';
 import ChatSettings from './components/ChatSettings';
+import { useElevenLabsConversation } from './hooks/useElevenLabsConversation';
 
 const VernonChat = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -23,12 +23,19 @@ const VernonChat = () => {
   const [isProPlan, setIsProPlan] = useState(false); // Simulate pro plan status
   const { theme, setTheme } = useTheme();
   
+  // Use our new conversation hook
   const {
+    isConnected,
+    isSpeaking,
+    isListening,
+    isProcessing,
     messages,
-    isTyping,
-    isSearching,
-    handleSendMessage
-  } = useChat(isProPlan, isVenueMode);
+    transcript,
+    interimTranscript,
+    connectToAgent,
+    toggleListening,
+    sendTextMessage
+  } = useElevenLabsConversation(isVenueMode);
   
   const toggleMinimize = () => {
     setIsMinimized(!isMinimized);
@@ -64,24 +71,18 @@ const VernonChat = () => {
     }
   }, []);
   
-  // When user opens chat, prepare for speech
+  // When user opens chat, connect to agent if not already connected
   useEffect(() => {
-    if (isOpen) {
-      // Force initialize speech synthesis
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.getVoices();
-        
-        // For iOS Safari, we need to speak a silent utterance to initialize the voices
-        if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
-          const silentUtterance = new SpeechSynthesisUtterance('');
-          silentUtterance.volume = 0;
-          window.speechSynthesis.speak(silentUtterance);
-        }
-      }
-      
-      console.log('Chat opened, ready for intro speech');
+    if (isOpen && !isConnected) {
+      connectToAgent();
     }
-  }, [isOpen]);
+  }, [isOpen, isConnected, connectToAgent]);
+  
+  // Handle opening chat
+  const handleOpenChat = (mode: boolean = false) => {
+    setIsVenueMode(mode);
+    setIsOpen(true);
+  };
   
   if (!isOpen) {
     return (
@@ -90,19 +91,13 @@ const VernonChat = () => {
           <Button
             variant="outline"
             className="h-12 w-12 rounded-full bg-amber-100 hover:bg-amber-200 border-amber-300"
-            onClick={() => {
-              setIsVenueMode(true);
-              setIsOpen(true);
-            }}
+            onClick={() => handleOpenChat(true)}
             title="Vernon for Venues"
           >
             <Building2 className="h-6 w-6 text-amber-800" />
           </Button>
         )}
-        <ChatButton onClick={() => {
-          setIsVenueMode(false);
-          setIsOpen(true);
-        }} />
+        <ChatButton onClick={() => handleOpenChat(false)} />
         <Button 
           variant="outline" 
           className="h-12 w-12 rounded-full" 
@@ -124,9 +119,16 @@ const VernonChat = () => {
       {/* Settings component */}
       <ChatSettings 
         useElevenLabs={true}
-        promptForElevenLabsKey={() => {}}
-        isListening={false}
-        toggleListening={() => {}}
+        promptForElevenLabsKey={() => {
+          const apiKey = prompt('Enter your Eleven Labs API key for improved voice quality:');
+          if (apiKey) {
+            ElevenLabsService.setApiKey(apiKey);
+            toast.success('Eleven Labs API key saved. Voice quality will be improved.');
+            window.location.reload(); // Reload to apply new key
+          }
+        }}
+        isListening={isListening}
+        toggleListening={toggleListening}
         isVenueMode={isVenueMode}
         toggleVenueMode={toggleVenueMode}
       />
@@ -137,10 +139,16 @@ const VernonChat = () => {
         toggleMinimize={toggleMinimize}
         closeChat={closeChat}
         messages={messages}
-        isTyping={isTyping}
-        isSearching={isSearching}
-        onSendMessage={handleSendMessage}
+        isTyping={isSpeaking}
+        isSearching={false}
+        onSendMessage={sendTextMessage}
         isVenueMode={isVenueMode}
+        isListening={isListening}
+        isProcessing={isProcessing}
+        transcript={transcript}
+        interimTranscript={interimTranscript}
+        toggleListening={toggleListening}
+        isSpeaking={isSpeaking}
       />
     </div>
   );

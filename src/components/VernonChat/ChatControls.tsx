@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Mic, MicOff, Loader2, Send } from 'lucide-react';
 import MessageInput from './MessageInput';
@@ -25,63 +25,11 @@ const ChatControls: React.FC<ChatControlsProps> = ({
   isTyping
 }) => {
   const [inputValue, setInputValue] = useState('');
-  const [autoSubmitTimeout, setAutoSubmitTimeout] = useState<NodeJS.Timeout | null>(null);
-
-  // Effect to handle auto-submission of transcript
-  useEffect(() => {
-    if (transcript) {
-      // Set the input value to the transcript
-      setInputValue(transcript);
-      
-      // Clear any existing timeout
-      if (autoSubmitTimeout) {
-        clearTimeout(autoSubmitTimeout);
-      }
-      
-      // Set a timeout to auto-submit after a short delay
-      const timeout = setTimeout(() => {
-        if (transcript.trim() && !isTyping) {
-          onSendMessage(transcript);
-          // Clear input after sending
-          setInputValue('');
-        }
-      }, 200);
-      
-      setAutoSubmitTimeout(timeout);
-    }
-    
-    // Clean up timeout on unmount
-    return () => {
-      if (autoSubmitTimeout) {
-        clearTimeout(autoSubmitTimeout);
-      }
-    };
-  }, [transcript, isTyping, onSendMessage]);
-
-  // Add effect for handling Enter key to submit voice transcript
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Enter' && isListening && transcript.trim() && !isProcessing && !isTyping) {
-        e.preventDefault();
-        toggleListening(); // This will stop listening and trigger processing
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isListening, transcript, isProcessing, toggleListening, isTyping]);
-
-  // Function to handle manual send of voice transcript
-  const handleSendVoiceTranscript = () => {
-    if (isListening && transcript.trim() && !isProcessing) {
-      toggleListening(); // This will stop listening and trigger processing
-    }
-  };
 
   // Combine transcript and interim transcript for display
-  const displayTranscript = transcript + (isListening ? ' ' + interimTranscript : '');
+  const displayTranscript = (interimTranscript && isListening) 
+    ? interimTranscript 
+    : transcript;
 
   // Handle input change from keyboard typing
   const handleInputChange = (value: string) => {
@@ -93,6 +41,14 @@ const ChatControls: React.FC<ChatControlsProps> = ({
     if (message.trim() && !isTyping) {
       onSendMessage(message);
       setInputValue('');
+    }
+  };
+
+  // Handle sending voice transcript
+  const handleSendVoiceTranscript = () => {
+    if (transcript.trim() && !isProcessing) {
+      onSendMessage(transcript);
+      toggleListening(); // This will stop listening
     }
   };
 

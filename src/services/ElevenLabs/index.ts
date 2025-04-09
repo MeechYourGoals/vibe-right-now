@@ -12,6 +12,7 @@ export class ElevenLabsService {
   public static getApiKey = ElevenLabsBase.getApiKey;
   public static clearApiKey = ElevenLabsBase.clearApiKey;
   public static hasApiKey = ElevenLabsBase.hasApiKey;
+  public static getDefaultVoiceId = ElevenLabsBase.getDefaultVoiceId;
   
   // Re-export text-to-speech functionality
   public static textToSpeech = ElevenLabsTextToSpeech.textToSpeech;
@@ -21,10 +22,15 @@ export class ElevenLabsService {
   
   // Re-export voice management functionality
   public static getVoices = ElevenLabsVoiceManagement.getVoices;
+  public static getVoice = ElevenLabsVoiceManagement.getVoice;
   
   // Re-export agent capabilities
   public static createAgentTask = ElevenLabsAgentCapabilities.createAgentTask;
+  public static getSignedUrl = ElevenLabsAgentCapabilities.getSignedUrl;
+  public static getAgentInfo = ElevenLabsAgentCapabilities.getAgentInfo;
 }
 
 // Re-export types
 export type { ElevenLabsOptions, ScribeTranscriptionOptions } from './base';
+export type { VoiceInfo } from './voiceManagement';
+export type { AgentTaskRequest, AgentTaskResponse } from './agentCapabilities';

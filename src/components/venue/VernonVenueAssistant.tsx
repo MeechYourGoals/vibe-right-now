@@ -6,8 +6,17 @@ import { Bot, MessageSquare, Crown } from "lucide-react";
 
 const VernonVenueAssistant = () => {
   const openVernonChat = () => {
-    // Trigger Vernon Chat UI
-    window.dispatchEvent(new CustomEvent('open-vernon-chat', { detail: { mode: 'venue' } }));
+    // Create and dispatch custom event
+    const event = new CustomEvent('open-vernon-chat', { 
+      detail: { mode: 'venue' } 
+    });
+    window.dispatchEvent(event);
+    
+    // Alternative approach: manipulate DOM elements directly
+    const chatButtons = document.querySelectorAll('.chatButton');
+    if (chatButtons && chatButtons.length > 0) {
+      (chatButtons[0] as HTMLElement).click();
+    }
   };
   
   return (
