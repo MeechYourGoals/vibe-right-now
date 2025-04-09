@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,9 +10,13 @@ import { Info } from "lucide-react";
 
 interface SocialMediaSettingsProps {
   onSaveApiKeys: (keys: SocialMediaApiKeys) => void;
+  initialApiKeys?: SocialMediaApiKeys;
 }
 
-const SocialMediaSettings: React.FC<SocialMediaSettingsProps> = ({ onSaveApiKeys }) => {
+const SocialMediaSettings: React.FC<SocialMediaSettingsProps> = ({ 
+  onSaveApiKeys,
+  initialApiKeys 
+}) => {
   const [apiKeys, setApiKeys] = useState<SocialMediaApiKeys>({
     instagram: '',
     tiktok: '',
@@ -32,22 +35,26 @@ const SocialMediaSettings: React.FC<SocialMediaSettingsProps> = ({ onSaveApiKeys
 
   // Load saved keys on component mount
   useEffect(() => {
-    const savedKeys = localStorage.getItem('socialMediaApiKeys');
-    if (savedKeys) {
-      try {
-        const parsedKeys = JSON.parse(savedKeys);
-        setApiKeys(parsedKeys);
-        
-        // Also load custom platform name if it exists
-        const savedPlatformName = localStorage.getItem('otherPlatformName');
-        if (savedPlatformName) {
-          setOtherPlatformName(savedPlatformName);
+    if (initialApiKeys) {
+      setApiKeys(initialApiKeys);
+    } else {
+      const savedKeys = localStorage.getItem('socialMediaApiKeys');
+      if (savedKeys) {
+        try {
+          const parsedKeys = JSON.parse(savedKeys);
+          setApiKeys(parsedKeys);
+          
+          // Also load custom platform name if it exists
+          const savedPlatformName = localStorage.getItem('otherPlatformName');
+          if (savedPlatformName) {
+            setOtherPlatformName(savedPlatformName);
+          }
+        } catch (error) {
+          console.error('Error parsing saved API keys:', error);
         }
-      } catch (error) {
-        console.error('Error parsing saved API keys:', error);
       }
     }
-  }, []);
+  }, [initialApiKeys]);
 
   const handleInputChange = (platform: keyof SocialMediaApiKeys, value: string) => {
     setApiKeys(prev => ({

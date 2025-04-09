@@ -1,26 +1,18 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { useSpeechSynthesisVoices } from './useSpeechSynthesisVoices';
-import { useElevenLabsVoice } from './useElevenLabsVoice';
-import { useBrowserSpeechSynthesis } from './useBrowserSpeechSynthesis';
-import { ElevenLabsService } from '@/services/ElevenLabs';
-import { useSpeechSynthesisCore } from './useSpeechSynthesisCore';
-import { useSpeakResponse } from './useSpeakResponse';
-import { useElevenLabsKeyManager } from './useElevenLabsKeyManager';
+import { ElevenLabsService } from '@/services/ElevenLabsService';
 
-// Main hook for speech synthesis
+// Export the speech synthesis hooks
 export { useSpeechSynthesis } from '../useSpeechSynthesis';
 
-// Component hooks
-export {
-  useSpeechSynthesisCore,
-  useSpeakResponse,
-  useElevenLabsKeyManager,
-  useSpeechSynthesisVoices,
-  useElevenLabsVoice,
-  useBrowserSpeechSynthesis,
-  useElevenLabsSpeech
-} from './';
+// Export component hooks from their respective files
+export { useSpeechSynthesisCore } from './useSpeechSynthesisCore';
+export { useSpeakResponse } from './useSpeakResponse';
+export { useElevenLabsKeyManager } from './useElevenLabsKeyManager';
+export { useSpeechSynthesisVoices } from './useSpeechSynthesisVoices';
+export { useElevenLabsVoice } from './useElevenLabsVoice';
+export { useBrowserSpeechSynthesis } from './useBrowserSpeechSynthesis';
+export { useElevenLabsSpeech } from './useElevenLabsSpeech';
 
-// Utility functions
+// Export utility functions
 export { createAudioElement, speakSentenceBySequence, setupSpeechSynthesis } from './speechSynthesisUtils';

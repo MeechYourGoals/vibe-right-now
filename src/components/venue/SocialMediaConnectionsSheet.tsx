@@ -13,18 +13,15 @@ import {
 import { Button } from '@/components/ui/button';
 import SocialMediaSettings from './SocialMediaSettings';
 import SocialMediaIntegration from './SocialMediaIntegration';
+import { SocialMediaApiKeys } from '@/services/SocialMediaService';
 
-// Add the missing type definition
-interface SocialMediaApiKeys {
-  facebook?: string;
-  instagram?: string;
-  twitter?: string;
-  tiktok?: string;
-  yelp?: string;
-  google?: string;
+interface SocialMediaConnectionsSheetProps {
+  onConnectedPlatformsChange?: (connectedPlatforms: Record<string, boolean>) => void;
 }
 
-const SocialMediaConnectionsSheet = () => {
+const SocialMediaConnectionsSheet: React.FC<SocialMediaConnectionsSheetProps> = ({ 
+  onConnectedPlatformsChange 
+}) => {
   const [activeTab, setActiveTab] = useState<'connect' | 'settings'>('connect');
   const [apiKeys, setApiKeys] = useState<SocialMediaApiKeys>({
     facebook: '',
@@ -39,6 +36,15 @@ const SocialMediaConnectionsSheet = () => {
     setApiKeys(keys);
     // This would typically connect to a backend API
     console.log('Saving API keys:', keys);
+    
+    // Update connected platforms based on which keys are set
+    if (onConnectedPlatformsChange) {
+      const connectedPlatforms: Record<string, boolean> = {};
+      Object.keys(keys).forEach(key => {
+        connectedPlatforms[key] = !!keys[key as keyof SocialMediaApiKeys];
+      });
+      onConnectedPlatformsChange(connectedPlatforms);
+    }
   };
   
   return (
@@ -71,11 +77,13 @@ const SocialMediaConnectionsSheet = () => {
           </div>
           
           {activeTab === 'connect' ? (
-            <SocialMediaIntegration />
+            <SocialMediaIntegration 
+              subscriptionTier="standard"
+              venueName="The Rooftop"
+            />
           ) : (
             <SocialMediaSettings 
-              onSaveApiKeys={handleSaveApiKeys} 
-              initialApiKeys={apiKeys}
+              onSaveApiKeys={handleSaveApiKeys}
             />
           )}
         </div>

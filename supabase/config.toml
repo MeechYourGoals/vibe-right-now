@@ -1,1 +1,43 @@
+
 project_id = "yiitqkjrbskxumriujrh"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage", "graphql_public"]
+
+[db]
+port = 54322
+
+[studio]
+enabled = true
+port = 54323
+api_url = "http://localhost"
+
+[inbucket]
+enabled = true
+port = 54324
+
+[storage]
+enabled = true
+
+[auth]
+enabled = true
+
+[realtime]
+enabled = true
+
+[functions.eleven-labs-tts]
+verify_jwt = true
+
+[functions.perplexity-search]
+verify_jwt = true
+
+[functions.google-places]
+verify_jwt = true
+
+[functions.yelp-fusion]
+verify_jwt = true
+
+[functions.ticketmaster]
+verify_jwt = true
