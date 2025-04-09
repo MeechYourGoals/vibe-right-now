@@ -7,7 +7,7 @@ import { useSpeechInteraction } from './hooks/speechInteraction';
 import { Message } from './types';
 import VoiceIndicator from './components/VoiceIndicator';
 import ChatSettings from './components/ChatSettings';
-import { useVoiceEffects } from './hooks/useVoiceEffects';
+import { useVoiceEffects } from './hooks/voiceEffects';
 
 interface ChatWindowProps {
   isOpen: boolean;
