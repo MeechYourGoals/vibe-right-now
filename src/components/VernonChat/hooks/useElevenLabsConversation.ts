@@ -20,6 +20,7 @@ export const useElevenLabsConversation = (isVenueMode = false) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [transcript, setTranscript] = useState('');
   const [interimTranscript, setInterimTranscript] = useState('');
+  const [hasSpokenIntro, setHasSpokenIntro] = useState(false);
   
   const audioContext = useRef<AudioContext | null>(null);
   const audioQueue = useRef<ArrayBuffer[]>([]);
@@ -55,6 +56,12 @@ export const useElevenLabsConversation = (isVenueMode = false) => {
           
           if (interimTranscript) {
             setInterimTranscript(interimTranscript);
+            
+            // If speaking, check for interruption
+            if (isSpeaking && interimTranscript.trim().length > 1) {
+              console.log('User is interrupting, stopping speech');
+              stopSpeaking();
+            }
           }
           
           if (finalTranscript) {
@@ -83,7 +90,7 @@ export const useElevenLabsConversation = (isVenueMode = false) => {
         };
       }
     }
-  }, [isListening]);
+  }, [isListening, isSpeaking, stopSpeaking]);
   
   // Initialize audio context and element
   useEffect(() => {
@@ -193,11 +200,18 @@ export const useElevenLabsConversation = (isVenueMode = false) => {
       setTranscript('');
       setInterimTranscript('');
       console.log('Started listening');
+      
+      // If this is first time listening and intro hasn't been spoken, speak it
+      if (!hasSpokenIntro && messages.length > 0) {
+        const introMessage = messages[0];
+        speakResponse(introMessage.text);
+        setHasSpokenIntro(true);
+      }
     } catch (error) {
       console.error('Error starting to listen:', error);
       setIsListening(false);
     }
-  }, [initSpeechRecognition]);
+  }, [initSpeechRecognition, hasSpokenIntro, messages, speakResponse]);
   
   // Stop listening to user
   const stopListening = useCallback(() => {
@@ -217,6 +231,24 @@ export const useElevenLabsConversation = (isVenueMode = false) => {
     setInterimTranscript('');
   }, [transcript, processVoiceInput]);
   
+  // Stop speaking (for interruptions)
+  const stopSpeaking = useCallback(() => {
+    if (audioElement.current) {
+      audioElement.current.pause();
+      audioElement.current.currentTime = 0;
+      audioElement.current.src = '';
+    }
+    
+    // Cancel any ongoing speech synthesis
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+    
+    audioQueue.current = [];
+    isPlaying.current = false;
+    setIsSpeaking(false);
+  }, []);
+  
   // Toggle listening state
   const toggleListening = useCallback(() => {
     if (isListening) {
@@ -229,6 +261,11 @@ export const useElevenLabsConversation = (isVenueMode = false) => {
   // Speak response using ElevenLabs
   const speakResponse = useCallback(async (text: string) => {
     if (!text) return;
+    
+    // If already speaking, stop current speech
+    if (isSpeaking) {
+      stopSpeaking();
+    }
     
     setIsSpeaking(true);
     
@@ -305,7 +342,7 @@ export const useElevenLabsConversation = (isVenueMode = false) => {
       console.error('Error in speakResponse:', error);
       setIsSpeaking(false);
     }
-  }, []);
+  }, [isSpeaking, stopSpeaking]);
   
   // Send a text message
   const sendTextMessage = useCallback(async (text: string) => {
@@ -329,6 +366,7 @@ export const useElevenLabsConversation = (isVenueMode = false) => {
     connectToAgent: () => setIsConnected(true),
     startListening,
     stopListening,
+    stopSpeaking,
     toggleListening,
     sendTextMessage,
     setMessages,

@@ -21,6 +21,7 @@ const VernonChat = () => {
   const [isMinimized, setIsMinimized] = useState(false);
   const [isVenueMode, setIsVenueMode] = useState(false);
   const [isProPlan, setIsProPlan] = useState(false); // Simulate pro plan status
+  const [introAttempted, setIntroAttempted] = useState(false);
   const { theme, setTheme } = useTheme();
   
   // Use our improved conversation hook
@@ -35,7 +36,8 @@ const VernonChat = () => {
     connectToAgent,
     toggleListening,
     sendTextMessage,
-    processVoiceInput
+    processVoiceInput,
+    speakResponse
   } = useElevenLabsConversation(isVenueMode);
   
   const toggleMinimize = () => {
@@ -44,6 +46,7 @@ const VernonChat = () => {
   
   const closeChat = () => {
     setIsOpen(false);
+    setIntroAttempted(false); // Reset intro state when closing
   };
 
   const toggleVenueMode = () => {
@@ -84,6 +87,24 @@ const VernonChat = () => {
     }
   }, [isOpen, isConnected, connectToAgent]);
   
+  // Play intro message when chat is opened
+  useEffect(() => {
+    const playIntroMessage = async () => {
+      if (isOpen && messages.length > 0 && !introAttempted) {
+        setIntroAttempted(true);
+        const introMessage = messages[0];
+        console.log('Attempting to play intro message:', introMessage.text);
+        
+        // Wait a moment for everything to be ready
+        setTimeout(() => {
+          speakResponse(introMessage.text);
+        }, 500);
+      }
+    };
+    
+    playIntroMessage();
+  }, [isOpen, messages, introAttempted, speakResponse]);
+  
   // Check for ElevenLabs API key and prompt if not available
   useEffect(() => {
     if (isOpen && !ElevenLabsService.hasApiKey()) {
@@ -95,6 +116,7 @@ const VernonChat = () => {
   const handleOpenChat = (mode: boolean = false) => {
     setIsVenueMode(mode);
     setIsOpen(true);
+    setIntroAttempted(false); // Reset intro state when opening
   };
   
   // Prompt for ElevenLabs API key
@@ -105,6 +127,26 @@ const VernonChat = () => {
       toast.success('Voice settings updated. Reload to apply changes.');
     }
   };
+  
+  // Handle user interruption
+  useEffect(() => {
+    if (isSpeaking && isListening && interimTranscript.trim().length > 2) {
+      // If Vernon is speaking but user starts talking, stop Vernon to listen
+      console.log('User interrupted Vernon, stopping speech to listen');
+      // Stop speaking and focus on listening
+      if (typeof window !== 'undefined') {
+        // Cancel any ongoing speech synthesis
+        if (window.speechSynthesis) {
+          window.speechSynthesis.cancel();
+        }
+        // Also stop any audio elements that might be playing
+        document.querySelectorAll('audio').forEach(audio => {
+          audio.pause();
+          audio.currentTime = 0;
+        });
+      }
+    }
+  }, [isSpeaking, isListening, interimTranscript]);
   
   if (!isOpen) {
     return (

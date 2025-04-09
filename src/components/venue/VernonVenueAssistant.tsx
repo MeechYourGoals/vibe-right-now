@@ -20,20 +20,20 @@ const VernonVenueAssistant = () => {
   };
   
   return (
-    <Card className="border-2 border-amber-300 bg-gradient-to-br from-amber-50 to-white dark:from-amber-950 dark:to-background/95">
+    <Card className="border-2 border-amber-300 bg-gradient-to-br from-amber-100 to-white dark:from-amber-900 dark:to-background">
       <CardHeader className="pb-2">
-        <CardTitle className="flex items-center text-amber-800 dark:text-amber-400">
+        <CardTitle className="flex items-center text-amber-900 dark:text-amber-300">
           <Bot className="mr-2 h-5 w-5" />
           Vernon Venue Assistant
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <p className="text-sm font-medium text-gray-800 dark:text-gray-200">Get AI-powered help with managing your venue and analyzing customer data.</p>
+          <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Get AI-powered help with managing your venue and analyzing customer data.</p>
           
           <div className="space-y-2">
-            <h4 className="text-xs font-medium uppercase text-gray-700 dark:text-gray-300">Ask Vernon about:</h4>
-            <ul className="text-sm space-y-1 text-gray-800 dark:text-gray-200">
+            <h4 className="text-xs font-medium uppercase text-gray-800 dark:text-gray-200">Ask Vernon about:</h4>
+            <ul className="text-sm space-y-1 text-gray-900 dark:text-gray-100">
               <li className="flex items-center"><Crown className="mr-2 h-3 w-3 text-amber-500" /> Marketing strategies</li>
               <li className="flex items-center"><Crown className="mr-2 h-3 w-3 text-amber-500" /> Customer insights</li>
               <li className="flex items-center"><Crown className="mr-2 h-3 w-3 text-amber-500" /> Competitive analysis</li>
