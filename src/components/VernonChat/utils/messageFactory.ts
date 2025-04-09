@@ -7,7 +7,7 @@ export const INITIAL_MESSAGE: Message = {
   id: '1',
   role: 'assistant',
   content: "Hi there! I'm VeRNon, your assistant. How can I help you today?",
-  timestamp: new Date().toISOString()
+  timestamp: new Date()
 };
 
 export const createUserMessage = (content: string): Message => {
@@ -15,7 +15,7 @@ export const createUserMessage = (content: string): Message => {
     id: uuidv4(),
     role: 'user',
     content,
-    timestamp: new Date().toISOString()
+    timestamp: new Date()
   };
 };
 
@@ -24,7 +24,7 @@ export const createAssistantMessage = (content: string): Message => {
     id: uuidv4(),
     role: 'assistant',
     content,
-    timestamp: new Date().toISOString()
+    timestamp: new Date()
   };
 };
 
