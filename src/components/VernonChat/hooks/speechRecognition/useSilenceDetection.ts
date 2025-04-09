@@ -1,7 +1,7 @@
 
 import { useRef, useCallback } from 'react';
 
-interface UseSilenceDetectionProps {
+export interface UseSilenceDetectionProps {
   onSilenceDetected: () => void;
   silenceDuration?: number;
 }

@@ -1,7 +1,7 @@
 
 import { useCallback } from 'react';
 
-interface TranscriptProcessorProps {
+export interface TranscriptProcessorProps {
   transcript: string;
   setIsProcessing: (value: boolean) => void;
   setTranscript: (value: string) => void;

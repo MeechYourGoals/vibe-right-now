@@ -21,6 +21,16 @@ export const useSpeechRecognition = (): SpeechRecognitionHookReturn => {
     restartAttempts,
     previousInterims
   } = useRecognitionSetup();
+
+  // Set up silence detection for auto-stopping
+  const { resetSilenceTimer, clearSilenceTimer } = useSilenceDetection({
+    onSilenceDetected: () => {
+      if (isListening && speechRecognition.current) {
+        console.log('Silence detected, stopping listening');
+        stopListening();
+      }
+    }
+  });
   
   // Set up event handlers for speech recognition
   useRecognitionEventHandlers({
@@ -30,7 +40,8 @@ export const useSpeechRecognition = (): SpeechRecognitionHookReturn => {
     setIsListening,
     isListening,
     restartAttempts,
-    previousInterims
+    previousInterims,
+    resetSilenceTimer
   });
   
   // Listening controls (start/stop)
@@ -45,21 +56,16 @@ export const useSpeechRecognition = (): SpeechRecognitionHookReturn => {
     setIsProcessing,
     setTranscript,
     setInterimTranscript,
-    restartAttempts
-  });
-  
-  // Silence detection for auto-stopping
-  useSilenceDetection({
-    speechRecognition,
-    isListening,
-    interimTranscript,
-    stopListening
+    restartAttempts,
+    clearSilenceTimer
   });
   
   // Process the transcript
   const { processTranscript } = useTranscriptProcessor({
     transcript,
-    setTranscript
+    setTranscript,
+    setIsProcessing,
+    setInterimTranscript
   });
   
   return {

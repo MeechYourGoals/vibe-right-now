@@ -1,16 +1,16 @@
 
-import { MutableRefObject } from 'react';
-import { toast } from 'sonner';
+import { useCallback } from 'react';
 
-interface UseListeningControlsProps {
-  speechRecognition: MutableRefObject<SpeechRecognition | null>;
+interface ListeningControlsProps {
+  speechRecognition: React.MutableRefObject<SpeechRecognition | null>;
   initialized: boolean;
   isListening: boolean;
   setIsListening: (value: boolean) => void;
   setIsProcessing: (value: boolean) => void;
   setTranscript: (value: string) => void;
   setInterimTranscript: (value: string) => void;
-  restartAttempts: MutableRefObject<number>;
+  restartAttempts: React.MutableRefObject<number>;
+  clearSilenceTimer?: () => void;
 }
 
 export const useListeningControls = ({
@@ -21,65 +21,60 @@ export const useListeningControls = ({
   setIsProcessing,
   setTranscript,
   setInterimTranscript,
-  restartAttempts
-}: UseListeningControlsProps) => {
+  restartAttempts,
+  clearSilenceTimer
+}: ListeningControlsProps) => {
   
-  // Start listening function
-  const startListening = () => {
+  // Start listening for speech
+  const startListening = useCallback(() => {
     if (!initialized || !speechRecognition.current) {
-      toast.error('Speech recognition is not available');
+      console.error('Speech recognition not initialized');
+      return;
+    }
+    
+    if (isListening) {
+      console.log('Already listening, no need to start again');
       return;
     }
     
     try {
       speechRecognition.current.start();
       setIsListening(true);
-      console.log('Started listening...');
+      restartAttempts.current = 0;
+      console.log('Started listening');
     } catch (error) {
       console.error('Error starting speech recognition:', error);
-      
-      // If already started, try to restart
-      if ((error as Error).message.includes('already started')) {
-        try {
-          speechRecognition.current.stop();
-          setTimeout(() => {
-            if (speechRecognition.current) {
-              speechRecognition.current.start();
-              setIsListening(true);
-              console.log('Restarted listening...');
-            }
-          }, 100);
-        } catch (restartError) {
-          console.error('Error restarting recognition:', restartError);
-          setIsListening(false);
-        }
-      } else {
-        toast.error('Could not start speech recognition');
-        setIsListening(false);
-      }
     }
-  };
+  }, [initialized, isListening, setIsListening, speechRecognition, restartAttempts]);
   
-  // Stop listening function
-  const stopListening = () => {
-    if (speechRecognition.current && isListening) {
-      try {
-        // Preserve current transcript when stopping
-        speechRecognition.current.stop();
+  // Stop listening and process the transcript
+  const stopListening = useCallback(() => {
+    if (!speechRecognition.current) return;
+    
+    try {
+      // Clear any silence detection timers
+      if (clearSilenceTimer) {
+        clearSilenceTimer();
+      }
+      
+      // Stop recognition
+      speechRecognition.current.stop();
+      console.log('Stopped listening');
+      
+      // Update state based on if there is a transcript to process
+      if (isListening) {
+        setIsListening(false);
         
-        // Set processing state if there's a transcript to process
-        if (setTranscript && setInterimTranscript) {
+        // Only set processing if we have some text to process
+        if (speechRecognition.current) {
           setIsProcessing(true);
         }
-        
-        setIsListening(false);
-        restartAttempts.current = 0;
-        console.log('Stopped listening...');
-      } catch (error) {
-        console.error('Error stopping speech recognition:', error);
       }
+    } catch (error) {
+      console.error('Error stopping speech recognition:', error);
+      setIsListening(false);
     }
-  };
+  }, [speechRecognition, isListening, setIsListening, setIsProcessing, clearSilenceTimer]);
   
   return {
     startListening,

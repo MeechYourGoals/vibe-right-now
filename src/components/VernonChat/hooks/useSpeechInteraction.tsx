@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from 'react';
-import { useSpeechRecognition } from './useSpeechRecognition';
-import { useSpeechSynthesis } from './useSpeechSynthesis';
+import { useSpeechRecognition } from './speechRecognition';
+import { useSpeechSynthesis } from './speechSynthesis';
 import { toast } from 'sonner';
 import { ElevenLabsService } from '@/services/ElevenLabsService';
 
