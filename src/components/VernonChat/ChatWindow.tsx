@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import ChatHeader from './ChatHeader';
 import MessageList from './MessageList';
@@ -63,12 +62,13 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       if (introTimeout.current) {
         clearTimeout(introTimeout.current);
       }
+      stopSpeaking();
     };
-  }, []);
+  }, [stopSpeaking]);
 
   // Trigger intro speech when chat is opened for the first time
   useEffect(() => {
-    if (isOpen && messages.length > 0 && !introMessageSpoken && !introAttempted) {
+    if (isOpen && messages.length > 0 && !introMessageSpoken && !introAttempted && !isSpeaking) {
       setIntroAttempted(true);
       console.log('Attempting to speak intro message on first open');
       
@@ -77,12 +77,11 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
         clearTimeout(introTimeout.current);
       }
       
+      // Make sure we're not already speaking something
+      stopSpeaking();
+      
       // Try to speak the intro with a small delay to ensure everything is loaded
       introTimeout.current = setTimeout(() => {
-        // Make sure we're not already speaking something
-        stopSpeaking();
-        
-        // Now try to speak the intro
         speakIntroOnce(messages[0].text)
           .then(success => {
             if (success) {
@@ -91,34 +90,15 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
               markIntroAsSpoken();
             } else {
               console.warn('Failed to speak intro message with speakIntroOnce');
-              
-              // Try one more time with direct speakResponse
-              console.log('Attempting direct speak response for intro');
-              speakResponse(messages[0].text)
-                .then(() => {
-                  console.log('Direct speak response for intro completed');
-                  setIntroMessageSpoken(true);
-                  markIntroAsSpoken();
-                })
-                .catch(err => {
-                  console.error('Second attempt to speak intro also failed:', err);
-                  toast.error('Voice synthesis not available. Check your audio settings.');
-                });
             }
           })
           .catch(err => {
             console.error('Error during intro speech:', err);
             toast.error('Error initializing voice. Check your audio settings.');
           });
-      }, 1000);
-      
-      return () => {
-        if (introTimeout.current) {
-          clearTimeout(introTimeout.current);
-        }
-      };
+      }, 1500);
     }
-  }, [isOpen, messages, introMessageSpoken, introAttempted, speakIntroOnce, markIntroAsSpoken, speakResponse, stopSpeaking]);
+  }, [isOpen, messages, introMessageSpoken, introAttempted, isSpeaking, speakIntroOnce, markIntroAsSpoken, stopSpeaking]);
 
   // Use the custom hook to manage voice interaction effects
   useVoiceEffects({

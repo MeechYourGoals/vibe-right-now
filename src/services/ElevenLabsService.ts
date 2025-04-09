@@ -1,3 +1,4 @@
+
 // Eleven Labs API integration
 // This service handles text-to-speech and speech-to-text conversion using Eleven Labs API
 
@@ -66,7 +67,7 @@ export class ElevenLabsService {
     }
     
     try {
-      // Use the Adam voice by default for a consistent male voice
+      // Always use the Adam voice by default for a consistent male voice
       const voiceId = options.voice_id || this.defaultVoiceId;
       const modelId = options.model_id || 'eleven_multilingual_v2';
       
@@ -84,8 +85,8 @@ export class ElevenLabsService {
           text,
           model_id: modelId,
           voice_settings: options.voice_settings || {
-            stability: 0.6,
-            similarity_boost: 0.85
+            stability: 0.75,  // Increased for more stable output
+            similarity_boost: 0.75  // Balanced for natural sound
           }
         })
       });
