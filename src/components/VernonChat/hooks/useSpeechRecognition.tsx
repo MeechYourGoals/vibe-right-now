@@ -24,7 +24,12 @@ export const useSpeechRecognition = () => {
       speechRecognition.current = initializeSpeechRecognition();
       
       if (speechRecognition.current) {
+        // Configure recognition
+        speechRecognition.current.continuous = true;
+        speechRecognition.current.interimResults = true;
+        
         speechRecognition.current.onresult = (event) => {
+          console.log('Speech recognition result received', event);
           // Get both interim and final results
           let finalTranscript = '';
           let currentInterimTranscript = '';
@@ -63,10 +68,12 @@ export const useSpeechRecognition = () => {
         };
         
         speechRecognition.current.onend = () => {
+          console.log('Speech recognition ended');
           if (isListening) {
             // Only try to restart if we're supposed to be listening
             try {
               speechRecognition.current?.start();
+              console.log('Restarted speech recognition');
             } catch (error) {
               console.error('Error restarting speech recognition:', error);
               setIsListening(false);
@@ -75,16 +82,12 @@ export const useSpeechRecognition = () => {
         };
         
         speechRecognition.current.onerror = (event) => {
+          console.error('Speech recognition error:', event);
           handleSpeechRecognitionError(event.error);
           setIsListening(false);
         };
         
         isInitialized.current = true;
-        
-        // Start listening automatically after a small delay to ensure proper initialization
-        setTimeout(() => {
-          startListening();
-        }, 500);
       }
     }
     
@@ -101,8 +104,14 @@ export const useSpeechRecognition = () => {
   // Start listening function with proper error handling
   const startListening = useCallback(() => {
     if (!speechRecognition.current) {
-      toast.error('Speech recognition not available');
-      return;
+      console.error('Speech recognition not available');
+      
+      // Reinitialize if needed
+      speechRecognition.current = initializeSpeechRecognition();
+      if (!speechRecognition.current) {
+        toast.error('Speech recognition not available on your browser');
+        return;
+      }
     }
     
     // Make sure we're not already listening before trying to start
@@ -119,9 +128,19 @@ export const useSpeechRecognition = () => {
       setIsListening(true);
       lastSpeechTime.current = Date.now();
       
-      // Only try to start if speechRecognition is available
-      speechRecognition.current.start();
-      toast.success('Voice mode activated. Start speaking...');
+      // Force request microphone access to ensure permissions
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(() => {
+          // Only try to start if speechRecognition is available
+          speechRecognition.current?.start();
+          console.log('Started speech recognition successfully');
+          toast.success('Voice mode activated. Start speaking...');
+        })
+        .catch(err => {
+          console.error('Microphone access denied:', err);
+          toast.error('Please allow microphone access to use voice features');
+          setIsListening(false);
+        });
     } catch (error) {
       console.error('Error starting speech recognition:', error);
       setIsListening(false);
@@ -134,6 +153,7 @@ export const useSpeechRecognition = () => {
       try {
         // Only try to stop if we're actually listening to avoid errors
         speechRecognition.current.stop();
+        console.log('Stopped speech recognition');
       } catch (error) {
         console.error('Error stopping speech recognition:', error);
       }

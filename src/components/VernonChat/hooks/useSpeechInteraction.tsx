@@ -1,10 +1,13 @@
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useSpeechRecognition } from './useSpeechRecognition';
 import { useSpeechSynthesis } from './useSpeechSynthesis';
 import { toast } from 'sonner';
+import { ElevenLabsService } from '@/services/ElevenLabsService';
 
 export const useSpeechInteraction = () => {
+  const [voiceSetupComplete, setVoiceSetupComplete] = useState(false);
+  
   const {
     isListening,
     isProcessing,
@@ -19,8 +22,37 @@ export const useSpeechInteraction = () => {
   const {
     isSpeaking,
     speakResponse,
-    stopSpeaking
+    stopSpeaking,
+    useElevenLabs,
+    promptForElevenLabsKey
   } = useSpeechSynthesis();
+  
+  // Check if this is the first time using voice features
+  useEffect(() => {
+    if (!voiceSetupComplete) {
+      const hasSeenVoicePrompt = localStorage.getItem('hasSeenVoicePrompt');
+      
+      if (!hasSeenVoicePrompt && !ElevenLabsService.hasApiKey()) {
+        // Set a small delay to show the prompt after component mounts
+        const promptTimer = setTimeout(() => {
+          const useElevenLabsVoice = window.confirm(
+            'Would you like to enable higher quality voice with Eleven Labs? ' +
+            'You\'ll need an API key from elevenlabs.io (free tier available).'
+          );
+          
+          if (useElevenLabsVoice) {
+            promptForElevenLabsKey();
+          }
+          
+          localStorage.setItem('hasSeenVoicePrompt', 'true');
+        }, 2000);
+        
+        return () => clearTimeout(promptTimer);
+      }
+      
+      setVoiceSetupComplete(true);
+    }
+  }, [voiceSetupComplete, promptForElevenLabsKey]);
   
   const toggleListening = () => {
     if (!navigator.mediaDevices) {
@@ -57,6 +89,8 @@ export const useSpeechInteraction = () => {
     stopListening,
     stopSpeaking,
     speakResponse,
-    processTranscript
+    processTranscript,
+    useElevenLabs,
+    promptForElevenLabsKey
   };
 };
