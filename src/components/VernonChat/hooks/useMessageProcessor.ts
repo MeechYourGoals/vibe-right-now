@@ -34,11 +34,11 @@ export const useMessageProcessor = (isProPlan: boolean = false, isVenueMode: boo
         // Process venue-specific queries
         responseText = await processVenueQuery(inputValue, isProPlan);
       } else {
-        // Try to get response from Perplexity first for more accurate information
+        // Try to get response from our search service
         try {
           responseText = await PerplexityService.searchPerplexity(inputValue);
         } catch (error) {
-          console.error('Error with Perplexity search, falling back to HuggingChat:', error);
+          console.error('Error with search service, falling back to HuggingChat:', error);
           // Get response from HuggingChat as fallback
           responseText = await HuggingChatService.searchHuggingChat(inputValue);
         }
