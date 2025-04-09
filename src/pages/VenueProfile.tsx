@@ -1,4 +1,3 @@
-
 import { useState, useMemo, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Minimize } from "lucide-react";
@@ -50,13 +49,8 @@ const VenueProfile = () => {
   // Generate venue-specific posts for each day of the week
   const generatedVenuePosts = useMemo(() => {
     if (!venue) return [];
-    const posts = createDaySpecificVenuePosts(venue.id, venue.type) as ExtendedPost[];
-    
-    // Ensure each generated post has all required Post properties
-    return posts.map(post => ({
-      ...post,
-      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days from now
-    })) as Post[];
+    // Create posts and cast the result to Post[]
+    return createDaySpecificVenuePosts(venue.id, venue.type) as unknown as Post[];
   }, [venue]);
 
   const filteredPosts = useMemo(() => {

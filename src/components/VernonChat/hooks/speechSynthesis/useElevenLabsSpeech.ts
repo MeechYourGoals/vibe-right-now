@@ -29,6 +29,7 @@ export const useElevenLabsSpeech = ({
       // Stop any currently playing speech first
       stopSpeaking();
       
+      // Set state to speaking and track current text
       setIsSpeaking(true);
       currentlyPlayingText.current = text;
       
@@ -52,20 +53,12 @@ export const useElevenLabsSpeech = ({
       try {
         await audioElement.current.play();
         
-        // Original onended handler will be set by the parent component
-        // This ensures we're not losing the URL cleanup logic
-        const originalOnEnded = audioElement.current.onended;
-        
-        // Add URL cleanup to onended
-        audioElement.current.onended = (event) => {
+        // Clean up blob URL after playback
+        audioElement.current.onended = () => {
           URL.revokeObjectURL(url);
-          
-          // Call original handler if it exists
-          if (originalOnEnded && typeof originalOnEnded === 'function') {
-            originalOnEnded.call(audioElement.current, event);
-          }
+          setIsSpeaking(false);
+          currentlyPlayingText.current = null;
         };
-        
         return true;
       } catch (error) {
         console.error('Error playing audio:', error);
