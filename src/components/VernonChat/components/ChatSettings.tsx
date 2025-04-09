@@ -14,21 +14,19 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 
 interface ChatSettingsProps {
-  useElevenLabs: boolean;
-  promptForElevenLabsKey: () => void;
   isListening: boolean;
   toggleListening: () => void;
   isVenueMode?: boolean;
   toggleVenueMode?: () => void;
+  isModelLoading?: boolean;
 }
 
 const ChatSettings: React.FC<ChatSettingsProps> = ({
-  useElevenLabs,
-  promptForElevenLabsKey,
   isListening,
   toggleListening,
   isVenueMode = false,
-  toggleVenueMode
+  toggleVenueMode,
+  isModelLoading = false
 }) => {
   return (
     <div className="absolute right-3 top-3 z-10">
@@ -40,11 +38,16 @@ const ChatSettings: React.FC<ChatSettingsProps> = ({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Voice Settings</DropdownMenuLabel>
-          <DropdownMenuItem onClick={promptForElevenLabsKey}>
-            {useElevenLabs ? "Update Eleven Labs API Key" : "Set Eleven Labs API Key"}
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={toggleListening}>
-            {isListening ? "Stop Voice Input" : "Start Voice Input"}
+          <DropdownMenuItem 
+            onClick={toggleListening}
+            disabled={isModelLoading}
+          >
+            {isModelLoading 
+              ? "Loading speech recognition model..." 
+              : isListening 
+                ? "Stop Voice Input" 
+                : "Start Voice Input"
+            }
           </DropdownMenuItem>
           
           {toggleVenueMode && (

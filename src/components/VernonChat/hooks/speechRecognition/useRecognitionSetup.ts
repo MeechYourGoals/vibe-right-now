@@ -1,34 +1,39 @@
 
 import { useRef, useEffect, useState } from 'react';
 import { initializeSpeechRecognition } from '../../utils/speech';
-import { ElevenLabsService } from '@/services/ElevenLabsService';
+import { WhisperSpeechService } from '@/services/WhisperSpeechService';
 
 export const useRecognitionSetup = () => {
   const [initialized, setInitialized] = useState(false);
-  const [useElevenLabsASR, setUseElevenLabsASR] = useState(false);
+  const [useLocalWhisper, setUseLocalWhisper] = useState(true);
   const speechRecognition = useRef<SpeechRecognition | null>(null);
   const restartAttempts = useRef<number>(0);
   const previousInterims = useRef<string[]>([]);
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const audioChunks = useRef<Blob[]>([]);
   
-  // Check if Eleven Labs API key is available
+  // Check if Whisper service is available in this browser
   useEffect(() => {
-    const hasElevenLabsKey = ElevenLabsService.hasApiKey();
-    // Prefer Eleven Labs ASR if API key is available
-    setUseElevenLabsASR(hasElevenLabsKey);
+    const hasWhisperSupport = WhisperSpeechService.isAvailable();
+    // Prefer Whisper if browser supports required APIs
+    setUseLocalWhisper(hasWhisperSupport);
     
     // Log for debugging
-    console.log('Eleven Labs API key available:', hasElevenLabsKey);
+    console.log('Local Whisper support available:', hasWhisperSupport);
   }, []);
   
   // Initialize speech recognition
   useEffect(() => {
     if (!initialized) {
-      if (useElevenLabsASR) {
-        // Set up audio recording for Eleven Labs Scribe
+      if (useLocalWhisper) {
+        // Set up audio recording for Whisper
         setupAudioRecording();
-        console.log('Setting up Eleven Labs Scribe audio recording');
+        console.log('Setting up Whisper audio recording');
+        
+        // Pre-load the Whisper model in background
+        WhisperSpeechService.initSpeechRecognition()
+          .then(() => console.log('Whisper model preloaded successfully'))
+          .catch(err => console.error('Error preloading Whisper model:', err));
       } else {
         // Fall back to browser's speech recognition
         speechRecognition.current = initializeSpeechRecognition();
@@ -44,12 +49,12 @@ export const useRecognitionSetup = () => {
         }
       }
     }
-  }, [initialized, useElevenLabsASR]);
+  }, [initialized, useLocalWhisper]);
   
-  // Setup audio recording for Eleven Labs Scribe
+  // Setup audio recording for Whisper
   const setupAudioRecording = async () => {
     try {
-      console.log('Requesting microphone access for Eleven Labs Scribe');
+      console.log('Requesting microphone access for Whisper');
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       
       mediaRecorder.current = new MediaRecorder(stream, {
@@ -63,8 +68,8 @@ export const useRecognitionSetup = () => {
       };
       
       mediaRecorder.current.onstop = async () => {
-        console.log('Audio recording stopped, processing with Eleven Labs Scribe');
-        // Process audio with Eleven Labs Scribe
+        console.log('Audio recording stopped, processing with Whisper');
+        // Process audio with Whisper
         if (audioChunks.current.length === 0) {
           console.warn('No audio chunks collected');
           return;
@@ -74,25 +79,23 @@ export const useRecognitionSetup = () => {
         const audioBlob = new Blob(audioChunks.current, { type: 'audio/webm' });
         console.log('Audio blob created, size:', audioBlob.size);
         
-        // Use Eleven Labs Scribe for transcription
+        // Use Whisper for transcription
         try {
-          const transcription = await ElevenLabsService.speechToText(audioBlob, {
-            language: 'en', // Default to English
-          });
+          const transcription = await WhisperSpeechService.speechToText(audioBlob);
           
-          console.log('Received transcription from Eleven Labs Scribe:', transcription);
+          console.log('Received transcription from Whisper:', transcription);
           
           if (transcription) {
             // Dispatch custom event with transcription
-            const event = new CustomEvent('elevenLabsTranscription', {
+            const event = new CustomEvent('whisperTranscription', {
               detail: { transcription }
             });
             window.dispatchEvent(event);
           } else {
-            console.warn('Empty transcription received from Eleven Labs Scribe');
+            console.warn('Empty transcription received from Whisper');
           }
         } catch (error) {
-          console.error('Error with Eleven Labs transcription:', error);
+          console.error('Error with Whisper transcription:', error);
         }
         
         // Reset chunks for next recording
@@ -100,9 +103,9 @@ export const useRecognitionSetup = () => {
       };
       
       setInitialized(true);
-      console.log('Eleven Labs Scribe audio recording setup complete');
+      console.log('Whisper audio recording setup complete');
     } catch (error) {
-      console.error('Error setting up audio recording for Eleven Labs Scribe:', error);
+      console.error('Error setting up audio recording for Whisper:', error);
       // Fall back to browser's speech recognition
       console.log('Falling back to browser speech recognition');
       speechRecognition.current = initializeSpeechRecognition();
@@ -120,7 +123,7 @@ export const useRecognitionSetup = () => {
     initialized,
     restartAttempts,
     previousInterims,
-    useElevenLabsASR,
+    useLocalWhisper,
     mediaRecorder,
     audioChunks
   };

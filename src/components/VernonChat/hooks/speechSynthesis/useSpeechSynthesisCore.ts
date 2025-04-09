@@ -1,14 +1,12 @@
 
 import { useState, useRef, useCallback } from 'react';
-import { useElevenLabsSpeech } from './useElevenLabsSpeech';
 import { useBrowserSpeechSynthesis } from './useBrowserSpeechSynthesis';
-import { ElevenLabsService } from '@/services/ElevenLabsService';
 import { useSpeechSynthesisVoices } from './useSpeechSynthesisVoices';
 import { createAudioElement } from './speechSynthesisUtils';
+import { WhisperSpeechService } from '@/services/WhisperSpeechService';
 
 export const useSpeechSynthesisCore = () => {
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [useElevenLabs, setUseElevenLabs] = useState(true); // Default to using ElevenLabs
   
   // References for tracking speech
   const currentlyPlayingText = useRef<string | null>(null);
@@ -36,47 +34,37 @@ export const useSpeechSynthesisCore = () => {
   
   // Define the stop speaking function
   const stopSpeaking = useCallback((): void => {
-    if (useElevenLabs && audioElement.current) {
+    if (audioElement.current) {
       audioElement.current.pause();
       audioElement.current.currentTime = 0;
-      setIsSpeaking(false);
-      currentlyPlayingText.current = null;
-    } else if (window.speechSynthesis) {
-      window.speechSynthesis.cancel();
-      setIsSpeaking(false);
-      currentlyPlayingText.current = null;
     }
-  }, [useElevenLabs]);
+    
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+    
+    setIsSpeaking(false);
+    currentlyPlayingText.current = null;
+  }, []);
   
   // Get browser speech synthesis functionality
   const { speakWithBrowser } = useBrowserSpeechSynthesis();
   
-  // Get ElevenLabs speech functionality
-  const { speakWithElevenLabs } = useElevenLabsSpeech({
-    audioElement,
-    isSpeaking,
-    setIsSpeaking,
-    currentlyPlayingText,
-    stopSpeaking
-  });
-  
-  // Check for ElevenLabs API key and set useElevenLabs state
+  // Initialize voices
   useCallback(() => {
-    const hasElevenLabsKey = ElevenLabsService.hasApiKey();
-    setUseElevenLabs(hasElevenLabsKey);
+    WhisperSpeechService.initVoices()
+      .then(voices => console.log(`Initialized ${voices.length} voices for speech synthesis`))
+      .catch(error => console.error('Error initializing voices:', error));
   }, []);
   
   return {
     isSpeaking,
     setIsSpeaking,
-    useElevenLabs,
-    setUseElevenLabs,
     currentlyPlayingText,
     audioElement,
     introHasPlayed,
     voices,
     stopSpeaking,
-    speakWithBrowser,
-    speakWithElevenLabs
+    speakWithBrowser
   };
 };

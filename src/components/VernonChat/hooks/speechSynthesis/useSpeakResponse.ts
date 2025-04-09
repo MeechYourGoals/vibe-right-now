@@ -1,14 +1,13 @@
 
 import { useCallback } from 'react';
-import { ElevenLabsService } from '@/services/ElevenLabsService';
+import { WhisperSpeechService } from '@/services/WhisperSpeechService';
+import { SimpleSearchService } from '@/services/SimpleSearchService';
 
 interface UseSpeakResponseProps {
   isSpeaking: boolean;
   currentlyPlayingText: React.MutableRefObject<string | null>;
   stopSpeaking: () => void;
-  speakWithElevenLabs: (text: string) => Promise<boolean>;
   speakWithBrowser: (text: string, voices: SpeechSynthesisVoice[]) => Promise<boolean>;
-  useElevenLabs: boolean;
   introHasPlayed: React.MutableRefObject<boolean>;
   voices: SpeechSynthesisVoice[];
 }
@@ -17,9 +16,7 @@ export const useSpeakResponse = ({
   isSpeaking,
   currentlyPlayingText,
   stopSpeaking,
-  speakWithElevenLabs,
   speakWithBrowser,
-  useElevenLabs,
   introHasPlayed,
   voices
 }: UseSpeakResponseProps) => {
@@ -40,27 +37,58 @@ export const useSpeakResponse = ({
     // Always stop any ongoing speech first to prevent overlapping voices
     stopSpeaking();
     
-    console.log('Speaking with ElevenLabs:', useElevenLabs);
-    
-    let speechSuccess = false;
-    
-    // Try to use Eleven Labs if available
-    if (useElevenLabs) {
+    // Log that search is happening regardless of speech synthesis
+    if (text.toLowerCase().includes('search') || 
+        text.toLowerCase().includes('find') || 
+        text.toLowerCase().includes('where') ||
+        text.toLowerCase().includes('what') ||
+        text.toLowerCase().includes('how')) {
+      console.log('Search query detected, fetching information...');
+      
       try {
-        speechSuccess = await speakWithElevenLabs(text);
-        if (speechSuccess) {
-          // Mark intro as played if this is the first message
-          if (!introHasPlayed.current && text.includes("I'm VeRNon")) {
-            introHasPlayed.current = true;
-          }
-          return;
-        }
+        // Always attempt to search for information, even if speech fails
+        SimpleSearchService.searchForCityInfo(text)
+          .then(searchResult => {
+            console.log('Search result:', searchResult);
+            // If search was successful and yielded results, speak those instead
+            if (searchResult && searchResult.trim() !== '') {
+              // Speak the search result instead
+              WhisperSpeechService.textToSpeech(searchResult)
+                .then(success => {
+                  if (success) {
+                    console.log('Speaking search result response');
+                  } else {
+                    console.warn('Failed to speak search result, falling back to browser');
+                    speakWithBrowser(searchResult, voices);
+                  }
+                });
+            }
+          })
+          .catch(err => console.error('Error in search service:', err));
       } catch (error) {
-        console.error('ElevenLabs speech failed, falling back to browser synthesis:', error);
+        console.error('Error while processing search:', error);
       }
     }
     
-    // If ElevenLabs failed or is not enabled, fall back to browser's speech synthesis
+    console.log('Speaking with built-in browser synthesis');
+    
+    let speechSuccess = false;
+    
+    // Try to use WhisperSpeechService's text-to-speech first
+    try {
+      speechSuccess = await WhisperSpeechService.textToSpeech(text);
+      if (speechSuccess) {
+        // Mark intro as played if this is the first message
+        if (!introHasPlayed.current && text.includes("I'm VeRNon")) {
+          introHasPlayed.current = true;
+        }
+        return;
+      }
+    } catch (error) {
+      console.error('WhisperSpeechService speech failed, falling back to browser synthesis:', error);
+    }
+    
+    // If WhisperSpeechService failed, fall back to browser's speech synthesis
     try {
       speechSuccess = await speakWithBrowser(text, voices);
       
@@ -79,8 +107,6 @@ export const useSpeakResponse = ({
     isSpeaking, 
     currentlyPlayingText, 
     stopSpeaking, 
-    useElevenLabs, 
-    speakWithElevenLabs,
     speakWithBrowser,
     introHasPlayed,
     voices

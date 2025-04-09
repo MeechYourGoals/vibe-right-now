@@ -4,10 +4,10 @@ import ChatButton from './ChatButton';
 import ChatWindow from './ChatWindow';
 import { useTheme } from '@/components/ThemeProvider';
 import { toast } from 'sonner';
-import { ElevenLabsService } from '@/services/ElevenLabsService';
 import VernonThemeToggle from './components/VernonThemeToggle';
 import VernonModeButtons from './components/VernonModeButtons';
 import { useElevenLabsConversation } from './hooks/useElevenLabsConversation';
+import { WhisperSpeechService } from '@/services/WhisperSpeechService';
 
 const VernonChat = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -15,6 +15,7 @@ const VernonChat = () => {
   const [isVenueMode, setIsVenueMode] = useState(false);
   const [isProPlan, setIsProPlan] = useState(false); // Simulate pro plan status
   const [introAttempted, setIntroAttempted] = useState(false);
+  const [isModelLoading, setIsModelLoading] = useState(false);
   const { theme, setTheme } = useTheme();
   
   // Use our conversation hook
@@ -32,6 +33,21 @@ const VernonChat = () => {
     processVoiceInput,
     speakResponse
   } = useElevenLabsConversation(isVenueMode);
+  
+  // Initialize Whisper model when the component mounts
+  useEffect(() => {
+    setIsModelLoading(true);
+    WhisperSpeechService.initSpeechRecognition()
+      .then(() => {
+        console.log('Whisper model initialized successfully');
+        setIsModelLoading(false);
+      })
+      .catch(error => {
+        console.error('Error initializing Whisper model:', error);
+        setIsModelLoading(false);
+        toast.error('Could not load speech recognition model. Voice features may be limited.');
+      });
+  }, []);
   
   const toggleMinimize = () => {
     setIsMinimized(!isMinimized);
@@ -98,27 +114,11 @@ const VernonChat = () => {
     playIntroMessage();
   }, [isOpen, messages, introAttempted, speakResponse]);
   
-  // Check for ElevenLabs API key and prompt if not available
-  useEffect(() => {
-    if (isOpen && !ElevenLabsService.hasApiKey()) {
-      promptForElevenLabsKey();
-    }
-  }, [isOpen]);
-  
   // Handle opening chat
   const handleOpenChat = (mode: boolean = false) => {
     setIsVenueMode(mode);
     setIsOpen(true);
     setIntroAttempted(false); // Reset intro state when opening
-  };
-  
-  // Prompt for ElevenLabs API key
-  const promptForElevenLabsKey = () => {
-    const apiKey = prompt('Enter your Eleven Labs API key for improved voice quality:');
-    if (apiKey) {
-      ElevenLabsService.setApiKey(apiKey);
-      toast.success('Voice settings updated. Reload to apply changes.');
-    }
   };
   
   if (!isOpen) {
@@ -141,7 +141,7 @@ const VernonChat = () => {
       toggleMinimize={toggleMinimize}
       closeChat={closeChat}
       toggleVenueMode={toggleVenueMode}
-      promptForElevenLabsKey={promptForElevenLabsKey}
+      isModelLoading={isModelLoading}
       messages={messages}
       isSpeaking={isSpeaking}
       isListening={isListening}
@@ -161,7 +161,7 @@ const VernonChatWindow = ({
   toggleMinimize,
   closeChat,
   toggleVenueMode,
-  promptForElevenLabsKey,
+  isModelLoading,
   messages,
   isSpeaking,
   isListening,
@@ -179,12 +179,11 @@ const VernonChatWindow = ({
     >
       {/* Settings component */}
       <ChatSettings 
-        useElevenLabs={true}
-        promptForElevenLabsKey={promptForElevenLabsKey}
         isListening={isListening}
         toggleListening={toggleListening}
         isVenueMode={isVenueMode}
         toggleVenueMode={toggleVenueMode}
+        isModelLoading={isModelLoading}
       />
       
       <ChatWindow
