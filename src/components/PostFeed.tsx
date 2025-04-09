@@ -5,7 +5,6 @@ import PostCard from "@/components/PostCard";
 import SearchVibes from "@/components/SearchVibes";
 import { Post } from "@/types";
 import { isWithinThreeMonths } from "@/mock/time-utils";
-import { Badge } from "@/components/ui/badge";
 
 const PostFeed = () => {
   const [filter, setFilter] = useState("all");
@@ -111,9 +110,8 @@ const PostFeed = () => {
 
   return (
     <div className="max-w-3xl mx-auto">
-      <div className="flex items-center justify-between mb-4">
+      <div className="mb-4">
         <SearchVibes onSearch={handleSearch} />
-        <Badge variant="outline" className="bg-muted/30">Posts from last 3 months</Badge>
       </div>
 
       <div className="p-4 space-y-4">

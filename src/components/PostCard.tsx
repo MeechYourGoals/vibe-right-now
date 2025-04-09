@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Post, Comment } from "@/types";
@@ -99,25 +100,6 @@ const PostCard = ({ posts, locationPostCount = 1, getComments }: PostCardProps) 
     return formatDistanceToNow(new Date(timestamp), { addSuffix: true });
   };
 
-  const formatExpirationTime = (expiresAt: string) => {
-    const now = new Date();
-    const expiry = new Date(expiresAt);
-    const diffHours = Math.max(0, Math.floor((expiry.getTime() - now.getTime()) / (1000 * 60 * 60)));
-    
-    if (diffHours < 24) {
-      return `${diffHours}h`;
-    } else if (diffHours < 24 * 7) {
-      const days = Math.floor(diffHours / 24);
-      return `${days} day${days > 1 ? 's' : ''}`;
-    } else if (diffHours < 24 * 30) {
-      const weeks = Math.floor(diffHours / (24 * 7));
-      return `${weeks} week${weeks > 1 ? 's' : ''}`;
-    } else {
-      const months = Math.floor(diffHours / (24 * 30));
-      return `${months} month${months > 1 ? 's' : ''}`;
-    }
-  };
-
   const getRandomUsers = (count: number) => {
     const shuffled = [...mockUsers].sort(() => 0.5 - Math.random());
     return shuffled.slice(0, count);
@@ -202,10 +184,7 @@ const PostCard = ({ posts, locationPostCount = 1, getComments }: PostCardProps) 
               {isFollowed ? "Following" : "Follow"}
             </Button>
             
-            <div className="flex items-center text-sm text-muted-foreground">
-              <Clock className="h-3 w-3 mr-1" />
-              <span>Posts expire in {formatExpirationTime(mainPost.expiresAt)}</span>
-            </div>
+            {/* Removed expiration time display from home feed */}
             
             {locationPostCount > 1 ? (
               <Collapsible open={isOpen} onOpenChange={setIsOpen}>

@@ -1,4 +1,3 @@
-
 // Helper functions for generating timestamps and expiration times
 
 // Get a recent timestamp (n hours ago)
@@ -8,18 +7,21 @@ export const getRecentTime = (hoursAgo: number): string => {
   return date.toISOString();
 };
 
-// Get expiry time for a post
-// Default is 1 week (168 hours), pinned posts last for 90 days
-export const getExpiryTime = (timestamp: string, isPinned: boolean = false): string => {
+// Function to calculate expiration time based on post timestamp
+// Adds variability to make posts expire at different rates
+export const getExpiryTime = (timestamp: string, isPinned = false): string => {
   const date = new Date(timestamp);
   
   if (isPinned) {
-    // For pinned posts: 90 days
+    // Pinned posts expire after 90 days
     date.setDate(date.getDate() + 90);
-  } else {
-    // Default: 1 week (168 hours)
-    date.setHours(date.getHours() + 168);
+    return date.toISOString();
   }
+  
+  // Generate random expiration period for regular posts
+  // Between 1-14 days for regular posts to create variety
+  const randomDays = Math.floor(Math.random() * 14) + 1;
+  date.setDate(date.getDate() + randomDays);
   
   return date.toISOString();
 };

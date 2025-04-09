@@ -19,7 +19,9 @@ const MessageList: React.FC<MessageListProps> = ({
 }) => {
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
-    messagesEndRef?.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messagesEndRef?.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
   }, [messages, isTyping, messagesEndRef]);
 
   return (

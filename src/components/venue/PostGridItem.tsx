@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
-import { Heart, Calendar, Pin } from "lucide-react";
+import { Heart, Calendar, Pin, Clock } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,9 +12,15 @@ interface PostGridItemProps {
   post: Post;
   isVenuePost?: boolean;
   timeAgo?: string;
+  isDetailView?: boolean; // New prop to indicate if this is a detailed view
 }
 
-const PostGridItem: React.FC<PostGridItemProps> = ({ post, isVenuePost = false, timeAgo }) => {
+const PostGridItem: React.FC<PostGridItemProps> = ({ 
+  post, 
+  isVenuePost = false, 
+  timeAgo,
+  isDetailView = false
+}) => {
   const [liked, setLiked] = useState(false);
   const navigate = useNavigate();
   
@@ -34,6 +40,28 @@ const PostGridItem: React.FC<PostGridItemProps> = ({ post, isVenuePost = false, 
   const dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'long' });
   const dayOnly = dayOfWeek.substring(0, 3);
   const timeString = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+
+  // Calculate expiration time for detail view
+  const formatExpiryTime = () => {
+    if (!post.expiresAt) return null;
+    
+    const now = new Date();
+    const expiry = new Date(post.expiresAt);
+    const diffHours = Math.max(0, Math.floor((expiry.getTime() - now.getTime()) / (1000 * 60 * 60)));
+    
+    if (diffHours < 24) {
+      return `${diffHours}h`;
+    } else if (diffHours < 24 * 7) {
+      const days = Math.floor(diffHours / 24);
+      return `${days} day${days > 1 ? 's' : ''}`;
+    } else if (diffHours < 24 * 30) {
+      const weeks = Math.floor(diffHours / (24 * 7));
+      return `${weeks} week${weeks > 1 ? 's' : ''}`;
+    } else {
+      const months = Math.floor(diffHours / (24 * 30));
+      return `${months} month${months > 1 ? 's' : ''}`;
+    }
+  };
 
   return (
     <Link 
@@ -109,6 +137,14 @@ const PostGridItem: React.FC<PostGridItemProps> = ({ post, isVenuePost = false, 
               @{post.user.username}
             </span>
           </div>
+          
+          {/* Only show expiration time in detail view */}
+          {isDetailView && !post.isPinned && post.expiresAt && (
+            <div className="mt-1 flex items-center justify-end text-xs text-white/80">
+              <Clock className="h-3 w-3 mr-1" />
+              <span>Expires in {formatExpiryTime()}</span>
+            </div>
+          )}
         </div>
       </div>
     </Link>
