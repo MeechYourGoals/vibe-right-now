@@ -87,33 +87,41 @@ const PostCard: React.FC<PostCardProps> = ({
           </p>
         </div>
         
-        {posts.map(post => (
-          <div key={post.id} className="border-t">
-            <PostHeader 
-              user={post.user} 
-              timestamp={String(post.timestamp)}
-              location={post.location}
-              isPinned={post.isPinned}
-              isVenuePost={post.isVenuePost}
-              canDelete={canDelete}
-              onDelete={() => {}}
-            />
-            
-            <div className="px-4">
-              <PostContent content={post.content} />
-              
-              {post.media && post.media.length > 0 && (
-                <PostMedia media={post.media} />
-              )}
-              
-              <PostFooter 
-                post={post} 
-                comments={getComments(post.id)} 
-                isDetailView={false} 
+        {posts.map(post => {
+          // Determine if the post is from the venue itself
+          const isVenuePost = post.isVenuePost || post.location?.id === firstPost.location.id;
+          
+          return (
+            <div 
+              key={post.id} 
+              className={`border-t ${isVenuePost ? 'border-l-4 border-l-amber-500' : ''}`}
+            >
+              <PostHeader 
+                user={post.user} 
+                timestamp={String(post.timestamp)}
+                location={post.location}
+                isPinned={post.isPinned}
+                isVenuePost={isVenuePost}
+                canDelete={canDelete}
+                onDelete={() => {}}
               />
+              
+              <div className="px-4">
+                <PostContent content={post.content} />
+                
+                {post.media && post.media.length > 0 && (
+                  <PostMedia media={post.media} />
+                )}
+                
+                <PostFooter 
+                  post={post} 
+                  comments={getComments(post.id)} 
+                  isDetailView={false} 
+                />
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </Card>
     );
   }
@@ -140,13 +148,13 @@ const PostCard: React.FC<PostCardProps> = ({
   const isVenuePost = post.isVenuePost || post.location?.id === venue?.id;
 
   return (
-    <Card className="overflow-hidden">
+    <Card className={`overflow-hidden ${isVenuePost ? 'ring-2 ring-amber-500' : ''}`}>
       <PostHeader 
         user={post.user} 
         timestamp={String(post.timestamp)} 
         location={post.location}
         isPinned={post.isPinned}
-        isVenuePost={isVenuePost}
+        isVenuePost={false} // We're not showing the venue badge anymore
         canDelete={canDelete && !isVenuePost}
         onDelete={handleDelete}
       />

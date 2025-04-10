@@ -62,9 +62,9 @@ const PostGridItem: React.FC<PostGridItemProps> = ({
     >
       <PostMedia post={post} />
       
-      {/* Show pinned badge or venue badge if applicable */}
-      {(post.isPinned || isVenuePost) && (
-        <PostBadges post={post} isVenuePost={isVenuePost} />
+      {/* Show pinned badge if applicable, but not venue badge */}
+      {post.isPinned && (
+        <PostBadges post={post} isVenuePost={false} />
       )}
       
       {/* Show delete button if applicable */}
@@ -74,7 +74,7 @@ const PostGridItem: React.FC<PostGridItemProps> = ({
       
       <PostOverlay
         post={post}
-        isVenuePost={isVenuePost}
+        isVenuePost={false} // Don't show venue badge in overlay
         timeAgo={timeAgo}
         isDetailView={isDetailView}
         onUserProfileClick={navigateToUserProfile}

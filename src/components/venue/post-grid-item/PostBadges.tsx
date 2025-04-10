@@ -10,7 +10,7 @@ interface PostBadgesProps {
 }
 
 const PostBadges: React.FC<PostBadgesProps> = ({ post, isVenuePost }) => {
-  if (!post.isPinned && !isVenuePost) return null;
+  if (!post.isPinned) return null;
   
   return (
     <div className="absolute top-2 right-2 z-10">
@@ -19,9 +19,6 @@ const PostBadges: React.FC<PostBadgesProps> = ({ post, isVenuePost }) => {
           <Pin className="h-3 w-3 mr-1" />
           Pinned
         </Badge>
-      )}
-      {isVenuePost && !post.isPinned && (
-        <Badge className="bg-amber-500 text-white">Venue</Badge>
       )}
     </div>
   );

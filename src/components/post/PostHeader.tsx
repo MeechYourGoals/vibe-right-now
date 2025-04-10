@@ -26,7 +26,7 @@ interface PostHeaderProps {
   timestamp: string;
   location?: Location;
   isPinned?: boolean;
-  isVenuePost?: boolean;
+  isVenuePost?: boolean; // We'll keep this prop for backwards compatibility
   canDelete?: boolean;
   onDelete?: () => void;
 }
@@ -36,7 +36,7 @@ const PostHeader: React.FC<PostHeaderProps> = ({
   timestamp,
   location,
   isPinned = false,
-  isVenuePost = false,
+  isVenuePost = false, // We'll ignore this prop in rendering
   canDelete = false,
   onDelete
 }) => {
@@ -79,9 +79,6 @@ const PostHeader: React.FC<PostHeaderProps> = ({
                 <Pin className="h-3 w-3" />
                 Pinned
               </Badge>
-            )}
-            {isVenuePost && (
-              <Badge className="text-xs bg-amber-500">Venue</Badge>
             )}
           </div>
           

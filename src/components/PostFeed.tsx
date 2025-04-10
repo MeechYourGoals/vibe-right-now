@@ -1,11 +1,16 @@
+
 import { useState, useMemo } from "react";
-import { mockPosts, mockComments } from "@/mock/data";
+import { mockPosts, mockComments, mockUsers } from "@/mock/data";
 import { PostCard } from "@/components/post";
 import SearchVibes from "@/components/SearchVibes";
-import { Post } from "@/types";
+import { Post, User } from "@/types";
 import { isWithinThreeMonths } from "@/mock/time-utils";
 
-const PostFeed = () => {
+interface PostFeedProps {
+  celebrityFeatured?: string[];
+}
+
+const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
   const [filter, setFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -23,8 +28,33 @@ const PostFeed = () => {
     return mockPosts.filter(post => isWithinThreeMonths(post.timestamp));
   }, []);
 
+  // Function to find a user by username
+  const findUserByUsername = (username: string): User | undefined => {
+    return mockUsers.find(user => user.username === username);
+  };
+
+  // Prioritize posts from featured users if provided
+  const prioritizedPosts = useMemo(() => {
+    if (!celebrityFeatured || celebrityFeatured.length === 0) {
+      return recentPosts;
+    }
+
+    // Find posts from featured users
+    const featuredUserPosts = recentPosts.filter(post => 
+      celebrityFeatured.includes(post.user.username)
+    );
+    
+    // Get the remaining posts
+    const otherPosts = recentPosts.filter(post => 
+      !celebrityFeatured.includes(post.user.username)
+    );
+    
+    // Combine them with featured posts first
+    return [...featuredUserPosts, ...otherPosts];
+  }, [recentPosts, celebrityFeatured]);
+
   const filteredPosts = useMemo(() => {
-    return recentPosts.filter((post) => {
+    return prioritizedPosts.filter((post) => {
       if (filter !== "all" && post.location.type !== filter) {
         return false;
       }
@@ -40,7 +70,7 @@ const PostFeed = () => {
       
       return true;
     });
-  }, [recentPosts, filter, searchQuery]);
+  }, [prioritizedPosts, filter, searchQuery]);
 
   // Group posts by location
   const postsGroupedByLocation = useMemo(() => {

@@ -1,53 +1,85 @@
-
-import { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Lightbulb, ArrowRight } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Location } from "@/types";
-import { getRecommendedLocations } from "@/mock/cityLocations";
+import { Link } from "react-router-dom";
+import { VerifiedIcon } from "lucide-react";
+import { mockUsers } from "@/mock/data";
+import { User } from "@/types";
 
-const RecommendedForYou = () => {
-  const [recommendations, setRecommendations] = useState<Location[]>([]);
-  
+interface RecommendedForYouProps {
+  featuredUsers?: string[];
+}
+
+const RecommendedForYou: React.FC<RecommendedForYouProps> = ({ featuredUsers }) => {
+  const [users, setUsers] = useState<User[]>([]);
+  const [followStates, setFollowStates] = useState<Record<string, boolean>>({});
+
   useEffect(() => {
-    // Get recommendations from our city data
-    const recs = getRecommendedLocations();
-    setRecommendations(recs);
-  }, []);
-  
-  if (recommendations.length === 0) {
-    return null;
-  }
-  
+    // If featured users are provided, use them
+    if (featuredUsers && featuredUsers.length > 0) {
+      const filteredUsers = mockUsers.filter(user => 
+        featuredUsers.includes(user.username)
+      );
+      setUsers(filteredUsers);
+    } else {
+      // Otherwise, just get random users from the mock data
+      const randomUsers = [...mockUsers]
+        .sort(() => 0.5 - Math.random())
+        .slice(0, 5);
+      setUsers(randomUsers);
+    }
+
+    // Initialize follow states
+    const initialFollowStates: Record<string, boolean> = {};
+    mockUsers.forEach(user => {
+      initialFollowStates[user.id] = false;
+    });
+    setFollowStates(initialFollowStates);
+  }, [featuredUsers]);
+
+  const toggleFollow = (userId: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    setFollowStates(prev => ({
+      ...prev,
+      [userId]: !prev[userId]
+    }));
+  };
+
   return (
     <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-xl flex items-center">
-          <Lightbulb className="h-5 w-5 mr-2" />
-          <span>Recommended For You</span>
-        </CardTitle>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg">Recommended For You</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {recommendations.map((location) => (
-            <div 
-              key={location.id} 
-              className="p-3 border rounded-lg flex justify-between items-center hover:bg-accent/10 transition-colors"
-            >
-              <div>
-                <div className="font-medium">{location.name}</div>
-                <div className="text-sm text-muted-foreground flex items-center gap-2">
-                  <span>{location.city}, {location.state || location.country}</span>
-                  <Badge variant="outline" className="text-xs">
-                    {location.type}
-                  </Badge>
+          {users.map((user) => (
+            <div key={user.id} className="flex items-center justify-between">
+              <Link 
+                to={`/user/${user.username}`} 
+                className="flex items-center space-x-3"
+              >
+                <Avatar>
+                  <AvatarImage src={user.avatar} alt={user.name} />
+                  <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <div className="flex items-center">
+                    <p className="font-medium text-sm">{user.name}</p>
+                    {user.verified && (
+                      <VerifiedIcon className="h-3.5 w-3.5 text-blue-500 ml-1" />
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground">@{user.username}</p>
                 </div>
-              </div>
-              <Button variant="ghost" size="sm" className="h-8" asChild>
-                <a href={`/venue/${location.id}`}>
-                  <ArrowRight className="h-4 w-4" />
-                </a>
+              </Link>
+              <Button
+                variant="outline"
+                size="sm"
+                className={followStates[user.id] ? "bg-primary/10" : ""}
+                onClick={(e) => toggleFollow(user.id, e)}
+              >
+                {followStates[user.id] ? "Following" : "Follow"}
               </Button>
             </div>
           ))}
