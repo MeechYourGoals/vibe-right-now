@@ -1,45 +1,63 @@
 
-import { format, subDays } from "date-fns";
+import { formatDate } from "@/lib/utils";
 import { VenueInsights } from "@/types";
 
-// Generate weekly data for insights
-export const generateWeeklyData = () => {
-  const data = [];
-  for (let i = 6; i >= 0; i--) {
-    const date = subDays(new Date(), i);
-    data.push({
-      date: format(date, "EEE"),
-      visitors: Math.floor(Math.random() * 50) + 10,
-      checkIns: Math.floor(Math.random() * 30) + 5,
-      receipts: Math.floor(Math.random() * 15),
-      discounts: Math.floor(Math.random() * 10),
-      photos: Math.floor(Math.random() * 20),
-      videos: Math.floor(Math.random() * 10),
-      impressions: Math.floor(Math.random() * 100) + 50,
-    });
-  }
-  return data;
-};
-
-// Monthly data for insights
-export const monthlyData = [
-  { name: "Jan", visitors: 240, checkIns: 180, receipts: 90, discounts: 60 },
-  { name: "Feb", visitors: 300, checkIns: 200, receipts: 100, discounts: 80 },
-  { name: "Mar", visitors: 200, checkIns: 150, receipts: 70, discounts: 40 },
-  { name: "Apr", visitors: 278, checkIns: 190, receipts: 95, discounts: 55 },
-  { name: "May", visitors: 189, checkIns: 120, receipts: 60, discounts: 30 },
-  { name: "Jun", visitors: 239, checkIns: 170, receipts: 85, discounts: 50 },
-];
-
-// Current insights data
-export const currentInsights: VenueInsights = {
-  visitorCount: 342,
-  checkInCount: 198,
-  receiptUploads: 87,
-  discountRedemptions: 52,
-  mediaUploads: {
-    photos: 156,
-    videos: 63,
-  },
-  impressions: 1248,
+// Mock insights data generator
+export const generateVenueInsights = (venueId: string): VenueInsights => {
+  // Use venueId to generate consistent "random" data
+  const seed = venueId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  
+  // Generate visitor trends for the last 14 days
+  const visitorTrends = Array.from({ length: 14 }, (_, i) => {
+    const date = new Date();
+    date.setDate(date.getDate() - (13 - i));
+    
+    // Generate somewhat random count based on the day of week
+    // Weekends have higher numbers
+    const dayOfWeek = date.getDay();
+    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+    const baseCount = isWeekend ? 80 + (seed % 40) : 30 + (seed % 30);
+    
+    return {
+      date: formatDate(date),
+      count: baseCount + Math.floor(Math.random() * 20)
+    };
+  });
+  
+  return {
+    visitorCount: 1200 + (seed % 800), 
+    checkInCount: 950 + (seed % 600),
+    receiptUploads: 430 + (seed % 300),
+    discountRedemptions: 210 + (seed % 150),
+    popularHours: {
+      "12pm": 15,
+      "1pm": 30,
+      "2pm": 40,
+      "3pm": 25,
+      "4pm": 35,
+      "5pm": 60,
+      "6pm": 90,
+      "7pm": 120,
+      "8pm": 140,
+      "9pm": 125,
+      "10pm": 90,
+      "11pm": 60
+    },
+    demographicData: {
+      ageGroups: {
+        "18-24": 20 + (seed % 10),
+        "25-34": 40 + (seed % 15),
+        "35-44": 25 + (seed % 10),
+        "45-54": 10 + (seed % 5),
+        "55+": 5 + (seed % 5)
+      },
+      gender: {
+        "Male": 48 + (seed % 10),
+        "Female": 48 + (seed % 10),
+        "Other": 4 + (seed % 2)
+      }
+    },
+    visitorTrends,
+    mediaUploads: 280 + (seed % 200)
+  };
 };
