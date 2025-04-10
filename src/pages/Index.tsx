@@ -29,7 +29,7 @@ const Index = () => {
           {!isMobile ? (
             <div className="w-full md:w-1/4 space-y-6">
               <NearbyVibesMap />
-              <RecommendedForYou featuredUsers={["kyliejenner", "ishowspeed", "sydney_sweeney", "champagnepapi", "kingbach", "jayjohnson", "sarah_vibes"]} />
+              <RecommendedForYou featuredLocations={["5", "7", "10", "13", "20"]} />
               <TrendingLocations />
               <DiscountLocations />
             </div>
@@ -41,7 +41,7 @@ const Index = () => {
           <div className="mt-8 space-y-6">
             <h2 className="text-xl font-bold mb-4 vibe-gradient-text">Around You</h2>
             <NearbyVibesMap />
-            <RecommendedForYou featuredUsers={["kyliejenner", "ishowspeed", "sydney_sweeney", "champagnepapi", "kingbach", "jayjohnson", "sarah_vibes"]} />
+            <RecommendedForYou featuredLocations={["5", "7", "10", "13", "20"]} />
             <TrendingLocations />
             <DiscountLocations />
           </div>

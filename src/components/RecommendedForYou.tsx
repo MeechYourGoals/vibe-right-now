@@ -1,54 +1,56 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { VerifiedIcon } from "lucide-react";
-import { mockUsers } from "@/mock/data";
-import { User } from "@/types";
+import { mockLocations } from "@/mock/data";
+import { Location } from "@/types";
+import { MapPin, Users } from "lucide-react";
 
 interface RecommendedForYouProps {
-  featuredUsers?: string[];
+  featuredLocations?: string[];
 }
 
-const RecommendedForYou: React.FC<RecommendedForYouProps> = ({ featuredUsers }) => {
-  const [users, setUsers] = useState<User[]>([]);
+const RecommendedForYou: React.FC<RecommendedForYouProps> = ({ featuredLocations }) => {
+  const [locations, setLocations] = useState<Location[]>([]);
   const [followStates, setFollowStates] = useState<Record<string, boolean>>({});
 
+  const getVisitorCount = (locationId: string) => {
+    const seed = parseInt(locationId) || 10;
+    return Math.floor((seed * 13) % 140) + 10;
+  };
+
   useEffect(() => {
-    // If featured users are provided, use them
-    if (featuredUsers && featuredUsers.length > 0) {
-      // Filter and map for easy lookup
-      const userMap = new Map(mockUsers.map(user => [user.username.toLowerCase(), user]));
+    const premiumLocations = mockLocations.filter(location => 
+      location.type === "restaurant" || location.type === "event" || location.type === "sports"
+    );
+    
+    if (featuredLocations && featuredLocations.length > 0) {
+      const locationMap = new Map(mockLocations.map(loc => [loc.id, loc]));
       
-      // Get users that match the featured usernames (case insensitive)
-      const filteredUsers = featuredUsers
-        .map(username => userMap.get(username.toLowerCase()))
-        .filter((user): user is User => user !== undefined);
+      const filteredLocations = featuredLocations
+        .map(id => locationMap.get(id))
+        .filter((loc): loc is Location => loc !== undefined);
       
-      setUsers(filteredUsers);
+      setLocations(filteredLocations.length > 0 ? filteredLocations : premiumLocations.slice(0, 5));
     } else {
-      // Otherwise, just get random users from the mock data
-      const randomUsers = [...mockUsers]
+      setLocations(premiumLocations
         .sort(() => 0.5 - Math.random())
-        .slice(0, 5);
-      setUsers(randomUsers);
+        .slice(0, 5));
     }
 
-    // Initialize follow states
     const initialFollowStates: Record<string, boolean> = {};
-    mockUsers.forEach(user => {
-      initialFollowStates[user.id] = false;
+    mockLocations.forEach(location => {
+      initialFollowStates[location.id] = false;
     });
     setFollowStates(initialFollowStates);
-  }, [featuredUsers]);
+  }, [featuredLocations]);
 
-  const toggleFollow = (userId: string, e: React.MouseEvent) => {
+  const toggleFollow = (locationId: string, e: React.MouseEvent) => {
     e.preventDefault();
     setFollowStates(prev => ({
       ...prev,
-      [userId]: !prev[userId]
+      [locationId]: !prev[locationId]
     }));
   };
 
@@ -59,33 +61,35 @@ const RecommendedForYou: React.FC<RecommendedForYouProps> = ({ featuredUsers }) 
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {users.map((user) => (
-            <div key={user.id} className="flex items-center justify-between">
+          {locations.map((location) => (
+            <div key={location.id} className="flex items-center justify-between">
               <Link 
-                to={`/user/${user.username}`} 
+                to={`/venue/${location.id}`} 
                 className="flex items-center space-x-3"
               >
                 <Avatar>
-                  <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                  <AvatarImage src={location.image || `/placeholder.svg`} alt={location.name} />
+                  <AvatarFallback>{location.name.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div>
-                  <div className="flex items-center">
-                    <p className="font-medium text-sm">{user.name}</p>
-                    {user.verified && (
-                      <VerifiedIcon className="h-3.5 w-3.5 text-blue-500 ml-1" />
-                    )}
+                  <p className="font-medium text-sm">{location.name}</p>
+                  <div className="flex items-center text-xs text-muted-foreground">
+                    <MapPin className="h-3 w-3 mr-1" />
+                    {location.city}, {location.state}
                   </div>
-                  <p className="text-xs text-muted-foreground">@{user.username}</p>
+                  <div className="flex items-center text-xs text-muted-foreground mt-0.5">
+                    <Users className="h-3 w-3 mr-1" />
+                    {getVisitorCount(location.id)} users this week
+                  </div>
                 </div>
               </Link>
               <Button
                 variant="outline"
                 size="sm"
-                className={followStates[user.id] ? "bg-primary/10" : ""}
-                onClick={(e) => toggleFollow(user.id, e)}
+                className={followStates[location.id] ? "bg-primary/10" : ""}
+                onClick={(e) => toggleFollow(location.id, e)}
               >
-                {followStates[user.id] ? "Following" : "Follow"}
+                {followStates[location.id] ? "Following" : "Follow"}
               </Button>
             </div>
           ))}

@@ -9,6 +9,7 @@ import {
   PostMedia,
   PostOverlay
 } from './post-grid-item';
+import { Users } from 'lucide-react';
 
 interface PostGridItemProps {
   post: Post;
@@ -53,6 +54,12 @@ const PostGridItem: React.FC<PostGridItemProps> = ({
     }
   };
 
+  // Generate a semi-random user count based on post ID
+  const getUserCount = () => {
+    const seed = post.id.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
+    return Math.floor((seed % 100) + 10);
+  };
+
   return (
     <Link 
       to={`/post/${post.id}`} 
@@ -71,6 +78,12 @@ const PostGridItem: React.FC<PostGridItemProps> = ({
       {canDelete && !isVenuePost && (
         <DeleteButton onDelete={handleDeletePost} />
       )}
+      
+      {/* Add user count overlay */}
+      <div className="absolute top-2 right-2 z-10 bg-black/60 rounded-full px-2 py-1 text-white text-xs flex items-center">
+        <Users className="h-3 w-3 mr-1" />
+        <span>{getUserCount()} users this week</span>
+      </div>
       
       <PostOverlay
         post={post}

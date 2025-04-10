@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Heart } from "lucide-react";
+import { Heart, Users } from "lucide-react";
 import { Post } from "@/types";
 import { formatDistanceToNow } from "date-fns";
 
@@ -25,6 +25,12 @@ const PostGridItem = ({ post }: PostGridItemProps) => {
     e.preventDefault();
     e.stopPropagation();
     navigate(`/user/${post.user.username}`);
+  };
+
+  // Generate a semi-random user count based on post ID
+  const getUserCount = () => {
+    const seed = post.id.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
+    return Math.floor((seed % 100) + 10);
   };
 
   return (
@@ -65,15 +71,23 @@ const PostGridItem = ({ post }: PostGridItemProps) => {
             </span>
           </div>
           <div className="mt-2 flex justify-between items-center">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={handleLike} 
-              className="h-8 px-2 text-white hover:bg-black/20"
-            >
-              <Heart className={`h-4 w-4 ${liked ? 'fill-red-500 text-red-500' : ''}`} />
-              <span className="ml-1">{post.likes + (liked ? 1 : 0)}</span>
-            </Button>
+            <div className="flex items-center space-x-4">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={handleLike} 
+                className="h-8 px-2 text-white hover:bg-black/20"
+              >
+                <Heart className={`h-4 w-4 ${liked ? 'fill-red-500 text-red-500' : ''}`} />
+                <span className="ml-1">{post.likes + (liked ? 1 : 0)}</span>
+              </Button>
+              
+              <div className="flex items-center text-xs text-white">
+                <Users className="h-3 w-3 mr-1" />
+                <span>{getUserCount()} users this week</span>
+              </div>
+            </div>
+            
             <span className="text-xs text-white">
               {formatDistanceToNow(new Date(post.timestamp), { addSuffix: true })}
             </span>

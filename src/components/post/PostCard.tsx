@@ -8,7 +8,7 @@ import PostMedia from "./PostMedia";
 import PostFooter from "./PostFooter";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { UserPlus, UserCheck } from "lucide-react";
+import { UserPlus, UserCheck, Users } from "lucide-react";
 import { deletePost, canDeleteUserPosts } from "@/utils/venue/postManagementUtils";
 
 interface PostCardProps {
@@ -42,6 +42,13 @@ const PostCard: React.FC<PostCardProps> = ({
     e.stopPropagation();
     setIsFollowing(!isFollowing);
   };
+
+  // Generate random user count (between 5 and 120) based on location
+  const getUserCount = (locationId: string) => {
+    // Use location ID to generate a consistent but seemingly random number
+    const seed = parseInt(locationId) || 5;
+    return Math.floor((seed * 13) % 115) + 5;
+  };
   
   // Handle multiple posts mode (used in feed)
   if (posts && posts.length > 0 && getComments) {
@@ -51,15 +58,23 @@ const PostCard: React.FC<PostCardProps> = ({
       <Card className="overflow-hidden">
         <div className="p-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <Link to={`/venue/${firstPost.location.id}`}>
-                <h3 className="text-lg font-semibold hover:underline">{firstPost.location.name}</h3>
-              </Link>
-              {locationPostCount !== undefined && (
-                <span className="ml-2 text-sm text-muted-foreground">
-                  {locationPostCount} posts
-                </span>
-              )}
+            <div className="flex-1">
+              <div className="flex flex-col">
+                <Link to={`/venue/${firstPost.location.id}`}>
+                  <h3 className="text-lg font-semibold hover:underline">{firstPost.location.name}</h3>
+                </Link>
+                <div className="flex items-center">
+                  {locationPostCount !== undefined && (
+                    <span className="text-sm text-muted-foreground mr-3">
+                      {locationPostCount} posts
+                    </span>
+                  )}
+                  <div className="flex items-center text-sm text-muted-foreground">
+                    <Users className="h-4 w-4 mr-1" />
+                    <span>{getUserCount(firstPost.location.id)} users this week</span>
+                  </div>
+                </div>
+              </div>
             </div>
             <Button
               variant="outline"
