@@ -1,6 +1,8 @@
 
 import { SimpleSearchService } from './SimpleSearchService';
 import { SwirlSearchService } from '../SwirlSearchService';
+import { GeminiService } from '../GeminiService';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   OpenAISearchProvider,
   GoogleSearchProvider,
@@ -23,7 +25,17 @@ export const SearchService = {
     try {
       console.log('Searching for:', query);
       
-      // Try using Swirl first (local search engine)
+      // Try using vector search first (through Gemini)
+      try {
+        const vectorResult = await this.vectorSearch(query);
+        if (vectorResult) {
+          return vectorResult;
+        }
+      } catch (vectorError) {
+        console.log('Vector search failed, trying alternative methods:', vectorError);
+      }
+      
+      // Try using Swirl (local search engine)
       try {
         // Check if Swirl is available
         const isSwirlAvailable = await SwirlSearchService.isAvailable();
@@ -39,7 +51,20 @@ export const SearchService = {
         console.log('Swirl search failed, trying alternative methods:', error);
       }
       
-      // Try using OpenAI's search capabilities (most comprehensive)
+      // Try using Gemini for a more conversational response
+      try {
+        const geminiResult = await GeminiService.generateResponse(
+          `Answer this search query: ${query}. Provide specific, factual information about real places, events or attractions if applicable.`, 
+          'user'
+        );
+        if (geminiResult) {
+          return geminiResult;
+        }
+      } catch (error) {
+        console.log('Gemini search failed, trying alternative methods:', error);
+      }
+      
+      // Try using OpenAI's search capabilities
       try {
         const openAIResult = await OpenAISearchProvider.search(query);
         if (openAIResult) {
@@ -59,7 +84,7 @@ export const SearchService = {
         console.log('Google search failed, trying next service:', error);
       }
       
-      // Try DuckDuckGo JSONP API - most reliable free option
+      // Try DuckDuckGo JSONP API
       try {
         const duckDuckGoResult = await DuckDuckGoSearchProvider.search(query);
         if (duckDuckGoResult) {
@@ -69,7 +94,7 @@ export const SearchService = {
         console.log('DuckDuckGo search failed, trying alternative method:', error);
       }
       
-      // Try Wikipedia API directly - most widely accessible
+      // Try Wikipedia API directly
       try {
         const wikiResult = await WikipediaSearchProvider.search(query);
         if (wikiResult) {
@@ -100,6 +125,29 @@ export const SearchService = {
     } catch (error) {
       console.error('Error in search services:', error);
       return FallbackResponseGenerator.useFallbackLocalService(query);
+    }
+  },
+  
+  /**
+   * Perform a vector search using Firebase/Supabase vector search capabilities
+   * This would connect to a vector database if properly set up
+   */
+  async vectorSearch(query: string): Promise<string | null> {
+    try {
+      // Check if we have a vector search function available
+      const { data, error } = await supabase.functions.invoke('vector-search', {
+        body: { query }
+      }).catch(() => ({ data: null, error: new Error('Vector search function not available') }));
+      
+      if (error || !data) {
+        console.log('Vector search not available, skipping:', error);
+        return null;
+      }
+      
+      return data.results;
+    } catch (error) {
+      console.error('Error with vector search:', error);
+      return null;
     }
   }
 };

@@ -9,6 +9,6 @@ export interface EventItem {
   imageUrl?: string;
   ticketUrl?: string;
   price?: string;
-  type?: "venue" | "sports" | "music" | "comedy";
+  type?: "venue" | "sports" | "music" | "comedy" | "nightlife";
   vibes?: string[];
 }

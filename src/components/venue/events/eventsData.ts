@@ -28,5 +28,14 @@ export const upcomingEvents: EventItem[] = [
     time: "6:00 PM - 9:00 PM",
     location: "Private Room",
     type: "venue"
+  },
+  {
+    id: "4",
+    title: "Night Club Special",
+    description: "Join us for a night of dancing and cocktails",
+    date: "2025-04-18",
+    time: "10:00 PM - 3:00 AM",
+    location: "VIP Room",
+    type: "nightlife"
   }
 ];

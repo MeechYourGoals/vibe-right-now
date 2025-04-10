@@ -5,6 +5,7 @@ import { extractPaginationParams } from './pagination';
 import { handleVenueQuery } from './handlers/venueQueryHandler';
 import { handleSearchQuery } from './handlers/searchQueryHandler';
 import { handleBookingQuery } from './handlers/bookingQueryHandler';
+import { GeminiService } from '@/services/GeminiService';
 
 export interface MessageProcessorProps {
   isVenueMode: boolean;
@@ -32,6 +33,16 @@ export const processMessageInput = async (
   setIsSearching(true);
   
   try {
+    // Get current messages for context
+    let messageHistory: Message[] = [];
+    setMessages(prevMessages => {
+      messageHistory = [...prevMessages];
+      return prevMessages;
+    });
+    
+    // Use context from previous messages, but limit to last 10 for efficiency
+    const contextMessages = messageHistory.slice(-10);
+    
     // Extract pagination parameters from the query
     const paginationParams = extractPaginationParams(inputValue);
     
@@ -47,15 +58,26 @@ export const processMessageInput = async (
       return;
     }
     
-    // Process the message based on mode
+    // Process the message using Gemini
     let responseText = '';
-    
-    if (isVenueMode) {
-      // Handle venue-specific queries
-      responseText = await handleVenueQuery(inputValue, isProPlan);
-    } else {
-      // Handle general search queries
-      responseText = await handleSearchQuery(inputValue, updatedPaginationState);
+    try {
+      // Use Gemini AI for response generation
+      responseText = await GeminiService.generateResponse(
+        inputValue, 
+        isVenueMode ? 'venue' : 'user',
+        contextMessages
+      );
+    } catch (geminiError) {
+      console.error('Error getting Gemini response, falling back to default handlers:', geminiError);
+      
+      // If Gemini fails, fall back to our existing handlers
+      if (isVenueMode) {
+        // Handle venue-specific queries
+        responseText = await handleVenueQuery(inputValue, isProPlan);
+      } else {
+        // Handle general search queries
+        responseText = await handleSearchQuery(inputValue, updatedPaginationState);
+      }
     }
     
     // Create and add the AI message with the response

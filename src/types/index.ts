@@ -78,6 +78,7 @@ export interface VenueInsights {
     date: string;
     count: number;
   }[];
+  mediaUploads?: number; // Add this field to fix the error
 }
 
 export interface EventItem {

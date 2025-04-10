@@ -6,11 +6,11 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function formatDate(dateString: string): string {
+export function formatDate(dateString: string | Date): string {
   if (!dateString) return '';
   
   try {
-    const date = new Date(dateString);
+    const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
     return date.toLocaleDateString('en-US', {
       weekday: 'short',
       month: 'short',
@@ -18,7 +18,7 @@ export function formatDate(dateString: string): string {
     });
   } catch (error) {
     console.error('Error formatting date:', error);
-    return dateString;
+    return typeof dateString === 'string' ? dateString : dateString.toString();
   }
 }
 
