@@ -29,9 +29,11 @@ export const SearchService = {
       try {
         console.log('Attempting vector search with Gemini');
         const vectorResult = await this.vectorSearch(query);
-        if (vectorResult) {
+        if (vectorResult && vectorResult.length > 100) {
           console.log('Vector search successful');
           return vectorResult;
+        } else {
+          console.log('Vector search returned insufficient results, trying alternatives');
         }
       } catch (vectorError) {
         console.log('Vector search failed, trying alternative methods:', vectorError);
@@ -41,10 +43,13 @@ export const SearchService = {
       try {
         console.log('Attempting direct Gemini search');
         const geminiResult = await GeminiService.generateResponse(
-          `Search the web for current information about: "${query}". Provide specific, factual information about real places, events or attractions if applicable. Include dates, times, and other relevant details.`, 
+          `Search the web for current information about: "${query}". 
+           Provide specific, factual information about real places, events or attractions if applicable. 
+           Include names, addresses, dates, times, and other relevant details.
+           Focus on giving practical information that would help someone visit these places.`, 
           'user'
         );
-        if (geminiResult) {
+        if (geminiResult && geminiResult.length > 100) {
           console.log('Gemini direct search successful');
           return geminiResult;
         }
@@ -60,7 +65,7 @@ export const SearchService = {
         if (isSwirlAvailable) {
           console.log('Swirl is available, using it for search');
           const swirlResult = await SwirlSearchService.search(query);
-          if (swirlResult) {
+          if (swirlResult && swirlResult.length > 100) {
             return swirlResult;
           }
         }
@@ -68,50 +73,46 @@ export const SearchService = {
         console.log('Swirl search failed, trying alternative methods:', error);
       }
       
-      // Try using OpenAI's search capabilities
+      // Try other providers as fallbacks
       try {
         const openAIResult = await OpenAISearchProvider.search(query);
-        if (openAIResult) {
+        if (openAIResult && openAIResult.length > 100) {
           return openAIResult;
         }
       } catch (error) {
         console.log('OpenAI search failed, trying alternative methods:', error);
       }
       
-      // Try with Google's Search API if available
       try {
         const googleResult = await GoogleSearchProvider.search(query);
-        if (googleResult) {
+        if (googleResult && googleResult.length > 100) {
           return googleResult;
         }
       } catch (error) {
         console.log('Google search failed, trying next service:', error);
       }
       
-      // Try DuckDuckGo JSONP API
       try {
         const duckDuckGoResult = await DuckDuckGoSearchProvider.search(query);
-        if (duckDuckGoResult) {
+        if (duckDuckGoResult && duckDuckGoResult.length > 100) {
           return duckDuckGoResult;
         }
       } catch (error) {
         console.log('DuckDuckGo search failed, trying alternative method:', error);
       }
       
-      // Try Wikipedia API directly
       try {
         const wikiResult = await WikipediaSearchProvider.search(query);
-        if (wikiResult) {
+        if (wikiResult && wikiResult.length > 100) {
           return wikiResult;
         }
       } catch (error) {
         console.log('Wikipedia search failed, trying fallback service:', error);
       }
       
-      // Try with Deepseek as fallback
       try {
         const deepseekResult = await DeepseekSearchProvider.search(query);
-        if (deepseekResult) {
+        if (deepseekResult && deepseekResult.length > 100) {
           return deepseekResult;
         }
       } catch (error) {
@@ -133,7 +134,7 @@ export const SearchService = {
   },
   
   /**
-   * Perform a vector search using Firebase/Supabase vector search capabilities
+   * Perform a vector search using Supabase vector search capabilities
    * This connects to our Gemini-powered search function
    */
   async vectorSearch(query: string): Promise<string | null> {

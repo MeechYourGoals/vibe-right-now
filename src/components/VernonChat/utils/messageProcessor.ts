@@ -58,8 +58,9 @@ export const processMessageInput = async (
       return;
     }
     
-    // Detect if this is likely a search query about places, events, or activities
-    const isLikelySearchQuery = /what|where|when|how|who|which|find|search|show|things to do|events|places|restaurants|bars|attractions|activities/i.test(inputValue);
+    // Detect if this is likely a location/venue search query
+    const isLocationQuery = /what|where|when|things to do|events|places|restaurants|bars|attractions|activities|visit|in|at|near|around/i.test(inputValue);
+    const hasCityName = /miami|new york|los angeles|chicago|san francisco|boston|seattle|austin|denver|nashville|atlanta|portland|dallas|houston|phoenix|philadelphia|san diego|las vegas/i.test(inputValue);
     
     // Process the message using Gemini or our search handlers
     let responseText = '';
@@ -71,17 +72,24 @@ export const processMessageInput = async (
           'venue',
           contextMessages
         );
-      } else if (isLikelySearchQuery) {
-        // For search queries, prioritize our enhanced search pipeline
+      } else if (isLocationQuery || hasCityName) {
+        // For location queries, prioritize our enhanced search pipeline
+        console.log('Location query detected, using search pipeline');
         responseText = await handleSearchQuery(inputValue, updatedPaginationState);
         
-        // If search result seems generic, enhance with Gemini
-        if (responseText.length < 100 || responseText.includes("I don't have specific information")) {
+        // If search result still seems generic, try again with Gemini directly
+        if (responseText.length < 200 || responseText.includes("I don't have specific information")) {
+          console.log('Search result insufficient, trying Gemini directly');
           const geminiEnhancement = await GeminiService.generateResponse(
-            `The user asked: "${inputValue}". Please provide specific, detailed information about real places, events, or activities related to this query.`, 
+            `The user is looking for information about: "${inputValue}". 
+             Please provide specific, detailed information about real venues, events, or activities.
+             Include names, addresses, and other practical details when possible.`, 
             'user'
           );
-          responseText = geminiEnhancement || responseText;
+          
+          if (geminiEnhancement && geminiEnhancement.length > 200) {
+            responseText = geminiEnhancement;
+          }
         }
       } else {
         // For conversational queries, use Gemini directly

@@ -23,6 +23,10 @@ export const useChat = (isProPlan: boolean = false, isVenueMode: boolean = false
   } = useMessageProcessor(isProPlan, isVenueMode);
 
   const handleSendMessage = async (inputValue: string) => {
+    if (!inputValue || inputValue.trim() === '') {
+      return;
+    }
+    
     await processMessage(inputValue, setMessages);
   };
 

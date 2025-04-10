@@ -25,26 +25,60 @@ export const handleSearchQuery = async (
   try {
     console.log('Processing search query:', inputValue);
     
-    // First try to get results from SearchService which prioritizes vector search
-    try {
-      responseText = await SearchService.search(inputValue);
-      console.log('Got response from SearchService');
-    } catch (searchError) {
-      console.error('Error with SearchService, trying alternatives:', searchError);
-      
-      // If SearchService fails, try Swirl
-      const isSwirlAvailable = await SwirlSearchService.isAvailable();
-      if (isSwirlAvailable) {
-        console.log('Using Swirl search engine for query');
-        try {
-          responseText = await SwirlSearchService.search(inputValue);
-        } catch (swirlError) {
-          console.error('Error with Swirl search, falling back to HuggingChat:', swirlError);
+    // Check if this is a location or event-related query
+    const isLocationQuery = isLocationOrEventQuery(inputValue);
+    const hasLocationKeywords = /miami|new york|los angeles|chicago|san francisco|las vegas|seattle|boston|places|venue|restaurant|bar|club|event|things to do|visit|attraction/i.test(inputValue);
+    
+    // For location-related queries, prioritize vector search
+    if (isLocationQuery || hasLocationKeywords) {
+      console.log('Location-related query detected, prioritizing vector search');
+      try {
+        // First attempt with vector search for most up-to-date information
+        responseText = await SearchService.vectorSearch(inputValue);
+        console.log('Vector search successful');
+        
+        if (responseText && responseText.length > 100) {
+          return cleanResponseText(responseText);
+        }
+      } catch (vectorError) {
+        console.error('Vector search failed:', vectorError);
+      }
+    }
+    
+    // Fall back to regular search service if vector search failed or wasn't applicable
+    if (!responseText || responseText.length < 100) {
+      try {
+        responseText = await SearchService.search(inputValue);
+        console.log('Got response from SearchService');
+      } catch (searchError) {
+        console.error('Error with SearchService, trying alternatives:', searchError);
+        
+        // If SearchService fails, try Swirl
+        const isSwirlAvailable = await SwirlSearchService.isAvailable();
+        if (isSwirlAvailable) {
+          console.log('Using Swirl search engine for query');
+          try {
+            responseText = await SwirlSearchService.search(inputValue);
+          } catch (swirlError) {
+            console.error('Error with Swirl search, falling back to HuggingChat:', swirlError);
+            responseText = await HuggingChatService.searchHuggingChat(inputValue);
+          }
+        } else {
+          // If Swirl is not available, use HuggingChat
           responseText = await HuggingChatService.searchHuggingChat(inputValue);
         }
-      } else {
-        // If Swirl is not available, use HuggingChat
-        responseText = await HuggingChatService.searchHuggingChat(inputValue);
+      }
+    }
+    
+    // If we still don't have a good response, try one last time with vector search
+    if (!responseText || responseText.length < 100 || responseText.includes("I don't have specific information")) {
+      try {
+        const lastChanceResponse = await SearchService.vectorSearch(inputValue);
+        if (lastChanceResponse && lastChanceResponse.length > 100) {
+          responseText = lastChanceResponse;
+        }
+      } catch (error) {
+        console.error('Last chance vector search failed:', error);
       }
     }
   } catch (error) {

@@ -19,10 +19,6 @@ serve(async (req) => {
     
     console.log("Vector search query:", query);
     
-    // This is a placeholder implementation
-    // In a real implementation, this would connect to a vector database
-    // For now, we'll use Gemini to emulate vector search capabilities
-    
     if (!GEMINI_API_KEY) {
       return new Response(
         JSON.stringify({ error: "Gemini API key not configured" }),
@@ -30,7 +26,7 @@ serve(async (req) => {
       );
     }
     
-    // Call Gemini API to emulate vector search with enhanced web search capabilities
+    // Use Gemini to search for relevant information with a more direct prompt
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${GEMINI_API_KEY}`, {
       method: "POST",
       headers: {
@@ -41,18 +37,25 @@ serve(async (req) => {
           {
             role: "user",
             parts: [{ 
-              text: `Please search the web for current information about: "${query}".
+              text: `You are VeRNon, a venue and event discovery assistant. The user is asking about: "${query}".
               
-              Return detailed and up-to-date information about venues, events, activities, or places that match this query.
-              If it's about things to do in a location, include specific venue names, opening hours, and event schedules if available.
-              If it's about events, include dates, times, ticket information, and venue details.
-              If it's about a type of activity, provide specific locations where this can be done.
+              Provide detailed, accurate information about real venues, events, activities, or attractions that match this query.
               
-              Format your response in a clear, organized way with headers and sections as appropriate.
-              Focus only on real, verifiable places and events.
-              Include web references where relevant.
+              If the query is about a location (city, neighborhood, etc.):
+              - List popular venues, attractions, and current events in that location
+              - Include specific venue names, addresses, and operating hours when available
+              - Group information by categories (dining, nightlife, attractions, events, etc.)
+              - Mention upcoming events with dates and ticket information if relevant
               
-              Your goal is to provide the most helpful and accurate information possible about real places and events.` 
+              If the query is about a specific type of activity or venue:
+              - Provide examples of places where this activity can be done
+              - Include specific details like hours, pricing, and locations
+              
+              Format your response in a clear, organized way with sections and categories.
+              Always prioritize real, verifiable places and events that exist in the real world.
+              Include helpful tips for visitors when appropriate.
+              
+              Your goal is to be as helpful as possible in helping the user discover real venues and events.` 
             }]
           }
         ],
@@ -75,6 +78,14 @@ serve(async (req) => {
     }
     
     const data = await response.json();
+    if (!data.candidates || !data.candidates[0] || !data.candidates[0].content || !data.candidates[0].content.parts) {
+      console.error("Unexpected Gemini API response structure:", JSON.stringify(data));
+      return new Response(
+        JSON.stringify({ error: "Unexpected Gemini API response structure" }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
     const results = data.candidates[0].content.parts[0].text;
     
     return new Response(

@@ -13,6 +13,13 @@ export const useMessageProcessor = (isProPlan: boolean = false, isVenueMode: boo
     inputValue: string,
     setMessages: React.Dispatch<React.SetStateAction<Message[]>>
   ) => {
+    // Skip processing if the input is empty
+    if (!inputValue || inputValue.trim() === '') {
+      return;
+    }
+    
+    console.log('Processing message:', inputValue);
+    
     await processMessageInput(inputValue, setMessages, {
       isVenueMode,
       isProPlan,
