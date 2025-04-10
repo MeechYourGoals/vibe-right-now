@@ -30,9 +30,36 @@ export const handleSearchQuery = async (
     const isLocationQuery = isLocationOrEventQuery(inputValue);
     const hasLocationKeywords = /miami|new york|los angeles|chicago|san francisco|las vegas|seattle|boston|orlando|washington|dc|places|venue|restaurant|bar|club|event|things to do|visit|attraction/i.test(inputValue);
     
+    // Check if this is a comedy-related query
+    const isComedyQuery = /comedy|comedian|stand[ -]?up|improv|funny|laugh|jokes/i.test(inputValue);
+    
     // Check if this is a complex natural language query with multiple requirements
     const isComplexQuery = inputValue.length > 50 && 
       /(\w+\s+(and|or|with|near|before|after)\s+\w+)|(\w+\s+for\s+\w+)/i.test(inputValue);
+    
+    // For comedy-specific queries, use specialized search
+    if (isComedyQuery) {
+      console.log('Comedy-related query detected, using comedy-specific search');
+      try {
+        const comedyResponse = await SearchService.comedySearch(inputValue);
+        if (comedyResponse && comedyResponse.length > 100) {
+          const comedyExploreLinkText = "\n\nYou can also [view all comedy shows on our Explore page](/explore?q=" + 
+            encodeURIComponent(inputValue) + "&tab=comedy) for a better visual experience.";
+          
+          // Set comedy category in sessionStorage
+          try {
+            sessionStorage.setItem('lastSearchCategories', JSON.stringify(['comedy']));
+            sessionStorage.setItem('lastSearchQuery', inputValue);
+          } catch (e) {
+            console.error('Error setting categories in sessionStorage:', e);
+          }
+          
+          return cleanResponseText(comedyResponse + comedyExploreLinkText);
+        }
+      } catch (comedyError) {
+        console.error('Comedy search failed:', comedyError);
+      }
+    }
     
     // For complex natural language queries or location-related queries, prioritize vector search
     if (isComplexQuery || isLocationQuery || hasLocationKeywords) {

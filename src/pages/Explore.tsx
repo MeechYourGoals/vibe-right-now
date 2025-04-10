@@ -18,6 +18,7 @@ import EventsList from "@/components/venue/events/EventsList";
 import { EventItem } from "@/components/venue/events/types";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from '@/integrations/supabase/client';
+import { getComedyEventsForCity } from "@/services/search/eventService";
 
 const getCitySpecificContent = (city: string, type: string) => {
   return `Check out this amazing ${type} in ${city}! The vibes are incredible right now.`;
@@ -281,6 +282,7 @@ const Explore = () => {
     const params = new URLSearchParams(location.search);
     const q = params.get('q');
     const vibe = params.get('vibe');
+    const tab = params.get('tab');
     
     if (q) {
       setSearchQuery(q);
@@ -306,6 +308,10 @@ const Explore = () => {
       }
       
       setSearchCategory("places");
+    }
+    
+    if (tab) {
+      setActiveTab(tab);
     }
     
     if (vibe) {
@@ -371,8 +377,23 @@ const Explore = () => {
           setSearchedCity(city);
           setSearchedState(state);
           
-          setMusicEvents(generateMusicEvents(city, state));
-          setComedyEvents(generateComedyEvents(city, state));
+          // Check if we need comedy shows
+          const needsComedy = data.categories.includes('comedy');
+          if (needsComedy) {
+            try {
+              // Get comedy events from the mock data for now
+              // In production, this would call an API
+              const comedyEvents = getComedyEventsForCity(city, state);
+              setComedyEvents(comedyEvents);
+              setActiveTab('comedy');
+            } catch (e) {
+              console.error('Error loading comedy events:', e);
+            }
+          } else {
+            setMusicEvents(generateMusicEvents(city, state));
+            setComedyEvents(generateComedyEvents(city, state));
+          }
+          
           setNightlifeVenues(generateNightlifeVenues(city, state));
           
           let results = generateMockLocationsForCity(city, state);
@@ -449,6 +470,12 @@ const Explore = () => {
       /(\w+\s+(and|or|with|near|before|after)\s+\w+)|(\w+\s+for\s+\w+)/i.test(query);
     
     setIsNaturalLanguageSearch(isComplexQuery);
+    
+    // Check if it's a comedy query
+    const isComedyQuery = /comedy|comedian|stand[ -]?up|improv|funny|laugh|jokes/i.test(query);
+    if (isComedyQuery) {
+      setActiveTab("comedy");
+    }
     
     const vibeKeywords = ["cozy", "family friendly", "nightowl", "trendy", "chill", "upscale", "casual", "romantic"];
     const queryLower = query.toLowerCase();
@@ -530,10 +557,12 @@ const Explore = () => {
     
     setFilteredLocations(results);
     
+    // Update URL parameters
     if (query) {
       const searchParams = new URLSearchParams();
       searchParams.set('q', query);
       if (vibeFilter) searchParams.set('vibe', vibeFilter);
+      if (isComedyQuery || activeTab !== "all") searchParams.set('tab', isComedyQuery ? 'comedy' : activeTab);
       navigate(`/explore?${searchParams.toString()}`, { replace: true });
     } else if (vibeFilter) {
       navigate(`/explore?vibe=${vibeFilter}`, { replace: true });
@@ -655,6 +684,35 @@ const Explore = () => {
     );
   };
 
+  const ComedyEventsSection = () => {
+    if (comedyEvents.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+          <AlertTriangle className="w-12 h-12 mb-4" />
+          <h3 className="text-xl font-semibold mb-2">No Comedy Shows Found</h3>
+          <p>We couldn't find any comedy shows in {searchedCity || "this area"} for the next few weeks. Try searching for another location.</p>
+        </div>
+      );
+    }
+    
+    return (
+      <div className="space-y-4">
+        <EventsList events={comedyEvents.map(event => ({
+          id: event.id,
+          title: event.title,
+          description: event.description,
+          date: event.date,
+          time: event.time,
+          location: event.venue,
+          imageUrl: event.imageUrl,
+          ticketUrl: event.ticketUrl,
+          price: event.price,
+          type: "comedy"
+        }))} />
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -768,13 +826,7 @@ const Explore = () => {
               {activeTab === "comedy" && (
                 <div className="mb-6">
                   <h2 className="text-xl font-semibold mb-4">Comedy Shows in {searchedCity}</h2>
-                  {comedyEvents.length > 0 ? (
-                    <div className="space-y-4">
-                      <EventsList events={comedyEvents} />
-                    </div>
-                  ) : (
-                    <NoEventsMessage />
-                  )}
+                  <ComedyEventsSection />
                 </div>
               )}
               

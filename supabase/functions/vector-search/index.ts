@@ -26,11 +26,20 @@ serve(async (req) => {
       );
     }
     
+    // Check if it's a comedy query
+    const isComedyQuery = /comedy|comedian|stand[ -]?up|improv|funny|laugh|jokes/i.test(query);
+    
     // Analyze the query to identify components that can be categorized
     const queryComponents = await analyzeQuery(query);
     
     // Generate the completion prompt based on the query analysis
-    const promptText = generatePrompt(query, queryComponents);
+    let promptText = "";
+    
+    if (isComedyQuery) {
+      promptText = generateComedyPrompt(query, queryComponents);
+    } else {
+      promptText = generatePrompt(query, queryComponents);
+    }
     
     try {
       // Use Gemini to search for relevant information with structured prompt
@@ -76,7 +85,12 @@ serve(async (req) => {
       const results = data.candidates[0].content.parts[0].text;
       
       // Extract categories for the UI to filter by
-      const extractedCategories = extractCategoriesFromQuery(queryComponents);
+      let extractedCategories = extractCategoriesFromQuery(queryComponents);
+      
+      // Add comedy category if it's a comedy query
+      if (isComedyQuery && !extractedCategories.includes('comedy')) {
+        extractedCategories.push('comedy');
+      }
       
       return new Response(
         JSON.stringify({ results, categories: extractedCategories }),
@@ -97,6 +111,41 @@ serve(async (req) => {
     );
   }
 });
+
+/**
+ * Generate a structured prompt for comedy-specific queries
+ */
+function generateComedyPrompt(originalQuery: string, queryComponents: any): string {
+  const { location } = queryComponents;
+  
+  return `You are VeRNon, a comedy event discovery assistant. The user is asking for: "${originalQuery}".
+  
+  Search for comedy shows, stand-up events, and comedy clubs in ${location || 'the mentioned location'}.
+  
+  For your search, consult these sources:
+  - PunchUp Live (punchup.live)
+  - Funny Bone Comedy Club (funnybone.com)
+  - The Improv (improv.com)
+  - Live Nation Comedy (livenation.com/feature/comedy)
+  - AEG Presents (aegpresents.com/tours/)
+  - Icon Concerts (iconconcerts.com/events/)
+  - Local comedy clubs in the specified city
+  
+  For each comedy show or venue, provide:
+  1. Name of comedian or show title
+  2. Venue name with full address
+  3. Date(s) and time(s)
+  4. Ticket price range (if available)
+  5. Direct links to official ticket pages (if available)
+  6. Brief description of the performer or show
+  
+  Structure your response in clearly defined sections:
+  - Upcoming Shows (for the next 2 weeks)
+  - Featured Comedians
+  - Comedy Venues in the area
+  
+  Focus on real venues and events that actually exist. Be specific and accurate with all details.`;
+}
 
 /**
  * Analyze a natural language query to extract key components
@@ -121,7 +170,7 @@ async function analyzeQuery(query) {
               - location (city, neighborhood, etc.)
               - venue_types (restaurant, bar, nightlife, attraction, etc.)
               - vibes (upscale, family-friendly, casual, romantic, etc.)
-              - events (sports games, concerts, shows, etc.)
+              - events (sports games, concerts, shows, comedy, etc.)
               - timeframe (morning, afternoon, night, specific dates, etc.)
               - special_requirements (parking, accessibility, etc.)
               
@@ -130,7 +179,7 @@ async function analyzeQuery(query) {
                 "location": "Chicago",
                 "venue_types": ["restaurant", "nightlife"],
                 "vibes": ["upscale", "family-friendly"],
-                "events": ["NBA game", "NFL game"],
+                "events": ["NBA game", "NFL game", "comedy show"],
                 "timeframe": "lunch",
                 "special_requirements": null
               }
@@ -251,8 +300,8 @@ function extractCategoriesFromQuery(queryComponents) {
         case 'show':
           return 'music';
         case 'comedy':
-        case 'theatre':
-        case 'theater':
+        case 'stand-up':
+        case 'improv':
           return 'comedy';
         case 'attraction':
         case 'sight':
@@ -279,7 +328,7 @@ function extractCategoriesFromQuery(queryComponents) {
       if (event.toLowerCase().includes('concert') || event.toLowerCase().includes('music')) {
         if (!categories.includes('music')) categories.push('music');
       }
-      if (event.toLowerCase().includes('comedy') || event.toLowerCase().includes('show')) {
+      if (event.toLowerCase().includes('comedy') || event.toLowerCase().includes('stand-up') || event.toLowerCase().includes('improv')) {
         if (!categories.includes('comedy')) categories.push('comedy');
       }
     }

@@ -1,3 +1,4 @@
+
 import { SimpleSearchService } from './SimpleSearchService';
 import { SwirlSearchService } from '../SwirlSearchService';
 import { GeminiService } from '../GeminiService';
@@ -135,6 +136,79 @@ export const SearchService = {
     } catch (error) {
       console.error('Error in search services:', error);
       return FallbackResponseGenerator.useFallbackLocalService(query);
+    }
+  },
+  
+  /**
+   * Specialized search for comedy shows and events
+   * @param query The search query about comedy shows
+   * @returns Information about comedy shows in the area
+   */
+  async comedySearch(query: string): Promise<string> {
+    try {
+      console.log('Performing comedy-specific search for:', query);
+      
+      // Extract city information
+      const cityMatch = query.match(/in\s+([a-zA-Z\s]+)(?:,\s*([a-zA-Z\s]+))?/i);
+      const city = cityMatch ? cityMatch[1] : '';
+      
+      // Gemini prompt specifically for comedy shows
+      const comedyPrompt = `
+        Find information about comedy shows, stand-up events, and comedy venues in ${city || 'the area mentioned'}. 
+        Search the following sources:
+        - PunchUp Live (https://punchup.live)
+        - Funny Bone Comedy Club (https://funnybone.com)
+        - The Improv (https://improv.com)
+        - Live Nation Comedy (https://www.livenation.com/feature/comedy)
+        - AEG Presents (https://www.aegpresents.com/tours/)
+        - Icon Concerts (https://www.iconconcerts.com/events/)
+        - Local comedy clubs in ${city || 'the mentioned area'}
+        
+        For each comedy show or venue, include:
+        - Name of comedian or show
+        - Venue name and address
+        - Date and time
+        - Ticket price range
+        - Link to buy tickets
+        - Brief description of the show or comedian
+        
+        Focus on upcoming shows within the next 2 weeks. Format your response in a clear, organized way.
+      `;
+      
+      // Try using Gemini for comedy search first
+      try {
+        const geminiResult = await GeminiService.generateResponse(comedyPrompt, 'user');
+        if (geminiResult && geminiResult.length > 100) {
+          console.log('Gemini comedy search successful, response length:', geminiResult.length);
+          return geminiResult;
+        }
+      } catch (error) {
+        console.log('Gemini comedy search failed, trying alternative methods:', error);
+      }
+      
+      // If Gemini fails, try extracting information from the vector search
+      try {
+        console.log('Attempting vector search for comedy shows');
+        const enhancedQuery = `comedy shows stand-up events in ${city || 'this area'}`;
+        const vectorResult = await this.vectorSearch(enhancedQuery);
+        
+        if (typeof vectorResult === 'object' && vectorResult !== null) {
+          if (vectorResult.results && vectorResult.results.length > 100) {
+            console.log('Vector search for comedy successful');
+            return vectorResult.results;
+          }
+        } else if (typeof vectorResult === 'string' && vectorResult.length > 100) {
+          return vectorResult;
+        }
+      } catch (vectorError) {
+        console.log('Vector search for comedy failed:', vectorError);
+      }
+      
+      // Fall back to general search with comedy-specific query
+      return this.search(`upcoming comedy shows and stand-up events in ${city || 'this area'}`);
+    } catch (error) {
+      console.error('Error in comedy search:', error);
+      return "I couldn't find specific information about comedy shows in that area. Please try searching for a specific city or comedy venue.";
     }
   },
   
