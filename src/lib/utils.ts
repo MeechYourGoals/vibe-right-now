@@ -6,6 +6,10 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+/**
+ * Format a date string or Date object into a human-readable format
+ * Handles both string and Date input types
+ */
 export function formatDate(dateString: string | Date): string {
   if (!dateString) return '';
   
@@ -22,6 +26,9 @@ export function formatDate(dateString: string | Date): string {
   }
 }
 
+/**
+ * Format a time string into a human-readable format
+ */
 export function formatTime(timeString: string): string {
   if (!timeString) return '';
   
@@ -32,4 +39,15 @@ export function formatTime(timeString: string): string {
     console.error('Error formatting time:', error);
     return timeString;
   }
+}
+
+/**
+ * Format a timestamp (string or Date) into a string for display
+ * Ensures compatibility with components expecting string
+ */
+export function formatTimestamp(timestamp: string | Date): string {
+  if (timestamp instanceof Date) {
+    return timestamp.toISOString();
+  }
+  return timestamp;
 }

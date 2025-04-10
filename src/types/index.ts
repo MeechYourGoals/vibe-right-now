@@ -78,7 +78,7 @@ export interface VenueInsights {
     date: string;
     count: number;
   }[];
-  mediaUploads?: number; // Add this field to fix the error
+  mediaUploads: number; // Changed from object to number to match expected type
 }
 
 export interface EventItem {
