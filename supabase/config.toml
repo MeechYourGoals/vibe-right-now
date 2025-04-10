@@ -41,3 +41,6 @@ verify_jwt = true
 
 [functions.ticketmaster]
 verify_jwt = true
+
+[functions.vertex-ai]
+verify_jwt = true

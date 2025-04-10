@@ -1,7 +1,7 @@
-
 import { SimpleSearchService } from './SimpleSearchService';
 import { SwirlSearchService } from '../SwirlSearchService';
 import { GeminiService } from '../GeminiService';
+import { VertexAIService } from '../VertexAIService';
 import { supabase } from '@/integrations/supabase/client';
 import { 
   OpenAISearchProvider,
@@ -11,6 +11,9 @@ import {
   DeepseekSearchProvider,
   FallbackResponseGenerator
 } from './providers';
+
+// Flag to determine which AI service to use
+const useVertexAI = false; // Default to Gemini, can be toggled in settings
 
 /**
  * Orchestrates multiple search providers to find the best result
@@ -25,9 +28,9 @@ export const SearchService = {
     try {
       console.log('Searching for:', query);
       
-      // First try vector search through Gemini API (most up-to-date info)
+      // First try vector search through AI API (most up-to-date info)
       try {
-        console.log('Attempting vector search with Gemini');
+        console.log('Attempting vector search with AI');
         const vectorResult = await this.vectorSearch(query);
         
         if (typeof vectorResult === 'object' && vectorResult !== null) {
@@ -45,22 +48,36 @@ export const SearchService = {
         console.log('Vector search failed, trying alternative methods:', vectorError);
       }
       
-      // Try using Gemini directly for a conversational response with current information
+      // Try using AI directly for a conversational response with current information
       try {
-        console.log('Attempting direct Gemini search');
-        const geminiResult = await GeminiService.generateResponse(
-          `Search the web for current information about: "${query}". 
-           Provide specific, factual information about real places, events or attractions if applicable. 
-           Include names, addresses, dates, times, and other relevant details.
-           Focus on giving practical information that would help someone visit these places.`, 
-          'user'
-        );
-        if (geminiResult && geminiResult.length > 100) {
-          console.log('Gemini direct search successful, response length:', geminiResult.length);
-          return geminiResult;
+        console.log(`Attempting direct ${useVertexAI ? 'Vertex AI' : 'Gemini'} search`);
+        
+        // Choose which AI service to use based on the flag
+        let aiResult;
+        if (useVertexAI) {
+          aiResult = await VertexAIService.generateResponse(
+            `Search the web for current information about: "${query}". 
+             Provide specific, factual information about real places, events or attractions if applicable. 
+             Include names, addresses, dates, times, and other relevant details.
+             Focus on giving practical information that would help someone visit these places.`, 
+            'user'
+          );
+        } else {
+          aiResult = await GeminiService.generateResponse(
+            `Search the web for current information about: "${query}". 
+             Provide specific, factual information about real places, events or attractions if applicable. 
+             Include names, addresses, dates, times, and other relevant details.
+             Focus on giving practical information that would help someone visit these places.`, 
+            'user'
+          );
+        }
+        
+        if (aiResult && aiResult.length > 100) {
+          console.log(`${useVertexAI ? 'Vertex AI' : 'Gemini'} direct search successful, response length:`, aiResult.length);
+          return aiResult;
         }
       } catch (error) {
-        console.log('Gemini search failed, trying alternative methods:', error);
+        console.log(`${useVertexAI ? 'Vertex AI' : 'Gemini'} search failed, trying alternative methods:`, error);
       }
       
       // Try using Swirl (local search engine)
@@ -152,7 +169,7 @@ export const SearchService = {
       const cityMatch = query.match(/in\s+([a-zA-Z\s]+)(?:,\s*([a-zA-Z\s]+))?/i);
       const city = cityMatch ? cityMatch[1] : '';
       
-      // Gemini prompt specifically for comedy shows
+      // AI prompt specifically for comedy shows
       const comedyPrompt = `
         Find information about comedy shows, stand-up events, and comedy venues in ${city || 'the area mentioned'}. 
         Search the following sources:
@@ -175,18 +192,25 @@ export const SearchService = {
         Focus on upcoming shows within the next 2 weeks. Format your response in a clear, organized way.
       `;
       
-      // Try using Gemini for comedy search first
+      // Try using chosen AI service for comedy search first
       try {
-        const geminiResult = await GeminiService.generateResponse(comedyPrompt, 'user');
-        if (geminiResult && geminiResult.length > 100) {
-          console.log('Gemini comedy search successful, response length:', geminiResult.length);
-          return geminiResult;
+        // Choose which AI service to use based on the flag
+        let aiResult;
+        if (useVertexAI) {
+          aiResult = await VertexAIService.generateResponse(comedyPrompt, 'user');
+        } else {
+          aiResult = await GeminiService.generateResponse(comedyPrompt, 'user');
+        }
+        
+        if (aiResult && aiResult.length > 100) {
+          console.log(`${useVertexAI ? 'Vertex AI' : 'Gemini'} comedy search successful, response length:`, aiResult.length);
+          return aiResult;
         }
       } catch (error) {
-        console.log('Gemini comedy search failed, trying alternative methods:', error);
+        console.log(`${useVertexAI ? 'Vertex AI' : 'Gemini'} comedy search failed, trying alternative methods:`, error);
       }
       
-      // If Gemini fails, try extracting information from the vector search
+      // If AI fails, try extracting information from the vector search
       try {
         console.log('Attempting vector search for comedy shows');
         const enhancedQuery = `comedy shows stand-up events in ${city || 'this area'}`;
@@ -214,7 +238,7 @@ export const SearchService = {
   
   /**
    * Perform a vector search using Supabase vector search capabilities
-   * This connects to our Gemini-powered search function
+   * This connects to our AI-powered search function
    * @returns Object with results and categories or string with results
    */
   async vectorSearch(query: string): Promise<{results: string, categories: string[]} | string | null> {

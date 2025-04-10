@@ -6,6 +6,7 @@ import { handleVenueQuery } from './handlers/venueQueryHandler';
 import { handleSearchQuery } from './handlers/searchQueryHandler';
 import { handleBookingQuery } from './handlers/bookingQueryHandler';
 import { GeminiService } from '@/services/GeminiService';
+import { VertexAIService } from '@/services/VertexAIService';
 
 export interface MessageProcessorProps {
   isVenueMode: boolean;
@@ -14,6 +15,9 @@ export interface MessageProcessorProps {
   setIsTyping: (isTyping: boolean) => void;
   setIsSearching: (isSearching: boolean) => void;
 }
+
+// Flag to determine which AI service to use (can be controlled via settings)
+const useVertexAI = false; // Default to Gemini, can be toggled in settings
 
 export const processMessageInput = async (
   inputValue: string,
@@ -66,47 +70,79 @@ export const processMessageInput = async (
     console.log('Is location query:', isLocationQuery);
     console.log('Has city name:', hasCityName);
     
-    // Process the message using Gemini or our search handlers
+    // Process the message using selected AI service or our search handlers
     let responseText = '';
     
     // For location queries or any query with city names, prioritize search
     if (isLocationQuery || hasCityName) {
       console.log('Location/city query detected, using search pipeline');
       try {
-        // First try the vector search which uses Gemini
+        // First try the vector search which uses AI
         responseText = await handleSearchQuery(inputValue, updatedPaginationState);
         console.log('Search query handler returned response of length:', responseText.length);
         
-        // If we didn't get a good response, try direct Gemini call
+        // If we didn't get a good response, try direct AI call
         if (!responseText || responseText.length < 100 || responseText.includes("I don't have specific information")) {
-          console.log('Search result insufficient, trying Gemini directly');
-          responseText = await GeminiService.generateResponse(
-            `The user is asking about: "${inputValue}". 
-             Provide detailed information about real venues, events, or activities in this location.
-             Include names of specific places, addresses, and hours when possible.
-             Group information by categories (dining, nightlife, attractions, events, etc.)`,
-            'user'
-          );
+          console.log('Search result insufficient, trying AI directly');
+          
+          // Choose which AI service to use based on the flag
+          if (useVertexAI) {
+            responseText = await VertexAIService.generateResponse(
+              `The user is asking about: "${inputValue}". 
+               Provide detailed information about real venues, events, or activities in this location.
+               Include names of specific places, addresses, and hours when possible.
+               Group information by categories (dining, nightlife, attractions, events, etc.)`,
+              'user'
+            );
+          } else {
+            responseText = await GeminiService.generateResponse(
+              `The user is asking about: "${inputValue}". 
+               Provide detailed information about real venues, events, or activities in this location.
+               Include names of specific places, addresses, and hours when possible.
+               Group information by categories (dining, nightlife, attractions, events, etc.)`,
+              'user'
+            );
+          }
         }
       } catch (error) {
         console.error('Error in search pipeline:', error);
-        // Fall back to direct Gemini call
-        responseText = await GeminiService.generateResponse(inputValue, 'user', contextMessages);
+        // Fall back to direct AI call
+        if (useVertexAI) {
+          responseText = await VertexAIService.generateResponse(inputValue, 'user', contextMessages);
+        } else {
+          responseText = await GeminiService.generateResponse(inputValue, 'user', contextMessages);
+        }
       }
     } else if (isVenueMode) {
-      // For venue mode, always use Gemini for business insights
-      responseText = await GeminiService.generateResponse(
-        inputValue, 
-        'venue',
-        contextMessages
-      );
+      // For venue mode, always use AI for business insights
+      if (useVertexAI) {
+        responseText = await VertexAIService.generateResponse(
+          inputValue, 
+          'venue',
+          contextMessages
+        );
+      } else {
+        responseText = await GeminiService.generateResponse(
+          inputValue, 
+          'venue',
+          contextMessages
+        );
+      }
     } else {
-      // For conversational queries, use Gemini directly
-      responseText = await GeminiService.generateResponse(
-        inputValue, 
-        'user',
-        contextMessages
-      );
+      // For conversational queries, use AI directly
+      if (useVertexAI) {
+        responseText = await VertexAIService.generateResponse(
+          inputValue, 
+          'user',
+          contextMessages
+        );
+      } else {
+        responseText = await GeminiService.generateResponse(
+          inputValue, 
+          'user',
+          contextMessages
+        );
+      }
     }
     
     // Create and add the AI message with the response

@@ -1,7 +1,11 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const GEMINI_API_KEY = "AIzaSyBeEJvxSAjyvoRS6supoob0F7jGW7lhZUU";
+const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
+const GOOGLE_VERTEX_API_KEY = Deno.env.get('GOOGLE_VERTEX_API_KEY');
+
+// Flag to determine which Google AI service to use
+const useVertexAI = false; // Default to Gemini, can be toggled
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -19,7 +23,13 @@ serve(async (req) => {
     
     console.log("Vector search query:", query);
     
-    if (!GEMINI_API_KEY) {
+    // Check if API keys are available
+    if (useVertexAI && !GOOGLE_VERTEX_API_KEY) {
+      return new Response(
+        JSON.stringify({ error: "Vertex AI API key not configured" }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    } else if (!useVertexAI && !GEMINI_API_KEY) {
       return new Response(
         JSON.stringify({ error: "Gemini API key not configured" }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -42,47 +52,78 @@ serve(async (req) => {
     }
     
     try {
-      // Use Gemini to search for relevant information with structured prompt
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${GEMINI_API_KEY}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              role: "user",
-              parts: [{ text: promptText }]
+      let results;
+      
+      if (useVertexAI) {
+        // Use Vertex AI to search for relevant information
+        const VERTEX_API_URL = "https://us-central1-aiplatform.googleapis.com/v1/projects/PROJECT_ID/locations/us-central1/publishers/google/models/gemini-1.5-pro:generateContent";
+        
+        const response = await fetch(`${VERTEX_API_URL}?key=${GOOGLE_VERTEX_API_KEY}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            contents: [
+              {
+                role: "USER",
+                parts: [{ text: promptText }]
+              }
+            ],
+            generationConfig: {
+              temperature: 0.2,
+              topK: 40,
+              topP: 0.95,
+              maxOutputTokens: 2048,
             }
-          ],
-          generationConfig: {
-            temperature: 0.2,
-            topK: 40,
-            topP: 0.95,
-            maxOutputTokens: 2048,
-          }
-        })
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.text();
-        console.error("Gemini API error:", errorData);
-        return new Response(
-          JSON.stringify({ error: "Error calling Gemini API", details: errorData }),
-          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
+          })
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.text();
+          console.error("Vertex AI API error:", errorData);
+          throw new Error(`Error calling Vertex AI API: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        results = data.candidates[0].content.parts[0].text;
+      } else {
+        // Use Gemini to search for relevant information
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${GEMINI_API_KEY}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            contents: [
+              {
+                role: "user",
+                parts: [{ text: promptText }]
+              }
+            ],
+            generationConfig: {
+              temperature: 0.2,
+              topK: 40,
+              topP: 0.95,
+              maxOutputTokens: 2048,
+            }
+          })
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.text();
+          console.error("Gemini API error:", errorData);
+          throw new Error(`Error calling Gemini API: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        if (!data.candidates || !data.candidates[0] || !data.candidates[0].content || !data.candidates[0].content.parts) {
+          console.error("Unexpected API response structure:", JSON.stringify(data));
+          throw new Error("Unexpected API response structure");
+        }
+        
+        results = data.candidates[0].content.parts[0].text;
       }
-      
-      const data = await response.json();
-      if (!data.candidates || !data.candidates[0] || !data.candidates[0].content || !data.candidates[0].content.parts) {
-        console.error("Unexpected Gemini API response structure:", JSON.stringify(data));
-        return new Response(
-          JSON.stringify({ error: "Unexpected Gemini API response structure", details: data }),
-          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      
-      const results = data.candidates[0].content.parts[0].text;
       
       // Extract categories for the UI to filter by
       let extractedCategories = extractCategoriesFromQuery(queryComponents);
@@ -96,10 +137,10 @@ serve(async (req) => {
         JSON.stringify({ results, categories: extractedCategories }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
-    } catch (geminiError) {
-      console.error('Error calling Gemini API:', geminiError);
+    } catch (aiError) {
+      console.error(`Error calling ${useVertexAI ? 'Vertex AI' : 'Gemini'} API:`, aiError);
       return new Response(
-        JSON.stringify({ error: "Failed to process with Gemini API", details: geminiError.message }),
+        JSON.stringify({ error: `Failed to process with ${useVertexAI ? 'Vertex AI' : 'Gemini'} API`, details: aiError.message }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
