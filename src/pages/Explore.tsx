@@ -377,12 +377,9 @@ const Explore = () => {
           setSearchedCity(city);
           setSearchedState(state);
           
-          // Check if we need comedy shows
           const needsComedy = data.categories.includes('comedy');
           if (needsComedy) {
             try {
-              // Get comedy events from the mock data for now
-              // In production, this would call an API
               const comedyEvents = getComedyEventsForCity(city, state);
               setComedyEvents(comedyEvents);
               setActiveTab('comedy');
@@ -471,7 +468,6 @@ const Explore = () => {
     
     setIsNaturalLanguageSearch(isComplexQuery);
     
-    // Check if it's a comedy query
     const isComedyQuery = /comedy|comedian|stand[ -]?up|improv|funny|laugh|jokes/i.test(query);
     if (isComedyQuery) {
       setActiveTab("comedy");
@@ -557,7 +553,6 @@ const Explore = () => {
     
     setFilteredLocations(results);
     
-    // Update URL parameters
     if (query) {
       const searchParams = new URLSearchParams();
       searchParams.set('q', query);
@@ -703,7 +698,7 @@ const Explore = () => {
           description: event.description,
           date: event.date,
           time: event.time,
-          location: event.venue,
+          location: event.location,
           imageUrl: event.imageUrl,
           ticketUrl: event.ticketUrl,
           price: event.price,
