@@ -5,7 +5,7 @@ import { mockLocations } from "@/mock/data";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { MapPin, Search, VerifiedIcon } from "lucide-react";
+import { MapPin, Search, VerifiedIcon, Music, Mic, AlertTriangle } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
@@ -14,6 +14,8 @@ import SearchVibes from "@/components/SearchVibes";
 import NearbyVibesMap from "@/components/NearbyVibesMap";
 import { Location } from "@/types";
 import VenuePost from "@/components/VenuePost";
+import EventsList from "@/components/venue/events/EventsList";
+import { EventItem } from "@/components/venue/events/types";
 
 const getCitySpecificContent = (city: string, type: string) => {
   return `Check out this amazing ${type} in ${city}! The vibes are incredible right now.`;
@@ -114,6 +116,90 @@ const getAdditionalTags = (location: Location) => {
   return additionalTags;
 };
 
+const generateMusicEvents = (city: string, state: string): EventItem[] => {
+  if (!city) return [];
+  
+  const musicArtists = [
+    "Taylor Swift", "The Weeknd", "Bad Bunny", "Billie Eilish", 
+    "Drake", "BTS", "Dua Lipa", "Post Malone", "Harry Styles"
+  ];
+  
+  const venues = [
+    `${city} Arena`, `${city} Amphitheater`, `Downtown ${city} Concert Hall`, 
+    `${city} Stadium`, `${city} Center`
+  ];
+  
+  const now = new Date();
+  const events: EventItem[] = [];
+  
+  const count = Math.floor(Math.random() * 6);
+  
+  for (let i = 0; i < count; i++) {
+    const artist = musicArtists[Math.floor(Math.random() * musicArtists.length)];
+    const venue = venues[Math.floor(Math.random() * venues.length)];
+    
+    const date = new Date();
+    date.setDate(now.getDate() + Math.floor(Math.random() * 7));
+    
+    events.push({
+      id: `music-${city}-${i}`,
+      title: `${artist} Concert`,
+      description: `Live performance by ${artist}`,
+      date: date.toISOString(),
+      time: `${7 + Math.floor(Math.random() * 4)}:00 PM`,
+      location: venue,
+      imageUrl: `https://source.unsplash.com/random/800x600/?concert,${artist.split(' ').join(',')}`,
+      ticketUrl: `https://www.${venue.toLowerCase().replace(/\s+/g, '')}.com/tickets`,
+      price: `$${45 + Math.floor(Math.random() * 150)}`,
+      type: "music"
+    });
+  }
+  
+  return events;
+};
+
+const generateComedyEvents = (city: string, state: string): EventItem[] => {
+  if (!city) return [];
+  
+  const comedians = [
+    "Dave Chappelle", "Kevin Hart", "John Mulaney", "Ali Wong", 
+    "Bill Burr", "Hannah Gadsby", "Trevor Noah", "Wanda Sykes", "Jim Gaffigan"
+  ];
+  
+  const venues = [
+    `${city} Comedy Club`, `Laugh Factory ${city}`, `${city} Improv`, 
+    `Funny Bone ${city}`, `Comedy Cellar ${city}`
+  ];
+  
+  const now = new Date();
+  const events: EventItem[] = [];
+  
+  const count = Math.floor(Math.random() * 5);
+  
+  for (let i = 0; i < count; i++) {
+    const comedian = comedians[Math.floor(Math.random() * comedians.length)];
+    const venue = venues[Math.floor(Math.random() * venues.length)];
+    
+    const date = new Date();
+    date.setDate(now.getDate() + Math.floor(Math.random() * 7));
+    
+    events.push({
+      id: `comedy-${city}-${i}`,
+      title: `${comedian} Stand-Up`,
+      description: `Comedy show featuring ${comedian}`,
+      date: date.toISOString(),
+      time: `${7 + Math.floor(Math.random() * 3)}:00 PM`,
+      location: venue,
+      imageUrl: `https://source.unsplash.com/random/800x600/?comedian,standup`,
+      ticketUrl: `https://www.${venue.toLowerCase().replace(/\s+/g, '')}.com/tickets`,
+      price: `$${30 + Math.floor(Math.random() * 70)}`,
+      type: "comedy"
+    });
+  }
+  
+  return events;
+};
+
 const Explore = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("all");
@@ -122,6 +208,8 @@ const Explore = () => {
   const [searchCategory, setSearchCategory] = useState("all");
   const [filteredLocations, setFilteredLocations] = useState(mockLocations);
   const [locationTags, setLocationTags] = useState<Record<string, string[]>>({});
+  const [musicEvents, setMusicEvents] = useState<EventItem[]>([]);
+  const [comedyEvents, setComedyEvents] = useState<EventItem[]>([]);
   
   const location = useLocation();
   const navigate = useNavigate();
@@ -141,6 +229,9 @@ const Explore = () => {
       setSearchedState(state);
       
       handleSearch(q, "All", "places");
+      
+      setMusicEvents(generateMusicEvents(city, state));
+      setComedyEvents(generateComedyEvents(city, state));
     }
   }, [location.search]);
   
@@ -171,9 +262,14 @@ const Explore = () => {
       state = parts.length > 1 ? parts[1].trim() : "";
       setSearchedCity(city);
       setSearchedState(state);
+      
+      setMusicEvents(generateMusicEvents(city, state));
+      setComedyEvents(generateComedyEvents(city, state));
     } else {
       setSearchedCity("");
       setSearchedState("");
+      setMusicEvents([]);
+      setComedyEvents([]);
     }
     
     let results = [...mockLocations];
@@ -238,6 +334,14 @@ const Explore = () => {
     return "Explore Vibes";
   };
 
+  const NoEventsMessage = () => (
+    <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+      <AlertTriangle className="w-12 h-12 mb-4" />
+      <h3 className="text-xl font-semibold mb-2">No Shows Right Now</h3>
+      <p>There are no upcoming shows in this area for the next week.</p>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -253,13 +357,21 @@ const Explore = () => {
           </div>
           
           <Tabs defaultValue="all" value={activeTab} onValueChange={handleTabChange} className="max-w-2xl mx-auto">
-            <TabsList className="grid grid-cols-3 md:grid-cols-7">
+            <TabsList className="grid grid-cols-3 md:grid-cols-9">
               <TabsTrigger value="all">All</TabsTrigger>
               <TabsTrigger value="restaurant">Restaurants</TabsTrigger>
               <TabsTrigger value="bar">Bars</TabsTrigger>
               <TabsTrigger value="event">Events</TabsTrigger>
               <TabsTrigger value="attraction">Attractions</TabsTrigger>
               <TabsTrigger value="sports">Sports</TabsTrigger>
+              <TabsTrigger value="music">
+                <Music className="mr-1 h-4 w-4" />
+                Music
+              </TabsTrigger>
+              <TabsTrigger value="comedy">
+                <Mic className="mr-1 h-4 w-4" />
+                Comedy
+              </TabsTrigger>
               <TabsTrigger value="other">Other</TabsTrigger>
             </TabsList>
           </Tabs>
@@ -267,6 +379,32 @@ const Explore = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-2">
+            {activeTab === "music" && (
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold mb-4">Music Events in {searchedCity}</h2>
+                {musicEvents.length > 0 ? (
+                  <div className="space-y-4">
+                    <EventsList events={musicEvents} />
+                  </div>
+                ) : (
+                  <NoEventsMessage />
+                )}
+              </div>
+            )}
+            
+            {activeTab === "comedy" && (
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold mb-4">Comedy Shows in {searchedCity}</h2>
+                {comedyEvents.length > 0 ? (
+                  <div className="space-y-4">
+                    <EventsList events={comedyEvents} />
+                  </div>
+                ) : (
+                  <NoEventsMessage />
+                )}
+              </div>
+            )}
+            
             {searchCategory === "places" && searchedCity && activeTab === "sports" && (
               <div className="mb-6">
                 <h2 className="text-xl font-semibold mb-4">Trending Sports Events</h2>
@@ -287,58 +425,60 @@ const Explore = () => {
               </div>
             )}
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {filteredLocations.length > 0 ? (
-                filteredLocations.map((location) => (
-                  <Card key={location.id} className="vibe-card-hover">
-                    <CardContent className="p-4">
-                      <div className="flex justify-between items-start mb-2">
-                        <h3 className="text-lg font-semibold flex items-center">
-                          {location.name}
-                          {location.verified && (
-                            <VerifiedIcon className="h-4 w-4 ml-1 text-primary" />
-                          )}
-                        </h3>
-                        <HoverCard>
-                          <HoverCardTrigger asChild>
-                            <Badge variant="outline" className="cursor-help">{location.type}</Badge>
-                          </HoverCardTrigger>
-                          <HoverCardContent className="w-auto">
-                            <div className="space-y-2">
-                              <h4 className="text-sm font-semibold">More Tags</h4>
-                              <div className="flex flex-wrap gap-1.5">
-                                <Badge variant="outline" className="bg-primary/10">{location.type}</Badge>
-                                {locationTags[location.id]?.map((tag, index) => (
-                                  <Badge key={index} variant="outline" className="bg-muted/40">{tag}</Badge>
-                                ))}
+            {activeTab !== "music" && activeTab !== "comedy" && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {filteredLocations.length > 0 ? (
+                  filteredLocations.map((location) => (
+                    <Card key={location.id} className="vibe-card-hover">
+                      <CardContent className="p-4">
+                        <div className="flex justify-between items-start mb-2">
+                          <h3 className="text-lg font-semibold flex items-center">
+                            {location.name}
+                            {location.verified && (
+                              <VerifiedIcon className="h-4 w-4 ml-1 text-primary" />
+                            )}
+                          </h3>
+                          <HoverCard>
+                            <HoverCardTrigger asChild>
+                              <Badge variant="outline" className="cursor-help">{location.type}</Badge>
+                            </HoverCardTrigger>
+                            <HoverCardContent className="w-auto">
+                              <div className="space-y-2">
+                                <h4 className="text-sm font-semibold">More Tags</h4>
+                                <div className="flex flex-wrap gap-1.5">
+                                  <Badge variant="outline" className="bg-primary/10">{location.type}</Badge>
+                                  {locationTags[location.id]?.map((tag, index) => (
+                                    <Badge key={index} variant="outline" className="bg-muted/40">{tag}</Badge>
+                                  ))}
+                                </div>
                               </div>
-                            </div>
-                          </HoverCardContent>
-                        </HoverCard>
-                      </div>
-                      
-                      <div className="text-sm text-muted-foreground mb-3 flex items-center">
-                        <MapPin className="h-4 w-4 mr-1" />
-                        <span>
-                          {location.address}, {location.city}, {location.state}
-                        </span>
-                      </div>
-                      
-                      <Button className="w-full bg-gradient-vibe" asChild>
-                        <Link to={`/venue/${location.id}`}>View Vibes</Link>
-                      </Button>
-                    </CardContent>
-                  </Card>
-                ))
-              ) : (
-                <div className="col-span-full text-center py-10">
-                  <h3 className="text-xl font-semibold mb-2">No locations found</h3>
-                  <p className="text-muted-foreground">
-                    Try adjusting your search or filters
-                  </p>
-                </div>
-              )}
-            </div>
+                            </HoverCardContent>
+                          </HoverCard>
+                        </div>
+                        
+                        <div className="text-sm text-muted-foreground mb-3 flex items-center">
+                          <MapPin className="h-4 w-4 mr-1" />
+                          <span>
+                            {location.address}, {location.city}, {location.state}
+                          </span>
+                        </div>
+                        
+                        <Button className="w-full bg-gradient-vibe" asChild>
+                          <Link to={`/venue/${location.id}`}>View Vibes</Link>
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))
+                ) : (
+                  <div className="col-span-full text-center py-10">
+                    <h3 className="text-xl font-semibold mb-2">No locations found</h3>
+                    <p className="text-muted-foreground">
+                      Try adjusting your search or filters
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
           
           <div className="hidden md:block">

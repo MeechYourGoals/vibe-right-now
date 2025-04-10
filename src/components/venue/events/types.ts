@@ -1,9 +1,13 @@
 
 export interface EventItem {
-  id: number;
+  id: string;
   title: string;
+  description: string;
   date: string;
   time: string;
-  attendees: number;
-  status: 'upcoming' | 'past' | 'canceled';
+  location: string;
+  imageUrl?: string;
+  ticketUrl?: string;
+  price?: string;
+  type?: "venue" | "sports" | "music" | "comedy";
 }

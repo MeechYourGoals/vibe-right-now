@@ -6,22 +6,25 @@ import { EventItem } from "./types";
 
 interface EventsListProps {
   events: EventItem[];
+  showViewAll?: boolean;
 }
 
-const EventsList = ({ events }: EventsListProps) => {
+const EventsList = ({ events, showViewAll = true }: EventsListProps) => {
   return (
     <div className="space-y-4">
       {events.map(event => (
         <EventListItem key={event.id} event={event} />
       ))}
       
-      <Button 
-        variant="ghost" 
-        size="sm" 
-        className="w-full text-pro-light hover:text-white hover:bg-pro-dark"
-      >
-        View All Events
-      </Button>
+      {showViewAll && events.length > 0 && (
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="w-full text-pro-light hover:text-white hover:bg-pro-dark"
+        >
+          View All Events
+        </Button>
+      )}
     </div>
   );
 };
