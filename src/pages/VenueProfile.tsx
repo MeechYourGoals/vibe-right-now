@@ -1,3 +1,4 @@
+
 import { useState, useMemo, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Minimize } from "lucide-react";
@@ -142,8 +143,8 @@ const VenueProfile = () => {
               searchedCity={venue.city}
               mapStyle="default"
               selectedLocation={null}
-              userAddressLocation={null}
               onLocationSelect={() => {}}
+              userAddressLocation={null}
               showAllCities={!venue.city}
             />
           </div>

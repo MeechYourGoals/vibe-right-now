@@ -2,7 +2,6 @@
 import React from 'react';
 import { Post, Comment, Location } from "@/types";
 import VenuePostsTabs from './VenuePostsTabs';
-import { SocialMediaApiKeys } from '@/services/SocialMediaService';
 
 interface VenuePostsContentProps {
   activeTab: string;
