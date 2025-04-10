@@ -6,6 +6,9 @@ import PostHeader from "./PostHeader";
 import PostContent from "./PostContent";
 import PostMedia from "./PostMedia";
 import PostFooter from "./PostFooter";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+import { UserPlus, UserCheck } from "lucide-react";
 import { deletePost, canDeleteUserPosts } from "@/utils/venue/postManagementUtils";
 
 interface PostCardProps {
@@ -32,6 +35,13 @@ const PostCard: React.FC<PostCardProps> = ({
   getComments
 }) => {
   const [isDeleted, setIsDeleted] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
+  
+  const toggleFollow = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsFollowing(!isFollowing);
+  };
   
   // Handle multiple posts mode (used in feed)
   if (posts && posts.length > 0 && getComments) {
@@ -42,16 +52,38 @@ const PostCard: React.FC<PostCardProps> = ({
         <div className="p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <h3 className="text-lg font-semibold">{firstPost.location.name}</h3>
+              <Link to={`/venue/${firstPost.location.id}`}>
+                <h3 className="text-lg font-semibold hover:underline">{firstPost.location.name}</h3>
+              </Link>
               {locationPostCount !== undefined && (
                 <span className="ml-2 text-sm text-muted-foreground">
                   {locationPostCount} posts
                 </span>
               )}
             </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className={isFollowing ? "bg-primary/10" : ""}
+              onClick={toggleFollow}
+            >
+              {isFollowing ? (
+                <>
+                  <UserCheck className="h-4 w-4 mr-1" />
+                  Following
+                </>
+              ) : (
+                <>
+                  <UserPlus className="h-4 w-4 mr-1" />
+                  Follow
+                </>
+              )}
+            </Button>
           </div>
           <p className="text-sm text-muted-foreground mt-1">
-            {firstPost.location.city}, {firstPost.location.state}
+            <Link to={`/venue/${firstPost.location.id}`} className="hover:underline">
+              {firstPost.location.city}, {firstPost.location.state}
+            </Link>
           </p>
         </div>
         
