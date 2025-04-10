@@ -1,10 +1,9 @@
-
 import { GeminiService } from '@/services/GeminiService';
 import { VertexAIService } from '@/services/VertexAIService';
 import { SearchServiceCore } from '../core/SearchServiceCore';
 
 // Flag to determine which AI service to use
-const useVertexAI = false; // Default to Gemini, can be toggled in settings
+const useVertexAI = true; // Changed from false to true to use Vertex AI by default
 
 /**
  * Specialized search service for comedy-related queries
@@ -46,22 +45,17 @@ export const ComedySearchService = {
         Focus on upcoming shows within the next 2 weeks. Format your response in a clear, organized way.
       `;
       
-      // Try using chosen AI service for comedy search first
+      // Try using Vertex AI for comedy search first
       try {
-        // Choose which AI service to use based on the flag
-        let aiResult;
-        if (useVertexAI) {
-          aiResult = await VertexAIService.generateResponse(comedyPrompt, 'user');
-        } else {
-          aiResult = await GeminiService.generateResponse(comedyPrompt, 'user');
-        }
+        // Using Vertex AI by default
+        const aiResult = await VertexAIService.generateResponse(comedyPrompt, 'user');
         
         if (aiResult && aiResult.length > 100) {
-          console.log(`${useVertexAI ? 'Vertex AI' : 'Gemini'} comedy search successful, response length:`, aiResult.length);
+          console.log('Vertex AI comedy search successful, response length:', aiResult.length);
           return aiResult;
         }
       } catch (error) {
-        console.log(`${useVertexAI ? 'Vertex AI' : 'Gemini'} comedy search failed, trying alternative methods:`, error);
+        console.log('Vertex AI comedy search failed, trying alternative methods:', error);
       }
       
       // If AI fails, try extracting information from the vector search

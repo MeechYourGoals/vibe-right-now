@@ -1,4 +1,3 @@
-
 import { SimpleSearchService } from '../SimpleSearchService';
 import { SwirlSearchService } from '@/services/SwirlSearchService';
 import { GeminiService } from '@/services/GeminiService';
@@ -14,7 +13,7 @@ import {
 import { SearchServiceCore } from '../core/SearchServiceCore';
 
 // Flag to determine which AI service to use
-const useVertexAI = false; // Default to Gemini, can be toggled in settings
+const useVertexAI = true; // Changed from false to true to use Vertex AI by default
 
 /**
  * Provides integrated search functionality by attempting multiple search providers
@@ -51,35 +50,24 @@ export const IntegratedSearchProvider = {
    */
   async attemptDirectAISearch(query: string): Promise<string | null> {
     try {
-      console.log(`Attempting direct ${useVertexAI ? 'Vertex AI' : 'Gemini'} search`);
+      console.log('Attempting direct Vertex AI search');
       
-      // Choose which AI service to use based on the flag
-      let aiResult;
-      if (useVertexAI) {
-        aiResult = await VertexAIService.generateResponse(
-          `Search the web for current information about: "${query}". 
-           Provide specific, factual information about real places, events or attractions if applicable. 
-           Include names, addresses, dates, times, and other relevant details.
-           Focus on giving practical information that would help someone visit these places.`, 
-          'user'
-        );
-      } else {
-        aiResult = await GeminiService.generateResponse(
-          `Search the web for current information about: "${query}". 
-           Provide specific, factual information about real places, events or attractions if applicable. 
-           Include names, addresses, dates, times, and other relevant details.
-           Focus on giving practical information that would help someone visit these places.`, 
-          'user'
-        );
-      }
+      // Using Vertex AI by default
+      const aiResult = await VertexAIService.generateResponse(
+        `Search the web for current information about: "${query}". 
+         Provide specific, factual information about real places, events or attractions if applicable. 
+         Include names, addresses, dates, times, and other relevant details.
+         Focus on giving practical information that would help someone visit these places.`, 
+        'user'
+      );
       
       if (aiResult && aiResult.length > 100) {
-        console.log(`${useVertexAI ? 'Vertex AI' : 'Gemini'} direct search successful, response length:`, aiResult.length);
+        console.log('Vertex AI direct search successful, response length:', aiResult.length);
         return aiResult;
       }
       return null;
     } catch (error) {
-      console.log(`${useVertexAI ? 'Vertex AI' : 'Gemini'} search failed, trying alternative methods:`, error);
+      console.log('Vertex AI search failed, trying alternative methods:', error);
       return null;
     }
   },

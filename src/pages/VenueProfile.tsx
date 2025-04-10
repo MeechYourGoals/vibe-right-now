@@ -1,4 +1,3 @@
-
 import { useState, useMemo, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Minimize } from "lucide-react";
@@ -7,7 +6,7 @@ import { mockLocations, mockPosts, mockComments } from "@/mock/data";
 import CameraButton from "@/components/CameraButton";
 import Header from "@/components/Header";
 import { Comment, Post, Location as VenueLocation } from "@/types"; // Import as VenueLocation to avoid conflicts
-import OpenStreetMap from "@/components/map/OpenStreetMap";
+import GoogleMapComponent from "@/components/map/google/GoogleMap";
 import { generateBusinessHours } from "@/utils/businessHoursUtils";
 import { 
   isPostFromDayOfWeek, 
@@ -137,7 +136,7 @@ const VenueProfile = () => {
             </Button>
           </div>
           <div className="h-[85vh] rounded-lg overflow-hidden">
-            <OpenStreetMap
+            <GoogleMapComponent
               userLocation={null}
               locations={[venue]}
               searchedCity={venue.city}
@@ -145,7 +144,6 @@ const VenueProfile = () => {
               selectedLocation={null}
               onLocationSelect={() => {}}
               userAddressLocation={null}
-              showAllCities={!venue.city}
             />
           </div>
         </div>

@@ -3,7 +3,7 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Maximize, MapPin } from "lucide-react";
 import { Location } from "@/types";
-import OpenStreetMap from "@/components/map/OpenStreetMap";
+import GoogleMapComponent from "@/components/map/google/GoogleMap";
 import { format } from "date-fns";
 
 interface VenueMapProps {
@@ -31,14 +31,14 @@ const VenueMap: React.FC<VenueMapProps> = ({ venue, onExpand }) => {
       </div>
       
       <div className="h-48 rounded-md overflow-hidden relative">
-        <OpenStreetMap
+        <GoogleMapComponent
           userLocation={null}
           locations={[venue]}
           searchedCity={venue.city}
           mapStyle="default"
           selectedLocation={null}
-          userAddressLocation={null}
           onLocationSelect={() => {}}
+          userAddressLocation={null}
           showAllCities={false}
         />
         <div className="absolute bottom-2 right-2">

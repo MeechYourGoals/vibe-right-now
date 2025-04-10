@@ -2,7 +2,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Compass } from "lucide-react";
-import OpenStreetMap from "./OpenStreetMap";
+import GoogleMapComponent from "./google/GoogleMap";
 import LocationDetailsSidebar from "./LocationDetailsSidebar";
 import { Location } from "@/types";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -54,7 +54,7 @@ const MapContainer = ({
   
   return (
     <div className={`relative ${isExpanded ? "h-[85vh]" : isMobile ? "h-40" : "h-60"} rounded-lg overflow-hidden transition-all`} style={{ zIndex: 1 }}>
-      <OpenStreetMap
+      <GoogleMapComponent
         userLocation={userLocation}
         locations={locations}
         searchedCity={searchedCity}
@@ -63,7 +63,6 @@ const MapContainer = ({
         onLocationSelect={onLocationSelect}
         showDistances={showDistances}
         userAddressLocation={userAddressLocation}
-        showAllCities={showAllCities}
       />
       
       {isExpanded && selectedLocation && (

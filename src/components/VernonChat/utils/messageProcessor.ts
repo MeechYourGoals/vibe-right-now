@@ -1,4 +1,3 @@
-
 import { Message } from '../types';
 import { createUserMessage, createAIMessage, createErrorMessage } from './messageFactory';
 import { extractPaginationParams } from './pagination';
@@ -17,7 +16,7 @@ export interface MessageProcessorProps {
 }
 
 // Flag to determine which AI service to use (can be controlled via settings)
-const useVertexAI = false; // Default to Gemini, can be toggled in settings
+const useVertexAI = true; // Changed from false to true to use Vertex AI by default
 
 export const processMessageInput = async (
   inputValue: string,
@@ -85,64 +84,34 @@ export const processMessageInput = async (
         if (!responseText || responseText.length < 100 || responseText.includes("I don't have specific information")) {
           console.log('Search result insufficient, trying AI directly');
           
-          // Choose which AI service to use based on the flag
-          if (useVertexAI) {
-            responseText = await VertexAIService.generateResponse(
-              `The user is asking about: "${inputValue}". 
-               Provide detailed information about real venues, events, or activities in this location.
-               Include names of specific places, addresses, and hours when possible.
-               Group information by categories (dining, nightlife, attractions, events, etc.)`,
-              'user'
-            );
-          } else {
-            responseText = await GeminiService.generateResponse(
-              `The user is asking about: "${inputValue}". 
-               Provide detailed information about real venues, events, or activities in this location.
-               Include names of specific places, addresses, and hours when possible.
-               Group information by categories (dining, nightlife, attractions, events, etc.)`,
-              'user'
-            );
-          }
+          // Using Vertex AI as the default
+          responseText = await VertexAIService.generateResponse(
+            `The user is asking about: "${inputValue}". 
+             Provide detailed information about real venues, events, or activities in this location.
+             Include names of specific places, addresses, and hours when possible.
+             Group information by categories (dining, nightlife, attractions, events, etc.)`,
+            'user'
+          );
         }
       } catch (error) {
         console.error('Error in search pipeline:', error);
-        // Fall back to direct AI call
-        if (useVertexAI) {
-          responseText = await VertexAIService.generateResponse(inputValue, 'user', contextMessages);
-        } else {
-          responseText = await GeminiService.generateResponse(inputValue, 'user', contextMessages);
-        }
+        // Fall back to direct AI call using Vertex AI
+        responseText = await VertexAIService.generateResponse(inputValue, 'user', contextMessages);
       }
     } else if (isVenueMode) {
-      // For venue mode, always use AI for business insights
-      if (useVertexAI) {
-        responseText = await VertexAIService.generateResponse(
-          inputValue, 
-          'venue',
-          contextMessages
-        );
-      } else {
-        responseText = await GeminiService.generateResponse(
-          inputValue, 
-          'venue',
-          contextMessages
-        );
-      }
+      // For venue mode, always use Vertex AI for business insights
+      responseText = await VertexAIService.generateResponse(
+        inputValue, 
+        'venue',
+        contextMessages
+      );
     } else {
-      // For conversational queries, use AI directly
-      if (useVertexAI) {
-        responseText = await VertexAIService.generateResponse(
-          inputValue, 
-          'user',
-          contextMessages
-        );
-      } else {
-        responseText = await GeminiService.generateResponse(
-          inputValue, 
-          'user',
-          contextMessages
-        );
-      }
+      // For conversational queries, use Vertex AI directly
+      responseText = await VertexAIService.generateResponse(
+        inputValue, 
+        'user',
+        contextMessages
+      );
     }
     
     // Create and add the AI message with the response

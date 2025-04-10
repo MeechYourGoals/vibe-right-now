@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState, useCallback } from "react";
 import { GoogleMap, useJsApiLoader } from '@react-google-maps/api';
 import { Location } from "@/types";
@@ -8,8 +7,8 @@ import { toast } from "sonner";
 import GoogleMapMarkers from './GoogleMapMarkers';
 import { getMapOptions } from './MapStyles';
 
-// Google Maps API key - in production, this should be stored in environment variables
-const GOOGLE_MAPS_API_KEY = "AIzaSyDIwf3LDvHPDNR3A5s1jWu_-o4Zat4f6TY";
+// Google Maps API key
+const GOOGLE_MAPS_API_KEY = "AIzaSyAWm0vayRrQJHpMc6XcShcge52hGTt9BV4";
 
 const mapContainerStyle = {
   width: '100%',
@@ -52,7 +51,6 @@ const GoogleMapComponent = ({
   const [mapCenter, setMapCenter] = useState(defaultCenter);
   const [mapZoom, setMapZoom] = useState(searchedCity ? 12 : 4);
 
-  // Initialize map
   const onLoad = useCallback((map: google.maps.Map) => {
     setMap(map);
   }, []);
@@ -61,7 +59,6 @@ const GoogleMapComponent = ({
     setMap(null);
   }, []);
 
-  // Set map center based on user location
   useEffect(() => {
     if (userLocation) {
       setMapCenter({ 
@@ -74,8 +71,6 @@ const GoogleMapComponent = ({
         lng: userAddressLocation[0]
       });
     } else if (locations.length > 0 && searchedCity) {
-      // If no user location but we have locations and a city search,
-      // center on the first location
       setMapCenter({
         lat: locations[0].lat,
         lng: locations[0].lng
@@ -84,17 +79,14 @@ const GoogleMapComponent = ({
     }
   }, [userLocation, userAddressLocation, locations, searchedCity]);
 
-  // Update selected marker when props change
   useEffect(() => {
     setSelectedMarker(selectedLocation);
   }, [selectedLocation]);
 
-  // Method to resize map (exposed for parent component)
   const resizeMap = () => {
     if (map) {
       google.maps.event.trigger(map, "resize");
       
-      // Re-center the map if user location is available
       if (userLocation) {
         map.setCenter({
           lat: userLocation.latitude,
@@ -104,7 +96,6 @@ const GoogleMapComponent = ({
     }
   };
 
-  // Expose resize method to parent
   useEffect(() => {
     if (window) {
       window.resizeMap = resizeMap;
@@ -117,12 +108,10 @@ const GoogleMapComponent = ({
     };
   }, [map]);
 
-  // Handle marker click
   const handleMarkerClick = (location: Location) => {
     setSelectedMarker(location);
     onLocationSelect(location);
     
-    // Fly to location
     if (map) {
       map.panTo({ lat: location.lat, lng: location.lng });
       map.setZoom(15);
