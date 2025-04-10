@@ -151,9 +151,9 @@ export function getEventWebsite(city: string, type: string = "festival"): string
   }
   
   if (type === "comedy") {
-    if (cityLower.includes("new york") || cityLower === "nyc")) {
+    if (cityLower.includes("new york") || cityLower === "nyc") {
       return "https://www.comedycellar.com";
-    } else if (cityLower.includes("los angeles") || cityLower === "la")) {
+    } else if (cityLower.includes("los angeles") || cityLower === "la") {
       return "https://hollywood.improv.com";
     } else if (cityLower.includes("chicago")) {
       return "https://www.secondcity.com";
@@ -220,3 +220,4 @@ export function getComedyEventsForCity(city: string, state: string = ""): any[] 
   
   return events;
 }
+
