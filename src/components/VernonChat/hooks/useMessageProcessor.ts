@@ -20,13 +20,23 @@ export const useMessageProcessor = (isProPlan: boolean = false, isVenueMode: boo
     
     console.log('Processing message:', inputValue);
     
-    await processMessageInput(inputValue, setMessages, {
-      isVenueMode,
-      isProPlan,
-      updatePaginationState,
-      setIsTyping,
-      setIsSearching
-    });
+    // Set typing and searching states to show loading indicators
+    setIsTyping(true);
+    setIsSearching(true);
+    
+    try {
+      await processMessageInput(inputValue, setMessages, {
+        isVenueMode,
+        isProPlan,
+        updatePaginationState,
+        setIsTyping,
+        setIsSearching
+      });
+    } catch (error) {
+      console.error('Error processing message:', error);
+      setIsTyping(false);
+      setIsSearching(false);
+    }
   };
 
   return {

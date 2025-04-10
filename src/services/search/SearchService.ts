@@ -30,7 +30,7 @@ export const SearchService = {
         console.log('Attempting vector search with Gemini');
         const vectorResult = await this.vectorSearch(query);
         if (vectorResult && vectorResult.length > 100) {
-          console.log('Vector search successful');
+          console.log('Vector search successful, response length:', vectorResult.length);
           return vectorResult;
         } else {
           console.log('Vector search returned insufficient results, trying alternatives');
@@ -50,7 +50,7 @@ export const SearchService = {
           'user'
         );
         if (geminiResult && geminiResult.length > 100) {
-          console.log('Gemini direct search successful');
+          console.log('Gemini direct search successful, response length:', geminiResult.length);
           return geminiResult;
         }
       } catch (error) {
@@ -155,7 +155,7 @@ export const SearchService = {
         return null;
       }
       
-      console.log('Vector search returned results');
+      console.log('Vector search returned results of length:', data.results.length);
       return data.results;
     } catch (error) {
       console.error('Error with vector search:', error);

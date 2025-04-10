@@ -26,6 +26,38 @@ serve(async (req) => {
       );
     }
     
+    // Check if this is a location query
+    const isLocationQuery = /what|where|when|things to do|events|places|restaurants|bars|attractions|activities|visit|in|at|near|around/i.test(query);
+    const hasCityName = /miami|new york|los angeles|chicago|san francisco|boston|seattle|austin|denver|nashville|atlanta|portland|dallas|houston|phoenix|philadelphia|san diego|las vegas|orlando|washington|dc/i.test(query);
+    
+    // Determine the best prompt for this query
+    let promptText = "";
+    
+    if (isLocationQuery || hasCityName) {
+      promptText = `You are VeRNon, a venue and event discovery assistant. The user is asking about: "${query}".
+      
+      Provide detailed, accurate information about real venues, events, activities, or attractions that match this query.
+      
+      If the query is about a location (city, neighborhood, etc.):
+      - List popular venues, attractions, and current events in that location
+      - Include specific venue names, addresses, and operating hours when available
+      - Group information by categories (dining, nightlife, attractions, events, etc.)
+      - Mention upcoming events with dates and ticket information if relevant
+      
+      If the query is about a specific type of activity or venue:
+      - Provide examples of places where this activity can be done
+      - Include specific details like hours, pricing, and locations
+      
+      Format your response in a clear, organized way with sections and categories.
+      Always prioritize real, verifiable places and events that exist in the real world.
+      Include helpful tips for visitors when appropriate.
+      
+      Your goal is to be as helpful as possible in helping the user discover real venues and events.`;
+    } else {
+      promptText = `You are VeRNon, a helpful AI assistant. The user is asking: "${query}". 
+      Provide a detailed, informative response to their question.`;
+    }
+    
     // Use Gemini to search for relevant information with a more direct prompt
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${GEMINI_API_KEY}`, {
       method: "POST",
@@ -36,27 +68,7 @@ serve(async (req) => {
         contents: [
           {
             role: "user",
-            parts: [{ 
-              text: `You are VeRNon, a venue and event discovery assistant. The user is asking about: "${query}".
-              
-              Provide detailed, accurate information about real venues, events, activities, or attractions that match this query.
-              
-              If the query is about a location (city, neighborhood, etc.):
-              - List popular venues, attractions, and current events in that location
-              - Include specific venue names, addresses, and operating hours when available
-              - Group information by categories (dining, nightlife, attractions, events, etc.)
-              - Mention upcoming events with dates and ticket information if relevant
-              
-              If the query is about a specific type of activity or venue:
-              - Provide examples of places where this activity can be done
-              - Include specific details like hours, pricing, and locations
-              
-              Format your response in a clear, organized way with sections and categories.
-              Always prioritize real, verifiable places and events that exist in the real world.
-              Include helpful tips for visitors when appropriate.
-              
-              Your goal is to be as helpful as possible in helping the user discover real venues and events.` 
-            }]
+            parts: [{ text: promptText }]
           }
         ],
         generationConfig: {

@@ -27,7 +27,7 @@ export const handleSearchQuery = async (
     
     // Check if this is a location or event-related query
     const isLocationQuery = isLocationOrEventQuery(inputValue);
-    const hasLocationKeywords = /miami|new york|los angeles|chicago|san francisco|las vegas|seattle|boston|places|venue|restaurant|bar|club|event|things to do|visit|attraction/i.test(inputValue);
+    const hasLocationKeywords = /miami|new york|los angeles|chicago|san francisco|las vegas|seattle|boston|orlando|washington|dc|places|venue|restaurant|bar|club|event|things to do|visit|attraction/i.test(inputValue);
     
     // For location-related queries, prioritize vector search
     if (isLocationQuery || hasLocationKeywords) {
@@ -35,10 +35,12 @@ export const handleSearchQuery = async (
       try {
         // First attempt with vector search for most up-to-date information
         responseText = await SearchService.vectorSearch(inputValue);
-        console.log('Vector search successful');
+        console.log('Vector search successful, response length:', responseText?.length);
         
         if (responseText && responseText.length > 100) {
           return cleanResponseText(responseText);
+        } else {
+          console.log('Vector search returned insufficient response, trying other methods');
         }
       } catch (vectorError) {
         console.error('Vector search failed:', vectorError);
@@ -49,7 +51,11 @@ export const handleSearchQuery = async (
     if (!responseText || responseText.length < 100) {
       try {
         responseText = await SearchService.search(inputValue);
-        console.log('Got response from SearchService');
+        console.log('Got response from SearchService, length:', responseText?.length);
+        
+        if (responseText && responseText.length > 100) {
+          return cleanResponseText(responseText);
+        }
       } catch (searchError) {
         console.error('Error with SearchService, trying alternatives:', searchError);
         
@@ -59,13 +65,22 @@ export const handleSearchQuery = async (
           console.log('Using Swirl search engine for query');
           try {
             responseText = await SwirlSearchService.search(inputValue);
+            if (responseText && responseText.length > 100) {
+              return cleanResponseText(responseText);
+            }
           } catch (swirlError) {
             console.error('Error with Swirl search, falling back to HuggingChat:', swirlError);
             responseText = await HuggingChatService.searchHuggingChat(inputValue);
+            if (responseText && responseText.length > 100) {
+              return cleanResponseText(responseText);
+            }
           }
         } else {
           // If Swirl is not available, use HuggingChat
           responseText = await HuggingChatService.searchHuggingChat(inputValue);
+          if (responseText && responseText.length > 100) {
+            return cleanResponseText(responseText);
+          }
         }
       }
     }
@@ -73,9 +88,13 @@ export const handleSearchQuery = async (
     // If we still don't have a good response, try one last time with vector search
     if (!responseText || responseText.length < 100 || responseText.includes("I don't have specific information")) {
       try {
-        const lastChanceResponse = await SearchService.vectorSearch(inputValue);
+        console.log('No good response yet, trying vector search one more time with enhanced prompt');
+        const lastChanceResponse = await SearchService.vectorSearch(
+          `Provide detailed information about "${inputValue}" including real venues, events, and activities. Include specific names, addresses, and practical details.`
+        );
         if (lastChanceResponse && lastChanceResponse.length > 100) {
           responseText = lastChanceResponse;
+          return cleanResponseText(responseText);
         }
       } catch (error) {
         console.error('Last chance vector search failed:', error);
@@ -91,41 +110,49 @@ export const handleSearchQuery = async (
   
   if (detectedCity && isLocationOrEventQuery(inputValue)) {
     const cityInfo = cityCoordinates[detectedCity];
-    let cityLocations = getLocationsByCity(cityInfo.name);
-    
-    const detectedCategory = detectCategoryInQuery(inputValue);
-    if (detectedCategory && cityLocations.length > 0) {
-      if (detectedCategory === "sports") {
-        cityLocations = cityLocations.filter(loc => loc.type === "sports");
-      } else if (detectedCategory === "nightlife") {
-        cityLocations = cityLocations.filter(loc => loc.type === "bar");
-      } else if (detectedCategory === "dining") {
-        cityLocations = cityLocations.filter(loc => loc.type === "restaurant");
-      } else if (detectedCategory === "concerts") {
-        cityLocations = cityLocations.filter(loc => 
-          loc.name.toLowerCase().includes("concert") || 
-          loc.name.toLowerCase().includes("music") ||
-          (loc.type === "event" && loc.name.toLowerCase().includes("festival"))
-        );
-      } else if (detectedCategory === "events") {
-        cityLocations = cityLocations.filter(loc => loc.type === "event");
-      } else if (detectedCategory === "attractions") {
-        cityLocations = cityLocations.filter(loc => loc.type === "attraction");
-      }
-    }
-    
-    if (cityLocations.length > 0) {
-      updateTrendingLocations(cityInfo.name, getTrendingLocationsForCity(cityInfo.name));
+    if (cityInfo) {
+      let cityLocations = getLocationsByCity(cityInfo.name);
       
-      let combinedResponse = responseText;
-      
-      if (!responseText.includes("Nightlife:") && !responseText.includes("Dining:")) {
-        combinedResponse = `${responseText}\n\n${generateLocationResponse(cityInfo.name, cityLocations, paginationState)}`;
+      const detectedCategory = detectCategoryInQuery(inputValue);
+      if (detectedCategory && cityLocations.length > 0) {
+        if (detectedCategory === "sports") {
+          cityLocations = cityLocations.filter(loc => loc.type === "sports");
+        } else if (detectedCategory === "nightlife") {
+          cityLocations = cityLocations.filter(loc => loc.type === "bar");
+        } else if (detectedCategory === "dining") {
+          cityLocations = cityLocations.filter(loc => loc.type === "restaurant");
+        } else if (detectedCategory === "concerts") {
+          cityLocations = cityLocations.filter(loc => 
+            loc.name.toLowerCase().includes("concert") || 
+            loc.name.toLowerCase().includes("music") ||
+            (loc.type === "event" && loc.name.toLowerCase().includes("festival"))
+          );
+        } else if (detectedCategory === "events") {
+          cityLocations = cityLocations.filter(loc => loc.type === "event");
+        } else if (detectedCategory === "attractions") {
+          cityLocations = cityLocations.filter(loc => loc.type === "attraction");
+        }
       }
       
-      return cleanResponseText(combinedResponse);
+      if (cityLocations.length > 0) {
+        updateTrendingLocations(cityInfo.name, getTrendingLocationsForCity(cityInfo.name));
+        
+        let combinedResponse = responseText;
+        
+        if (!responseText.includes("Nightlife:") && !responseText.includes("Dining:")) {
+          combinedResponse = `${responseText}\n\n${generateLocationResponse(cityInfo.name, cityLocations, paginationState)}`;
+        }
+        
+        return cleanResponseText(combinedResponse);
+      }
     }
   }
   
-  return cleanResponseText(responseText);
+  // If we have any result, return it
+  if (responseText && responseText.length > 0) {
+    return cleanResponseText(responseText);
+  }
+  
+  // Ultimate fallback if all else fails
+  return "I'm sorry, I couldn't find specific information about that location or request. Could you try asking in a different way or about a different location?";
 };

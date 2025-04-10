@@ -27,6 +27,17 @@ export const useChat = (isProPlan: boolean = false, isVenueMode: boolean = false
       return;
     }
     
+    // Add user message immediately
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      text: inputValue,
+      sender: 'user',
+      timestamp: new Date()
+    };
+    
+    setMessages(prev => [...prev, userMessage]);
+    
+    // Process the message to get AI response
     await processMessage(inputValue, setMessages);
   };
 
