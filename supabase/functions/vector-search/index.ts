@@ -26,40 +26,14 @@ serve(async (req) => {
       );
     }
     
-    // Check if this is a location query
-    const isLocationQuery = /what|where|when|things to do|events|places|restaurants|bars|attractions|activities|visit|in|at|near|around/i.test(query);
-    const hasCityName = /miami|new york|los angeles|chicago|san francisco|boston|seattle|austin|denver|nashville|atlanta|portland|dallas|houston|phoenix|philadelphia|san diego|las vegas|orlando|washington|dc/i.test(query);
+    // Analyze the query to identify components that can be categorized
+    const queryComponents = await analyzeQuery(query);
     
-    // Determine the best prompt for this query
-    let promptText = "";
-    
-    if (isLocationQuery || hasCityName) {
-      promptText = `You are VeRNon, a venue and event discovery assistant. The user is asking about: "${query}".
-      
-      Provide detailed, accurate information about real venues, events, activities, or attractions that match this query.
-      
-      If the query is about a location (city, neighborhood, etc.):
-      - List popular venues, attractions, and current events in that location
-      - Include specific venue names, addresses, and operating hours when available
-      - Group information by categories (dining, nightlife, attractions, events, etc.)
-      - Mention upcoming events with dates and ticket information if relevant
-      
-      If the query is about a specific type of activity or venue:
-      - Provide examples of places where this activity can be done
-      - Include specific details like hours, pricing, and locations
-      
-      Format your response in a clear, organized way with sections and categories.
-      Always prioritize real, verifiable places and events that exist in the real world.
-      Include helpful tips for visitors when appropriate.
-      
-      Your goal is to be as helpful as possible in helping the user discover real venues and events.`;
-    } else {
-      promptText = `You are VeRNon, a helpful AI assistant. The user is asking: "${query}". 
-      Provide a detailed, informative response to their question.`;
-    }
+    // Generate the completion prompt based on the query analysis
+    const promptText = generatePrompt(query, queryComponents);
     
     try {
-      // Use Gemini to search for relevant information with a more direct prompt
+      // Use Gemini to search for relevant information with structured prompt
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${GEMINI_API_KEY}`, {
         method: "POST",
         headers: {
@@ -101,8 +75,11 @@ serve(async (req) => {
       
       const results = data.candidates[0].content.parts[0].text;
       
+      // Extract categories for the UI to filter by
+      const extractedCategories = extractCategoriesFromQuery(queryComponents);
+      
       return new Response(
-        JSON.stringify({ results }),
+        JSON.stringify({ results, categories: extractedCategories }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     } catch (geminiError) {
@@ -120,3 +97,199 @@ serve(async (req) => {
     );
   }
 });
+
+/**
+ * Analyze a natural language query to extract key components
+ */
+async function analyzeQuery(query) {
+  try {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${GEMINI_API_KEY}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            role: "user",
+            parts: [{ text: `
+              For the following search query, extract and categorize the key components into a JSON structure:
+              
+              Query: "${query}"
+              
+              Extract the following information if present:
+              - location (city, neighborhood, etc.)
+              - venue_types (restaurant, bar, nightlife, attraction, etc.)
+              - vibes (upscale, family-friendly, casual, romantic, etc.)
+              - events (sports games, concerts, shows, etc.)
+              - timeframe (morning, afternoon, night, specific dates, etc.)
+              - special_requirements (parking, accessibility, etc.)
+              
+              Format the output as a valid JSON object, like:
+              {
+                "location": "Chicago",
+                "venue_types": ["restaurant", "nightlife"],
+                "vibes": ["upscale", "family-friendly"],
+                "events": ["NBA game", "NFL game"],
+                "timeframe": "lunch",
+                "special_requirements": null
+              }
+              
+              Only include fields that are explicitly mentioned in the query. If a category isn't mentioned, set it to null or an empty array.
+            ` }]
+          }
+        ],
+        generationConfig: {
+          temperature: 0.1,
+          topP: 0.95,
+          maxOutputTokens: 1024,
+        }
+      })
+    });
+    
+    const data = await response.json();
+    const jsonText = data.candidates[0].content.parts[0].text;
+    
+    // Extract the JSON object from the response text
+    const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      try {
+        return JSON.parse(jsonMatch[0]);
+      } catch (e) {
+        console.error("Failed to parse JSON from analysis:", e);
+        return {}; 
+      }
+    }
+    
+    return {};
+  } catch (error) {
+    console.error("Error analyzing query:", error);
+    return {};
+  }
+}
+
+/**
+ * Generate a structured prompt for Gemini based on query components
+ */
+function generatePrompt(originalQuery, queryComponents) {
+  const {
+    location,
+    venue_types = [],
+    vibes = [],
+    events = [],
+    timeframe,
+    special_requirements
+  } = queryComponents;
+  
+  // Build a structured prompt for Gemini to get comprehensive results
+  let prompt = `You are VeRNon, a venue and event discovery assistant. The user is asking for: "${originalQuery}".
+  
+  Provide detailed information about real venues, events, and activities in ${location || 'the specified location'} that match these criteria:
+  `;
+  
+  if (venue_types.length > 0) {
+    prompt += `\n- Venue Types: ${venue_types.join(', ')}`;
+  }
+  
+  if (vibes.length > 0) {
+    prompt += `\n- Atmosphere/Vibes: ${vibes.join(', ')}`;
+  }
+  
+  if (events.length > 0) {
+    prompt += `\n- Events: ${events.join(', ')}`;
+  }
+  
+  if (timeframe) {
+    prompt += `\n- Timeframe: ${timeframe}`;
+  }
+  
+  if (special_requirements) {
+    prompt += `\n- Special Requirements: ${special_requirements}`;
+  }
+  
+  prompt += `
+  
+  For each category (Restaurants, Nightlife, Events, Attractions, etc.), provide:
+  1. At least 3-5 specific venues or events with real names
+  2. Address information for each venue
+  3. Brief descriptions highlighting how they match the requested criteria
+  4. Operating hours when available
+  5. Price ranges when applicable
+  6. Direct links to websites or ticketing if available
+  
+  For sporting events like NBA or NFL games:
+  - Include any upcoming games in the area with dates, times, and ticket information
+  - Mention nearby venues that would be good before/after the game
+  
+  Structure your response in clearly defined sections for each category and make it easy to read.
+  Prioritize real, verifiable places and events that actually exist.
+  `;
+  
+  return prompt;
+}
+
+/**
+ * Extract categories from query components for UI filtering
+ */
+function extractCategoriesFromQuery(queryComponents) {
+  const categories = [];
+  
+  if (queryComponents.venue_types && queryComponents.venue_types.length > 0) {
+    categories.push(...queryComponents.venue_types.map(type => {
+      // Map venue types to our application's category system
+      switch (type.toLowerCase()) {
+        case 'restaurant':
+        case 'dining':
+        case 'food':
+          return 'restaurant';
+        case 'bar':
+        case 'nightlife':
+        case 'club':
+          return 'bar';
+        case 'concert':
+        case 'music':
+        case 'show':
+          return 'music';
+        case 'comedy':
+        case 'theatre':
+        case 'theater':
+          return 'comedy';
+        case 'attraction':
+        case 'sight':
+        case 'landmark':
+          return 'attraction';
+        case 'sports':
+        case 'game':
+        case 'match':
+          return 'sports';
+        default:
+          return type.toLowerCase();
+      }
+    }));
+  }
+  
+  if (queryComponents.events && queryComponents.events.length > 0) {
+    for (const event of queryComponents.events) {
+      if (event.toLowerCase().includes('nba') || event.toLowerCase().includes('basketball')) {
+        if (!categories.includes('sports')) categories.push('sports');
+      }
+      if (event.toLowerCase().includes('nfl') || event.toLowerCase().includes('football')) {
+        if (!categories.includes('sports')) categories.push('sports');
+      }
+      if (event.toLowerCase().includes('concert') || event.toLowerCase().includes('music')) {
+        if (!categories.includes('music')) categories.push('music');
+      }
+      if (event.toLowerCase().includes('comedy') || event.toLowerCase().includes('show')) {
+        if (!categories.includes('comedy')) categories.push('comedy');
+      }
+    }
+  }
+  
+  if (queryComponents.vibes && queryComponents.vibes.length > 0) {
+    // Add vibes as categories too
+    categories.push(...queryComponents.vibes.map(vibe => vibe.toLowerCase()));
+  }
+  
+  // Remove duplicates
+  return [...new Set(categories)];
+}

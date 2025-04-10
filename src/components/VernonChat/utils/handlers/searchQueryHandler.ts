@@ -21,6 +21,7 @@ export const handleSearchQuery = async (
   paginationState: Record<string, number>
 ): Promise<string> => {
   let responseText = '';
+  let categories: string[] = [];
   
   try {
     console.log('Processing search query:', inputValue);
@@ -29,16 +30,43 @@ export const handleSearchQuery = async (
     const isLocationQuery = isLocationOrEventQuery(inputValue);
     const hasLocationKeywords = /miami|new york|los angeles|chicago|san francisco|las vegas|seattle|boston|orlando|washington|dc|places|venue|restaurant|bar|club|event|things to do|visit|attraction/i.test(inputValue);
     
-    // For location-related queries, prioritize vector search
-    if (isLocationQuery || hasLocationKeywords) {
-      console.log('Location-related query detected, prioritizing vector search');
+    // Check if this is a complex natural language query with multiple requirements
+    const isComplexQuery = inputValue.length > 50 && 
+      /(\w+\s+(and|or|with|near|before|after)\s+\w+)|(\w+\s+for\s+\w+)/i.test(inputValue);
+    
+    // For complex natural language queries or location-related queries, prioritize vector search
+    if (isComplexQuery || isLocationQuery || hasLocationKeywords) {
+      console.log('Complex or location-related query detected, prioritizing vector search');
       try {
         // First attempt with vector search for most up-to-date information
-        responseText = await SearchService.vectorSearch(inputValue);
+        const vectorSearchResult = await SearchService.vectorSearch(inputValue);
+        
+        if (typeof vectorSearchResult === 'object' && vectorSearchResult !== null) {
+          responseText = vectorSearchResult.results || '';
+          categories = vectorSearchResult.categories || [];
+          
+          // Set categories in sessionStorage for the Explore page to use
+          if (categories && categories.length > 0) {
+            try {
+              sessionStorage.setItem('lastSearchCategories', JSON.stringify(categories));
+              sessionStorage.setItem('lastSearchQuery', inputValue);
+              console.log('Set search categories in session storage:', categories);
+            } catch (e) {
+              console.error('Error setting categories in sessionStorage:', e);
+            }
+          }
+        } else if (typeof vectorSearchResult === 'string') {
+          responseText = vectorSearchResult;
+        }
+        
         console.log('Vector search successful, response length:', responseText?.length);
+        console.log('Categories extracted:', categories);
         
         if (responseText && responseText.length > 100) {
-          return cleanResponseText(responseText);
+          // Include a link to the Explore page for a better visual experience
+          const exploreLinkText = "\n\nYou can also [view all these results on our Explore page](/explore?q=" + 
+            encodeURIComponent(inputValue) + ") for a better visual experience.";
+          return cleanResponseText(responseText + exploreLinkText);
         } else {
           console.log('Vector search returned insufficient response, trying other methods');
         }
@@ -54,7 +82,9 @@ export const handleSearchQuery = async (
         console.log('Got response from SearchService, length:', responseText?.length);
         
         if (responseText && responseText.length > 100) {
-          return cleanResponseText(responseText);
+          const exploreLinkText = "\n\nYou can also [view all these results on our Explore page](/explore?q=" + 
+            encodeURIComponent(inputValue) + ") for a better visual experience.";
+          return cleanResponseText(responseText + exploreLinkText);
         }
       } catch (searchError) {
         console.error('Error with SearchService, trying alternatives:', searchError);
@@ -150,9 +180,12 @@ export const handleSearchQuery = async (
   
   // If we have any result, return it
   if (responseText && responseText.length > 0) {
-    return cleanResponseText(responseText);
+    // Add a link to the Explore page
+    const exploreLinkText = "\n\nYou can also [view all these results on our Explore page](/explore?q=" + 
+      encodeURIComponent(inputValue) + ") for a better visual experience.";
+    return cleanResponseText(responseText + exploreLinkText);
   }
   
   // Ultimate fallback if all else fails
-  return "I'm sorry, I couldn't find specific information about that location or request. Could you try asking in a different way or about a different location?";
+  return "I'm sorry, I couldn't find specific information about that location or request. Could you try asking in a different way or about a different location?\n\nYou can also try using our [Explore page](/explore) directly to browse venues and events.";
 };

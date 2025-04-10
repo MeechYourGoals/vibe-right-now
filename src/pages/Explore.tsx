@@ -16,6 +16,8 @@ import { Location } from "@/types";
 import VenuePost from "@/components/VenuePost";
 import EventsList from "@/components/venue/events/EventsList";
 import { EventItem } from "@/components/venue/events/types";
+import { useToast } from "@/components/ui/use-toast";
+import { supabase } from '@/integrations/supabase/client';
 
 const getCitySpecificContent = (city: string, type: string) => {
   return `Check out this amazing ${type} in ${city}! The vibes are incredible right now.`;
@@ -267,9 +269,13 @@ const Explore = () => {
   const [comedyEvents, setComedyEvents] = useState<EventItem[]>([]);
   const [nightlifeVenues, setNightlifeVenues] = useState<Location[]>([]);
   const [vibeFilter, setVibeFilter] = useState<string>("");
+  const [isNaturalLanguageSearch, setIsNaturalLanguageSearch] = useState(false);
+  const [searchCategories, setSearchCategories] = useState<string[]>([]);
+  const [isLoadingResults, setIsLoadingResults] = useState(false);
   
   const location = useLocation();
   const navigate = useNavigate();
+  const { toast } = useToast();
   
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -279,24 +285,227 @@ const Explore = () => {
     if (q) {
       setSearchQuery(q);
       
-      const parts = q.split(',');
-      const city = parts[0].trim();
-      const state = parts.length > 1 ? parts[1].trim() : "";
+      const isComplexQuery = q.length > 50 && 
+        /(\w+\s+(and|or|with|near|before|after)\s+\w+)|(\w+\s+for\s+\w+)/i.test(q);
       
-      setSearchedCity(city);
-      setSearchedState(state);
+      setIsNaturalLanguageSearch(isComplexQuery);
       
-      handleSearch(q, "All", "places");
+      if (isComplexQuery) {
+        try {
+          const { data, error } = await supabase.functions.invoke('vector-search', {
+            body: { query }
+          });
+          
+          if (error) {
+            console.error('Error calling vector-search function:', error);
+            return;
+          }
+          
+          if (data && data.categories && data.categories.length > 0) {
+            setSearchCategories(data.categories);
+            sessionStorage.setItem('lastSearchCategories', JSON.stringify(data.categories));
+            
+            const locationMatch = q.match(/in\s+([a-zA-Z\s]+)(?:,\s*([a-zA-Z\s]+))?/i);
+            
+            if (locationMatch && locationMatch[1]) {
+              const city = locationMatch[1].trim();
+              const state = locationMatch[2] ? locationMatch[2].trim() : "";
+              
+              setSearchedCity(city);
+              setSearchedState(state);
+              
+              setMusicEvents(generateMusicEvents(city, state));
+              setComedyEvents(generateComedyEvents(city, state));
+              setNightlifeVenues(generateNightlifeVenues(city, state));
+              
+              let results = generateMockLocationsForCity(city, state);
+              
+              const categoryMap: Record<string, string> = {
+                'restaurant': 'restaurant',
+                'dining': 'restaurant',
+                'bar': 'bar',
+                'nightlife': 'bar',
+                'attraction': 'attraction',
+                'sport': 'sports',
+                'sports': 'sports',
+                'event': 'event',
+                'upscale': 'restaurant',
+                'family friendly': 'restaurant'
+              };
+              
+              const relevantTypes = data.categories
+                .map(cat => categoryMap[cat.toLowerCase()])
+                .filter(Boolean);
+              
+              if (relevantTypes.length > 0) {
+                results = results.filter(location => 
+                  relevantTypes.includes(location.type)
+                );
+              }
+              
+              const vibes = data.categories.filter(cat => 
+                ['upscale', 'family friendly', 'casual', 'romantic', 'cozy', 'trendy', 'nightowl'].includes(cat.toLowerCase())
+              );
+              
+              if (vibes.length > 0) {
+                results.forEach(location => {
+                  if (!location.vibes) {
+                    location.vibes = [];
+                  }
+                  location.vibes.push(...vibes);
+                });
+                
+                if (vibes[0]) {
+                  setVibeFilter(vibes[0]);
+                }
+              }
+              
+              setFilteredLocations(results);
+            }
+          }
+        } catch (e) {
+          console.error('Error processing complex query:', e);
+        }
+      } else {
+        const parts = q.split(',');
+        const city = parts[0].trim();
+        const state = parts.length > 1 ? parts[1].trim() : "";
+        
+        setSearchedCity(city);
+        setSearchedState(state);
+        
+        setMusicEvents(generateMusicEvents(city, state));
+        setComedyEvents(generateComedyEvents(city, state));
+        setNightlifeVenues(generateNightlifeVenues(city, state));
+      }
       
-      setMusicEvents(generateMusicEvents(city, state));
-      setComedyEvents(generateComedyEvents(city, state));
-      setNightlifeVenues(generateNightlifeVenues(city, state));
+      setSearchCategory("places");
     }
     
     if (vibe) {
       setVibeFilter(vibe);
     }
-  }, [location.search]);
+    
+    const lastChatQuery = sessionStorage.getItem('lastChatQuery');
+    const lastChatTimestamp = sessionStorage.getItem('lastChatTimestamp');
+    
+    if (lastChatQuery && lastChatTimestamp && !q) {
+      const timestamp = new Date(lastChatTimestamp);
+      const fiveMinutesAgo = new Date();
+      fiveMinutesAgo.setMinutes(fiveMinutesAgo.getMinutes() - 5);
+      
+      if (timestamp > fiveMinutesAgo) {
+        setSearchQuery(lastChatQuery);
+        
+        sessionStorage.removeItem('lastChatQuery');
+        sessionStorage.removeItem('lastChatTimestamp');
+        
+        if (sessionStorage.getItem('isComplexQuery') === 'true') {
+          setIsNaturalLanguageSearch(true);
+          processComplexQuery(lastChatQuery);
+          sessionStorage.removeItem('isComplexQuery');
+        }
+        
+        const searchParams = new URLSearchParams();
+        searchParams.set('q', lastChatQuery);
+        navigate(`/explore?${searchParams.toString()}`, { replace: true });
+      }
+    }
+  }, [location.search, navigate]);
+  
+  const processComplexQuery = async (query: string) => {
+    try {
+      setIsLoadingResults(true);
+      toast({
+        title: "Processing Complex Search",
+        description: "Finding venues and events that match all your criteria...",
+        duration: 3000,
+      });
+      
+      const { data, error } = await supabase.functions.invoke('vector-search', {
+        body: { query }
+      });
+      
+      if (error) {
+        console.error('Error calling vector-search function:', error);
+        setIsLoadingResults(false);
+        return;
+      }
+      
+      if (data && data.categories && data.categories.length > 0) {
+        setSearchCategories(data.categories);
+        sessionStorage.setItem('lastSearchCategories', JSON.stringify(data.categories));
+        
+        const locationMatch = query.match(/in\s+([a-zA-Z\s]+)(?:,\s*([a-zA-Z\s]+))?/i);
+        
+        if (locationMatch && locationMatch[1]) {
+          const city = locationMatch[1].trim();
+          const state = locationMatch[2] ? locationMatch[2].trim() : "";
+          
+          setSearchedCity(city);
+          setSearchedState(state);
+          
+          setMusicEvents(generateMusicEvents(city, state));
+          setComedyEvents(generateComedyEvents(city, state));
+          setNightlifeVenues(generateNightlifeVenues(city, state));
+          
+          let results = generateMockLocationsForCity(city, state);
+          
+          const categoryMap: Record<string, string> = {
+            'restaurant': 'restaurant',
+            'dining': 'restaurant',
+            'bar': 'bar',
+            'nightlife': 'bar',
+            'attraction': 'attraction',
+            'sport': 'sports',
+            'sports': 'sports',
+            'event': 'event',
+            'upscale': 'restaurant',
+            'family friendly': 'restaurant'
+          };
+          
+          const relevantTypes = data.categories
+            .map(cat => categoryMap[cat.toLowerCase()])
+            .filter(Boolean);
+          
+          if (relevantTypes.length > 0) {
+            results = results.filter(location => 
+              relevantTypes.includes(location.type)
+            );
+          }
+          
+          const vibes = data.categories.filter(cat => 
+            ['upscale', 'family friendly', 'casual', 'romantic', 'cozy', 'trendy', 'nightowl'].includes(cat.toLowerCase())
+          );
+          
+          if (vibes.length > 0) {
+            results.forEach(location => {
+              if (!location.vibes) {
+                location.vibes = [];
+              }
+              location.vibes.push(...vibes);
+            });
+            
+            if (vibes[0]) {
+              setVibeFilter(vibes[0]);
+            }
+          }
+          
+          setFilteredLocations(results);
+        }
+      }
+      
+      toast({
+        title: "Search Results Ready",
+        description: "We've found venues and events matching your criteria",
+        duration: 3000,
+      });
+    } catch (e) {
+      console.error('Error processing complex query:', e);
+    } finally {
+      setIsLoadingResults(false);
+    }
+  };
   
   useEffect(() => {
     const tagsMap: Record<string, string[]> = {};
@@ -310,16 +519,24 @@ const Explore = () => {
     setSearchQuery(query);
     setSearchCategory(category);
     
+    const isComplexQuery = query.length > 50 && 
+      /(\w+\s+(and|or|with|near|before|after)\s+\w+)|(\w+\s+for\s+\w+)/i.test(query);
+    
+    setIsNaturalLanguageSearch(isComplexQuery);
+    
     const vibeKeywords = ["cozy", "family friendly", "nightowl", "trendy", "chill", "upscale", "casual", "romantic"];
     const queryLower = query.toLowerCase();
-    let isVibeSearch = false;
+    let detectedVibe = "";
     
     for (const vibe of vibeKeywords) {
       if (queryLower.includes(vibe)) {
-        setVibeFilter(vibe);
-        isVibeSearch = true;
+        detectedVibe = vibe;
         break;
       }
+    }
+    
+    if (detectedVibe) {
+      setVibeFilter(detectedVibe);
     }
     
     if (filterType !== "All") {
@@ -331,7 +548,9 @@ const Explore = () => {
     let city = "";
     let state = "";
     
-    if (query && !isVibeSearch) {
+    if (isComplexQuery) {
+      processComplexQuery(query);
+    } else if (query && !detectedVibe) {
       const parts = query.split(',');
       city = parts[0].trim();
       state = parts.length > 1 ? parts[1].trim() : "";
@@ -440,7 +659,9 @@ const Explore = () => {
   };
 
   const getPageTitle = () => {
-    if (searchedCity) {
+    if (isNaturalLanguageSearch) {
+      return "Smart Search Results";
+    } else if (searchedCity) {
       return `Explore Vibes in ${searchedCity}${searchedState ? `, ${searchedState}` : ''}`;
     }
     return "Explore Vibes";
@@ -522,6 +743,34 @@ const Explore = () => {
             <SearchVibes onSearch={handleSearch} />
           </div>
           
+          {isNaturalLanguageSearch && (
+            <div className="max-w-xl mx-auto mb-4">
+              <div className="p-3 bg-indigo-50 rounded-lg border border-indigo-100">
+                <h3 className="text-sm font-medium flex items-center text-indigo-700">
+                  <Sparkles className="h-4 w-4 mr-2 text-indigo-500" />
+                  Smart Search Results
+                </h3>
+                <p className="text-xs text-indigo-600">
+                  Showing results for "{searchQuery.substring(0, 75)}
+                  {searchQuery.length > 75 ? '...' : ''}"
+                </p>
+                {searchCategories.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {searchCategories.map((category, index) => (
+                      <Badge 
+                        key={index} 
+                        variant="outline" 
+                        className="bg-indigo-100 text-indigo-700 border-indigo-200 text-xs"
+                      >
+                        {category}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+          
           {vibeFilter && (
             <div className="max-w-xl mx-auto mb-4 flex items-center justify-center">
               <Badge className="bg-indigo-100 text-indigo-800 px-3 py-1 text-sm flex items-center">
@@ -536,7 +785,7 @@ const Explore = () => {
                     handleSearch(searchQuery, "All", searchCategory);
                   }}
                 >
-                  <AlertTriangle className="h-3 w-3" />
+                  <X className="h-3 w-3" />
                 </Button>
               </Badge>
             </div>
@@ -567,121 +816,130 @@ const Explore = () => {
           </Tabs>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:col-span-2">
-            {activeTab === "music" && (
-              <div className="mb-6">
-                <h2 className="text-xl font-semibold mb-4">Music Events in {searchedCity}</h2>
-                {musicEvents.length > 0 ? (
-                  <div className="space-y-4">
-                    <EventsList events={musicEvents} />
-                  </div>
-                ) : (
-                  <NoEventsMessage />
-                )}
-              </div>
-            )}
-            
-            {activeTab === "comedy" && (
-              <div className="mb-6">
-                <h2 className="text-xl font-semibold mb-4">Comedy Shows in {searchedCity}</h2>
-                {comedyEvents.length > 0 ? (
-                  <div className="space-y-4">
-                    <EventsList events={comedyEvents} />
-                  </div>
-                ) : (
-                  <NoEventsMessage />
-                )}
-              </div>
-            )}
-            
-            {activeTab === "nightlife" && (
-              <div className="mb-6">
-                <h2 className="text-xl font-semibold mb-4">Nightlife in {searchedCity}</h2>
-                <NightlifeSection />
-              </div>
-            )}
-            
-            {searchCategory === "places" && searchedCity && activeTab === "sports" && (
-              <div className="mb-6">
-                <h2 className="text-xl font-semibold mb-4">Trending Sports Events</h2>
-                <div className="space-y-4">
-                  {filteredLocations
-                    .filter(loc => loc.type === "sports")
-                    .slice(0, 3)
-                    .map(location => (
-                      <VenuePost
-                        key={location.id}
-                        venue={location}
-                        content={getCitySpecificContent(location.city, 'sports event')}
-                        media={getMediaForLocation(location)}
-                        timestamp={new Date().toISOString()}
-                      />
-                    ))}
+        {isLoadingResults ? (
+          <div className="flex justify-center items-center py-12">
+            <div className="text-center">
+              <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent motion-reduce:animate-[spin_1.5s_linear_infinite] mb-4"></div>
+              <p className="text-muted-foreground">Finding the perfect matches for your search...</p>
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="md:col-span-2">
+              {activeTab === "music" && (
+                <div className="mb-6">
+                  <h2 className="text-xl font-semibold mb-4">Music Events in {searchedCity}</h2>
+                  {musicEvents.length > 0 ? (
+                    <div className="space-y-4">
+                      <EventsList events={musicEvents} />
+                    </div>
+                  ) : (
+                    <NoEventsMessage />
+                  )}
                 </div>
-              </div>
-            )}
-            
-            {activeTab !== "music" && activeTab !== "comedy" && activeTab !== "nightlife" && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {filteredLocations.length > 0 ? (
-                  filteredLocations.map((location) => (
-                    <Card key={location.id} className="vibe-card-hover">
-                      <CardContent className="p-4">
-                        <div className="flex justify-between items-start mb-2">
-                          <h3 className="text-lg font-semibold flex items-center">
-                            {location.name}
-                            {location.verified && (
-                              <VerifiedIcon className="h-4 w-4 ml-1 text-primary" />
-                            )}
-                          </h3>
-                          <HoverCard>
-                            <HoverCardTrigger asChild>
-                              <Badge variant="outline" className="cursor-help">{location.type}</Badge>
-                            </HoverCardTrigger>
-                            <HoverCardContent className="w-auto">
-                              <div className="space-y-2">
-                                <h4 className="text-sm font-semibold">More Tags</h4>
-                                <div className="flex flex-wrap gap-1.5">
-                                  <Badge variant="outline" className="bg-primary/10">{location.type}</Badge>
-                                  {locationTags[location.id]?.map((tag, index) => (
-                                    <Badge key={index} variant="outline" className="bg-muted/40">{tag}</Badge>
-                                  ))}
-                                </div>
-                              </div>
-                            </HoverCardContent>
-                          </HoverCard>
-                        </div>
-                        
-                        <div className="text-sm text-muted-foreground mb-3 flex items-center">
-                          <MapPin className="h-4 w-4 mr-1" />
-                          <span>
-                            {location.address}, {location.city}, {location.state}
-                          </span>
-                        </div>
-                        
-                        <Button className="w-full bg-gradient-vibe" asChild>
-                          <Link to={`/venue/${location.id}`}>View Vibes</Link>
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  ))
-                ) : (
-                  <div className="col-span-full text-center py-10">
-                    <h3 className="text-xl font-semibold mb-2">No locations found</h3>
-                    <p className="text-muted-foreground">
-                      Try adjusting your search or filters
-                    </p>
+              )}
+              
+              {activeTab === "comedy" && (
+                <div className="mb-6">
+                  <h2 className="text-xl font-semibold mb-4">Comedy Shows in {searchedCity}</h2>
+                  {comedyEvents.length > 0 ? (
+                    <div className="space-y-4">
+                      <EventsList events={comedyEvents} />
+                    </div>
+                  ) : (
+                    <NoEventsMessage />
+                  )}
+                </div>
+              )}
+              
+              {activeTab === "nightlife" && (
+                <div className="mb-6">
+                  <h2 className="text-xl font-semibold mb-4">Nightlife in {searchedCity}</h2>
+                  <NightlifeSection />
+                </div>
+              )}
+              
+              {searchCategory === "places" && searchedCity && activeTab === "sports" && (
+                <div className="mb-6">
+                  <h2 className="text-xl font-semibold mb-4">Trending Sports Events</h2>
+                  <div className="space-y-4">
+                    {filteredLocations
+                      .filter(loc => loc.type === "sports")
+                      .slice(0, 3)
+                      .map(location => (
+                        <VenuePost
+                          key={location.id}
+                          venue={location}
+                          content={getCitySpecificContent(location.city, 'sports event')}
+                          media={getMediaForLocation(location)}
+                          timestamp={new Date().toISOString()}
+                        />
+                      ))}
                   </div>
-                )}
-              </div>
-            )}
+                </div>
+              )}
+              
+              {activeTab !== "music" && activeTab !== "comedy" && activeTab !== "nightlife" && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {filteredLocations.length > 0 ? (
+                    filteredLocations.map((location) => (
+                      <Card key={location.id} className="vibe-card-hover">
+                        <CardContent className="p-4">
+                          <div className="flex justify-between items-start mb-2">
+                            <h3 className="text-lg font-semibold flex items-center">
+                              {location.name}
+                              {location.verified && (
+                                <VerifiedIcon className="h-4 w-4 ml-1 text-primary" />
+                              )}
+                            </h3>
+                            <HoverCard>
+                              <HoverCardTrigger asChild>
+                                <Badge variant="outline" className="cursor-help">{location.type}</Badge>
+                              </HoverCardTrigger>
+                              <HoverCardContent className="w-auto">
+                                <div className="space-y-2">
+                                  <h4 className="text-sm font-semibold">More Tags</h4>
+                                  <div className="flex flex-wrap gap-1.5">
+                                    <Badge variant="outline" className="bg-primary/10">{location.type}</Badge>
+                                    {locationTags[location.id]?.map((tag, index) => (
+                                      <Badge key={index} variant="outline" className="bg-muted/40">{tag}</Badge>
+                                    ))}
+                                  </div>
+                                </div>
+                              </HoverCardContent>
+                            </HoverCard>
+                          </div>
+                          
+                          <div className="text-sm text-muted-foreground mb-3 flex items-center">
+                            <MapPin className="h-4 w-4 mr-1" />
+                            <span>
+                              {location.address}, {location.city}, {location.state}
+                            </span>
+                          </div>
+                          
+                          <Button className="w-full bg-gradient-vibe" asChild>
+                            <Link to={`/venue/${location.id}`}>View Vibes</Link>
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    ))
+                  ) : (
+                    <div className="col-span-full text-center py-10">
+                      <h3 className="text-xl font-semibold mb-2">No locations found</h3>
+                      <p className="text-muted-foreground">
+                        Try adjusting your search or filters
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+            
+            <div className="hidden md:block">
+              <NearbyVibesMap />
+            </div>
           </div>
-          
-          <div className="hidden md:block">
-            <NearbyVibesMap />
-          </div>
-        </div>
+        )}
       </main>
       
       <CameraButton />

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Map, X, ChevronDown, User, Building, Calendar, MapPin, Star, Sparkles } from "lucide-react";
@@ -25,6 +25,7 @@ import { Card } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { cityCoordinates } from "@/utils/cityLocations";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/components/ui/use-toast";
 
 interface SearchVibesProps {
   onSearch: (query: string, filterType: string, category: string) => void;
@@ -45,8 +46,11 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
     "Cozy", "Family Friendly", "NightOwl", "Trendy", "Chill", 
     "Upscale", "Casual", "Romantic", "Lively", "Intimate"
   ]);
+  const [isNaturalLanguageSearch, setIsNaturalLanguageSearch] = useState(false);
 
   const location = useLocation();
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
   const filters = [
     "Restaurants",
@@ -77,10 +81,43 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const q = params.get('q');
+    const vibe = params.get('vibe');
     
     if (q) {
       setSearchQuery(q);
+      
+      const isComplexQuery = q.length > 50 && 
+        /(\w+\s+(and|or|with|near|before|after)\s+\w+)|(\w+\s+for\s+\w+)/i.test(q);
+      
+      setIsNaturalLanguageSearch(isComplexQuery);
+      
+      if (isComplexQuery) {
+        try {
+          const savedCategories = sessionStorage.getItem('lastSearchCategories');
+          const savedQuery = sessionStorage.getItem('lastSearchQuery');
+          
+          if (savedCategories && savedQuery === q) {
+            const parsedCategories = JSON.parse(savedCategories);
+            if (parsedCategories && parsedCategories.length > 0) {
+              setActiveFilters(parsedCategories);
+              toast({
+                title: "Smart Search Results",
+                description: `Showing results for "${q.substring(0, 50)}${q.length > 50 ? '...' : ''}"`,
+                duration: 5000,
+              });
+            }
+          }
+        } catch (e) {
+          console.error('Error retrieving categories from sessionStorage:', e);
+        }
+      }
+      
       setSearchCategory("places");
+    }
+    
+    if (vibe) {
+      setSearchQuery(vibe);
+      setSearchCategory("vibes");
     }
   }, [location.search]);
 
@@ -114,6 +151,11 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
   }, [searchCategory]);
 
   const handleSearch = () => {
+    if (searchQuery.length > 50 && 
+      /(\w+\s+(and|or|with|near|before|after)\s+\w+)|(\w+\s+for\s+\w+)/i.test(searchQuery)) {
+      setIsNaturalLanguageSearch(true);
+    }
+    
     onSearch(searchQuery, selectedFilter, searchCategory);
     setShowUserSuggestions(false);
     setShowPlaceSuggestions(false);
@@ -159,6 +201,10 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
     const value = e.target.value;
     setSearchQuery(value);
     
+    if (isNaturalLanguageSearch && value !== searchQuery) {
+      setIsNaturalLanguageSearch(false);
+    }
+    
     if (searchCategory === 'places' && value.length > 1) {
       const filtered = allCities.filter(city => 
         city.toLowerCase().includes(value.toLowerCase())
@@ -200,6 +246,16 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
 
   return (
     <div className="space-y-3 sticky top-16 z-10 bg-background p-4">
+      {isNaturalLanguageSearch && (
+        <div className="mb-2 p-3 bg-primary/10 rounded-md">
+          <h3 className="text-sm font-medium flex items-center">
+            <Sparkles className="h-4 w-4 mr-2 text-primary" />
+            Smart Search
+          </h3>
+          <p className="text-xs text-muted-foreground">Showing diverse results for your natural language search</p>
+        </div>
+      )}
+
       <Tabs 
         value={searchCategory} 
         onValueChange={handleCategoryChange} 
@@ -232,10 +288,12 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
             searchCategory === "users" 
               ? "Search users by name or username..." 
               : searchCategory === "places"
-                ? "Search cities, venues, events..."
+                ? isNaturalLanguageSearch 
+                  ? "Try natural language: 'Upscale restaurants in Chicago for a family lunch...'" 
+                  : "Search cities, venues, events or use natural language..."
                 : searchCategory === "vibes"
                   ? "Search for vibes like Cozy, Trendy, NightOwl..."
-                  : "Search venues, events, vibes, users..."
+                  : "Search venues, events, vibes, users or use natural language..."
           }
           value={searchQuery}
           onChange={handleSearchInputChange}
@@ -382,13 +440,13 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
             {filters.map((filter) => (
               <Button
                 key={filter}
-                variant={activeFilters.includes(filter) ? "secondary" : "outline"}
+                variant={activeFilters.includes(filter.toLowerCase()) ? "secondary" : "outline"}
                 size="sm"
-                onClick={() => toggleFilter(filter)}
+                onClick={() => toggleFilter(filter.toLowerCase())}
                 className="h-7 text-xs"
               >
                 {filter}
-                {activeFilters.includes(filter) && (
+                {activeFilters.includes(filter.toLowerCase()) && (
                   <X className="ml-1 h-3 w-3" />
                 )}
               </Button>

@@ -1,4 +1,3 @@
-
 import { SimpleSearchService } from './SimpleSearchService';
 import { SwirlSearchService } from '../SwirlSearchService';
 import { GeminiService } from '../GeminiService';
@@ -29,12 +28,18 @@ export const SearchService = {
       try {
         console.log('Attempting vector search with Gemini');
         const vectorResult = await this.vectorSearch(query);
-        if (vectorResult && vectorResult.length > 100) {
+        
+        if (typeof vectorResult === 'object' && vectorResult !== null) {
+          if (vectorResult.results && vectorResult.results.length > 100) {
+            console.log('Vector search successful, response length:', vectorResult.results.length);
+            return vectorResult.results;
+          }
+        } else if (typeof vectorResult === 'string' && vectorResult.length > 100) {
           console.log('Vector search successful, response length:', vectorResult.length);
           return vectorResult;
-        } else {
-          console.log('Vector search returned insufficient results, trying alternatives');
         }
+        
+        console.log('Vector search returned insufficient results, trying alternatives');
       } catch (vectorError) {
         console.log('Vector search failed, trying alternative methods:', vectorError);
       }
@@ -136,8 +141,9 @@ export const SearchService = {
   /**
    * Perform a vector search using Supabase vector search capabilities
    * This connects to our Gemini-powered search function
+   * @returns Object with results and categories or string with results
    */
-  async vectorSearch(query: string): Promise<string | null> {
+  async vectorSearch(query: string): Promise<{results: string, categories: string[]} | string | null> {
     try {
       console.log('Invoking vector-search function with query:', query);
       // Call the vector-search edge function
@@ -150,13 +156,28 @@ export const SearchService = {
         return null;
       }
       
-      if (!data || !data.results) {
-        console.log('No results from vector search');
+      if (!data) {
+        console.log('No data from vector search');
         return null;
       }
       
-      console.log('Vector search returned results of length:', data.results.length);
-      return data.results;
+      if (data.results) {
+        console.log('Vector search returned results of length:', data.results.length);
+        
+        // If we have categories, return both results and categories
+        if (data.categories) {
+          console.log('Vector search returned categories:', data.categories);
+          return {
+            results: data.results,
+            categories: data.categories
+          };
+        }
+        
+        // Otherwise just return the results string
+        return data.results;
+      }
+      
+      return null;
     } catch (error) {
       console.error('Error with vector search:', error);
       return null;
