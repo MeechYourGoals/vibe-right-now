@@ -61,3 +61,18 @@ export const generateVenueInsights = (venueId: string): VenueInsights => {
     mediaUploads: 280 + (seed % 200)
   };
 };
+
+// Add the missing exported functions for VenueInsights and PerformanceMetrics components
+export const generateWeeklyData = () => {
+  return [
+    { name: 'Mon', photos: 65, videos: 12 },
+    { name: 'Tue', photos: 59, videos: 10 },
+    { name: 'Wed', photos: 80, videos: 15 },
+    { name: 'Thu', photos: 81, videos: 16 },
+    { name: 'Fri', photos: 90, videos: 22 },
+    { name: 'Sat', photos: 120, videos: 35 },
+    { name: 'Sun', photos: 95, videos: 25 },
+  ];
+};
+
+export const currentInsights = generateVenueInsights("default-venue");

@@ -7,6 +7,7 @@ import { Post, Comment, Location } from "@/types";
 import { getTimeGroup, formatTimeAgo } from "@/mock/time-utils";
 import { Badge } from "@/components/ui/badge";
 import { PinIcon } from "lucide-react";
+import { formatTimestamp } from "@/lib/utils";
 
 interface VenuePostsListProps {
   posts: Post[];
@@ -93,7 +94,7 @@ const VenuePostsList: React.FC<VenuePostsListProps> = ({
                         venue={venue}
                         content={post.content}
                         media={post.media[0] as {type: "image" | "video"; url: string}}
-                        timestamp={post.timestamp}
+                        timestamp={formatTimestamp(post.timestamp)}
                         timeAgo={formatTimeAgo(post.timestamp)}
                       />
                     ) : (

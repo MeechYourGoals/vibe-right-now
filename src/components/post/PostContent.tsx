@@ -10,6 +10,7 @@ import { Post, Comment, Location } from "@/types";
 import { formatDistanceToNow } from "date-fns";
 import PostMedia from "./PostMedia";
 import CommentList from "@/components/CommentList";
+import { formatTimestamp } from "@/lib/utils";
 
 interface PostContentProps {
   location: Location;
@@ -42,7 +43,7 @@ const PostContent: React.FC<PostContentProps> = ({
   handleLike,
   getComments
 }) => {
-  const formatTime = (timestamp: string) => {
+  const formatTime = (timestamp: string | Date) => {
     return formatDistanceToNow(new Date(timestamp), { addSuffix: true });
   };
 

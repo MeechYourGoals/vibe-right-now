@@ -27,7 +27,7 @@ export const getExpiryTime = (timestamp: string, isPinned = false): string => {
 };
 
 // Check if timestamp is within the last three months
-export const isWithinThreeMonths = (timestamp: string): boolean => {
+export const isWithinThreeMonths = (timestamp: string | Date): boolean => {
   const now = new Date();
   const then = new Date(timestamp);
   const threeMonthsAgo = new Date();
@@ -37,7 +37,7 @@ export const isWithinThreeMonths = (timestamp: string): boolean => {
 };
 
 // Determine which time group a post belongs to
-export const getTimeGroup = (timestamp: string): 'recent' | 'week' | 'month' | 'older' => {
+export const getTimeGroup = (timestamp: string | Date): 'recent' | 'week' | 'month' | 'older' => {
   const now = new Date();
   const postDate = new Date(timestamp);
   
@@ -55,7 +55,7 @@ export const getTimeGroup = (timestamp: string): 'recent' | 'week' | 'month' | '
 };
 
 // Format a timestamp as "X time ago"
-export const formatTimeAgo = (timestamp: string): string => {
+export const formatTimeAgo = (timestamp: string | Date): string => {
   const now = new Date();
   const postDate = new Date(timestamp);
   
@@ -131,7 +131,7 @@ export const getDaySpecificImageUrl = (venueType: string, dayOfWeek: number): st
 };
 
 // Check if a post is from a specific day of the week
-export const isPostFromDayOfWeek = (timestamp: string, targetDayOfWeek: number): boolean => {
+export const isPostFromDayOfWeek = (timestamp: string | Date, targetDayOfWeek: number): boolean => {
   const date = new Date(timestamp);
   return date.getDay() === targetDayOfWeek;
 };

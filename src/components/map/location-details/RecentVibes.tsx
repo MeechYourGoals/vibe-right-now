@@ -8,6 +8,7 @@ import {
   getDaySpecificContent, 
   getDaySpecificImageUrl
 } from "@/mock/time-utils";
+import { formatTimestamp } from "@/lib/utils";
 
 interface RecentVibesProps {
   location: Location;
@@ -47,7 +48,7 @@ const RecentVibes = ({ location }: RecentVibesProps) => {
                 venue={location}
                 content={post.content}
                 media={getMediaForLocation(location)}
-                timestamp={post.timestamp}
+                timestamp={formatTimestamp(post.timestamp)}
               />
             </div>
           ))
@@ -58,7 +59,7 @@ const RecentVibes = ({ location }: RecentVibesProps) => {
                 venue={location}
                 content={todayContent}
                 media={todayImage}
-                timestamp={new Date().toISOString()}
+                timestamp={formatTimestamp(new Date().toISOString())}
               />
             </div>
             <div className="border-2 border-amber-500/50 rounded-lg overflow-hidden">
@@ -66,7 +67,7 @@ const RecentVibes = ({ location }: RecentVibesProps) => {
                 venue={location}
                 content={previousContent}
                 media={previousImage}
-                timestamp={new Date(Date.now() - 3600000 * 48).toISOString()}
+                timestamp={formatTimestamp(new Date(Date.now() - 3600000 * 48).toISOString())}
               />
             </div>
           </>
