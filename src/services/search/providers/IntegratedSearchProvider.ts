@@ -1,0 +1,167 @@
+
+import { SimpleSearchService } from '../SimpleSearchService';
+import { SwirlSearchService } from '@/services/SwirlSearchService';
+import { GeminiService } from '@/services/GeminiService';
+import { VertexAIService } from '@/services/VertexAIService';
+import { 
+  OpenAISearchProvider,
+  GoogleSearchProvider,
+  DuckDuckGoSearchProvider,
+  WikipediaSearchProvider,
+  DeepseekSearchProvider,
+  FallbackResponseGenerator
+} from './';
+import { SearchServiceCore } from '../core/SearchServiceCore';
+
+// Flag to determine which AI service to use
+const useVertexAI = false; // Default to Gemini, can be toggled in settings
+
+/**
+ * Provides integrated search functionality by attempting multiple search providers
+ */
+export const IntegratedSearchProvider = {
+  /**
+   * Attempt to search using vector search
+   */
+  async attemptVectorSearch(query: string): Promise<string | null> {
+    try {
+      console.log('Attempting vector search with AI');
+      const vectorResult = await SearchServiceCore.vectorSearch(query);
+      
+      if (typeof vectorResult === 'object' && vectorResult !== null) {
+        if (vectorResult.results && vectorResult.results.length > 100) {
+          console.log('Vector search successful, response length:', vectorResult.results.length);
+          return vectorResult.results;
+        }
+      } else if (typeof vectorResult === 'string' && vectorResult.length > 100) {
+        console.log('Vector search successful, response length:', vectorResult.length);
+        return vectorResult;
+      }
+      
+      console.log('Vector search returned insufficient results, trying alternatives');
+      return null;
+    } catch (vectorError) {
+      console.log('Vector search failed, trying alternative methods:', vectorError);
+      return null;
+    }
+  },
+
+  /**
+   * Attempt to search using direct AI service
+   */
+  async attemptDirectAISearch(query: string): Promise<string | null> {
+    try {
+      console.log(`Attempting direct ${useVertexAI ? 'Vertex AI' : 'Gemini'} search`);
+      
+      // Choose which AI service to use based on the flag
+      let aiResult;
+      if (useVertexAI) {
+        aiResult = await VertexAIService.generateResponse(
+          `Search the web for current information about: "${query}". 
+           Provide specific, factual information about real places, events or attractions if applicable. 
+           Include names, addresses, dates, times, and other relevant details.
+           Focus on giving practical information that would help someone visit these places.`, 
+          'user'
+        );
+      } else {
+        aiResult = await GeminiService.generateResponse(
+          `Search the web for current information about: "${query}". 
+           Provide specific, factual information about real places, events or attractions if applicable. 
+           Include names, addresses, dates, times, and other relevant details.
+           Focus on giving practical information that would help someone visit these places.`, 
+          'user'
+        );
+      }
+      
+      if (aiResult && aiResult.length > 100) {
+        console.log(`${useVertexAI ? 'Vertex AI' : 'Gemini'} direct search successful, response length:`, aiResult.length);
+        return aiResult;
+      }
+      return null;
+    } catch (error) {
+      console.log(`${useVertexAI ? 'Vertex AI' : 'Gemini'} search failed, trying alternative methods:`, error);
+      return null;
+    }
+  },
+
+  /**
+   * Attempt to search using Swirl service
+   */
+  async attemptSwirlSearch(query: string): Promise<string | null> {
+    try {
+      // Check if Swirl is available
+      const isSwirlAvailable = await SwirlSearchService.isAvailable();
+      
+      if (isSwirlAvailable) {
+        console.log('Swirl is available, using it for search');
+        const swirlResult = await SwirlSearchService.search(query);
+        if (swirlResult && swirlResult.length > 100) {
+          return swirlResult;
+        }
+      }
+      return null;
+    } catch (error) {
+      console.log('Swirl search failed, trying alternative methods:', error);
+      return null;
+    }
+  },
+
+  /**
+   * Attempt to search using all available search provider services
+   */
+  async attemptAllProviders(query: string): Promise<string | null> {
+    try {
+      const openAIResult = await OpenAISearchProvider.search(query);
+      if (openAIResult && openAIResult.length > 100) {
+        return openAIResult;
+      }
+    } catch (error) {
+      console.log('OpenAI search failed, trying alternative methods:', error);
+    }
+    
+    try {
+      const googleResult = await GoogleSearchProvider.search(query);
+      if (googleResult && googleResult.length > 100) {
+        return googleResult;
+      }
+    } catch (error) {
+      console.log('Google search failed, trying next service:', error);
+    }
+    
+    try {
+      const duckDuckGoResult = await DuckDuckGoSearchProvider.search(query);
+      if (duckDuckGoResult && duckDuckGoResult.length > 100) {
+        return duckDuckGoResult;
+      }
+    } catch (error) {
+      console.log('DuckDuckGo search failed, trying alternative method:', error);
+    }
+    
+    try {
+      const wikiResult = await WikipediaSearchProvider.search(query);
+      if (wikiResult && wikiResult.length > 100) {
+        return wikiResult;
+      }
+    } catch (error) {
+      console.log('Wikipedia search failed, trying fallback service:', error);
+    }
+    
+    try {
+      const deepseekResult = await DeepseekSearchProvider.search(query);
+      if (deepseekResult && deepseekResult.length > 100) {
+        return deepseekResult;
+      }
+    } catch (error) {
+      console.log('Deepseek search failed, using final fallback:', error);
+    }
+    
+    // Try SimpleSearchService as the final fallback
+    const simpleFallbackResult = await SimpleSearchService.searchForCityInfo(query);
+    if (simpleFallbackResult) {
+      return simpleFallbackResult;
+    }
+    
+    // Ultimate fallback if all services fail
+    return FallbackResponseGenerator.generateFallbackResponse(query);
+  }
+};

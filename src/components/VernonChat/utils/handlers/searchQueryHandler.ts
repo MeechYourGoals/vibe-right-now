@@ -1,4 +1,3 @@
-
 import { SwirlSearchService } from '@/services/SwirlSearchService';
 import { SearchService } from '@/services/search/SearchService';
 import { HuggingChatService } from '@/services/HuggingChatService';
