@@ -58,52 +58,60 @@ serve(async (req) => {
       Provide a detailed, informative response to their question.`;
     }
     
-    // Use Gemini to search for relevant information with a more direct prompt
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${GEMINI_API_KEY}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            role: "user",
-            parts: [{ text: promptText }]
+    try {
+      // Use Gemini to search for relevant information with a more direct prompt
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${GEMINI_API_KEY}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              role: "user",
+              parts: [{ text: promptText }]
+            }
+          ],
+          generationConfig: {
+            temperature: 0.2,
+            topK: 40,
+            topP: 0.95,
+            maxOutputTokens: 2048,
           }
-        ],
-        generationConfig: {
-          temperature: 0.2,
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: 2048,
-        }
-      })
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.text();
-      console.error("Gemini API error:", errorData);
+        })
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error("Gemini API error:", errorData);
+        return new Response(
+          JSON.stringify({ error: "Error calling Gemini API", details: errorData }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      const data = await response.json();
+      if (!data.candidates || !data.candidates[0] || !data.candidates[0].content || !data.candidates[0].content.parts) {
+        console.error("Unexpected Gemini API response structure:", JSON.stringify(data));
+        return new Response(
+          JSON.stringify({ error: "Unexpected Gemini API response structure", details: data }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      const results = data.candidates[0].content.parts[0].text;
+      
       return new Response(
-        JSON.stringify({ error: "Error calling Gemini API" }),
+        JSON.stringify({ results }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    } catch (geminiError) {
+      console.error('Error calling Gemini API:', geminiError);
+      return new Response(
+        JSON.stringify({ error: "Failed to process with Gemini API", details: geminiError.message }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
-    
-    const data = await response.json();
-    if (!data.candidates || !data.candidates[0] || !data.candidates[0].content || !data.candidates[0].content.parts) {
-      console.error("Unexpected Gemini API response structure:", JSON.stringify(data));
-      return new Response(
-        JSON.stringify({ error: "Unexpected Gemini API response structure" }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-    
-    const results = data.candidates[0].content.parts[0].text;
-    
-    return new Response(
-      JSON.stringify({ results }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
   } catch (error) {
     console.error('Error in vector-search function:', error);
     return new Response(

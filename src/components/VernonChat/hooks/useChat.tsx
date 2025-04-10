@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Message } from '../types';
 import { INITIAL_MESSAGE } from '../utils/messageFactory';
 import { useMessageProcessor } from './useMessageProcessor';
@@ -22,24 +22,38 @@ export const useChat = (isProPlan: boolean = false, isVenueMode: boolean = false
     processMessage
   } = useMessageProcessor(isProPlan, isVenueMode);
 
-  const handleSendMessage = async (inputValue: string) => {
+  const handleSendMessage = useCallback(async (inputValue: string) => {
     if (!inputValue || inputValue.trim() === '') {
       return;
     }
     
-    // Add user message immediately
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      text: inputValue,
-      sender: 'user',
-      timestamp: new Date()
-    };
-    
-    setMessages(prev => [...prev, userMessage]);
-    
-    // Process the message to get AI response
-    await processMessage(inputValue, setMessages);
-  };
+    try {
+      // Add user message immediately
+      const userMessage: Message = {
+        id: Date.now().toString(),
+        text: inputValue,
+        sender: 'user',
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, userMessage]);
+      
+      // Process the message to get AI response
+      await processMessage(inputValue, setMessages);
+    } catch (error) {
+      console.error('Error sending message:', error);
+      // Make sure we show an error to the user
+      setMessages(prev => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          text: "I'm sorry, I encountered an error. Please try again.",
+          sender: 'ai',
+          timestamp: new Date()
+        }
+      ]);
+    }
+  }, [processMessage]);
 
   return {
     messages,
