@@ -94,7 +94,7 @@ const PostCard: React.FC<PostCardProps> = ({
           return (
             <div 
               key={post.id} 
-              className={`border-t ${isVenuePost ? 'border-l-4 border-l-amber-500' : ''}`}
+              className={`border-t ${isVenuePost ? 'ring-2 ring-amber-500' : ''}`}
             >
               <PostHeader 
                 user={post.user} 
@@ -148,13 +148,13 @@ const PostCard: React.FC<PostCardProps> = ({
   const isVenuePost = post.isVenuePost || post.location?.id === venue?.id;
 
   return (
-    <Card className={`overflow-hidden ${isVenuePost ? 'ring-2 ring-amber-500' : ''}`}>
+    <Card className={`overflow-hidden ${isVenuePost ? 'ring-2 ring-amber-500' : ''} ${post.isPinned && !isVenuePost ? 'ring-2 ring-amber-300' : ''}`}>
       <PostHeader 
         user={post.user} 
         timestamp={String(post.timestamp)} 
         location={post.location}
         isPinned={post.isPinned}
-        isVenuePost={false} // We're not showing the venue badge anymore
+        isVenuePost={isVenuePost}
         canDelete={canDelete && !isVenuePost}
         onDelete={handleDelete}
       />

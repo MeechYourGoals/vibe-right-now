@@ -30,7 +30,7 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
 
   // Function to find a user by username
   const findUserByUsername = (username: string): User | undefined => {
-    return mockUsers.find(user => user.username === username);
+    return mockUsers.find(user => user.username.toLowerCase() === username.toLowerCase());
   };
 
   // Prioritize posts from featured users if provided
@@ -39,14 +39,17 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
       return recentPosts;
     }
 
+    // Create a map of usernames (lowercase) for case-insensitive comparison
+    const featuredUsernames = celebrityFeatured.map(username => username.toLowerCase());
+
     // Find posts from featured users
     const featuredUserPosts = recentPosts.filter(post => 
-      celebrityFeatured.includes(post.user.username)
+      featuredUsernames.includes(post.user.username.toLowerCase())
     );
     
     // Get the remaining posts
     const otherPosts = recentPosts.filter(post => 
-      !celebrityFeatured.includes(post.user.username)
+      !featuredUsernames.includes(post.user.username.toLowerCase())
     );
     
     // Combine them with featured posts first

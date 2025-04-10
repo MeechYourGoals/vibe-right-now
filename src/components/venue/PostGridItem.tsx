@@ -58,11 +58,11 @@ const PostGridItem: React.FC<PostGridItemProps> = ({
       to={`/post/${post.id}`} 
       className={`group relative block aspect-square overflow-hidden rounded-lg ${
         isVenuePost ? 'ring-2 ring-amber-500' : ''
-      }`}
+      } ${post.isPinned && !isVenuePost ? 'ring-2 ring-amber-300' : ''}`}
     >
       <PostMedia post={post} />
       
-      {/* Show pinned badge if applicable, but not venue badge */}
+      {/* Show pinned badge if applicable */}
       {post.isPinned && (
         <PostBadges post={post} isVenuePost={false} />
       )}

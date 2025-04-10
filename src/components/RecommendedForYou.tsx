@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -18,9 +19,14 @@ const RecommendedForYou: React.FC<RecommendedForYouProps> = ({ featuredUsers }) 
   useEffect(() => {
     // If featured users are provided, use them
     if (featuredUsers && featuredUsers.length > 0) {
-      const filteredUsers = mockUsers.filter(user => 
-        featuredUsers.includes(user.username)
-      );
+      // Filter and map for easy lookup
+      const userMap = new Map(mockUsers.map(user => [user.username.toLowerCase(), user]));
+      
+      // Get users that match the featured usernames (case insensitive)
+      const filteredUsers = featuredUsers
+        .map(username => userMap.get(username.toLowerCase()))
+        .filter((user): user is User => user !== undefined);
+      
       setUsers(filteredUsers);
     } else {
       // Otherwise, just get random users from the mock data

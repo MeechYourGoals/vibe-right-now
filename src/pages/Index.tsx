@@ -23,13 +23,13 @@ const Index = () => {
                 Discover the Vibe Right Now
               </h1>
             </div>
-            <PostFeed celebrityFeatured={["kimkardashian", "ishowspeed", "sydney_sweeney", "champagnepapi", "sarah_vibes", "jay_experiences"]} />
+            <PostFeed celebrityFeatured={["kimkardashian", "ishowspeed", "sydney_sweeney", "champagnepapi", "kingbach", "sarah_vibes"]} />
           </div>
           
           {!isMobile ? (
             <div className="w-full md:w-1/4 space-y-6">
               <NearbyVibesMap />
-              <RecommendedForYou featuredUsers={["kimkardashian", "ishowspeed", "sydney_sweeney", "champagnepapi", "keithlee", "sarah_vibes"]} />
+              <RecommendedForYou featuredUsers={["kyliejenner", "ishowspeed", "sydney_sweeney", "champagnepapi", "kingbach", "jayjohnson", "sarah_vibes"]} />
               <TrendingLocations />
               <DiscountLocations />
             </div>
@@ -41,7 +41,7 @@ const Index = () => {
           <div className="mt-8 space-y-6">
             <h2 className="text-xl font-bold mb-4 vibe-gradient-text">Around You</h2>
             <NearbyVibesMap />
-            <RecommendedForYou featuredUsers={["kimkardashian", "ishowspeed", "sydney_sweeney", "champagnepapi", "keithlee", "sarah_vibes"]} />
+            <RecommendedForYou featuredUsers={["kyliejenner", "ishowspeed", "sydney_sweeney", "champagnepapi", "kingbach", "jayjohnson", "sarah_vibes"]} />
             <TrendingLocations />
             <DiscountLocations />
           </div>
