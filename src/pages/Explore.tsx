@@ -5,7 +5,7 @@ import { mockLocations } from "@/mock/data";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { MapPin, Search, VerifiedIcon, Music, Mic, AlertTriangle, Moon, Sparkles, Coffee } from "lucide-react";
+import { MapPin, Search, VerifiedIcon, Music, Mic, AlertTriangle, Moon, Sparkles, Coffee, X } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
@@ -291,81 +291,7 @@ const Explore = () => {
       setIsNaturalLanguageSearch(isComplexQuery);
       
       if (isComplexQuery) {
-        try {
-          const { data, error } = await supabase.functions.invoke('vector-search', {
-            body: { query }
-          });
-          
-          if (error) {
-            console.error('Error calling vector-search function:', error);
-            return;
-          }
-          
-          if (data && data.categories && data.categories.length > 0) {
-            setSearchCategories(data.categories);
-            sessionStorage.setItem('lastSearchCategories', JSON.stringify(data.categories));
-            
-            const locationMatch = q.match(/in\s+([a-zA-Z\s]+)(?:,\s*([a-zA-Z\s]+))?/i);
-            
-            if (locationMatch && locationMatch[1]) {
-              const city = locationMatch[1].trim();
-              const state = locationMatch[2] ? locationMatch[2].trim() : "";
-              
-              setSearchedCity(city);
-              setSearchedState(state);
-              
-              setMusicEvents(generateMusicEvents(city, state));
-              setComedyEvents(generateComedyEvents(city, state));
-              setNightlifeVenues(generateNightlifeVenues(city, state));
-              
-              let results = generateMockLocationsForCity(city, state);
-              
-              const categoryMap: Record<string, string> = {
-                'restaurant': 'restaurant',
-                'dining': 'restaurant',
-                'bar': 'bar',
-                'nightlife': 'bar',
-                'attraction': 'attraction',
-                'sport': 'sports',
-                'sports': 'sports',
-                'event': 'event',
-                'upscale': 'restaurant',
-                'family friendly': 'restaurant'
-              };
-              
-              const relevantTypes = data.categories
-                .map(cat => categoryMap[cat.toLowerCase()])
-                .filter(Boolean);
-              
-              if (relevantTypes.length > 0) {
-                results = results.filter(location => 
-                  relevantTypes.includes(location.type)
-                );
-              }
-              
-              const vibes = data.categories.filter(cat => 
-                ['upscale', 'family friendly', 'casual', 'romantic', 'cozy', 'trendy', 'nightowl'].includes(cat.toLowerCase())
-              );
-              
-              if (vibes.length > 0) {
-                results.forEach(location => {
-                  if (!location.vibes) {
-                    location.vibes = [];
-                  }
-                  location.vibes.push(...vibes);
-                });
-                
-                if (vibes[0]) {
-                  setVibeFilter(vibes[0]);
-                }
-              }
-              
-              setFilteredLocations(results);
-            }
-          }
-        } catch (e) {
-          console.error('Error processing complex query:', e);
-        }
+        processComplexQuery(q);
       } else {
         const parts = q.split(',');
         const city = parts[0].trim();
@@ -413,7 +339,7 @@ const Explore = () => {
     }
   }, [location.search, navigate]);
   
-  const processComplexQuery = async (query: string) => {
+  const processComplexQuery = async (queryText: string) => {
     try {
       setIsLoadingResults(true);
       toast({
@@ -423,7 +349,7 @@ const Explore = () => {
       });
       
       const { data, error } = await supabase.functions.invoke('vector-search', {
-        body: { query }
+        body: { query: queryText }
       });
       
       if (error) {
@@ -436,7 +362,7 @@ const Explore = () => {
         setSearchCategories(data.categories);
         sessionStorage.setItem('lastSearchCategories', JSON.stringify(data.categories));
         
-        const locationMatch = query.match(/in\s+([a-zA-Z\s]+)(?:,\s*([a-zA-Z\s]+))?/i);
+        const locationMatch = queryText.match(/in\s+([a-zA-Z\s]+)(?:,\s*([a-zA-Z\s]+))?/i);
         
         if (locationMatch && locationMatch[1]) {
           const city = locationMatch[1].trim();
@@ -465,7 +391,7 @@ const Explore = () => {
           };
           
           const relevantTypes = data.categories
-            .map(cat => categoryMap[cat.toLowerCase()])
+            .map((cat: string) => categoryMap[cat.toLowerCase()])
             .filter(Boolean);
           
           if (relevantTypes.length > 0) {
@@ -474,7 +400,7 @@ const Explore = () => {
             );
           }
           
-          const vibes = data.categories.filter(cat => 
+          const vibes = data.categories.filter((cat: string) => 
             ['upscale', 'family friendly', 'casual', 'romantic', 'cozy', 'trendy', 'nightowl'].includes(cat.toLowerCase())
           );
           

@@ -59,10 +59,10 @@ export const handleSearchQuery = async (
           responseText = vectorSearchResult;
         }
         
-        console.log('Vector search successful, response length:', responseText?.length);
+        console.log('Vector search successful, response length:', typeof responseText === 'string' ? responseText.length : 'object');
         console.log('Categories extracted:', categories);
         
-        if (responseText && responseText.length > 100) {
+        if (responseText && (typeof responseText === 'string' && responseText.length > 100)) {
           // Include a link to the Explore page for a better visual experience
           const exploreLinkText = "\n\nYou can also [view all these results on our Explore page](/explore?q=" + 
             encodeURIComponent(inputValue) + ") for a better visual experience.";
@@ -76,12 +76,12 @@ export const handleSearchQuery = async (
     }
     
     // Fall back to regular search service if vector search failed or wasn't applicable
-    if (!responseText || responseText.length < 100) {
+    if (!responseText || (typeof responseText === 'string' && responseText.length < 100)) {
       try {
         responseText = await SearchService.search(inputValue);
-        console.log('Got response from SearchService, length:', responseText?.length);
+        console.log('Got response from SearchService, length:', typeof responseText === 'string' ? responseText.length : 'object');
         
-        if (responseText && responseText.length > 100) {
+        if (responseText && typeof responseText === 'string' && responseText.length > 100) {
           const exploreLinkText = "\n\nYou can also [view all these results on our Explore page](/explore?q=" + 
             encodeURIComponent(inputValue) + ") for a better visual experience.";
           return cleanResponseText(responseText + exploreLinkText);
@@ -95,20 +95,20 @@ export const handleSearchQuery = async (
           console.log('Using Swirl search engine for query');
           try {
             responseText = await SwirlSearchService.search(inputValue);
-            if (responseText && responseText.length > 100) {
+            if (responseText && typeof responseText === 'string' && responseText.length > 100) {
               return cleanResponseText(responseText);
             }
           } catch (swirlError) {
             console.error('Error with Swirl search, falling back to HuggingChat:', swirlError);
             responseText = await HuggingChatService.searchHuggingChat(inputValue);
-            if (responseText && responseText.length > 100) {
+            if (responseText && typeof responseText === 'string' && responseText.length > 100) {
               return cleanResponseText(responseText);
             }
           }
         } else {
           // If Swirl is not available, use HuggingChat
           responseText = await HuggingChatService.searchHuggingChat(inputValue);
-          if (responseText && responseText.length > 100) {
+          if (responseText && typeof responseText === 'string' && responseText.length > 100) {
             return cleanResponseText(responseText);
           }
         }
@@ -116,14 +116,18 @@ export const handleSearchQuery = async (
     }
     
     // If we still don't have a good response, try one last time with vector search
-    if (!responseText || responseText.length < 100 || responseText.includes("I don't have specific information")) {
+    if (!responseText || (typeof responseText === 'string' && responseText.length < 100) || (typeof responseText === 'string' && responseText.includes("I don't have specific information"))) {
       try {
         console.log('No good response yet, trying vector search one more time with enhanced prompt');
         const lastChanceResponse = await SearchService.vectorSearch(
           `Provide detailed information about "${inputValue}" including real venues, events, and activities. Include specific names, addresses, and practical details.`
         );
-        if (lastChanceResponse && lastChanceResponse.length > 100) {
+        
+        if (typeof lastChanceResponse === 'string' && lastChanceResponse.length > 100) {
           responseText = lastChanceResponse;
+          return cleanResponseText(responseText);
+        } else if (typeof lastChanceResponse === 'object' && lastChanceResponse !== null && lastChanceResponse.results && lastChanceResponse.results.length > 100) {
+          responseText = lastChanceResponse.results;
           return cleanResponseText(responseText);
         }
       } catch (error) {
@@ -167,10 +171,10 @@ export const handleSearchQuery = async (
       if (cityLocations.length > 0) {
         updateTrendingLocations(cityInfo.name, getTrendingLocationsForCity(cityInfo.name));
         
-        let combinedResponse = responseText;
+        let combinedResponse = typeof responseText === 'string' ? responseText : '';
         
-        if (!responseText.includes("Nightlife:") && !responseText.includes("Dining:")) {
-          combinedResponse = `${responseText}\n\n${generateLocationResponse(cityInfo.name, cityLocations, paginationState)}`;
+        if (!combinedResponse.includes("Nightlife:") && !combinedResponse.includes("Dining:")) {
+          combinedResponse = `${combinedResponse}\n\n${generateLocationResponse(cityInfo.name, cityLocations, paginationState)}`;
         }
         
         return cleanResponseText(combinedResponse);
@@ -179,11 +183,11 @@ export const handleSearchQuery = async (
   }
   
   // If we have any result, return it
-  if (responseText && responseText.length > 0) {
+  if (responseText && (typeof responseText === 'string' && responseText.length > 0)) {
     // Add a link to the Explore page
     const exploreLinkText = "\n\nYou can also [view all these results on our Explore page](/explore?q=" + 
       encodeURIComponent(inputValue) + ") for a better visual experience.";
-    return cleanResponseText(responseText + exploreLinkText);
+    return cleanResponseText((typeof responseText === 'string' ? responseText : JSON.stringify(responseText)) + exploreLinkText);
   }
   
   // Ultimate fallback if all else fails
