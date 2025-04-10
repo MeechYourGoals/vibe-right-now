@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -6,6 +7,7 @@ import { Link } from "react-router-dom";
 import { mockLocations } from "@/mock/data";
 import { Location } from "@/types";
 import { MapPin, Users } from "lucide-react";
+import { getMediaForLocation } from "@/utils/map/locationMediaUtils";
 
 interface RecommendedForYouProps {
   featuredLocations?: string[];
@@ -68,7 +70,7 @@ const RecommendedForYou: React.FC<RecommendedForYouProps> = ({ featuredLocations
                 className="flex items-center space-x-3"
               >
                 <Avatar>
-                  <AvatarImage src={location.image || `/placeholder.svg`} alt={location.name} />
+                  <AvatarImage src={getMediaForLocation(location).url} alt={location.name} />
                   <AvatarFallback>{location.name.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div>
