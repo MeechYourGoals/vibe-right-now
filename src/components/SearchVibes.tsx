@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Map, X, ChevronDown, User, Building, CalendarDays, MapPin, Star } from "lucide-react";
+import { Search, Map, X, ChevronDown, User, Building, Calendar, MapPin, Star, Sparkles } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,6 +24,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { cityCoordinates } from "@/utils/cityLocations";
+import { Badge } from "@/components/ui/badge";
 
 interface SearchVibesProps {
   onSearch: (query: string, filterType: string, category: string) => void;
@@ -39,7 +40,12 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
   const [showPlaceSuggestions, setShowPlaceSuggestions] = useState(false);
   const [citySuggestions, setCitySuggestions] = useState<string[]>([]);
   const [showCitySuggestions, setShowCitySuggestions] = useState(false);
-  
+  const [showVibeSuggestions, setShowVibeSuggestions] = useState(false);
+  const [vibeSuggestions, setVibeSuggestions] = useState<string[]>([
+    "Cozy", "Family Friendly", "NightOwl", "Trendy", "Chill", 
+    "Upscale", "Casual", "Romantic", "Lively", "Intimate"
+  ]);
+
   const location = useLocation();
 
   const filters = [
@@ -79,15 +85,31 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
   }, [location.search]);
 
   useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const vibe = params.get('vibe');
+    if (vibe) {
+      setSearchQuery(vibe);
+      setSearchCategory("vibes");
+    }
+  }, [location.search]);
+
+  useEffect(() => {
     if (searchCategory === "users") {
       setShowUserSuggestions(true);
       setShowPlaceSuggestions(false);
+      setShowVibeSuggestions(false);
     } else if (searchCategory === "places") {
       setShowPlaceSuggestions(true);
       setShowUserSuggestions(false);
+      setShowVibeSuggestions(false);
+    } else if (searchCategory === "vibes") {
+      setShowVibeSuggestions(true);
+      setShowUserSuggestions(false);
+      setShowPlaceSuggestions(false);
     } else {
       setShowUserSuggestions(false);
       setShowPlaceSuggestions(false);
+      setShowVibeSuggestions(false);
     }
   }, [searchCategory]);
 
@@ -95,6 +117,7 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
     onSearch(searchQuery, selectedFilter, searchCategory);
     setShowUserSuggestions(false);
     setShowPlaceSuggestions(false);
+    setShowVibeSuggestions(false);
   };
 
   const toggleFilter = (filter: string) => {
@@ -126,6 +149,12 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
     onSearch(placeName, selectedFilter, searchCategory);
   };
   
+  const handleVibeSelect = (vibe: string) => {
+    setSearchQuery(vibe);
+    setShowVibeSuggestions(false);
+    onSearch(vibe, selectedFilter, "vibes");
+  };
+  
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchQuery(value);
@@ -137,6 +166,16 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
       
       setCitySuggestions(filtered);
       setShowCitySuggestions(filtered.length > 0);
+    } else if (searchCategory === 'vibes' && value.length > 0) {
+      const filtered = vibeSuggestions.filter(vibe => 
+        vibe.toLowerCase().includes(value.toLowerCase())
+      );
+      
+      setVibeSuggestions(filtered.length > 0 ? filtered : [
+        "Cozy", "Family Friendly", "NightOwl", "Trendy", "Chill", 
+        "Upscale", "Casual", "Romantic", "Lively", "Intimate"
+      ]);
+      setShowVibeSuggestions(true);
     } else {
       setShowCitySuggestions(false);
     }
@@ -154,6 +193,8 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
       setShowUserSuggestions(true);
     } else if (searchCategory === "places") {
       setShowPlaceSuggestions(true);
+    } else if (searchCategory === "vibes") {
+      setShowVibeSuggestions(true);
     }
   };
 
@@ -164,7 +205,7 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
         onValueChange={handleCategoryChange} 
         className="w-full mb-3"
       >
-        <TabsList className="grid grid-cols-3 w-full">
+        <TabsList className="grid grid-cols-4 w-full">
           <TabsTrigger value="all" className="flex items-center gap-1">
             <Search className="h-3.5 w-3.5" />
             <span>All</span>
@@ -177,6 +218,10 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
             <User className="h-3.5 w-3.5" />
             <span>Users</span>
           </TabsTrigger>
+          <TabsTrigger value="vibes" className="flex items-center gap-1">
+            <Sparkles className="h-3.5 w-3.5" />
+            <span>Vibes</span>
+          </TabsTrigger>
         </TabsList>
       </Tabs>
 
@@ -188,7 +233,9 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
               ? "Search users by name or username..." 
               : searchCategory === "places"
                 ? "Search cities, venues, events..."
-                : "Search venues, events, vibes, users..."
+                : searchCategory === "vibes"
+                  ? "Search for vibes like Cozy, Trendy, NightOwl..."
+                  : "Search venues, events, vibes, users..."
           }
           value={searchQuery}
           onChange={handleSearchInputChange}
@@ -293,6 +340,28 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
                   </div>
                 </div>
               ))}
+            </div>
+          </Card>
+        </CollapsibleContent>
+      </Collapsible>
+
+      <Collapsible open={showVibeSuggestions && searchCategory === "vibes"} className="w-full">
+        <CollapsibleContent className="overflow-hidden">
+          <Card className="mt-1 w-full p-2 shadow-md border border-border">
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground px-2 py-1">Popular Vibes</p>
+              <div className="flex flex-wrap gap-2 p-2">
+                {vibeSuggestions.map((vibe, index) => (
+                  <Badge 
+                    key={index} 
+                    className="bg-indigo-100 text-indigo-800 hover:bg-indigo-200 cursor-pointer flex items-center"
+                    onClick={() => handleVibeSelect(vibe)}
+                  >
+                    <Sparkles className="h-3 w-3 mr-1" />
+                    {vibe}
+                  </Badge>
+                ))}
+              </div>
             </div>
           </Card>
         </CollapsibleContent>

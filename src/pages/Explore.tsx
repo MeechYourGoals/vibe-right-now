@@ -5,7 +5,7 @@ import { mockLocations } from "@/mock/data";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { MapPin, Search, VerifiedIcon, Music, Mic, AlertTriangle } from "lucide-react";
+import { MapPin, Search, VerifiedIcon, Music, Mic, AlertTriangle, Moon, Sparkles, Coffee } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
@@ -200,6 +200,61 @@ const generateComedyEvents = (city: string, state: string): EventItem[] => {
   return events;
 };
 
+const generateNightlifeVenues = (city: string, state: string): Location[] => {
+  if (!city) return [];
+  
+  const nightlifeVenues = [
+    "Rooftop Lounge", "Nightclub", "Cocktail Bar", "Jazz Bar", "Dance Club", 
+    "Speakeasy", "Brewery", "Wine Bar", "Pub", "Karaoke Bar"
+  ];
+  
+  const nightlifeLocations: Location[] = [];
+  
+  const count = Math.floor(Math.random() * 7) + 3;
+  
+  for (let i = 0; i < count; i++) {
+    const venueName = `${city} ${nightlifeVenues[Math.floor(Math.random() * nightlifeVenues.length)]}`;
+    const isVerified = Math.random() > 0.4;
+    
+    nightlifeLocations.push({
+      id: `nightlife-${city}-${i}`,
+      name: venueName,
+      address: `${100 + i} Party St`,
+      city,
+      state,
+      country: "USA",
+      lat: 40 + Math.random(),
+      lng: -75 + Math.random(),
+      type: "bar",
+      verified: isVerified,
+      vibes: generateRandomVibes()
+    });
+  }
+  
+  return nightlifeLocations;
+};
+
+const generateRandomVibes = (): string[] => {
+  const allVibes = [
+    "Cozy", "Family Friendly", "NightOwl", "Trendy", "Chill", 
+    "Upscale", "Casual", "Romantic", "Lively", "Intimate", 
+    "High Energy", "Laid Back", "Artsy", "Eclectic", "Historic",
+    "Modern", "Vintage", "Industrial", "Bohemian", "Elegant"
+  ];
+  
+  const numberOfVibes = Math.floor(Math.random() * 4) + 1;
+  const selectedVibes: string[] = [];
+  
+  for (let i = 0; i < numberOfVibes; i++) {
+    const randomVibe = allVibes[Math.floor(Math.random() * allVibes.length)];
+    if (!selectedVibes.includes(randomVibe)) {
+      selectedVibes.push(randomVibe);
+    }
+  }
+  
+  return selectedVibes;
+};
+
 const Explore = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("all");
@@ -210,6 +265,8 @@ const Explore = () => {
   const [locationTags, setLocationTags] = useState<Record<string, string[]>>({});
   const [musicEvents, setMusicEvents] = useState<EventItem[]>([]);
   const [comedyEvents, setComedyEvents] = useState<EventItem[]>([]);
+  const [nightlifeVenues, setNightlifeVenues] = useState<Location[]>([]);
+  const [vibeFilter, setVibeFilter] = useState<string>("");
   
   const location = useLocation();
   const navigate = useNavigate();
@@ -217,6 +274,7 @@ const Explore = () => {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const q = params.get('q');
+    const vibe = params.get('vibe');
     
     if (q) {
       setSearchQuery(q);
@@ -232,6 +290,11 @@ const Explore = () => {
       
       setMusicEvents(generateMusicEvents(city, state));
       setComedyEvents(generateComedyEvents(city, state));
+      setNightlifeVenues(generateNightlifeVenues(city, state));
+    }
+    
+    if (vibe) {
+      setVibeFilter(vibe);
     }
   }, [location.search]);
   
@@ -247,6 +310,18 @@ const Explore = () => {
     setSearchQuery(query);
     setSearchCategory(category);
     
+    const vibeKeywords = ["cozy", "family friendly", "nightowl", "trendy", "chill", "upscale", "casual", "romantic"];
+    const queryLower = query.toLowerCase();
+    let isVibeSearch = false;
+    
+    for (const vibe of vibeKeywords) {
+      if (queryLower.includes(vibe)) {
+        setVibeFilter(vibe);
+        isVibeSearch = true;
+        break;
+      }
+    }
+    
     if (filterType !== "All") {
       setActiveTab(filterType.toLowerCase());
     } else {
@@ -256,7 +331,7 @@ const Explore = () => {
     let city = "";
     let state = "";
     
-    if (query) {
+    if (query && !isVibeSearch) {
       const parts = query.split(',');
       city = parts[0].trim();
       state = parts.length > 1 ? parts[1].trim() : "";
@@ -265,17 +340,25 @@ const Explore = () => {
       
       setMusicEvents(generateMusicEvents(city, state));
       setComedyEvents(generateComedyEvents(city, state));
+      setNightlifeVenues(generateNightlifeVenues(city, state));
     } else {
       setSearchedCity("");
       setSearchedState("");
       setMusicEvents([]);
       setComedyEvents([]);
+      setNightlifeVenues([]);
     }
     
     let results = [...mockLocations];
     
     if (category === "places" && city) {
       results = generateMockLocationsForCity(city, state);
+      
+      results.forEach(location => {
+        if (!location.vibes) {
+          location.vibes = generateRandomVibes();
+        }
+      });
     } else if (query) {
       results = mockLocations.filter(location => {
         const locationMatches = 
@@ -291,10 +374,24 @@ const Explore = () => {
       results = results.filter(location => location.type === activeTab);
     }
     
+    if (vibeFilter && vibeFilter.length > 0) {
+      results = results.filter(location => {
+        if (!location.vibes) return false;
+        return location.vibes.some(vibe => 
+          vibe.toLowerCase().includes(vibeFilter.toLowerCase())
+        );
+      });
+    }
+    
     setFilteredLocations(results);
     
     if (query) {
-      navigate(`/explore?q=${encodeURIComponent(query)}`, { replace: true });
+      const searchParams = new URLSearchParams();
+      searchParams.set('q', query);
+      if (vibeFilter) searchParams.set('vibe', vibeFilter);
+      navigate(`/explore?${searchParams.toString()}`, { replace: true });
+    } else if (vibeFilter) {
+      navigate(`/explore?vibe=${vibeFilter}`, { replace: true });
     } else {
       navigate('/explore', { replace: true });
     }
@@ -318,10 +415,25 @@ const Explore = () => {
     
     if (searchCategory === "places" && searchedCity) {
       results = generateMockLocationsForCity(searchedCity, searchedState);
+      
+      results.forEach(location => {
+        if (!location.vibes) {
+          location.vibes = generateRandomVibes();
+        }
+      });
     }
     
     if (value !== "all") {
       results = results.filter(location => location.type === value);
+    }
+    
+    if (vibeFilter && vibeFilter.length > 0) {
+      results = results.filter(location => {
+        if (!location.vibes) return false;
+        return location.vibes.some(vibe => 
+          vibe.toLowerCase().includes(vibeFilter.toLowerCase())
+        );
+      });
     }
     
     setFilteredLocations(results);
@@ -342,6 +454,60 @@ const Explore = () => {
     </div>
   );
 
+  const NightlifeSection = () => {
+    if (nightlifeVenues.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+          <Moon className="w-12 h-12 mb-4" />
+          <h3 className="text-xl font-semibold mb-2">No Nightlife Venues Found</h3>
+          <p>We couldn't find any nightlife venues in this area. Try searching for another location.</p>
+        </div>
+      );
+    }
+    
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {nightlifeVenues.map((venue) => (
+          <Card key={venue.id} className="vibe-card-hover bg-indigo-50 border-indigo-200 hover:bg-indigo-100">
+            <CardContent className="p-4">
+              <div className="flex justify-between items-start mb-2">
+                <h3 className="text-lg font-semibold flex items-center">
+                  {venue.name}
+                  {venue.verified && (
+                    <VerifiedIcon className="h-4 w-4 ml-1 text-indigo-500" />
+                  )}
+                </h3>
+                <Badge variant="outline" className="bg-indigo-100 border-indigo-300 text-indigo-700">Nightlife</Badge>
+              </div>
+              
+              <div className="text-sm text-muted-foreground mb-3 flex items-center">
+                <MapPin className="h-4 w-4 mr-1" />
+                <span>
+                  {venue.address}, {venue.city}, {venue.state}
+                </span>
+              </div>
+              
+              {venue.vibes && venue.vibes.length > 0 && (
+                <div className="flex flex-wrap gap-1 mb-3">
+                  {venue.vibes.map((vibe, index) => (
+                    <Badge key={index} variant="outline" className="bg-indigo-50 text-indigo-700 border-indigo-200">
+                      <Sparkles className="h-3 w-3 mr-1 text-indigo-500" />
+                      {vibe}
+                    </Badge>
+                  ))}
+                </div>
+              )}
+              
+              <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white" asChild>
+                <Link to={`/venue/${venue.id}`}>View Vibes</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -356,8 +522,28 @@ const Explore = () => {
             <SearchVibes onSearch={handleSearch} />
           </div>
           
+          {vibeFilter && (
+            <div className="max-w-xl mx-auto mb-4 flex items-center justify-center">
+              <Badge className="bg-indigo-100 text-indigo-800 px-3 py-1 text-sm flex items-center">
+                <Sparkles className="h-4 w-4 mr-1" />
+                Filtering by vibe: {vibeFilter}
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-5 w-5 ml-2 rounded-full" 
+                  onClick={() => {
+                    setVibeFilter("");
+                    handleSearch(searchQuery, "All", searchCategory);
+                  }}
+                >
+                  <AlertTriangle className="h-3 w-3" />
+                </Button>
+              </Badge>
+            </div>
+          )}
+          
           <Tabs defaultValue="all" value={activeTab} onValueChange={handleTabChange} className="max-w-2xl mx-auto">
-            <TabsList className="grid grid-cols-3 md:grid-cols-9">
+            <TabsList className="grid grid-cols-2 md:grid-cols-10">
               <TabsTrigger value="all">All</TabsTrigger>
               <TabsTrigger value="restaurant">Restaurants</TabsTrigger>
               <TabsTrigger value="bar">Bars</TabsTrigger>
@@ -371,6 +557,10 @@ const Explore = () => {
               <TabsTrigger value="comedy">
                 <Mic className="mr-1 h-4 w-4" />
                 Comedy
+              </TabsTrigger>
+              <TabsTrigger value="nightlife">
+                <Moon className="mr-1 h-4 w-4" />
+                Nightlife
               </TabsTrigger>
               <TabsTrigger value="other">Other</TabsTrigger>
             </TabsList>
@@ -405,6 +595,13 @@ const Explore = () => {
               </div>
             )}
             
+            {activeTab === "nightlife" && (
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold mb-4">Nightlife in {searchedCity}</h2>
+                <NightlifeSection />
+              </div>
+            )}
+            
             {searchCategory === "places" && searchedCity && activeTab === "sports" && (
               <div className="mb-6">
                 <h2 className="text-xl font-semibold mb-4">Trending Sports Events</h2>
@@ -425,7 +622,7 @@ const Explore = () => {
               </div>
             )}
             
-            {activeTab !== "music" && activeTab !== "comedy" && (
+            {activeTab !== "music" && activeTab !== "comedy" && activeTab !== "nightlife" && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {filteredLocations.length > 0 ? (
                   filteredLocations.map((location) => (

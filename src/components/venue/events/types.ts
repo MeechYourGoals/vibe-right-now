@@ -10,4 +10,5 @@ export interface EventItem {
   ticketUrl?: string;
   price?: string;
   type?: "venue" | "sports" | "music" | "comedy";
+  vibes?: string[];
 }
