@@ -1,6 +1,13 @@
 
 import { Location } from "@/types";
 import { isEligibleForPriceComparison } from "@/utils/venue/travelIntegrationUtils";
+import { mockPosts } from "@/mock/data";
+
+// Helper function to get recent vibes (posts) for a specific location
+export const getLocationVibes = (locationId: string) => {
+  // Filter posts for this location
+  return mockPosts.filter(post => post.location.id === locationId);
+};
 
 // Helper function to get ride service URL
 export const getRideServiceUrl = (place: Location) => {

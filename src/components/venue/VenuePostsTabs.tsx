@@ -4,6 +4,7 @@ import { Tabs } from "@/components/ui/tabs";
 import { Post, Comment, Location } from "@/types";
 import VenuePostsTabsHeader from './tabs/VenuePostsTabsHeader';
 import VenuePostsTabsContent from './tabs/VenuePostsTabsContent';
+import AddVenuePostDialog from './AddVenuePostDialog';
 
 interface VenuePostsTabsProps {
   activeTab: string;
@@ -28,7 +29,7 @@ const VenuePostsTabs: React.FC<VenuePostsTabsProps> = ({
   venue,
   getPostComments
 }) => {
-  // State for social media connections (moved from parent)
+  // State for social media connections
   const [connectedPlatforms, setConnectedPlatforms] = useState<Record<string, boolean>>({
     instagram: false,
     tiktok: false,
@@ -42,6 +43,16 @@ const VenuePostsTabs: React.FC<VenuePostsTabsProps> = ({
   
   // State to track subscription tier
   const [subscriptionTier, setSubscriptionTier] = useState<'standard' | 'plus' | 'premium' | 'pro'>('standard');
+  
+  // State to track deleted posts
+  const [deletedPostIds, setDeletedPostIds] = useState<string[]>([]);
+  
+  // State to track add post dialog
+  const [isAddPostDialogOpen, setIsAddPostDialogOpen] = useState(false);
+  
+  // Filter out deleted posts
+  const filteredAllPosts = allPosts.filter(post => !deletedPostIds.includes(post.id));
+  const filteredUserPosts = filteredPosts.filter(post => !deletedPostIds.includes(post.id));
   
   // Load saved platforms on component mount
   useEffect(() => {
@@ -78,32 +89,48 @@ const VenuePostsTabs: React.FC<VenuePostsTabsProps> = ({
     localStorage.setItem('subscriptionTier', nextTier);
   };
   
+  // Handle post deletion
+  const handlePostDeleted = (postId: string) => {
+    setDeletedPostIds(prev => [...prev, postId]);
+  };
+  
   // Check if embedding is allowed (premium/pro tiers only)
   const canEmbed = subscriptionTier === 'premium' || subscriptionTier === 'pro';
   
   return (
-    <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="mb-6">
-      <VenuePostsTabsHeader 
-        activeTab={activeTab}
-        viewMode={viewMode}
-        setViewMode={setViewMode}
-        onConnectedPlatformsChange={setConnectedPlatforms}
-      />
+    <>
+      <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="mb-6">
+        <VenuePostsTabsHeader 
+          activeTab={activeTab}
+          viewMode={viewMode}
+          setViewMode={setViewMode}
+          onConnectedPlatformsChange={setConnectedPlatforms}
+          onAddPost={() => setIsAddPostDialogOpen(true)}
+          venueId={venue.id}
+        />
+        
+        <VenuePostsTabsContent 
+          activeTab={activeTab}
+          allPosts={filteredAllPosts}
+          filteredPosts={filteredUserPosts}
+          filteredVenuePosts={filteredVenuePosts}
+          venue={venue}
+          viewMode={viewMode}
+          getPostComments={getPostComments}
+          subscriptionTier={subscriptionTier}
+          canEmbed={canEmbed}
+          connectedPlatforms={connectedPlatforms}
+          onUpgradeSubscription={handleUpgradeSubscription}
+          onPostDeleted={handlePostDeleted}
+        />
+      </Tabs>
       
-      <VenuePostsTabsContent 
-        activeTab={activeTab}
-        allPosts={allPosts}
-        filteredPosts={filteredPosts}
-        filteredVenuePosts={filteredVenuePosts}
+      <AddVenuePostDialog 
+        open={isAddPostDialogOpen}
+        onOpenChange={setIsAddPostDialogOpen}
         venue={venue}
-        viewMode={viewMode}
-        getPostComments={getPostComments}
-        subscriptionTier={subscriptionTier}
-        canEmbed={canEmbed}
-        connectedPlatforms={connectedPlatforms}
-        onUpgradeSubscription={handleUpgradeSubscription}
       />
-    </Tabs>
+    </>
   );
 };
 

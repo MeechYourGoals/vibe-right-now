@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Post, Comment, Location } from "@/types";
 import VenuePostsTabs from './VenuePostsTabs';
 

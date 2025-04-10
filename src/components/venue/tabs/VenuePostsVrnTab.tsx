@@ -10,6 +10,8 @@ interface VenuePostsVrnTabProps {
   venue: Location;
   viewMode: "list" | "grid";
   getComments: (postId: string) => Comment[];
+  subscriptionTier?: 'standard' | 'plus' | 'premium' | 'pro';
+  onPostDeleted?: (postId: string) => void;
 }
 
 const VenuePostsVrnTab: React.FC<VenuePostsVrnTabProps> = ({
@@ -17,7 +19,9 @@ const VenuePostsVrnTab: React.FC<VenuePostsVrnTabProps> = ({
   filteredPosts,
   venue,
   viewMode,
-  getComments
+  getComments,
+  subscriptionTier = 'standard',
+  onPostDeleted
 }) => {
   return (
     <div className="flex flex-col gap-4">
@@ -45,7 +49,9 @@ const VenuePostsVrnTab: React.FC<VenuePostsVrnTabProps> = ({
           posts={filteredVenuePosts} 
           venue={venue} 
           viewMode={viewMode} 
-          getComments={getComments} 
+          getComments={getComments}
+          subscriptionTier={subscriptionTier}
+          onPostDeleted={onPostDeleted}
         />
         
         <div className="border-l-4 border-blue-500 pl-4 py-2 mt-4">
@@ -59,7 +65,9 @@ const VenuePostsVrnTab: React.FC<VenuePostsVrnTabProps> = ({
           posts={filteredPosts} 
           venue={venue} 
           viewMode={viewMode} 
-          getComments={getComments} 
+          getComments={getComments}
+          subscriptionTier={subscriptionTier}
+          onPostDeleted={onPostDeleted}
         />
       </div>
     </div>

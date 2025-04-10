@@ -18,6 +18,7 @@ interface VenuePostsTabsContentProps {
   canEmbed: boolean;
   connectedPlatforms: Record<string, boolean>;
   onUpgradeSubscription: () => void;
+  onPostDeleted?: (postId: string) => void;
 }
 
 const VenuePostsTabsContent: React.FC<VenuePostsTabsContentProps> = ({
@@ -31,7 +32,8 @@ const VenuePostsTabsContent: React.FC<VenuePostsTabsContentProps> = ({
   subscriptionTier,
   canEmbed,
   connectedPlatforms,
-  onUpgradeSubscription
+  onUpgradeSubscription,
+  onPostDeleted
 }) => {
   return (
     <>
@@ -40,7 +42,9 @@ const VenuePostsTabsContent: React.FC<VenuePostsTabsContentProps> = ({
           posts={allPosts} 
           venue={venue} 
           viewMode={viewMode} 
-          getComments={getPostComments} 
+          getComments={getPostComments}
+          subscriptionTier={subscriptionTier}
+          onPostDeleted={onPostDeleted}
         />
       </TabsContent>
       
@@ -51,6 +55,8 @@ const VenuePostsTabsContent: React.FC<VenuePostsTabsContentProps> = ({
           venue={venue}
           viewMode={viewMode}
           getComments={getPostComments}
+          subscriptionTier={subscriptionTier}
+          onPostDeleted={onPostDeleted}
         />
       </TabsContent>
       

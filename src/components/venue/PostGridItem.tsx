@@ -2,24 +2,37 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
-import { Heart, Calendar, Pin, Clock } from "lucide-react";
+import { Heart, Calendar, Pin, Clock, Trash2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { 
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Post } from "@/types";
+import { deletePost } from "@/utils/venue/postManagementUtils";
 
 interface PostGridItemProps {
   post: Post;
   isVenuePost?: boolean;
   timeAgo?: string;
-  isDetailView?: boolean; // New prop to indicate if this is a detailed view
+  isDetailView?: boolean;
+  canDelete?: boolean;
+  venue?: { id: string; name: string };
+  onPostDeleted?: (postId: string) => void;
 }
 
 const PostGridItem: React.FC<PostGridItemProps> = ({ 
   post, 
   isVenuePost = false, 
   timeAgo,
-  isDetailView = false
+  isDetailView = false,
+  canDelete = false,
+  venue,
+  onPostDeleted
 }) => {
   const [liked, setLiked] = useState(false);
   const navigate = useNavigate();
@@ -33,6 +46,17 @@ const PostGridItem: React.FC<PostGridItemProps> = ({
     e.preventDefault();
     e.stopPropagation();
     navigate(`/user/${post.user.username}`);
+  };
+
+  const handleDeletePost = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (venue && deletePost(post.id, venue)) {
+      if (onPostDeleted) {
+        onPostDeleted(post.id);
+      }
+    }
   };
 
   // Get the day of the week
@@ -94,6 +118,28 @@ const PostGridItem: React.FC<PostGridItemProps> = ({
             <Pin className="h-3 w-3 mr-1" />
             Pinned
           </Badge>
+        </div>
+      )}
+      
+      {canDelete && !isVenuePost && (
+        <div className="absolute top-2 right-2 z-10">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="destructive"
+                  size="icon"
+                  className="h-8 w-8 opacity-75 hover:opacity-100"
+                  onClick={handleDeletePost}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Delete post</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       )}
       
