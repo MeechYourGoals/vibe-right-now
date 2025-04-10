@@ -25,14 +25,31 @@ export const SearchService = {
     try {
       console.log('Searching for:', query);
       
-      // Try using vector search first (through Gemini)
+      // First try vector search through Gemini API (most up-to-date info)
       try {
+        console.log('Attempting vector search with Gemini');
         const vectorResult = await this.vectorSearch(query);
         if (vectorResult) {
+          console.log('Vector search successful');
           return vectorResult;
         }
       } catch (vectorError) {
         console.log('Vector search failed, trying alternative methods:', vectorError);
+      }
+      
+      // Try using Gemini directly for a conversational response with current information
+      try {
+        console.log('Attempting direct Gemini search');
+        const geminiResult = await GeminiService.generateResponse(
+          `Search the web for current information about: "${query}". Provide specific, factual information about real places, events or attractions if applicable. Include dates, times, and other relevant details.`, 
+          'user'
+        );
+        if (geminiResult) {
+          console.log('Gemini direct search successful');
+          return geminiResult;
+        }
+      } catch (error) {
+        console.log('Gemini search failed, trying alternative methods:', error);
       }
       
       // Try using Swirl (local search engine)
@@ -49,19 +66,6 @@ export const SearchService = {
         }
       } catch (error) {
         console.log('Swirl search failed, trying alternative methods:', error);
-      }
-      
-      // Try using Gemini for a more conversational response
-      try {
-        const geminiResult = await GeminiService.generateResponse(
-          `Answer this search query: ${query}. Provide specific, factual information about real places, events or attractions if applicable.`, 
-          'user'
-        );
-        if (geminiResult) {
-          return geminiResult;
-        }
-      } catch (error) {
-        console.log('Gemini search failed, trying alternative methods:', error);
       }
       
       // Try using OpenAI's search capabilities
@@ -130,20 +134,27 @@ export const SearchService = {
   
   /**
    * Perform a vector search using Firebase/Supabase vector search capabilities
-   * This would connect to a vector database if properly set up
+   * This connects to our Gemini-powered search function
    */
   async vectorSearch(query: string): Promise<string | null> {
     try {
-      // Check if we have a vector search function available
+      console.log('Invoking vector-search function with query:', query);
+      // Call the vector-search edge function
       const { data, error } = await supabase.functions.invoke('vector-search', {
         body: { query }
-      }).catch(() => ({ data: null, error: new Error('Vector search function not available') }));
+      });
       
-      if (error || !data) {
-        console.log('Vector search not available, skipping:', error);
+      if (error) {
+        console.error('Error calling vector-search function:', error);
         return null;
       }
       
+      if (!data || !data.results) {
+        console.log('No results from vector search');
+        return null;
+      }
+      
+      console.log('Vector search returned results');
       return data.results;
     } catch (error) {
       console.error('Error with vector search:', error);

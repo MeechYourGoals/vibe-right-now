@@ -58,19 +58,43 @@ export const processMessageInput = async (
       return;
     }
     
-    // Process the message using Gemini
+    // Detect if this is likely a search query about places, events, or activities
+    const isLikelySearchQuery = /what|where|when|how|who|which|find|search|show|things to do|events|places|restaurants|bars|attractions|activities/i.test(inputValue);
+    
+    // Process the message using Gemini or our search handlers
     let responseText = '';
     try {
-      // Use Gemini AI for response generation
-      responseText = await GeminiService.generateResponse(
-        inputValue, 
-        isVenueMode ? 'venue' : 'user',
-        contextMessages
-      );
-    } catch (geminiError) {
-      console.error('Error getting Gemini response, falling back to default handlers:', geminiError);
+      if (isVenueMode) {
+        // For venue mode, always use Gemini for business insights
+        responseText = await GeminiService.generateResponse(
+          inputValue, 
+          'venue',
+          contextMessages
+        );
+      } else if (isLikelySearchQuery) {
+        // For search queries, prioritize our enhanced search pipeline
+        responseText = await handleSearchQuery(inputValue, updatedPaginationState);
+        
+        // If search result seems generic, enhance with Gemini
+        if (responseText.length < 100 || responseText.includes("I don't have specific information")) {
+          const geminiEnhancement = await GeminiService.generateResponse(
+            `The user asked: "${inputValue}". Please provide specific, detailed information about real places, events, or activities related to this query.`, 
+            'user'
+          );
+          responseText = geminiEnhancement || responseText;
+        }
+      } else {
+        // For conversational queries, use Gemini directly
+        responseText = await GeminiService.generateResponse(
+          inputValue, 
+          'user',
+          contextMessages
+        );
+      }
+    } catch (error) {
+      console.error('Error getting primary response, falling back to handlers:', error);
       
-      // If Gemini fails, fall back to our existing handlers
+      // Fall back to our existing handlers if Gemini fails
       if (isVenueMode) {
         // Handle venue-specific queries
         responseText = await handleVenueQuery(inputValue, isProPlan);

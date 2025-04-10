@@ -23,26 +23,36 @@ export const handleSearchQuery = async (
   let responseText = '';
   
   try {
-    // First try Swirl search if it's available
-    const isSwirlAvailable = await SwirlSearchService.isAvailable();
+    console.log('Processing search query:', inputValue);
     
-    if (isSwirlAvailable) {
-      console.log('Using Swirl search engine for query');
-      try {
-        responseText = await SwirlSearchService.search(inputValue);
-      } catch (swirlError) {
-        console.error('Error with Swirl search, falling back to SearchService:', swirlError);
-        responseText = await SearchService.search(inputValue);
-      }
-    } else {
-      // If Swirl is not available, use the SearchService
+    // First try to get results from SearchService which prioritizes vector search
+    try {
       responseText = await SearchService.search(inputValue);
+      console.log('Got response from SearchService');
+    } catch (searchError) {
+      console.error('Error with SearchService, trying alternatives:', searchError);
+      
+      // If SearchService fails, try Swirl
+      const isSwirlAvailable = await SwirlSearchService.isAvailable();
+      if (isSwirlAvailable) {
+        console.log('Using Swirl search engine for query');
+        try {
+          responseText = await SwirlSearchService.search(inputValue);
+        } catch (swirlError) {
+          console.error('Error with Swirl search, falling back to HuggingChat:', swirlError);
+          responseText = await HuggingChatService.searchHuggingChat(inputValue);
+        }
+      } else {
+        // If Swirl is not available, use HuggingChat
+        responseText = await HuggingChatService.searchHuggingChat(inputValue);
+      }
     }
   } catch (error) {
-    console.error('Error with search services, falling back to HuggingChat:', error);
-    responseText = await HuggingChatService.searchHuggingChat(inputValue);
+    console.error('All search services failed, using local data:', error);
+    // Fall back to local data if all else fails
   }
   
+  // Check if we need to augment with local city data
   const detectedCity = detectCityInQuery(inputValue);
   
   if (detectedCity && isLocationOrEventQuery(inputValue)) {

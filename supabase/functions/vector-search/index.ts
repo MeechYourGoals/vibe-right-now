@@ -30,7 +30,7 @@ serve(async (req) => {
       );
     }
     
-    // Call Gemini API to emulate vector search
+    // Call Gemini API to emulate vector search with enhanced web search capabilities
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${GEMINI_API_KEY}`, {
       method: "POST",
       headers: {
@@ -41,9 +41,18 @@ serve(async (req) => {
           {
             role: "user",
             parts: [{ 
-              text: `Perform a semantic search for: "${query}". 
-              Return ONLY relevant venue and event information in a clear format with details about name, location, type, and other relevant information.
-              Format the results in a well-organized way. Focus on real venues and events.` 
+              text: `Please search the web for current information about: "${query}".
+              
+              Return detailed and up-to-date information about venues, events, activities, or places that match this query.
+              If it's about things to do in a location, include specific venue names, opening hours, and event schedules if available.
+              If it's about events, include dates, times, ticket information, and venue details.
+              If it's about a type of activity, provide specific locations where this can be done.
+              
+              Format your response in a clear, organized way with headers and sections as appropriate.
+              Focus only on real, verifiable places and events.
+              Include web references where relevant.
+              
+              Your goal is to provide the most helpful and accurate information possible about real places and events.` 
             }]
           }
         ],
