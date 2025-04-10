@@ -8,8 +8,9 @@ import PostMedia from "./PostMedia";
 import PostFooter from "./PostFooter";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { UserPlus, UserCheck, Users } from "lucide-react";
-import { deletePost, canDeleteUserPosts } from "@/utils/venue/postManagementUtils";
+import { UserPlus, UserCheck } from "lucide-react";
+import { deletePost } from "@/utils/venue/postManagementUtils";
+import UserDropdown from "@/components/venue/post-grid-item/UserDropdown";
 
 interface PostCardProps {
   post?: Post;
@@ -69,9 +70,11 @@ const PostCard: React.FC<PostCardProps> = ({
                       {locationPostCount} posts
                     </span>
                   )}
-                  <div className="flex items-center text-sm text-muted-foreground">
-                    <Users className="h-4 w-4 mr-1" />
-                    <span>{getUserCount(firstPost.location.id)} users this week</span>
+                  <div className="relative z-10">
+                    <UserDropdown 
+                      userCount={getUserCount(firstPost.location.id)} 
+                      post={firstPost}
+                    />
                   </div>
                 </div>
               </div>
@@ -173,6 +176,10 @@ const PostCard: React.FC<PostCardProps> = ({
         canDelete={canDelete && !isVenuePost}
         onDelete={handleDelete}
       />
+      
+      <div className="px-4 py-2 flex justify-end">
+        <UserDropdown userCount={getUserCount(post.location.id)} post={post} />
+      </div>
       
       <PostContent content={post.content} />
       

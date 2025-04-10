@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Link, useNavigate } from "react-router-dom";
 import { Post } from "@/types";
 import { deletePost } from "@/utils/venue/postManagementUtils";
@@ -9,7 +9,7 @@ import {
   PostMedia,
   PostOverlay
 } from './post-grid-item';
-import { Users } from 'lucide-react';
+import UserDropdown from './post-grid-item/UserDropdown';
 
 interface PostGridItemProps {
   post: Post;
@@ -79,10 +79,9 @@ const PostGridItem: React.FC<PostGridItemProps> = ({
         <DeleteButton onDelete={handleDeletePost} />
       )}
       
-      {/* Add user count overlay */}
-      <div className="absolute top-2 right-2 z-10 bg-black/60 rounded-full px-2 py-1 text-white text-xs flex items-center">
-        <Users className="h-3 w-3 mr-1" />
-        <span>{getUserCount()} users this week</span>
+      {/* Add user count dropdown */}
+      <div className="absolute top-2 right-2 z-10">
+        <UserDropdown userCount={getUserCount()} post={post} />
       </div>
       
       <PostOverlay

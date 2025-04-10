@@ -3,9 +3,10 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Heart, Users } from "lucide-react";
+import { Heart } from "lucide-react";
 import { Post } from "@/types";
 import { formatDistanceToNow } from "date-fns";
+import UserDropdown from "@/components/venue/post-grid-item/UserDropdown";
 
 interface PostGridItemProps {
   post: Post;
@@ -53,6 +54,11 @@ const PostGridItem = ({ post }: PostGridItemProps) => {
         </div>
       )}
       
+      {/* Add user count dropdown */}
+      <div className="absolute top-2 right-2 z-10">
+        <UserDropdown userCount={getUserCount()} post={post} />
+      </div>
+      
       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
         <div className="absolute bottom-0 left-0 right-0 p-3">
           <div className="flex items-center gap-2">
@@ -81,11 +87,6 @@ const PostGridItem = ({ post }: PostGridItemProps) => {
                 <Heart className={`h-4 w-4 ${liked ? 'fill-red-500 text-red-500' : ''}`} />
                 <span className="ml-1">{post.likes + (liked ? 1 : 0)}</span>
               </Button>
-              
-              <div className="flex items-center text-xs text-white">
-                <Users className="h-3 w-3 mr-1" />
-                <span>{getUserCount()} users this week</span>
-              </div>
             </div>
             
             <span className="text-xs text-white">
