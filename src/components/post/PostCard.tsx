@@ -9,24 +9,88 @@ import PostFooter from "./PostFooter";
 import { deletePost, canDeleteUserPosts } from "@/utils/venue/postManagementUtils";
 
 interface PostCardProps {
-  post: Post;
-  comments: Comment[];
+  post?: Post;
+  posts?: Post[];
+  comments?: Comment[];
+  locationPostCount?: number;
   isDetailView?: boolean;
   canDelete?: boolean;
   venue?: Location;
   onPostDeleted?: (postId: string) => void;
+  getComments?: (postId: string) => Comment[];
 }
 
 const PostCard: React.FC<PostCardProps> = ({ 
   post, 
-  comments, 
+  posts,
+  comments = [],
+  locationPostCount,
   isDetailView = false,
   canDelete = false,
   venue,
-  onPostDeleted
+  onPostDeleted,
+  getComments
 }) => {
   const [isDeleted, setIsDeleted] = useState(false);
-
+  
+  // Handle multiple posts mode (used in feed)
+  if (posts && posts.length > 0 && getComments) {
+    const firstPost = posts[0];
+    
+    return (
+      <Card className="overflow-hidden">
+        <div className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <h3 className="text-lg font-semibold">{firstPost.location.name}</h3>
+              {locationPostCount !== undefined && (
+                <span className="ml-2 text-sm text-muted-foreground">
+                  {locationPostCount} posts
+                </span>
+              )}
+            </div>
+          </div>
+          <p className="text-sm text-muted-foreground mt-1">
+            {firstPost.location.city}, {firstPost.location.state}
+          </p>
+        </div>
+        
+        {posts.map(post => (
+          <div key={post.id} className="border-t">
+            <PostHeader 
+              user={post.user} 
+              timestamp={String(post.timestamp)}
+              location={post.location}
+              isPinned={post.isPinned}
+              isVenuePost={post.isVenuePost}
+              canDelete={canDelete}
+              onDelete={() => {}}
+            />
+            
+            <div className="px-4">
+              <PostContent content={post.content} />
+              
+              {post.media && post.media.length > 0 && (
+                <PostMedia media={post.media} />
+              )}
+              
+              <PostFooter 
+                post={post} 
+                comments={getComments(post.id)} 
+                isDetailView={false} 
+              />
+            </div>
+          </div>
+        ))}
+      </Card>
+    );
+  }
+  
+  // Single post mode
+  if (!post) {
+    return null; // Don't render if no post is provided
+  }
+  
   // Don't render if the post has been deleted
   if (isDeleted) {
     return null;
@@ -47,7 +111,7 @@ const PostCard: React.FC<PostCardProps> = ({
     <Card className="overflow-hidden">
       <PostHeader 
         user={post.user} 
-        timestamp={post.timestamp} 
+        timestamp={String(post.timestamp)} 
         location={post.location}
         isPinned={post.isPinned}
         isVenuePost={isVenuePost}

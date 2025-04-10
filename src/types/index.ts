@@ -56,6 +56,7 @@ export interface Post {
   likes: number;
   comments: number;
   isPinned?: boolean;
+  isVenuePost?: boolean;
 }
 
 export interface Media {
@@ -78,7 +79,7 @@ export interface VenueInsights {
     date: string;
     count: number;
   }[];
-  mediaUploads: number; // Changed from object to number to match expected type
+  mediaUploads: number;
 }
 
 export interface EventItem {

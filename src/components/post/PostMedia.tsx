@@ -1,81 +1,74 @@
 
-import React from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { Post } from "@/types";
+import React, { useState } from "react";
+import { Media } from "@/types";
+import { ArrowLeft, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface PostMediaProps {
-  posts: Post[];
-  isSinglePost: boolean;
+  media: Media[];
 }
 
-interface MediaItem {
-  postId: string;
-  media: Post['media'][0];
-  user: Post['user'];
-}
+const PostMedia: React.FC<PostMediaProps> = ({ media }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const hasMultipleMedia = media.length > 1;
 
-const PostMedia: React.FC<PostMediaProps> = ({ posts, isSinglePost }) => {
-  const getAllMedia = () => {
-    const allMedia: MediaItem[] = [];
-    
-    posts.forEach(post => {
-      post.media.forEach(mediaItem => {
-        allMedia.push({
-          postId: post.id,
-          media: mediaItem,
-          user: post.user
-        });
-      });
-    });
-    
-    return allMedia;
+  const nextMedia = () => {
+    setCurrentIndex((prev) => (prev + 1) % media.length);
   };
 
-  const allMedia = getAllMedia();
-  
+  const prevMedia = () => {
+    setCurrentIndex((prev) => (prev - 1 + media.length) % media.length);
+  };
+
+  const currentMedia = media[currentIndex];
+
   return (
-    <div className="mb-4">
-      <div className="relative">
-        <Carousel className="w-full">
-          <CarouselContent>
-            {allMedia.map((item, index) => (
-              <CarouselItem 
-                key={`${item.postId}-${index}`} 
-                className={isSinglePost ? "basis-full" : "md:basis-1/2 lg:basis-1/3"}
-              >
-                <div className="relative group rounded-lg overflow-hidden aspect-square">
-                  {item.media.type === "image" ? (
-                    <img
-                      src={item.media.url}
-                      alt={`Post media`}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <video
-                      src={item.media.url}
-                      controls
-                      className="w-full h-full object-cover"
-                      poster="https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                    />
-                  )}
-                  <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <div className="flex flex-col items-center text-white">
-                      <Avatar className="h-8 w-8 mb-1 border-2 border-white">
-                        <AvatarImage src={item.user.avatar} alt={item.user.name} />
-                        <AvatarFallback>{item.user.name.charAt(0)}</AvatarFallback>
-                      </Avatar>
-                      <span className="text-xs">@{item.user.username}</span>
-                    </div>
-                  </div>
-                </div>
-              </CarouselItem>
+    <div className="relative mb-2">
+      {currentMedia.type === "image" ? (
+        <img
+          src={currentMedia.url}
+          alt="Post media"
+          className="w-full object-cover max-h-[500px]"
+        />
+      ) : (
+        <video
+          src={currentMedia.url}
+          controls
+          className="w-full max-h-[500px]"
+          poster={currentMedia.thumbnail}
+        />
+      )}
+
+      {hasMultipleMedia && (
+        <>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/20 text-white hover:bg-black/40 rounded-full h-8 w-8"
+            onClick={prevMedia}
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/20 text-white hover:bg-black/40 rounded-full h-8 w-8"
+            onClick={nextMedia}
+          >
+            <ArrowRight className="h-4 w-4" />
+          </Button>
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+            {media.map((_, index) => (
+              <div
+                key={index}
+                className={`h-1.5 rounded-full ${
+                  index === currentIndex ? "w-4 bg-white" : "w-1.5 bg-white/50"
+                }`}
+              />
             ))}
-          </CarouselContent>
-          <CarouselPrevious className="left-2" />
-          <CarouselNext className="right-2" />
-        </Carousel>
-      </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };
