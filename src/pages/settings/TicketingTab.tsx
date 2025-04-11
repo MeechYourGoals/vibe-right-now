@@ -23,7 +23,7 @@ const TicketingTab = ({ onConnectPlatform }: TicketingTabProps) => {
       <CardContent>
         <div className="space-y-6">
           {TICKETING_PLATFORMS.map(platform => (
-            <div key={platform.id} className="flex items-center justify-between">
+            <div key={platform.id} className="flex items-center justify-between border p-3 rounded-md">
               <div>
                 <h3 className="font-medium">{platform.name}</h3>
                 <p className="text-sm text-muted-foreground">

@@ -114,6 +114,111 @@ const PreferencesTab = ({
       <h2 className="text-xl font-semibold mb-4">Preferences</h2>
       
       <div className="space-y-6">
+        {/* User Preferences Section - Always shown when not in venue mode */}
+        {!isVenueMode && (
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <h3 className="text-lg font-medium">My Preferences</h3>
+              <p className="text-sm text-muted-foreground">
+                Select tags that match your personal vibe preferences. These will help us recommend venues that match your style.
+              </p>
+              
+              <div className="space-y-2 mt-4">
+                <Label>Selected Preferences {selectedTags.length > 0 && `(${selectedTags.length})`}</Label>
+                <div className="flex flex-wrap gap-2 min-h-10 p-2 border rounded-md bg-background">
+                  {selectedTags.length === 0 ? (
+                    <span className="text-sm text-muted-foreground">No preferences selected</span>
+                  ) : (
+                    selectedTags.map(tag => (
+                      <Badge key={tag} variant="secondary" className="flex items-center gap-1">
+                        {tag}
+                        <X 
+                          className="h-3 w-3 cursor-pointer" 
+                          onClick={() => handleTagRemove(tag)}
+                        />
+                      </Badge>
+                    ))
+                  )}
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="new-tag">Add Custom Preference</Label>
+                <div className="flex gap-2">
+                  <Input 
+                    id="new-tag"
+                    value={newTag}
+                    onChange={(e) => setNewTag(e.target.value)}
+                    placeholder="Enter a custom preference"
+                    className="flex-1"
+                  />
+                  <Button 
+                    onClick={handleAddCustomTag}
+                    disabled={!newTag.trim()}
+                    size="icon"
+                  >
+                    <PlusCircle className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              
+              {/* Tag Categories */}
+              <div className="space-y-4 mt-4">
+                <Label>Popular Preferences</Label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {PREFERENCE_CATEGORIES.map(category => (
+                    <div key={category.id} className="space-y-2">
+                      <h4 className="text-sm font-medium flex items-center">
+                        <category.icon className="h-4 w-4 mr-2" />
+                        {category.name}
+                      </h4>
+                      <div className="flex flex-wrap gap-2">
+                        {PREFERENCE_TAGS.slice(0, 5).map(tag => (
+                          <Badge 
+                            key={`${category.id}-${tag}`} 
+                            variant="outline" 
+                            className={`cursor-pointer hover:bg-primary/10 ${
+                              selectedTags.includes(tag) ? "bg-primary/20 border-primary" : ""
+                            }`}
+                            onClick={() => handleTagSelect(tag)}
+                          >
+                            {selectedTags.includes(tag) && (
+                              <Check className="h-3 w-3 mr-1" />
+                            )}
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              {/* All Available Tags */}
+              <div className="space-y-2 mt-4">
+                <Label>All Available Preferences</Label>
+                <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto p-2 border rounded-md bg-background">
+                  {PREFERENCE_TAGS.map(tag => (
+                    <Badge 
+                      key={tag} 
+                      variant="outline" 
+                      className={`cursor-pointer hover:bg-primary/10 ${
+                        selectedTags.includes(tag) ? "bg-primary/20 border-primary" : ""
+                      }`}
+                      onClick={() => handleTagSelect(tag)}
+                    >
+                      {selectedTags.includes(tag) && (
+                        <Check className="h-3 w-3 mr-1" />
+                      )}
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        
         {isVenueMode && (
           <div className="space-y-4">
             <div className="flex justify-between items-center">

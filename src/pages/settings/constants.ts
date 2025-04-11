@@ -20,6 +20,8 @@ export const TICKETING_PLATFORMS = [
   { name: "EventBrite", id: "eventbrite" },
   { name: "OpenTable", id: "opentable" },
   { name: "Partiful", id: "partiful" },
+  { name: "Gametime", id: "gametime" },
+  { name: "SeatGeek", id: "seatgeek" },
   { name: "Other", id: "other" }
 ];
 
