@@ -16,7 +16,7 @@ serve(async (req) => {
   }
 
   try {
-    const { prompt, mode, history, searchMode } = await req.json();
+    const { prompt, mode, history, searchMode, categories } = await req.json();
     
     // Build conversation history in Vertex AI format
     const contents = [];
@@ -34,26 +34,51 @@ serve(async (req) => {
     } else if (searchMode) {
       contents.push({
         role: "USER",
-        parts: [{ text: "You are VeRNon, a venue and event discovery assistant. You provide ONLY real, factual information about venues, events, and places. Never make up information. If you don't know something, say so clearly. Always include real venue names, addresses, and other factual details when possible." }]
+        parts: [{ text: "You are VeRNon, a venue and event discovery assistant. You provide ONLY real, factual information about venues, events, and places. Never make up information. If you don't know something, say so clearly. Always include real venue names, addresses, and other factual details when possible. Always format your responses with markdown and include hyperlinks to official websites or to internal pages using the format [Venue Name](/venue/venue-id) for internal links." }]
       });
       contents.push({
         role: "MODEL",
-        parts: [{ text: "I am VeRNon, a venue and event discovery assistant. I provide only real, factual information about venues, events, and places. I will never make up information and will clearly state when I don't know something." }]
+        parts: [{ text: "I am VeRNon, a venue and event discovery assistant. I provide only real, factual information about venues, events, and places. I will never make up information and will clearly state when I don't know something. I'll format my responses with markdown and include hyperlinks." }]
       });
       
       // For search mode, add a special prompt to get real information
+      let enhancedPrompt = prompt;
+      
+      // Incorporate categories if available
+      if (categories && categories.length > 0) {
+        const categoryContext = categories.join(', ');
+        enhancedPrompt = `${prompt} (Categories: ${categoryContext})`;
+      }
+      
       contents.push({
         role: "USER",
-        parts: [{ text: `Search for real factual information about: "${prompt}". Include real venue names, addresses, opening hours, and other specific details. Only provide information you're confident is factual. If you don't know, say so clearly.` }]
+        parts: [{ text: `Search for real factual information about: "${enhancedPrompt}". Include real venue names, addresses, opening hours, and other specific details. Format your response with markdown, including headers and bulleted lists. IMPORTANT: Present information for venues in this format:
+
+## [Venue Name](venue official website URL) - Category
+* 📍 Address
+* ⏰ Hours
+* 💲 Price range
+* 📞 Phone
+* 🌐 [View on VRN](/venue/venue-id)
+
+For events, use this format:
+## [Event Name](event official website URL)
+* 📅 Date and time
+* 📍 Location
+* 💲 Ticket prices
+* 🎟️ [Get Tickets](ticket URL)
+* 🌐 [View on VRN](/event/event-id)
+
+Only provide information you're confident is factual. If you don't know, say so clearly.` }]
       });
     } else {
       contents.push({
         role: "USER",
-        parts: [{ text: "You are VeRNon, a venue and event discovery assistant. Help users find venues, events, and local attractions based on their preferences and location." }]
+        parts: [{ text: "You are VeRNon, a venue and event discovery assistant. Help users find venues, events, and local attractions based on their preferences and location. Always format your responses with markdown and include hyperlinks to venues and events when possible." }]
       });
       contents.push({
         role: "MODEL",
-        parts: [{ text: "I am VeRNon, a venue and event discovery assistant. I help users find venues, events, and local attractions based on their preferences and location." }]
+        parts: [{ text: "I am VeRNon, a venue and event discovery assistant. I help users find venues, events, and local attractions based on their preferences and location. I'll format my responses with markdown and include hyperlinks." }]
       });
     }
     
@@ -109,8 +134,11 @@ serve(async (req) => {
     // Extract the response text
     const responseText = data.candidates[0].content.parts[0].text;
     
+    // Add hyperlinks to the Explore page for any locations or events mentioned
+    const enhancedResponse = addExplorePageLinks(responseText, prompt);
+    
     return new Response(
-      JSON.stringify({ text: responseText }),
+      JSON.stringify({ text: enhancedResponse }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
@@ -121,3 +149,13 @@ serve(async (req) => {
     );
   }
 });
+
+/**
+ * Add hyperlinks to the Explore page for locations/events mentioned in the text
+ */
+function addExplorePageLinks(text: string, originalQuery: string): string {
+  // Add a link to explore all results at the bottom
+  const exploreAllLink = `\n\n---\n\n**[Explore all results on the map](/explore?q=${encodeURIComponent(originalQuery)})**`;
+  
+  return text + exploreAllLink;
+}

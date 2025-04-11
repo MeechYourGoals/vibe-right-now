@@ -1,73 +1,60 @@
 
-import { cityCoordinates } from '@/utils/locations';
-import { getLocationsByCity, getTrendingLocationsForCity } from '@/mock/cityLocations';
-import { updateTrendingLocations } from '@/utils/trendingLocationsUpdater';
-import { generateLocationResponse } from '../../locationResponseGenerator';
-import { cleanResponseText } from '../../responseFormatter';
-import { detectCityInQuery, detectCategoryInQuery, isLocationOrEventQuery } from '../../locationResponseGenerator';
+import { SimpleSearchService } from '@/services/search/SimpleSearchService';
 
 /**
- * Provides local data fallback for search queries
+ * Strategy for fetching information from local mock data
+ * Used as a fallback when other strategies fail
  */
 export const LocalDataStrategy = {
   /**
-   * Augments search results with local city data when external services fail
+   * Check if the query can be handled with local data
    */
-  augmentWithLocalData(
-    inputValue: string, 
-    existingResponse: string, 
-    paginationState: Record<string, number>
-  ): string {
-    // Check if we need to augment with local city data
-    const detectedCity = detectCityInQuery(inputValue);
-    
-    if (detectedCity && isLocationOrEventQuery(inputValue)) {
-      const cityInfo = cityCoordinates[detectedCity];
-      if (cityInfo) {
-        let cityLocations = getLocationsByCity(cityInfo.name);
-        
-        const detectedCategory = detectCategoryInQuery(inputValue);
-        if (detectedCategory && cityLocations.length > 0) {
-          if (detectedCategory === "sports") {
-            cityLocations = cityLocations.filter(loc => loc.type === "sports");
-          } else if (detectedCategory === "nightlife") {
-            cityLocations = cityLocations.filter(loc => loc.type === "bar");
-          } else if (detectedCategory === "dining") {
-            cityLocations = cityLocations.filter(loc => loc.type === "restaurant");
-          } else if (detectedCategory === "concerts") {
-            cityLocations = cityLocations.filter(loc => 
-              loc.name.toLowerCase().includes("concert") || 
-              loc.name.toLowerCase().includes("music") ||
-              (loc.type === "event" && loc.name.toLowerCase().includes("festival"))
-            );
-          } else if (detectedCategory === "events") {
-            cityLocations = cityLocations.filter(loc => loc.type === "event");
-          } else if (detectedCategory === "attractions") {
-            cityLocations = cityLocations.filter(loc => loc.type === "attraction");
-          }
-        }
-        
-        if (cityLocations.length > 0) {
-          updateTrendingLocations(cityInfo.name, getTrendingLocationsForCity(cityInfo.name));
-          
-          let combinedResponse = typeof existingResponse === 'string' ? existingResponse : '';
-          
-          if (!combinedResponse.includes("Nightlife:") && !combinedResponse.includes("Dining:")) {
-            combinedResponse = `${combinedResponse}\n\n${generateLocationResponse(cityInfo.name, cityLocations, paginationState)}`;
-          }
-          
-          return cleanResponseText(combinedResponse);
-        }
-      }
-    }
-    
-    return existingResponse;
+  canHandleLocalQuery(inputValue: string): boolean {
+    // Check if query contains keywords that we have local data for
+    const localDataKeywords = /city|travel|visitor|location|venue|event|bar|restaurant|nightclub|concert/i;
+    return localDataKeywords.test(inputValue);
   },
   
   /**
-   * Creates a fallback message when all other strategies fail
+   * Handle search using local data sources
+   */
+  async handleLocalSearch(
+    inputValue: string, 
+    paginationState: Record<string, number> = {}
+  ): Promise<string> {
+    console.log('Using local data strategy for query:', inputValue);
+    
+    // Try to find city information in our local data
+    const cityInfo = await SimpleSearchService.searchForCityInfo(inputValue);
+    if (cityInfo && cityInfo.length > 50) {
+      return cityInfo;
+    }
+    
+    // If no specific city info, return a general response
+    return this.augmentWithLocalData(inputValue, '', paginationState);
+  },
+  
+  /**
+   * Augment an existing response with additional local data
+   */
+  augmentWithLocalData(
+    inputValue: string, 
+    existingResponse: string,
+    paginationState: Record<string, number>
+  ): string {
+    // If we already have a substantial response, return it
+    if (existingResponse && existingResponse.length > 100) {
+      return existingResponse;
+    }
+    
+    // Generate a generic response based on available local data
+    return `Based on our local information, I can help you discover interesting venues related to "${inputValue}". Try being more specific about what you're looking for, or explore our featured locations.`;
+  },
+  
+  /**
+   * Get ultimate fallback when no other strategies work
    */
   getUltimateFallback(inputValue: string): string {
-    return "I'm sorry, I couldn't find specific information about that location or request. Could you try asking in a different way or about a different location?\n\nYou can also try using our [Explore page](/explore) directly to browse venues and events.";
+    return `I don't have specific information about "${inputValue}". Try searching for specific cities, venues, or events.`;
   }
 };
