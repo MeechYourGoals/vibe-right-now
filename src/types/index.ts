@@ -1,3 +1,4 @@
+
 export interface Location {
   id: string;
   name: string;
@@ -16,4 +17,80 @@ export interface Location {
   website?: string;
   photos?: any[];
   tags?: string[]; // Added tags property for location
+  verified?: boolean; // Added verified property
+  vibes?: string[]; // Added vibes property
+}
+
+// Add these interfaces to fix the build errors
+export interface BusinessHours {
+  monday: { open: string; close: string };
+  tuesday: { open: string; close: string };
+  wednesday: { open: string; close: string };
+  thursday: { open: string; close: string };
+  friday: { open: string; close: string };
+  saturday: { open: string; close: string };
+  sunday: { open: string; close: string };
+  [key: string]: { open: string; close: string };
+}
+
+export interface User {
+  id: string;
+  username: string;
+  name: string;
+  avatar: string;
+  bio?: string;
+  followers?: number;
+  following?: number;
+  verified?: boolean;
+  location?: string;
+  website?: string;
+  joinDate?: string;
+}
+
+export interface Comment {
+  id: string;
+  user: User;
+  text: string;
+  timestamp: string;
+  likes: number;
+}
+
+export interface Post {
+  id: string;
+  user: User;
+  location?: Location;
+  text?: string;
+  media?: Media[];
+  timestamp: string;
+  likes: number;
+  comments: Comment[];
+  saved: boolean;
+}
+
+export interface Media {
+  id: string;
+  type: 'image' | 'video';
+  url: string;
+  thumbnail?: string;
+}
+
+export interface VenueInsights {
+  id: string;
+  venueName: string;
+  totalVisits: number;
+  uniqueVisitors: number;
+  averageRating: number;
+  topReasons: Array<{reason: string; count: number}>;
+  demographics: {
+    ageGroups: {[key: string]: number};
+    gender: {[key: string]: number};
+  };
+  visitsByDay: {[key: string]: number};
+  visitsByHour: {[key: string]: number};
+  competitorAnalysis?: Array<{
+    name: string;
+    visitors: number;
+    rating: number;
+    distance: number;
+  }>;
 }

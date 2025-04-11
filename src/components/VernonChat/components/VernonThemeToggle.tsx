@@ -13,7 +13,11 @@ const VernonThemeToggle: React.FC<VernonThemeToggleProps> = ({ theme, toggleThem
     <Button 
       variant="outline" 
       className="h-12 w-12 rounded-full" 
-      onClick={toggleTheme}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleTheme();
+      }}
       title={theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
     >
       {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}

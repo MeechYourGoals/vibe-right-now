@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useIsMobile } from "@/hooks/use-mobile";
 import UserPoints from "@/components/user-points";
+import NotificationsDropdown from "@/components/notifications/NotificationsDropdown";
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -71,7 +72,7 @@ const Header = () => {
 
           <div className="flex flex-1 items-center justify-end space-x-2">
             <UserPoints />
-            <ThemeToggle />
+            <NotificationsDropdown />
 
             {!isMobile && (
               <nav className="flex items-center space-x-2">
@@ -148,6 +149,12 @@ const Header = () => {
                         <BarChart className="mr-2 h-4 w-4" />
                         <span>Data Insights</span>
                       </Link>
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem>
+                      <ThemeToggle />
+                      <span className="ml-2">Theme</span>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
