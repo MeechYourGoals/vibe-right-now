@@ -1,6 +1,7 @@
+
 import { User } from "@/types";
 
-export const mockUsers: User[] = [
+export const regularUsers: User[] = [
   {
     id: "1",
     username: "sarah_vibes",
@@ -165,56 +166,6 @@ export const mockUsers: User[] = [
     username: "music_festival",
     name: "Jordan Rivers",
     avatar: "https://randomuser.me/api/portraits/men/13.jpg",
-    isPrivate: false,
-  },
-  {
-    id: "24",
-    username: "kimkardashian",
-    name: "Kim Kardashian",
-    avatar: "https://randomuser.me/api/portraits/women/14.jpg",
-    isCelebrity: true,
-    verified: true,
-    bio: "Reality TV star, entrepreneur, and fashion icon. Creating vibes everywhere. SKIMS & KKW Beauty founder.",
-    isPrivate: false,
-  },
-  {
-    id: "25",
-    username: "champagnepapi",
-    name: "Drake",
-    avatar: "https://randomuser.me/api/portraits/men/14.jpg",
-    isCelebrity: true,
-    verified: true,
-    bio: "Grammy-winning artist. OVO Sound. Discovering the best vibes across the globe.",
-    isPrivate: false,
-  },
-  {
-    id: "26",
-    username: "keithlee",
-    name: "Keith Lee",
-    avatar: "https://randomuser.me/api/portraits/men/15.jpg",
-    isCelebrity: true,
-    verified: true,
-    bio: "Food critic extraordinaire. Helping you find the best food spots in every city.",
-    isPrivate: false,
-  },
-  {
-    id: "27",
-    username: "ishowspeed",
-    name: "iShowSpeed",
-    avatar: "https://randomuser.me/api/portraits/men/16.jpg",
-    isCelebrity: true,
-    verified: true,
-    bio: "Entertainer and content creator. Finding the most energetic vibes around the world!",
-    isPrivate: false,
-  },
-  {
-    id: "28",
-    username: "sydney_sweeney",
-    name: "Sydney Sweeney",
-    avatar: "https://randomuser.me/api/portraits/women/15.jpg",
-    isCelebrity: true,
-    verified: true,
-    bio: "Actress, producer, and adventure seeker. Euphoria & White Lotus star. Sharing my favorite places.",
     isPrivate: false,
   },
 ];

@@ -9,23 +9,11 @@ import NearbyVibesMap from "@/components/NearbyVibesMap";
 import RecommendedForYou from "@/components/RecommendedForYou";
 import VernonChat from "@/components/VernonChat";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { getFeaturedUsers } from "@/mock/users";
 
 const Index = () => {
   const isMobile = useIsMobile();
-
-  // Featured users that will appear in dropdown suggestions and other prominent places
-  const featuredUsers = [
-    "sarah_vibes",          // Sarah Miller - regular user with nice profile
-    "jay_experiences",      // Jay Johnson - photographer and coffee enthusiast
-    "adventure_alex",       // Alex Kim - adrenaline junkie
-    "marco_travels",        // Marco Williams - digital nomad
-    "local_explorer",       // Jamie Chen - New York local expert
-    "kimkardashian",        // Celebrity profiles
-    "champagnepapi",        // Drake
-    "sydney_sweeney",       // Sydney Sweeney
-    "ishowspeed",           // IShowSpeed
-    "keithlee"              // Keith Lee - food critic
-  ];
+  const featuredUsers = getFeaturedUsers();
 
   return (
     <Layout>

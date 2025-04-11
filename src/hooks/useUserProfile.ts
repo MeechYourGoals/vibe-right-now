@@ -1,7 +1,7 @@
-
 import { useState, useEffect } from "react";
 import { User, Post, Location, Comment } from "@/types";
 import { mockUsers, mockPosts, mockComments, mockLocations } from "@/mock/data";
+import { hashString, generateUserBio } from "@/mock/users";
 
 export const useUserProfile = (username: string | undefined) => {
   const [user, setUser] = useState<User | null>(null);
@@ -91,34 +91,7 @@ export const useUserProfile = (username: string | undefined) => {
 
   const getUserBio = () => {
     if (!user) return "";
-    
-    if (user.bio) {
-      return user.bio;
-    }
-    
-    // Generate bios based on username patterns as fallback
-    if (user.username.includes("food") || user.username.includes("chef") || user.username.includes("coffee")) {
-      return "Foodie exploring the best culinary experiences around the world. Always on the hunt for hidden gems and authentic flavors. 🍜🍷✨";
-    } else if (user.username.includes("travel") || user.username.includes("explorer") || user.username.includes("wanderer")) {
-      return "Travel enthusiast with a passion for discovering new cultures and hidden spots. 30 countries and counting! 🌍✈️🧳";
-    } else if (user.username.includes("party") || user.username.includes("club") || user.username.includes("fest")) {
-      return "Nightlife connoisseur and music lover. Finding the best clubs, festivals, and dance floors wherever I go. 🎵🥂🕺";
-    } else if (user.username.includes("sport") || user.username.includes("fitness")) {
-      return "Sports fanatic and fitness enthusiast. Always looking for the next adrenaline rush and active experiences. 🏈🏀⚽";
-    } else {
-      return "Always seeking the next great vibe! Foodie, music lover, and adventure seeker exploring one city at a time. 🌮🎵✨";
-    }
-  };
-
-  // Simple string hash function for deterministic selection
-  const hashString = (str: string): number => {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
-      hash = hash & hash; // Convert to 32bit integer
-    }
-    return Math.abs(hash);
+    return generateUserBio(user);
   };
 
   // Determine if user profile is private (explicitly set or based on ID pattern)
