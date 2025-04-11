@@ -1,75 +1,41 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Suspense, lazy, useEffect } from "react";
-import { Toaster } from "@/components/ui/sonner";
-import { ThemeProvider } from "@/components/ThemeProvider";
-import VernonNext from '@/components/VernonNext';
 
-// Lazy-loaded components
-const Index = lazy(() => import("@/pages/Index"));
-const Explore = lazy(() => import("@/pages/Explore"));
-const MyPlaces = lazy(() => import("@/pages/MyPlaces"));
-const Settings = lazy(() => import("@/pages/Settings"));
-const NotFound = lazy(() => import("@/pages/NotFound"));
-const UserPoints = lazy(() => import("@/pages/UserPoints"));
-const PinnedVibes = lazy(() => import("@/pages/PinnedVibes"));
-const VenueProfile = lazy(() => import("@/pages/VenueProfile"));
-const ProfileBio = lazy(() => import("@/pages/ProfileBio"));
-const UserProfile = lazy(() => import("@/pages/UserProfile"));
-const DataInsights = lazy(() => import("@/pages/DataInsights"));
-const TripDetails = lazy(() => import("@/components/places/TripDetails"));
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Home from "@/pages/Home";
+import Explore from "@/pages/Explore";
+import Profile from "@/pages/Profile";
+import MyPlaces from "@/pages/MyPlaces";
+import Pinned from "@/pages/Pinned";
+import Points from "@/pages/Points";
+import Settings from "@/pages/Settings";
+import VenueProfile from "@/pages/VenueProfile";
+import Header from "@/components/Header";
+import { ThemeProvider } from "@/components/ThemeProvider";
+import { Toaster } from "@/components/ui/toaster";
+import VernonChat from "@/components/VernonChat";
+import CameraButton from "@/components/CameraButton";
+import LocationSearch from "@/components/LocationSearch";
 
 function App() {
-  // Add a useEffect to handle mobile view adjustments
-  useEffect(() => {
-    // Set viewport meta tag to ensure proper scaling on mobile devices
-    const viewportMeta = document.querySelector('meta[name="viewport"]');
-    if (viewportMeta) {
-      viewportMeta.setAttribute(
-        'content',
-        'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover'
-      );
-    }
-    
-    // Add a class to the body for mobile-specific styling if needed
-    const handleResize = () => {
-      if (window.innerWidth < 768) {
-        document.body.classList.add('is-mobile');
-      } else {
-        document.body.classList.remove('is-mobile');
-      }
-    };
-    
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
-
   return (
-    <ThemeProvider defaultTheme="dark" storageKey="vibe-theme">
+    <ThemeProvider defaultTheme="system" storageKey="vibe-ui-theme">
       <BrowserRouter>
-        <Suspense fallback={<div className="h-screen w-screen flex items-center justify-center">Loading...</div>}>
+        <div className="min-h-screen bg-background text-foreground">
+          <Header />
           <Routes>
-            <Route path="/" element={<Index />} />
+            <Route path="/" element={<Home />} />
             <Route path="/explore" element={<Explore />} />
-            <Route path="/explore/:city" element={<Explore />} />
+            <Route path="/profile" element={<Profile />} />
             <Route path="/my-places" element={<MyPlaces />} />
-            <Route path="/my-places/trip/:tripId" element={<TripDetails />} />
-            <Route path="/trip/:tripId" element={<TripDetails />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/points" element={<UserPoints />} />
-            <Route path="/pinned" element={<PinnedVibes />} />
+            <Route path="/pinned" element={<Pinned />} />
+            <Route path="/points" element={<Points />} />
+            <Route path="/settings/*" element={<Settings />} />
             <Route path="/venue/:id" element={<VenueProfile />} />
-            <Route path="/profile" element={<ProfileBio />} />
-            <Route path="/user/:username" element={<UserProfile />} />
-            <Route path="/data-insights" element={<DataInsights />} />
-            <Route path="*" element={<NotFound />} />
           </Routes>
-        </Suspense>
-        <VernonNext />
-        <Toaster />
+          <VernonChat />
+          <CameraButton />
+          <LocationSearch />
+          <Toaster />
+        </div>
       </BrowserRouter>
     </ThemeProvider>
   );

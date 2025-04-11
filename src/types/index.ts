@@ -27,7 +27,7 @@ export interface Location {
   openNow?: boolean; // Flag for venues currently open
 }
 
-// Add these interfaces to fix the build errors
+// Modified BusinessHours interface to fix type errors
 export interface BusinessHours {
   monday: { open: string; close: string };
   tuesday: { open: string; close: string };
@@ -55,15 +55,16 @@ export interface User {
   isCelebrity?: boolean; // Added to fix type errors
 }
 
+// Updated Comment interface to include both text and content fields
 export interface Comment {
   id: string;
   user: User;
   text: string;
+  content?: string;
   timestamp: string;
   likes: number;
-  postId?: string; // Added to fix type errors
-  content?: string; // Added to fix type errors
-  vibedHere?: boolean; // Added to fix type errors
+  postId?: string;
+  vibedHere?: boolean;
 }
 
 export interface Post {
@@ -82,6 +83,7 @@ export interface Post {
   expiresAt?: string; // Added to fix type errors
 }
 
+// Updated Media interface to ensure id is always included
 export interface Media {
   id: string;
   type: 'image' | 'video';
@@ -112,4 +114,5 @@ export interface VenueInsights {
   checkInCount?: number; // Added to fix type errors
   receiptUploads?: number; // Added to fix type errors
   discountRedemptions?: number; // Added to fix type errors
+  popularHours?: {[key: string]: number}; // Added to fix type errors
 }

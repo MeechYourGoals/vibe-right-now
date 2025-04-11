@@ -1,5 +1,5 @@
-
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import ChatButton from './ChatButton';
 import ChatWindow from './ChatWindow';
 import { useTheme } from '@/components/ThemeProvider';
@@ -138,6 +138,21 @@ const VernonChat = () => {
     setIntroAttempted(false); // Reset intro state when opening
   };
   
+  // Open chat if not already open and start listening
+  const handleOpenAndListen = () => {
+    if (!isOpen) {
+      setIsOpen(true);
+      // Wait for chat to fully open before starting listening
+      setTimeout(() => {
+        if (!isListening) {
+          toggleListening();
+        }
+      }, 300);
+    } else if (!isListening) {
+      toggleListening();
+    }
+  };
+  
   if (!isOpen) {
     return (
       <div className="fixed left-6 bottom-6 flex flex-col gap-2">
@@ -145,82 +160,60 @@ const VernonChat = () => {
           isProPlan={isProPlan}
           handleOpenChat={handleOpenChat}
         />
-        <ChatButton onClick={() => handleOpenChat(false)} />
+        
+        <motion.div
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <ChatButton onClick={() => handleOpenAndListen()} />
+        </motion.div>
+        
         <VernonThemeToggle theme={theme} toggleTheme={toggleTheme} />
       </div>
     );
   }
   
   return (
-    <VernonChatWindow
-      isMinimized={isMinimized}
-      isVenueMode={isVenueMode}
-      toggleMinimize={toggleMinimize}
-      closeChat={closeChat}
-      toggleVenueMode={toggleVenueMode}
-      isModelLoading={isModelLoading}
-      messages={messages}
-      isSpeaking={isSpeaking}
-      isListening={isListening}
-      isProcessing={isProcessing}
-      transcript={transcript}
-      interimTranscript={interimTranscript}
-      toggleListening={toggleListening}
-      sendTextMessage={sendTextMessage}
-    />
-  );
-};
-
-// Extracted VernonChatWindow component
-const VernonChatWindow = ({
-  isMinimized,
-  isVenueMode,
-  toggleMinimize,
-  closeChat,
-  toggleVenueMode,
-  isModelLoading,
-  messages,
-  isSpeaking,
-  isListening,
-  isProcessing,
-  transcript,
-  interimTranscript,
-  toggleListening,
-  sendTextMessage
-}) => {
-  return (
-    <div 
-      className={`fixed left-6 bottom-32 bg-card border rounded-lg shadow-lg transition-all duration-200 z-40
-      ${isMinimized ? 'w-64 h-12' : 'w-80 h-96'}
-      ${isVenueMode ? 'border-amber-300' : 'border-primary-100'}`}
+    <motion.div 
+      className={`fixed left-6 bottom-6 z-40 max-h-[85vh] w-80 sm:w-96 overflow-hidden shadow-2xl rounded-lg border ${
+        isVenueMode 
+          ? 'border-amber-300 shadow-amber-200/20 dark:shadow-amber-800/10' 
+          : 'border-blue-300/30 shadow-blue-200/30 dark:shadow-blue-900/20'
+      }`}
+      initial={{ opacity: 0, y: 20, scale: 0.9 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: 20, scale: 0.9 }}
+      transition={{ duration: 0.2 }}
     >
-      {/* Settings component */}
-      <ChatSettings 
-        isListening={isListening}
-        toggleListening={toggleListening}
-        isVenueMode={isVenueMode}
-        toggleVenueMode={toggleVenueMode}
-        isModelLoading={isModelLoading}
-      />
-      
-      <ChatWindow
-        isOpen={true}
-        isMinimized={isMinimized}
-        toggleMinimize={toggleMinimize}
-        closeChat={closeChat}
-        messages={messages}
-        isTyping={isSpeaking}
-        isSearching={false}
-        onSendMessage={sendTextMessage}
-        isVenueMode={isVenueMode}
-        isListening={isListening}
-        isProcessing={isProcessing}
-        transcript={transcript}
-        interimTranscript={interimTranscript}
-        toggleListening={toggleListening}
-        isSpeaking={isSpeaking}
-      />
-    </div>
+      <div className="h-full flex flex-col max-h-[85vh]">
+        {/* Settings component */}
+        <ChatSettings 
+          isListening={isListening}
+          toggleListening={toggleListening}
+          isVenueMode={isVenueMode}
+          toggleVenueMode={toggleVenueMode}
+          isModelLoading={isModelLoading}
+        />
+        
+        <ChatWindow
+          isOpen={true}
+          isMinimized={isMinimized}
+          toggleMinimize={toggleMinimize}
+          closeChat={closeChat}
+          messages={messages}
+          isTyping={isSpeaking}
+          isSearching={false}
+          onSendMessage={sendTextMessage}
+          isVenueMode={isVenueMode}
+          isListening={isListening}
+          isProcessing={isProcessing}
+          transcript={transcript}
+          interimTranscript={interimTranscript}
+          toggleListening={toggleListening}
+          isSpeaking={isSpeaking}
+        />
+      </div>
+    </motion.div>
   );
 };
 

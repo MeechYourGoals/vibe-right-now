@@ -55,19 +55,24 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   }
 
   return (
-    <>
+    <div className="flex flex-col h-full backdrop-blur-sm bg-background/70 rounded-lg overflow-hidden shadow-xl border border-blue-500/20">
       <ChatHeader
         isMinimized={isMinimized}
         toggleMinimize={toggleMinimize}
         closeChat={closeChat}
       />
       
-      {/* Voice Active Indicator */}
-      <VoiceIndicator 
-        isListening={isListening}
-        isSpeaking={isSpeaking}
-        toggleListening={toggleListening}
-      />
+      {/* Voice Activity Indicator */}
+      <div className="relative">
+        {(isListening || isSpeaking) && (
+          <div className={`absolute top-2 left-0 right-0 flex justify-center z-10 ${isListening ? 'text-red-500' : 'text-blue-500'} animate-pulse text-sm font-medium`}>
+            <div className="px-3 py-1 bg-background/80 rounded-full backdrop-blur-md flex items-center gap-2 shadow-md border border-current/30">
+              <span className="h-2 w-2 rounded-full bg-current"></span>
+              {isListening ? 'Listening...' : isSpeaking ? 'Speaking...' : ''}
+            </div>
+          </div>
+        )}
+      </div>
       
       <MessageList
         messages={messages}
@@ -85,7 +90,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
         onSendMessage={onSendMessage}
         isTyping={isTyping}
       />
-    </>
+    </div>
   );
 };
 

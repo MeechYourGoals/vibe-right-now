@@ -1,31 +1,47 @@
 
 import React from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface ChatTranscriptProps {
   transcript: string;
   isVisible: boolean;
-  isListening?: boolean;
+  isListening: boolean;
 }
 
 const ChatTranscript: React.FC<ChatTranscriptProps> = ({ 
   transcript, 
   isVisible,
-  isListening = false
+  isListening
 }) => {
   if (!isVisible) return null;
-
+  
   return (
-    <div className="mb-2 px-2 py-1.5 rounded-md bg-muted/50 text-sm max-h-20 overflow-y-auto">
-      <div className="flex items-center gap-1.5 mb-1">
-        <div className={`w-2 h-2 rounded-full ${isListening ? 'bg-red-500 animate-pulse' : 'bg-gray-400'}`} />
-        <span className="text-xs font-medium text-muted-foreground">
-          {isListening ? 'Listening...' : 'Transcript:'}
-        </span>
-      </div>
-      <p className="text-sm truncate">
-        {transcript || (isListening ? 'Speak now...' : 'No speech detected')}
-      </p>
-    </div>
+    <AnimatePresence>
+      {isVisible && (
+        <motion.div 
+          initial={{ opacity: 0, y: 20, height: 0 }}
+          animate={{ opacity: 1, y: 0, height: 'auto' }}
+          exit={{ opacity: 0, y: 20, height: 0 }}
+          transition={{ duration: 0.2 }}
+          className="mb-3"
+        >
+          <div className={`px-4 py-3 rounded-lg text-sm ${
+            isListening 
+              ? 'bg-red-500/5 border border-red-500/20 dark:bg-red-900/10' 
+              : 'bg-blue-500/5 border border-blue-500/20 dark:bg-blue-900/10'
+          }`}>
+            <div className={`font-medium mb-1 text-xs ${
+              isListening ? 'text-red-500 dark:text-red-400' : 'text-blue-500 dark:text-blue-400'
+            }`}>
+              {isListening ? 'Listening...' : 'Transcript'}
+            </div>
+            <p className="text-foreground/80">
+              {transcript || (isListening ? 'Waiting for speech...' : '')}
+            </p>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 

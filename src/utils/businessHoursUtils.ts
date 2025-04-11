@@ -1,117 +1,112 @@
 
-import { BusinessHours, Location } from '@/types';
-import { format } from 'date-fns';
+import { BusinessHours } from '@/types';
 
-/**
- * Generates mock business hours for a location
- */
-export const generateBusinessHours = (location: Location): BusinessHours => {
-  // First check if location has hours already
-  if (location.hours) {
-    return location.hours;
+// Convert legacy string format hours to new object format
+export const convertLegacyHours = (hours: any): BusinessHours => {
+  if (!hours) return getDefaultBusinessHours();
+  
+  // Check if already in the correct format
+  if (typeof hours.monday === 'object' && hours.monday.open !== undefined) {
+    return hours as BusinessHours;
   }
   
-  // Some locations are open 24 hours
-  const is24Hours = location.id.includes('24') || Math.random() < 0.1;
+  // Convert from legacy string format to object format
+  const result: BusinessHours = {
+    monday: parseHoursString(hours.monday),
+    tuesday: parseHoursString(hours.tuesday),
+    wednesday: parseHoursString(hours.wednesday),
+    thursday: parseHoursString(hours.thursday),
+    friday: parseHoursString(hours.friday),
+    saturday: parseHoursString(hours.saturday),
+    sunday: parseHoursString(hours.sunday),
+  };
   
-  if (is24Hours) {
-    return {
-      monday: 'Open 24 hours',
-      tuesday: 'Open 24 hours',
-      wednesday: 'Open 24 hours',
-      thursday: 'Open 24 hours',
-      friday: 'Open 24 hours',
-      saturday: 'Open 24 hours',
-      sunday: 'Open 24 hours',
-      isOpen24Hours: true
-    };
+  return result;
+};
+
+// Parse string format like "9:00 AM - 5:00 PM" to object format
+export const parseHoursString = (hoursString: string): { open: string; close: string } => {
+  if (!hoursString || hoursString === 'Closed') {
+    return { open: 'Closed', close: 'Closed' };
   }
   
-  // Determine opening and closing times based on location type
-  const openingHour = getOpeningHour(location.type);
-  const closingHour = getClosingHour(location.type);
-  
-  // Create weekday hours
-  const weekdayHours = `${openingHour}AM - ${closingHour > 12 ? closingHour - 12 : closingHour}${closingHour >= 12 ? 'PM' : 'AM'}`;
-  
-  // Weekend might have different hours
-  const weekendOpeningHour = Math.max(openingHour - 1, 6); // Open earlier on weekends, but not before 6AM
-  const weekendClosingHour = Math.min(closingHour + 1, 24); // Close later on weekends, but not after midnight
-  
-  const weekendHours = `${weekendOpeningHour}AM - ${weekendClosingHour > 12 ? weekendClosingHour - 12 : weekendClosingHour}${weekendClosingHour >= 12 ? 'PM' : 'AM'}`;
+  const parts = hoursString.split(' - ');
+  if (parts.length !== 2) {
+    return { open: 'Closed', close: 'Closed' };
+  }
   
   return {
-    monday: weekdayHours,
-    tuesday: weekdayHours,
-    wednesday: weekdayHours,
-    thursday: weekdayHours,
-    friday: weekendHours,
-    saturday: weekendHours,
-    sunday: weekendHours,
-    isOpen24Hours: false
+    open: parts[0].trim(),
+    close: parts[1].trim()
   };
 };
 
-/**
- * Get typical opening hour based on location type
- */
-const getOpeningHour = (locationType: string): number => {
-  switch (locationType) {
-    case 'restaurant':
-      return 11; // 11AM
-    case 'bar':
-      return 16; // 4PM
-    case 'event':
-      return 9; // 9AM
-    case 'attraction':
-      return 9; // 9AM
-    case 'sports':
-      return 9; // 9AM
-    default:
-      return 9; // 9AM
-  }
+// Get default business hours
+export const getDefaultBusinessHours = (): BusinessHours => {
+  return {
+    monday: { open: '9:00 AM', close: '5:00 PM' },
+    tuesday: { open: '9:00 AM', close: '5:00 PM' },
+    wednesday: { open: '9:00 AM', close: '5:00 PM' },
+    thursday: { open: '9:00 AM', close: '5:00 PM' },
+    friday: { open: '9:00 AM', close: '5:00 PM' },
+    saturday: { open: '10:00 AM', close: '3:00 PM' },
+    sunday: { open: 'Closed', close: 'Closed' },
+  };
 };
 
-/**
- * Get typical closing hour based on location type
- */
-const getClosingHour = (locationType: string): number => {
-  switch (locationType) {
-    case 'restaurant':
-      return 22; // 10PM
-    case 'bar':
-      return 2; // 2AM (next day)
-    case 'event':
-      return 22; // 10PM
-    case 'attraction':
-      return 18; // 6PM
-    case 'sports':
-      return 21; // 9PM
-    default:
-      return 18; // 6PM
+// Format hours for display
+export const formatHoursForDisplay = (hours: { open: string; close: string }): string => {
+  if (hours.open === 'Closed' || hours.close === 'Closed') {
+    return 'Closed';
   }
+  
+  return `${hours.open} - ${hours.close}`;
 };
 
-/**
- * Get today's business hours for a location
- */
-export const getTodaysHours = (location: Location): string => {
-  // Ensure location has hours
-  if (!location.hours) {
-    location.hours = generateBusinessHours(location);
+// Check if a venue is currently open
+export const isOpenNow = (hours: BusinessHours): boolean => {
+  if (!hours) return false;
+  
+  const now = new Date();
+  const dayOfWeek = now.toLocaleDateString('en-US', { weekday: 'lowercase' });
+  const currentHours = hours[dayOfWeek];
+  
+  if (!currentHours || currentHours.open === 'Closed') {
+    return false;
   }
   
-  // Get the current day of the week
-  const today = new Date();
-  const dayOfWeek = format(today, 'EEEE').toLowerCase();
+  // Convert current time to minutes
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
   
-  // Return the hours for today
-  const hours = location.hours[dayOfWeek as keyof typeof location.hours];
+  // Convert open time to minutes
+  const openTime = parseTimeString(currentHours.open);
+  const openMinutes = openTime.hours * 60 + openTime.minutes;
   
-  // Handle the case where hours might be a boolean (isOpen24Hours)
-  if (typeof hours === 'boolean') {
-    return hours ? 'Open 24 hours' : 'Closed';
+  // Convert close time to minutes
+  const closeTime = parseTimeString(currentHours.close);
+  const closeMinutes = closeTime.hours * 60 + closeTime.minutes;
+  
+  return currentMinutes >= openMinutes && currentMinutes < closeMinutes;
+};
+
+// Parse time string like "9:00 AM" to hours and minutes
+const parseTimeString = (timeString: string): { hours: number; minutes: number } => {
+  if (timeString === 'Closed') {
+    return { hours: 0, minutes: 0 };
   }
   
-  return hours || 'Closed';
+  const [timePart, period] = timeString.split(' ');
+  const [hourStr, minuteStr] = timePart.split(':');
+  
+  let hours = parseInt(hourStr, 10);
+  const minutes = parseInt(minuteStr, 10);
+  
+  // Convert to 24-hour format
+  if (period === 'PM' && hours < 12) {
+    hours += 12;
+  } else if (period === 'AM' && hours === 12) {
+    hours = 0;
+  }
+  
+  return { hours, minutes };
 };

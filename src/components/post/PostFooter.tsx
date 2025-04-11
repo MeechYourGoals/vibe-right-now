@@ -1,93 +1,146 @@
 
-import React, { useState } from "react";
-import { Post, Comment } from "@/types";
-import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
-import { Heart, MessageCircle, Share2 } from "lucide-react";
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Heart, MessageCircle, Bookmark, Share2, ThumbsUp } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Post, Comment } from '@/types';
+import { formatDistanceToNow } from 'date-fns';
+import CommentList from '@/components/CommentList';
 
 interface PostFooterProps {
   post: Post;
-  comments: Comment[];
-  isDetailView?: boolean;
+  onLike?: () => void;
+  onComment?: () => void;
+  onSave?: () => void;
+  onShare?: () => void;
 }
 
-const PostFooter: React.FC<PostFooterProps> = ({ 
-  post, 
-  comments, 
-  isDetailView = false 
+const PostFooter: React.FC<PostFooterProps> = ({
+  post,
+  onLike,
+  onComment,
+  onSave,
+  onShare
 }) => {
-  const [liked, setLiked] = useState(false);
+  const [newComment, setNewComment] = useState('');
+  const [showCommentInput, setShowCommentInput] = useState(false);
+  const [showAllComments, setShowAllComments] = useState(false);
   
-  const handleLike = () => {
-    setLiked(!liked);
-  };
+  const commentDate = new Date(post.timestamp);
+  const timeAgo = formatDistanceToNow(commentDate, { addSuffix: true });
   
-  const renderComments = () => {
-    if (isDetailView) {
-      return null; // Comments are rendered separately in detail view
-    }
+  const handleSubmitComment = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newComment.trim()) return;
     
-    if (comments.length === 0) {
-      return null;
-    }
+    // Here you would typically call an API to add the comment
+    // For now, we'll just log it
+    console.log('Submitting comment:', newComment);
     
-    // Show the most recent comment
-    const latestComment = comments[0];
-    
-    return (
-      <div className="px-4 py-2 border-t text-sm">
-        <div className="flex items-start gap-2">
-          <span className="font-semibold">{latestComment.user.username}</span>
-          <p className="text-xs whitespace-pre-wrap">{latestComment.content}</p>
-        </div>
-        
-        {comments.length > 1 && (
-          <Link to={`/post/${post.id}`} className="text-muted-foreground text-xs mt-1 block">
-            View all {post.comments} comments
-          </Link>
-        )}
-      </div>
-    );
+    setNewComment('');
+    // Optionally close the comment input after submitting
+    // setShowCommentInput(false);
   };
   
   return (
-    <div className="px-4 pb-2">
-      <div className="flex items-center justify-between py-2">
-        <div className="flex items-center gap-4">
+    <div className="space-y-3">
+      <div className="flex gap-4 justify-between items-center">
+        <div className="flex gap-2 items-center">
           <Button 
             variant="ghost" 
             size="sm" 
-            className="flex items-center gap-1 px-2"
-            onClick={handleLike}
+            className="flex items-center gap-1 px-2 h-8"
+            onClick={onLike}
           >
             <Heart 
-              className={`h-5 w-5 ${liked ? 'fill-red-500 text-red-500' : ''}`} 
+              className={`h-5 w-5 ${post.saved ? 'fill-red-500 text-red-500' : ''}`} 
             />
-            <span>{post.likes + (liked ? 1 : 0)}</span>
+            <span className="text-sm">{post.likes}</span>
           </Button>
           
-          <Link to={`/post/${post.id}`}>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="flex items-center gap-1 px-2"
-            >
-              <MessageCircle className="h-5 w-5" />
-              <span>{post.comments}</span>
-            </Button>
-          </Link>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="flex items-center gap-1 px-2 h-8"
+            onClick={() => setShowCommentInput(prev => !prev)}
+          >
+            <MessageCircle className="h-5 w-5" />
+            <span className="text-sm">{post.comments.length}</span>
+          </Button>
         </div>
         
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="rounded-full h-8 w-8 p-0"
-        >
-          <Share2 className="h-4 w-4" />
-        </Button>
+        <div className="flex gap-1">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="h-8 w-8 p-0"
+            onClick={onSave}
+          >
+            <Bookmark className={`h-5 w-5 ${post.saved ? 'fill-primary text-primary' : ''}`} />
+          </Button>
+          
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="h-8 w-8 p-0"
+            onClick={onShare}
+          >
+            <Share2 className="h-5 w-5" />
+          </Button>
+        </div>
       </div>
       
-      {renderComments()}
+      <div className="text-xs text-muted-foreground">
+        {timeAgo}
+      </div>
+      
+      {/* Comments section */}
+      {post.comments.length > 0 && (
+        <div className="space-y-3">
+          <CommentList 
+            comments={post.comments} 
+            limit={showAllComments ? undefined : 2} 
+          />
+          
+          {!showAllComments && post.comments.length > 2 && (
+            <button 
+              className="text-sm text-muted-foreground hover:text-primary transition-colors"
+              onClick={() => setShowAllComments(true)}
+            >
+              View all {post.comments.length} comments
+            </button>
+          )}
+        </div>
+      )}
+      
+      {/* Comment input */}
+      {showCommentInput && (
+        <form onSubmit={handleSubmitComment} className="flex items-center gap-2">
+          <Avatar className="h-8 w-8">
+            <AvatarImage src="/placeholder-avatar.jpg" alt="Your avatar" />
+            <AvatarFallback>YA</AvatarFallback>
+          </Avatar>
+          
+          <div className="relative flex-1">
+            <input
+              type="text"
+              className="w-full py-2 px-3 pr-10 rounded-full bg-muted/50 border-0 text-sm focus:ring-1 focus:ring-primary"
+              placeholder="Add a comment..."
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+            />
+            
+            {newComment.trim() && (
+              <button 
+                type="submit" 
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-primary hover:text-primary/80 transition-colors"
+              >
+                <ThumbsUp className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+        </form>
+      )}
     </div>
   );
 };
