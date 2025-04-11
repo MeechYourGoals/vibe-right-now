@@ -1,5 +1,3 @@
-// This file is importing from the wrong location - needs to be updated
-// to use the new structure where VertexAIHub is exported from the index file
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';

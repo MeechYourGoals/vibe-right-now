@@ -21,9 +21,6 @@ import {
  * Central service for interacting with Google Vertex AI
  */
 export const VertexAIHub = {
-  // Re-export types
-  DEFAULT_MALE_VOICE,
-  
   // Text generation
   generateText,
   searchWithAI,
@@ -39,7 +36,7 @@ export const VertexAIHub = {
   checkContentSafety
 };
 
-// Re-export types
+// Re-export types and constants
 export type {
   VertexAIModel,
   VertexAIVisionModel, 
@@ -48,3 +45,5 @@ export type {
   GenerateImageOptions,
   TextToSpeechOptions
 };
+
+export { DEFAULT_MALE_VOICE };
