@@ -45,11 +45,39 @@ export const VertexAIService = {
     try {
       console.log(`Searching with Vertex AI: "${query.substring(0, 50)}..."`);
       
+      // Add location context to the query if it seems to be about nearby places
+      const enhancedQuery = this.enhanceQueryWithLocationContext(query);
+      
       // Use our new hub for AI search capabilities
-      return await VertexAIHub.searchWithAI(query, categories);
+      return await VertexAIHub.searchWithAI(enhancedQuery, categories);
     } catch (error) {
       console.error('Error in VertexAIService.searchWithVertex:', error);
       return "I couldn't find specific information about that. Could you try rephrasing your question?";
     }
+  },
+  
+  /**
+   * Add location context to queries about nearby places
+   */
+  enhanceQueryWithLocationContext(query: string): string {
+    // If query contains terms about "nearby", "close", etc. try to add location context
+    if (/nearby|close|around|near me|in the area|local|vicinity|closest/i.test(query)) {
+      // Try to get location from session storage (set by other parts of the app)
+      try {
+        const lastCity = sessionStorage.getItem('lastSearchedCity');
+        const userLat = sessionStorage.getItem('userLat');
+        const userLng = sessionStorage.getItem('userLng');
+        
+        if (lastCity) {
+          return `${query} in ${lastCity}`;
+        } else if (userLat && userLng) {
+          return `${query} at coordinates ${userLat},${userLng}`;
+        }
+      } catch (e) {
+        console.warn('Could not access session storage for location context');
+      }
+    }
+    
+    return query;
   }
 };

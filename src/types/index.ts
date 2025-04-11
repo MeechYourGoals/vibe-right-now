@@ -12,13 +12,19 @@ export interface Location {
   type?: string;
   rating?: number;
   priceLevel?: number;
-  hours?: any;
+  hours?: BusinessHours;
   phone?: string;
   website?: string;
   photos?: any[];
   tags?: string[]; // Added tags property for location
   verified?: boolean; // Added verified property
   vibes?: string[]; // Added vibes property
+  isPopular?: boolean; // Added popular flag for trending venues
+  priceRange?: string; // Added price range display string (e.g., "$$$")
+  isFeatured?: boolean; // Added featured flag for promoted venues
+  featuredUntil?: string; // Featured promotion end date
+  temporarilyClosed?: boolean; // Flag for temporarily closed venues
+  openNow?: boolean; // Flag for venues currently open
 }
 
 // Add these interfaces to fix the build errors
@@ -45,6 +51,8 @@ export interface User {
   location?: string;
   website?: string;
   joinDate?: string;
+  isPrivate?: boolean; // Added to fix type errors
+  isCelebrity?: boolean; // Added to fix type errors
 }
 
 export interface Comment {
@@ -53,6 +61,9 @@ export interface Comment {
   text: string;
   timestamp: string;
   likes: number;
+  postId?: string; // Added to fix type errors
+  content?: string; // Added to fix type errors
+  vibedHere?: boolean; // Added to fix type errors
 }
 
 export interface Post {
@@ -65,6 +76,10 @@ export interface Post {
   likes: number;
   comments: Comment[];
   saved: boolean;
+  content?: string; // Added to fix type errors
+  isVenuePost?: boolean; // Added to fix type errors
+  isPinned?: boolean; // Added to fix type errors
+  expiresAt?: string; // Added to fix type errors
 }
 
 export interface Media {
@@ -93,4 +108,8 @@ export interface VenueInsights {
     rating: number;
     distance: number;
   }>;
+  visitorCount?: number; // Added to fix type errors
+  checkInCount?: number; // Added to fix type errors
+  receiptUploads?: number; // Added to fix type errors
+  discountRedemptions?: number; // Added to fix type errors
 }

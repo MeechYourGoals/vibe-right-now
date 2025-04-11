@@ -6,6 +6,7 @@ import { handleVenueQuery } from './handlers/venueQueryHandler';
 import { handleSearchQuery } from './handlers/searchQueryHandler';
 import { handleBookingQuery } from './handlers/bookingQueryHandler';
 import { VertexAIService } from '@/services/VertexAIService';
+import { LocationSearchStrategy } from './handlers/search/locationSearchStrategy';
 
 export interface MessageProcessorProps {
   isVenueMode: boolean;
@@ -58,29 +59,36 @@ export const processMessageInput = async (
       return;
     }
     
-    // Detect if this is likely a location/venue search query
-    const isLocationQuery = /what|where|when|how|things to do|events|places|restaurants|bars|attractions|activities|visit|in|at|near|around/i.test(inputValue);
-    const hasCityName = /miami|new york|los angeles|chicago|san francisco|boston|seattle|austin|denver|nashville|atlanta|portland|dallas|houston|phoenix|philadelphia|san diego|las vegas|orlando|washington|dc/i.test(inputValue);
+    // Enhanced detection for location/venue queries
+    const isLocationQuery = LocationSearchStrategy.isLocationQuery(inputValue);
     
     console.log('Processing query:', inputValue);
     console.log('Is location query:', isLocationQuery);
-    console.log('Has city name:', hasCityName);
     
     // Process the message using selected AI service or our search handlers
     let responseText = '';
     
-    // For location queries or any query with city names, prioritize search
-    if (isLocationQuery || hasCityName) {
-      console.log('Location/city query detected, using search pipeline');
+    // For location queries, prioritize the location search pipeline
+    if (isLocationQuery) {
+      console.log('Location/venue query detected, using enhanced search pipeline');
       try {
         // Extract any categories from the query to help with search relevance
         const categories = extractCategoriesFromQuery(inputValue);
+        console.log('Extracted categories from query:', categories);
         
-        // Use the search handler which now directly prioritizes Vertex AI
-        responseText = await handleSearchQuery(inputValue, updatedPaginationState);
-        console.log('Search query handler returned response of length:', responseText.length);
+        // Use the location search strategy directly for venue queries
+        const locationSearchResult = await LocationSearchStrategy.handleLocationSearch(inputValue);
+        
+        if (locationSearchResult && locationSearchResult.response) {
+          responseText = locationSearchResult.response;
+          console.log('Location search strategy returned response of length:', responseText.length);
+        } else {
+          // Fall back to general search handler if location-specific search fails
+          responseText = await handleSearchQuery(inputValue, updatedPaginationState);
+          console.log('General search handler returned response of length:', responseText.length);
+        }
       } catch (error) {
-        console.error('Error in search pipeline:', error);
+        console.error('Error in venue search pipeline:', error);
         // Fall back to direct AI call
         responseText = await VertexAIService.generateResponse(inputValue, 'default', contextMessages);
       }
@@ -118,30 +126,56 @@ export const processMessageInput = async (
  */
 function extractCategoriesFromQuery(query: string): string[] {
   const categories = [];
+  const lowercaseQuery = query.toLowerCase();
   
   // Check for food-related terms
-  if (/restaurant|food|eat|dining|breakfast|lunch|dinner|brunch|cafe|bar|pub|coffee/i.test(query)) {
+  if (/restaurant|food|eat|dining|breakfast|lunch|dinner|brunch|cafe|bar|pub|coffee|cuisine|culinary|meal|feast|dine/i.test(lowercaseQuery)) {
     categories.push('food');
   }
   
   // Check for entertainment-related terms
-  if (/movie|theater|theatre|concert|show|performance|music|live|entertainment/i.test(query)) {
+  if (/movie|theater|theatre|concert|show|performance|music|live|entertainment|festival|event|ticket|stage/i.test(lowercaseQuery)) {
     categories.push('entertainment');
   }
   
   // Check for outdoor activities
-  if (/park|hike|hiking|trail|beach|outdoor|nature|walk|walking/i.test(query)) {
+  if (/park|hike|hiking|trail|beach|outdoor|nature|walk|walking|garden|scenic|mountain|lake|forest|wilderness|camping/i.test(lowercaseQuery)) {
     categories.push('outdoors');
   }
   
   // Check for nightlife
-  if (/club|nightlife|party|dancing|dance|nightclub|bar/i.test(query)) {
+  if (/club|nightlife|party|dancing|dance|nightclub|bar|pub|lounge|cocktail|brewery|dj|mixer|night out/i.test(lowercaseQuery)) {
     categories.push('nightlife');
   }
   
   // Check for family-friendly
-  if (/family|kid|child|children|family-friendly/i.test(query)) {
+  if (/family|kid|child|children|family-friendly|playground|arcade|zoo|aquarium|museum|educational/i.test(lowercaseQuery)) {
     categories.push('family');
+  }
+  
+  // Check for shopping
+  if (/shop|shopping|mall|boutique|store|market|retail|outlet|plaza|buy|purchase|souvenir/i.test(lowercaseQuery)) {
+    categories.push('shopping');
+  }
+  
+  // Check for sports
+  if (/sport|game|match|stadium|arena|baseball|football|basketball|soccer|tennis|golf|fitness|gym|workout/i.test(lowercaseQuery)) {
+    categories.push('sports');
+  }
+  
+  // Check for arts and culture
+  if (/art|museum|gallery|exhibition|cultural|historic|heritage|architecture|sculpture|painting|artifact/i.test(lowercaseQuery)) {
+    categories.push('arts');
+  }
+  
+  // Check for proximity
+  if (/nearby|close|around|walking distance|near me|in the area|local|vicinity|closest/i.test(lowercaseQuery)) {
+    categories.push('nearby');
+  }
+  
+  // Check for timing
+  if (/open now|tonight|today|this weekend|happening now|current|ongoing|immediate/i.test(lowercaseQuery)) {
+    categories.push('current');
   }
   
   return categories;

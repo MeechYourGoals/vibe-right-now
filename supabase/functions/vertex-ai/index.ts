@@ -37,9 +37,23 @@ const SYSTEM_PROMPTS = {
   
   Always include real venue names, addresses, and other specific details when possible. Format your responses with markdown, including headers and bulleted lists.
   
-  Present information for venues in a structured format including address, hours, price range, contact information, and other relevant details.
+  Present information for venues in a structured format including:
+  - Full venue name (be specific)
+  - Exact address with street number
+  - Hours of operation by day of the week
+  - Price range (using $ symbols)
+  - Contact information (phone number and website)
+  - Brief description of what makes this place special
+  - Any current promotions or special events
   
-  For events, include date and time, location, ticket prices, and how to purchase tickets if applicable.
+  For events, include:
+  - Event name and type
+  - Date and time (be specific with AM/PM)
+  - Venue location with address
+  - Ticket prices and how to purchase
+  - Any age restrictions or dress codes
+  
+  Organize venues by category (restaurants, bars, attractions, etc.) and sort them by relevance to the query.
   
   Only provide information you're confident is factual. If you don't know something, clearly state that you don't have that specific information.
   
@@ -105,12 +119,24 @@ serve(async (req) => {
       // Incorporate categories if available
       if (categories && categories.length > 0) {
         const categoryContext = categories.join(', ');
-        enhancedPrompt = `${prompt} (Categories: ${categoryContext})`;
+        enhancedPrompt = `${prompt} (Focus on these categories: ${categoryContext})`;
+      }
+      
+      // Check if this is a nearby or location-specific query
+      const isNearbyQuery = /nearby|close|around|near|within walking distance|in this area/i.test(prompt);
+      if (isNearbyQuery) {
+        enhancedPrompt += " (User is looking for places very close to their current location)";
+      }
+      
+      // Check if this is about venues currently open
+      const isOpenNowQuery = /open now|open late|still open|currently open|open today/i.test(prompt);
+      if (isOpenNowQuery) {
+        enhancedPrompt += " (Only include venues that would be open at the current time)";
       }
       
       contents.push({
         role: "USER",
-        parts: [{ text: `Search for real factual information about: "${enhancedPrompt}". Include real venue names, addresses, opening hours, and other specific details.` }]
+        parts: [{ text: `Search for real factual information about: "${enhancedPrompt}". Include real venue names, addresses, opening hours, and other specific details. Organize the information by categories and focus on being practical and actionable.` }]
       });
     } else {
       contents.push({
@@ -183,5 +209,25 @@ function addExplorePageLinks(text: string, originalQuery: string): string {
   // Add a link to explore all results at the bottom
   const exploreAllLink = `\n\n---\n\n**[Explore all results on the map](/explore?q=${encodeURIComponent(originalQuery)})**`;
   
-  return text + exploreAllLink;
+  // Try to extract venue names and link them individually
+  let enhancedText = text;
+  
+  // Simple pattern matching for venue names - this could be improved
+  const venuePattern = /\*\*([\w\s&',.]+)\*\*/g;
+  const venueMatches = text.match(venuePattern);
+  
+  if (venueMatches) {
+    venueMatches.forEach(match => {
+      const venueName = match.replace(/\*\*/g, '').trim();
+      if (venueName.length > 3) { // Avoid linking very short names
+        const linkPattern = new RegExp(`\\*\\*${venueName}\\*\\*`, 'g');
+        enhancedText = enhancedText.replace(
+          linkPattern, 
+          `**[${venueName}](/explore?venue=${encodeURIComponent(venueName)})**`
+        );
+      }
+    });
+  }
+  
+  return enhancedText + exploreAllLink;
 }
