@@ -280,10 +280,12 @@ const OpportunityCard = ({ opportunity, onRedeem }: OpportunityCardProps) => {
   };
   
   const getVenueIcon = () => {
+    // Fixed: Using only valid location types
+    if (location.name.toLowerCase().includes("hotel") || location.name.toLowerCase().includes("resort")) {
+      return <Hotel className="h-5 w-5" />;
+    }
+    
     switch (location.type) {
-      case "hotel":
-      case "resort":
-        return <Hotel className="h-5 w-5" />;
       case "attraction":
         return <MapPin className="h-5 w-5" />;
       case "event":
