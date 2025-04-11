@@ -11,7 +11,7 @@ const ChatButton: React.FC<ChatButtonProps> = ({ onClick }) => {
   return (
     <Button 
       onClick={onClick}
-      className="fixed left-6 bottom-6 w-16 h-16 rounded-full shadow-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 flex items-center justify-center p-0 z-10 transition-all duration-300 hover:scale-105"
+      className="w-16 h-16 rounded-full shadow-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 flex items-center justify-center p-0 z-10 transition-all duration-300 hover:scale-105"
     >
       <div className="absolute inset-0 rounded-full bg-blue-400 opacity-0 group-hover:opacity-20 animate-pulse transition-opacity"></div>
       <Bot className="h-7 w-7" />
