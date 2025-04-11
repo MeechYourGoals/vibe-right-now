@@ -95,3 +95,18 @@ serve_port = 54333
 # Enable by default.
 [functions.vertex-ai]
 verify_jwt = true
+
+[functions.gemini-ai]
+verify_jwt = true
+
+[functions.google-tts]
+verify_jwt = true
+
+[functions.google-stt]
+verify_jwt = true
+
+[functions.google-nlp]
+verify_jwt = true
+
+[functions.content-safety]
+verify_jwt = true

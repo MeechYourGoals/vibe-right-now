@@ -39,3 +39,34 @@ export interface SearchOptions {
   /** Maximum number of results to return */
   maxResults?: number;
 }
+
+/**
+ * Options for text-to-speech with Google TTS
+ */
+export interface TextToSpeechOptions {
+  /** Voice to use for synthesis */
+  voice?: string;
+  
+  /** Speed rate of speech (0.25 to 4.0) */
+  speakingRate?: number;
+  
+  /** Pitch of speech (-20.0 to 20.0) */
+  pitch?: number;
+}
+
+/**
+ * Content safety check response
+ */
+export interface ContentSafetyResponse {
+  /** Whether the content is deemed safe */
+  safe: boolean;
+  
+  /** Reasons why content might be unsafe */
+  reasons?: string[];
+}
+
+/**
+ * Default voices for Google Text-to-Speech
+ */
+export const DEFAULT_MALE_VOICE = "en-US-Neural2-D";
+export const DEFAULT_FEMALE_VOICE = "en-US-Neural2-F";

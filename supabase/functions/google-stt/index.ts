@@ -1,7 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const GOOGLE_API_KEY = Deno.env.get('GOOGLE_API_KEY');
+const GOOGLE_VERTEX_API_KEY = Deno.env.get('GOOGLE_VERTEX_API_KEY');
 const STT_API_URL = "https://speech.googleapis.com/v1/speech:recognize";
 
 const corsHeaders = {
@@ -25,10 +25,8 @@ serve(async (req) => {
       );
     }
     
-    console.log('Processing speech-to-text request');
-    
-    // Prepare the request to Google Speech-to-Text API
-    const response = await fetch(`${STT_API_URL}?key=${GOOGLE_API_KEY}`, {
+    // Call Google Speech-to-Text API
+    const response = await fetch(`${STT_API_URL}?key=${GOOGLE_VERTEX_API_KEY}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -38,8 +36,7 @@ serve(async (req) => {
           encoding: 'WEBM_OPUS',
           sampleRateHertz: 48000,
           languageCode: 'en-US',
-          model: 'latest_long',
-          enableAutomaticPunctuation: true
+          model: 'latest_long'
         },
         audio: {
           content: audio
@@ -48,18 +45,17 @@ serve(async (req) => {
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Google STT API error:', errorText);
-      
+      const errorData = await response.text();
+      console.error(`Google STT API error: ${response.status}`, errorData);
       return new Response(
-        JSON.stringify({ error: `Google STT API error: ${response.status}` }),
+        JSON.stringify({ error: `Error calling Google STT API: ${response.status}` }),
         { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     const data = await response.json();
+    console.log("Google STT API response received");
     
-    // Extract the transcript from the response
     let transcript = '';
     if (data.results && data.results.length > 0) {
       transcript = data.results[0].alternatives[0].transcript || '';
@@ -71,7 +67,6 @@ serve(async (req) => {
     );
   } catch (error) {
     console.error('Error in google-stt function:', error);
-    
     return new Response(
       JSON.stringify({ error: error.message }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
