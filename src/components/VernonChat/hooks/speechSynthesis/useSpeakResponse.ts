@@ -2,6 +2,7 @@
 import { useCallback } from 'react';
 import { CoquiTTSService } from '@/services/CoquiTTSService';
 import { SimpleSearchService } from '@/services/SimpleSearchService';
+import { getGoogleTTS, playAudioBase64 } from '@/components/VernonChat/utils/speech/synthesis';
 
 interface UseSpeakResponseProps {
   isSpeaking: boolean;
@@ -52,14 +53,21 @@ export const useSpeakResponse = ({
             console.log('Search result:', searchResult);
             // If search was successful and yielded results, speak those instead
             if (searchResult && searchResult.trim() !== '') {
-              // Speak the search result instead
-              CoquiTTSService.textToSpeech(searchResult)
-                .then(success => {
-                  if (success) {
-                    console.log('Speaking search result response');
+              // Speak the search result with Google TTS
+              getGoogleTTS(searchResult)
+                .then(audioBase64 => {
+                  if (audioBase64) {
+                    console.log('Speaking search result with Google TTS');
+                    playAudioBase64(audioBase64);
                   } else {
-                    console.warn('Failed to speak search result, falling back to browser');
-                    speakWithBrowser(searchResult, voices);
+                    console.warn('Failed to use Google TTS, trying Coqui TTS');
+                    CoquiTTSService.textToSpeech(searchResult)
+                      .then(success => {
+                        if (!success) {
+                          console.warn('Failed to speak with Coqui TTS, falling back to browser');
+                          speakWithBrowser(searchResult, voices);
+                        }
+                      });
                   }
                 });
             }
@@ -70,14 +78,17 @@ export const useSpeakResponse = ({
       }
     }
     
-    console.log('Speaking with Coqui TTS or browser fallback');
+    console.log('Speaking with Google TTS or fallbacks');
     
     let speechSuccess = false;
     
-    // Try to use Coqui TTS first
+    // Try to use Google TTS first (via Vertex AI)
     try {
-      speechSuccess = await CoquiTTSService.textToSpeech(text);
-      if (speechSuccess) {
+      const audioBase64 = await getGoogleTTS(text);
+      if (audioBase64) {
+        playAudioBase64(audioBase64);
+        speechSuccess = true;
+        
         // Mark intro as played if this is the first message
         if (!introHasPlayed.current && text.includes("I'm VeRNon")) {
           introHasPlayed.current = true;
@@ -85,16 +96,34 @@ export const useSpeakResponse = ({
         return;
       }
     } catch (error) {
+      console.error('Google TTS failed, falling back to Coqui TTS:', error);
+    }
+    
+    // If Google TTS failed, try Coqui TTS
+    try {
+      if (!speechSuccess) {
+        speechSuccess = await CoquiTTSService.textToSpeech(text);
+        if (speechSuccess) {
+          // Mark intro as played if this is the first message
+          if (!introHasPlayed.current && text.includes("I'm VeRNon")) {
+            introHasPlayed.current = true;
+          }
+          return;
+        }
+      }
+    } catch (error) {
       console.error('Coqui TTS speech failed, falling back to browser synthesis:', error);
     }
     
-    // If Coqui TTS failed, fall back to browser's speech synthesis
+    // If both TTS services failed, fall back to browser's speech synthesis
     try {
-      speechSuccess = await speakWithBrowser(text, voices);
-      
-      // Mark intro as played if this is the first message (even if using browser speech)
-      if (speechSuccess && !introHasPlayed.current && text.includes("I'm VeRNon")) {
-        introHasPlayed.current = true;
+      if (!speechSuccess) {
+        speechSuccess = await speakWithBrowser(text, voices);
+        
+        // Mark intro as played if this is the first message (even if using browser speech)
+        if (speechSuccess && !introHasPlayed.current && text.includes("I'm VeRNon")) {
+          introHasPlayed.current = true;
+        }
       }
     } catch (error) {
       console.error('Browser speech synthesis failed:', error);

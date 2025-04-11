@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Location } from "@/types";
 import { mockLocations } from "@/mock/locations";
 import { getTrendingLocationsForCity } from "@/mock/cityLocations";
+import { toast } from "sonner";
 
 // Event bus for updating trending locations from VernonChat
 export const eventBus = {
@@ -35,14 +36,75 @@ const TrendingLocations = () => {
   // Default to some popular locations if no city is specified
   const [trendingLocations, setTrendingLocations] = useState(mockLocations.slice(0, 3));
   const [currentCity, setCurrentCity] = useState("Los Angeles");
+  const [geolocationAttempted, setGeolocationAttempted] = useState(false);
   
-  // Initialize with trending locations for a default city
+  // Use Google Maps to determine user's location
   useEffect(() => {
-    const defaultTrending = getTrendingLocationsForCity("Los Angeles");
-    if (defaultTrending.length > 0) {
-      setTrendingLocations(defaultTrending);
+    if (!geolocationAttempted && navigator.geolocation) {
+      setGeolocationAttempted(true);
+      
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          try {
+            // Use Google's Geocoding API to get the city name from coordinates
+            const response = await fetch(
+              `https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.coords.latitude},${position.coords.longitude}&key=AIzaSyAWm0vayRrQJHpMc6XcShcge52hGTt9BV4`
+            );
+            
+            if (response.ok) {
+              const data = await response.json();
+              
+              if (data.results && data.results.length > 0) {
+                // Try to find the city component
+                const addressComponents = data.results[0].address_components;
+                const cityComponent = addressComponents.find(
+                  (component: any) => 
+                    component.types.includes('locality') || 
+                    component.types.includes('administrative_area_level_1')
+                );
+                
+                if (cityComponent) {
+                  const detectedCity = cityComponent.long_name;
+                  setCurrentCity(detectedCity);
+                  
+                  // Get trending locations for the detected city
+                  const cityTrending = getTrendingLocationsForCity(detectedCity);
+                  if (cityTrending.length > 0) {
+                    setTrendingLocations(cityTrending);
+                  }
+                }
+              }
+            }
+          } catch (error) {
+            console.error("Error getting city from coordinates:", error);
+            // Fall back to default trending locations
+            const defaultTrending = getTrendingLocationsForCity("Los Angeles");
+            if (defaultTrending.length > 0) {
+              setTrendingLocations(defaultTrending);
+            }
+          }
+        },
+        (error) => {
+          console.error("Error getting location:", error);
+          // Fall back to default trending locations
+          const defaultTrending = getTrendingLocationsForCity("Los Angeles");
+          if (defaultTrending.length > 0) {
+            setTrendingLocations(defaultTrending);
+          }
+        }
+      );
     }
-  }, []);
+  }, [geolocationAttempted]);
+  
+  // Initialize with trending locations for a default city if geolocation fails
+  useEffect(() => {
+    if (!geolocationAttempted) {
+      const defaultTrending = getTrendingLocationsForCity("Los Angeles");
+      if (defaultTrending.length > 0) {
+        setTrendingLocations(defaultTrending);
+      }
+    }
+  }, [geolocationAttempted]);
   
   useEffect(() => {
     // Listen for updates from VernonChat
@@ -56,8 +118,7 @@ const TrendingLocations = () => {
         setTrendingLocations(events);
         
         // Show toast notification
-        // This would use the toast component in a real implementation
-        console.log(`Updated trending locations for ${cityName}`);
+        toast.success(`Updated trending locations for ${cityName}`);
       } else {
         // If no events were provided, get trending locations for the city
         const cityTrending = getTrendingLocationsForCity(cityName);
