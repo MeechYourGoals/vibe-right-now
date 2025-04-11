@@ -26,6 +26,7 @@ import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { cityCoordinates } from "@/utils/cityLocations";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/lib/supabase";
 
 interface SearchVibesProps {
   onSearch: (query: string, filterType: string, category: string) => void;
@@ -47,6 +48,8 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
     "Upscale", "Casual", "Romantic", "Lively", "Intimate"
   ]);
   const [isNaturalLanguageSearch, setIsNaturalLanguageSearch] = useState(false);
+  const [nlpAnalysis, setNlpAnalysis] = useState<any>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -150,10 +153,84 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
     }
   }, [searchCategory]);
 
-  const handleSearch = () => {
+  useEffect(() => {
+    try {
+      const nlpCategories = sessionStorage.getItem('nlpCategories');
+      if (nlpCategories) {
+        const parsedCategories = JSON.parse(nlpCategories);
+        if (parsedCategories && parsedCategories.length > 0) {
+          setActiveFilters(prevFilters => {
+            const newFilters = [...prevFilters];
+            parsedCategories.forEach((category: string) => {
+              const categoryMap: Record<string, string> = {
+                'location': 'attractions',
+                'event': 'events',
+                'organization': 'other',
+                'restaurant': 'restaurants',
+                'bar': 'bars',
+                'entertainment': 'events',
+                'sports': 'sports'
+              };
+              
+              const mappedCategory = categoryMap[category.toLowerCase()];
+              if (mappedCategory && !newFilters.includes(mappedCategory)) {
+                newFilters.push(mappedCategory);
+              }
+            });
+            return newFilters;
+          });
+        }
+      }
+    } catch (e) {
+      console.error('Error retrieving NLP categories from sessionStorage:', e);
+    }
+  }, [searchQuery]);
+
+  const handleSearch = async () => {
     if (searchQuery.length > 50 && 
       /(\w+\s+(and|or|with|near|before|after)\s+\w+)|(\w+\s+for\s+\w+)/i.test(searchQuery)) {
       setIsNaturalLanguageSearch(true);
+      
+      setIsAnalyzing(true);
+      try {
+        const { data, error } = await supabase.functions.invoke('google-nlp', {
+          body: { text: searchQuery }
+        });
+        
+        if (error) {
+          console.error('Error calling NLP API:', error);
+        } else if (data && data.entities) {
+          setNlpAnalysis(data);
+          
+          const extractedCategories = new Set<string>();
+          data.entities.forEach((entity: any) => {
+            if (entity.type) {
+              const entityType = entity.type.toLowerCase();
+              if (['location', 'event', 'organization', 'consumer_good'].includes(entityType)) {
+                extractedCategories.add(entityType);
+              }
+            }
+          });
+          
+          if (extractedCategories.size > 0) {
+            const newFilters = Array.from(extractedCategories).map((cat: string) => {
+              const categoryMap: Record<string, string> = {
+                'location': 'attractions',
+                'event': 'events',
+                'organization': 'other',
+                'consumer_good': 'other'
+              };
+              return categoryMap[cat] || cat;
+            });
+            
+            setActiveFilters(prev => [...new Set([...prev, ...newFilters])]);
+          }
+        }
+      } catch (e) {
+        console.error('Error analyzing with Cloud Natural Language API:', e);
+      } finally {
+        setIsAnalyzing(false);
+      }
     }
     
     onSearch(searchQuery, selectedFilter, searchCategory);
@@ -250,9 +327,28 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
         <div className="mb-2 p-3 bg-primary/10 rounded-md">
           <h3 className="text-sm font-medium flex items-center">
             <Sparkles className="h-4 w-4 mr-2 text-primary" />
-            Smart Search
+            {isAnalyzing ? "Analyzing with Google Cloud Natural Language API..." : "Smart Search"}
           </h3>
-          <p className="text-xs text-muted-foreground">Showing diverse results for your natural language search</p>
+          <p className="text-xs text-muted-foreground">
+            {isAnalyzing 
+              ? "Identifying key entities and categories in your query..."
+              : "Showing diverse results for your natural language search"}
+          </p>
+          {nlpAnalysis && nlpAnalysis.entities && nlpAnalysis.entities.length > 0 && (
+            <div className="mt-1">
+              <div className="flex flex-wrap gap-1 mt-1">
+                {nlpAnalysis.entities.slice(0, 5).map((entity: any, index: number) => (
+                  <Badge 
+                    key={index} 
+                    variant="outline" 
+                    className="bg-primary/5 text-primary/70 border-primary/20 text-xs"
+                  >
+                    {entity.name}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -311,12 +407,17 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
             <ChevronDown className="h-4 w-4" />
           </Button>
           <Button 
-            variant="ghost" 
+            variant={isAnalyzing ? "secondary" : "ghost"}
             size="icon" 
             onClick={handleSearch}
+            disabled={isAnalyzing}
             className="h-full rounded-none rounded-r-md"
           >
-            <Search className="h-4 w-4" />
+            {isAnalyzing ? (
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-solid border-current border-r-transparent" />
+            ) : (
+              <Search className="h-4 w-4" />
+            )}
           </Button>
         </div>
       </div>

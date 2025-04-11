@@ -1,12 +1,34 @@
 
 import { SearchCoordinator } from './search';
+import { extractCategories } from '@/services/VertexAI/analysis';
 
 /**
  * Handle general search queries and location-based queries
+ * Now powered by Cloud Natural Language API
  */
 export const handleSearchQuery = async (
   inputValue: string,
   paginationState: Record<string, number>
 ): Promise<string> => {
-  return SearchCoordinator.processSearchQuery(inputValue, paginationState);
+  try {
+    // Extract categories using Cloud Natural Language API
+    const categories = await extractCategories(inputValue);
+    console.log('Cloud Natural Language API extracted categories:', categories);
+    
+    // Store categories in session for later use
+    if (categories.length > 0) {
+      try {
+        sessionStorage.setItem('nlpCategories', JSON.stringify(categories));
+      } catch (e) {
+        console.error('Error storing NLP categories in session:', e);
+      }
+    }
+    
+    // Process the search query with the categories
+    return SearchCoordinator.processSearchQuery(inputValue, paginationState, categories);
+  } catch (error) {
+    console.error('Error in search query handler with NLP:', error);
+    // Fall back to regular search without NLP categories
+    return SearchCoordinator.processSearchQuery(inputValue, paginationState);
+  }
 };

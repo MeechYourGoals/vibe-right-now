@@ -1,6 +1,7 @@
 
 import { VertexAIService } from '@/services/VertexAIService';
 import { cleanResponseText } from '../../responseFormatter';
+import { extractCategories } from '@/services/VertexAI/analysis';
 
 /**
  * Handles location-based searches using Vertex AI search capabilities
@@ -17,11 +18,15 @@ export const LocationSearchStrategy = {
   },
   
   /**
-   * Processes a location-based query using Vertex AI search
+   * Processes a location-based query using Vertex AI search and Cloud Natural Language API
    */
   async handleLocationSearch(inputValue: string): Promise<{response: string, categories: string[]}> {
-    console.log('Location query detected, using Vertex AI search');
+    console.log('Location query detected, using Cloud Natural Language API and Vertex AI search');
     try {
+      // First, extract categories using the Cloud Natural Language API
+      const extractedCategories = await extractCategories(inputValue);
+      console.log('Extracted categories using Cloud NLP:', extractedCategories);
+      
       // Enhance the prompt for location-specific information
       const enhancedPrompt = `
         Please provide real information about "${inputValue}".
@@ -41,7 +46,7 @@ export const LocationSearchStrategy = {
         console.log('Got real-world information from Vertex AI');
         
         // Extract likely categories based on content
-        const categories: string[] = [];
+        const contentCategories: string[] = [];
         const categoryKeywords = {
           'dining': /restaurant|dining|food|eat|cuisine|menu|chef|brunch|dinner|lunch/i,
           'nightlife': /bar|club|nightlife|pub|cocktail|brewery|dance|dj|party/i,
@@ -52,17 +57,20 @@ export const LocationSearchStrategy = {
         
         Object.entries(categoryKeywords).forEach(([category, regex]) => {
           if (regex.test(vertexResponse)) {
-            categories.push(category);
+            contentCategories.push(category);
           }
         });
         
+        // Combine extracted categories from NLP API with content-based categories
+        const allCategories = [...new Set([...extractedCategories, ...contentCategories])];
+        
         // Set categories in sessionStorage for the Explore page to use
-        if (categories.length > 0) {
+        if (allCategories.length > 0) {
           try {
-            sessionStorage.setItem('lastSearchCategories', JSON.stringify(categories));
+            sessionStorage.setItem('lastSearchCategories', JSON.stringify(allCategories));
             sessionStorage.setItem('lastSearchQuery', inputValue);
             sessionStorage.setItem('lastSearchTimestamp', new Date().toISOString());
-            console.log('Set search categories in session storage:', categories);
+            console.log('Set search categories in session storage:', allCategories);
           } catch (e) {
             console.error('Error setting categories in sessionStorage:', e);
           }
@@ -74,11 +82,11 @@ export const LocationSearchStrategy = {
         
         return {
           response: cleanResponseText(vertexResponse + exploreLinkText),
-          categories
+          categories: allCategories
         };
       }
       
-      return { response: '', categories: [] };
+      return { response: '', categories: extractedCategories };
     } catch (vertexError) {
       console.error('Vertex AI search failed:', vertexError);
       return { response: '', categories: [] };

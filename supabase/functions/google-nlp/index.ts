@@ -25,9 +25,9 @@ serve(async (req) => {
       );
     }
     
-    console.log(`Analyzing text: "${text.substring(0, 50)}..."`);
+    console.log(`Analyzing text with Cloud Natural Language API: "${text.substring(0, 50)}..."`);
     
-    // Prepare the request to Google NLP API
+    // Prepare the request to Google Cloud Natural Language API
     const response = await fetch(`${NLP_API_URL}?key=${GOOGLE_API_KEY}`, {
       method: 'POST',
       headers: {
