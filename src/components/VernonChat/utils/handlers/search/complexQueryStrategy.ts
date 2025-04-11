@@ -1,66 +1,73 @@
 
 import { SearchService } from '@/services/search/SearchService';
-import { cleanResponseText } from '../../responseFormatter';
 
 /**
- * Handles complex natural language queries
+ * Strategy for handling complex search queries with multiple parameters
+ * Now enhanced with Cloud Natural Language API support
  */
 export const ComplexQueryStrategy = {
   /**
-   * Detects if a query is complex (multiple requirements, conditions, etc.)
+   * Determine if a query is complex based on various criteria
    */
-  isComplexQuery(inputValue: string): boolean {
-    return inputValue.length > 50 && 
-      /(\w+\s+(and|or|with|near|before|after)\s+\w+)|(\w+\s+for\s+\w+)/i.test(inputValue);
+  isComplexQuery(query: string): boolean {
+    const hasMultipleKeywords = 
+      /(\w+\s+(and|or|with|near|before|after)\s+\w+)|(\w+\s+for\s+\w+)/i.test(query);
+    
+    const hasQuestionWords = 
+      /\b(what|where|when|how|which|why|who)\b/i.test(query);
+    
+    const isLongQuery = query.length > 50;
+    
+    return hasMultipleKeywords || hasQuestionWords || isLongQuery;
   },
   
   /**
-   * Processes a complex query using vector search
+   * Handle complex queries with integrated search service
+   * @param query The complex search query
+   * @param paginationState Current pagination state
+   * @param categories Optional categories extracted by NLP
    */
-  async handleComplexSearch(inputValue: string): Promise<{response: string, categories: string[]}> {
+  async handleComplexQuery(
+    query: string, 
+    paginationState: Record<string, number> = {},
+    categories: string[] = []
+  ): Promise<string> {
+    console.log('Handling complex query with AI-powered search:', query);
+    console.log('Using NLP categories:', categories);
+    
     try {
-      // Attempt with vector search for most up-to-date information
-      const vectorSearchResult = await SearchService.vectorSearch(inputValue);
-      
-      let responseText = '';
-      let categories: string[] = [];
+      // Try vector search first, which now includes the NLP-derived categories
+      const vectorSearchResult = await SearchService.vectorSearch(query);
       
       if (typeof vectorSearchResult === 'object' && vectorSearchResult !== null) {
-        responseText = vectorSearchResult.results || '';
-        categories = vectorSearchResult.categories || [];
+        // If we have a structured result with categories
+        const combinedCategories = [...new Set([
+          ...(vectorSearchResult.categories || []),
+          ...categories
+        ])];
         
-        // Set categories in sessionStorage for the Explore page to use
-        if (categories && categories.length > 0) {
-          try {
-            sessionStorage.setItem('lastSearchCategories', JSON.stringify(categories));
-            sessionStorage.setItem('lastSearchQuery', inputValue);
-            console.log('Set search categories in session storage:', categories);
-          } catch (e) {
-            console.error('Error setting categories in sessionStorage:', e);
-          }
+        console.log('Combined search categories:', combinedCategories);
+        
+        // Store enhanced categories in session
+        try {
+          sessionStorage.setItem('lastSearchCategories', JSON.stringify(combinedCategories));
+          sessionStorage.setItem('lastSearchQuery', query);
+        } catch (e) {
+          console.error('Error storing combined categories in session:', e);
         }
-      } else if (typeof vectorSearchResult === 'string') {
-        responseText = vectorSearchResult;
+        
+        return vectorSearchResult.results;
+      } else if (typeof vectorSearchResult === 'string' && vectorSearchResult.length > 0) {
+        return vectorSearchResult;
       }
       
-      console.log('Vector search successful, response length:', typeof responseText === 'string' ? responseText.length : 'object');
-      console.log('Categories extracted:', categories);
+      // If vector search didn't return useful results, use generalized search
+      return await SearchService.search(query);
+    } catch (error) {
+      console.error('Error in handleComplexQuery:', error);
       
-      if (responseText && (typeof responseText === 'string' && responseText.length > 100)) {
-        // Include a link to the Explore page for a better visual experience
-        const exploreLinkText = "\n\nYou can also [view all these results on our Explore page](/explore?q=" + 
-          encodeURIComponent(inputValue) + ") for a better visual experience.";
-        return {
-          response: cleanResponseText(responseText + exploreLinkText),
-          categories
-        };
-      }
-      
-      console.log('Vector search returned insufficient response, trying other methods');
-      return { response: '', categories: [] };
-    } catch (vectorError) {
-      console.error('Vector search failed:', vectorError);
-      return { response: '', categories: [] };
+      // Fallback response
+      return `I couldn't find specific information about "${query}". Could you try rephrasing your question?`;
     }
   }
 };

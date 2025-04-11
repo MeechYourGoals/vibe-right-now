@@ -22,11 +22,17 @@ const useVertexAI = true; // Using Vertex AI by default
 export const IntegratedSearchProvider = {
   /**
    * Attempt to search using vector search
+   * @param query The search query
+   * @param categories Optional categories from Cloud Natural Language API
    */
-  async attemptVectorSearch(query: string): Promise<string | null> {
+  async attemptVectorSearch(query: string, categories?: string[]): Promise<string | null> {
     try {
       console.log('Attempting vector search with AI');
-      const vectorResult = await SearchServiceCore.vectorSearch(query);
+      if (categories && categories.length > 0) {
+        console.log('With NLP categories:', categories);
+      }
+      
+      const vectorResult = await SearchServiceCore.vectorSearch(query, categories);
       
       if (typeof vectorResult === 'object' && vectorResult !== null) {
         if (vectorResult.results && vectorResult.results.length > 100) {
@@ -48,17 +54,32 @@ export const IntegratedSearchProvider = {
 
   /**
    * Attempt to search using direct AI service
+   * @param query The search query
+   * @param categories Optional categories from Cloud Natural Language API
    */
-  async attemptDirectAISearch(query: string): Promise<string | null> {
+  async attemptDirectAISearch(query: string, categories?: string[]): Promise<string | null> {
     try {
       console.log('Attempting direct Vertex AI search');
-      
-      // Using VertexAIHub for search
-      const aiResult = await VertexAIHub.searchWithAI(query);
-      
-      if (aiResult && aiResult.length > 100) {
-        console.log('Vertex AI direct search successful, response length:', aiResult.length);
-        return aiResult;
+      if (categories && categories.length > 0) {
+        // Pass categories to VertexAI for more contextual results
+        const enhancedQuery = this.enhanceQueryWithCategories(query, categories);
+        console.log('Enhanced query with categories:', enhancedQuery);
+        
+        // Using VertexAIHub for search with enhanced query
+        const aiResult = await VertexAIHub.searchWithAI(enhancedQuery);
+        
+        if (aiResult && aiResult.length > 100) {
+          console.log('Vertex AI direct search successful, response length:', aiResult.length);
+          return aiResult;
+        }
+      } else {
+        // Regular query without categories
+        const aiResult = await VertexAIHub.searchWithAI(query);
+        
+        if (aiResult && aiResult.length > 100) {
+          console.log('Vertex AI direct search successful, response length:', aiResult.length);
+          return aiResult;
+        }
       }
       return null;
     } catch (error) {
@@ -146,5 +167,26 @@ export const IntegratedSearchProvider = {
     
     // Ultimate fallback if all services fail
     return FallbackResponseGenerator.generateFallbackResponse(query);
+  },
+  
+  /**
+   * Helper method to enhance a query with NLP categories
+   * Makes search more effective by providing context
+   */
+  enhanceQueryWithCategories(query: string, categories: string[]): string {
+    if (!categories || categories.length === 0) {
+      return query;
+    }
+    
+    // Add category context to the query
+    const categoryContext = categories
+      .filter(cat => cat && cat.trim().length > 0)
+      .join(', ');
+      
+    if (categoryContext) {
+      return `${query} (Categories: ${categoryContext})`;
+    }
+    
+    return query;
   }
 };

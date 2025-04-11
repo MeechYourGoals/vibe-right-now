@@ -1,59 +1,90 @@
 
 import { ComedySearchStrategy } from './comedySearchStrategy';
+import { ComplexQueryStrategy } from './complexQueryStrategy';
+import { LocalDataStrategy } from './localDataStrategy';
 import { LocationSearchStrategy } from './locationSearchStrategy';
-import { VertexAIService } from '@/services/VertexAIService';
-import { cleanResponseText } from '../../responseFormatter';
+import { FallbackSearchStrategy } from './fallbackSearchStrategy';
+import { PerplexityService } from '@/services/PerplexityService';
+import { SearchService } from '@/services/search/SearchService';
 
 /**
- * Coordinates the search process by delegating to specialized search strategies
+ * Coordinates different search strategies based on query type
  */
 export const SearchCoordinator = {
   /**
-   * Process a search query using the appropriate strategy
+   * Process a search query by determining the best strategy
+   * @param query The user's search query
+   * @param paginationState Current pagination state
+   * @param categories Optional categories extracted by NLP
+   * @returns Text response with search results
    */
-  async processSearchQuery(inputValue: string, paginationState: Record<string, number>): Promise<string> {
-    console.log('SearchCoordinator processing query:', inputValue);
+  async processSearchQuery(
+    query: string, 
+    paginationState: Record<string, number> = {},
+    categories: string[] = []
+  ): Promise<string> {
+    console.log(`Processing search query: "${query}"`);
+    console.log('With NLP categories:', categories);
     
+    // Check for comedy-related queries first
+    if (ComedySearchStrategy.isComedyQuery(query)) {
+      console.log('Using comedy search strategy');
+      return ComedySearchStrategy.handleComedySearch(query, paginationState);
+    }
+    
+    // Check for complex queries (now enhanced with NLP categories)
+    if (ComplexQueryStrategy.isComplexQuery(query) || categories.length > 0) {
+      console.log('Using complex query strategy (with NLP assistance)');
+      return ComplexQueryStrategy.handleComplexQuery(query, paginationState, categories);
+    }
+    
+    // Check for location-based queries
+    if (LocationSearchStrategy.isLocationQuery(query)) {
+      console.log('Using location search strategy');
+      return LocationSearchStrategy.handleLocationSearch(query, paginationState);
+    }
+    
+    // Try local data for simple queries
+    if (LocalDataStrategy.canHandleQuery(query)) {
+      console.log('Using local data strategy');
+      return LocalDataStrategy.handleLocalSearch(query, paginationState);
+    }
+    
+    // Use the integrated search service with NLP categories
     try {
-      // Always prioritize comedy search for comedy-related queries
-      if (ComedySearchStrategy.isComedyQuery(inputValue)) {
-        const comedyResponse = await ComedySearchStrategy.handleComedySearch(inputValue);
-        if (comedyResponse) {
-          console.log('Comedy search successful, returning results');
-          return comedyResponse;
+      console.log('Using integrated search service with NLP categories');
+      
+      // Store categories in session for later use by other components
+      if (categories.length > 0) {
+        try {
+          sessionStorage.setItem('lastSearchCategories', JSON.stringify(categories));
+          sessionStorage.setItem('lastSearchQuery', query);
+        } catch (e) {
+          console.error('Error storing search categories in session:', e);
         }
       }
       
-      // For location and general queries, try location strategy first
-      if (LocationSearchStrategy.isLocationQuery(inputValue)) {
-        const locationResult = await LocationSearchStrategy.handleLocationSearch(inputValue);
-        if (locationResult && locationResult.response) {
-          console.log('Location search successful, returning results');
-          return locationResult.response;
-        }
+      // Try vector search first with categories
+      const vectorSearchResult = await SearchService.vectorSearch(query);
+      if (typeof vectorSearchResult === 'object' && vectorSearchResult !== null) {
+        return vectorSearchResult.results;
+      } else if (typeof vectorSearchResult === 'string' && vectorSearchResult.length > 0) {
+        return vectorSearchResult;
       }
       
-      // Direct Vertex AI call as fallback for all queries
-      console.log('Using Vertex AI as fallback search method');
-      const vertexResponse = await VertexAIService.searchWithVertex(
-        `Please provide detailed, factual information about: "${inputValue}".
-         Include specific names, addresses, and details about real places and events.
-         Focus on giving practical information that would help someone planning to visit these places.`
-      );
-      
-      // Clean and format the response with explore link
-      if (vertexResponse && vertexResponse.length > 100) {
-        console.log('Vertex AI direct search successful');
-        const exploreLinkText = "\n\nYou can also [view all results on our Explore page](/explore?q=" + 
-          encodeURIComponent(inputValue) + ") for a better visual experience.";
-        
-        return cleanResponseText(vertexResponse + exploreLinkText);
-      }
-      
-      return "I couldn't find specific information about that. Could you try asking in a different way?";
+      // Fall back to regular search
+      return await SearchService.search(query);
     } catch (error) {
-      console.error('Error in SearchCoordinator:', error);
-      return "I'm having trouble searching for information right now. Please try again shortly.";
+      console.error('Error using integrated search service:', error);
+      
+      // Fall back to perplexity as a last resort
+      try {
+        console.log('Falling back to perplexity service');
+        return await PerplexityService.searchPerplexity(query);
+      } catch (secondError) {
+        console.error('Error with perplexity fallback:', secondError);
+        return FallbackSearchStrategy.generateFallbackResponse(query);
+      }
     }
   }
 };

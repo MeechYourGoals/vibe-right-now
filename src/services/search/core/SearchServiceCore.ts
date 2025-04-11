@@ -1,51 +1,49 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 /**
- * Core search functionality used by the search service
+ * Core search functionality using vector search
  */
 export const SearchServiceCore = {
   /**
-   * Perform a vector search using Supabase vector search capabilities
-   * This connects to our AI-powered search function
-   * @returns Object with results and categories or string with results
+   * Perform vector search using Supabase
+   * @param query The search query
+   * @param categories Optional categories from Cloud Natural Language API
    */
-  async vectorSearch(query: string): Promise<{results: string, categories: string[]} | string | null> {
+  async vectorSearch(query: string, categories?: string[]): Promise<{results: string, categories: string[]} | string | null> {
     try {
-      console.log('Invoking vector-search function with query:', query);
-      // Call the vector-search edge function
+      console.log('Performing vector search with:', query);
+      if (categories && categories.length > 0) {
+        console.log('With NLP categories:', categories);
+      }
+      
+      // Call vector search edge function
       const { data, error } = await supabase.functions.invoke('vector-search', {
-        body: { query }
+        body: { 
+          query,
+          categories: categories || [] // Pass categories to the edge function
+        }
       });
       
       if (error) {
-        console.error('Error calling vector-search function:', error);
+        console.error('Vector search function error:', error);
         return null;
       }
       
-      if (!data) {
-        console.log('No data from vector search');
-        return null;
-      }
-      
-      if (data.results) {
-        console.log('Vector search returned results of length:', data.results.length);
-        
-        // If we have categories, return both results and categories
+      if (data && data.content) {
+        // Return results with categories if available
         if (data.categories) {
-          console.log('Vector search returned categories:', data.categories);
           return {
-            results: data.results,
+            results: data.content,
             categories: data.categories
           };
         }
-        
-        // Otherwise just return the results string
-        return data.results;
+        return data.content;
       }
       
       return null;
     } catch (error) {
-      console.error('Error with vector search:', error);
+      console.error('Error in vector search:', error);
       return null;
     }
   }

@@ -12,18 +12,22 @@ export const SearchService = {
   /**
    * Search using multiple providers, trying each one until a result is found
    * @param query The search query
+   * @param categories Optional categories from Cloud Natural Language API
    * @returns The search results as text
    */
-  async search(query: string): Promise<string> {
+  async search(query: string, categories?: string[]): Promise<string> {
     try {
       console.log('Searching for:', query);
+      if (categories && categories.length > 0) {
+        console.log('With NLP categories:', categories);
+      }
       
       // First try vector search through AI API (most up-to-date info)
-      const vectorResult = await IntegratedSearchProvider.attemptVectorSearch(query);
+      const vectorResult = await IntegratedSearchProvider.attemptVectorSearch(query, categories);
       if (vectorResult) return vectorResult;
       
       // Try using AI directly for a conversational response with current information
-      const aiResult = await IntegratedSearchProvider.attemptDirectAISearch(query);
+      const aiResult = await IntegratedSearchProvider.attemptDirectAISearch(query, categories);
       if (aiResult) return aiResult;
       
       // Try using Swirl (local search engine)
@@ -54,9 +58,11 @@ export const SearchService = {
   /**
    * Perform a vector search using Supabase vector search capabilities
    * This connects to our AI-powered search function
+   * @param query The search query
+   * @param categories Optional categories from Cloud Natural Language API
    * @returns Object with results and categories or string with results
    */
-  async vectorSearch(query: string): Promise<{results: string, categories: string[]} | string | null> {
-    return SearchServiceCore.vectorSearch(query);
+  async vectorSearch(query: string, categories?: string[]): Promise<{results: string, categories: string[]} | string | null> {
+    return SearchServiceCore.vectorSearch(query, categories);
   }
 };

@@ -26,7 +26,7 @@ import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { cityCoordinates } from "@/utils/cityLocations";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 
 interface SearchVibesProps {
   onSearch: (query: string, filterType: string, category: string) => void;

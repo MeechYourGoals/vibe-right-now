@@ -25,7 +25,13 @@ export const handleSearchQuery = async (
     }
     
     // Process the search query with the categories
-    return SearchCoordinator.processSearchQuery(inputValue, paginationState, categories);
+    // Pass categories to SearchCoordinator but handle case where it might not support categories
+    try {
+      return await SearchCoordinator.processSearchQuery(inputValue, paginationState, categories);
+    } catch (error) {
+      console.error('Error using processSearchQuery with categories, falling back to standard search:', error);
+      return await SearchCoordinator.processSearchQuery(inputValue, paginationState);
+    }
   } catch (error) {
     console.error('Error in search query handler with NLP:', error);
     // Fall back to regular search without NLP categories
