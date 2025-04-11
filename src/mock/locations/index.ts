@@ -27,3 +27,5 @@ export {
   otherLocations
 };
 
+// For backward compatibility, export the utility functions
+export * from "./utils";
