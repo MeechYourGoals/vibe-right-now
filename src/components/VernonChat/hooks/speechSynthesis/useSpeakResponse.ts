@@ -1,7 +1,8 @@
+
 import { useCallback } from 'react';
 import { playAudioBase64 } from '@/components/VernonChat/utils/speech/synthesis';
 import { toast } from "sonner";
-import { VertexAIHub } from '@/services/VertexAI';
+import { VertexAIHub, DEFAULT_MALE_VOICE } from '@/services/VertexAI';
 
 interface UseSpeakResponseProps {
   isSpeaking: boolean;
@@ -47,8 +48,10 @@ export const useSpeakResponse = ({
     // Use Google TTS via Vertex AI Hub with male voice
     try {
       console.log('Attempting to use Google TTS via Vertex AI Hub...');
+      console.log(`Using voice: ${DEFAULT_MALE_VOICE}`);
+      
       const audioBase64 = await VertexAIHub.textToSpeech(text, {
-        voice: 'en-US-Neural2-D',  // Use male voice
+        voice: DEFAULT_MALE_VOICE,  // Use the default male voice constant
         speakingRate: 1.0,
         pitch: 0
       });

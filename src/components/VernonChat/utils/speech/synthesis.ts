@@ -1,6 +1,7 @@
+
 // Speech synthesis helpers using Google's TTS
 import { toast } from "sonner";
-import { VertexAIHub } from "@/services/VertexAI";
+import { VertexAIHub, DEFAULT_MALE_VOICE } from "@/services/VertexAI";
 
 export const initializeSpeechSynthesis = (): SpeechSynthesis | null => {
   if ('speechSynthesis' in window) {
@@ -29,7 +30,7 @@ export const getGoogleTTS = async (text: string): Promise<string | null> => {
     
     // Use our VertexAIHub to handle TTS
     return await VertexAIHub.textToSpeech(text, {
-      voice: 'en-US-Neural2-D',
+      voice: DEFAULT_MALE_VOICE,
       speakingRate: 1.0,
       pitch: 0
     });
