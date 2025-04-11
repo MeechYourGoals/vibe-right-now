@@ -31,3 +31,20 @@ export const createDefaultMedia = (): Media => {
     url: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4"
   };
 };
+
+/**
+ * Get media items for a location
+ */
+export const getMediaForLocation = (location: any): Media[] => {
+  if (!location) return [createDefaultMedia()];
+  
+  if (location.media && Array.isArray(location.media) && location.media.length > 0) {
+    return location.media;
+  }
+  
+  if (location.photos && Array.isArray(location.photos) && location.photos.length > 0) {
+    return formatLocationPhotos(location.photos);
+  }
+  
+  return [createDefaultMedia()];
+};

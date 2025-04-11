@@ -16,4 +16,5 @@ export interface BusinessHours {
   friday: { open: string; close: string };
   saturday: { open: string; close: string };
   sunday: { open: string; close: string };
+  [key: string]: { open: string; close: string }; // Add index signature for string keys
 }
