@@ -2,15 +2,15 @@
 import { HeartHandshake, Users, Building, Briefcase, Moon } from "lucide-react";
 
 export const PREFERENCE_TAGS = [
-  "Cozy", "High Energy", "Locally Owned", "Clubs", "Lounges", 
-  "Early Morning Risers", "Night Owls", "Fitness", "Outdoors", 
-  "Chains", "Women Owned", "Black Owned", "Franchises", 
-  "Family Friendly", "Date Night", "Physical Adventure", 
-  "Differently Abled Accessible", "Fine Dining", "Casual", 
-  "Budget Friendly", "Luxury", "Pet Friendly", "Live Music",
-  "Art", "Theater", "Shopping", "Sightseeing", "Historic",
-  "LGBTQ+ Friendly", "Good for Groups", "Tourist Attraction", 
-  "Business Appropriate", "After Hours"
+  "After Hours", "Art", "Black Owned", "Brunch", "Budget Friendly", 
+  "Business Appropriate", "Cannabis Friendly", "Casual", "Chains", 
+  "Church", "Clubs", "Comedy", "Cozy", "Date Night", "Differently Abled Accessible", 
+  "Early Morning Risers", "EV Charging Nearby", "Family Friendly", "Farmer's Markets", 
+  "Fine Dining", "Fitness", "Franchises", "Good for Groups", "Healthy Eats", 
+  "High Energy", "Historic", "LGBTQ+ Friendly", "Live Music", "Locally Owned", 
+  "Lounges", "Luxury", "Night Owls", "Outdoors", "Pet Friendly", 
+  "Physical Adventure", "Red Light District", "Shopping", "Sightseeing", 
+  "Sports", "Theater", "Tourist Attraction", "Volunteering", "Women Owned"
 ];
 
 export const TICKETING_PLATFORMS = [

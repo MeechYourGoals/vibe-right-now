@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -7,9 +6,10 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { PlusCircle, X, Crown, Sparkles, Check } from "lucide-react";
+import { PlusCircle, X, Crown, Sparkles, Check, Star } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PREFERENCE_TAGS, PREFERENCE_CATEGORIES } from "./constants";
+import { useToast } from "@/hooks/use-toast";
 
 export interface PreferencesTabProps {
   onSave: () => void;
@@ -29,6 +29,10 @@ const PreferencesTab = ({
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState("");
+  const [favorites, setFavorites] = useState<string[]>([]);
+  const [newFavorite, setNewFavorite] = useState("");
+  
+  const { toast } = useToast();
   const [competitorVenues, setCompetitorVenues] = useState([
     { id: 1, name: "The Corner Bar", tags: ["Cozy", "Lounges", "Date Night"] },
     { id: 2, name: "Downtown Café", tags: ["Cozy", "Locally Owned", "Budget Friendly"] },
@@ -66,6 +70,26 @@ const PreferencesTab = ({
       setSelectedTags([...selectedTags, newTag.trim()]);
       setNewTag("");
     }
+  };
+  
+  const handleAddFavorite = () => {
+    if (newFavorite.trim() && !favorites.includes(newFavorite.trim())) {
+      if (favorites.length < 10) {
+        setFavorites([...favorites, newFavorite.trim()]);
+        setNewFavorite("");
+      } else {
+        // Show a message indicating the limit has been reached
+        toast({
+          title: "Favorites limit reached",
+          description: "You can only add up to 10 favorites. Remove one to add another.",
+          variant: "destructive"
+        });
+      }
+    }
+  };
+  
+  const handleRemoveFavorite = (favorite: string) => {
+    setFavorites(favorites.filter(f => f !== favorite));
   };
   
   const isTaggingAvailable = () => {
@@ -159,6 +183,54 @@ const PreferencesTab = ({
                   >
                     <PlusCircle className="h-4 w-4" />
                   </Button>
+                </div>
+              </div>
+              
+              {/* Favorites Section - New Addition */}
+              <div className="space-y-2 mt-6">
+                <h4 className="text-md font-medium flex items-center">
+                  <Star className="h-4 w-4 mr-2 text-amber-500" />
+                  My Favorite Teams, Artists & Events
+                </h4>
+                <p className="text-sm text-muted-foreground">
+                  Add your favorites to get notifications when they're in your area (up to 10).
+                </p>
+                
+                <div className="space-y-2 mt-2">
+                  <div className="flex flex-wrap gap-2 min-h-10 p-2 border rounded-md bg-background">
+                    {favorites.length === 0 ? (
+                      <span className="text-sm text-muted-foreground">No favorites added yet</span>
+                    ) : (
+                      favorites.map(favorite => (
+                        <Badge key={favorite} variant="secondary" className="flex items-center gap-1">
+                          {favorite}
+                          <X 
+                            className="h-3 w-3 cursor-pointer" 
+                            onClick={() => handleRemoveFavorite(favorite)}
+                          />
+                        </Badge>
+                      ))
+                    )}
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <Input 
+                      value={newFavorite}
+                      onChange={(e) => setNewFavorite(e.target.value)}
+                      placeholder="Add team, artist or event (e.g. Lakers, Beyoncé, Pride Festival)"
+                      className="flex-1"
+                    />
+                    <Button 
+                      onClick={handleAddFavorite}
+                      disabled={!newFavorite.trim() || favorites.length >= 10}
+                      size="icon"
+                    >
+                      <PlusCircle className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {favorites.length}/10 favorites added
+                  </div>
                 </div>
               </div>
               
