@@ -65,9 +65,10 @@ const RecommendedForYou: React.FC<RecommendedForYouProps> = ({ featuredLocations
     }
     
     // Add locations matching user preferences
-    const preferenceLocations = mockLocations.filter(location => 
-      location.tags && location.tags.some(tag => userPreferences.includes(tag))
-    ).slice(0, 3);
+    const preferenceLocations = mockLocations.filter(location => {
+      // Make sure location.tags exists before trying to use it
+      return location.tags && location.tags.some(tag => userPreferences.includes(tag));
+    }).slice(0, 3);
     
     // Add premium/promoted venues
     const premiumLocations = mockLocations.filter(location => 
