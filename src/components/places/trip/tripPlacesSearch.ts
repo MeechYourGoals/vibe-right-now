@@ -1,6 +1,6 @@
 
 import { Location } from "@/types";
-import { searchLocations as mockSearchLocations } from "@/mock/locations";
+import { mockLocations } from "@/mock/data";
 
 /**
  * Search for locations based on query string
@@ -10,5 +10,11 @@ export const searchLocations = (query: string): Location[] => {
     return [];
   }
   
-  return mockSearchLocations(query).slice(0, 5); // Limit to 5 results
+  // Simple search from mock locations
+  const results = mockLocations.filter(
+    location => location.name.toLowerCase().includes(query.toLowerCase()) ||
+                location.city.toLowerCase().includes(query.toLowerCase())
+  );
+  
+  return results.slice(0, 5); // Limit to 5 results
 };

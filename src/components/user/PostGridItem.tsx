@@ -36,13 +36,13 @@ const PostGridItem = ({ post }: PostGridItemProps) => {
 
   return (
     <div className="group relative block aspect-square overflow-hidden rounded-lg">
-      {post.media && post.media[0]?.type === "image" ? (
+      {post.media[0]?.type === "image" ? (
         <img 
           src={post.media[0].url}
-          alt={`Post by ${post.user.username} at ${post.location.name}`}
+          alt={`Post by ${post.user.username}`}
           className="h-full w-full object-cover transition-transform group-hover:scale-105"
         />
-      ) : post.media && post.media[0]?.type === "video" ? (
+      ) : post.media[0]?.type === "video" ? (
         <video
           src={post.media[0].url}
           className="h-full w-full object-cover"

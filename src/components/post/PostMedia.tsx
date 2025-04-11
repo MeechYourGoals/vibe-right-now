@@ -22,10 +22,6 @@ const PostMedia: React.FC<PostMediaProps> = ({ media }) => {
 
   const currentMedia = media[currentIndex];
 
-  if (!currentMedia) {
-    return null;
-  }
-
   return (
     <div className="relative mb-2">
       {currentMedia.type === "image" ? (

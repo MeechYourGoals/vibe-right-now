@@ -1,8 +1,9 @@
 
 import { useState, useEffect } from "react";
-import { mockLocations, getLocationsByCity, getLocationsNearby } from "@/mock/locations";
+import { mockLocations } from "@/mock/locations";
 import { Location } from "@/types";
 import { cityCoordinates } from "@/utils/locations";
+import { getLocationsByCity, getNearbyLocations } from "@/mock/cityLocations";
 
 // Improved version that uses city data
 export const useNearbyLocations = () => {
@@ -53,12 +54,12 @@ export const useNearbyLocations = () => {
     } else if (userAddressLocation) {
       // If we have a custom address location but no city search
       const [lng, lat] = userAddressLocation;
-      const nearbyLocs = getLocationsNearby(lat, lng);
+      const nearbyLocs = getNearbyLocations(lat, lng);
       setNearbyLocations(nearbyLocs);
       setLoading(false);
     } else if (userLocation) {
       // Use actual user location if available and no city search
-      const nearbyLocs = getLocationsNearby(userLocation.latitude, userLocation.longitude);
+      const nearbyLocs = getNearbyLocations(userLocation.latitude, userLocation.longitude);
       setNearbyLocations(nearbyLocs);
       setLoading(false);
     } else {
