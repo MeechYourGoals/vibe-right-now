@@ -4,4 +4,5 @@ export interface Message {
   text: string;
   sender: 'user' | 'ai';
   timestamp: Date;
+  verified?: boolean;
 }
