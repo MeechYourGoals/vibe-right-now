@@ -1,7 +1,7 @@
 import { SimpleSearchService } from '../SimpleSearchService';
 import { SwirlSearchService } from '@/services/SwirlSearchService';
 import { GeminiService } from '@/services/GeminiService';
-import { VertexAIService } from '@/services/VertexAIService';
+import { VertexAIHub } from '@/services/VertexAIHub';
 import { 
   OpenAISearchProvider,
   GoogleSearchProvider,
@@ -13,7 +13,7 @@ import {
 import { SearchServiceCore } from '../core/SearchServiceCore';
 
 // Flag to determine which AI service to use
-const useVertexAI = true; // Changed from false to true to use Vertex AI by default
+const useVertexAI = true; // Using Vertex AI by default
 
 /**
  * Provides integrated search functionality by attempting multiple search providers
@@ -52,14 +52,8 @@ export const IntegratedSearchProvider = {
     try {
       console.log('Attempting direct Vertex AI search');
       
-      // Using Vertex AI by default
-      const aiResult = await VertexAIService.generateResponse(
-        `Search the web for current information about: "${query}". 
-         Provide specific, factual information about real places, events or attractions if applicable. 
-         Include names, addresses, dates, times, and other relevant details.
-         Focus on giving practical information that would help someone visit these places.`, 
-        'user'
-      );
+      // Using VertexAIHub for search
+      const aiResult = await VertexAIHub.searchWithAI(query);
       
       if (aiResult && aiResult.length > 100) {
         console.log('Vertex AI direct search successful, response length:', aiResult.length);

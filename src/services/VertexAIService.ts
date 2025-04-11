@@ -1,6 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { Message } from '@/components/VernonChat/types';
+import { VertexAIHub } from './VertexAIHub';
 
 /**
  * Service to interact with Google's Vertex AI API via Supabase Edge Functions
@@ -17,20 +18,16 @@ export const VertexAIService = {
     try {
       console.log(`Calling Vertex AI with prompt: "${prompt.substring(0, 50)}..."`);
       
-      const { data, error } = await supabase.functions.invoke('vertex-ai', {
-        body: { prompt, mode, history }
+      // Convert Message[] to format expected by VertexAIHub
+      const formattedHistory = history.map(msg => ({
+        sender: msg.sender,
+        text: msg.text
+      }));
+      
+      // Use our new hub to generate text
+      return await VertexAIHub.generateText(prompt, formattedHistory, {
+        temperature: mode === 'venue' ? 0.5 : 0.7, // Lower temperature for business insights
       });
-      
-      if (error) {
-        console.error('Error calling Vertex AI function:', error);
-        throw new Error(`Failed to generate response: ${error.message}`);
-      }
-      
-      if (!data || !data.text) {
-        throw new Error('No response received from Vertex AI');
-      }
-      
-      return data.text;
     } catch (error) {
       console.error('Error in VertexAIService.generateResponse:', error);
       return "I'm having trouble connecting to my AI services right now. Please try again later.";
@@ -46,24 +43,8 @@ export const VertexAIService = {
     try {
       console.log(`Searching with Vertex AI: "${query.substring(0, 50)}..."`);
       
-      const { data, error } = await supabase.functions.invoke('vertex-ai', {
-        body: { 
-          prompt: query,
-          mode: 'search',
-          searchMode: true
-        }
-      });
-      
-      if (error) {
-        console.error('Error calling Vertex AI search:', error);
-        throw new Error(`Failed to search with Vertex AI: ${error.message}`);
-      }
-      
-      if (!data || !data.text) {
-        throw new Error('No search results received from Vertex AI');
-      }
-      
-      return data.text;
+      // Use our new hub for AI search capabilities
+      return await VertexAIHub.searchWithAI(query);
     } catch (error) {
       console.error('Error in VertexAIService.searchWithVertex:', error);
       return "I couldn't find specific information about that. Could you try rephrasing your question?";

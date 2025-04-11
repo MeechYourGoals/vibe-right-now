@@ -1,7 +1,8 @@
 
 import { useCallback } from 'react';
-import { getGoogleTTS, playAudioBase64 } from '@/components/VernonChat/utils/speech/synthesis';
+import { playAudioBase64 } from '@/components/VernonChat/utils/speech/synthesis';
 import { toast } from "sonner";
+import { VertexAIHub } from '@/services/VertexAIHub';
 
 interface UseSpeakResponseProps {
   isSpeaking: boolean;
@@ -40,14 +41,18 @@ export const useSpeakResponse = ({
     // Set the current text being spoken
     currentlyPlayingText.current = text;
     
-    console.log('Speaking with Google TTS');
+    console.log('Speaking with Google TTS via Vertex AI Hub');
     
     let speechSuccess = false;
     
-    // Try to use Google TTS first (via Cloud TTS API)
+    // Try to use Google TTS via our Vertex AI Hub
     try {
-      console.log('Attempting to use Google TTS...');
-      const audioBase64 = await getGoogleTTS(text);
+      console.log('Attempting to use Google TTS via Vertex AI Hub...');
+      const audioBase64 = await VertexAIHub.textToSpeech(text, {
+        voice: 'en-US-Neural2-J',  // Use a natural-sounding voice
+        speakingRate: 1.0,         // Normal speaking rate
+        pitch: 0                   // Natural pitch
+      });
       
       if (audioBase64) {
         console.log('Google TTS successful, playing audio');

@@ -1,6 +1,7 @@
 
 // Speech synthesis helpers using Google's TTS
 import { toast } from "sonner";
+import { VertexAIHub } from "@/services/VertexAIHub";
 
 export const initializeSpeechSynthesis = (): SpeechSynthesis | null => {
   if ('speechSynthesis' in window) {
@@ -27,34 +28,12 @@ export const getGoogleTTS = async (text: string): Promise<string | null> => {
   try {
     console.log('Requesting Google TTS for text:', text.substring(0, 50) + '...');
     
-    // Call Google Cloud TTS via API endpoint
-    const response = await fetch('/api/google-tts', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ 
-        text,
-        voice: 'en-US-Neural2-J', // Google's conversational voice
-        languageCode: 'en-US'
-      }),
+    // Use our VertexAIHub to handle TTS
+    return await VertexAIHub.textToSpeech(text, {
+      voice: 'en-US-Neural2-J',
+      speakingRate: 1.0,
+      pitch: 0
     });
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Error from Google TTS API:', errorText);
-      return null;
-    }
-    
-    const data = await response.json();
-    
-    if (!data.audioContent) {
-      console.error('No audio content returned from Google TTS');
-      return null;
-    }
-    
-    console.log('Successfully received audio from Google TTS');
-    return data.audioContent; // Base64 encoded audio
   } catch (error) {
     console.error('Error calling Google TTS:', error);
     toast.error('Error generating speech, falling back to browser TTS');
