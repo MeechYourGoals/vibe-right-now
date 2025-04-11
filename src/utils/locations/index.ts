@@ -1,8 +1,11 @@
 
 // Consolidated exports file for locations module
-export { cityCoordinates } from './cityDatabase';
-export { generateRandomLocation, generateRandomLocations } from './locationGenerator';
+import { cityCoordinates } from './cityDatabase';
+import { generateRandomLocation, generateRandomLocations } from './locationGenerator';
 export type { CityCoordinates } from './types';
+
+// Export the imported functions and data
+export { cityCoordinates, generateRandomLocation, generateRandomLocations };
 
 // Export functions for generating city locations
 export const generateCityLocations = (cityName: string, count: number = 10) => {

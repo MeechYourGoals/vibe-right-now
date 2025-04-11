@@ -1,9 +1,9 @@
-
-import { Location, BusinessHours } from '@/types';
-import { getRandomArrayElement, getRandomInt } from '@/utils/random';
+import { getRandomArrayElement, getRandomInt } from '../random';
 
 // Random business names
-const businessNamePrefixes = ["The", "City", "Golden", "Blue", "Urban", "Metro", "Elite", "Royal", "Coastal", "Capital"];
+const businessNamePrefixes = [
+  "The", "City", "Golden", "Blue", "Urban", "Metro", "Elite", "Royal", "Coastal", "Capital"
+];
 const businessNameWords = ["Café", "Bistro", "Bar", "Grill", "Restaurant", "Diner", "Lounge", "Pub", "Kitchen", "Eatery"];
 const businessNameSuffixes = ["& Co.", "House", "Place", "Corner", "Hub", "Spot", "Joint", "Express", "Collective", "Room"];
 
@@ -24,7 +24,7 @@ const samplePhotoUrls = [
   "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4",
   "https://images.unsplash.com/photo-1467003909585-2f8a72700288",
   "https://images.unsplash.com/photo-1544148103-0773bf10d330",
-  "https://images.unsplash.com/photo-1559329007-40df8a9345d8",
+  "https://images.unsplash.com/photo-1555992336-03a23c7b20ee",
   "https://images.unsplash.com/photo-1516997121675-4c2d1684aa3e",
   "https://images.unsplash.com/photo-1555992336-03a23c7b20ee",
 ];
@@ -150,12 +150,10 @@ export const generateRandomLocation = (id: string, latBase = 34.05, lngBase = -1
 };
 
 // Generate multiple random locations around a central point
-export const generateRandomLocations = (count: number, latBase = 34.05, lngBase = -118.25): Location[] => {
-  const locations: Location[] = [];
-  
-  for (let i = 0; i < count; i++) {
+export const generateRandomLocations = (count, latBase = 34.05, lngBase = -118.25) => {
+  const locations = [];
+  for(let i = 0; i < count; i++) {
     locations.push(generateRandomLocation(`loc_${i}`, latBase, lngBase));
   }
-  
   return locations;
 };
