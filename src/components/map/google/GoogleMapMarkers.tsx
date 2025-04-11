@@ -57,8 +57,7 @@ const GoogleMapMarkers: React.FC<GoogleMapMarkersProps> = ({
           }}
           onClick={() => handleCityClick(city.name)}
           title={`View vibes in ${city.name}`}
-        >
-        </Marker>
+        />
       ))}
 
       {/* Location markers */}
@@ -103,6 +102,7 @@ const GoogleMapMarkers: React.FC<GoogleMapMarkersProps> = ({
             scaledSize: new google.maps.Size(30, 30),
             anchor: new google.maps.Point(15, 15)
           }}
+          title="Your Location"
         />
       )}
       
@@ -115,19 +115,22 @@ const GoogleMapMarkers: React.FC<GoogleMapMarkersProps> = ({
             scaledSize: new google.maps.Size(30, 30),
             anchor: new google.maps.Point(15, 15)
           }}
+          title="Searched Address"
         />
       )}
       
-      {/* InfoWindow for selected marker */}
+      {/* Info window for selected marker */}
       {selectedMarker && (
         <InfoWindow
           position={{ lat: selectedMarker.lat, lng: selectedMarker.lng }}
           onCloseClick={onInfoWindowClose}
         >
-          <InfoWindowContent 
-            location={selectedMarker} 
-            onSelect={onMarkerClick} 
-          />
+          <div>
+            <InfoWindowContent 
+              location={selectedMarker} 
+              onSelect={onMarkerClick}
+            />
+          </div>
         </InfoWindow>
       )}
     </>
