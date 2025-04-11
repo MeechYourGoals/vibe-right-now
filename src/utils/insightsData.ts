@@ -6,8 +6,6 @@ export const getVenueInsights = (): VenueInsights => {
   return {
     id: "venue1",
     venueName: "The Rooftop Bar",
-    overallRating: 4.7,
-    totalReviews: 342,
     totalVisits: 1250,
     uniqueVisitors: 864,
     averageRating: 4.7,
@@ -15,6 +13,7 @@ export const getVenueInsights = (): VenueInsights => {
     checkInCount: 156,
     receiptUploads: 98,
     discountRedemptions: 67,
+    totalReviews: 342,
     reviewDistribution: {
       5: 254,
       4: 76,
@@ -104,14 +103,50 @@ export const getVenueInsights = (): VenueInsights => {
   };
 };
 
-// Current insights data for the venue (simplified version)
-export const currentInsights = {
+// Current insights data for the venue
+export const currentInsights: VenueInsights = {
+  id: "venue1",
+  venueName: "The Rooftop Bar",
   visitorCount: 342,
   checkInCount: 156,
   receiptUploads: 98,
   discountRedemptions: 67,
   averageRating: 4.7,
   totalReviews: 342,
+  totalVisits: 1250,
+  uniqueVisitors: 864,
+  topReasons: [
+    { reason: "Ambiance", count: 45 },
+    { reason: "Food Quality", count: 38 }
+  ],
+  demographics: {
+    gender: {
+      male: 48,
+      female: 52
+    },
+    ageGroups: {
+      '18-24': 22,
+      '25-34': 38,
+      '35-44': 25,
+      '45-54': 10,
+      '55+': 5
+    }
+  },
+  visitsByDay: {
+    'Monday': 85,
+    'Tuesday': 95,
+    'Wednesday': 120,
+    'Thursday': 145,
+    'Friday': 210,
+    'Saturday': 250,
+    'Sunday': 100
+  },
+  visitsByHour: {
+    '12 PM': 25,
+    '1 PM': 30,
+    '2 PM': 35,
+    '3 PM': 40
+  },
   engagement: {
     posts: 78,
     shares: 156,
