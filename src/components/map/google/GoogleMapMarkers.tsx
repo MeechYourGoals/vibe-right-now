@@ -47,16 +47,18 @@ const GoogleMapMarkers: React.FC<GoogleMapMarkersProps> = ({
           position={{ lat: city.lat, lng: city.lng }}
           icon={{
             url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="%23000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10" fill="%239333ea" stroke="white" stroke-width="2"/>
-                <path d="M12 8v8M8 12h8" stroke="white" stroke-width="2"/>
+              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="%23000000" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10" fill="%23F5D742" stroke="white" stroke-width="2"/>
+                <circle cx="12" cy="12" r="5" fill="%23FFB319" stroke="white" stroke-width="1"/>
               </svg>
             `),
-            scaledSize: new google.maps.Size(30, 30),
-            anchor: new google.maps.Point(15, 15)
+            scaledSize: new google.maps.Size(32, 32),
+            anchor: new google.maps.Point(16, 16)
           }}
           onClick={() => handleCityClick(city.name)}
-        />
+          title={`View vibes in ${city.name}`}
+        >
+        </Marker>
       ))}
 
       {/* Location markers */}
@@ -87,6 +89,7 @@ const GoogleMapMarkers: React.FC<GoogleMapMarkersProps> = ({
               fontWeight: 'bold',
               className: 'bg-black'
             } : undefined}
+            title={location.name}
           />
         );
       })}

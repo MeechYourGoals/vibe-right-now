@@ -14,7 +14,21 @@ interface VenueMapProps {
 const VenueMap: React.FC<VenueMapProps> = ({ venue, onExpand }) => {
   const today = new Date();
   const dayOfWeek = format(today, 'EEEE').toLowerCase();
-  const hoursToday = venue.hours ? venue.hours[dayOfWeek as keyof typeof venue.hours] : "Not available";
+  
+  // Ensure venue has hours, even if mock
+  if (!venue.hours) {
+    venue.hours = {
+      monday: "9:00 AM - 9:00 PM",
+      tuesday: "9:00 AM - 9:00 PM",
+      wednesday: "9:00 AM - 9:00 PM",
+      thursday: "9:00 AM - 9:00 PM",
+      friday: "9:00 AM - 10:00 PM",
+      saturday: "10:00 AM - 10:00 PM",
+      sunday: "10:00 AM - 8:00 PM"
+    };
+  }
+  
+  const hoursToday = venue.hours[dayOfWeek as keyof typeof venue.hours];
   
   return (
     <div className="mt-4 rounded-md overflow-hidden relative">
@@ -23,11 +37,9 @@ const VenueMap: React.FC<VenueMapProps> = ({ venue, onExpand }) => {
           <MapPin className="h-4 w-4 mr-1 text-primary" />
           <span className="font-medium">{venue.address}</span>
         </div>
-        {venue.hours && (
-          <div className="text-right">
-            <span className="font-medium">Today:</span> {hoursToday}
-          </div>
-        )}
+        <div className="text-right">
+          <span className="font-medium">Today:</span> {hoursToday}
+        </div>
       </div>
       
       <div className="h-48 rounded-md overflow-hidden relative">
@@ -36,7 +48,7 @@ const VenueMap: React.FC<VenueMapProps> = ({ venue, onExpand }) => {
           locations={[venue]}
           searchedCity={venue.city}
           mapStyle="default"
-          selectedLocation={null}
+          selectedLocation={venue}
           onLocationSelect={() => {}}
           userAddressLocation={null}
           showAllCities={false}

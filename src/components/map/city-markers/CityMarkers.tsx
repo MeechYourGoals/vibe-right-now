@@ -6,14 +6,17 @@ import { cityCoordinates } from '@/utils/locations/cityDatabase';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 
-// Create a special icon for city markers
+// Create a special icon for city markers with a golden color
 const cityIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-violet.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41]
+  iconUrl: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="%23000000" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10" fill="%23F5D742" stroke="white" stroke-width="2"/>
+      <circle cx="12" cy="12" r="5" fill="%23FFB319" stroke="white" stroke-width="1"/>
+    </svg>
+  `),
+  iconSize: [32, 32],
+  iconAnchor: [16, 16],
+  popupAnchor: [0, -16],
 });
 
 interface CityMarkersProps {
@@ -39,17 +42,18 @@ const CityMarkers: React.FC<CityMarkersProps> = ({ onCitySelect }) => {
           key={`city-${city.name}-${index}`}
           position={[city.lat, city.lng]}
           icon={cityIcon}
+          title={`View vibes in ${city.name}`}
         >
           <Popup>
-            <div className="p-2 min-w-[150px]">
+            <div className="p-2 min-w-[180px]">
               <h3 className="font-bold text-sm">{city.name}</h3>
               <p className="text-xs text-gray-600">{city.state ? `${city.state}, ` : ''}{city.country}</p>
               <Button 
                 size="sm" 
-                className="mt-2 text-xs py-0 h-7 w-full" 
+                className="mt-2 text-xs py-0 h-7 w-full bg-gradient-vibe" 
                 onClick={() => handleCityClick(city.name)}
               >
-                Explore Vibes
+                View Vibes in {city.name}
               </Button>
             </div>
           </Popup>

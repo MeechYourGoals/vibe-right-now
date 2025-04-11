@@ -25,6 +25,13 @@ const northAmericanCities: Record<string, CityCoordinates> = {
   "portland": { name: "Portland", state: "OR", country: "USA", lat: 45.5051, lng: -122.6750 },
   "san francisco": { name: "San Francisco", state: "CA", country: "USA", lat: 37.7749, lng: -122.4194 },
   "philadelphia": { name: "Philadelphia", state: "PA", country: "USA", lat: 39.9526, lng: -75.1652 },
+  "orlando": { name: "Orlando", state: "FL", country: "USA", lat: 28.5383, lng: -81.3792 },
+  "tampa": { name: "Tampa", state: "FL", country: "USA", lat: 27.9506, lng: -82.4572 },
+  "washington dc": { name: "Washington DC", state: "DC", country: "USA", lat: 38.9072, lng: -77.0369 },
+  "detroit": { name: "Detroit", state: "MI", country: "USA", lat: 42.3314, lng: -83.0458 },
+  "st. louis": { name: "St. Louis", state: "MO", country: "USA", lat: 38.6270, lng: -90.1994 },
+  "minneapolis": { name: "Minneapolis", state: "MN", country: "USA", lat: 44.9778, lng: -93.2650 },
+  "salt lake city": { name: "Salt Lake City", state: "UT", country: "USA", lat: 40.7608, lng: -111.8910 },
   // Canada
   "toronto": { name: "Toronto", country: "Canada", lat: 43.6532, lng: -79.3832 },
 };
@@ -43,6 +50,7 @@ const asianCities: Record<string, CityCoordinates> = {
   "hong kong": { name: "Hong Kong", country: "China", lat: 22.3193, lng: 114.1694 },
   "bangkok": { name: "Bangkok", country: "Thailand", lat: 13.7563, lng: 100.5018 },
   "mumbai": { name: "Mumbai", country: "India", lat: 19.0760, lng: 72.8777 },
+  "beijing": { name: "Beijing", country: "China", lat: 39.9042, lng: 116.4074 },
 };
 
 const australianCities: Record<string, CityCoordinates> = {
@@ -57,6 +65,7 @@ const latinAmericanCities: Record<string, CityCoordinates> = {
   "rio de janeiro": { name: "Rio de Janeiro", country: "Brazil", lat: -22.9068, lng: -43.1729 },
   "tulum": { name: "Tulum", country: "Mexico", lat: 20.2114, lng: -87.4654 },
   "cancun": { name: "Cancun", country: "Mexico", lat: 21.1619, lng: -86.8515 },
+  "medellin": { name: "Medellin", country: "Colombia", lat: 6.2442, lng: -75.5812 },
 };
 
 // Combined database with all cities
