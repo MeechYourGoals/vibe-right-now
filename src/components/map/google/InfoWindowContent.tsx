@@ -21,7 +21,7 @@ const InfoWindowContent: React.FC<InfoWindowContentProps> = ({ location, onSelec
   
   // Get today's hours
   const today = new Date();
-  const dayOfWeek = today.toLocaleDateString('en-US', { weekday: 'lowercase' });
+  const dayOfWeek = today.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
   const todaysHours = location.hours[dayOfWeek as keyof typeof location.hours] || 'Closed';
 
   const handleViewVenue = () => {

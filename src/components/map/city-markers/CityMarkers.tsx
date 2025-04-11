@@ -42,7 +42,12 @@ const CityMarkers: React.FC<CityMarkersProps> = ({ onCitySelect }) => {
           key={`city-${city.name}-${index}`}
           position={[city.lat, city.lng]}
           icon={cityIcon}
-          title={`View vibes in ${city.name}`}
+          eventHandlers={{
+            click: () => {},
+            mouseover: (e) => {
+              e.target.openPopup();
+            }
+          }}
         >
           <Popup>
             <div className="p-2 min-w-[180px]">
