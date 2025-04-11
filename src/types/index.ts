@@ -1,4 +1,3 @@
-
 export interface Location {
   id: string;
   name: string;
@@ -12,6 +11,7 @@ export interface Location {
   verified?: boolean;
   vibes?: string[];
   hours?: BusinessHours;
+  userProfile?: import("@/utils/locations/types").MockUserProfile;
 }
 
 export interface BusinessHours {
