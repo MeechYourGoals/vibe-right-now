@@ -3,7 +3,7 @@ import React from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import EventHeader from "./events/EventHeader";
 import EventsList from "./events/EventsList";
-import { upcomingEvents } from "./events/eventsData";
+import { sampleEvents } from "./events/eventsData";
 
 const UpcomingEvents = () => {
   return (
@@ -12,7 +12,7 @@ const UpcomingEvents = () => {
         <EventHeader />
       </CardHeader>
       <CardContent>
-        <EventsList events={upcomingEvents} />
+        <EventsList events={sampleEvents} />
       </CardContent>
     </Card>
   );
