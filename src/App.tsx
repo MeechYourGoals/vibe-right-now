@@ -1,9 +1,8 @@
-
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Suspense, lazy, useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import VernonChat from "@/components/VernonChat";
+import VernonNext from '@/components/VernonNext';
 
 // Lazy-loaded components
 const Index = lazy(() => import("@/pages/Index"));
@@ -69,7 +68,7 @@ function App() {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
-        <VernonChat />
+        <VernonNext />
         <Toaster />
       </BrowserRouter>
     </ThemeProvider>

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Layout } from "@/components/Layout";
 import PostFeed from "@/components/PostFeed";
@@ -8,7 +7,7 @@ import DiscountLocations from "@/components/DiscountLocations";
 import CameraButton from "@/components/CameraButton";
 import NearbyVibesMap from "@/components/NearbyVibesMap";
 import RecommendedForYou from "@/components/RecommendedForYou";
-import VernonChat from "@/components/VernonChat";
+import VernonNext from "@/components/VernonNext";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { getFeaturedUsers } from "@/mock/users";
 import { DateRange } from "react-day-picker";
@@ -98,7 +97,6 @@ const Index = () => {
           ) : null}
         </div>
         
-        {/* Add mobile sidebar content below the main feed on mobile */}
         {isMobile && (
           <div className="mt-8 space-y-6">
             <h2 className="text-xl font-bold mb-4 vibe-gradient-text">Around You</h2>
@@ -111,7 +109,7 @@ const Index = () => {
       </main>
       
       <CameraButton />
-      <VernonChat />
+      <VernonNext />
     </Layout>
   );
 };

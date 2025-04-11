@@ -20,7 +20,7 @@ serve(async (req) => {
     
     if (!audio) {
       return new Response(
-        JSON.stringify({ error: 'Audio content is required' }),
+        JSON.stringify({ error: 'Audio data is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -36,7 +36,8 @@ serve(async (req) => {
           encoding: 'WEBM_OPUS',
           sampleRateHertz: 48000,
           languageCode: 'en-US',
-          model: 'latest_long'
+          model: 'latest_short',
+          enableAutomaticPunctuation: true
         },
         audio: {
           content: audio
@@ -58,7 +59,7 @@ serve(async (req) => {
     
     let transcript = '';
     if (data.results && data.results.length > 0) {
-      transcript = data.results[0].alternatives[0].transcript || '';
+      transcript = data.results[0].alternatives[0].transcript;
     }
     
     return new Response(
