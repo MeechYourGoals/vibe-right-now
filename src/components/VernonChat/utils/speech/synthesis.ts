@@ -22,10 +22,12 @@ export const initializeSpeechSynthesis = (): SpeechSynthesis | null => {
   return null;
 };
 
-// Google TTS using Vertex AI implementation
+// Google TTS using Cloud Text-to-Speech API implementation
 export const getGoogleTTS = async (text: string): Promise<string | null> => {
   try {
-    // Call Vertex AI via Supabase Edge Function
+    console.log('Requesting Google TTS for text:', text.substring(0, 50) + '...');
+    
+    // Call Google Cloud TTS via Supabase Edge Function
     const response = await fetch('/api/google-tts', {
       method: 'POST',
       headers: {
@@ -39,11 +41,19 @@ export const getGoogleTTS = async (text: string): Promise<string | null> => {
     });
     
     if (!response.ok) {
-      console.error('Error from Google TTS API:', await response.text());
+      const errorText = await response.text();
+      console.error('Error from Google TTS API:', errorText);
       return null;
     }
     
     const data = await response.json();
+    
+    if (!data.audioContent) {
+      console.error('No audio content returned from Google TTS');
+      return null;
+    }
+    
+    console.log('Successfully received audio from Google TTS');
     return data.audioContent; // Base64 encoded audio
   } catch (error) {
     console.error('Error calling Google TTS:', error);
@@ -54,10 +64,28 @@ export const getGoogleTTS = async (text: string): Promise<string | null> => {
 
 // Helper to play audio from base64 string
 export const playAudioBase64 = (audioBase64: string): HTMLAudioElement => {
-  const audio = new Audio(`data:audio/mp3;base64,${audioBase64}`);
-  audio.play().catch(err => {
-    console.error('Error playing audio:', err);
-    toast.error('Error playing audio');
-  });
-  return audio;
+  if (!audioBase64) {
+    console.error('Empty audio base64 string provided');
+    throw new Error('Invalid audio data');
+  }
+  
+  try {
+    const audio = new Audio(`data:audio/mp3;base64,${audioBase64}`);
+    
+    // Add event listeners for debugging
+    audio.onloadeddata = () => console.log('Audio loaded successfully');
+    audio.onerror = (err) => console.error('Audio loading error:', err);
+    
+    // Play the audio
+    audio.play().catch(err => {
+      console.error('Error playing audio:', err);
+      toast.error('Error playing audio');
+    });
+    
+    return audio;
+  } catch (error) {
+    console.error('Error creating audio element:', error);
+    toast.error('Error processing audio');
+    throw error;
+  }
 };

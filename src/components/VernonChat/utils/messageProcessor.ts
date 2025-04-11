@@ -15,9 +15,6 @@ export interface MessageProcessorProps {
   setIsSearching: (isSearching: boolean) => void;
 }
 
-// Always use Vertex AI by default
-const useVertexAI = true;
-
 export const processMessageInput = async (
   inputValue: string,
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>,
@@ -62,7 +59,7 @@ export const processMessageInput = async (
     }
     
     // Detect if this is likely a location/venue search query
-    const isLocationQuery = /what|where|when|things to do|events|places|restaurants|bars|attractions|activities|visit|in|at|near|around/i.test(inputValue);
+    const isLocationQuery = /what|where|when|how|things to do|events|places|restaurants|bars|attractions|activities|visit|in|at|near|around/i.test(inputValue);
     const hasCityName = /miami|new york|los angeles|chicago|san francisco|boston|seattle|austin|denver|nashville|atlanta|portland|dallas|houston|phoenix|philadelphia|san diego|las vegas|orlando|washington|dc/i.test(inputValue);
     
     console.log('Processing query:', inputValue);
@@ -76,24 +73,12 @@ export const processMessageInput = async (
     if (isLocationQuery || hasCityName) {
       console.log('Location/city query detected, using search pipeline');
       try {
-        // First try the search handler which now prioritizes Vertex AI
+        // Use the search handler which now directly prioritizes Vertex AI
         responseText = await handleSearchQuery(inputValue, updatedPaginationState);
         console.log('Search query handler returned response of length:', responseText.length);
-        
-        // If we didn't get a good response, try direct Vertex AI call
-        if (!responseText || responseText.length < 100 || responseText.includes("I don't have specific information")) {
-          console.log('Search result insufficient, trying Vertex AI directly with search mode');
-          
-          responseText = await VertexAIService.searchWithVertex(
-            `The user is asking about: "${inputValue}". 
-             Provide detailed information about real venues, events, or activities in this location.
-             Include names of specific places, addresses, and hours when possible.
-             Group information by categories (dining, nightlife, attractions, events, etc.)`
-          );
-        }
       } catch (error) {
         console.error('Error in search pipeline:', error);
-        // Fall back to direct AI call using Vertex AI
+        // Fall back to direct AI call
         responseText = await VertexAIService.generateResponse(inputValue, 'user', contextMessages);
       }
     } else if (isVenueMode) {

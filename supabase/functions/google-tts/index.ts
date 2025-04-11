@@ -16,13 +16,26 @@ serve(async (req) => {
     const { text, voice, languageCode } = await req.json();
 
     if (!text) {
+      console.error('No text provided to Google TTS function');
       return new Response(
         JSON.stringify({ error: 'Text is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Prepare request to Google Cloud Text-to-Speech API using Vertex AI
+    console.log(`Google TTS request: ${text.substring(0, 50)}...`);
+
+    // Get Google API key from environment
+    const apiKey = Deno.env.get('GOOGLE_API_KEY');
+    if (!apiKey) {
+      console.error('Google API key not configured in environment');
+      return new Response(
+        JSON.stringify({ error: 'Google API key not configured' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Prepare request to Google Cloud Text-to-Speech API
     const requestBody = {
       input: { text },
       voice: { 
@@ -32,16 +45,8 @@ serve(async (req) => {
       audioConfig: { audioEncoding: 'MP3' }
     };
 
-    // Get Google API key from environment
-    const apiKey = Deno.env.get('GOOGLE_API_KEY');
-    if (!apiKey) {
-      return new Response(
-        JSON.stringify({ error: 'Google API key not configured' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
     // Call Google TTS API
+    console.log('Calling Google TTS API...');
     const response = await fetch(
       `https://texttospeech.googleapis.com/v1/text:synthesize?key=${apiKey}`,
       {
@@ -64,6 +69,15 @@ serve(async (req) => {
 
     const data = await response.json();
     
+    if (!data.audioContent) {
+      console.error('No audio content in Google TTS response');
+      return new Response(
+        JSON.stringify({ error: 'No audio content in Google TTS response' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    console.log('Google TTS successful, returning audio content');
     return new Response(
       JSON.stringify({ audioContent: data.audioContent }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

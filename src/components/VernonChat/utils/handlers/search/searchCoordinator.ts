@@ -1,86 +1,59 @@
 
-import { LocationSearchStrategy } from './locationSearchStrategy';
 import { ComedySearchStrategy } from './comedySearchStrategy';
-import { ComplexQueryStrategy } from './complexQueryStrategy';
-import { FallbackSearchStrategy } from './fallbackSearchStrategy';
-import { LocalDataStrategy } from './localDataStrategy';
+import { LocationSearchStrategy } from './locationSearchStrategy';
+import { VertexAIService } from '@/services/VertexAIService';
 import { cleanResponseText } from '../../responseFormatter';
 
 /**
- * Coordinates the search process by trying different strategies
- * in order of priority until a satisfactory result is found
+ * Coordinates the search process by delegating to specialized search strategies
  */
 export const SearchCoordinator = {
   /**
-   * Handles a search query using multiple strategies
+   * Process a search query using the appropriate strategy
    */
-  async processSearchQuery(
-    inputValue: string,
-    paginationState: Record<string, number>
-  ): Promise<string> {
-    console.log('Processing search query:', inputValue);
-    let responseText = '';
+  async processSearchQuery(inputValue: string, paginationState: Record<string, number>): Promise<string> {
+    console.log('SearchCoordinator processing query:', inputValue);
     
-    // Strategy 1: Location-based search with Vertex AI
-    if (LocationSearchStrategy.isLocationQuery(inputValue)) {
-      const locationResult = await LocationSearchStrategy.handleLocationSearch(inputValue);
-      if (locationResult.response) {
-        return locationResult.response;
+    try {
+      // Always prioritize comedy search for comedy-related queries
+      if (ComedySearchStrategy.isComedyQuery(inputValue)) {
+        const comedyResponse = await ComedySearchStrategy.handleComedySearch(inputValue);
+        if (comedyResponse) {
+          console.log('Comedy search successful, returning results');
+          return comedyResponse;
+        }
       }
-    }
-    
-    // Strategy 2: Comedy-specific search
-    if (ComedySearchStrategy.isComedyQuery(inputValue)) {
-      const comedyResult = await ComedySearchStrategy.handleComedySearch(inputValue);
-      if (comedyResult) {
-        return comedyResult;
+      
+      // For location and general queries, try location strategy first
+      if (LocationSearchStrategy.isLocationQuery(inputValue)) {
+        const locationResult = await LocationSearchStrategy.handleLocationSearch(inputValue);
+        if (locationResult && locationResult.response) {
+          console.log('Location search successful, returning results');
+          return locationResult.response;
+        }
       }
-    }
-    
-    // Strategy 3: Complex natural language query search
-    if (ComplexQueryStrategy.isComplexQuery(inputValue) || LocationSearchStrategy.isLocationQuery(inputValue)) {
-      const complexResult = await ComplexQueryStrategy.handleComplexSearch(inputValue);
-      if (complexResult.response) {
-        return complexResult.response;
+      
+      // Direct Vertex AI call as fallback for all queries
+      console.log('Using Vertex AI as fallback search method');
+      const vertexResponse = await VertexAIService.searchWithVertex(
+        `Please provide detailed, factual information about: "${inputValue}".
+         Include specific names, addresses, and details about real places and events.
+         Focus on giving practical information that would help someone planning to visit these places.`
+      );
+      
+      // Clean and format the response with explore link
+      if (vertexResponse && vertexResponse.length > 100) {
+        console.log('Vertex AI direct search successful');
+        const exploreLinkText = "\n\nYou can also [view all results on our Explore page](/explore?q=" + 
+          encodeURIComponent(inputValue) + ") for a better visual experience.";
+        
+        return cleanResponseText(vertexResponse + exploreLinkText);
       }
+      
+      return "I couldn't find specific information about that. Could you try asking in a different way?";
+    } catch (error) {
+      console.error('Error in SearchCoordinator:', error);
+      return "I'm having trouble searching for information right now. Please try again shortly.";
     }
-    
-    // Strategy 4: Standard search service
-    responseText = await FallbackSearchStrategy.useStandardSearch(inputValue);
-    if (responseText) {
-      return responseText;
-    }
-    
-    // Strategy 5: Swirl search
-    responseText = await FallbackSearchStrategy.useSwirlSearch(inputValue);
-    if (responseText) {
-      return responseText;
-    }
-    
-    // Strategy 6: HuggingChat search
-    responseText = await FallbackSearchStrategy.useHuggingChatSearch(inputValue);
-    if (responseText) {
-      return responseText;
-    }
-    
-    // Strategy 7: Last attempt with Vertex AI
-    responseText = await FallbackSearchStrategy.useVertexAILastAttempt(inputValue);
-    if (responseText) {
-      return responseText;
-    }
-    
-    // Strategy 8: Local data fallback
-    responseText = LocalDataStrategy.augmentWithLocalData(inputValue, responseText, paginationState);
-    
-    // If we have any result, return it
-    if (responseText && (typeof responseText === 'string' && responseText.length > 0)) {
-      // Add a link to the Explore page
-      const exploreLinkText = "\n\nYou can also [view all these results on our Explore page](/explore?q=" + 
-        encodeURIComponent(inputValue) + ") for a better visual experience.";
-      return cleanResponseText((typeof responseText === 'string' ? responseText : JSON.stringify(responseText)) + exploreLinkText);
-    }
-    
-    // Ultimate fallback if all else fails
-    return LocalDataStrategy.getUltimateFallback(inputValue);
   }
 };
