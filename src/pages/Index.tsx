@@ -13,6 +13,20 @@ import { useIsMobile } from "@/hooks/use-mobile";
 const Index = () => {
   const isMobile = useIsMobile();
 
+  // Featured users that will appear in dropdown suggestions and other prominent places
+  const featuredUsers = [
+    "sarah_vibes",          // Sarah Miller - regular user with nice profile
+    "jay_experiences",      // Jay Johnson - photographer and coffee enthusiast
+    "adventure_alex",       // Alex Kim - adrenaline junkie
+    "marco_travels",        // Marco Williams - digital nomad
+    "local_explorer",       // Jamie Chen - New York local expert
+    "kimkardashian",        // Celebrity profiles
+    "champagnepapi",        // Drake
+    "sydney_sweeney",       // Sydney Sweeney
+    "ishowspeed",           // IShowSpeed
+    "keithlee"              // Keith Lee - food critic
+  ];
+
   return (
     <Layout>
       <main className="container py-6">
@@ -23,7 +37,7 @@ const Index = () => {
                 Discover the Vibe Right Now
               </h1>
             </div>
-            <PostFeed celebrityFeatured={["kimkardashian", "ishowspeed", "sydney_sweeney", "champagnepapi", "kingbach", "sarah_vibes"]} />
+            <PostFeed celebrityFeatured={featuredUsers} />
           </div>
           
           {!isMobile ? (

@@ -1,4 +1,3 @@
-
 import { User } from "@/types";
 
 export const mockUsers: User[] = [
@@ -8,13 +7,15 @@ export const mockUsers: User[] = [
     name: "Sarah Miller",
     avatar: "https://randomuser.me/api/portraits/women/1.jpg",
     isPrivate: false,
+    bio: "Food lover and travel enthusiast. Always looking for the next great vibe! Currently exploring Miami's hidden gems and documenting the best spots for dinner and drinks. 🌮🍹✨",
   },
   {
     id: "2",
     username: "jay_experiences",
     name: "Jay Johnson",
     avatar: "https://randomuser.me/api/portraits/men/1.jpg",
-    isPrivate: true,
+    isPrivate: false,
+    bio: "Concert photographer by night, coffee shop explorer by day. Searching for the perfect sound and the perfect latte in every city I visit. 🎵☕️📸",
   },
   {
     id: "3",
@@ -22,13 +23,15 @@ export const mockUsers: User[] = [
     name: "Alex Kim",
     avatar: "https://randomuser.me/api/portraits/women/2.jpg",
     isPrivate: false,
+    bio: "Adrenaline junkie and outdoor enthusiast. If it's thrilling or has a beautiful view, I'm there! Currently planning my next mountain climbing trip. 🏔️🧗‍♀️🌄",
   },
   {
     id: "4",
     username: "marco_travels",
     name: "Marco Williams",
     avatar: "https://randomuser.me/api/portraits/men/2.jpg",
-    isPrivate: true,
+    isPrivate: false,
+    bio: "Digital nomad traveling the world one city at a time. Passionate about street food, local culture, and finding the perfect sunset spot. 🌍✈️🌇",
   },
   {
     id: "5",
@@ -36,6 +39,7 @@ export const mockUsers: User[] = [
     name: "Jamie Chen",
     avatar: "https://randomuser.me/api/portraits/women/3.jpg",
     isPrivate: false,
+    bio: "Native New Yorker who knows all the best kept secrets in town. From speakeasies to underground art shows, I'll help you experience the city like a local. 🗽🍸🎭",
   },
   {
     id: "6",
@@ -163,7 +167,6 @@ export const mockUsers: User[] = [
     avatar: "https://randomuser.me/api/portraits/men/13.jpg",
     isPrivate: false,
   },
-  // Celebrity profiles
   {
     id: "24",
     username: "kimkardashian",

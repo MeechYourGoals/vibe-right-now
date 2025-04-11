@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { User, Post, Location, Comment } from "@/types";
 import { mockUsers, mockPosts, mockComments, mockLocations } from "@/mock/data";
@@ -30,29 +31,57 @@ export const useUserProfile = (username: string | undefined) => {
     if (foundUser) {
       setUser(foundUser);
       
-      // Find posts by this user
-      const foundPosts = mockPosts.filter((post) => {
-        return post.user.id === foundUser?.id || post.user.username === foundUser?.username;
-      });
-      setUserPosts(foundPosts);
+      // Find posts by this user - use username for deterministic posts
+      const usernameHash = hashString(foundUser.username);
+      const postCount = 3 + (usernameHash % 8); // 3-10 posts per user
       
-      // Get random venues as "followed venues"
-      const randomVenues = mockLocations
-        .filter(location => !!location.type) // Ensure location type is defined
-        .sort(() => 0.5 - Math.random())
-        .slice(0, Math.floor(Math.random() * 6) + 3);
-      setFollowedVenues(randomVenues);
+      // Find posts by this user with deterministic selection based on username
+      const allPosts = [...mockPosts];
+      const selectedPosts = [];
+      for (let i = 0; i < postCount; i++) {
+        const index = (usernameHash + i) % allPosts.length;
+        const post = {...allPosts[index], user: foundUser};
+        selectedPosts.push(post);
+      }
       
-      // Get random venues for "visited" and "want to visit" sections
-      const allLocations = [...mockLocations]
-        .filter(location => !!location.type) // Ensure location type is defined
-        .sort(() => 0.5 - Math.random());
+      setUserPosts(selectedPosts);
       
-      // First 5 locations for visited places
-      setVisitedPlaces(allLocations.slice(0, 5));
+      // Get deterministic venues as "followed venues" based on username
+      const usernameCharCode = foundUser.username.charCodeAt(0);
+      const venueCount = 3 + (usernameCharCode % 5); // 3-7 venues
       
-      // Next 5 locations for want to visit places
-      setWantToVisitPlaces(allLocations.slice(5, 10));
+      const filteredLocations = mockLocations.filter(location => !!location.type);
+      const followedVenuesList = [];
+      
+      for (let i = 0; i < venueCount; i++) {
+        const index = (usernameCharCode + i * 3) % filteredLocations.length;
+        followedVenuesList.push(filteredLocations[index]);
+      }
+      
+      setFollowedVenues(followedVenuesList);
+      
+      // Get deterministic venues for "visited" and "want to visit" sections
+      const visitedCount = 4 + (usernameCharCode % 4); // 4-7 visited places
+      const wantToVisitCount = 3 + (usernameCharCode % 5); // 3-7 want to visit places
+      
+      const visitedList = [];
+      const wantToVisitList = [];
+      
+      for (let i = 0; i < visitedCount; i++) {
+        const index = (usernameCharCode + i * 7) % filteredLocations.length;
+        visitedList.push(filteredLocations[index]);
+      }
+      
+      for (let i = 0; i < wantToVisitCount; i++) {
+        const index = (usernameCharCode + i * 11) % filteredLocations.length;
+        // Ensure no duplicates between visited and want to visit
+        if (!visitedList.some(loc => loc.id === filteredLocations[index].id)) {
+          wantToVisitList.push(filteredLocations[index]);
+        }
+      }
+      
+      setVisitedPlaces(visitedList);
+      setWantToVisitPlaces(wantToVisitList);
     }
   }, [username]);
 
@@ -67,7 +96,7 @@ export const useUserProfile = (username: string | undefined) => {
       return user.bio;
     }
     
-    // Generate bios based on username patterns
+    // Generate bios based on username patterns as fallback
     if (user.username.includes("food") || user.username.includes("chef") || user.username.includes("coffee")) {
       return "Foodie exploring the best culinary experiences around the world. Always on the hunt for hidden gems and authentic flavors. 🍜🍷✨";
     } else if (user.username.includes("travel") || user.username.includes("explorer") || user.username.includes("wanderer")) {
@@ -81,8 +110,18 @@ export const useUserProfile = (username: string | undefined) => {
     }
   };
 
-  // Determine if user profile is private (based on user ID for deterministic results)
-  // Make user ID even = private, odd = public for consistent results
+  // Simple string hash function for deterministic selection
+  const hashString = (str: string): number => {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32bit integer
+    }
+    return Math.abs(hash);
+  };
+
+  // Determine if user profile is private (explicitly set or based on ID pattern)
   const isPrivateProfile = user ? user.isPrivate || parseInt(user.id) % 2 === 0 : false;
   
   return {
