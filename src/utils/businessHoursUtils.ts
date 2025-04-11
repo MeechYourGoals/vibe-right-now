@@ -106,5 +106,12 @@ export const getTodaysHours = (location: Location): string => {
   const dayOfWeek = format(today, 'EEEE').toLowerCase();
   
   // Return the hours for today
-  return location.hours[dayOfWeek as keyof typeof location.hours] || 'Closed';
+  const hours = location.hours[dayOfWeek as keyof typeof location.hours];
+  
+  // Handle the case where hours might be a boolean (isOpen24Hours)
+  if (typeof hours === 'boolean') {
+    return hours ? 'Open 24 hours' : 'Closed';
+  }
+  
+  return hours || 'Closed';
 };
