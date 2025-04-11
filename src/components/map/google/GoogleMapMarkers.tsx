@@ -14,6 +14,7 @@ interface GoogleMapMarkersProps {
   showDistances: boolean;
   onMarkerClick: (location: Location) => void;
   onInfoWindowClose: () => void;
+  showAllCities?: boolean;
 }
 
 const GoogleMapMarkers: React.FC<GoogleMapMarkersProps> = ({
@@ -23,7 +24,8 @@ const GoogleMapMarkers: React.FC<GoogleMapMarkersProps> = ({
   selectedMarker,
   showDistances,
   onMarkerClick,
-  onInfoWindowClose
+  onInfoWindowClose,
+  showAllCities = true
 }) => {
   // Get reference point for distance calculation
   const referencePoint = getReferencePoint(userAddressLocation, userLocation);
