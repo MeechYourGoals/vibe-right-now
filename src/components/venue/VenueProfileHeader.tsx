@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Building, MapPin, Phone, Globe, Clock, Video, Star, DollarSign } from "lucide-react";
+import { Building, MapPin, Phone, Globe, Clock, Video, Star, DollarSign, CreditCard } from "lucide-react";
 import { Location } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,11 +8,10 @@ import BusinessHours from "@/components/BusinessHours";
 import VenueActionButton from "./VenueActionButton";
 import { getOfficialUrl, getActionButtonText } from "@/utils/locationUtils";
 import { isEligibleForPriceComparison, getPriceComparisons } from "@/utils/venue/travelIntegrationUtils";
+import { CreditCardType, getRedemptionOpportunities } from "@/utils/creditCardRedemption";
+import { toast } from "sonner";
 
-// Function to determine price tier (1-4) based on venue properties
 const getPriceTier = (venue: Location): number => {
-  // In a real app, this would be part of the venue data
-  // For now, let's create a simple algorithm based on the venue type and other properties
   const basePrice = {
     restaurant: 2,
     bar: 2,
@@ -22,15 +21,12 @@ const getPriceTier = (venue: Location): number => {
     other: 2
   }[venue.type] || 2;
   
-  // Randomize slightly based on venue id to make it look more natural
   const idSum = venue.id.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
-  let adjustment = (idSum % 3) - 1; // -1, 0, or 1
+  let adjustment = (idSum % 3) - 1;
   
-  // Ensure price is between 1 and 4
   return Math.max(1, Math.min(4, basePrice + adjustment));
 };
 
-// Function to render dollar signs based on price tier
 const renderPriceTier = (tier: number) => {
   const dollars = Array(tier).fill('$').join('');
   return (
@@ -43,7 +39,6 @@ const renderPriceTier = (tier: number) => {
   );
 };
 
-// Function to get the appropriate RSVP button text based on venue type
 const getRSVPButtonText = (venue: Location): string => {
   switch (venue.type) {
     case 'restaurant':
@@ -67,19 +62,32 @@ const VenueProfileHeader = ({ venue, onMapExpand }: { venue: Location, onMapExpa
   const [showLivestream, setShowLivestream] = useState(false);
   const [showComparisons, setShowComparisons] = useState(false);
   
-  // Simulate livestreaming capability for Pro users (random venues would have it)
   const hasLivestream = venue.id.charCodeAt(0) % 3 === 0;
   
   const toggleLivestream = () => {
     setShowLivestream(!showLivestream);
   };
   
-  // Check if the venue is eligible for price comparisons
   const isEligible = isEligibleForPriceComparison(venue);
   const priceComparisons = isEligible ? getPriceComparisons(venue) : [];
   
-  // Determine if we show the "Compare Prices" badge
   const showCompareButton = priceComparisons.length > 0;
+  
+  const isEligibleForPoints = venue.type === 'attraction' || 
+                              venue.name.toLowerCase().includes('hotel') || 
+                              venue.id.charCodeAt(0) % 3 === 0;
+  
+  const acceptedCards: CreditCardType[] = ['amex', 'chase', 'capital_one'].filter(
+    (_, index) => venue.id.charCodeAt(0) % (index + 2) === 0
+  ) as CreditCardType[];
+  
+  const showRedeemPoints = isEligibleForPoints && acceptedCards.length > 0;
+  
+  const handleRedeemPoints = () => {
+    const pointsRequired = venue.id.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0) * 100;
+    toast.success(`Points redemption requested for ${venue.name}`);
+    toast.info(`${pointsRequired.toLocaleString()} points will be deducted from your account`);
+  };
   
   return (
     <div className="mb-4">
@@ -106,6 +114,12 @@ const VenueProfileHeader = ({ venue, onMapExpand }: { venue: Location, onMapExpa
               Compare Prices
             </Badge>
           )}
+          {showRedeemPoints && (
+            <Badge variant="outline" className="ml-2 bg-green-500/10 text-green-500 border-green-300 cursor-pointer" onClick={handleRedeemPoints}>
+              <CreditCard className="h-3 w-3 mr-1" />
+              Redeem Points
+            </Badge>
+          )}
         </h1>
         
         <div className="flex flex-col items-end">
@@ -126,6 +140,18 @@ const VenueProfileHeader = ({ venue, onMapExpand }: { venue: Location, onMapExpa
               {venue.address}, {venue.city}, {venue.state}
             </span>
           </div>
+          {showRedeemPoints && (
+            <div className="flex items-center text-xs text-green-600 mt-1">
+              <CreditCard className="h-3 w-3 mr-1" />
+              <span>
+                Accepts points: {acceptedCards.map(card => 
+                  card === 'amex' ? 'Amex' : 
+                  card === 'capital_one' ? 'Capital One' : 
+                  card.charAt(0).toUpperCase() + card.slice(1)
+                ).join(', ')}
+              </span>
+            </div>
+          )}
         </div>
       </div>
       
