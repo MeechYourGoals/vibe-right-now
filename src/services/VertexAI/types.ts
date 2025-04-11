@@ -1,31 +1,41 @@
 
 /**
- * Type definitions for Vertex AI service
+ * Options for text generation with Vertex AI
  */
-
-// Model types
-export type VertexAIModel = 'gemini-1.5-pro' | 'gemini-1.5-flash';
-export type VertexAIVisionModel = 'gemini-1.5-pro-vision';
-export type VertexVoiceModel = 'en-US-Neural2-J' | 'en-US-Neural2-F' | 'en-US-Neural2-D';
-
-// Options for different API calls
 export interface GenerateTextOptions {
-  model?: VertexAIModel;
+  /** The model to use for text generation */
+  model?: string;
+  
+  /** The maximum number of tokens to generate */
   maxTokens?: number;
+  
+  /** Temperature controls randomness (0.0 to 1.0) */
   temperature?: number;
+  
+  /** Controls diversity via nucleus sampling (0.0 to 1.0) */
+  topP?: number;
+  
+  /** Prevents the model from generating harmful content */
+  safetySettings?: any[];
 }
 
-export interface GenerateImageOptions {
-  width?: number;
-  height?: number;
-  samples?: number;
+/**
+ * Response from Vertex AI text generation
+ */
+export interface GenerateTextResponse {
+  text: string;
 }
 
-export interface TextToSpeechOptions {
-  voice?: VertexVoiceModel;
-  pitch?: number;
-  speakingRate?: number;
+/**
+ * Search options for Vertex AI
+ */
+export interface SearchOptions {
+  /** Categories to focus the search on */
+  categories?: string[];
+  
+  /** Location context for the search */
+  location?: string;
+  
+  /** Maximum number of results to return */
+  maxResults?: number;
 }
-
-// Default settings
-export const DEFAULT_MALE_VOICE: VertexVoiceModel = 'en-US-Neural2-D';
