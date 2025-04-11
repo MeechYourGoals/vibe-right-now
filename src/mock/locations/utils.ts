@@ -3,6 +3,15 @@ import { Location } from "@/types";
 import { mockLocations } from "./index";
 
 /**
+ * Type definitions for location utility functions
+ */
+export type LocationsByTypeFunction = (type: string) => Location[];
+export type LocationsByCityFunction = (city: string) => Location[];
+export type LocationsNearbyFunction = (lat: number, lng: number, radiusMiles?: number) => Location[];
+export type LocationByIdFunction = (id: string) => Location | undefined;
+export type SearchLocationsFunction = (query: string) => Location[];
+
+/**
  * Filter locations by type
  * @param type Location type to filter by
  * @returns Filtered array of locations
