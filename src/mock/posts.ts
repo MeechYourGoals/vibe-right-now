@@ -13,11 +13,11 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Nightclub/lounge image
+        url: "https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Sunset lounge with DJ
       },
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // DJ/nightlife image
+        url: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Nightlife/DJ image
       },
     ],
     timestamp: getRecentTime(1),
@@ -34,7 +34,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Coffee shop/pastries image
+        url: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Coffee shop pastries
       },
     ],
     timestamp: getRecentTime(2),
@@ -54,7 +54,7 @@ export const mockPosts: Post[] = [
       },
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Music festival crowd image
+        url: "https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Music festival crowd
       },
     ],
     timestamp: getRecentTime(0.5),
@@ -103,7 +103,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1504450758481-7338eba7524a?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Basketball arena/game image
+        url: "https://images.unsplash.com/photo-1504450758481-7338eba7524a?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Basketball arena/game
       },
     ],
     timestamp: getRecentTime(0.3),
@@ -119,7 +119,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1566737236500-c8ac43014a67?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Pool party image
+        url: "https://images.unsplash.com/photo-1566737236500-c8ac43014a67?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Pool party
       },
     ],
     timestamp: getRecentTime(0.2),
@@ -135,7 +135,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1483729558449-99ef09a8c325?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Christ the Redeemer/Rio view image
+        url: "https://images.unsplash.com/photo-1483729558449-99ef09a8c325?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Christ the Redeemer/Rio view
       },
     ],
     timestamp: getRecentTime(1.1),
@@ -184,7 +184,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1545579133-99bb5ab189bd?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Oceanfront restaurant/seafood image
+        url: "https://images.unsplash.com/photo-1545579133-99bb5ab189bd?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Oceanfront restaurant/seafood
       },
     ],
     timestamp: getRecentTime(0.6),
@@ -200,7 +200,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Outdoor fitness/beach workout image
+        url: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Outdoor fitness/beach workout
       },
     ],
     timestamp: getRecentTime(0.3),
@@ -216,7 +216,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1560147307-7fef1854cd4a?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Rodeo/bull riding image
+        url: "https://images.unsplash.com/photo-1560147307-7fef1854cd4a?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Rodeo/bull riding
       },
     ],
     timestamp: getRecentTime(0.2),
@@ -232,7 +232,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1517256064527-09c73fc73e38?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Latte/coffee image
+        url: "https://images.unsplash.com/photo-1517256064527-09c73fc73e38?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Latte/coffee
       },
     ],
     timestamp: getRecentTime(0.4),
@@ -248,7 +248,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Coffee shop seating/workspace image
+        url: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Coffee shop seating/workspace
       },
     ],
     timestamp: getRecentTime(0.7),
@@ -264,7 +264,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1572358337087-ab2addf09aa1?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Christ the Redeemer viewpoint image
+        url: "https://images.unsplash.com/photo-1572358337087-ab2addf09aa1?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Christ the Redeemer viewpoint
       },
     ],
     timestamp: getRecentTime(0.9),
@@ -272,16 +272,15 @@ export const mockPosts: Post[] = [
     likes: 89,
     comments: 12,
   },
-  // Fixing mismatched posts for venues
   {
     id: "17",
-    user: mockUsers[23], // Using a different user that fits this context better
-    location: mockLocations[28], // Using appropriate Bitcoin Conference location
+    user: mockUsers[23], 
+    location: mockLocations[28], // Bitcoin Conference
     content: "Bitcoin Conference is packed today! Great keynotes happening on the main stage with minimal wait times for entry.",
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1639815188546-c43c240ff4df?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Crypto/bitcoin conference image
+        url: "https://images.unsplash.com/photo-1639815188546-c43c240ff4df?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Crypto conference
       },
     ],
     timestamp: getRecentTime(0.15),
@@ -291,13 +290,13 @@ export const mockPosts: Post[] = [
   },
   {
     id: "18",
-    user: mockUsers[24], // Using a different user that fits this context better
-    location: mockLocations[22], // InvestFest location
+    user: mockUsers[24], 
+    location: mockLocations[23], // InvestFest
     content: "InvestFest workshops are incredible! The west wing has shorter lines for the top speakers right now.",
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1515187029135-18ee286d815b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Investment conference/workshop image
+        url: "https://images.unsplash.com/photo-1515187029135-18ee286d815b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Investment conference
       },
     ],
     timestamp: getRecentTime(0.2),
@@ -313,7 +312,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Stadium entrance/crowd image
+        url: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Stadium entrance/crowd
       },
     ],
     timestamp: getRecentTime(0.3),
@@ -329,7 +328,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Tech convention/gadget display image
+        url: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Tech convention
       },
     ],
     timestamp: getRecentTime(0.25),
@@ -345,7 +344,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Comedy club/stand-up audience image
+        url: "https://images.unsplash.com/photo-1527224857830-43a7acc85260?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Comedy club
       },
     ],
     timestamp: getRecentTime(0.1),
@@ -361,7 +360,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1548574505-5e239809ee19?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Cruise ship/Disney cruise image
+        url: "https://images.unsplash.com/photo-1548574505-5e239809ee19?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Cruise ship/Disney cruise
       },
     ],
     timestamp: getRecentTime(0.3),
@@ -377,7 +376,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1555507036-ab1f4038808a?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Bakery/fresh pastries image
+        url: "https://images.unsplash.com/photo-1555507036-ab1f4038808a?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Bakery/fresh pastries
       },
     ],
     timestamp: getRecentTime(0.4),
@@ -393,7 +392,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1534353436294-0dbd4bdac845?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Rooftop bar/sunset cocktail image
+        url: "https://images.unsplash.com/photo-1534353436294-0dbd4bdac845?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Rooftop bar/sunset cocktail
       },
     ],
     timestamp: getRecentTime(0.2),
@@ -409,7 +408,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1624138784614-87fd1b6528f8?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Sydney Opera House image
+        url: "https://images.unsplash.com/photo-1624138784614-87fd1b6528f8?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Sydney Opera House
       },
     ],
     timestamp: getRecentTime(0.5),
@@ -425,7 +424,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Eiffel Tower night image
+        url: "https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Eiffel Tower at night
       },
     ],
     timestamp: getRecentTime(0.3),
@@ -441,7 +440,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Music festival/concert image
+        url: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Music festival/concert
       },
     ],
     timestamp: getRecentTime(0.1),
@@ -457,7 +456,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Luxury retail/fashion pop-up image
+        url: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Luxury retail/fashion pop-up
       },
     ],
     timestamp: getRecentTime(0.2),
@@ -473,7 +472,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1527224857830-43a7acc85260?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Comedy club/stand-up venue image
+        url: "https://images.unsplash.com/photo-1527224857830-43a7acc85260?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Comedy club
       },
     ],
     timestamp: getRecentTime(0.05),
@@ -489,7 +488,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1566737236500-c8ac43014a67?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Nightclub/dance floor image
+        url: "https://images.unsplash.com/photo-1566737236500-c8ac43014a67?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Nightclub
       },
     ],
     timestamp: getRecentTime(0.1),
@@ -505,7 +504,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1517433367423-c7e5b0f35086?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Bakery/pastry image
+        url: "https://images.unsplash.com/photo-1517433367423-c7e5b0f35086?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // Bakery/pastry
       },
     ],
     timestamp: getRecentTime(0.3),
@@ -521,7 +520,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1535086181678-5a5c4d23aa7d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // VIP tent/lounge image
+        url: "https://images.unsplash.com/photo-1535086181678-5a5c4d23aa7d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", // VIP tent/lounge
       },
     ],
     timestamp: getRecentTime(0.15),

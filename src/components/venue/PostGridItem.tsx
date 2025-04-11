@@ -71,7 +71,7 @@ const PostGridItem: React.FC<PostGridItemProps> = ({
       
       {/* Show pinned badge if applicable */}
       {post.isPinned && (
-        <PostBadges post={post} isVenuePost={false} />
+        <PostBadges post={post} isVenuePost={isVenuePost} />
       )}
       
       {/* Show delete button if applicable */}
@@ -86,7 +86,7 @@ const PostGridItem: React.FC<PostGridItemProps> = ({
       
       <PostOverlay
         post={post}
-        isVenuePost={false} // Don't show venue badge in overlay
+        isVenuePost={isVenuePost}
         timeAgo={timeAgo}
         isDetailView={isDetailView}
         onUserProfileClick={navigateToUserProfile}

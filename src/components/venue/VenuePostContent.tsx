@@ -28,7 +28,7 @@ const VenuePostContent: React.FC<VenuePostContentProps> = ({
         {media.type === "image" ? (
           <img
             src={media.url}
-            alt={`Media content`}
+            alt={`Media content related to ${venueType}`}
             className="w-full h-auto object-cover"
           />
         ) : (

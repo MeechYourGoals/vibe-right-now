@@ -1,6 +1,6 @@
 
 import { Location } from "@/types";
-import { mockLocations, searchLocations as mockSearchLocations } from "@/mock/locations";
+import { searchLocations as mockSearchLocations } from "@/mock/locations";
 
 /**
  * Search for locations based on query string

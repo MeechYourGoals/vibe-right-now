@@ -26,7 +26,7 @@ const RecentVibes = ({ location }: RecentVibesProps) => {
   const todayContent = getDaySpecificContent(location.type, dayOfWeek);
   const todayImage = {
     type: "image" as const,
-    url: getDaySpecificImageUrl(location.type, dayOfWeek)
+    url: getDaySpecificImageUrl(location.type, dayOfWeek) || getMediaForLocation(location).url
   };
   
   // Get content for another day (2 days earlier)
@@ -34,7 +34,7 @@ const RecentVibes = ({ location }: RecentVibesProps) => {
   const previousContent = getDaySpecificContent(location.type, previousDay);
   const previousImage = {
     type: "image" as const,
-    url: getDaySpecificImageUrl(location.type, previousDay)
+    url: getDaySpecificImageUrl(location.type, previousDay) || getMediaForLocation(location).url
   };
   
   return (

@@ -7,11 +7,11 @@ export const getMediaForLocation = (location: Location): Media => {
   const imageMap: Record<string, string> = {
     // Sports venues
     "5": "https://images.unsplash.com/photo-1519214605650-76a613ee3245?q=80&w=1000&auto=format&fit=crop", // Skyline Rooftop Bar
-    "6": "https://images.unsplash.com/photo-1504450758481-7338eba7524a?q=80&w=1000&auto=format&fit=crop", // Madison Square Garden
+    "6": "https://images.unsplash.com/photo-1504450758481-7338eba7524a?q=80&w=1000&auto=format&fit=crop", // Madison Square Garden (basketball)
     "7": "https://images.unsplash.com/photo-1566737236500-c8ac43014a67?q=80&w=1000&auto=format&fit=crop", // Encore Beach Club
     "8": "https://images.unsplash.com/photo-1483729558449-99ef09a8c325?q=80&w=1000&auto=format&fit=crop", // Christ the Redeemer
     "9": "https://images.unsplash.com/photo-1551524559-8af4e6624178?q=80&w=1000&auto=format&fit=crop", // Aspen Highlands
-    "10": "https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=1000&auto=format&fit=crop", // Allegiant Stadium
+    "10": "https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=1000&auto=format&fit=crop", // Allegiant Stadium (football)
     "11": "https://images.unsplash.com/photo-1545579133-99bb5ab189bd?q=80&w=1000&auto=format&fit=crop", // Mama's Fish House
     "12": "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=1000&auto=format&fit=crop", // Barry's Bootcamp
     "13": "https://images.unsplash.com/photo-1560147307-7fef1854cd4a?q=80&w=1000&auto=format&fit=crop", // Houston Rodeo
@@ -31,12 +31,12 @@ export const getMediaForLocation = (location: Location): Media => {
     "27": "https://images.unsplash.com/photo-1535086181678-5a5c4d23aa7d?q=80&w=1000&auto=format&fit=crop", // Coachella VIP
     "28": "https://images.unsplash.com/photo-1639815188546-c43c240ff4df?q=80&w=1000&auto=format&fit=crop", // Bitcoin Conference
     "29": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=1000&auto=format&fit=crop", // CES Las Vegas
-    "30": "https://images.unsplash.com/photo-1504450758481-7338eba7524a?q=80&w=1000&auto=format&fit=crop",  // Lakers
-    "31": "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?q=80&w=1000&auto=format&fit=crop",  // Rams
-    "32": "https://images.unsplash.com/photo-1566577134624-d9b13555e288?q=80&w=1000&auto=format&fit=crop",  // Dodgers
-    "33": "https://images.unsplash.com/photo-1459865264687-595d652de67e?q=80&w=1000&auto=format&fit=crop",  // LA Galaxy
-    "34": "https://images.unsplash.com/photo-1530915872-13619796d013?q=80&w=1000&auto=format&fit=crop",    // Volleyball
-    "35": "https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?q=80&w=1000&auto=format&fit=crop",  // Golf
+    "30": "https://images.unsplash.com/photo-1504450758481-7338eba7524a?q=80&w=1000&auto=format&fit=crop", // Lakers
+    "31": "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?q=80&w=1000&auto=format&fit=crop", // Rams
+    "32": "https://images.unsplash.com/photo-1566577134624-d9b13555e288?q=80&w=1000&auto=format&fit=crop", // Dodgers
+    "33": "https://images.unsplash.com/photo-1459865264687-595d652de67e?q=80&w=1000&auto=format&fit=crop", // LA Galaxy
+    "34": "https://images.unsplash.com/photo-1530915872-13619796d013?q=80&w=1000&auto=format&fit=crop", // Volleyball
+    "35": "https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?q=80&w=1000&auto=format&fit=crop", // Golf
   };
 
   // Default media based on type if no specific image is available

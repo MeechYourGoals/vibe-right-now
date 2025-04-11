@@ -21,7 +21,7 @@ const PostMedia: React.FC<PostMediaProps> = ({ post }) => {
     return (
       <img 
         src={post.media[0].url}
-        alt={`Post by ${post.user.username}`}
+        alt={`Post by ${post.user.username} at ${post.location.name}`}
         className="h-full w-full object-cover transition-transform group-hover:scale-105"
       />
     );
