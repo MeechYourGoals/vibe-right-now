@@ -125,7 +125,7 @@ const RecommendedForYou: React.FC<RecommendedForYouProps> = ({ featuredLocations
                 className="flex items-center space-x-3"
               >
                 <Avatar>
-                  <AvatarImage src={getMediaForLocation(location).url} alt={location.name} />
+                  <AvatarImage src={getMediaForLocation(location)[0]?.url} alt={location.name} />
                   <AvatarFallback>{location.name.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div>

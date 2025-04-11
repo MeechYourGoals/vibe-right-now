@@ -1,5 +1,5 @@
 
-import { Location } from "@/types";
+import { Location, Media } from "@/types";
 import VenuePost from "@/components/VenuePost";
 import { getMediaForLocation } from "@/utils/map/locationMediaUtils";
 import { getLocationVibes } from "@/utils/locationUtils";
@@ -47,7 +47,7 @@ const RecentVibes = ({ location }: RecentVibesProps) => {
               <VenuePost
                 venue={location}
                 content={post.content}
-                media={getMediaForLocation(location)}
+                media={getMediaForLocation(location)[0] || { type: "image", url: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4" }}
                 timestamp={formatTimestamp(post.timestamp)}
               />
             </div>

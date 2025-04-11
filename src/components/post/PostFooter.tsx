@@ -9,6 +9,8 @@ import CommentList from '@/components/CommentList';
 
 interface PostFooterProps {
   post: Post;
+  comments?: Comment[];
+  isDetailView?: boolean;
   onLike?: () => void;
   onComment?: () => void;
   onSave?: () => void;
@@ -17,6 +19,8 @@ interface PostFooterProps {
 
 const PostFooter: React.FC<PostFooterProps> = ({
   post,
+  comments,
+  isDetailView = false,
   onLike,
   onComment,
   onSave,
@@ -25,6 +29,8 @@ const PostFooter: React.FC<PostFooterProps> = ({
   const [newComment, setNewComment] = useState('');
   const [showCommentInput, setShowCommentInput] = useState(false);
   const [showAllComments, setShowAllComments] = useState(false);
+  
+  const postComments = comments || post.comments || [];
   
   const commentDate = new Date(post.timestamp);
   const timeAgo = formatDistanceToNow(commentDate, { addSuffix: true });
@@ -65,7 +71,7 @@ const PostFooter: React.FC<PostFooterProps> = ({
             onClick={() => setShowCommentInput(prev => !prev)}
           >
             <MessageCircle className="h-5 w-5" />
-            <span className="text-sm">{post.comments.length}</span>
+            <span className="text-sm">{postComments.length}</span>
           </Button>
         </div>
         
@@ -95,19 +101,19 @@ const PostFooter: React.FC<PostFooterProps> = ({
       </div>
       
       {/* Comments section */}
-      {post.comments.length > 0 && (
+      {postComments.length > 0 && (
         <div className="space-y-3">
           <CommentList 
-            comments={post.comments} 
+            comments={postComments} 
             limit={showAllComments ? undefined : 2} 
           />
           
-          {!showAllComments && post.comments.length > 2 && (
+          {!showAllComments && postComments.length > 2 && (
             <button 
               className="text-sm text-muted-foreground hover:text-primary transition-colors"
               onClick={() => setShowAllComments(true)}
             >
-              View all {post.comments.length} comments
+              View all {postComments.length} comments
             </button>
           )}
         </div>

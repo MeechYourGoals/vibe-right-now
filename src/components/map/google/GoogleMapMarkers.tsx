@@ -126,10 +126,7 @@ const GoogleMapMarkers: React.FC<GoogleMapMarkersProps> = ({
           onCloseClick={onInfoWindowClose}
         >
           <div>
-            <InfoWindowContent 
-              location={selectedMarker} 
-              onSelect={onMarkerClick}
-            />
+            <InfoWindowContent location={selectedMarker} />
           </div>
         </InfoWindow>
       )}
