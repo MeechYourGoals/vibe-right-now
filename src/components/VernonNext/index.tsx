@@ -11,6 +11,7 @@ import { useSpeechRecognition } from './hooks/useSpeechRecognition';
 import { useSpeechSynthesis } from './hooks/useSpeechSynthesis';
 import { useNLPService } from './hooks/useNLPService';
 import { useGooglePlacesService } from './hooks/useGooglePlacesService';
+import { supabase } from '@/integrations/supabase/client';
 
 const VernonNext: React.FC = () => {
   const [state, setState] = useState<ChatState>({
@@ -32,7 +33,7 @@ const VernonNext: React.FC = () => {
   // Custom hooks for speech and AI services
   const { 
     transcript, 
-    interimTranscript, in
+    interimTranscript,
     isListening, 
     startListening, 
     stopListening 
