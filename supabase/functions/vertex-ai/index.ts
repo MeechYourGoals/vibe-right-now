@@ -16,7 +16,7 @@ serve(async (req) => {
   }
 
   try {
-    const { prompt, mode, history } = await req.json();
+    const { prompt, mode, history, searchMode } = await req.json();
     
     // Build conversation history in Vertex AI format
     const contents = [];
@@ -31,6 +31,21 @@ serve(async (req) => {
         role: "MODEL",
         parts: [{ text: "I am VeRNon for Venues, a business insights assistant. I help venue owners understand their metrics, customer trends, and marketing performance." }]
       });
+    } else if (searchMode) {
+      contents.push({
+        role: "USER",
+        parts: [{ text: "You are VeRNon, a venue and event discovery assistant. You provide ONLY real, factual information about venues, events, and places. Never make up information. If you don't know something, say so clearly. Always include real venue names, addresses, and other factual details when possible." }]
+      });
+      contents.push({
+        role: "MODEL",
+        parts: [{ text: "I am VeRNon, a venue and event discovery assistant. I provide only real, factual information about venues, events, and places. I will never make up information and will clearly state when I don't know something." }]
+      });
+      
+      // For search mode, add a special prompt to get real information
+      contents.push({
+        role: "USER",
+        parts: [{ text: `Search for real factual information about: "${prompt}". Include real venue names, addresses, opening hours, and other specific details. Only provide information you're confident is factual. If you don't know, say so clearly.` }]
+      });
     } else {
       contents.push({
         role: "USER",
@@ -42,8 +57,8 @@ serve(async (req) => {
       });
     }
     
-    // Add conversation history
-    if (history && history.length > 0) {
+    // Add conversation history for regular chat mode
+    if (history && history.length > 0 && !searchMode) {
       for (const message of history) {
         contents.push({
           role: message.sender === 'user' ? "USER" : "MODEL",
@@ -52,11 +67,13 @@ serve(async (req) => {
       }
     }
     
-    // Add the current prompt
-    contents.push({
-      role: "USER",
-      parts: [{ text: prompt }]
-    });
+    // Add the current prompt (only for non-search mode, for search mode it's already added)
+    if (!searchMode) {
+      contents.push({
+        role: "USER",
+        parts: [{ text: prompt }]
+      });
+    }
     
     console.log("Sending request to Vertex AI API");
     
@@ -69,7 +86,7 @@ serve(async (req) => {
       body: JSON.stringify({
         contents: contents,
         generationConfig: {
-          temperature: 0.7,
+          temperature: searchMode ? 0.1 : 0.7, // Lower temperature for factual search queries
           topK: 40,
           topP: 0.95,
           maxOutputTokens: 2048,

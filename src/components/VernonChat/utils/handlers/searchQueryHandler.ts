@@ -1,6 +1,7 @@
 import { SwirlSearchService } from '@/services/SwirlSearchService';
 import { SearchService } from '@/services/search/SearchService';
 import { HuggingChatService } from '@/services/HuggingChatService';
+import { VertexAIService } from '@/services/VertexAIService';
 import { 
   detectCityInQuery, 
   isLocationOrEventQuery,
@@ -28,6 +29,51 @@ export const handleSearchQuery = async (
     // Check if this is a location or event-related query
     const isLocationQuery = isLocationOrEventQuery(inputValue);
     const hasLocationKeywords = /miami|new york|los angeles|chicago|san francisco|las vegas|seattle|boston|orlando|washington|dc|places|venue|restaurant|bar|club|event|things to do|visit|attraction/i.test(inputValue);
+    
+    // For location-based queries, try Vertex AI search first as it has the most up-to-date real-world information
+    if (isLocationQuery || hasLocationKeywords) {
+      try {
+        console.log('Location query detected, trying Vertex AI search first');
+        const vertexResponse = await VertexAIService.searchWithVertex(inputValue);
+        
+        if (vertexResponse && vertexResponse.length > 100 && !vertexResponse.includes("I don't have specific information")) {
+          console.log('Got real-world information from Vertex AI');
+          
+          // Extract likely categories based on content
+          if (vertexResponse.toLowerCase().includes('restaurant') || vertexResponse.toLowerCase().includes('dining')) {
+            categories.push('dining');
+          }
+          if (vertexResponse.toLowerCase().includes('bar') || vertexResponse.toLowerCase().includes('club') || vertexResponse.toLowerCase().includes('nightlife')) {
+            categories.push('nightlife');
+          }
+          if (vertexResponse.toLowerCase().includes('museum') || vertexResponse.toLowerCase().includes('park') || vertexResponse.toLowerCase().includes('attraction')) {
+            categories.push('attractions');
+          }
+          if (vertexResponse.toLowerCase().includes('show') || vertexResponse.toLowerCase().includes('concert') || vertexResponse.toLowerCase().includes('event')) {
+            categories.push('events');
+          }
+          
+          // Set categories in sessionStorage for the Explore page to use
+          if (categories.length > 0) {
+            try {
+              sessionStorage.setItem('lastSearchCategories', JSON.stringify(categories));
+              sessionStorage.setItem('lastSearchQuery', inputValue);
+              console.log('Set search categories in session storage:', categories);
+            } catch (e) {
+              console.error('Error setting categories in sessionStorage:', e);
+            }
+          }
+          
+          // Include a link to the Explore page for a better visual experience
+          const exploreLinkText = "\n\nYou can also [view all these results on our Explore page](/explore?q=" + 
+            encodeURIComponent(inputValue) + ") for a better visual experience.";
+          
+          return cleanResponseText(vertexResponse + exploreLinkText);
+        }
+      } catch (vertexError) {
+        console.error('Vertex AI search failed, trying other methods:', vertexError);
+      }
+    }
     
     // Check if this is a comedy-related query
     const isComedyQuery = /comedy|comedian|stand[ -]?up|improv|funny|laugh|jokes/i.test(inputValue);
@@ -60,9 +106,8 @@ export const handleSearchQuery = async (
       }
     }
     
-    // For complex natural language queries or location-related queries, prioritize vector search
+    // For complex natural language queries or location-related queries, try vector search if Vertex failed
     if (isComplexQuery || isLocationQuery || hasLocationKeywords) {
-      console.log('Complex or location-related query detected, prioritizing vector search');
       try {
         // First attempt with vector search for most up-to-date information
         const vectorSearchResult = await SearchService.vectorSearch(inputValue);
@@ -101,7 +146,7 @@ export const handleSearchQuery = async (
       }
     }
     
-    // Fall back to regular search service if vector search failed or wasn't applicable
+    // Fall back to regular search service if Vertex and vector search failed
     if (!responseText || (typeof responseText === 'string' && responseText.length < 100)) {
       try {
         responseText = await SearchService.search(inputValue);
@@ -141,23 +186,20 @@ export const handleSearchQuery = async (
       }
     }
     
-    // If we still don't have a good response, try one last time with vector search
+    // If we still don't have a good response, try one last time with Vertex AI
     if (!responseText || (typeof responseText === 'string' && responseText.length < 100) || (typeof responseText === 'string' && responseText.includes("I don't have specific information"))) {
       try {
-        console.log('No good response yet, trying vector search one more time with enhanced prompt');
-        const lastChanceResponse = await SearchService.vectorSearch(
+        console.log('No good response yet, trying Vertex AI one more time with enhanced prompt');
+        const lastChanceResponse = await VertexAIService.searchWithVertex(
           `Provide detailed information about "${inputValue}" including real venues, events, and activities. Include specific names, addresses, and practical details.`
         );
         
-        if (typeof lastChanceResponse === 'string' && lastChanceResponse.length > 100) {
+        if (lastChanceResponse && lastChanceResponse.length > 100) {
           responseText = lastChanceResponse;
-          return cleanResponseText(responseText);
-        } else if (typeof lastChanceResponse === 'object' && lastChanceResponse !== null && lastChanceResponse.results && lastChanceResponse.results.length > 100) {
-          responseText = lastChanceResponse.results;
           return cleanResponseText(responseText);
         }
       } catch (error) {
-        console.error('Last chance vector search failed:', error);
+        console.error('Last chance Vertex AI search failed:', error);
       }
     }
   } catch (error) {

@@ -35,5 +35,38 @@ export const VertexAIService = {
       console.error('Error in VertexAIService.generateResponse:', error);
       return "I'm having trouble connecting to my AI services right now. Please try again later.";
     }
+  },
+  
+  /**
+   * Search for real-world information using Vertex AI
+   * @param query The search query
+   * @returns The search results from Vertex AI
+   */
+  async searchWithVertex(query: string): Promise<string> {
+    try {
+      console.log(`Searching with Vertex AI: "${query.substring(0, 50)}..."`);
+      
+      const { data, error } = await supabase.functions.invoke('vertex-ai', {
+        body: { 
+          prompt: query,
+          mode: 'search',
+          searchMode: true
+        }
+      });
+      
+      if (error) {
+        console.error('Error calling Vertex AI search:', error);
+        throw new Error(`Failed to search with Vertex AI: ${error.message}`);
+      }
+      
+      if (!data || !data.text) {
+        throw new Error('No search results received from Vertex AI');
+      }
+      
+      return data.text;
+    } catch (error) {
+      console.error('Error in VertexAIService.searchWithVertex:', error);
+      return "I couldn't find specific information about that. Could you try rephrasing your question?";
+    }
   }
 };

@@ -1,10 +1,10 @@
+
 import { Message } from '../types';
 import { createUserMessage, createAIMessage, createErrorMessage } from './messageFactory';
 import { extractPaginationParams } from './pagination';
 import { handleVenueQuery } from './handlers/venueQueryHandler';
 import { handleSearchQuery } from './handlers/searchQueryHandler';
 import { handleBookingQuery } from './handlers/bookingQueryHandler';
-import { GeminiService } from '@/services/GeminiService';
 import { VertexAIService } from '@/services/VertexAIService';
 
 export interface MessageProcessorProps {
@@ -15,8 +15,8 @@ export interface MessageProcessorProps {
   setIsSearching: (isSearching: boolean) => void;
 }
 
-// Flag to determine which AI service to use (can be controlled via settings)
-const useVertexAI = true; // Changed from false to true to use Vertex AI by default
+// Always use Vertex AI by default
+const useVertexAI = true;
 
 export const processMessageInput = async (
   inputValue: string,
@@ -76,21 +76,19 @@ export const processMessageInput = async (
     if (isLocationQuery || hasCityName) {
       console.log('Location/city query detected, using search pipeline');
       try {
-        // First try the vector search which uses AI
+        // First try the search handler which now prioritizes Vertex AI
         responseText = await handleSearchQuery(inputValue, updatedPaginationState);
         console.log('Search query handler returned response of length:', responseText.length);
         
-        // If we didn't get a good response, try direct AI call
+        // If we didn't get a good response, try direct Vertex AI call
         if (!responseText || responseText.length < 100 || responseText.includes("I don't have specific information")) {
-          console.log('Search result insufficient, trying AI directly');
+          console.log('Search result insufficient, trying Vertex AI directly with search mode');
           
-          // Using Vertex AI as the default
-          responseText = await VertexAIService.generateResponse(
+          responseText = await VertexAIService.searchWithVertex(
             `The user is asking about: "${inputValue}". 
              Provide detailed information about real venues, events, or activities in this location.
              Include names of specific places, addresses, and hours when possible.
-             Group information by categories (dining, nightlife, attractions, events, etc.)`,
-            'user'
+             Group information by categories (dining, nightlife, attractions, events, etc.)`
           );
         }
       } catch (error) {
