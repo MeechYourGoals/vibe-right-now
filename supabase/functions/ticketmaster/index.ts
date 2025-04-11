@@ -52,7 +52,24 @@ serve(async (req) => {
   }
 
   async function handleEventSearch(req: Request) {
-    const { keyword, city, stateCode, countryCode, postalCode, latlong, radius, unit, startDateTime, endDateTime, classificationName, size, page } = await req.json();
+    const { 
+      keyword, 
+      city, 
+      stateCode, 
+      countryCode, 
+      postalCode, 
+      latlong, 
+      radius, 
+      unit, 
+      startDateTime, 
+      endDateTime, 
+      classificationName, 
+      size, 
+      page, 
+      // Add support for future date range filtering
+      startDate,
+      endDate 
+    } = await req.json();
 
     const params = new URLSearchParams({ apikey: TICKETMASTER_API_KEY });
     
@@ -64,11 +81,29 @@ serve(async (req) => {
     if (latlong) params.append('latlong', latlong);
     if (radius) params.append('radius', radius.toString());
     if (unit) params.append('unit', unit);
-    if (startDateTime) params.append('startDateTime', startDateTime);
-    if (endDateTime) params.append('endDateTime', endDateTime);
+    
+    // Handle date parameters - use ISO format with timezone (YYYY-MM-DDTHH:MM:SSZ)
+    if (startDateTime) {
+      params.append('startDateTime', startDateTime);
+    } else if (startDate) {
+      // Convert date format for Ticketmaster API
+      const formattedStartDate = `${startDate}T00:00:00Z`;
+      params.append('startDateTime', formattedStartDate);
+    }
+    
+    if (endDateTime) {
+      params.append('endDateTime', endDateTime);
+    } else if (endDate) {
+      // Convert date format for Ticketmaster API
+      const formattedEndDate = `${endDate}T23:59:59Z`;
+      params.append('endDateTime', formattedEndDate);
+    }
+    
     if (classificationName) params.append('classificationName', classificationName);
     if (size) params.append('size', size.toString());
     if (page) params.append('page', page.toString());
+
+    console.log(`Searching Ticketmaster events with params: ${params.toString()}`);
 
     const response = await fetch(
       `https://app.ticketmaster.com/discovery/v2/events.json?${params}`
