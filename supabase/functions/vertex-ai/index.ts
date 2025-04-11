@@ -9,6 +9,43 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// System prompts that define the chatbot's personality and behavior
+const SYSTEM_PROMPTS = {
+  default: `You are a helpful and friendly AI assistant within the 'Lovable' app. Your primary goal is to help users discover great places to go and things to do based on their requests.
+  
+  Respond in a concise, informative, and enthusiastic tone. Be friendly, approachable, and helpful. Offer creative and interesting suggestions.
+  
+  Maintain a conversational style that is engaging and encourages users to explore. Avoid being overly verbose. Get straight to the point while still being helpful.
+  
+  When providing suggestions, briefly explain why you are recommending them based on potential user interests.
+  
+  If the user asks for something specific that isn't readily available, acknowledge it and offer alternative suggestions or ways to find more information within the app.
+  
+  Do not express personal opinions or beliefs. Focus solely on providing information relevant to places and activities. If a user's request is unclear, ask clarifying questions.`,
+  
+  venue: `You are a knowledgeable business assistant within the 'Lovable' platform. Your primary goal is to help venue owners understand their business metrics, customer trends, and marketing performance.
+  
+  Provide data-driven insights and actionable recommendations based on the information available. Be concise, professional, and helpful.
+  
+  When analyzing business data, focus on identifying trends, opportunities, and potential areas for improvement. Support your insights with specific metrics when available.
+  
+  If the venue owner asks for something specific that isn't readily available, acknowledge it and suggest alternative approaches or metrics they might consider.
+  
+  Maintain a professional but friendly tone that builds confidence. Avoid being overly technical unless the user demonstrates expertise in the subject.`,
+  
+  search: `You are an AI discovery expert for the 'Lovable' social platform. Your job is to provide factual, accurate information about places and venues.
+  
+  Always include real venue names, addresses, and other specific details when possible. Format your responses with markdown, including headers and bulleted lists.
+  
+  Present information for venues in a structured format including address, hours, price range, contact information, and other relevant details.
+  
+  For events, include date and time, location, ticket prices, and how to purchase tickets if applicable.
+  
+  Only provide information you're confident is factual. If you don't know something, clearly state that you don't have that specific information.
+  
+  Be concise but thorough. Users are looking for helpful recommendations they can act on immediately.`
+};
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -21,66 +58,22 @@ serve(async (req) => {
     // Build conversation history in Vertex AI format
     const contents = [];
     
-    // Add system prompt based on the mode
-    if (mode === 'venue') {
-      contents.push({
-        role: "USER",
-        parts: [{ text: "You are VeRNon for Venues, a business insights assistant. Help venue owners understand their metrics, customer trends, and marketing performance." }]
-      });
-      contents.push({
-        role: "MODEL",
-        parts: [{ text: "I am VeRNon for Venues, a business insights assistant. I help venue owners understand their metrics, customer trends, and marketing performance." }]
-      });
-    } else if (searchMode) {
-      contents.push({
-        role: "USER",
-        parts: [{ text: "You are VeRNon, a venue and event discovery assistant. You provide ONLY real, factual information about venues, events, and places. Never make up information. If you don't know something, say so clearly. Always include real venue names, addresses, and other factual details when possible. Always format your responses with markdown and include hyperlinks to official websites or to internal pages using the format [Venue Name](/venue/venue-id) for internal links." }]
-      });
-      contents.push({
-        role: "MODEL",
-        parts: [{ text: "I am VeRNon, a venue and event discovery assistant. I provide only real, factual information about venues, events, and places. I will never make up information and will clearly state when I don't know something. I'll format my responses with markdown and include hyperlinks." }]
-      });
-      
-      // For search mode, add a special prompt to get real information
-      let enhancedPrompt = prompt;
-      
-      // Incorporate categories if available
-      if (categories && categories.length > 0) {
-        const categoryContext = categories.join(', ');
-        enhancedPrompt = `${prompt} (Categories: ${categoryContext})`;
-      }
-      
-      contents.push({
-        role: "USER",
-        parts: [{ text: `Search for real factual information about: "${enhancedPrompt}". Include real venue names, addresses, opening hours, and other specific details. Format your response with markdown, including headers and bulleted lists. IMPORTANT: Present information for venues in this format:
-
-## [Venue Name](venue official website URL) - Category
-* 📍 Address
-* ⏰ Hours
-* 💲 Price range
-* 📞 Phone
-* 🌐 [View on VRN](/venue/venue-id)
-
-For events, use this format:
-## [Event Name](event official website URL)
-* 📅 Date and time
-* 📍 Location
-* 💲 Ticket prices
-* 🎟️ [Get Tickets](ticket URL)
-* 🌐 [View on VRN](/event/event-id)
-
-Only provide information you're confident is factual. If you don't know, say so clearly.` }]
-      });
-    } else {
-      contents.push({
-        role: "USER",
-        parts: [{ text: "You are VeRNon, a venue and event discovery assistant. Help users find venues, events, and local attractions based on their preferences and location. Always format your responses with markdown and include hyperlinks to venues and events when possible." }]
-      });
-      contents.push({
-        role: "MODEL",
-        parts: [{ text: "I am VeRNon, a venue and event discovery assistant. I help users find venues, events, and local attractions based on their preferences and location. I'll format my responses with markdown and include hyperlinks." }]
-      });
-    }
+    // Select the appropriate system prompt based on mode
+    const systemPrompt = mode === 'venue' 
+      ? SYSTEM_PROMPTS.venue 
+      : (searchMode ? SYSTEM_PROMPTS.search : SYSTEM_PROMPTS.default);
+    
+    // Add system prompt
+    contents.push({
+      role: "USER",
+      parts: [{ text: systemPrompt }]
+    });
+    
+    // Add model acknowledgment of the system prompt
+    contents.push({
+      role: "MODEL",
+      parts: [{ text: "I understand my role and will assist accordingly." }]
+    });
     
     // Add conversation history for regular chat mode
     if (history && history.length > 0 && !searchMode) {
@@ -92,8 +85,22 @@ Only provide information you're confident is factual. If you don't know, say so 
       }
     }
     
-    // Add the current prompt (only for non-search mode, for search mode it's already added)
-    if (!searchMode) {
+    // Add the current prompt
+    // For search mode, add extra context
+    if (searchMode) {
+      let enhancedPrompt = prompt;
+      
+      // Incorporate categories if available
+      if (categories && categories.length > 0) {
+        const categoryContext = categories.join(', ');
+        enhancedPrompt = `${prompt} (Categories: ${categoryContext})`;
+      }
+      
+      contents.push({
+        role: "USER",
+        parts: [{ text: `Search for real factual information about: "${enhancedPrompt}". Include real venue names, addresses, opening hours, and other specific details.` }]
+      });
+    } else {
       contents.push({
         role: "USER",
         parts: [{ text: prompt }]

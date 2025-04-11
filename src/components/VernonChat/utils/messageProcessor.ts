@@ -73,13 +73,16 @@ export const processMessageInput = async (
     if (isLocationQuery || hasCityName) {
       console.log('Location/city query detected, using search pipeline');
       try {
+        // Extract any categories from the query to help with search relevance
+        const categories = extractCategoriesFromQuery(inputValue);
+        
         // Use the search handler which now directly prioritizes Vertex AI
         responseText = await handleSearchQuery(inputValue, updatedPaginationState);
         console.log('Search query handler returned response of length:', responseText.length);
       } catch (error) {
         console.error('Error in search pipeline:', error);
         // Fall back to direct AI call
-        responseText = await VertexAIService.generateResponse(inputValue, 'user', contextMessages);
+        responseText = await VertexAIService.generateResponse(inputValue, 'default', contextMessages);
       }
     } else if (isVenueMode) {
       // For venue mode, always use Vertex AI for business insights
@@ -92,7 +95,7 @@ export const processMessageInput = async (
       // For conversational queries, use Vertex AI directly
       responseText = await VertexAIService.generateResponse(
         inputValue, 
-        'user',
+        'default',
         contextMessages
       );
     }
@@ -109,3 +112,37 @@ export const processMessageInput = async (
     setIsSearching(false);
   }
 };
+
+/**
+ * Extract basic categories from a query to help with search relevance
+ */
+function extractCategoriesFromQuery(query: string): string[] {
+  const categories = [];
+  
+  // Check for food-related terms
+  if (/restaurant|food|eat|dining|breakfast|lunch|dinner|brunch|cafe|bar|pub|coffee/i.test(query)) {
+    categories.push('food');
+  }
+  
+  // Check for entertainment-related terms
+  if (/movie|theater|theatre|concert|show|performance|music|live|entertainment/i.test(query)) {
+    categories.push('entertainment');
+  }
+  
+  // Check for outdoor activities
+  if (/park|hike|hiking|trail|beach|outdoor|nature|walk|walking/i.test(query)) {
+    categories.push('outdoors');
+  }
+  
+  // Check for nightlife
+  if (/club|nightlife|party|dancing|dance|nightclub|bar/i.test(query)) {
+    categories.push('nightlife');
+  }
+  
+  // Check for family-friendly
+  if (/family|kid|child|children|family-friendly/i.test(query)) {
+    categories.push('family');
+  }
+  
+  return categories;
+}

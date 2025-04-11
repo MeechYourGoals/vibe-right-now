@@ -17,6 +17,9 @@ export interface GenerateTextOptions {
   
   /** Prevents the model from generating harmful content */
   safetySettings?: any[];
+  
+  /** Mode for conversation (default, venue, search) */
+  mode?: 'default' | 'venue' | 'search';
 }
 
 /**

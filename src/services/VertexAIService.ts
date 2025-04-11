@@ -14,7 +14,7 @@ export const VertexAIService = {
    * @param history Previous chat messages for context
    * @returns The generated text response
    */
-  async generateResponse(prompt: string, mode: 'venue' | 'user' = 'user', history: Message[] = []): Promise<string> {
+  async generateResponse(prompt: string, mode: 'venue' | 'default' = 'default', history: Message[] = []): Promise<string> {
     try {
       console.log(`Calling Vertex AI with prompt: "${prompt.substring(0, 50)}..."`);
       
@@ -27,6 +27,7 @@ export const VertexAIService = {
       // Use our new hub to generate text
       return await VertexAIHub.generateText(prompt, formattedHistory, {
         temperature: mode === 'venue' ? 0.5 : 0.7, // Lower temperature for business insights
+        mode: mode
       });
     } catch (error) {
       console.error('Error in VertexAIService.generateResponse:', error);
@@ -37,14 +38,15 @@ export const VertexAIService = {
   /**
    * Search for real-world information using Vertex AI
    * @param query The search query
+   * @param categories Optional categories to help categorize the search
    * @returns The search results from Vertex AI
    */
-  async searchWithVertex(query: string): Promise<string> {
+  async searchWithVertex(query: string, categories?: string[]): Promise<string> {
     try {
       console.log(`Searching with Vertex AI: "${query.substring(0, 50)}..."`);
       
       // Use our new hub for AI search capabilities
-      return await VertexAIHub.searchWithAI(query);
+      return await VertexAIHub.searchWithAI(query, categories);
     } catch (error) {
       console.error('Error in VertexAIService.searchWithVertex:', error);
       return "I couldn't find specific information about that. Could you try rephrasing your question?";

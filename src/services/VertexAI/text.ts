@@ -23,7 +23,9 @@ export async function generateText(
         history,
         model: options.model || 'gemini-1.5-pro',
         maxTokens: options.maxTokens || 2048,
-        temperature: options.temperature || 0.7
+        temperature: options.temperature || 0.7,
+        mode: options.mode || 'default',
+        safetySettings: options.safetySettings
       }
     });
     
@@ -47,7 +49,7 @@ export async function generateText(
 /**
  * Generate factual information using Vertex AI search capabilities
  */
-export async function searchWithAI(query: string): Promise<string> {
+export async function searchWithAI(query: string, categories?: string[]): Promise<string> {
   try {
     console.log(`Searching with Vertex AI: "${query.substring(0, 50)}..."`);
     
@@ -56,6 +58,7 @@ export async function searchWithAI(query: string): Promise<string> {
         prompt: query,
         mode: 'search',
         searchMode: true,
+        categories: categories || [],
         temperature: 0.1 // Low temperature for factual responses
       }
     });

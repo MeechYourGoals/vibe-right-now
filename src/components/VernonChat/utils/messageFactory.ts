@@ -27,7 +27,7 @@ export const createErrorMessage = (): Message => ({
 
 export const INITIAL_MESSAGE: Message = {
   id: '1',
-  text: "Hi there! I'm VeRNon, your Vibe guide. I can help you discover cool places, events happening tonight, or answer questions about specific venues. What are you looking for?",
+  text: "Hi there! I'm your friendly Lovable guide. I can help you discover amazing places to go and things to do based on your interests. Try asking about restaurants, events, attractions, or specific activities you're interested in. What are you looking for today?",
   sender: 'ai',
   timestamp: new Date()
 };
