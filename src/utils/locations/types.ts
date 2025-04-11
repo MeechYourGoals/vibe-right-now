@@ -1,7 +1,9 @@
 
 export interface CityCoordinates {
   city: string;
-  state: string;
+  state?: string;
+  country?: string;
+  name?: string; // For backward compatibility
   lat: number;
   lng: number;
 }

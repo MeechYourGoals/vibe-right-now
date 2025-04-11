@@ -5,7 +5,7 @@ import { venues } from "./venues";
 import { posts } from "./posts";
 import { comments } from "./comments";
 import { getRecentTime, getExpiryTime } from "./time-utils";
-import { cityLocations } from "./cityLocations";
+import { cityLocations, getLocationsByCity, getTrendingLocationsForCity, getNearbyLocations } from "./cityLocations";
 
 // Export everything so existing imports continue to work
 export { 
@@ -15,5 +15,8 @@ export {
   comments as mockComments,
   getRecentTime,
   getExpiryTime,
-  cityLocations
+  cityLocations,
+  getLocationsByCity,
+  getTrendingLocationsForCity,
+  getNearbyLocations
 };

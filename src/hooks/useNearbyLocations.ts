@@ -2,8 +2,8 @@
 import { useState, useEffect } from "react";
 import { mockLocations } from "@/mock/data";
 import { Location } from "@/types";
-import { cityLocations } from "@/utils/locations";
-import { getLocationsByCity, getNearbyLocations } from "@/mock/cityLocations";
+import { cityCoordinates } from "@/utils/locations/cityDatabase";
+import { getLocationsByCity, getNearbyLocations, cityLocations } from "@/mock/cityLocations";
 
 // Improved version that uses city data
 export const useNearbyLocations = () => {
