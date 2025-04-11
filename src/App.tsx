@@ -1,11 +1,11 @@
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Home from "@/pages/Home";
+import Home from "@/pages/Index"; // Changed from "@/pages/Home"
 import Explore from "@/pages/Explore";
-import Profile from "@/pages/Profile";
+import Profile from "@/pages/ProfileBio"; // Changed from "@/pages/Profile"
 import MyPlaces from "@/pages/MyPlaces";
-import Pinned from "@/pages/Pinned";
-import Points from "@/pages/Points";
+import Pinned from "@/pages/PinnedVibes"; // Changed from "@/pages/Pinned"
+import Points from "@/pages/UserPoints"; // Changed from "@/pages/Points"
 import Settings from "@/pages/Settings";
 import VenueProfile from "@/pages/VenueProfile";
 import Header from "@/components/Header";
@@ -13,7 +13,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "@/components/ui/toaster";
 import VernonChat from "@/components/VernonChat";
 import CameraButton from "@/components/CameraButton";
-import LocationSearch from "@/components/LocationSearch";
+import LocationSearch from "@/components/LocationSearch"; // Added back now that we've created the component
 
 function App() {
   return (
