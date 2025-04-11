@@ -3,7 +3,6 @@ import { useState, useRef, useCallback } from 'react';
 import { useBrowserSpeechSynthesis } from './useBrowserSpeechSynthesis';
 import { useSpeechSynthesisVoices } from './useSpeechSynthesisVoices';
 import { createAudioElement } from './speechSynthesisUtils';
-import { CoquiTTSService } from '@/services/CoquiTTSService';
 
 export const useSpeechSynthesisCore = () => {
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -49,19 +48,6 @@ export const useSpeechSynthesisCore = () => {
   
   // Get browser speech synthesis functionality
   const { speakWithBrowser } = useBrowserSpeechSynthesis();
-  
-  // Initialize Coqui TTS
-  useCallback(() => {
-    CoquiTTSService.init()
-      .then(available => {
-        if (available) {
-          console.log('Coqui TTS service initialized successfully');
-        } else {
-          console.warn('Coqui TTS initialization failed, will use browser fallback');
-        }
-      })
-      .catch(error => console.error('Error initializing Coqui TTS:', error));
-  }, []);
   
   return {
     isSpeaking,

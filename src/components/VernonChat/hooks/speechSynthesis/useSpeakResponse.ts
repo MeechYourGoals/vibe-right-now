@@ -1,7 +1,7 @@
 
 import { useCallback } from 'react';
-import { CoquiTTSService } from '@/services/CoquiTTSService';
 import { getGoogleTTS, playAudioBase64 } from '@/components/VernonChat/utils/speech/synthesis';
+import { toast } from "sonner";
 
 interface UseSpeakResponseProps {
   isSpeaking: boolean;
@@ -51,43 +51,26 @@ export const useSpeakResponse = ({
       
       if (audioBase64) {
         console.log('Google TTS successful, playing audio');
-        playAudioBase64(audioBase64);
-        speechSuccess = true;
-        
-        // Mark intro as played if this is the first message
-        if (!introHasPlayed.current && text.includes("I'm VeRNon")) {
-          introHasPlayed.current = true;
-        }
-        return;
-      } else {
-        console.warn('Google TTS returned null, falling back to Coqui TTS');
-      }
-    } catch (error) {
-      console.error('Google TTS failed, falling back to Coqui TTS:', error);
-    }
-    
-    // If Google TTS failed, try Coqui TTS
-    try {
-      if (!speechSuccess) {
-        console.log('Attempting to use Coqui TTS...');
-        speechSuccess = await CoquiTTSService.textToSpeech(text);
-        
-        if (speechSuccess) {
-          console.log('Coqui TTS successful');
+        const audioElement = playAudioBase64(audioBase64);
+        if (audioElement) {
+          speechSuccess = true;
+          
           // Mark intro as played if this is the first message
           if (!introHasPlayed.current && text.includes("I'm VeRNon")) {
             introHasPlayed.current = true;
           }
           return;
         } else {
-          console.warn('Coqui TTS returned false, falling back to browser synthesis');
+          console.warn('Audio element creation failed, falling back to browser TTS');
         }
+      } else {
+        console.warn('Google TTS returned null, falling back to browser TTS');
       }
     } catch (error) {
-      console.error('Coqui TTS speech failed, falling back to browser synthesis:', error);
+      console.error('Google TTS failed, falling back to browser TTS:', error);
     }
     
-    // If both TTS services failed, fall back to browser's speech synthesis
+    // If Google TTS failed, fall back to browser's speech synthesis
     try {
       if (!speechSuccess) {
         console.log('Attempting to use browser speech synthesis...');
@@ -100,6 +83,7 @@ export const useSpeakResponse = ({
       }
     } catch (error) {
       console.error('Browser speech synthesis failed:', error);
+      toast.error("Voice synthesis unavailable. Please try again later.");
       // Even if speech fails completely, we continue with the app's functionality
     }
     

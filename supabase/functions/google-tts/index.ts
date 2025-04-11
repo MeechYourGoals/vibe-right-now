@@ -45,7 +45,7 @@ serve(async (req) => {
       audioConfig: { audioEncoding: 'MP3' }
     };
 
-    // Call Google TTS API
+    // Call Google TTS API with proper error handling
     console.log('Calling Google TTS API...');
     const response = await fetch(
       `https://texttospeech.googleapis.com/v1/text:synthesize?key=${apiKey}`,

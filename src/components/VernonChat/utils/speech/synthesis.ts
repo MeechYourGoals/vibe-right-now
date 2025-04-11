@@ -27,7 +27,7 @@ export const getGoogleTTS = async (text: string): Promise<string | null> => {
   try {
     console.log('Requesting Google TTS for text:', text.substring(0, 50) + '...');
     
-    // Call Google Cloud TTS via Supabase Edge Function
+    // Call Google Cloud TTS via API endpoint
     const response = await fetch('/api/google-tts', {
       method: 'POST',
       headers: {
@@ -63,10 +63,10 @@ export const getGoogleTTS = async (text: string): Promise<string | null> => {
 };
 
 // Helper to play audio from base64 string
-export const playAudioBase64 = (audioBase64: string): HTMLAudioElement => {
+export const playAudioBase64 = (audioBase64: string): HTMLAudioElement | null => {
   if (!audioBase64) {
     console.error('Empty audio base64 string provided');
-    throw new Error('Invalid audio data');
+    return null;
   }
   
   try {
@@ -86,6 +86,6 @@ export const playAudioBase64 = (audioBase64: string): HTMLAudioElement => {
   } catch (error) {
     console.error('Error creating audio element:', error);
     toast.error('Error processing audio');
-    throw error;
+    return null;
   }
 };
