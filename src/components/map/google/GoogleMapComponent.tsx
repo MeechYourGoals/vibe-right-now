@@ -61,7 +61,7 @@ const GoogleMapComponent = ({
 
   // Loading and error states
   const loadingState = (
-    <MapLoadingStates loadError={loadError} isLoaded={isLoaded} />
+    <MapLoadingStates loadError={!!loadError} isLoaded={isLoaded} />
   );
   
   if (loadError || !isLoaded) {

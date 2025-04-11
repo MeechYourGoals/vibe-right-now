@@ -38,6 +38,9 @@ export const useSpeakResponse = ({
     // Always stop any ongoing speech first to prevent overlapping voices
     stopSpeaking();
     
+    // Set the current text being spoken
+    currentlyPlayingText.current = text;
+    
     // Log that search is happening regardless of speech synthesis
     if (text.toLowerCase().includes('search') || 
         text.toLowerCase().includes('find') || 
