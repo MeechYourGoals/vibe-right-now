@@ -2,7 +2,7 @@
 // Consolidated exports file for locations module
 import { cityCoordinates } from './cityDatabase';
 import { generateRandomLocation, generateRandomLocations } from './locationGenerator';
-export type { CityCoordinates } from './types';
+export type { CityCoordinates, BusinessHours } from './types';
 
 // Export the imported functions and data
 export { cityCoordinates, generateRandomLocation, generateRandomLocations };

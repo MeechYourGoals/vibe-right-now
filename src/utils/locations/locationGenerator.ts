@@ -1,4 +1,6 @@
+
 import { getRandomArrayElement, getRandomInt } from '../random';
+import { BusinessHours } from './types';
 
 // Random business names
 const businessNamePrefixes = [
@@ -100,7 +102,7 @@ const generatePriceRange = (priceLevel: number): string => {
 };
 
 // Generate a single random location
-export const generateRandomLocation = (id: string, latBase = 34.05, lngBase = -118.25): Location => {
+export const generateRandomLocation = (id: string, latBase = 34.05, lngBase = -118.25): any => {
   const type = getRandomArrayElement(locationTypes);
   const priceLevel = generatePriceLevel();
   const tags = generateTags(type);
@@ -116,6 +118,7 @@ export const generateRandomLocation = (id: string, latBase = 34.05, lngBase = -1
   const photos = [];
   for (let i = 0; i < photoCount; i++) {
     photos.push({
+      id: `photo_${i}_${Math.random().toString(36).substring(2, 9)}`,
       url: getRandomArrayElement(samplePhotoUrls)
     });
   }
@@ -150,7 +153,7 @@ export const generateRandomLocation = (id: string, latBase = 34.05, lngBase = -1
 };
 
 // Generate multiple random locations around a central point
-export const generateRandomLocations = (count, latBase = 34.05, lngBase = -118.25) => {
+export const generateRandomLocations = (count: number, latBase = 34.05, lngBase = -118.25) => {
   const locations = [];
   for(let i = 0; i < count; i++) {
     locations.push(generateRandomLocation(`loc_${i}`, latBase, lngBase));

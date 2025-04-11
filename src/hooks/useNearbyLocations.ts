@@ -1,8 +1,8 @@
 
 import { useState, useEffect } from "react";
-import { mockLocations } from "@/mock/locations";
+import { mockLocations } from "@/mock/data";
 import { Location } from "@/types";
-import { cityCoordinates } from "@/utils/locations";
+import { cityLocations } from "@/utils/locations";
 import { getLocationsByCity, getNearbyLocations } from "@/mock/cityLocations";
 
 // Improved version that uses city data
@@ -36,14 +36,11 @@ export const useNearbyLocations = () => {
   useEffect(() => {
     if (searchedCity) {
       // If we have a city search, prioritize that
-      const cityKey = Object.keys(cityCoordinates).find(
-        key => cityCoordinates[key].name.toLowerCase() === searchedCity.toLowerCase()
-      );
+      const city = cityLocations.find(c => c.city.toLowerCase() === searchedCity.toLowerCase());
       
-      if (cityKey) {
-        const cityData = cityCoordinates[cityKey];
+      if (city) {
         // Get locations for the searched city
-        const cityLocations = getLocationsByCity(cityData.name);
+        const cityLocations = getLocationsByCity(city.city);
         setNearbyLocations(cityLocations);
         setLoading(false);
       } else {
