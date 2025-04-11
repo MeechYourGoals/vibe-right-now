@@ -53,7 +53,19 @@ serve(async (req) => {
   }
 
   try {
-    const { prompt, mode, history, searchMode, categories } = await req.json();
+    console.log("Starting Vertex AI function execution");
+    
+    // Parse request body
+    const requestData = await req.json();
+    const { prompt, mode, history, searchMode, categories } = requestData;
+    
+    console.log("Request parameters:", { 
+      prompt: prompt?.substring(0, 50) + "...", 
+      mode, 
+      historyLength: history?.length || 0,
+      searchMode, 
+      categoriesCount: categories?.length || 0 
+    });
     
     // Build conversation history in Vertex AI format
     const contents = [];
@@ -107,7 +119,12 @@ serve(async (req) => {
       });
     }
     
-    console.log("Sending request to Vertex AI API");
+    console.log("Preparing to call Vertex AI API with URL:", VERTEX_API_URL);
+    console.log("Contents length:", contents.length);
+    
+    if (!GOOGLE_VERTEX_API_KEY) {
+      throw new Error("GOOGLE_VERTEX_API_KEY environment variable is not set");
+    }
     
     // Call the Vertex AI API
     const response = await fetch(`${VERTEX_API_URL}?key=${GOOGLE_VERTEX_API_KEY}`, {
@@ -125,6 +142,8 @@ serve(async (req) => {
         }
       })
     });
+
+    console.log("Vertex AI API response status:", response.status);
 
     if (!response.ok) {
       const errorData = await response.text();

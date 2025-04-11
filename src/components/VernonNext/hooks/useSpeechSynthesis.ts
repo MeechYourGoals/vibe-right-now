@@ -8,6 +8,7 @@ interface SpeechSynthesisOptions {
   rate?: number;
 }
 
+// Set a fixed male voice by default
 const DEFAULT_MALE_VOICE = "en-US-Neural2-D";
 const DEFAULT_FEMALE_VOICE = "en-US-Neural2-F";
 
@@ -36,8 +37,8 @@ export const useSpeechSynthesis = (options: SpeechSynthesisOptions = {}) => {
       console.log('Requesting speech for text:', text.substring(0, 50) + '...');
       setIsSpeaking(true);
       
-      // Get voice based on options
-      const voice = options.voice === 'female' ? DEFAULT_FEMALE_VOICE : DEFAULT_MALE_VOICE;
+      // Force 'male' voice regardless of options to ensure consistency
+      const voice = DEFAULT_MALE_VOICE;
       
       // Call Google TTS via Supabase Edge Function
       const { data, error } = await supabase.functions.invoke('google-tts', {
@@ -52,7 +53,7 @@ export const useSpeechSynthesis = (options: SpeechSynthesisOptions = {}) => {
       if (error) {
         console.error('Error calling TTS service:', error);
         setIsSpeaking(false);
-        return fallbackToSpeechSynthesis(text);
+        return fallbackToSpeechSynthesis(text, true); // Force male voice in fallback
       }
       
       if (data?.audioContent) {
@@ -70,7 +71,7 @@ export const useSpeechSynthesis = (options: SpeechSynthesisOptions = {}) => {
           console.error('Error playing audio');
           setIsSpeaking(false);
           currentAudio.current = null;
-          return fallbackToSpeechSynthesis(text);
+          return fallbackToSpeechSynthesis(text, true); // Force male voice in fallback
         };
         
         // Play the audio
@@ -79,37 +80,40 @@ export const useSpeechSynthesis = (options: SpeechSynthesisOptions = {}) => {
       } else {
         console.warn('No audio content received');
         setIsSpeaking(false);
-        return fallbackToSpeechSynthesis(text);
+        return fallbackToSpeechSynthesis(text, true); // Force male voice in fallback
       }
     } catch (error) {
       console.error('Error in speech synthesis:', error);
       setIsSpeaking(false);
-      return fallbackToSpeechSynthesis(text);
+      return fallbackToSpeechSynthesis(text, true); // Force male voice in fallback
     }
-  }, [options.voice, options.rate, options.pitch]);
+  }, [options.rate, options.pitch]);
   
   // Fallback to browser's speech synthesis
-  const fallbackToSpeechSynthesis = (text: string): boolean => {
+  const fallbackToSpeechSynthesis = (text: string, forceMale: boolean = false): boolean => {
     if (!window.speechSynthesis) return false;
     
     try {
-      console.log('Falling back to browser speech synthesis');
+      console.log('Falling back to browser speech synthesis with male voice');
       
       // Create utterance
       const utterance = new SpeechSynthesisUtterance(text);
       
-      // Find a male voice if requested
-      if (options.voice === 'male') {
-        const voices = window.speechSynthesis.getVoices();
-        const maleVoice = voices.find(v => 
-          v.name.includes('Male') || 
-          v.name.includes('David') || 
-          v.name.includes('John')
-        );
-        
-        if (maleVoice) {
-          utterance.voice = maleVoice;
-        }
+      // Force find a male voice
+      const voices = window.speechSynthesis.getVoices();
+      const maleVoice = voices.find(v => 
+        v.name.includes('Male') || 
+        v.name.includes('David') || 
+        v.name.includes('John') ||
+        v.name.includes('Daniel') ||
+        v.name.includes('Google UK English Male')
+      );
+      
+      if (maleVoice) {
+        console.log('Using male voice:', maleVoice.name);
+        utterance.voice = maleVoice;
+      } else {
+        console.warn('No male voice found, using default');
       }
       
       if (options.rate) utterance.rate = options.rate;

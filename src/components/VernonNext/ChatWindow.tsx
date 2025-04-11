@@ -1,5 +1,5 @@
 
-import React, { RefObject } from 'react';
+import React, { RefObject, useState } from 'react';
 import { motion } from 'framer-motion';
 import { X, Minimize2, Maximize2, Mic, MicOff, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { ChatState, Message } from './types';
@@ -16,6 +16,7 @@ interface ChatWindowProps {
   onClose: () => void;
   onMinimize: () => void;
   onToggleListening: () => void;
+  onSpeak: (text: string) => void;
   messagesEndRef: RefObject<HTMLDivElement>;
 }
 
@@ -25,9 +26,12 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   onClose,
   onMinimize,
   onToggleListening,
+  onSpeak,
   messagesEndRef
 }) => {
-  const [inputValue, setInputValue] = React.useState('');
+  const [inputValue, setInputValue] = useState('');
+  // State for push-to-talk button
+  const [isPushToTalkActive, setIsPushToTalkActive] = useState(false);
   
   // If minimized, show a collapsed header
   if (state.isMinimized) {
@@ -60,6 +64,22 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       onSendMessage(inputValue);
       setInputValue('');
     }
+  };
+  
+  // Push-to-talk handlers
+  const handlePushToTalkStart = () => {
+    setIsPushToTalkActive(true);
+    onToggleListening(); // Start listening
+  };
+  
+  const handlePushToTalkEnd = () => {
+    setIsPushToTalkActive(false);
+    onToggleListening(); // Stop listening
+  };
+  
+  // Speak message handler
+  const handleSpeakMessage = (text: string) => {
+    onSpeak(text);
   };
   
   const renderMessage = (message: Message) => {
@@ -107,6 +127,16 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                 <ArrowRight className="h-3 w-3 ml-1" />
               </a>
             </div>
+          )}
+          {!isUser && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="mt-2 p-1 h-7 text-xs text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900"
+              onClick={() => handleSpeakMessage(message.text)}
+            >
+              🔊 Speak
+            </Button>
           )}
         </div>
       </div>
@@ -195,6 +225,21 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
             className="flex-1 border-blue-200 dark:border-blue-800 bg-white dark:bg-gray-950"
             disabled={state.isLoading}
           />
+          
+          <Button 
+            type="button"
+            className="shrink-0 bg-blue-600 hover:bg-blue-700 px-3" 
+            disabled={state.isLoading}
+            onMouseDown={handlePushToTalkStart}
+            onMouseUp={handlePushToTalkEnd}
+            onMouseLeave={handlePushToTalkEnd}
+            onTouchStart={handlePushToTalkStart}
+            onTouchEnd={handlePushToTalkEnd}
+            onTouchCancel={handlePushToTalkEnd}
+          >
+            <Mic className="h-4 w-4 mr-1" />
+            Talk
+          </Button>
           
           <Button 
             type="submit" 

@@ -1,62 +1,63 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const GOOGLE_VERTEX_API_KEY = Deno.env.get('GOOGLE_VERTEX_API_KEY');
-const TTS_API_URL = "https://texttospeech.googleapis.com/v1/text:synthesize";
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const DEFAULT_MALE_VOICE = "en-US-Neural2-D";
+
 serve(async (req) => {
-  // Handle CORS preflight requests
+  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { text, voice, speakingRate, pitch } = await req.json();
+    const { text, voice = DEFAULT_MALE_VOICE, speakingRate = 1.0, pitch = 0 } = await req.json();
     
     if (!text) {
-      return new Response(
-        JSON.stringify({ error: 'Text is required' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      throw new Error('Text is required');
     }
     
-    // Call Google Text-to-Speech API
-    const response = await fetch(`${TTS_API_URL}?key=${GOOGLE_VERTEX_API_KEY}`, {
+    console.log('TTS request received:', { 
+      textLength: text.length,
+      voice,
+      speakingRate,
+      pitch
+    });
+
+    // Prepare Google Cloud TTS request
+    const response = await fetch('https://texttospeech.googleapis.com/v1/text:synthesize', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'X-Goog-Api-Key': Deno.env.get('GOOGLE_CLOUD_API_KEY') || ''
       },
       body: JSON.stringify({
         input: { text },
         voice: {
-          languageCode: 'en-US',
-          name: voice || 'en-US-Neural2-D', // Default male voice
-          ssmlGender: 'MALE'
+          languageCode: voice.substring(0, 5),
+          name: voice,
+          ssmlGender: 'MALE' // Force MALE gender for consistent voice
         },
         audioConfig: {
           audioEncoding: 'MP3',
-          speakingRate: speakingRate || 1.0,
-          pitch: pitch || 0
+          speakingRate,
+          pitch
         }
       })
     });
 
     if (!response.ok) {
       const errorData = await response.text();
-      console.error(`Google TTS API error: ${response.status}`, errorData);
-      return new Response(
-        JSON.stringify({ error: `Error calling Google TTS API: ${response.status}` }),
-        { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      console.error('Google TTS API error:', response.status, errorData);
+      throw new Error(`Google TTS API error: ${response.status}`);
     }
 
     const data = await response.json();
-    console.log("Google TTS API response received");
+    console.log('TTS response received successfully');
     
     return new Response(
       JSON.stringify({ audioContent: data.audioContent }),

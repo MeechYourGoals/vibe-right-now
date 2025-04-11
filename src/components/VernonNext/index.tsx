@@ -66,12 +66,7 @@ const VernonNext: React.FC = () => {
     }
   }, [state.messages, state.isOpen]);
   
-  // Speak initial message when chat is opened
-  useEffect(() => {
-    if (state.isOpen && state.messages.length === 1 && !state.isSpeaking) {
-      speak(state.messages[0].text);
-    }
-  }, [state.isOpen, state.messages, state.isSpeaking]);
+  // Removed auto-speaking of intro message to only speak when user initiates
   
   const toggleChat = () => {
     setState(prev => ({ 
@@ -114,7 +109,10 @@ const VernonNext: React.FC = () => {
       // Search for places based on intent
       let response = '';
       if (intent.type === 'search' && intent.location) {
+        console.log('Searching for places with intent', intent);
         const results = await searchPlaces(text, intent);
+        console.log('Search results:', results);
+        
         setState(prev => ({ ...prev, searchResults: results }));
         
         if (results.length > 0) {
@@ -126,6 +124,7 @@ const VernonNext: React.FC = () => {
         }
       } else {
         // Use Vertex AI for general responses
+        console.log('Getting Vertex AI response for intent:', intent);
         response = await getVertexAIResponse(text, intent);
       }
       
@@ -137,8 +136,7 @@ const VernonNext: React.FC = () => {
         isLoading: false
       }));
       
-      // Read response aloud
-      speak(response);
+      // No automatic speaking - will now only speak when user requests it
       
     } catch (error) {
       console.error('Error processing message:', error);
@@ -154,6 +152,8 @@ const VernonNext: React.FC = () => {
   // Helper function to get response from Vertex AI
   const getVertexAIResponse = async (text: string, intent: any) => {
     try {
+      console.log('Calling Vertex AI with:', { text, intent });
+      
       const { data, error } = await supabase.functions.invoke('vertex-ai', {
         body: { 
           prompt: text,
@@ -163,7 +163,17 @@ const VernonNext: React.FC = () => {
         }
       });
       
-      if (error) throw new Error(error.message);
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw new Error(error.message);
+      }
+      
+      if (!data || !data.text) {
+        console.error('No data returned from Vertex AI');
+        throw new Error('No data returned from Vertex AI');
+      }
+      
+      console.log('Vertex AI response:', data.text);
       return data.text;
     } catch (error) {
       console.error('Error calling Vertex AI:', error);
@@ -186,7 +196,7 @@ const VernonNext: React.FC = () => {
           </motion.div>
         ) : (
           <motion.div
-            className="fixed bottom-6 right-6 z-50"
+            className="fixed bottom-6 left-6 z-50"
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.8, opacity: 0 }}
@@ -198,6 +208,7 @@ const VernonNext: React.FC = () => {
               onClose={toggleChat}
               onMinimize={toggleMinimize}
               onToggleListening={toggleListening}
+              onSpeak={speak}
               messagesEndRef={messagesEndRef}
             />
           </motion.div>
