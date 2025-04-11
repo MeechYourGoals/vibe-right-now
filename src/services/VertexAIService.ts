@@ -1,7 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { Message } from '@/components/VernonChat/types';
-import { VertexAIHub } from './VertexAIHub';
+import { VertexAIHub } from '@/services/VertexAI';
 
 /**
  * Service to interact with Google's Vertex AI API via Supabase Edge Functions

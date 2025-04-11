@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { playAudioBase64 } from '@/components/VernonChat/utils/speech/synthesis';
 import { toast } from "sonner";
-import { VertexAIHub } from '@/services/VertexAIHub';
+import { VertexAIHub } from '@/services/VertexAI';
 
 interface UseSpeakResponseProps {
   isSpeaking: boolean;

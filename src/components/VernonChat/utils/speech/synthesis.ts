@@ -1,7 +1,6 @@
-
 // Speech synthesis helpers using Google's TTS
 import { toast } from "sonner";
-import { VertexAIHub } from "@/services/VertexAIHub";
+import { VertexAIHub } from "@/services/VertexAI";
 
 export const initializeSpeechSynthesis = (): SpeechSynthesis | null => {
   if ('speechSynthesis' in window) {

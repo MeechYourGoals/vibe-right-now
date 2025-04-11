@@ -2,7 +2,7 @@
 import { SimpleSearchService } from '../SimpleSearchService';
 import { SwirlSearchService } from '@/services/SwirlSearchService';
 import { GeminiService } from '@/services/GeminiService';
-import { VertexAIHub } from '@/services/VertexAIHub';
+import { VertexAIHub } from '@/services/VertexAI';
 import { 
   OpenAISearchProvider,
   GoogleSearchProvider,
