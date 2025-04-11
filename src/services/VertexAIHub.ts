@@ -29,6 +29,9 @@ interface TextToSpeechOptions {
   speakingRate?: number;
 }
 
+// Default male voice for TTS
+const DEFAULT_MALE_VOICE: VertexVoiceModel = 'en-US-Neural2-D';
+
 /**
  * Central service for interacting with Google Vertex AI
  */
@@ -129,10 +132,12 @@ export const VertexAIHub = {
    */
   async textToSpeech(text: string, options: TextToSpeechOptions = {}): Promise<string | null> {
     try {
+      console.log('Converting text to speech with Google TTS:', text.substring(0, 50) + '...');
+      
       const { data, error } = await supabase.functions.invoke('google-tts', {
         body: { 
           text,
-          voice: options.voice || 'en-US-Neural2-J',
+          voice: options.voice || DEFAULT_MALE_VOICE,
           speakingRate: options.speakingRate || 1.0,
           pitch: options.pitch || 0
         }
@@ -150,6 +155,7 @@ export const VertexAIHub = {
       return data.audioContent;
     } catch (error) {
       console.error('Error in VertexAIHub.textToSpeech:', error);
+      toast.error('Failed to generate speech. Using browser voice instead.');
       return null;
     }
   },

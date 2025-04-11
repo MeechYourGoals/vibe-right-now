@@ -13,7 +13,7 @@ serve(async (req) => {
   }
 
   try {
-    const { text, voice, languageCode } = await req.json();
+    const { text, voice, languageCode, speakingRate, pitch } = await req.json();
 
     if (!text) {
       console.error('No text provided to Google TTS function');
@@ -24,6 +24,7 @@ serve(async (req) => {
     }
 
     console.log(`Google TTS request: ${text.substring(0, 50)}...`);
+    console.log(`Using voice: ${voice || 'en-US-Neural2-D'}`);
 
     // Get Google API key from environment
     const apiKey = Deno.env.get('GOOGLE_API_KEY');
@@ -40,9 +41,13 @@ serve(async (req) => {
       input: { text },
       voice: { 
         languageCode: languageCode || 'en-US', 
-        name: voice || 'en-US-Neural2-J'
+        name: voice || 'en-US-Neural2-D'  // Default to male voice
       },
-      audioConfig: { audioEncoding: 'MP3' }
+      audioConfig: { 
+        audioEncoding: 'MP3',
+        speakingRate: speakingRate || 1.0,
+        pitch: pitch !== undefined ? pitch : 0
+      }
     };
 
     // Call Google TTS API with proper error handling

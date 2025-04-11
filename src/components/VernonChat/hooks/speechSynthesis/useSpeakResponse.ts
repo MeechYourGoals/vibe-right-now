@@ -1,4 +1,3 @@
-
 import { useCallback } from 'react';
 import { playAudioBase64 } from '@/components/VernonChat/utils/speech/synthesis';
 import { toast } from "sonner";
@@ -41,17 +40,17 @@ export const useSpeakResponse = ({
     // Set the current text being spoken
     currentlyPlayingText.current = text;
     
-    console.log('Speaking with Google TTS via Vertex AI Hub');
+    console.log('Speaking with Google Vertex AI TTS');
     
     let speechSuccess = false;
     
-    // Try to use Google TTS via our Vertex AI Hub
+    // Use Google TTS via Vertex AI Hub with male voice
     try {
       console.log('Attempting to use Google TTS via Vertex AI Hub...');
       const audioBase64 = await VertexAIHub.textToSpeech(text, {
-        voice: 'en-US-Neural2-J',  // Use a natural-sounding voice
-        speakingRate: 1.0,         // Normal speaking rate
-        pitch: 0                   // Natural pitch
+        voice: 'en-US-Neural2-D',  // Use male voice
+        speakingRate: 1.0,
+        pitch: 0
       });
       
       if (audioBase64) {
@@ -79,7 +78,24 @@ export const useSpeakResponse = ({
     try {
       if (!speechSuccess) {
         console.log('Attempting to use browser speech synthesis...');
-        speechSuccess = await speakWithBrowser(text, voices);
+        
+        // Try to find a male voice in the browser
+        const maleVoice = voices.find(voice => 
+          voice.name.includes('Male') || 
+          voice.name.includes('David') || 
+          voice.name.includes('James') ||
+          voice.name.includes('Thomas')
+        );
+        
+        // If we found a male voice, use it specifically
+        if (maleVoice) {
+          console.log('Using browser male voice:', maleVoice.name);
+          // Create a speech synthesis utterance with the selected voice
+          speechSuccess = await speakWithBrowser(text, [maleVoice]);
+        } else {
+          // Otherwise use default browser voice selection
+          speechSuccess = await speakWithBrowser(text, voices);
+        }
         
         // Mark intro as played if this is the first message (even if using browser speech)
         if (speechSuccess && !introHasPlayed.current && text.includes("I'm VeRNon")) {
