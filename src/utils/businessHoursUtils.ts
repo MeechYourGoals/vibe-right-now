@@ -1,5 +1,6 @@
 
 import { BusinessHours, Location } from '@/types';
+import { format } from 'date-fns';
 
 /**
  * Generates mock business hours for a location
@@ -89,4 +90,21 @@ const getClosingHour = (locationType: string): number => {
     default:
       return 18; // 6PM
   }
+};
+
+/**
+ * Get today's business hours for a location
+ */
+export const getTodaysHours = (location: Location): string => {
+  // Ensure location has hours
+  if (!location.hours) {
+    location.hours = generateBusinessHours(location);
+  }
+  
+  // Get the current day of the week
+  const today = new Date();
+  const dayOfWeek = format(today, 'EEEE').toLowerCase();
+  
+  // Return the hours for today
+  return location.hours[dayOfWeek as keyof typeof location.hours] || 'Closed';
 };
