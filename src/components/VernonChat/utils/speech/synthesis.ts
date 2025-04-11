@@ -30,7 +30,7 @@ export const getGoogleTTS = async (text: string): Promise<string | null> => {
     
     // Use our VertexAIHub to handle TTS
     return await VertexAIHub.textToSpeech(text, {
-      voice: 'en-US-Neural2-J',
+      voice: 'en-US-Neural2-D',
       speakingRate: 1.0,
       pitch: 0
     });
