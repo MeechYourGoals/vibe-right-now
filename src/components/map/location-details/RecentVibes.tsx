@@ -1,5 +1,5 @@
 
-import { Location, Media } from "@/types";
+import { Location } from "@/types";
 import VenuePost from "@/components/VenuePost";
 import { getMediaForLocation } from "@/utils/map/locationMediaUtils";
 import { getLocationVibes } from "@/utils/locationUtils";
@@ -9,7 +9,6 @@ import {
   getDaySpecificImageUrl
 } from "@/mock/time-utils";
 import { formatTimestamp } from "@/lib/utils";
-import { v4 as uuidv4 } from 'uuid';
 
 interface RecentVibesProps {
   location: Location;
@@ -25,8 +24,7 @@ const RecentVibes = ({ location }: RecentVibesProps) => {
   
   // Get content specific to today's day of week
   const todayContent = getDaySpecificContent(location.type, dayOfWeek);
-  const todayImage: Media = {
-    id: `today-${uuidv4()}`,
+  const todayImage = {
     type: "image" as const,
     url: getDaySpecificImageUrl(location.type, dayOfWeek)
   };
@@ -34,8 +32,7 @@ const RecentVibes = ({ location }: RecentVibesProps) => {
   // Get content for another day (2 days earlier)
   const previousDay = (dayOfWeek - 2 + 7) % 7; // Ensure it's a positive number
   const previousContent = getDaySpecificContent(location.type, previousDay);
-  const previousImage: Media = {
-    id: `previous-${uuidv4()}`,
+  const previousImage = {
     type: "image" as const,
     url: getDaySpecificImageUrl(location.type, previousDay)
   };
@@ -50,7 +47,7 @@ const RecentVibes = ({ location }: RecentVibesProps) => {
               <VenuePost
                 venue={location}
                 content={post.content}
-                media={getMediaForLocation(location)[0]}
+                media={getMediaForLocation(location)}
                 timestamp={formatTimestamp(post.timestamp)}
               />
             </div>

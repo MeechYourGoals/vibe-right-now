@@ -1,107 +1,117 @@
 
-import { BusinessHours } from "@/types";
+import { BusinessHours, Location } from '@/types';
+import { format } from 'date-fns';
 
-export const getFormattedBusinessHours = (hours: BusinessHours): Record<string, string> => {
-  const formattedHours: Record<string, string> = {};
-  
-  Object.entries(hours).forEach(([day, timeRange]) => {
-    if (typeof timeRange === 'object' && 'open' in timeRange && 'close' in timeRange) {
-      formattedHours[day] = `${timeRange.open} - ${timeRange.close}`;
-    } else if (timeRange === 'Closed') {
-      formattedHours[day] = 'Closed';
-    } else {
-      formattedHours[day] = 'Hours not available';
-    }
-  });
-  
-  return formattedHours;
-};
-
-export const getDefaultBusinessHours = (): BusinessHours => {
-  return {
-    monday: { open: "9:00 AM", close: "5:00 PM" },
-    tuesday: { open: "9:00 AM", close: "5:00 PM" },
-    wednesday: { open: "9:00 AM", close: "5:00 PM" },
-    thursday: { open: "9:00 AM", close: "5:00 PM" },
-    friday: { open: "9:00 AM", close: "6:00 PM" },
-    saturday: { open: "10:00 AM", close: "4:00 PM" },
-    sunday: { open: "Closed", close: "Closed" }
-  };
-};
-
-export const formatHoursForDisplay = (hours: BusinessHours): string => {
-  const today = new Date().getDay();
-  const daysOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-  const todayName = daysOfWeek[today];
-  
-  const todayHours = hours[todayName as keyof BusinessHours];
-  
-  if (typeof todayHours === 'object' && 'open' in todayHours && 'close' in todayHours) {
-    if (todayHours.open === "Closed" || todayHours.close === "Closed") {
-      return "Closed Today";
-    }
-    return `Today: ${todayHours.open} - ${todayHours.close}`;
+/**
+ * Generates mock business hours for a location
+ */
+export const generateBusinessHours = (location: Location): BusinessHours => {
+  // First check if location has hours already
+  if (location.hours) {
+    return location.hours;
   }
   
-  return "Hours not available";
-};
-
-// Add the missing functions:
-export const generateBusinessHours = (venue: any): BusinessHours => {
-  // Based on the venue type, return different business hours
-  if (venue.type === "restaurant") {
-    return getRestaurantBusinessHours();
-  } else if (venue.type === "bar") {
-    return getBarBusinessHours();
-  } else if (venue.type === "event") {
-    return getEventBusinessHours();
+  // Some locations are open 24 hours
+  const is24Hours = location.id.includes('24') || Math.random() < 0.1;
+  
+  if (is24Hours) {
+    return {
+      monday: 'Open 24 hours',
+      tuesday: 'Open 24 hours',
+      wednesday: 'Open 24 hours',
+      thursday: 'Open 24 hours',
+      friday: 'Open 24 hours',
+      saturday: 'Open 24 hours',
+      sunday: 'Open 24 hours',
+      isOpen24Hours: true
+    };
   }
   
-  // Default business hours for other venue types
-  return getDefaultBusinessHours();
+  // Determine opening and closing times based on location type
+  const openingHour = getOpeningHour(location.type);
+  const closingHour = getClosingHour(location.type);
+  
+  // Create weekday hours
+  const weekdayHours = `${openingHour}AM - ${closingHour > 12 ? closingHour - 12 : closingHour}${closingHour >= 12 ? 'PM' : 'AM'}`;
+  
+  // Weekend might have different hours
+  const weekendOpeningHour = Math.max(openingHour - 1, 6); // Open earlier on weekends, but not before 6AM
+  const weekendClosingHour = Math.min(closingHour + 1, 24); // Close later on weekends, but not after midnight
+  
+  const weekendHours = `${weekendOpeningHour}AM - ${weekendClosingHour > 12 ? weekendClosingHour - 12 : weekendClosingHour}${weekendClosingHour >= 12 ? 'PM' : 'AM'}`;
+  
+  return {
+    monday: weekdayHours,
+    tuesday: weekdayHours,
+    wednesday: weekdayHours,
+    thursday: weekdayHours,
+    friday: weekendHours,
+    saturday: weekendHours,
+    sunday: weekendHours,
+    isOpen24Hours: false
+  };
 };
 
-export const getTodaysHours = (venue: any): string => {
-  // Ensure venue has hours
-  if (!venue.hours) {
-    venue.hours = generateBusinessHours(venue);
+/**
+ * Get typical opening hour based on location type
+ */
+const getOpeningHour = (locationType: string): number => {
+  switch (locationType) {
+    case 'restaurant':
+      return 11; // 11AM
+    case 'bar':
+      return 16; // 4PM
+    case 'event':
+      return 9; // 9AM
+    case 'attraction':
+      return 9; // 9AM
+    case 'sports':
+      return 9; // 9AM
+    default:
+      return 9; // 9AM
+  }
+};
+
+/**
+ * Get typical closing hour based on location type
+ */
+const getClosingHour = (locationType: string): number => {
+  switch (locationType) {
+    case 'restaurant':
+      return 22; // 10PM
+    case 'bar':
+      return 2; // 2AM (next day)
+    case 'event':
+      return 22; // 10PM
+    case 'attraction':
+      return 18; // 6PM
+    case 'sports':
+      return 21; // 9PM
+    default:
+      return 18; // 6PM
+  }
+};
+
+/**
+ * Get today's business hours for a location
+ */
+export const getTodaysHours = (location: Location): string => {
+  // Ensure location has hours
+  if (!location.hours) {
+    location.hours = generateBusinessHours(location);
   }
   
-  return formatHoursForDisplay(venue.hours);
-};
-
-export const getRestaurantBusinessHours = (): BusinessHours => {
-  return {
-    monday: { open: "11:00 AM", close: "10:00 PM" },
-    tuesday: { open: "11:00 AM", close: "10:00 PM" },
-    wednesday: { open: "11:00 AM", close: "10:00 PM" },
-    thursday: { open: "11:00 AM", close: "11:00 PM" },
-    friday: { open: "11:00 AM", close: "12:00 AM" },
-    saturday: { open: "10:00 AM", close: "12:00 AM" },
-    sunday: { open: "10:00 AM", close: "9:00 PM" }
-  };
-};
-
-export const getBarBusinessHours = (): BusinessHours => {
-  return {
-    monday: { open: "4:00 PM", close: "1:00 AM" },
-    tuesday: { open: "4:00 PM", close: "1:00 AM" },
-    wednesday: { open: "4:00 PM", close: "1:00 AM" },
-    thursday: { open: "4:00 PM", close: "2:00 AM" },
-    friday: { open: "4:00 PM", close: "3:00 AM" },
-    saturday: { open: "2:00 PM", close: "3:00 AM" },
-    sunday: { open: "2:00 PM", close: "12:00 AM" }
-  };
-};
-
-export const getEventBusinessHours = (): BusinessHours => {
-  return {
-    monday: { open: "Varies", close: "Varies" },
-    tuesday: { open: "Varies", close: "Varies" },
-    wednesday: { open: "Varies", close: "Varies" },
-    thursday: { open: "Varies", close: "Varies" },
-    friday: { open: "6:00 PM", close: "2:00 AM" },
-    saturday: { open: "6:00 PM", close: "2:00 AM" },
-    sunday: { open: "Closed", close: "Closed" }
-  };
+  // Get the current day of the week
+  const today = new Date();
+  const dayOfWeek = format(today, 'EEEE').toLowerCase();
+  
+  // Return the hours for today
+  const hours = location.hours[dayOfWeek as keyof typeof location.hours];
+  
+  // Handle the case where hours might be a boolean (isOpen24Hours)
+  if (typeof hours === 'boolean') {
+    return hours ? 'Open 24 hours' : 'Closed';
+  }
+  
+  return hours || 'Closed';
 };

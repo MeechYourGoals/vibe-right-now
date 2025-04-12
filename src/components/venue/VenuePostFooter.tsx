@@ -1,75 +1,141 @@
 
 import React from 'react';
-import { Location } from '@/types';
-import { Button } from '@/components/ui/button';
-import { ExternalLink, Share, ThumbsUp, MessageSquare, Bookmark } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Share2, ExternalLink } from "lucide-react";
+import VenueActionButton from "./VenueActionButton";
+import TravelSiteComparison from "./TravelSiteComparison";
+import { Location } from "@/types";
+import { 
+  shareVenue, 
+  getRideServiceUrl, 
+  getExternalLinkUrl, 
+  getActionButtonText,
+  shouldShowExternalActionButton
+} from "@/utils/venue/venuePostUtils";
+import { isEligibleForPriceComparison } from "@/utils/venue/travelIntegrationUtils";
 
-export interface VenuePostFooterProps {
+interface VenuePostFooterProps {
   venue: Location;
-  sourceUrl?: string;
-  sourcePlatform?: string;
-  officialTicketUrl?: string;
+  officialTicketUrl: string;
+  sourceUrl?: string; // URL to the original post source (Yelp, TripAdvisor, etc.)
+  sourcePlatform?: string; // Name of the source platform
 }
 
 const VenuePostFooter: React.FC<VenuePostFooterProps> = ({ 
   venue, 
+  officialTicketUrl, 
   sourceUrl, 
-  sourcePlatform,
-  officialTicketUrl 
+  sourcePlatform 
 }) => {
+  const rideUrl = getRideServiceUrl(venue);
+  const showExternalButton = shouldShowExternalActionButton(venue, officialTicketUrl);
+  const showPriceComparison = isEligibleForPriceComparison(venue);
+  const isExternalContent = !!sourceUrl;
+
   return (
-    <div className="flex flex-col space-y-2 mt-2">
-      {(sourceUrl || officialTicketUrl) && (
-        <div className="flex flex-wrap gap-2 mb-2">
-          {sourceUrl && (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="text-xs h-8"
-              onClick={() => window.open(sourceUrl, '_blank')}
-            >
-              <ExternalLink className="h-3 w-3 mr-1" />
-              {sourcePlatform || 'View on web'}
-            </Button>
-          )}
-          
-          {officialTicketUrl && (
-            <Button 
-              variant="default" 
-              size="sm" 
-              className="text-xs h-8 bg-green-600 hover:bg-green-700"
-              onClick={() => window.open(officialTicketUrl, '_blank')}
-            >
-              <ExternalLink className="h-3 w-3 mr-1" />
-              Get Tickets
-            </Button>
-          )}
-        </div>
+    <>
+      {showPriceComparison && (
+        <TravelSiteComparison venue={venue} />
       )}
       
-      <div className="flex justify-between items-center">
-        <div className="flex gap-2">
-          <Button variant="ghost" size="sm" className="text-xs h-8">
-            <ThumbsUp className="h-3 w-3 mr-1" />
-            Like
-          </Button>
-          <Button variant="ghost" size="sm" className="text-xs h-8">
-            <MessageSquare className="h-3 w-3 mr-1" />
-            Comment
-          </Button>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="ghost" size="sm" className="text-xs h-8">
-            <Share className="h-3 w-3 mr-1" />
-            Share
-          </Button>
-          <Button variant="ghost" size="sm" className="text-xs h-8">
-            <Bookmark className="h-3 w-3 mr-1" />
-            Save
-          </Button>
-        </div>
+      <div className="flex justify-between w-full">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="flex items-center gap-1"
+          onClick={() => shareVenue(venue)}
+        >
+          <Share2 className="h-4 w-4" />
+          <span>Share</span>
+        </Button>
+        
+        <Button 
+          variant="default" 
+          size="sm" 
+          onClick={() => window.location.href = `/venue/${venue.id}`}
+        >
+          View Event
+        </Button>
       </div>
-    </div>
+      
+      <div className="flex gap-2 w-full">
+        {isExternalContent ? (
+          <>
+            <a 
+              href={sourceUrl} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex-1"
+            >
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="w-full bg-blue-500/20 text-blue-500 border-blue-500/50 hover:bg-blue-500/30"
+              >
+                <ExternalLink className="h-4 w-4 mr-1" />
+                View on {sourcePlatform || "Original Site"}
+              </Button>
+            </a>
+            
+            <a 
+              href={rideUrl} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex-1"
+            >
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="w-full"
+              >
+                Order a Ride
+              </Button>
+            </a>
+          </>
+        ) : (
+          <>
+            <VenueActionButton 
+              venue={venue} 
+              variant="outline" 
+              className="flex-1"
+            />
+            
+            <a 
+              href={rideUrl} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex-1"
+            >
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="w-full"
+              >
+                Order a Ride
+              </Button>
+            </a>
+            
+            {showExternalButton && (
+              <a 
+                href={getExternalLinkUrl(venue, officialTicketUrl)} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex-1"
+              >
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="bg-amber-500/20 text-amber-500 border-amber-500/50 hover:bg-amber-500/30 w-full"
+                >
+                  <ExternalLink className="h-4 w-4 mr-1" />
+                  {getActionButtonText(venue.type)}
+                </Button>
+              </a>
+            )}
+          </>
+        )}
+      </div>
+    </>
   );
 };
 

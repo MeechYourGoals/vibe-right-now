@@ -43,7 +43,7 @@ const PostFooter: React.FC<PostFooterProps> = ({
         
         {comments.length > 1 && (
           <Link to={`/post/${post.id}`} className="text-muted-foreground text-xs mt-1 block">
-            View all {typeof post.comments === 'number' ? post.comments : post.comments.length} comments
+            View all {post.comments} comments
           </Link>
         )}
       </div>
@@ -73,7 +73,7 @@ const PostFooter: React.FC<PostFooterProps> = ({
               className="flex items-center gap-1 px-2"
             >
               <MessageCircle className="h-5 w-5" />
-              <span>{typeof post.comments === 'number' ? post.comments : post.comments.length}</span>
+              <span>{post.comments}</span>
             </Button>
           </Link>
         </div>
