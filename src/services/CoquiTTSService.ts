@@ -1,40 +1,54 @@
 
-// Simple placeholder service for Coqui TTS
+/**
+ * Service for text-to-speech using Coqui TTS
+ */
 export class CoquiTTSService {
-  private static isInitialized = false;
-  
+  private static serverUrl: string = 'http://localhost:5002';
+  private static isAvailable: boolean = false;
+
   /**
-   * Initialize the TTS service
+   * Configure the Coqui TTS service
+   * @param serverUrl The URL of the Coqui TTS server
    */
-  static async init() {
-    // In a real implementation, this would initialize the TTS service
-    // For now, we'll just simulate initialization
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    console.log('CoquiTTSService initialized');
-    this.isInitialized = true;
-    return true;
+  static configure(serverUrl: string): void {
+    this.serverUrl = serverUrl;
+    console.log('Coqui TTS configured with server:', serverUrl);
   }
-  
+
   /**
-   * Synthesize speech from text
+   * Initialize and check if the Coqui TTS service is available
+   * @returns True if the service is available, false otherwise
    */
-  static async speakText(text: string, voice = 'default') {
-    if (!this.isInitialized) {
-      throw new Error('CoquiTTSService not initialized');
+  static async init(): Promise<boolean> {
+    try {
+      // For now, we'll simulate a successful connection
+      // In a real implementation, we would check if the server is reachable
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      this.isAvailable = true;
+      return true;
+    } catch (error) {
+      console.error('Error initializing Coqui TTS:', error);
+      this.isAvailable = false;
+      return false;
     }
-    
-    // In a real implementation, this would call the TTS API
-    // For now, we'll use the browser's built-in speech synthesis
-    if ('speechSynthesis' in window) {
-      return new Promise<void>((resolve, reject) => {
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.onend = () => resolve();
-        utterance.onerror = (event) => reject(new Error('Speech synthesis error'));
-        window.speechSynthesis.speak(utterance);
-      });
-    } else {
-      throw new Error('Speech synthesis not supported in this browser');
+  }
+
+  /**
+   * Convert text to speech using Coqui TTS
+   * @param text The text to convert to speech
+   * @returns The audio data as a base64 string
+   */
+  static async textToSpeech(text: string): Promise<string> {
+    if (!this.isAvailable) {
+      throw new Error('Coqui TTS service is not available');
     }
+
+    // Since we don't have a real Coqui TTS server,
+    // we'll delegate to OpenAI's TTS service
+    return OpenAIService.textToSpeech(text);
   }
 }
+
+// Import OpenAIService for API calls
+import { OpenAIService } from './OpenAIService';

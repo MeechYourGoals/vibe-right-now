@@ -1,55 +1,64 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { Message } from '@/components/VernonChat/types';
-import { VertexAIHub } from '@/services/VertexAI';
 
 /**
- * Service to interact with Google's Vertex AI API via Supabase Edge Functions
+ * Service for interacting with Google Vertex AI API
  */
-export const VertexAIService = {
+export class VertexAIService {
+  // Text-to-speech voice configuration
+  static DEFAULT_MALE_VOICE = "en-US-Neural2-D";
+  static DEFAULT_FEMALE_VOICE = "en-US-Neural2-F";
+
   /**
-   * Generate a text response using Vertex AI
-   * @param prompt The user's prompt
-   * @param mode The chat mode ('venue' or default user)
-   * @param history Previous chat messages for context
-   * @returns The generated text response
+   * Generate a response using Vertex AI API
+   * @param prompt The prompt to send to the model
+   * @param mode The mode to use (default, search, venue)
+   * @param context Optional context for the conversation
+   * @returns The generated response
    */
-  async generateResponse(prompt: string, mode: 'venue' | 'default' = 'default', history: Message[] = []): Promise<string> {
+  static async generateResponse(
+    prompt: string, 
+    mode: 'default' | 'search' | 'venue' = 'default', 
+    context: any[] = []
+  ): Promise<string> {
+    // For now, we'll delegate to OpenAI since that's what we have configured
     try {
-      console.log(`Calling Vertex AI with prompt: "${prompt.substring(0, 50)}..."`);
-      
-      // Convert Message[] to format expected by VertexAIHub
-      const formattedHistory = history.map(msg => ({
-        sender: msg.sender,
-        text: msg.text
+      // Convert context to the format expected by OpenAI
+      const messages = context.map(msg => ({
+        role: msg.sender === 'user' ? 'user' : 'assistant',
+        content: msg.text
       }));
       
-      // Use our new hub to generate text
-      return await VertexAIHub.generateText(prompt, formattedHistory, {
-        temperature: mode === 'venue' ? 0.5 : 0.7, // Lower temperature for business insights
-        mode: mode
+      // Add the new prompt
+      messages.push({
+        role: 'user',
+        content: prompt
       });
-    } catch (error) {
-      console.error('Error in VertexAIService.generateResponse:', error);
-      return "I'm having trouble connecting to my AI services right now. Please try again later.";
-    }
-  },
-  
-  /**
-   * Search for real-world information using Vertex AI
-   * @param query The search query
-   * @param categories Optional categories to help categorize the search
-   * @returns The search results from Vertex AI
-   */
-  async searchWithVertex(query: string, categories?: string[]): Promise<string> {
-    try {
-      console.log(`Searching with Vertex AI: "${query.substring(0, 50)}..."`);
       
-      // Use our new hub for AI search capabilities
-      return await VertexAIHub.searchWithAI(query, categories);
+      // Determine the context based on mode
+      const chatContext = mode === 'venue' ? 'venue' : 'user';
+      
+      return await OpenAIService.sendChatRequest(messages, { context: chatContext });
     } catch (error) {
-      console.error('Error in VertexAIService.searchWithVertex:', error);
-      return "I couldn't find specific information about that. Could you try rephrasing your question?";
+      console.error('Error generating response with Vertex AI:', error);
+      throw error;
     }
   }
-};
+
+  /**
+   * Convert text to speech using Vertex AI API
+   * @param text The text to convert to speech
+   * @param options Options for the text-to-speech conversion
+   * @returns The audio data as a base64 string
+   */
+  static async textToSpeech(
+    text: string, 
+    options: { voice?: string; speakingRate?: number; pitch?: number } = {}
+  ): Promise<string> {
+    // For now, we'll delegate to OpenAI since that's what we have configured
+    return OpenAIService.textToSpeech(text);
+  }
+}
+
+// Import OpenAIService for fallback
+import { OpenAIService } from './OpenAIService';

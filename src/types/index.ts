@@ -99,12 +99,17 @@ export interface VenueInsights {
   averageRating: number;
   ratingCount: number;
   totalReviews: number;
+  visitorCount: number;
+  checkInCount: number;
+  receiptUploads: number;
+  discountRedemptions: number;
   dailyViews: Record<string, number>;
   peakHours: Record<string, number>;
   demographicData: {
     age: Record<string, number>;
     gender: Record<string, number>;
     location: Record<string, number>;
+    ageGroups?: Record<string, number>;
   };
   competitiveInsights: {
     rank: number;
