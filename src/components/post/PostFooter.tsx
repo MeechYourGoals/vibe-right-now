@@ -22,6 +22,17 @@ const PostFooter: React.FC<PostFooterProps> = ({
     setLiked(!liked);
   };
   
+  // Helper function to get comment count safely
+  const getCommentCount = (post: Post): number => {
+    if (typeof post.comments === 'number') {
+      return post.comments;
+    }
+    if (Array.isArray(post.comments)) {
+      return post.comments.length;
+    }
+    return 0;
+  };
+  
   const renderComments = () => {
     if (isDetailView) {
       return null; // Comments are rendered separately in detail view
@@ -43,7 +54,7 @@ const PostFooter: React.FC<PostFooterProps> = ({
         
         {comments.length > 1 && (
           <Link to={`/post/${post.id}`} className="text-muted-foreground text-xs mt-1 block">
-            View all {typeof post.comments === 'number' ? post.comments : post.comments.length} comments
+            View all {getCommentCount(post)} comments
           </Link>
         )}
       </div>
@@ -73,7 +84,7 @@ const PostFooter: React.FC<PostFooterProps> = ({
               className="flex items-center gap-1 px-2"
             >
               <MessageCircle className="h-5 w-5" />
-              <span>{typeof post.comments === 'number' ? post.comments : post.comments.length}</span>
+              <span>{getCommentCount(post)}</span>
             </Button>
           </Link>
         </div>

@@ -2,8 +2,10 @@
 export interface User {
   id: string;
   username: string;
-  fullName: string;
-  avatarUrl: string;
+  fullName?: string;  // Made optional to accommodate mock data
+  name?: string;      // Added to accommodate mock data
+  avatarUrl?: string; // Made optional to accommodate mock data
+  avatar?: string;    // Added to accommodate mock data
   bio?: string;
   location?: string;
   website?: string;
@@ -12,8 +14,6 @@ export interface User {
   isVerified?: boolean;
   
   // Added properties to match existing code
-  name?: string;
-  avatar?: string;
   verified?: boolean;
   isPrivate?: boolean;
   isCelebrity?: boolean;
@@ -53,7 +53,7 @@ export interface Post {
   timestamp: string;
   expiresAt: string;
   likes: number;
-  comments: number;
+  comments: number | Comment[]; // Updated to be either a number or array
   isPinned?: boolean;
   saved: boolean;
   isVenuePost?: boolean;

@@ -46,6 +46,52 @@ export class VertexAIService {
   }
 
   /**
+   * Search for information using Vertex AI
+   * @param query The search query
+   * @param categories Optional categories to filter the search
+   * @returns The search results as text
+   */
+  static async searchWithVertex(
+    query: string,
+    categories?: string[]
+  ): Promise<string> {
+    try {
+      console.log('Searching with Vertex AI:', query);
+      if (categories && categories.length > 0) {
+        console.log('With categories:', categories);
+      }
+      
+      // Since we're using OpenAI as our backend, delegate the search
+      const enhancedPrompt = `
+        Please provide real information about "${query}".
+        ${categories && categories.length > 0 ? `Focusing on these categories: ${categories.join(', ')}` : ''}
+        Include:
+        - Names of specific places or events
+        - Actual addresses and locations if known
+        - Opening hours and pricing when available
+        - Any other helpful details
+        
+        Format your response in a clear, readable way.
+      `;
+      
+      // Convert to OpenAI format
+      return await OpenAIService.sendChatRequest([
+        {
+          role: 'system',
+          content: 'You are a helpful assistant that provides accurate information about places, events, and things to do.'
+        },
+        {
+          role: 'user',
+          content: enhancedPrompt
+        }
+      ]);
+    } catch (error) {
+      console.error('Error in Vertex AI search:', error);
+      return `I couldn't find specific information about "${query}". Please try a different search.`;
+    }
+  }
+
+  /**
    * Convert text to speech using Vertex AI API
    * @param text The text to convert to speech
    * @param options Options for the text-to-speech conversion
