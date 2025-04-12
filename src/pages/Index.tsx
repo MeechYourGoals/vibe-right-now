@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Layout } from "@/components/Layout";
 import PostFeed from "@/components/PostFeed";
@@ -52,8 +53,8 @@ const Index = () => {
                 Discover the Vibe Right Now
               </h1>
               <Button 
-                variant="outline" 
-                className="flex items-center gap-2 bg-gradient-to-r from-indigo-50 to-purple-50 hover:from-indigo-100 hover:to-purple-100"
+                variant="default" 
+                className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white font-medium shadow-md"
                 onClick={() => setShowDatePicker(!showDatePicker)}
               >
                 <CalendarRange className="h-4 w-4" />
@@ -62,17 +63,17 @@ const Index = () => {
             </div>
 
             {showDatePicker && (
-              <Card className="mb-6 bg-indigo-50 border-indigo-100">
+              <Card className="mb-6 bg-card border-2 border-primary/20 shadow-md">
                 <CardContent className="p-4">
-                  <h3 className="text-lg font-semibold mb-3 text-indigo-800">Find Future Vibes</h3>
-                  <p className="text-sm text-indigo-700 mb-3">Select dates to explore events, concerts, games and more in the coming months</p>
+                  <h3 className="text-lg font-semibold mb-3 text-foreground">Find Future Vibes</h3>
+                  <p className="text-sm text-muted-foreground mb-3">Select dates to explore events, concerts, games and more in the coming months</p>
                   <DateRangeSelector 
                     dateRange={dateRange} 
                     onDateRangeChange={handleDateRangeChange} 
                   />
                   <div className="flex justify-end mt-4">
                     <Button
-                      className="bg-indigo-600 hover:bg-indigo-700"
+                      className="bg-primary hover:bg-primary/90 text-white font-medium shadow-sm"
                       onClick={handlePlanFutureVibes}
                       disabled={!dateRange?.from}
                     >
