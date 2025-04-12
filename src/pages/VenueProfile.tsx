@@ -1,4 +1,4 @@
-// VenueProfile.tsx
+
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { mockLocations, mockPosts, mockComments } from "@/mock/data";
@@ -21,6 +21,7 @@ const VenueProfile: React.FC = () => {
   const [filteredPosts, setFilteredPosts] = useState<Post[]>([]);
   const [generatedVenuePosts, setGeneratedVenuePosts] = useState<Post[]>([]);
   const [selectedDays, setSelectedDays] = useState<number[]>([]);
+  const [showExpandedMap, setShowExpandedMap] = useState(false);
 
   useEffect(() => {
     if (venueId) {
@@ -42,6 +43,10 @@ const VenueProfile: React.FC = () => {
 
   const getPostComments = (postId: string): Comment[] => {
     return mockComments.filter(comment => comment.postId === postId);
+  };
+
+  const handleMapExpand = () => {
+    setShowExpandedMap(true);
   };
 
   if (!venue) {
@@ -72,7 +77,7 @@ const VenueProfile: React.FC = () => {
           <div>
             <Card className="mb-6">
               <CardContent className="p-0">
-                <VenueMap venue={venue} />
+                <VenueMap venue={venue} onExpand={handleMapExpand} />
               </CardContent>
             </Card>
             <PerformanceMetrics />
@@ -84,24 +89,3 @@ const VenueProfile: React.FC = () => {
 };
 
 export default VenueProfile;
-
-// Somewhere in your component:
-const VenueMap = ({ venue, onMapExpand }: { venue: Location, onMapExpand: () => void }) => {
-  return (
-    <div className="venue-map">
-      {venue?.lat && venue?.lng ? (
-        <iframe
-          width="100%"
-          height="250"
-          style={{ border: 0 }}
-          loading="lazy"
-          allowFullScreen
-          src={`https://www.google.com/maps/embed/v1/place?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&q=${venue.name},${venue.city}`}
-        ></iframe>
-      ) : (
-        <p>Map Unavailable</p>
-      )}
-      <button onClick={onMapExpand}>Expand Map</button>
-    </div>
-  );
-};

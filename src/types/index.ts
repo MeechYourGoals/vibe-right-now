@@ -16,12 +16,12 @@ export interface Location {
   phone?: string;
   website?: string;
   photos?: any[];
-  tags?: string[]; // Added tags property for location
-  verified?: boolean; // Added verified property
-  vibes?: string[]; // Added vibes property
+  tags?: string[];
+  verified?: boolean;
+  vibes?: string[];
+  userProfile?: any;
 }
 
-// Add these interfaces to fix the build errors
 export interface BusinessHours {
   monday: { open: string; close: string };
   tuesday: { open: string; close: string };
@@ -45,26 +45,19 @@ export interface User {
   location?: string;
   website?: string;
   joinDate?: string;
+  isCelebrity?: boolean;
+  isPrivate?: boolean;
 }
 
 export interface Comment {
   id: string;
+  postId?: string;
   user: User;
   text: string;
+  content?: string;
   timestamp: string;
   likes: number;
-}
-
-export interface Post {
-  id: string;
-  user: User;
-  location?: Location;
-  text?: string;
-  media?: Media[];
-  timestamp: string;
-  likes: number;
-  comments: Comment[];
-  saved: boolean;
+  vibedHere?: boolean;
 }
 
 export interface Media {
@@ -74,16 +67,37 @@ export interface Media {
   thumbnail?: string;
 }
 
+export interface Post {
+  id: string;
+  user: User;
+  location?: Location;
+  text?: string;
+  content?: string;
+  media?: Media[];
+  timestamp: string;
+  likes: number;
+  comments: Comment[];
+  saved: boolean;
+  isPinned?: boolean;
+  isVenuePost?: boolean;
+  expiresAt?: string;
+}
+
 export interface VenueInsights {
   id: string;
   venueName: string;
   totalVisits: number;
   uniqueVisitors: number;
   averageRating: number;
+  visitorCount?: number;
+  checkInCount?: number;
+  receiptUploads?: number;
+  discountRedemptions?: number;
   topReasons: Array<{reason: string; count: number}>;
   demographics: {
     ageGroups: {[key: string]: number};
     gender: {[key: string]: number};
+    genderDistribution?: {[key: string]: number};
   };
   visitsByDay: {[key: string]: number};
   visitsByHour: {[key: string]: number};
