@@ -40,11 +40,9 @@ const LocationCard = ({ location, onViewVibes }: LocationCardProps) => {
   const navigate = useNavigate();
 
   // Ensure location has hours
-  if (!location.hours) {
-    location.hours = generateBusinessHours(location);
-  }
+  const hours = location.hours || generateBusinessHours();
   
-  const todaysHours = getTodaysHours(location);
+  const todaysHours = getTodaysHours(hours);
 
   const handleViewVibes = () => {
     if (onViewVibes) {

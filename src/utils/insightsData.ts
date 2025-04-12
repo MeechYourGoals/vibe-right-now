@@ -73,7 +73,7 @@ export const generateMockInsights = (venueId: string, venueName: string): VenueI
   };
 };
 
-// Add missing function for VenueInsights component
+// Generate weekly data with a venue ID parameter
 export const generateWeeklyData = (venueId: string): Record<string, number> => {
   return {
     Monday: 120 + Math.floor(Math.random() * 50),
@@ -86,7 +86,7 @@ export const generateWeeklyData = (venueId: string): Record<string, number> => {
   };
 };
 
-// Add missing function for PerformanceMetrics component
+// Return VenueInsights for a specific venue ID
 export const currentInsights = (venueId: string): VenueInsights => {
   return generateMockInsights(venueId, "Current Venue");
 };

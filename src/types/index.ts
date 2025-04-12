@@ -12,25 +12,25 @@ export interface Location {
   type?: string;
   rating?: number;
   priceLevel?: number;
-  hours?: any;
+  hours?: BusinessHours;
   phone?: string;
   website?: string;
   photos?: any[];
   tags?: string[];
   verified?: boolean;
   vibes?: string[];
-  userProfile?: any; // Added userProfile property
+  userProfile?: any;
 }
 
 export interface BusinessHours {
-  monday: { open: string; close: string };
-  tuesday: { open: string; close: string };
-  wednesday: { open: string; close: string };
-  thursday: { open: string; close: string };
-  friday: { open: string; close: string };
-  saturday: { open: string; close: string };
-  sunday: { open: string; close: string };
-  [key: string]: { open: string; close: string };
+  monday: { open: string; close: string; } | string;
+  tuesday: { open: string; close: string; } | string;
+  wednesday: { open: string; close: string; } | string;
+  thursday: { open: string; close: string; } | string;
+  friday: { open: string; close: string; } | string;
+  saturday: { open: string; close: string; } | string;
+  sunday: { open: string; close: string; } | string;
+  [key: string]: { open: string; close: string; } | string;
 }
 
 export interface User {
@@ -45,35 +45,35 @@ export interface User {
   location?: string;
   website?: string;
   joinDate?: string;
-  isPrivate?: boolean; // Added isPrivate property
-  isCelebrity?: boolean; // Added isCelebrity property
+  isPrivate?: boolean;
+  isCelebrity?: boolean;
 }
 
 export interface Comment {
   id: string;
-  postId?: string; // Added postId property
+  postId: string;
   user: User;
-  text?: string; // Keep for backward compatibility
-  content?: string; // Added content property
+  text?: string;
+  content: string;
   timestamp: string;
   likes: number;
-  vibedHere?: boolean; // Added vibedHere property
+  vibedHere?: boolean;
 }
 
 export interface Post {
   id: string;
   user: User;
   location?: Location;
-  text?: string; // Keep for backward compatibility
-  content?: string; // Added content property
+  text?: string;
+  content: string;
   media?: Media[];
   timestamp: string;
-  expiresAt?: string; // Added expiresAt property
+  expiresAt?: string;
   likes: number;
-  comments: Comment[] | number; // Allow both Comment[] and number
+  comments: Comment[] | number;
   saved?: boolean;
-  isPinned?: boolean; // Added isPinned property
-  isVenuePost?: boolean; // Added isVenuePost property
+  isPinned?: boolean;
+  isVenuePost?: boolean;
 }
 
 export interface Media {
@@ -102,9 +102,8 @@ export interface VenueInsights {
     rating: number;
     distance: number;
   }>;
-  // Add missing properties
-  visitorCount?: number;
-  checkInCount?: number;
-  receiptUploads?: number;
-  discountRedemptions?: number;
+  visitorCount: number;
+  checkInCount: number;
+  receiptUploads: number;
+  discountRedemptions: number;
 }

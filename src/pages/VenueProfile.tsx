@@ -1,8 +1,9 @@
+
 import { useState, useMemo, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Minimize } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { mockLocations, mockPosts, mockComments } from "@/mock/data";
+import { mockLocations, mockPosts, comments } from "@/mock/data";
 import CameraButton from "@/components/CameraButton";
 import Header from "@/components/Header";
 import { Comment, Post, Location as VenueLocation } from "@/types"; // Import as VenueLocation to avoid conflicts
@@ -36,12 +37,12 @@ const VenueProfile = () => {
   const venue = mockLocations.find(location => location.id === id);
   
   if (venue && !venue.hours) {
-    venue.hours = generateBusinessHours(venue);
+    venue.hours = generateBusinessHours();
   }
   
   const venuePosts = useMemo(() => {
     return mockPosts.filter(post => 
-      post.location.id === id && 
+      post.location?.id === id && 
       isWithinThreeMonths(post.timestamp)
     );
   }, [id]);
@@ -82,7 +83,7 @@ const VenueProfile = () => {
   }, [filteredPosts, venue, generatedVenuePosts, selectedDays]);
 
   const getPostComments = (postId: string): Comment[] => {
-    return mockComments.filter(comment => comment.postId === postId);
+    return comments.filter(comment => comment.postId === postId);
   };
 
   const toggleMapExpansion = () => {

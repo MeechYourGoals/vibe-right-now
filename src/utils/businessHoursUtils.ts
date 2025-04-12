@@ -67,7 +67,7 @@ export const formatBusinessHours = (hours: BusinessHours): string => {
   return formatted;
 };
 
-// Add the missing utility functions
+// Fix the signature: generateBusinessHours should take no arguments
 export const generateBusinessHours = (): BusinessHours => {
   return {
     monday: { open: '9:00 AM', close: '5:00 PM' },
@@ -76,18 +76,23 @@ export const generateBusinessHours = (): BusinessHours => {
     thursday: { open: '9:00 AM', close: '5:00 PM' },
     friday: { open: '9:00 AM', close: '5:00 PM' },
     saturday: { open: '10:00 AM', close: '3:00 PM' },
-    sunday: { open: 'Closed', close: 'Closed' } as any
+    sunday: 'Closed'
   };
 };
 
+// Fix the getTodaysHours function to properly handle the hours property from Location
 export const getTodaysHours = (hours: BusinessHours): string => {
   const daysOfWeek: DayOfWeek[] = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
   const today = daysOfWeek[new Date().getDay()] as DayOfWeek;
   
   const dayHours = hours[today];
   
-  if (!dayHours || typeof dayHours === 'string') {
+  if (!dayHours) {
     return 'Closed';
+  }
+  
+  if (typeof dayHours === 'string') {
+    return dayHours;
   }
   
   return `${dayHours.open} - ${dayHours.close}`;
@@ -100,5 +105,5 @@ export const defaultBusinessHours: BusinessHours = {
   thursday: { open: '9:00 AM', close: '5:00 PM' },
   friday: { open: '9:00 AM', close: '5:00 PM' },
   saturday: { open: '10:00 AM', close: '3:00 PM' },
-  sunday: { open: 'Closed', close: 'Closed' } as any
+  sunday: 'Closed'
 };

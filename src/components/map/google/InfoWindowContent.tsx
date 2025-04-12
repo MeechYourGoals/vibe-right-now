@@ -4,7 +4,7 @@ import { Location } from '@/types';
 import { MapPin, Share2, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { generateBusinessHours } from '@/utils/businessHoursUtils';
+import { generateBusinessHours, getTodaysHours } from '@/utils/businessHoursUtils';
 
 interface InfoWindowContentProps {
   location: Location;
@@ -15,14 +15,10 @@ const InfoWindowContent: React.FC<InfoWindowContentProps> = ({ location, onSelec
   const navigate = useNavigate();
 
   // Ensure we have business hours
-  if (!location.hours) {
-    location.hours = generateBusinessHours(location);
-  }
+  const hours = location.hours || generateBusinessHours();
   
   // Get today's hours
-  const today = new Date();
-  const dayOfWeek = today.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
-  const todaysHours = location.hours[dayOfWeek as keyof typeof location.hours] || 'Closed';
+  const todaysHours = getTodaysHours(hours);
 
   const handleViewVenue = () => {
     navigate(`/venue/${location.id}`);
