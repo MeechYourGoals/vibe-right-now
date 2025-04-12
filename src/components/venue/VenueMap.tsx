@@ -5,9 +5,10 @@ import type { Location } from '@/types';
 
 interface VenueMapProps {
   location: Location;
+  onMapExpand?: () => void;
 }
 
-const VenueMap: React.FC<VenueMapProps> = ({ location }) => {
+const VenueMap: React.FC<VenueMapProps> = ({ location, onMapExpand }) => {
   const formattedAddress = location.address ? 
     `${location.address}, ${location.city}, ${location.state}` : 
     `${location.city}, ${location.state}`;
@@ -39,6 +40,12 @@ const VenueMap: React.FC<VenueMapProps> = ({ location }) => {
     return `${hours.open} - ${hours.close}`;
   };
 
+  const handleMapClick = () => {
+    if (onMapExpand) {
+      onMapExpand();
+    }
+  };
+
   return (
     <Card className="overflow-hidden">
       <CardContent className="p-0">
@@ -47,7 +54,10 @@ const VenueMap: React.FC<VenueMapProps> = ({ location }) => {
           <p className="text-sm mb-3">{formattedAddress}</p>
           
           {/* Map placeholder - would be replaced with actual map component */}
-          <div className="bg-gray-200 h-48 w-full rounded-md mb-4 flex items-center justify-center">
+          <div 
+            className="bg-gray-200 h-48 w-full rounded-md mb-4 flex items-center justify-center cursor-pointer"
+            onClick={handleMapClick}
+          >
             <p className="text-gray-500">Map view at {location.lat}, {location.lng}</p>
           </div>
           

@@ -13,6 +13,7 @@ import { LayoutGrid, ListIcon, Map } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Container } from '@/components/ui/container';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
+import VenueInsights from '@/components/VenueInsights';
 
 const VenueProfile = () => {
   const { venueId } = useParams<{ venueId: string }>();
@@ -26,31 +27,8 @@ const VenueProfile = () => {
   // Get posts for this venue
   const venuePosts = mockPosts.filter((post) => post.location.id === venueId);
 
-  // Function to format business hours
-  const formatBusinessHours = (hours: any) => {
-    if (!hours) return "Hours not available";
-    
-    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-    
-    return (
-      <div className="text-sm">
-        {days.map(day => (
-          <div key={day} className="flex justify-between py-1">
-            <span className="capitalize">{day}:</span>
-            <span>
-              {formatHours(hours[day])}
-            </span>
-          </div>
-        ))}
-      </div>
-    );
-  };
-  
-  // Helper function to format hours
-  const formatHours = (hours: any) => {
-    if (!hours) return "Closed";
-    if (typeof hours === 'string') return hours;
-    return `${hours.open} - ${hours.close}`;
+  const handleMapExpand = () => {
+    setShowMapModal(true);
   };
 
   if (!venue) {
@@ -135,8 +113,9 @@ const VenueProfile = () => {
           
           <TabsContent value="posts" className="mt-4">
             <VenuePostsTabs 
-              venuePosts={venuePosts} 
-              viewMode={viewMode} 
+              posts={venuePosts}
+              venue={venue}
+              viewMode={viewMode}
             />
           </TabsContent>
           
@@ -157,18 +136,16 @@ const VenueProfile = () => {
               </div>
               
               <div>
-                <VenueMap location={venue} />
+                <VenueMap 
+                  location={venue} 
+                  onMapExpand={handleMapExpand}
+                />
               </div>
             </div>
           </TabsContent>
           
           <TabsContent value="insights">
-            <div className="text-center py-10">
-              <h3 className="text-xl font-semibold mb-2">Insights Coming Soon</h3>
-              <p className="text-muted-foreground">
-                We're working on gathering insights for this venue. Check back later!
-              </p>
-            </div>
+            <VenueInsights />
           </TabsContent>
         </Tabs>
       </div>

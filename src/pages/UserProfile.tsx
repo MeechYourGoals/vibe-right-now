@@ -19,6 +19,15 @@ const UserProfile = () => {
     return comments.filter(comment => comment.postId === postId);
   };
 
+  // Function to get user bio
+  const getUserBio = () => {
+    if (!user) return "";
+    
+    return user.isCelebrity 
+      ? "Official account. Sharing my favorite spots and vibes around the world!" 
+      : "Exploring hidden gems and sharing the best vibes with everyone!";
+  };
+
   if (loading) {
     return <div className="flex justify-center items-center h-screen">Loading...</div>;
   }
@@ -34,7 +43,11 @@ const UserProfile = () => {
   return (
     <Container>
       <div className="max-w-4xl mx-auto py-6 px-4">
-        <UserProfileHeader user={user} postCount={posts.length} />
+        <UserProfileHeader 
+          user={user} 
+          postCount={posts.length}
+          getUserBio={getUserBio}
+        />
         
         <div className="mt-8">
           <ProfileTabs 

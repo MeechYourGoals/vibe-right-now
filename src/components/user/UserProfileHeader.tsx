@@ -11,10 +11,11 @@ import { cn } from "@/lib/utils";
 
 interface UserProfileHeaderProps {
   user: User;
-  getUserBio: () => string;
+  postCount?: number;
+  getUserBio?: () => string;
 }
 
-const UserProfileHeader = ({ user, getUserBio }: UserProfileHeaderProps) => {
+const UserProfileHeader = ({ user, postCount, getUserBio }: UserProfileHeaderProps) => {
   const [isFollowing, setIsFollowing] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   
@@ -56,6 +57,13 @@ const UserProfileHeader = ({ user, getUserBio }: UserProfileHeaderProps) => {
         .then(() => toast.success("Profile link copied to clipboard!"))
         .catch(() => toast.error("Couldn't copy link. Please try again."));
     }
+  };
+
+  const getBio = () => {
+    if (getUserBio) return getUserBio();
+    return user.isCelebrity 
+      ? "Official account. Sharing my favorite spots and vibes around the world!" 
+      : "Exploring hidden gems and sharing the best vibes with everyone!";
   };
 
   return (
@@ -164,7 +172,7 @@ const UserProfileHeader = ({ user, getUserBio }: UserProfileHeaderProps) => {
           </div>
           
           <p className="mt-4 text-sm transition-all duration-500 hover:text-foreground">
-            {getUserBio()}
+            {getBio()}
           </p>
         </div>
       </div>

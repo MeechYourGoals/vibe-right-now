@@ -1,25 +1,51 @@
+export interface Post {
+  id: string;
+  user: User;
+  location: Location;
+  timestamp: string;
+  text: string;
+  media?: Media[];
+  likes: number;
+  comments: number;
+  liked?: boolean;
+  saved?: boolean;
+  categories?: string[];
+}
+
+export interface Media {
+  id: string;
+  type: 'image' | 'video';
+  url: string;
+  thumbnail?: string;
+}
+
+export interface User {
+  id: string;
+  name: string;
+  username: string;
+  avatar: string;
+  verified?: boolean;
+  isCelebrity?: boolean;
+}
 
 export interface Location {
   id: string;
   name: string;
-  description?: string;
   address?: string;
   city: string;
   state: string;
   country?: string;
   lat: number;
   lng: number;
-  type?: string;
   rating?: number;
-  priceLevel?: number;
-  hours?: BusinessHours;
-  phone?: string;
-  website?: string;
-  photos?: any[];
-  tags?: string[];
+  price?: string;
+  type?: string;
   verified?: boolean;
-  vibes?: string[];
-  userProfile?: any;
+  hours?: BusinessHours;
+  website?: string;
+  phone?: string;
+  email?: string;
+  description?: string;
 }
 
 export interface BusinessHours {
@@ -33,77 +59,11 @@ export interface BusinessHours {
   [key: string]: { open: string; close: string; } | string;
 }
 
-export interface User {
-  id: string;
-  username: string;
-  name: string;
-  avatar: string;
-  bio?: string;
-  followers?: number;
-  following?: number;
-  verified?: boolean;
-  location?: string;
-  website?: string;
-  joinDate?: string;
-  isPrivate?: boolean;
-  isCelebrity?: boolean;
-}
-
 export interface Comment {
   id: string;
   postId: string;
   user: User;
-  text?: string;
-  content: string;
+  text: string;
   timestamp: string;
   likes: number;
-  vibedHere?: boolean;
-}
-
-export interface Post {
-  id: string;
-  user: User;
-  location?: Location;
-  text?: string;
-  content: string;
-  media?: Media[];
-  timestamp: string;
-  expiresAt?: string;
-  likes: number;
-  comments: Comment[] | number;
-  saved?: boolean;
-  isPinned?: boolean;
-  isVenuePost?: boolean;
-}
-
-export interface Media {
-  id: string;
-  type: 'image' | 'video';
-  url: string;
-  thumbnail?: string;
-}
-
-export interface VenueInsights {
-  id: string;
-  venueName: string;
-  totalVisits: number;
-  uniqueVisitors: number;
-  averageRating: number;
-  topReasons: Array<{reason: string; count: number}>;
-  demographics: {
-    ageGroups: {[key: string]: number};
-    gender: {[key: string]: number};
-  };
-  visitsByDay: {[key: string]: number};
-  visitsByHour: {[key: string]: number};
-  competitorAnalysis?: Array<{
-    name: string;
-    visitors: number;
-    rating: number;
-    distance: number;
-  }>;
-  visitorCount: number;
-  checkInCount: number;
-  receiptUploads: number;
-  discountRedemptions: number;
 }

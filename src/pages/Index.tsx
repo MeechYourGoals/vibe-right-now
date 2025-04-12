@@ -8,7 +8,6 @@ import NearbyVibesMap from '@/components/NearbyVibesMap';
 import PostFeed from '@/components/PostFeed';
 import { mockPosts, mockUsers } from '@/mock/data';
 import { Button } from '@/components/ui/button';
-import { useSpeechSynthesis } from '@/components/VernonChat/hooks/useSpeechSynthesis';
 import VernonChat from '@/components/VernonChat';
 import { Container } from '@/components/ui/container';
 import LocationsNearby from '@/components/LocationsNearby';
@@ -19,8 +18,6 @@ const Index = () => {
   const [posts, setPosts] = useState([]);
   const [viewingMap, setViewingMap] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('all');
-  
-  const { speak } = useSpeechSynthesis();
   
   useEffect(() => {
     // Simulate API call to fetch posts
@@ -43,12 +40,17 @@ const Index = () => {
   // Get celebrity users for featured content
   const celebrityUsers = mockUsers.filter(user => user.isCelebrity);
   
+  const handleSearch = (query, filterType, category) => {
+    console.log(`Searching for ${query} with filter ${filterType} in category ${category}`);
+    // Implement search functionality
+  };
+  
   return (
     <>
       <Container className="py-4">
         <div className="space-y-6">
           {/* Search Bar */}
-          <SearchVibes />
+          <SearchVibes onSearch={handleSearch} />
           
           {/* Recommendations Section */}
           <section className="mb-8">
