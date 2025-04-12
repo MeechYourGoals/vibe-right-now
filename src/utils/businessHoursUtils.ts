@@ -46,6 +46,30 @@ export const formatHoursForDisplay = (hours: BusinessHours): string => {
   return "Hours not available";
 };
 
+// Add the missing functions:
+export const generateBusinessHours = (venue: any): BusinessHours => {
+  // Based on the venue type, return different business hours
+  if (venue.type === "restaurant") {
+    return getRestaurantBusinessHours();
+  } else if (venue.type === "bar") {
+    return getBarBusinessHours();
+  } else if (venue.type === "event") {
+    return getEventBusinessHours();
+  }
+  
+  // Default business hours for other venue types
+  return getDefaultBusinessHours();
+};
+
+export const getTodaysHours = (venue: any): string => {
+  // Ensure venue has hours
+  if (!venue.hours) {
+    venue.hours = generateBusinessHours(venue);
+  }
+  
+  return formatHoursForDisplay(venue.hours);
+};
+
 export const getRestaurantBusinessHours = (): BusinessHours => {
   return {
     monday: { open: "11:00 AM", close: "10:00 PM" },
