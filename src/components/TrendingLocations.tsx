@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowRight, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Location } from "@/types";
-import { mockLocations } from "@/mock/data";
+import { mockLocations } from "@/mock/locations";
 import { getTrendingLocationsForCity } from "@/mock/cityLocations";
 import { toast } from "sonner";
 

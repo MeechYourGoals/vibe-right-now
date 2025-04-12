@@ -9,12 +9,11 @@ import {
   TableRow 
 } from "@/components/ui/table";
 import { BusinessHours as BusinessHoursType } from '@/types';
-import { formatHoursForDisplay, formatDayOfWeek } from '@/utils/businessHoursUtils';
+import { formatHoursForDisplay } from '@/utils/businessHoursUtils';
 
 interface BusinessHoursProps {
   hours: BusinessHoursType;
   compact?: boolean;
-  venue?: any; // Added to match usage in VenueProfileHeader
 }
 
 const BusinessHours: React.FC<BusinessHoursProps> = ({ 
@@ -22,7 +21,7 @@ const BusinessHours: React.FC<BusinessHoursProps> = ({
   compact = false
 }) => {
   // Current day of week to highlight
-  const today = new Date().toLocaleDateString('en-US', { weekday: 'short' }).toLowerCase();
+  const today = new Date().toLocaleDateString('en-US', { weekday: 'lowercase' });
   
   if (compact) {
     return (
@@ -36,7 +35,7 @@ const BusinessHours: React.FC<BusinessHoursProps> = ({
               }`}
             >
               <span className="capitalize">{day}</span>
-              <span>{formatHoursForDisplay(day, hourObj)}</span>
+              <span>{formatHoursForDisplay(hourObj)}</span>
             </div>
           ))}
         </div>
@@ -53,33 +52,33 @@ const BusinessHours: React.FC<BusinessHoursProps> = ({
         </TableRow>
       </TableHeader>
       <TableBody>
-        <TableRow className={today === 'mon' ? 'bg-primary/10' : ''}>
+        <TableRow className={today === 'monday' ? 'bg-primary/10' : ''}>
           <TableCell className="font-medium">Monday</TableCell>
-          <TableCell>{formatHoursForDisplay('monday', hours.monday)}</TableCell>
+          <TableCell>{formatHoursForDisplay(hours.monday)}</TableCell>
         </TableRow>
-        <TableRow className={today === 'tue' ? 'bg-primary/10' : ''}>
+        <TableRow className={today === 'tuesday' ? 'bg-primary/10' : ''}>
           <TableCell className="font-medium">Tuesday</TableCell>
-          <TableCell>{formatHoursForDisplay('tuesday', hours.tuesday)}</TableCell>
+          <TableCell>{formatHoursForDisplay(hours.tuesday)}</TableCell>
         </TableRow>
-        <TableRow className={today === 'wed' ? 'bg-primary/10' : ''}>
+        <TableRow className={today === 'wednesday' ? 'bg-primary/10' : ''}>
           <TableCell className="font-medium">Wednesday</TableCell>
-          <TableCell>{formatHoursForDisplay('wednesday', hours.wednesday)}</TableCell>
+          <TableCell>{formatHoursForDisplay(hours.wednesday)}</TableCell>
         </TableRow>
-        <TableRow className={today === 'thu' ? 'bg-primary/10' : ''}>
+        <TableRow className={today === 'thursday' ? 'bg-primary/10' : ''}>
           <TableCell className="font-medium">Thursday</TableCell>
-          <TableCell>{formatHoursForDisplay('thursday', hours.thursday)}</TableCell>
+          <TableCell>{formatHoursForDisplay(hours.thursday)}</TableCell>
         </TableRow>
-        <TableRow className={today === 'fri' ? 'bg-primary/10' : ''}>
+        <TableRow className={today === 'friday' ? 'bg-primary/10' : ''}>
           <TableCell className="font-medium">Friday</TableCell>
-          <TableCell>{formatHoursForDisplay('friday', hours.friday)}</TableCell>
+          <TableCell>{formatHoursForDisplay(hours.friday)}</TableCell>
         </TableRow>
-        <TableRow className={today === 'sat' ? 'bg-primary/10' : ''}>
+        <TableRow className={today === 'saturday' ? 'bg-primary/10' : ''}>
           <TableCell className="font-medium">Saturday</TableCell>
-          <TableCell>{formatHoursForDisplay('saturday', hours.saturday)}</TableCell>
+          <TableCell>{formatHoursForDisplay(hours.saturday)}</TableCell>
         </TableRow>
-        <TableRow className={today === 'sun' ? 'bg-primary/10' : ''}>
+        <TableRow className={today === 'sunday' ? 'bg-primary/10' : ''}>
           <TableCell className="font-medium">Sunday</TableCell>
-          <TableCell>{formatHoursForDisplay('sunday', hours.sunday)}</TableCell>
+          <TableCell>{formatHoursForDisplay(hours.sunday)}</TableCell>
         </TableRow>
       </TableBody>
     </Table>

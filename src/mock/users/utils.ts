@@ -20,14 +20,6 @@ export const generateUserBio = (user: User): string => {
     return "Nightlife connoisseur and music lover. Finding the best clubs, festivals, and dance floors wherever I go. 🎵🥂🕺";
   } else if (user.username.includes("sport") || user.username.includes("fitness")) {
     return "Sports fanatic and fitness enthusiast. Always looking for the next adrenaline rush and active experiences. 🏈🏀⚽";
-  } else if (user.username.includes("luxury") || user.username.includes("premium")) {
-    return "Luxury lifestyle curator. Sharing the most exclusive experiences and destinations for the discerning traveler. 🥂✨🛩️";
-  } else if (user.username.includes("art") || user.username.includes("design") || user.username.includes("creative")) {
-    return "Art lover and creative soul. Seeking out galleries, street art, and design inspiration wherever I go. 🎨🖼️🏙️";
-  } else if (user.username.includes("nature") || user.username.includes("outdoor") || user.username.includes("wild")) {
-    return "Nature enthusiast and outdoor adventurer. Hiking, camping, and connecting with the natural world. 🏔️🌲🌊";
-  } else if (user.isCelebrity) {
-    return "Official account. Sharing my favorite places, experiences, and moments with my amazing fans. Thanks for all your support! ✨🌟";
   } else {
     return "Always seeking the next great vibe! Foodie, music lover, and adventure seeker exploring one city at a time. 🌮🎵✨";
   }

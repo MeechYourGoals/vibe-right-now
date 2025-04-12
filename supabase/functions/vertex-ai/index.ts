@@ -1,6 +1,7 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const GOOGLE_VERTEX_API_KEY = "AIzaSyDq1Cm2qUvsJAxvcHnJGrSWvyHDNqOi_O0";
+const GOOGLE_VERTEX_API_KEY = Deno.env.get('GOOGLE_VERTEX_API_KEY');
 const VERTEX_API_URL = "https://us-central1-aiplatform.googleapis.com/v1/projects/PROJECT_ID/locations/us-central1/publishers/google/models/gemini-1.5-pro:generateContent";
 
 const corsHeaders = {

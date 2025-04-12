@@ -1,20 +1,59 @@
 
 export interface CityCoordinates {
-  city: string;
+  name: string;
   state?: string;
-  country?: string;
-  name?: string; // For backward compatibility
+  country: string;
   lat: number;
   lng: number;
 }
 
-export interface BusinessHours {
-  monday: { open: string; close: string };
-  tuesday: { open: string; close: string };
-  wednesday: { open: string; close: string };
-  thursday: { open: string; close: string };
-  friday: { open: string; close: string };
-  saturday: { open: string; close: string };
-  sunday: { open: string; close: string };
-  [key: string]: { open: string; close: string }; // Add index signature for string keys
+export interface MockUserProfile {
+  id: string;
+  username: string;
+  avatar: string;
+  bio?: string;
+  verified: boolean;
 }
+
+export const defaultUserProfiles: MockUserProfile[] = [
+  {
+    id: "user1",
+    username: "vibemaster",
+    avatar: "https://i.pravatar.cc/150?img=1",
+    bio: "Always looking for the next vibe ✨",
+    verified: true
+  },
+  {
+    id: "user2",
+    username: "cityhopper",
+    avatar: "https://i.pravatar.cc/150?img=2",
+    bio: "Exploring one city at a time 🌃",
+    verified: false
+  },
+  {
+    id: "user3",
+    username: "nightowl",
+    avatar: "https://i.pravatar.cc/150?img=3",
+    bio: "The night is when the real fun begins 🦉",
+    verified: true
+  },
+  {
+    id: "user4",
+    username: "foodiefinder",
+    avatar: "https://i.pravatar.cc/150?img=4",
+    bio: "Following my stomach to all the best spots 🍽️",
+    verified: false
+  },
+  {
+    id: "user5",
+    username: "adventuretime",
+    avatar: "https://i.pravatar.cc/150?img=5",
+    bio: "Life is an adventure, and I'm here for it 🏄‍♂️",
+    verified: true
+  }
+];
+
+// Helper function to get a random user profile
+export const getRandomUserProfile = (): MockUserProfile => {
+  return defaultUserProfiles[Math.floor(Math.random() * defaultUserProfiles.length)];
+};

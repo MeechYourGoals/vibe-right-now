@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Bot } from 'lucide-react';
+import { Bot, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface ChatButtonProps {

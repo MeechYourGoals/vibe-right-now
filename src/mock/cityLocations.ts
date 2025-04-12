@@ -1,64 +1,45 @@
 
-import { CityCoordinates } from "@/utils/locations/types";
-import { generateRandomLocations } from "@/utils/locations/locationGenerator";
 import { Location } from "@/types";
+import { generateAllCityLocations } from "@/utils/locations";
 
-export const cityLocations: CityCoordinates[] = [
-  { 
-    city: "San Francisco", 
-    state: "CA", 
-    lat: 37.7749, 
-    lng: -122.4194 
-  },
-  { 
-    city: "New York", 
-    state: "NY", 
-    lat: 40.7128, 
-    lng: -74.0060 
-  },
-  { 
-    city: "Los Angeles", 
-    state: "CA", 
-    lat: 34.0522, 
-    lng: -118.2437 
-  },
-  { 
-    city: "Chicago", 
-    state: "IL", 
-    lat: 41.8781, 
-    lng: -87.6298 
-  },
-  { 
-    city: "Miami", 
-    state: "FL", 
-    lat: 25.7617, 
-    lng: -80.1918 
-  }
-];
+// Generate locations for all cities
+export const cityLocations: Location[] = generateAllCityLocations();
 
-// Get locations for a specific city
-export const getLocationsByCity = (cityName: string, count: number = 10): Location[] => {
-  const city = cityLocations.find(c => c.city.toLowerCase() === cityName.toLowerCase());
-  
-  if (city) {
-    return generateRandomLocations(count, city.lat, city.lng);
-  }
-  
-  // Default to Los Angeles if city not found
-  return generateRandomLocations(count, 34.0522, -118.2437);
+// Function to get locations for a specific city
+export const getLocationsByCity = (cityName: string): Location[] => {
+  if (!cityName) return [];
+  return cityLocations.filter(
+    location => location.city.toLowerCase() === cityName.toLowerCase()
+  );
 };
 
-// Get trending locations for a specific city
-export const getTrendingLocationsForCity = (cityName: string, count: number = 3): Location[] => {
-  const locations = getLocationsByCity(cityName, count * 3);
+// Function to get trending locations for a city
+export const getTrendingLocationsForCity = (cityName: string): Location[] => {
+  const cityLocs = getLocationsByCity(cityName);
+  if (cityLocs.length === 0) return [];
   
-  // Sort by rating and return the top 'count'
-  return locations
-    .sort((a, b) => (b.rating || 0) - (a.rating || 0))
-    .slice(0, count);
+  // Return 3 random locations from the city
+  return cityLocs
+    .sort(() => 0.5 - Math.random())
+    .slice(0, 3);
+};
+
+// Function to get recommended locations based on user preferences or history
+export const getRecommendedLocations = (): Location[] => {
+  // In a real app, this would be based on user preferences, history, etc.
+  // For the prototype, just return some random locations from different cities
+  return cityLocations
+    .sort(() => 0.5 - Math.random())
+    .slice(0, 5);
 };
 
 // Get nearby locations based on coordinates
-export const getNearbyLocations = (lat: number, lng: number, count: number = 8): Location[] => {
-  return generateRandomLocations(count, lat, lng);
+export const getNearbyLocations = (lat: number, lng: number, radius: number = 10): Location[] => {
+  // Simple distance calculation (not accurate for large distances but fine for prototype)
+  return cityLocations.filter(location => {
+    const distance = Math.sqrt(
+      Math.pow(location.lat - lat, 2) + Math.pow(location.lng - lng, 2)
+    ) * 69; // Rough miles conversion
+    return distance <= radius;
+  }).slice(0, 20); // Limit to 20 locations
 };

@@ -4,103 +4,103 @@ export const cityCoordinates: Record<string, CityCoordinates> = {
   // Original cities (keep if any)
   // New cities
   'las vegas': {
-    city: 'Las Vegas',
+    name: 'Las Vegas',
     state: 'NV',
     country: 'USA',
     lat: 36.1699,
     lng: -115.1398
   },
   'indianapolis': {
-    city: 'Indianapolis',
+    name: 'Indianapolis',
     state: 'IN',
     country: 'USA',
     lat: 39.7684,
     lng: -86.1581
   },
   'medellin': {
-    city: 'Medellin',
+    name: 'Medellin',
     country: 'Colombia',
     lat: 6.2476,
     lng: -75.5660
   },
   'toronto': {
-    city: 'Toronto',
+    name: 'Toronto',
     state: 'ON',
     country: 'Canada',
     lat: 43.6532,
     lng: -79.3832
   },
   'beijing': {
-    city: 'Beijing',
+    name: 'Beijing',
     country: 'China',
     lat: 39.9042,
     lng: 116.4074
   },
   'salt lake city': {
-    city: 'Salt Lake City',
+    name: 'Salt Lake City',
     state: 'UT',
     country: 'USA',
     lat: 40.7608,
     lng: -111.8910
   },
   'san francisco': {
-    city: 'San Francisco',
+    name: 'San Francisco',
     state: 'CA',
     country: 'USA',
     lat: 37.7749,
     lng: -122.4194
   },
   'austin': {
-    city: 'Austin',
+    name: 'Austin',
     state: 'TX',
     country: 'USA',
     lat: 30.2672,
     lng: -97.7431
   },
   'orlando': {
-    city: 'Orlando',
+    name: 'Orlando',
     state: 'FL',
     country: 'USA',
     lat: 28.5383,
     lng: -81.3792
   },
   'tampa': {
-    city: 'Tampa',
+    name: 'Tampa',
     state: 'FL',
     country: 'USA',
     lat: 27.9506,
     lng: -82.4572
   },
   'washington dc': {
-    city: 'Washington DC',
+    name: 'Washington DC',
     state: 'DC',
     country: 'USA',
     lat: 38.9072,
     lng: -77.0369
   },
   'boston': {
-    city: 'Boston',
+    name: 'Boston',
     state: 'MA',
     country: 'USA',
     lat: 42.3601,
     lng: -71.0589
   },
   'detroit': {
-    city: 'Detroit',
+    name: 'Detroit',
     state: 'MI',
     country: 'USA',
     lat: 42.3314,
     lng: -83.0458
   },
   'st. louis': {
-    city: 'St. Louis',
+    name: 'St. Louis',
     state: 'MO',
     country: 'USA',
     lat: 38.6270,
     lng: -90.1994
   },
   'minneapolis': {
-    city: 'Minneapolis',
+    name: 'Minneapolis',
     state: 'MN',
     country: 'USA',
     lat: 44.9778,
@@ -108,100 +108,100 @@ export const cityCoordinates: Record<string, CityCoordinates> = {
   },
   // Add existing cities below
   'new york': {
-    city: 'New York',
+    name: 'New York',
     state: 'NY',
     country: 'USA',
     lat: 40.7128,
     lng: -74.0060
   },
   'los angeles': {
-    city: 'Los Angeles',
+    name: 'Los Angeles',
     state: 'CA',
     country: 'USA',
     lat: 34.0522,
     lng: -118.2437
   },
   'chicago': {
-    city: 'Chicago',
+    name: 'Chicago',
     state: 'IL',
     country: 'USA',
     lat: 41.8781,
     lng: -87.6298
   },
   'houston': {
-    city: 'Houston',
+    name: 'Houston',
     state: 'TX',
     country: 'USA',
     lat: 29.7604,
     lng: -95.3698
   },
   'phoenix': {
-    city: 'Phoenix',
+    name: 'Phoenix',
     state: 'AZ',
     country: 'USA',
     lat: 33.4484,
     lng: -112.0740
   },
   'philadelphia': {
-    city: 'Philadelphia',
+    name: 'Philadelphia',
     state: 'PA',
     country: 'USA',
     lat: 39.9526,
     lng: -75.1652
   },
   'san antonio': {
-    city: 'San Antonio',
+    name: 'San Antonio',
     state: 'TX',
     country: 'USA',
     lat: 29.4241,
     lng: -98.4936
   },
   'san diego': {
-    city: 'San Diego',
+    name: 'San Diego',
     state: 'CA',
     country: 'USA',
     lat: 32.7157,
     lng: -117.1611
   },
   'dallas': {
-    city: 'Dallas',
+    name: 'Dallas',
     state: 'TX',
     country: 'USA',
     lat: 32.7767,
     lng: -96.7970
   },
   'london': {
-    city: 'London',
+    name: 'London',
     country: 'UK',
     lat: 51.5074,
     lng: -0.1278
   },
   'paris': {
-    city: 'Paris',
+    name: 'Paris',
     country: 'France',
     lat: 48.8566,
     lng: 2.3522
   },
   'tokyo': {
-    city: 'Tokyo',
+    name: 'Tokyo',
     country: 'Japan',
     lat: 35.6762,
     lng: 139.6503
   },
   'sydney': {
-    city: 'Sydney',
+    name: 'Sydney',
     country: 'Australia',
     lat: -33.8688,
     lng: 151.2093
   },
   'rio de janeiro': {
-    city: 'Rio de Janeiro',
+    name: 'Rio de Janeiro',
     country: 'Brazil',
     lat: -22.9068,
     lng: -43.1729
   },
   'miami': {
-    city: 'Miami',
+    name: 'Miami',
     state: 'FL',
     country: 'USA',
     lat: 25.7617,

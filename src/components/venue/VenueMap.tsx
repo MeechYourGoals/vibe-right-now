@@ -1,73 +1,66 @@
 
 import React from 'react';
-import { Card, CardContent } from "@/components/ui/card";
-import { MapPin } from "lucide-react";
-import { formatHoursForDisplay } from '@/utils/businessHoursUtils';
-import { Location } from '@/types';
+import { Button } from "@/components/ui/button";
+import { Maximize, MapPin } from "lucide-react";
+import { Location } from "@/types";
+import GoogleMapComponent from "@/components/map/google/GoogleMapComponent";
+import { format } from "date-fns";
 
 interface VenueMapProps {
-  address?: string;
-  latitude?: number;
-  longitude?: number;
-  venue?: Location;
-  onExpand?: () => void;
+  venue: Location;
+  onExpand: () => void;
 }
 
-const VenueMap: React.FC<VenueMapProps> = ({ 
-  address, 
-  latitude, 
-  longitude, 
-  venue,
-  onExpand
-}) => {
-  // Use venue properties if provided, otherwise use individual props
-  const venueAddress = venue?.address || address || '';
-  const venueLat = venue?.lat || latitude || 0;
-  const venueLng = venue?.lng || longitude || 0;
+const VenueMap: React.FC<VenueMapProps> = ({ venue, onExpand }) => {
+  const today = new Date();
+  const dayOfWeek = format(today, 'EEEE').toLowerCase();
   
-  // Create properly formatted business hours
-  const businessHours = {
-    monday: { open: "9:00 AM", close: "5:00 PM" },
-    tuesday: { open: "9:00 AM", close: "5:00 PM" },
-    wednesday: { open: "9:00 AM", close: "5:00 PM" },
-    thursday: { open: "9:00 AM", close: "5:00 PM" },
-    friday: { open: "9:00 AM", close: "5:00 PM" },
-    saturday: { open: "10:00 AM", close: "3:00 PM" },
-    sunday: { open: "Closed", close: "Closed" }
-  };
-
-  const todayKey = new Date().toLocaleDateString('en-US', { weekday: 'short' }).toLowerCase();
-  const today = todayKey === 'mon' ? 'monday' : 
-                todayKey === 'tue' ? 'tuesday' : 
-                todayKey === 'wed' ? 'wednesday' : 
-                todayKey === 'thu' ? 'thursday' : 
-                todayKey === 'fri' ? 'friday' : 
-                todayKey === 'sat' ? 'saturday' : 'sunday';
-
+  // Ensure venue has hours, even if mock
+  if (!venue.hours) {
+    venue.hours = {
+      monday: "9:00 AM - 9:00 PM",
+      tuesday: "9:00 AM - 9:00 PM",
+      wednesday: "9:00 AM - 9:00 PM",
+      thursday: "9:00 AM - 9:00 PM",
+      friday: "9:00 AM - 10:00 PM",
+      saturday: "10:00 AM - 10:00 PM",
+      sunday: "10:00 AM - 8:00 PM"
+    };
+  }
+  
+  const hoursToday = venue.hours[dayOfWeek as keyof typeof venue.hours];
+  
   return (
-    <Card className="border shadow-sm overflow-hidden">
-      <div className="relative h-[200px] bg-muted">
-        <iframe
-          title="Venue Location"
-          width="100%"
-          height="100%"
-          frameBorder="0"
-          src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyBNLrJhOMz6idD05pzwk_7PtfYnX6RBKW8&q=${venueLat},${venueLng}&zoom=15`}
-          allowFullScreen
-        />
-      </div>
-      <CardContent className="p-4">
-        <div className="flex items-start gap-2">
-          <MapPin className="h-5 w-5 text-primary mt-0.5" />
-          <div>
-            <p className="font-medium">{venueAddress}</p>
-            <p className="text-sm text-muted-foreground">
-              {formatHoursForDisplay(today, businessHours[today as keyof typeof businessHours])}
-            </p>
-          </div>
+    <div className="mt-4 rounded-md overflow-hidden relative">
+      <div className="flex justify-between items-center text-sm mb-2">
+        <div className="flex items-center">
+          <MapPin className="h-4 w-4 mr-1 text-primary" />
+          <span className="font-medium">{venue.address}</span>
         </div>
-      </CardContent>
-    </Card>
+        <div className="text-right">
+          <span className="font-medium">Today:</span> {hoursToday}
+        </div>
+      </div>
+      
+      <div className="h-48 rounded-md overflow-hidden relative">
+        <GoogleMapComponent
+          userLocation={null}
+          locations={[venue]}
+          searchedCity={venue.city}
+          mapStyle="default"
+          selectedLocation={venue}
+          onLocationSelect={() => {}}
+          userAddressLocation={null}
+          showAllCities={false}
+        />
+        <div className="absolute bottom-2 right-2">
+          <Button size="sm" variant="secondary" onClick={onExpand}>
+            <Maximize className="h-4 w-4 mr-1" />
+            Expand Map
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 };
 

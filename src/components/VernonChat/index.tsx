@@ -1,10 +1,10 @@
-
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import ChatButton from './ChatButton';
 import ChatWindow from './ChatWindow';
 import { useTheme } from '@/components/ThemeProvider';
 import { toast } from 'sonner';
+import VernonThemeToggle from './components/VernonThemeToggle';
 import VernonModeButtons from './components/VernonModeButtons';
 import { useElevenLabsConversation } from './hooks/useElevenLabsConversation';
 import { WhisperSpeechService } from '@/services/WhisperSpeechService';
@@ -168,7 +168,7 @@ const VernonChat = () => {
           <ChatButton onClick={() => handleOpenAndListen()} />
         </motion.div>
         
-        {/* Theme toggle button removed from here */}
+        <VernonThemeToggle theme={theme} toggleTheme={toggleTheme} />
       </div>
     );
   }

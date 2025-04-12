@@ -11,7 +11,7 @@ interface InfoWindowContentProps {
 }
 
 const InfoWindowContent: React.FC<InfoWindowContentProps> = ({ location }) => {
-  const today = new Date().toLocaleDateString('en-US', { weekday: 'short' }).toLowerCase() as keyof typeof location.hours;
+  const today = new Date().toLocaleDateString('en-US', { weekday: 'lowercase' }) as keyof typeof location.hours;
   const todayHours = location.hours?.[today];
   
   return (
@@ -45,7 +45,7 @@ const InfoWindowContent: React.FC<InfoWindowContentProps> = ({ location }) => {
             <Clock className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0 text-gray-500" />
             <div className="flex-1">
               <div>
-                Today: {formatHoursForDisplay(today.toString(), todayHours)}
+                Today: {formatHoursForDisplay(todayHours)}
               </div>
               {location.openNow && (
                 <span className="text-xs text-green-600 font-medium">Open Now</span>

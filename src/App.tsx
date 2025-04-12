@@ -1,11 +1,11 @@
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Home from "@/pages/Index";
+import Home from "@/pages/Home";
 import Explore from "@/pages/Explore";
-import Profile from "@/pages/ProfileBio";
+import Profile from "@/pages/Profile";
 import MyPlaces from "@/pages/MyPlaces";
-import Pinned from "@/pages/PinnedVibes";
-import Points from "@/pages/UserPoints";
+import Pinned from "@/pages/Pinned";
+import Points from "@/pages/Points";
 import Settings from "@/pages/Settings";
 import VenueProfile from "@/pages/VenueProfile";
 import Header from "@/components/Header";
@@ -13,6 +13,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "@/components/ui/toaster";
 import VernonChat from "@/components/VernonChat";
 import CameraButton from "@/components/CameraButton";
+import LocationSearch from "@/components/LocationSearch";
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
           </Routes>
           <VernonChat />
           <CameraButton />
+          <LocationSearch />
           <Toaster />
         </div>
       </BrowserRouter>

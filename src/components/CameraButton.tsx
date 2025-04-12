@@ -64,10 +64,8 @@ const CameraButton = () => {
     <>
       <Button 
         onClick={handleCameraClick}
-        className="fixed right-6 bottom-6 w-16 h-16 rounded-full shadow-lg bg-gradient-to-r from-primary to-secondary text-white flex items-center justify-center p-0 z-50 hover:shadow-xl transition-all duration-300"
-        aria-label="Post a Vibe"
+        className="fixed bottom-6 right-6 w-16 h-16 rounded-full shadow-lg bg-gradient-to-r from-primary to-secondary flex items-center justify-center p-0 z-10 animate-pulse-gradient"
       >
-        <div className="absolute inset-0 rounded-full bg-primary opacity-0 group-hover:opacity-20 transition-opacity" />
         <Camera className="h-7 w-7" />
       </Button>
 

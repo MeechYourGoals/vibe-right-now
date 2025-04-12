@@ -1,182 +1,78 @@
 
+import { formatDate } from "@/lib/utils";
 import { VenueInsights } from "@/types";
 
-// Mock data for venue insights
-export const getVenueInsights = (): VenueInsights => {
+// Mock insights data generator
+export const generateVenueInsights = (venueId: string): VenueInsights => {
+  // Use venueId to generate consistent "random" data
+  const seed = venueId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  
+  // Generate visitor trends for the last 14 days
+  const visitorTrends = Array.from({ length: 14 }, (_, i) => {
+    const date = new Date();
+    date.setDate(date.getDate() - (13 - i));
+    
+    // Generate somewhat random count based on the day of week
+    // Weekends have higher numbers
+    const dayOfWeek = date.getDay();
+    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+    const baseCount = isWeekend ? 80 + (seed % 40) : 30 + (seed % 30);
+    
+    return {
+      date: formatDate(date),
+      count: baseCount + Math.floor(Math.random() * 20)
+    };
+  });
+  
   return {
-    id: "venue1",
-    venueName: "The Rooftop Bar",
-    totalVisits: 1250,
-    uniqueVisitors: 864,
-    averageRating: 4.7,
-    visitorCount: 342,
-    checkInCount: 156,
-    receiptUploads: 98,
-    discountRedemptions: 67,
-    totalReviews: 342,
-    reviewDistribution: {
-      5: 254,
-      4: 76,
-      3: 8,
-      2: 3,
-      1: 1
+    visitorCount: 1200 + (seed % 800), 
+    checkInCount: 950 + (seed % 600),
+    receiptUploads: 430 + (seed % 300),
+    discountRedemptions: 210 + (seed % 150),
+    popularHours: {
+      "12pm": 15,
+      "1pm": 30,
+      "2pm": 40,
+      "3pm": 25,
+      "4pm": 35,
+      "5pm": 60,
+      "6pm": 90,
+      "7pm": 120,
+      "8pm": 140,
+      "9pm": 125,
+      "10pm": 90,
+      "11pm": 60
     },
-    demographics: {
-      gender: {
-        male: 48,
-        female: 52
-      },
+    demographicData: {
       ageGroups: {
-        '18-24': 22,
-        '25-34': 38,
-        '35-44': 25,
-        '45-54': 10,
-        '55+': 5
+        "18-24": 20 + (seed % 10),
+        "25-34": 40 + (seed % 15),
+        "35-44": 25 + (seed % 10),
+        "45-54": 10 + (seed % 5),
+        "55+": 5 + (seed % 5)
+      },
+      gender: {
+        "Male": 48 + (seed % 10),
+        "Female": 48 + (seed % 10),
+        "Other": 4 + (seed % 2)
       }
     },
-    topReasons: [
-      { reason: "Ambiance", count: 45 },
-      { reason: "Food Quality", count: 38 },
-      { reason: "Service", count: 32 },
-      { reason: "Value", count: 25 }
-    ],
-    peakHours: {
-      monday: '6-9 PM',
-      tuesday: '6-10 PM',
-      wednesday: '7-10 PM',
-      thursday: '7-11 PM',
-      friday: '8 PM-12 AM',
-      saturday: '8 PM-1 AM',
-      sunday: '2-5 PM'
-    },
-    visitsByDay: {
-      'Monday': 85,
-      'Tuesday': 95,
-      'Wednesday': 120,
-      'Thursday': 145,
-      'Friday': 210,
-      'Saturday': 250,
-      'Sunday': 100
-    },
-    visitsByHour: {
-      '12 PM': 25,
-      '1 PM': 30,
-      '2 PM': 35,
-      '3 PM': 40,
-      '4 PM': 60,
-      '5 PM': 80,
-      '6 PM': 120,
-      '7 PM': 150,
-      '8 PM': 180,
-      '9 PM': 200,
-      '10 PM': 180,
-      '11 PM': 150
-    },
-    averageSpend: 35,
-    customerLoyalty: {
-      repeatCustomers: 32,
-      newCustomers: 68
-    },
-    marketingEffectiveness: {
-      socialMedia: 45,
-      email: 25,
-      ads: 30
-    },
-    customerFeedback: {
-      positive: 89,
-      negative: 11
-    },
-    popularHours: {
-      'Monday': 18,
-      'Tuesday': 19,
-      'Wednesday': 19,
-      'Thursday': 20,
-      'Friday': 21,
-      'Saturday': 22,
-      'Sunday': 15
-    },
-    competitorAnalysis: [
-      { name: "Sky Lounge", visitors: 1050, rating: 4.5, distance: 0.5 },
-      { name: "Cloud Nine", visitors: 950, rating: 4.2, distance: 0.8 },
-      { name: "Elevation Bar", visitors: 1150, rating: 4.6, distance: 1.2 }
-    ]
+    visitorTrends,
+    mediaUploads: 280 + (seed % 200)
   };
 };
 
-// Current insights data for the venue
-export const currentInsights: VenueInsights = {
-  id: "venue1",
-  venueName: "The Rooftop Bar",
-  visitorCount: 342,
-  checkInCount: 156,
-  receiptUploads: 98,
-  discountRedemptions: 67,
-  averageRating: 4.7,
-  totalReviews: 342,
-  totalVisits: 1250,
-  uniqueVisitors: 864,
-  topReasons: [
-    { reason: "Ambiance", count: 45 },
-    { reason: "Food Quality", count: 38 }
-  ],
-  demographics: {
-    gender: {
-      male: 48,
-      female: 52
-    },
-    ageGroups: {
-      '18-24': 22,
-      '25-34': 38,
-      '35-44': 25,
-      '45-54': 10,
-      '55+': 5
-    }
-  },
-  visitsByDay: {
-    'Monday': 85,
-    'Tuesday': 95,
-    'Wednesday': 120,
-    'Thursday': 145,
-    'Friday': 210,
-    'Saturday': 250,
-    'Sunday': 100
-  },
-  visitsByHour: {
-    '12 PM': 25,
-    '1 PM': 30,
-    '2 PM': 35,
-    '3 PM': 40
-  },
-  engagement: {
-    posts: 78,
-    shares: 156,
-    mentions: 45
-  },
-  dailyData: [
-    { day: 'Mon', visitors: 45 },
-    { day: 'Tue', visitors: 52 },
-    { day: 'Wed', visitors: 58 },
-    { day: 'Thu', visitors: 75 },
-    { day: 'Fri', visitors: 87 },
-    { day: 'Sat', visitors: 120 },
-    { day: 'Sun', visitors: 65 }
-  ]
+// Add the missing exported functions for VenueInsights and PerformanceMetrics components
+export const generateWeeklyData = () => {
+  return [
+    { name: 'Mon', photos: 65, videos: 12 },
+    { name: 'Tue', photos: 59, videos: 10 },
+    { name: 'Wed', photos: 80, videos: 15 },
+    { name: 'Thu', photos: 81, videos: 16 },
+    { name: 'Fri', photos: 90, videos: 22 },
+    { name: 'Sat', photos: 120, videos: 35 },
+    { name: 'Sun', photos: 95, videos: 25 },
+  ];
 };
 
-// Generate mock weekly data for charts
-export const generateWeeklyData = () => {
-  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  
-  return days.map(day => {
-    const baseViews = Math.floor(Math.random() * 50) + 100;
-    const baseEngagement = Math.floor(Math.random() * 30) + 50;
-    const baseShares = Math.floor(Math.random() * 15) + 10;
-    
-    return {
-      name: day,
-      views: baseViews,
-      engagement: baseEngagement,
-      shares: baseShares
-    };
-  });
-};
+export const currentInsights = generateVenueInsights("default-venue");

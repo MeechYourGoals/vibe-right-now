@@ -1,74 +1,66 @@
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { posts as mockPosts } from '@/mock/posts';
-import { Badge } from '@/components/ui/badge';
-import { CreditCard, MapPin, BarChart3 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useState } from "react";
+import { mockPosts } from "@/mock/posts";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { ArrowRight, Ticket, Tag } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Link, useNavigate } from "react-router-dom";
 
 const DiscountLocations = () => {
-  const [userPoints, setUserPoints] = useState(1250);
-  const [userRedeemed, setUserRedeemed] = useState([]);
-  
-  // For demo, we're just using the mock posts data to derive venues with discounts
-  const venues = mockPosts
-    .map(post => post.location)
-    .filter((loc, index, self) => 
-      index === self.findIndex(l => l.id === loc.id) && 
-      Math.random() > 0.7 // Randomly select 30% of locations
-    )
-    .slice(0, 3);
-  
-  // Add some discount metadata
-  const discountVenues = venues.map(venue => ({
-    ...venue,
-    discount: {
-      percentage: Math.floor(Math.random() * 3) * 5 + 10, // 10%, 15%, or 20%
-      pointsRequired: Math.floor(Math.random() * 5) * 100 + 300, // 300-800 points
-      expiresIn: Math.floor(Math.random() * 14) + 1 // 1-14 days
-    }
-  }));
+  const navigate = useNavigate();
+  // Filter posts with discount offers (posts 29-32 are our discount posts)
+  const discountPosts = mockPosts.filter(post => 
+    ["29", "30", "31", "32"].includes(post.id)
+  );
   
   return (
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="text-xl flex items-center">
-          <CreditCard className="h-5 w-5 mr-2" />
-          <span>Discount Offers</span>
+          <Tag className="h-5 w-5 mr-2" />
+          <span>Currently Offering Discounts</span>
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {discountVenues.map((venue) => (
+          {discountPosts.map((post) => (
             <div 
-              key={venue.id} 
-              className="p-3 border rounded-lg flex flex-col space-y-2 hover:bg-accent/10 transition-colors"
+              key={post.id} 
+              className="p-3 border rounded-lg flex justify-between items-start hover:bg-accent/10 transition-colors"
             >
-              <div className="flex justify-between items-start">
+              <div className="flex gap-3">
+                <Avatar className="h-10 w-10">
+                  <AvatarImage 
+                    src={post.media[0]?.url || `https://source.unsplash.com/random/200x200/?${post.location.type}`} 
+                    alt={post.location.name} 
+                  />
+                  <AvatarFallback>{post.location.name.charAt(0)}</AvatarFallback>
+                </Avatar>
                 <div>
-                  <div className="font-medium">{venue.name}</div>
-                  <div className="text-sm text-muted-foreground flex items-center">
-                    <MapPin className="h-3 w-3 mr-1" />
-                    <span>{venue.city}, {venue.state}</span>
+                  <div className="font-medium">{post.location.name}</div>
+                  <div className="text-sm text-muted-foreground">
+                    {post.location.city}, {post.location.state}
+                  </div>
+                  <div className="mt-1">
+                    <Badge variant="secondary" className="text-xs">
+                      <Ticket className="h-3 w-3 mr-1" />
+                      {post.content.includes("FREE TICKETS") ? "Free Tickets" :
+                        post.content.includes("FREE COVER") ? "Free Entry" :
+                        post.content.includes("FREE pastry") ? "Free Item w/ Purchase" :
+                        "VIP Access"}
+                    </Badge>
                   </div>
                 </div>
-                <Badge variant="outline" className="bg-green-50 text-green-800 border-green-200">
-                  {venue.discount.percentage}% Off
-                </Badge>
               </div>
-              
-              <div className="text-xs text-muted-foreground flex items-center">
-                <BarChart3 className="h-3 w-3 mr-1" />
-                <span>{venue.discount.pointsRequired} Points • Expires in {venue.discount.expiresIn} days</span>
-              </div>
-              
               <Button 
-                variant="outline" 
+                variant="ghost" 
                 size="sm" 
-                className="w-full mt-2" 
-                disabled={userPoints < venue.discount.pointsRequired}
+                className="h-8" 
+                onClick={() => navigate(`/venue/${post.location.id}`)}
               >
-                {userPoints >= venue.discount.pointsRequired ? 'Redeem' : 'Not Enough Points'}
+                <ArrowRight className="h-4 w-4" />
               </Button>
             </div>
           ))}

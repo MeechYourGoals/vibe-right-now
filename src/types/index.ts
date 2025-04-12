@@ -104,45 +104,15 @@ export interface VenueInsights {
   };
   visitsByDay: {[key: string]: number};
   visitsByHour: {[key: string]: number};
-  visitorCount?: number;
-  checkInCount?: number;
-  receiptUploads?: number;
-  discountRedemptions?: number;
-  totalReviews?: number;
-  popularHours?: {[key: string]: number};
   competitorAnalysis?: Array<{
     name: string;
     visitors: number;
     rating: number;
     distance: number;
   }>;
-  reviewDistribution?: {
-    [key: number]: number;
-  };
-  peakHours?: {
-    [key: string]: string;
-  };
-  averageSpend?: number;
-  customerLoyalty?: {
-    repeatCustomers: number;
-    newCustomers: number;
-  };
-  marketingEffectiveness?: {
-    socialMedia: number;
-    email: number;
-    ads: number;
-  };
-  customerFeedback?: {
-    positive: number;
-    negative: number;
-  };
-  engagement?: {
-    posts: number;
-    shares: number;
-    mentions: number;
-  };
-  dailyData?: Array<{
-    day: string;
-    visitors: number;
-  }>;
+  visitorCount?: number; // Added to fix type errors
+  checkInCount?: number; // Added to fix type errors
+  receiptUploads?: number; // Added to fix type errors
+  discountRedemptions?: number; // Added to fix type errors
+  popularHours?: {[key: string]: number}; // Added to fix type errors
 }

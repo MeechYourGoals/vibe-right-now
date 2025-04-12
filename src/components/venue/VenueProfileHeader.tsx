@@ -10,7 +10,6 @@ import { getOfficialUrl, getActionButtonText } from "@/utils/locationUtils";
 import { isEligibleForPriceComparison, getPriceComparisons } from "@/utils/venue/travelIntegrationUtils";
 import { CreditCardType, getRedemptionOpportunities } from "@/utils/creditCardRedemption";
 import { toast } from "sonner";
-import { generateBusinessHours } from "@/utils/businessHoursUtils";
 
 const getPriceTier = (venue: Location): number => {
   const basePrice = {
@@ -213,7 +212,7 @@ const VenueProfileHeader = ({ venue, onMapExpand }: { venue: Location, onMapExpa
         </div>
       )}
       
-      <BusinessHours hours={venue.hours || generateBusinessHours()} />
+      <BusinessHours venue={venue} />
       
       <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-2">
         <Button variant="outline" className="flex justify-start">

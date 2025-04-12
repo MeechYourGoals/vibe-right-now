@@ -1,22 +1,19 @@
 
 // Main mock data index file
-import { users } from "./users";
-import { venues } from "./venues";
-import { posts } from "./posts";
-import { comments } from "./comments";
+import { mockUsers } from "./users";
+import { mockLocations } from "./locations";
+import { mockPosts } from "./posts";
+import { mockComments } from "./comments";
 import { getRecentTime, getExpiryTime } from "./time-utils";
-import { cityLocations, getLocationsByCity, getTrendingLocationsForCity, getNearbyLocations } from "./cityLocations";
+import { cityLocations } from "./cityLocations";
 
 // Export everything so existing imports continue to work
 export { 
-  users as mockUsers,
-  venues as mockLocations,
-  posts as mockPosts,
-  comments as mockComments,
+  mockUsers,
+  mockLocations,
+  mockPosts,
+  mockComments,
   getRecentTime,
   getExpiryTime,
-  cityLocations,
-  getLocationsByCity,
-  getTrendingLocationsForCity,
-  getNearbyLocations
+  cityLocations
 };
