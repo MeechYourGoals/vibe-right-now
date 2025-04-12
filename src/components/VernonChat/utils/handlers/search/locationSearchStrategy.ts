@@ -2,9 +2,10 @@
 import { VertexAIService } from '@/services/VertexAIService';
 import { cleanResponseText } from '../../responseFormatter';
 import { extractCategories } from '@/services/VertexAI/analysis';
+import { OpenAIService } from '@/services/OpenAIService';
 
 /**
- * Handles location-based searches using Vertex AI search capabilities
+ * Handles location-based searches using OpenAI search capabilities
  */
 export const LocationSearchStrategy = {
   /**
@@ -18,10 +19,10 @@ export const LocationSearchStrategy = {
   },
   
   /**
-   * Processes a location-based query using Vertex AI search and Cloud Natural Language API
+   * Processes a location-based query using OpenAI search and Cloud Natural Language API
    */
   async handleLocationSearch(inputValue: string): Promise<{response: string, categories: string[]}> {
-    console.log('Location query detected, using Cloud Natural Language API and Vertex AI search');
+    console.log('Location query detected, using OpenAI search');
     try {
       // First, extract categories using the Cloud Natural Language API
       const extractedCategories = await extractCategories(inputValue);
@@ -40,10 +41,23 @@ export const LocationSearchStrategy = {
         Group information by categories (dining, nightlife, attractions, events, etc.)
       `;
       
-      const vertexResponse = await VertexAIService.searchWithVertex(enhancedPrompt);
+      // Create system message to guide OpenAI response
+      const systemMessage = {
+        role: 'system',
+        content: 'You are a helpful assistant specialized in providing accurate information about places, venues, events, and things to do. Your responses should be detailed, well-organized, and include specific information like addresses, hours, and prices when available.'
+      };
       
-      if (vertexResponse && vertexResponse.length > 100) {
-        console.log('Got real-world information from Vertex AI');
+      // Use OpenAI chat completion for better results
+      const openAIResponse = await OpenAIService.sendChatRequest([
+        systemMessage,
+        { role: 'user', content: enhancedPrompt }
+      ], {
+        model: 'gpt-4o',
+        context: 'user'
+      });
+      
+      if (openAIResponse && openAIResponse.length > 100) {
+        console.log('Got real-world information from OpenAI');
         
         // Extract likely categories based on content
         const contentCategories: string[] = [];
@@ -56,7 +70,7 @@ export const LocationSearchStrategy = {
         };
         
         Object.entries(categoryKeywords).forEach(([category, regex]) => {
-          if (regex.test(vertexResponse)) {
+          if (regex.test(openAIResponse)) {
             contentCategories.push(category);
           }
         });
@@ -81,14 +95,39 @@ export const LocationSearchStrategy = {
           encodeURIComponent(inputValue) + ") for a better visual experience.";
         
         return {
-          response: cleanResponseText(vertexResponse + exploreLinkText),
+          response: cleanResponseText(openAIResponse + exploreLinkText),
           categories: allCategories
         };
       }
       
+      // Fall back to VertexAI if OpenAI fails
+      const vertexResponse = await VertexAIService.searchWithVertex(enhancedPrompt);
+      
+      if (vertexResponse && vertexResponse.length > 100) {
+        // Similar processing as above for VertexAI response
+        return {
+          response: cleanResponseText(vertexResponse),
+          categories: extractedCategories
+        };
+      }
+      
       return { response: '', categories: extractedCategories };
-    } catch (vertexError) {
-      console.error('Vertex AI search failed:', vertexError);
+    } catch (error) {
+      console.error('OpenAI search failed:', error);
+      
+      // Fall back to VertexAI
+      try {
+        const vertexResponse = await VertexAIService.searchWithVertex(inputValue);
+        if (vertexResponse && vertexResponse.length > 100) {
+          return {
+            response: cleanResponseText(vertexResponse),
+            categories: []
+          };
+        }
+      } catch (vertexError) {
+        console.error('Vertex AI search also failed:', vertexError);
+      }
+      
       return { response: '', categories: [] };
     }
   }

@@ -6,6 +6,7 @@ import { handleVenueQuery } from './handlers/venueQueryHandler';
 import { handleSearchQuery } from './handlers/searchQueryHandler';
 import { handleBookingQuery } from './handlers/bookingQueryHandler';
 import { VertexAIService } from '@/services/VertexAIService';
+import { OpenAIService } from '@/services/OpenAIService';
 
 export interface MessageProcessorProps {
   isVenueMode: boolean;
@@ -71,33 +72,88 @@ export const processMessageInput = async (
     
     // For location queries or any query with city names, prioritize search
     if (isLocationQuery || hasCityName) {
-      console.log('Location/city query detected, using search pipeline');
+      console.log('Location/city query detected, using search pipeline with OpenAI');
       try {
         // Extract any categories from the query to help with search relevance
         const categories = extractCategoriesFromQuery(inputValue);
         
-        // Use the search handler which now directly prioritizes Vertex AI
+        // Use the search handler which now prioritizes OpenAI
         responseText = await handleSearchQuery(inputValue, updatedPaginationState);
         console.log('Search query handler returned response of length:', responseText.length);
       } catch (error) {
         console.error('Error in search pipeline:', error);
-        // Fall back to direct AI call
-        responseText = await VertexAIService.generateResponse(inputValue, 'default', contextMessages);
+        // Fall back to direct OpenAI call
+        try {
+          // Convert contextMessages to format expected by OpenAI
+          const openAIMessages = contextMessages.map(msg => ({
+            role: msg.sender === 'user' ? 'user' : 'assistant',
+            content: msg.text
+          }));
+          
+          // Add the new user message
+          openAIMessages.push({
+            role: 'user',
+            content: inputValue
+          });
+          
+          responseText = await OpenAIService.sendChatRequest(openAIMessages, {
+            model: 'gpt-4o-mini',
+            context: isVenueMode ? 'venue' : 'user'
+          });
+        } catch (openAIError) {
+          console.error('Error with OpenAI fallback:', openAIError);
+          // Fall back to Vertex AI if OpenAI fails
+          responseText = await VertexAIService.generateResponse(inputValue, 'default', contextMessages);
+        }
       }
     } else if (isVenueMode) {
-      // For venue mode, always use Vertex AI for business insights
-      responseText = await VertexAIService.generateResponse(
-        inputValue, 
-        'venue',
-        contextMessages
-      );
+      // For venue mode, use OpenAI for business insights
+      try {
+        // Convert contextMessages to format expected by OpenAI
+        const openAIMessages = contextMessages.map(msg => ({
+          role: msg.sender === 'user' ? 'user' : 'assistant',
+          content: msg.text
+        }));
+        
+        // Add the new user message
+        openAIMessages.push({
+          role: 'user',
+          content: inputValue
+        });
+        
+        responseText = await OpenAIService.sendChatRequest(openAIMessages, {
+          model: 'gpt-4o',
+          context: 'venue'
+        });
+      } catch (error) {
+        console.error('Error with OpenAI for venue mode:', error);
+        // Fall back to Vertex AI
+        responseText = await VertexAIService.generateResponse(inputValue, 'venue', contextMessages);
+      }
     } else {
-      // For conversational queries, use Vertex AI directly
-      responseText = await VertexAIService.generateResponse(
-        inputValue, 
-        'default',
-        contextMessages
-      );
+      // For conversational queries, use OpenAI directly
+      try {
+        // Convert contextMessages to format expected by OpenAI
+        const openAIMessages = contextMessages.map(msg => ({
+          role: msg.sender === 'user' ? 'user' : 'assistant',
+          content: msg.text
+        }));
+        
+        // Add the new user message
+        openAIMessages.push({
+          role: 'user',
+          content: inputValue
+        });
+        
+        responseText = await OpenAIService.sendChatRequest(openAIMessages, {
+          model: 'gpt-4o-mini',
+          context: 'user'
+        });
+      } catch (error) {
+        console.error('Error with OpenAI for conversational mode:', error);
+        // Fall back to Vertex AI
+        responseText = await VertexAIService.generateResponse(inputValue, 'default', contextMessages);
+      }
     }
     
     // Create and add the AI message with the response

@@ -1,10 +1,12 @@
 
 import { SearchCoordinator } from './search';
 import { extractCategories } from '@/services/VertexAI/analysis';
+import { SearchService } from '@/services/search/SearchService';
+import { OpenAIService } from '@/services/OpenAIService';
 
 /**
  * Handle general search queries and location-based queries
- * Now powered by Cloud Natural Language API
+ * Now powered by OpenAI
  */
 export const handleSearchQuery = async (
   inputValue: string,
@@ -24,8 +26,19 @@ export const handleSearchQuery = async (
       }
     }
     
-    // Process the search query with the categories
-    // Pass categories to SearchCoordinator but handle case where it might not support categories
+    // First, try using OpenAI directly
+    try {
+      console.log('Attempting search with OpenAI');
+      const openAIResult = await SearchService.searchWithOpenAI(inputValue, categories);
+      if (openAIResult) {
+        console.log('Successfully retrieved information from OpenAI');
+        return openAIResult;
+      }
+    } catch (openAIError) {
+      console.error('Error using OpenAI for search:', openAIError);
+    }
+    
+    // Fall back to our existing search coordinator
     try {
       return await SearchCoordinator.processSearchQuery(inputValue, paginationState, categories);
     } catch (error) {
