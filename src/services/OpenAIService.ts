@@ -1,112 +1,93 @@
 
 import { supabase } from '@/integrations/supabase/client';
 
-const OPENAI_CHAT_ENDPOINT = 'https://yiitqkjrbskxumriujrh.functions.supabase.co/openai-chat';
-const OPENAI_SPEECH_ENDPOINT = 'https://yiitqkjrbskxumriujrh.functions.supabase.co/openai-speech';
-
-interface ChatOptions {
-  model?: string;
-  stream?: boolean;
-  context?: 'user' | 'venue';
-}
-
-export const OpenAIService = {
+export class OpenAIService {
   /**
-   * Send a chat request to OpenAI
+   * Send a chat request to the OpenAI API
    */
-  async sendChatRequest(messages: Array<{ role: string; content: string }>, options: ChatOptions = {}) {
+  static async sendChatRequest(
+    messages: { role: string; content: string }[],
+    options: { 
+      model?: string; 
+      context?: string;
+      stream?: boolean;
+      maxTokens?: number;
+    } = {}
+  ) {
     try {
-      const { model = 'gpt-4o-mini', stream = false, context = 'user' } = options;
-      console.log('Sending chat request to OpenAI:', { messages, model, stream, context });
-      
-      const response = await fetch(OPENAI_CHAT_ENDPOINT, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      const {
+        model = 'gpt-4o-mini',
+        context = 'user',
+        stream = false,
+        maxTokens = 1000
+      } = options;
+
+      const { data, error } = await supabase.functions.invoke('openai-chat', {
+        body: {
           messages,
           model,
-          stream,
-          context
-        }),
+          context,
+          stream
+        }
       });
 
-      if (!response.ok) {
-        throw new Error(`API request failed with status ${response.status}`);
+      if (error) {
+        console.error('Error calling OpenAI chat function:', error);
+        throw new Error(`Failed to call OpenAI chat function: ${error.message}`);
       }
 
-      // Handle streaming responses
-      if (stream) {
-        return response;
-      }
-
-      // Handle regular responses
-      const data = await response.json();
-      return data.response.choices[0].message.content;
+      return stream ? data : data?.response?.choices?.[0]?.message?.content || '';
     } catch (error) {
-      console.error('Error in OpenAIService.sendChatRequest:', error);
-      throw error;
-    }
-  },
-
-  /**
-   * Convert speech to text using OpenAI's Whisper model
-   */
-  async speechToText(audioBase64: string): Promise<string> {
-    try {
-      console.log('Converting speech to text...');
-      
-      const response = await fetch(OPENAI_SPEECH_ENDPOINT, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          action: 'speech-to-text',
-          audio: audioBase64,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`API request failed with status ${response.status}`);
-      }
-
-      const data = await response.json();
-      return data.text;
-    } catch (error) {
-      console.error('Error in OpenAIService.speechToText:', error);
-      throw error;
-    }
-  },
-
-  /**
-   * Convert text to speech using OpenAI's TTS model
-   */
-  async textToSpeech(text: string): Promise<string> {
-    try {
-      console.log('Converting text to speech...');
-      
-      const response = await fetch(OPENAI_SPEECH_ENDPOINT, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          action: 'text-to-speech',
-          text,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`API request failed with status ${response.status}`);
-      }
-
-      const data = await response.json();
-      return data.audio;
-    } catch (error) {
-      console.error('Error in OpenAIService.textToSpeech:', error);
+      console.error('Error in OpenAI chat service:', error);
       throw error;
     }
   }
-};
+
+  /**
+   * Convert speech to text using OpenAI's Whisper API
+   */
+  static async speechToText(audioBase64: string) {
+    try {
+      const { data, error } = await supabase.functions.invoke('openai-speech', {
+        body: {
+          action: 'speech-to-text',
+          audio: audioBase64
+        }
+      });
+
+      if (error) {
+        console.error('Error calling speech-to-text function:', error);
+        throw new Error(`Failed to convert speech to text: ${error.message}`);
+      }
+
+      return data?.text || '';
+    } catch (error) {
+      console.error('Error in speech-to-text service:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Convert text to speech using OpenAI's TTS API
+   */
+  static async textToSpeech(text: string) {
+    try {
+      const { data, error } = await supabase.functions.invoke('openai-speech', {
+        body: {
+          action: 'text-to-speech',
+          text
+        }
+      });
+
+      if (error) {
+        console.error('Error calling text-to-speech function:', error);
+        throw new Error(`Failed to convert text to speech: ${error.message}`);
+      }
+
+      return data?.audio || '';
+    } catch (error) {
+      console.error('Error in text-to-speech service:', error);
+      throw error;
+    }
+  }
+}

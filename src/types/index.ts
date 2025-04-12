@@ -1,3 +1,4 @@
+
 export interface User {
   id: string;
   username: string;
@@ -9,6 +10,13 @@ export interface User {
   email?: string;
   phone?: string;
   isVerified?: boolean;
+  
+  // Added properties to match existing code
+  name?: string;
+  avatar?: string;
+  verified?: boolean;
+  isPrivate?: boolean;
+  isCelebrity?: boolean;
 }
 
 export interface Location {
@@ -22,11 +30,18 @@ export interface Location {
   lng: number;
   type: string;
   verified: boolean;
+  
+  // Added properties to match existing code
+  hours?: BusinessHours;
+  vibes?: string[];
+  tags?: string[];
+  userProfile?: MockUserProfile;
 }
 
 export interface Media {
   type: "image" | "video";
   url: string;
+  thumbnail?: string;
 }
 
 export interface Post {
@@ -41,18 +56,19 @@ export interface Post {
   comments: number;
   isPinned?: boolean;
   saved: boolean;
+  isVenuePost?: boolean;
+  text?: string; // For backward compatibility
 }
 
-// Update Comment interface to include text and likes properties
 export interface Comment {
   id: string;
   postId: string;
   user: User;
   content: string;
-  text?: string; // Add this to maintain compatibility
+  text?: string; // For backward compatibility
   timestamp: string;
   vibedHere: boolean;
-  likes?: number; // Add this to maintain compatibility
+  likes?: number;
 }
 
 export interface Vibe {
@@ -62,3 +78,84 @@ export interface Vibe {
   color: string;
 }
 
+// Add BusinessHours interface
+export interface BusinessHours {
+  monday: string;
+  tuesday: string;
+  wednesday: string;
+  thursday: string;
+  friday: string;
+  saturday: string;
+  sunday: string;
+  isOpen24Hours?: boolean;
+}
+
+// Add VenueInsights interface
+export interface VenueInsights {
+  totalViews: number;
+  totalVisits: number;
+  totalSaves: number;
+  totalShares: number;
+  averageRating: number;
+  ratingCount: number;
+  totalReviews: number;
+  dailyViews: Record<string, number>;
+  peakHours: Record<string, number>;
+  demographicData: {
+    age: Record<string, number>;
+    gender: Record<string, number>;
+    location: Record<string, number>;
+  };
+  competitiveInsights: {
+    rank: number;
+    totalCompetitors: number;
+    marketShare: number;
+    averageCompetitorRating: number;
+  };
+}
+
+// Add ChatState interface for VernonNext component
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  timestamp: Date;
+  verified?: boolean;
+  location?: {
+    lat: number;
+    lng: number;
+    name: string;
+  };
+}
+
+export interface ChatState {
+  isOpen: boolean;
+  isMinimized: boolean;
+  isLoading: boolean;
+  isListening: boolean;
+  isSpeaking: boolean;
+  messages: ChatMessage[];
+  searchResults?: any[];
+  transcript: string;
+  interimTranscript: string;
+}
+
+export type IntentType = 'search' | 'info' | 'question' | 'booking' | 'unknown';
+
+export interface ExtractedIntent {
+  type: IntentType;
+  location?: string;
+  date?: string;
+  categories?: string[];
+  keywords?: string[];
+  mood?: string[];
+}
+
+// Add MockUserProfile for compatibility with existing code
+export interface MockUserProfile {
+  id: string;
+  username: string;
+  avatar: string;
+  bio?: string;
+  verified: boolean;
+}

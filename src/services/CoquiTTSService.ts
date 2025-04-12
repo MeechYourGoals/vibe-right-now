@@ -1,124 +1,40 @@
 
-/**
- * Service to interact with a Coqui TTS server
- */
-
-// Default server URL - can be configured based on deployment environment
-const DEFAULT_SERVER_URL = 'http://localhost:5002';
-
-export const CoquiTTSService = {
-  // Server URL can be configured at runtime
-  serverUrl: DEFAULT_SERVER_URL,
+// Simple placeholder service for Coqui TTS
+export class CoquiTTSService {
+  private static isInitialized = false;
   
   /**
-   * Configure the service with a custom server URL
+   * Initialize the TTS service
    */
-  configure(serverUrl: string): void {
-    this.serverUrl = serverUrl;
-  },
+  static async init() {
+    // In a real implementation, this would initialize the TTS service
+    // For now, we'll just simulate initialization
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    console.log('CoquiTTSService initialized');
+    this.isInitialized = true;
+    return true;
+  }
   
   /**
-   * Check if the Coqui TTS server is available
+   * Synthesize speech from text
    */
-  async isAvailable(): Promise<boolean> {
-    try {
-      // Try to connect to the server's health endpoint if available
-      // or just attempt a simple HEAD request
-      const response = await fetch(`${this.serverUrl}/api/health`, {
-        method: 'HEAD',
-        // Short timeout to avoid long waits
-        signal: AbortSignal.timeout(2000),
-      });
-      return response.ok;
-    } catch (error) {
-      console.error('Coqui TTS server availability check failed:', error);
-      return false;
+  static async speakText(text: string, voice = 'default') {
+    if (!this.isInitialized) {
+      throw new Error('CoquiTTSService not initialized');
     }
-  },
-  
-  /**
-   * Convert text to speech using Coqui TTS server
-   * 
-   * @param text The text to convert to speech
-   * @returns A promise that resolves to true if successful
-   */
-  async textToSpeech(text: string): Promise<boolean> {
-    try {
-      if (!text || text.trim() === '') {
-        console.warn('Empty text provided to Coqui TTS');
-        return false;
-      }
-      
-      console.log('Converting text to speech with Coqui TTS:', text);
-      
-      // Make the API call to the Coqui TTS server
-      const response = await fetch(`${this.serverUrl}/api/tts?text=${encodeURIComponent(text)}`, {
-        method: 'GET',
+    
+    // In a real implementation, this would call the TTS API
+    // For now, we'll use the browser's built-in speech synthesis
+    if ('speechSynthesis' in window) {
+      return new Promise<void>((resolve, reject) => {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.onend = () => resolve();
+        utterance.onerror = (event) => reject(new Error('Speech synthesis error'));
+        window.speechSynthesis.speak(utterance);
       });
-      
-      if (!response.ok) {
-        throw new Error(`Coqui TTS server responded with status: ${response.status}`);
-      }
-      
-      // Get the audio blob from the response
-      const audioBlob = await response.blob();
-      
-      if (!audioBlob || audioBlob.size === 0) {
-        throw new Error('Received empty audio data from Coqui TTS server');
-      }
-      
-      // Create a URL for the audio blob
-      const audioURL = URL.createObjectURL(audioBlob);
-      
-      // Create and play the audio element
-      const audio = new Audio(audioURL);
-      
-      // Set up event handlers
-      return new Promise((resolve) => {
-        audio.onended = () => {
-          // Clean up the URL object when done
-          URL.revokeObjectURL(audioURL);
-          console.log('Coqui TTS audio playback complete');
-          resolve(true);
-        };
-        
-        audio.onerror = (error) => {
-          console.error('Error playing Coqui TTS audio:', error);
-          URL.revokeObjectURL(audioURL);
-          resolve(false);
-        };
-        
-        // Start playback
-        audio.play().catch((error) => {
-          console.error('Failed to play Coqui TTS audio:', error);
-          URL.revokeObjectURL(audioURL);
-          resolve(false);
-        });
-      });
-    } catch (error) {
-      console.error('Error with Coqui TTS text-to-speech:', error);
-      return false;
-    }
-  },
-  
-  /**
-   * Initialize the service and pre-warm connections
-   */
-  async init(): Promise<boolean> {
-    try {
-      // Check if server is available
-      const available = await this.isAvailable();
-      
-      if (available) {
-        console.log('Coqui TTS server is available at:', this.serverUrl);
-      } else {
-        console.warn('Coqui TTS server is not available. Speech synthesis will use browser fallback.');
-      }
-      
-      return available;
-    } catch (error) {
-      console.error('Error initializing Coqui TTS service:', error);
-      return false;
+    } else {
+      throw new Error('Speech synthesis not supported in this browser');
     }
   }
-};
+}
