@@ -14,16 +14,20 @@ import { getFeaturedUsers } from "@/mock/users";
 import { DateRange } from "react-day-picker";
 import { format, addMonths } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { Calendar, CalendarRange } from "lucide-react";
+import { Calendar, CalendarRange, MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import DateRangeSelector from "@/components/DateRangeSelector";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import { toast } from "sonner";
 
 const Index = () => {
   const isMobile = useIsMobile();
   const featuredUsers = getFeaturedUsers();
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
+  const [city, setCity] = useState<string>("");
   const navigate = useNavigate();
 
   const handleDateRangeChange = (range: DateRange | undefined) => {
@@ -31,16 +35,22 @@ const Index = () => {
   };
 
   const handlePlanFutureVibes = () => {
+    if (!city.trim()) {
+      toast.error("Please enter a city");
+      return;
+    }
+    
+    const searchParams = new URLSearchParams();
+    searchParams.set('city', city.trim());
+    
     if (dateRange?.from) {
-      const searchParams = new URLSearchParams();
       searchParams.set('from', dateRange.from.toISOString().split('T')[0]);
       if (dateRange.to) {
         searchParams.set('to', dateRange.to.toISOString().split('T')[0]);
       }
-      navigate(`/explore?${searchParams.toString()}`);
-    } else {
-      navigate('/explore');
     }
+    
+    navigate(`/explore?${searchParams.toString()}`);
   };
 
   return (
@@ -67,15 +77,35 @@ const Index = () => {
                 <CardContent className="p-4">
                   <h3 className="text-lg font-semibold mb-3 text-foreground">Find Future Vibes</h3>
                   <p className="text-sm text-muted-foreground mb-3">Select dates to explore events, concerts, games and more in the coming months</p>
-                  <DateRangeSelector 
-                    dateRange={dateRange} 
-                    onDateRangeChange={handleDateRangeChange} 
-                  />
+                  
+                  <div className="space-y-4">
+                    <div className="mb-4">
+                      <label htmlFor="city-input" className="text-sm font-medium block mb-1 text-foreground">
+                        City
+                      </label>
+                      <div className="relative">
+                        <Input
+                          id="city-input"
+                          placeholder="Enter a city name"
+                          value={city}
+                          onChange={(e) => setCity(e.target.value)}
+                          className="pl-9 bg-background/80"
+                        />
+                        <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      </div>
+                    </div>
+                    
+                    <DateRangeSelector 
+                      dateRange={dateRange} 
+                      onDateRangeChange={handleDateRangeChange} 
+                    />
+                  </div>
+                  
                   <div className="flex justify-end mt-4">
                     <Button
                       className="bg-primary hover:bg-primary/90 text-white font-medium shadow-sm"
                       onClick={handlePlanFutureVibes}
-                      disabled={!dateRange?.from}
+                      disabled={!city.trim()}
                     >
                       <Calendar className="h-4 w-4 mr-2" />
                       Explore Future Vibes
