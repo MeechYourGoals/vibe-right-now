@@ -28,6 +28,12 @@ serve(async (req) => {
       ...messages
     ];
     
+    console.log("OpenAI API request:", {
+      model,
+      messages: fullMessages.map(m => ({ role: m.role, contentLength: m.content.length })),
+      stream
+    });
+    
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -69,6 +75,7 @@ serve(async (req) => {
 
     // Handle regular response
     const data = await response.json();
+    console.log("OpenAI API response received successfully");
     return new Response(JSON.stringify({ response: data }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

@@ -47,10 +47,15 @@ serve(async (req) => {
 
   try {
     const { action, audio, text } = await req.json();
+    console.log(`Processing ${action} request`, { 
+      hasAudio: !!audio, 
+      textLength: text?.length 
+    });
     
     if (action === "speech-to-text" && audio) {
       // Process audio in chunks
       const binaryAudio = processBase64Chunks(audio);
+      console.log("Audio processed, sending to OpenAI");
       
       // Prepare form data
       const formData = new FormData();
@@ -68,15 +73,19 @@ serve(async (req) => {
       });
 
       if (!response.ok) {
-        throw new Error(`OpenAI API error: ${await response.text()}`);
+        const errorText = await response.text();
+        console.error("OpenAI Whisper API error:", errorText);
+        throw new Error(`OpenAI API error: ${response.status}`);
       }
 
       const result = await response.json();
+      console.log("Transcription successful:", { textLength: result.text.length });
       return new Response(
         JSON.stringify({ text: result.text }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     } else if (action === "text-to-speech" && text) {
+      console.log("Processing text-to-speech request");
       // Call OpenAI TTS API
       const response = await fetch('https://api.openai.com/v1/audio/speech', {
         method: 'POST',
@@ -92,7 +101,9 @@ serve(async (req) => {
       });
 
       if (!response.ok) {
-        throw new Error(`OpenAI API error: ${await response.text()}`);
+        const errorText = await response.text();
+        console.error("OpenAI TTS API error:", errorText);
+        throw new Error(`OpenAI API error: ${response.status}`);
       }
 
       // Process the audio file
@@ -102,6 +113,7 @@ serve(async (req) => {
           .reduce((data, byte) => data + String.fromCharCode(byte), '')
       );
 
+      console.log("Text-to-speech successful");
       return new Response(
         JSON.stringify({ audio: audioBase64 }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

@@ -33,8 +33,10 @@ const CommentList = ({ postId, commentsCount }: CommentListProps) => {
       postId: postId,
       user: mockUsers[Math.floor(Math.random() * mockUsers.length)],
       content: "This place looks amazing! How's the crowd right now?",
+      text: "This place looks amazing! How's the crowd right now?", // Add text matching content
       timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30 minutes ago
-      vibedHere: false
+      vibedHere: false,
+      likes: 0 // Add likes property
     });
     
     // "Vibed Here" comment
@@ -43,8 +45,10 @@ const CommentList = ({ postId, commentsCount }: CommentListProps) => {
       postId: postId,
       user: mockUsers[Math.floor(Math.random() * mockUsers.length)],
       content: "I was here yesterday and it was incredible! The line moves fast if you go around to the side entrance.",
+      text: "I was here yesterday and it was incredible! The line moves fast if you go around to the side entrance.", // Add text matching content
       timestamp: new Date(Date.now() - 1000 * 60 * 120).toISOString(), // 2 hours ago
-      vibedHere: true
+      vibedHere: true,
+      likes: 0 // Add likes property
     });
     
     // Add a third comment if needed
@@ -54,8 +58,10 @@ const CommentList = ({ postId, commentsCount }: CommentListProps) => {
         postId: postId,
         user: mockUsers[Math.floor(Math.random() * mockUsers.length)],
         content: "Heading there now! Anyone want to meet up?",
+        text: "Heading there now! Anyone want to meet up?", // Add text matching content
         timestamp: new Date(Date.now() - 1000 * 60 * 10).toISOString(), // 10 minutes ago
-        vibedHere: Math.random() > 0.5 // 50% chance of being "Vibed Here"
+        vibedHere: Math.random() > 0.5, // 50% chance of being "Vibed Here"
+        likes: 0 // Add likes property
       });
     }
     
