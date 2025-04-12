@@ -1,52 +1,75 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, FormEvent } from 'react';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Send } from 'lucide-react';
 
 interface MessageInputProps {
   onSendMessage: (message: string) => void;
   isTyping: boolean;
   disabled?: boolean;
-  value: string;
-  onChange: (value: string) => void;
+  value?: string;
+  onChange?: (value: string) => void;
 }
 
-const MessageInput: React.FC<MessageInputProps> = ({
-  onSendMessage,
+const MessageInput: React.FC<MessageInputProps> = ({ 
+  onSendMessage, 
   isTyping,
   disabled = false,
-  value,
+  value = '',
   onChange
 }) => {
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [internalValue, setInternalValue] = useState('');
   
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (value.trim() && !isTyping && !disabled) {
-      onSendMessage(value);
-    }
-  };
+  // Use either controlled or uncontrolled pattern based on props
+  const inputValue = onChange ? value : internalValue;
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(e.target.value);
+    if (onChange) {
+      onChange(e.target.value);
+    } else {
+      setInternalValue(e.target.value);
+    }
   };
 
-  // Auto focus the input when it becomes available
-  useEffect(() => {
-    if (inputRef.current && !disabled) {
-      inputRef.current.focus();
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    if (inputValue.trim() && !isTyping && !disabled) {
+      onSendMessage(inputValue);
+      if (!onChange) {
+        setInternalValue('');
+      }
     }
-  }, [disabled]);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Allow sending message with Enter key
+    if (e.key === 'Enter' && !e.shiftKey && inputValue.trim() && !isTyping && !disabled) {
+      e.preventDefault();
+      onSendMessage(inputValue);
+      if (!onChange) {
+        setInternalValue('');
+      }
+    }
+  };
 
   return (
-    <form onSubmit={handleSubmit} className="flex-1">
+    <form onSubmit={handleSubmit} className="flex-1 flex">
       <Input
-        ref={inputRef}
-        className="w-full h-10 bg-card/70 backdrop-blur-sm border-blue-200 dark:border-blue-800 focus-visible:ring-blue-500"
-        placeholder={disabled ? "Processing..." : "Ask Vernon about places, events..."}
-        value={value}
+        value={inputValue}
         onChange={handleChange}
-        disabled={disabled}
+        onKeyDown={handleKeyDown}
+        placeholder="Ask Vernon anything..."
+        className="flex-1 mr-2"
+        disabled={isTyping || disabled}
       />
+      <Button 
+        type="submit" 
+        size="icon" 
+        disabled={!inputValue.trim() || isTyping || disabled}
+      >
+        <Send className="h-4 w-4" />
+      </Button>
     </form>
   );
 };

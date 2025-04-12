@@ -1,6 +1,7 @@
 
 import React from 'react';
-import { Mic, VolumeX } from 'lucide-react';
+import { Mic, MicOff } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface VoiceIndicatorProps {
   isListening: boolean;
@@ -13,35 +14,28 @@ const VoiceIndicator: React.FC<VoiceIndicatorProps> = ({
   isSpeaking,
   toggleListening
 }) => {
-  if (!isListening && !isSpeaking) return null;
-  
   return (
-    <div 
-      className={`absolute top-14 left-1/2 transform -translate-x-1/2 z-20 px-3 py-1 rounded-full flex items-center gap-2 text-xs font-medium transition-all duration-300 ${
-        isListening 
-          ? 'bg-red-500/10 text-red-500 border border-red-500/20' 
-          : 'bg-blue-500/10 text-blue-500 border border-blue-500/20'
-      }`}
-    >
-      {isListening ? (
-        <>
-          <Mic className="h-3 w-3 animate-pulse" />
-          Listening...
-        </>
-      ) : isSpeaking ? (
-        <>
-          <div className="h-3 w-3 relative">
-            <div className="absolute inset-0 rounded-full bg-blue-500 animate-ping opacity-75"></div>
-            <div className="relative rounded-full h-full w-full bg-blue-500"></div>
-          </div>
-          Speaking...
-        </>
-      ) : (
-        <>
-          <VolumeX className="h-3 w-3" />
-          Muted
-        </>
-      )}
+    <div className="absolute left-3 top-3 z-10">
+      <div className="flex items-center gap-1.5">
+        <Button
+          variant="ghost"
+          size="icon"
+          className={`h-7 w-7 rounded-full ${isListening ? 'bg-red-100 hover:bg-red-200' : isSpeaking ? 'bg-blue-100 hover:bg-blue-200' : 'bg-transparent'}`}
+          onClick={toggleListening}
+          title={isListening ? "Stop Listening" : "Start Voice Input"}
+        >
+          {isListening ? (
+            <MicOff className="h-3.5 w-3.5 text-red-600" />
+          ) : (
+            <Mic className={`h-3.5 w-3.5 ${isSpeaking ? 'text-blue-600' : 'text-muted-foreground'}`} />
+          )}
+        </Button>
+        {(isListening || isSpeaking) && (
+          <span className="text-xs font-medium">
+            {isListening ? 'Listening...' : isSpeaking ? 'Speaking...' : ''}
+          </span>
+        )}
+      </div>
     </div>
   );
 };

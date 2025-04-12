@@ -1,70 +1,120 @@
 
-import React from 'react';
-import { Comment, User } from '@/types';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { formatDistanceToNow } from 'date-fns';
-import { Badge } from './ui/badge';
-import { Heart } from 'lucide-react';
+import { useState } from "react";
+import { Comment, User } from "@/types";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { MessageSquare, Send } from "lucide-react";
+import CommentItem from "@/components/CommentItem";
+import { mockComments } from "@/mock/data";
+import { mockUsers } from "@/mock/data";
 
 interface CommentListProps {
-  comments: Comment[];
-  limit?: number;
+  postId: string;
+  commentsCount: number;
 }
 
-const CommentList: React.FC<CommentListProps> = ({ comments, limit = 3 }) => {
-  const displayComments = limit ? comments.slice(0, limit) : comments;
-  
-  return (
-    <div className="space-y-4">
-      {displayComments.map((comment) => (
-        <CommentItem key={comment.id} comment={comment} />
-      ))}
-      
-      {comments.length > limit && (
-        <button className="text-xs text-muted-foreground hover:text-primary transition-colors">
-          View all {comments.length} comments
-        </button>
-      )}
-    </div>
-  );
-};
+const CommentList = ({ postId, commentsCount }: CommentListProps) => {
+  const [newComment, setNewComment] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-interface CommentItemProps {
-  comment: Comment;
-}
-
-const CommentItem: React.FC<CommentItemProps> = ({ comment }) => {
-  const commentDate = new Date(comment.timestamp);
-  const timeAgo = formatDistanceToNow(commentDate, { addSuffix: true });
-  const displayText = comment.text || comment.content || '';
+  // Filter comments for this specific post
+  let postComments = mockComments.filter(comment => comment.postId === postId);
   
+  // If no comments found in mock data, generate example comments
+  if (postComments.length === 0 && commentsCount > 0) {
+    // Generate 2-3 example comments
+    const commentCount = Math.min(commentsCount, Math.floor(Math.random() * 2) + 2);
+    const exampleComments: Comment[] = [];
+    
+    // Regular comment
+    exampleComments.push({
+      id: `example-${postId}-1`,
+      postId: postId,
+      user: mockUsers[Math.floor(Math.random() * mockUsers.length)],
+      content: "This place looks amazing! How's the crowd right now?",
+      timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30 minutes ago
+      vibedHere: false
+    });
+    
+    // "Vibed Here" comment
+    exampleComments.push({
+      id: `example-${postId}-2`,
+      postId: postId,
+      user: mockUsers[Math.floor(Math.random() * mockUsers.length)],
+      content: "I was here yesterday and it was incredible! The line moves fast if you go around to the side entrance.",
+      timestamp: new Date(Date.now() - 1000 * 60 * 120).toISOString(), // 2 hours ago
+      vibedHere: true
+    });
+    
+    // Add a third comment if needed
+    if (commentCount > 2) {
+      exampleComments.push({
+        id: `example-${postId}-3`,
+        postId: postId,
+        user: mockUsers[Math.floor(Math.random() * mockUsers.length)],
+        content: "Heading there now! Anyone want to meet up?",
+        timestamp: new Date(Date.now() - 1000 * 60 * 10).toISOString(), // 10 minutes ago
+        vibedHere: Math.random() > 0.5 // 50% chance of being "Vibed Here"
+      });
+    }
+    
+    postComments = exampleComments;
+  }
+
+  const handleSubmitComment = () => {
+    if (!newComment.trim()) return;
+    
+    setIsSubmitting(true);
+    
+    // Simulate API call
+    setTimeout(() => {
+      setNewComment("");
+      setIsSubmitting(false);
+      // In a real app, we would add the new comment to the list
+    }, 500);
+  };
+
   return (
-    <div className="flex items-start gap-2">
-      <Avatar className="h-8 w-8">
-        <AvatarImage src={comment.user.avatar} alt={comment.user.name} />
-        <AvatarFallback>{comment.user.name.charAt(0)}</AvatarFallback>
-      </Avatar>
+    <div className="pt-3 border-t">
+      <div className="flex items-center mb-3">
+        <h4 className="font-medium flex items-center">
+          <MessageSquare className="h-4 w-4 mr-1" />
+          Comments ({commentsCount})
+        </h4>
+      </div>
       
-      <div className="flex-1 space-y-1">
-        <div className="flex items-center flex-wrap gap-1">
-          <span className="text-sm font-medium">{comment.user.name}</span>
-          {comment.user.verified && (
-            <Badge variant="outline" className="h-4 px-1 text-[10px] bg-blue-500/10 text-blue-500 border-blue-500/20">Verified</Badge>
-          )}
-          {comment.vibedHere && (
-            <Badge variant="outline" className="h-4 px-1 text-[10px] bg-purple-500/10 text-purple-500 border-purple-500/20">Vibed Here</Badge>
-          )}
-          <span className="text-xs text-muted-foreground ml-auto">{timeAgo}</span>
+      {postComments.length > 0 ? (
+        <div className="space-y-1 max-h-80 overflow-y-auto pr-1">
+          {postComments.map((comment) => (
+            <CommentItem key={comment.id} comment={comment} />
+          ))}
         </div>
-        
-        <p className="text-sm">{displayText}</p>
-        
-        <div className="flex items-center gap-1">
-          <button className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1">
-            <Heart className="h-3 w-3" />
-            {comment.likes}
-          </button>
-          <button className="text-xs text-muted-foreground hover:text-primary">Reply</button>
+      ) : (
+        <div className="text-center py-4 text-muted-foreground text-sm">
+          No comments yet. Be the first to comment!
+        </div>
+      )}
+      
+      <div className="mt-3 flex gap-2">
+        <Avatar className="h-8 w-8">
+          <AvatarImage src="https://randomuser.me/api/portraits/men/1.jpg" alt="Your avatar" />
+          <AvatarFallback>Y</AvatarFallback>
+        </Avatar>
+        <div className="flex-1 flex items-end gap-2">
+          <Textarea
+            placeholder="Add a comment..."
+            className="min-h-[60px] flex-1"
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+          />
+          <Button 
+            size="icon"
+            disabled={!newComment.trim() || isSubmitting}
+            onClick={handleSubmitComment}
+          >
+            <Send className="h-4 w-4" />
+          </Button>
         </div>
       </div>
     </div>
