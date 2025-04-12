@@ -1,7 +1,7 @@
 
-import { Location, Post } from "@/types";
+import { Location, Post, Media } from "@/types";
 import { mockUsers } from "@/mock/users";
-import { Media } from "@/types";
+import { v4 as uuidv4 } from 'uuid';
 
 // Generates venue-specific posts based on the location and available media
 export const generateVenuePosts = (venue: Location, media: Media[]): Post[] => {

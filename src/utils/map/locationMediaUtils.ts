@@ -1,8 +1,9 @@
 
 import { Location, Media } from "@/types";
+import { v4 as uuidv4 } from 'uuid';
 
 // Get media for a location
-export const getMediaForLocation = (location: Location): Media => {
+export const getMediaForLocation = (location: Location): Media[] => {
   // Return appropriate media based on location type and name
   const imageMap: Record<string, string> = {
     // Sports venues
@@ -24,8 +25,13 @@ export const getMediaForLocation = (location: Location): Media => {
     "other": "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=1000&auto=format&fit=crop",
   };
 
-  return {
+  const url = imageMap[location.id] || 
+              typeDefaultMedia[location.type as string] || 
+              `https://source.unsplash.com/random/800x600/?${location.type},${location.city}`;
+
+  return [{
+    id: `media-${location.id}-${uuidv4().substring(0, 8)}`,
     type: "image" as const,
-    url: imageMap[location.id] || typeDefaultMedia[location.type] || `https://source.unsplash.com/random/800x600/?${location.type},${location.city}`
-  };
+    url: url
+  }];
 };

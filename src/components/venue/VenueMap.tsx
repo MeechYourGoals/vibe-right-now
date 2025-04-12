@@ -16,19 +16,21 @@ const VenueMap: React.FC<VenueMapProps> = ({ venue, onExpand }) => {
   const dayOfWeek = format(today, 'EEEE').toLowerCase();
   
   // Ensure venue has hours, even if mock
-  if (!venue.hours) {
-    venue.hours = {
-      monday: "9:00 AM - 9:00 PM",
-      tuesday: "9:00 AM - 9:00 PM",
-      wednesday: "9:00 AM - 9:00 PM",
-      thursday: "9:00 AM - 9:00 PM",
-      friday: "9:00 AM - 10:00 PM",
-      saturday: "10:00 AM - 10:00 PM",
-      sunday: "10:00 AM - 8:00 PM"
-    };
-  }
+  const mockHours = {
+    monday: { open: "9:00 AM", close: "9:00 PM" },
+    tuesday: { open: "9:00 AM", close: "9:00 PM" },
+    wednesday: { open: "9:00 AM", close: "9:00 PM" },
+    thursday: { open: "9:00 AM", close: "9:00 PM" },
+    friday: { open: "9:00 AM", close: "10:00 PM" },
+    saturday: { open: "10:00 AM", close: "10:00 PM" },
+    sunday: { open: "10:00 AM", close: "8:00 PM" }
+  };
   
-  const hoursToday = venue.hours[dayOfWeek as keyof typeof venue.hours];
+  const hours = venue.hours || mockHours;
+  const todayHours = hours[dayOfWeek as keyof typeof hours];
+  const hoursDisplay = typeof todayHours === 'string' 
+    ? todayHours 
+    : `${todayHours.open} - ${todayHours.close}`;
   
   return (
     <div className="mt-4 rounded-md overflow-hidden relative">
@@ -38,7 +40,7 @@ const VenueMap: React.FC<VenueMapProps> = ({ venue, onExpand }) => {
           <span className="font-medium">{venue.address}</span>
         </div>
         <div className="text-right">
-          <span className="font-medium">Today:</span> {hoursToday}
+          <span className="font-medium">Today:</span> {hoursDisplay}
         </div>
       </div>
       

@@ -76,7 +76,7 @@ export interface Post {
   media?: Media[];
   timestamp: string;
   likes: number;
-  comments: Comment[];
+  comments: Comment[] | number;
   saved: boolean;
   isPinned?: boolean;
   isVenuePost?: boolean;
@@ -96,7 +96,7 @@ export interface VenueInsights {
   topReasons: Array<{reason: string; count: number}>;
   demographics: {
     ageGroups: {[key: string]: number};
-    gender: {[key: string]: number};
+    gender?: {[key: string]: number};
     genderDistribution?: {[key: string]: number};
   };
   visitsByDay: {[key: string]: number};
