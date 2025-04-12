@@ -2,7 +2,8 @@
 import { supabase } from '@/integrations/supabase/client';
 import { Message } from '@/components/VernonChat/types';
 import { VertexAIHub } from '@/services/VertexAI';
-import { getPrimaryProvider, getFallbackProviders } from '@/services/MultiProviderSystem';
+import { getPrimaryProvider, getFallbackProviders, isProviderAvailable } from '@/services/MultiProviderSystem';
+import { toast } from 'sonner';
 
 /**
  * Service to interact with Google's Vertex AI API via Supabase Edge Functions
@@ -19,6 +20,9 @@ export const VertexAIService = {
   async generateResponse(prompt: string, mode: 'venue' | 'default' = 'default', history: Message[] = []): Promise<string> {
     try {
       console.log(`MCP: Generating response for: "${prompt.substring(0, 50)}..."`);
+      
+      // Record API key availability in localStorage for MCP
+      const apiKeyCheck = await this.checkApiKeyAvailability();
       
       // Get primary chat provider based on MCP priorities
       const primaryProvider = getPrimaryProvider('chat');
@@ -158,6 +162,35 @@ export const VertexAIService = {
     } catch (error) {
       console.error('MCP: Error in VertexAIService.searchWithVertex:', error);
       return "I couldn't find specific information about that. Could you try rephrasing your question?";
+    }
+  },
+  
+  /**
+   * Check if the necessary API keys are available and update localStorage
+   * This helps MCP know which providers can be used
+   */
+  async checkApiKeyAvailability(): Promise<boolean> {
+    try {
+      // Try a simple request to check if the API key works
+      const testResult = await supabase.functions.invoke('vertex-ai', {
+        body: { prompt: 'test', mode: 'check-api-key' }
+      });
+      
+      const hasValidKey = !testResult.error;
+      localStorage.setItem('hasVertexAIKey', hasValidKey ? 'true' : 'false');
+      
+      if (hasValidKey) {
+        console.log('MCP: Valid Vertex AI API key detected');
+      } else {
+        console.warn('MCP: Vertex AI API key is not valid or not set');
+        toast.error('Vertex AI API key is missing or invalid. Some features may not work properly.');
+      }
+      
+      return hasValidKey;
+    } catch (error) {
+      console.error('MCP: Error checking API key availability:', error);
+      localStorage.setItem('hasVertexAIKey', 'false');
+      return false;
     }
   }
 };

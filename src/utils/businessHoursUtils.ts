@@ -7,14 +7,15 @@ export function isOpen(hours: BusinessHours, currentTime: Date = new Date()): bo
   const daysOfWeek: DayOfWeek[] = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
   const day = daysOfWeek[currentTime.getDay()] as DayOfWeek;
   
-  if (!hours[day] || hours[day] === 'Closed') {
+  if (!hours[day]) {
     return false;
   }
   
   const dayHours = hours[day];
   
+  // Check if hours are stored as a string (e.g. 'Closed')
   if (typeof dayHours === 'string') {
-    return false; // Handle case where hours are stored as a string instead of object
+    return false;
   }
   
   const currentTimeString = currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
@@ -52,7 +53,7 @@ export const formatBusinessHours = (hours: BusinessHours): string => {
     
     if (!dayHours) {
       formatted += `${dayCapitalized}: Closed\n`;
-    } else if (dayHours === 'Closed' || typeof dayHours === 'string') {
+    } else if (typeof dayHours === 'string') {
       formatted += `${dayCapitalized}: Closed\n`;
     } else {
       try {
@@ -66,6 +67,32 @@ export const formatBusinessHours = (hours: BusinessHours): string => {
   return formatted;
 };
 
+// Add the missing utility functions
+export const generateBusinessHours = (): BusinessHours => {
+  return {
+    monday: { open: '9:00 AM', close: '5:00 PM' },
+    tuesday: { open: '9:00 AM', close: '5:00 PM' },
+    wednesday: { open: '9:00 AM', close: '5:00 PM' },
+    thursday: { open: '9:00 AM', close: '5:00 PM' },
+    friday: { open: '9:00 AM', close: '5:00 PM' },
+    saturday: { open: '10:00 AM', close: '3:00 PM' },
+    sunday: { open: 'Closed', close: 'Closed' } as any
+  };
+};
+
+export const getTodaysHours = (hours: BusinessHours): string => {
+  const daysOfWeek: DayOfWeek[] = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+  const today = daysOfWeek[new Date().getDay()] as DayOfWeek;
+  
+  const dayHours = hours[today];
+  
+  if (!dayHours || typeof dayHours === 'string') {
+    return 'Closed';
+  }
+  
+  return `${dayHours.open} - ${dayHours.close}`;
+};
+
 export const defaultBusinessHours: BusinessHours = {
   monday: { open: '9:00 AM', close: '5:00 PM' },
   tuesday: { open: '9:00 AM', close: '5:00 PM' },
@@ -73,5 +100,5 @@ export const defaultBusinessHours: BusinessHours = {
   thursday: { open: '9:00 AM', close: '5:00 PM' },
   friday: { open: '9:00 AM', close: '5:00 PM' },
   saturday: { open: '10:00 AM', close: '3:00 PM' },
-  sunday: { open: 'Closed', close: 'Closed' } as any // Type cast for backward compatibility
+  sunday: { open: 'Closed', close: 'Closed' } as any
 };

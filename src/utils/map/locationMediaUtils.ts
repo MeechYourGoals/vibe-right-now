@@ -1,4 +1,3 @@
-
 import { Location, Media } from "@/types";
 
 // Get media for a location
@@ -27,5 +26,35 @@ export const getMediaForLocation = (location: Location): Media => {
   return {
     type: "image" as const,
     url: imageMap[location.id] || typeDefaultMedia[location.type] || `https://source.unsplash.com/random/800x600/?${location.type},${location.city}`
+  };
+};
+
+export const generateRandomMediaForLocation = (locationId: string): Media[] => {
+  const mediaCount = Math.floor(Math.random() * 3) + 1;
+  const media: Media[] = [];
+  
+  for (let i = 0; i < mediaCount; i++) {
+    const isVideo = Math.random() < 0.2;
+    const mediaItem: Media = {
+      id: `${locationId}-media-${i}`, // Add ID property
+      type: isVideo ? 'video' : 'image',
+      url: isVideo 
+        ? `/images/locations/videos/venue-${Math.floor(Math.random() * 5) + 1}.mp4`
+        : `/images/locations/venue-${Math.floor(Math.random() * 20) + 1}.jpg`,
+      thumbnail: isVideo ? `/images/locations/venue-${Math.floor(Math.random() * 20) + 1}.jpg` : undefined
+    };
+    
+    media.push(mediaItem);
+  }
+  
+  return media;
+};
+
+// For default image place to show on map
+export const getDefaultLocationImage = (): Media => {
+  return {
+    id: 'default-location-image', // Add ID property
+    type: 'image',
+    url: '/images/locations/venue-1.jpg'
   };
 };

@@ -69,6 +69,24 @@ serve(async (req) => {
       provider = 'default'
     } = requestData;
     
+    // Special handler for API key check mode
+    if (mode === 'check-api-key') {
+      if (!GOOGLE_VERTEX_API_KEY && !GEMINI_API_KEY) {
+        return new Response(
+          JSON.stringify({ error: 'No API keys configured' }),
+          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          hasVertexKey: !!GOOGLE_VERTEX_API_KEY,
+          hasGeminiKey: !!GEMINI_API_KEY
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
     console.log("Request parameters:", { 
       prompt: prompt?.substring(0, 50) + "...", 
       mode, 
@@ -143,7 +161,7 @@ serve(async (req) => {
     
     // Use Vertex AI
     if (useVertexAI) {
-      console.log("Using Vertex AI provider");
+      console.log("Using Vertex AI provider with MCP protocol");
       const response = await fetch(`${VERTEX_API_URL}?key=${GOOGLE_VERTEX_API_KEY}`, {
         method: "POST",
         headers: {
@@ -176,7 +194,7 @@ serve(async (req) => {
     } 
     // Use Gemini API
     else if (useGeminiAPI) {
-      console.log("Using Gemini API provider");
+      console.log("Using Gemini API provider with MCP protocol");
       const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
         method: "POST",
         headers: {
@@ -211,15 +229,37 @@ serve(async (req) => {
     // Add hyperlinks to the Explore page for any locations or events mentioned
     const enhancedResponse = addExplorePageLinks(responseText, prompt);
     
+    // Include MCP headers in the response
+    const mcpHeaders = {
+      ...corsHeaders,
+      'Content-Type': 'application/json',
+      'X-MCP-Provider': useVertexAI ? 'vertex-ai' : 'gemini',
+      'X-MCP-Status': 'success'
+    };
+    
     return new Response(
-      JSON.stringify({ text: enhancedResponse }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ 
+        text: enhancedResponse,
+        provider: useVertexAI ? 'vertex-ai' : 'gemini'
+      }),
+      { headers: mcpHeaders }
     );
   } catch (error) {
     console.error('Error in AI function:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ 
+        error: error.message,
+        provider: 'none',
+        status: 'error'
+      }),
+      { 
+        status: 500, 
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json',
+          'X-MCP-Status': 'error' 
+        } 
+      }
     );
   }
 });

@@ -72,3 +72,21 @@ export const generateMockInsights = (venueId: string, venueName: string): VenueI
     ]
   };
 };
+
+// Add missing function for VenueInsights component
+export const generateWeeklyData = (venueId: string): Record<string, number> => {
+  return {
+    Monday: 120 + Math.floor(Math.random() * 50),
+    Tuesday: 150 + Math.floor(Math.random() * 50),
+    Wednesday: 180 + Math.floor(Math.random() * 50),
+    Thursday: 220 + Math.floor(Math.random() * 50),
+    Friday: 350 + Math.floor(Math.random() * 100),
+    Saturday: 420 + Math.floor(Math.random() * 100),
+    Sunday: 280 + Math.floor(Math.random() * 80),
+  };
+};
+
+// Add missing function for PerformanceMetrics component
+export const currentInsights = (venueId: string): VenueInsights => {
+  return generateMockInsights(venueId, "Current Venue");
+};

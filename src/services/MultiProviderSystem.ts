@@ -109,12 +109,42 @@ export function setProviderStatuses(statuses: Record<string, boolean>): void {
   });
 }
 
+/**
+ * Check if a specific provider is available
+ */
+export function isProviderAvailable(providerId: string): boolean {
+  const provider = availableProviders.find(p => p.id === providerId);
+  return provider ? provider.isAvailable : false;
+}
+
+/**
+ * Initialize providers based on API key availability
+ */
+export function initializeProviders(): void {
+  // Try to get API key status
+  const hasVertexAIKey = Boolean(localStorage.getItem('hasVertexAIKey'));
+  const hasGeminiKey = Boolean(localStorage.getItem('hasGeminiKey'));
+  
+  if (hasVertexAIKey) {
+    updateProviderStatus('vertex-ai', true);
+    console.log('MCP: Vertex AI provider enabled based on API key');
+  }
+  
+  if (hasGeminiKey) {
+    updateProviderStatus('gemini', true);
+    console.log('MCP: Gemini provider enabled based on API key');
+  }
+}
+
 // Load provider statuses from localStorage on initialization
 try {
   const savedStatuses = localStorage.getItem('mcp-provider-statuses');
   if (savedStatuses) {
     setProviderStatuses(JSON.parse(savedStatuses));
   }
+  
+  // Check for API keys
+  initializeProviders();
 } catch (error) {
   console.error('Error loading provider statuses:', error);
 }
