@@ -1,66 +1,64 @@
 
 import React from 'react';
-import { Button } from "@/components/ui/button";
-import { Maximize, MapPin } from "lucide-react";
-import { Location } from "@/types";
-import GoogleMapComponent from "@/components/map/google/GoogleMapComponent";
-import { format } from "date-fns";
+import { Card, CardContent } from "@/components/ui/card";
+import { formatBusinessHours } from '@/utils/businessHoursUtils';
+import type { Location, BusinessHours } from '@/types';
 
 interface VenueMapProps {
-  venue: Location;
-  onExpand: () => void;
+  location: Location;
 }
 
-const VenueMap: React.FC<VenueMapProps> = ({ venue, onExpand }) => {
-  const today = new Date();
-  const dayOfWeek = format(today, 'EEEE').toLowerCase();
+const VenueMap: React.FC<VenueMapProps> = ({ location }) => {
+  const formattedAddress = location.address ? 
+    `${location.address}, ${location.city}, ${location.state}` : 
+    `${location.city}, ${location.state}`;
   
-  // Ensure venue has hours, even if mock
-  if (!venue.hours) {
-    venue.hours = {
-      monday: "9:00 AM - 9:00 PM",
-      tuesday: "9:00 AM - 9:00 PM",
-      wednesday: "9:00 AM - 9:00 PM",
-      thursday: "9:00 AM - 9:00 PM",
-      friday: "9:00 AM - 10:00 PM",
-      saturday: "10:00 AM - 10:00 PM",
-      sunday: "10:00 AM - 8:00 PM"
-    };
-  }
+  // Format business hours if available
+  const renderBusinessHours = () => {
+    if (!location.hours) return <p>Hours not available</p>;
+    
+    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    
+    return (
+      <div className="text-sm">
+        {days.map(day => (
+          <div key={day} className="flex justify-between py-1">
+            <span className="capitalize">{day}:</span>
+            <span>
+              {formatHours(location.hours?.[day])}
+            </span>
+          </div>
+        ))}
+      </div>
+    );
+  };
   
-  const hoursToday = venue.hours[dayOfWeek as keyof typeof venue.hours];
-  
+  // Helper function to format hours
+  const formatHours = (hours: { open: string; close: string; } | string | undefined) => {
+    if (!hours) return "Closed";
+    if (typeof hours === 'string') return hours;
+    return `${hours.open} - ${hours.close}`;
+  };
+
   return (
-    <div className="mt-4 rounded-md overflow-hidden relative">
-      <div className="flex justify-between items-center text-sm mb-2">
-        <div className="flex items-center">
-          <MapPin className="h-4 w-4 mr-1 text-primary" />
-          <span className="font-medium">{venue.address}</span>
+    <Card className="overflow-hidden">
+      <CardContent className="p-0">
+        <div className="p-4">
+          <h3 className="text-lg font-semibold mb-2">Location & Hours</h3>
+          <p className="text-sm mb-3">{formattedAddress}</p>
+          
+          {/* Map placeholder - would be replaced with actual map component */}
+          <div className="bg-gray-200 h-48 w-full rounded-md mb-4 flex items-center justify-center">
+            <p className="text-gray-500">Map view at {location.lat}, {location.lng}</p>
+          </div>
+          
+          <div className="mt-4">
+            <h4 className="font-medium mb-2">Business Hours</h4>
+            {renderBusinessHours()}
+          </div>
         </div>
-        <div className="text-right">
-          <span className="font-medium">Today:</span> {hoursToday}
-        </div>
-      </div>
-      
-      <div className="h-48 rounded-md overflow-hidden relative">
-        <GoogleMapComponent
-          userLocation={null}
-          locations={[venue]}
-          searchedCity={venue.city}
-          mapStyle="default"
-          selectedLocation={venue}
-          onLocationSelect={() => {}}
-          userAddressLocation={null}
-          showAllCities={false}
-        />
-        <div className="absolute bottom-2 right-2">
-          <Button size="sm" variant="secondary" onClick={onExpand}>
-            <Maximize className="h-4 w-4 mr-1" />
-            Expand Map
-          </Button>
-        </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 

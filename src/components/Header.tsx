@@ -13,7 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { User, Bookmark, MapPin, Award, UserCircle, LogIn, Settings, Mail, GithubIcon, BarChart, Headphones } from "lucide-react";
+import { User, Bell, Globe, Shield, PaintBucket, MessageSquare, Search, LogIn, Settings, MapPin, Bookmark, Award, UserCircle, BarChart, Headphones } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AuthDialog } from "@/components/AuthDialog";
 import VernonConciergeDialog from "./VernonConcierge/VernonConciergeDialog";
@@ -96,12 +96,7 @@ const Header = () => {
                     
                     <DropdownMenuItem onSelect={() => handleOpenAuth('signin')} className="cursor-pointer">
                       <LogIn className="mr-2 h-4 w-4" />
-                      <span>Sign In</span>
-                    </DropdownMenuItem>
-                    
-                    <DropdownMenuItem onSelect={() => handleOpenAuth('signup')} className="cursor-pointer">
-                      <User className="mr-2 h-4 w-4" />
-                      <span>Sign Up</span>
+                      <span>Sign In/Up</span>
                     </DropdownMenuItem>
                     
                     <DropdownMenuSeparator />
@@ -149,12 +144,6 @@ const Header = () => {
                         <BarChart className="mr-2 h-4 w-4" />
                         <span>Data Insights</span>
                       </Link>
-                    </DropdownMenuItem>
-                    
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem>
-                      <ThemeToggle />
-                      <span className="ml-2">Theme</span>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>

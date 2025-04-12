@@ -1,11 +1,9 @@
-
-import React, { useState } from "react";
-import { PostCard } from "@/components/post";
-import { Skeleton } from "@/components/ui/skeleton";
-import PostGridItem from "./PostGridItem";
-import { mockPosts, mockComments } from "@/mock/data";
-import { Post, Comment } from "@/types";
-import { isWithinThreeMonths } from "@/mock/time-utils";
+import React, { useState, useEffect } from 'react';
+import { Tabs, TabsContent } from '@/components/ui/tabs';
+import { User, Post } from '@/types';
+import PostGridItem from './PostGridItem';
+import UserPlacesContent from './UserPlacesContent';
+import { comments } from '@/mock/data';
 
 interface ProfileTabContentProps {
   activeTab: string;

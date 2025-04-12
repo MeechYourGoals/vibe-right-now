@@ -1,5 +1,47 @@
-
 import { Location, Media } from "@/types";
+import { v4 as uuidv4 } from 'uuid';
+
+// Function to extract and format media from a location
+export function extractLocationMedia(location: Location): Media[] {
+  if (!location.photos || location.photos.length === 0) {
+    // Return default placeholder image if no photos
+    return [
+      {
+        id: uuidv4(),
+        type: "image",
+        url: '/placeholder.svg'
+      }
+    ];
+  }
+
+  // Convert location photos to media format
+  return location.photos.map(photo => {
+    if (typeof photo === 'string') {
+      return {
+        id: uuidv4(),
+        type: "image",
+        url: photo
+      };
+    }
+    
+    // If photo is already in Media format
+    if (photo.type && photo.url) {
+      return {
+        id: photo.id || uuidv4(),
+        type: photo.type as 'image' | 'video',
+        url: photo.url,
+        thumbnail: photo.thumbnail
+      };
+    }
+    
+    // Fallback
+    return {
+      id: uuidv4(),
+      type: "image",
+      url: '/placeholder.svg'
+    };
+  });
+}
 
 // Get media for a location
 export const getMediaForLocation = (location: Location): Media => {
