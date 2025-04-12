@@ -47,7 +47,7 @@ const VenueProfile = () => {
             variant="outline" 
             className="border-blue-300" 
             onClick={() => {}} 
-            icon="CheckIn"
+            icon="Check"
           >
             Check In
           </VenueActionButton>
@@ -153,7 +153,7 @@ const VenueProfile = () => {
       {/* Map Modal */}
       <Dialog open={showMapModal} onOpenChange={setShowMapModal}>
         <DialogContent className="max-w-3xl">
-          <VenueMap location={venue} />
+          <VenueMap location={venue} onMapExpand={handleMapExpand} />
         </DialogContent>
       </Dialog>
     </Container>

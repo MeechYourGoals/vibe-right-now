@@ -5,7 +5,7 @@ import type { Location } from '@/types';
 
 interface VenueMapProps {
   location: Location;
-  onMapExpand?: () => void;
+  onMapExpand?: () => void; // Make this prop optional
 }
 
 const VenueMap: React.FC<VenueMapProps> = ({ location, onMapExpand }) => {

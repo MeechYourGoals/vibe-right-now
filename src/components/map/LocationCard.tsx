@@ -1,4 +1,3 @@
-
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MapPin, Share2, Clock } from "lucide-react";
@@ -85,9 +84,10 @@ const LocationCard = ({ location, onViewVibes }: LocationCardProps) => {
           </Button>
           
           <VenueActionButton 
-            venue={location} 
+            icon="Check"
             size="sm"
             className="w-full h-7 text-xs"
+            onClick={() => {}}
           />
           
           <a 

@@ -1,56 +1,85 @@
 
 import React from 'react';
 import { TabsContent } from '@/components/ui/tabs';
-import { Post, Location } from '@/types';
+import { Post, Location, Comment } from '@/types';
 import VenuePostsList from './VenuePostsList';
 import { Skeleton } from '@/components/ui/skeleton';
 import { comments } from '@/mock/data';
 
 interface VenuePostsTabsProps {
-  posts: Post[];
+  posts?: Post[];
   venue: Location;
   viewMode: "list" | "grid";
+  getComments?: (postId: string) => Comment[];
+  
+  // Additional props for VenuePostsContent
+  activeTab?: string;
+  setActiveTab?: (tab: string) => void;
+  setViewMode?: (mode: "list" | "grid") => void;
+  allPosts?: Post[];
+  filteredPosts?: Post[];
+  filteredVenuePosts?: Post[];
+  getPostComments?: (postId: string) => Comment[];
 }
 
 const VenuePostsTabs: React.FC<VenuePostsTabsProps> = ({
-  posts,
+  posts = [],
   venue,
-  viewMode
+  viewMode,
+  getComments,
+  activeTab,
+  setActiveTab,
+  allPosts,
+  filteredPosts,
+  filteredVenuePosts,
+  getPostComments
 }) => {
   // Function to get comments for a post
-  const getComments = (postId: string) => {
+  const getCommentsForPost = (postId: string) => {
+    if (getComments) {
+      return getComments(postId);
+    }
+    if (getPostComments) {
+      return getPostComments(postId);
+    }
     return comments.filter(comment => comment.postId === postId);
   };
 
-  const userPosts = posts.filter(post => post.user.id !== "system");
-  const systemPosts = posts.filter(post => post.user.id === "system");
+  // Use provided posts or fallback to derived ones
+  const postsToShow = posts.length > 0 ? posts : (allPosts || []);
+  const userPosts = postsToShow.filter(post => post.user.id !== "system");
+  const systemPosts = postsToShow.filter(post => post.user.id === "system");
+  
+  // Used filtered posts if available
+  const filteredUserPosts = filteredPosts || userPosts;
+  const filteredSystemPosts = filteredVenuePosts || systemPosts;
   
   return (
     <>
       <TabsContent value="all" className="mt-4">
         <VenuePostsList 
-          posts={posts}
+          posts={postsToShow}
           venue={venue}
           viewMode={viewMode}
-          getComments={getComments}
+          getComments={getCommentsForPost}
         />
       </TabsContent>
       
       <TabsContent value="user" className="mt-4">
         <VenuePostsList 
-          posts={userPosts}
+          posts={filteredUserPosts}
           venue={venue}
           viewMode={viewMode}
-          getComments={getComments}
+          getComments={getCommentsForPost}
         />
       </TabsContent>
       
       <TabsContent value="venue" className="mt-4">
         <VenuePostsList 
-          posts={systemPosts}
+          posts={filteredSystemPosts}
           venue={venue}
           viewMode={viewMode}
-          getComments={getComments}
+          getComments={getCommentsForPost}
         />
       </TabsContent>
     </>

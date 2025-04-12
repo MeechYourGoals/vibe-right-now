@@ -1,9 +1,10 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { CheckIn, Camera, Star, Map, MapPin, Clock, Share2, Heart, BookOpen, Calendar } from 'lucide-react';
+import { Check, Camera, Star, Map, MapPin, Clock, Share2, Heart, BookOpen, Calendar } from 'lucide-react';
+import { Location } from '@/types';
 
-type IconType = 'CheckIn' | 'Camera' | 'Star' | 'Map' | 'MapPin' | 'Clock' | 'Share' | 'Heart' | 'BookOpen' | 'Calendar';
+type IconType = 'Check' | 'Camera' | 'Star' | 'Map' | 'MapPin' | 'Clock' | 'Share' | 'Heart' | 'BookOpen' | 'Calendar';
 
 interface VenueActionButtonProps {
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
@@ -11,6 +12,8 @@ interface VenueActionButtonProps {
   onClick: () => void;
   icon: IconType;
   children?: React.ReactNode;
+  venue?: Location;
+  size?: "default" | "sm" | "lg" | "icon";
 }
 
 const VenueActionButton: React.FC<VenueActionButtonProps> = ({ 
@@ -18,11 +21,13 @@ const VenueActionButton: React.FC<VenueActionButtonProps> = ({
   className = "", 
   onClick, 
   icon,
-  children 
+  children,
+  venue,
+  size = "default"
 }) => {
   const getIcon = () => {
     switch (icon) {
-      case 'CheckIn': return <CheckIn className="h-4 w-4" />;
+      case 'Check': return <Check className="h-4 w-4" />;
       case 'Camera': return <Camera className="h-4 w-4" />;
       case 'Star': return <Star className="h-4 w-4" />;
       case 'Map': return <Map className="h-4 w-4" />;
@@ -32,13 +37,14 @@ const VenueActionButton: React.FC<VenueActionButtonProps> = ({
       case 'Heart': return <Heart className="h-4 w-4" />;
       case 'BookOpen': return <BookOpen className="h-4 w-4" />;
       case 'Calendar': return <Calendar className="h-4 w-4" />;
-      default: return <CheckIn className="h-4 w-4" />;
+      default: return <Check className="h-4 w-4" />;
     }
   };
   
   return (
     <Button
       variant={variant}
+      size={size}
       className={`flex items-center gap-2 ${className}`}
       onClick={onClick}
     >
