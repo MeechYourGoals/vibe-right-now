@@ -1,135 +1,122 @@
-import React, { useState, useEffect } from 'react';
-import { Comment } from "@/types";
+
+import { useState } from "react";
+import { Comment, User } from "@/types";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { MessageSquare, Send } from "lucide-react";
 import CommentItem from "@/components/CommentItem";
+import { mockComments } from "@/mock/data";
+import { mockUsers } from "@/mock/data";
 
 interface CommentListProps {
   postId: string;
+  commentsCount: number;
 }
 
-const CommentList = ({ postId }: CommentListProps) => {
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [newComment, setNewComment] = useState('');
-  
-  useEffect(() => {
-    // Mock comments for testing
-    const mockComments: Comment[] = [
-      {
-        id: '1',
-        postId: postId,
-        user: {
-          id: "user1",
-          username: "johndoe",
-          name: "John Doe",
-          avatar: "/avatars/user-placeholder.png",
-          followers: 123,
-          following: 456
-        },
-        content: "Great vibe here!",
-        timestamp: new Date().toISOString(),
-        vibedHere: true,
-        likes: 10
-      },
-      {
-        id: '2',
-        postId: postId,
-        user: {
-          id: "user2",
-          username: "janedoe",
-          name: "Jane Doe",
-          avatar: "/avatars/user-placeholder.png",
-          followers: 789,
-          following: 101
-        },
-        content: "I love this place!",
-        timestamp: new Date().toISOString(),
-        vibedHere: false,
-        likes: 5
-      }
-    ];
-    
-    setComments(mockComments);
-  }, [postId]);
+const CommentList = ({ postId, commentsCount }: CommentListProps) => {
+  const [newComment, setNewComment] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleAddComment = (e: React.FormEvent) => {
-    e.preventDefault();
+  // Filter comments for this specific post
+  let postComments = mockComments.filter(comment => comment.postId === postId);
+  
+  // If no comments found in mock data, generate example comments
+  if (postComments.length === 0 && commentsCount > 0) {
+    // Generate 2-3 example comments
+    const commentCount = Math.min(commentsCount, Math.floor(Math.random() * 2) + 2);
+    const exampleComments: Comment[] = [];
     
+    // Regular comment
+    exampleComments.push({
+      id: `example-${postId}-1`,
+      postId: postId,
+      user: mockUsers[Math.floor(Math.random() * mockUsers.length)],
+      content: "This place looks amazing! How's the crowd right now?",
+      timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30 minutes ago
+      vibedHere: false
+    });
+    
+    // "Vibed Here" comment
+    exampleComments.push({
+      id: `example-${postId}-2`,
+      postId: postId,
+      user: mockUsers[Math.floor(Math.random() * mockUsers.length)],
+      content: "I was here yesterday and it was incredible! The line moves fast if you go around to the side entrance.",
+      timestamp: new Date(Date.now() - 1000 * 60 * 120).toISOString(), // 2 hours ago
+      vibedHere: true
+    });
+    
+    // Add a third comment if needed
+    if (commentCount > 2) {
+      exampleComments.push({
+        id: `example-${postId}-3`,
+        postId: postId,
+        user: mockUsers[Math.floor(Math.random() * mockUsers.length)],
+        content: "Heading there now! Anyone want to meet up?",
+        timestamp: new Date(Date.now() - 1000 * 60 * 10).toISOString(), // 10 minutes ago
+        vibedHere: Math.random() > 0.5 // 50% chance of being "Vibed Here"
+      });
+    }
+    
+    postComments = exampleComments;
+  }
+
+  const handleSubmitComment = () => {
     if (!newComment.trim()) return;
     
-    // Create new comment with all required properties
-    const comment: Comment = {
-      id: Date.now().toString(),
-      postId: postId,
-      user: {
-        id: "current-user",
-        username: "currentuser",
-        name: "Current User",
-        avatar: "/avatars/user-placeholder.png",
-        followers: 0,
-        following: 0
-      },
-      content: newComment,
-      timestamp: new Date().toISOString(),
-      vibedHere: false,
-      likes: 0 // Add the missing likes property
-    };
+    setIsSubmitting(true);
     
-    setComments(prev => [comment, ...prev]);
-    setNewComment('');
+    // Simulate API call
+    setTimeout(() => {
+      setNewComment("");
+      setIsSubmitting(false);
+      // In a real app, we would add the new comment to the list
+    }, 500);
   };
-  
-  const handleAddVibeComment = () => {
-    // Create new "vibed here" comment with all required properties
-    const comment: Comment = {
-      id: Date.now().toString(),
-      postId: postId,
-      user: {
-        id: "current-user",
-        username: "currentuser",
-        name: "Current User",
-        avatar: "/avatars/user-placeholder.png",
-        followers: 0,
-        following: 0
-      },
-      content: "I vibed here! The atmosphere was amazing.",
-      timestamp: new Date().toISOString(),
-      vibedHere: true,
-      likes: 0 // Add the missing likes property
-    };
-    
-    setComments(prev => [comment, ...prev]);
-  };
-  
+
   return (
-    <div className="space-y-4">
-      <h4 className="text-md font-semibold">Comments</h4>
-      
-      <div className="space-y-2">
-        {comments.map(comment => (
-          <CommentItem key={comment.id} comment={comment} />
-        ))}
+    <div className="pt-3 border-t">
+      <div className="flex items-center mb-3">
+        <h4 className="font-medium flex items-center">
+          <MessageSquare className="h-4 w-4 mr-1" />
+          Comments ({commentsCount})
+        </h4>
       </div>
       
-      <form onSubmit={handleAddComment} className="flex items-center space-x-2">
-        <Avatar className="h-8 w-8">
-          <AvatarImage src="/avatars/user-placeholder.png" alt="Your Avatar" />
-          <AvatarFallback>U</AvatarFallback>
-        </Avatar>
-        <Input
-          type="text"
-          placeholder="Add a comment..."
-          value={newComment}
-          onChange={(e) => setNewComment(e.target.value)}
-          className="flex-1"
-        />
-        <Button type="submit" size="sm">Post</Button>
-      </form>
+      {postComments.length > 0 ? (
+        <div className="space-y-1 max-h-80 overflow-y-auto pr-1">
+          {postComments.map((comment) => (
+            <CommentItem key={comment.id} comment={comment} />
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-4 text-muted-foreground text-sm">
+          No comments yet. Be the first to comment!
+        </div>
+      )}
       
-      <Button variant="secondary" size="sm" onClick={handleAddVibeComment}>
-        Vibe Here!
-      </Button>
+      <div className="mt-3 flex gap-2">
+        <Avatar className="h-8 w-8">
+          <AvatarImage src="https://randomuser.me/api/portraits/men/1.jpg" alt="Your avatar" />
+          <AvatarFallback>Y</AvatarFallback>
+        </Avatar>
+        <div className="flex-1 flex items-end gap-2">
+          <Textarea
+            placeholder="Add a comment..."
+            className="min-h-[60px] flex-1"
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+          />
+          <Button 
+            size="icon"
+            disabled={!newComment.trim() || isSubmitting}
+            onClick={handleSubmitComment}
+          >
+            <Send className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };

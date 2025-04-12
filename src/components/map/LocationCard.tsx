@@ -40,9 +40,11 @@ const LocationCard = ({ location, onViewVibes }: LocationCardProps) => {
   const navigate = useNavigate();
 
   // Ensure location has hours
-  const hours = location.hours || generateBusinessHours();
+  if (!location.hours) {
+    location.hours = generateBusinessHours(location);
+  }
   
-  const todaysHours = getTodaysHours(hours);
+  const todaysHours = getTodaysHours(location);
 
   const handleViewVibes = () => {
     if (onViewVibes) {
@@ -85,10 +87,9 @@ const LocationCard = ({ location, onViewVibes }: LocationCardProps) => {
           </Button>
           
           <VenueActionButton 
-            icon="Check"
+            venue={location} 
             size="sm"
             className="w-full h-7 text-xs"
-            onClick={() => {}}
           />
           
           <a 

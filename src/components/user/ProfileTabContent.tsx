@@ -1,12 +1,11 @@
 
-import React, { useState, useEffect } from 'react';
-import { Tabs, TabsContent } from '@/components/ui/tabs';
-import { User, Post, Comment } from '@/types';
-import PostGridItem from './PostGridItem';
-import UserPlacesContent from './UserPlacesContent';
-import { comments } from '@/mock/data';
-import { Skeleton } from '@/components/ui/skeleton';
-import PostCard from '@/components/post/PostCard';
+import React, { useState } from "react";
+import { PostCard } from "@/components/post";
+import { Skeleton } from "@/components/ui/skeleton";
+import PostGridItem from "./PostGridItem";
+import { mockPosts, mockComments } from "@/mock/data";
+import { Post, Comment } from "@/types";
+import { isWithinThreeMonths } from "@/mock/time-utils";
 
 interface ProfileTabContentProps {
   activeTab: string;
@@ -80,7 +79,9 @@ const ProfileTabContent: React.FC<ProfileTabContentProps> = ({
               Object.entries(postsGroupedByLocation).map(([locationId, posts]) => (
                 <PostCard 
                   key={locationId} 
-                  post={posts[0]} 
+                  posts={posts} 
+                  locationPostCount={locationPostCounts[locationId]}
+                  getComments={getComments}
                 />
               ))
             ) : (

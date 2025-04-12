@@ -1,155 +1,116 @@
-
-import React, { useState, useEffect } from 'react';
-import Header from '@/components/Header';
-import SearchVibes from '@/components/SearchVibes';
-import RecommendedForYou from '@/components/RecommendedForYou';
-import TrendingLocations from '@/components/TrendingLocations';
-import NearbyVibesMap from '@/components/NearbyVibesMap';
-import PostFeed from '@/components/PostFeed';
-import { mockPosts, mockUsers } from '@/mock/data';
-import { Button } from '@/components/ui/button';
-import VernonChat from '@/components/VernonChat';
-import { Container } from '@/components/ui/container';
-import LocationsNearby from '@/components/LocationsNearby';
-import DiscountLocations from '@/components/DiscountLocations';
+import { useState } from "react";
+import { Layout } from "@/components/Layout";
+import PostFeed from "@/components/PostFeed";
+import LocationsNearby from "@/components/LocationsNearby";
+import TrendingLocations from "@/components/TrendingLocations";
+import DiscountLocations from "@/components/DiscountLocations";
+import CameraButton from "@/components/CameraButton";
+import NearbyVibesMap from "@/components/NearbyVibesMap";
+import RecommendedForYou from "@/components/RecommendedForYou";
+import VernonNext from "@/components/VernonNext";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { getFeaturedUsers } from "@/mock/users";
+import { DateRange } from "react-day-picker";
+import { format, addMonths } from "date-fns";
+import { Button } from "@/components/ui/button";
+import { Calendar, CalendarRange } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import DateRangeSelector from "@/components/DateRangeSelector";
+import { Card, CardContent } from "@/components/ui/card";
 
 const Index = () => {
-  const [loadingPosts, setLoadingPosts] = useState(true);
-  const [posts, setPosts] = useState([]);
-  const [viewingMap, setViewingMap] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  
-  useEffect(() => {
-    // Simulate API call to fetch posts
-    const timer = setTimeout(() => {
-      setPosts(mockPosts);
-      setLoadingPosts(false);
-    }, 1000);
-    
-    return () => clearTimeout(timer);
-  }, []);
-  
-  const handleCategorySelect = (category) => {
-    setSelectedCategory(category);
+  const isMobile = useIsMobile();
+  const featuredUsers = getFeaturedUsers();
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
+  const navigate = useNavigate();
+
+  const handleDateRangeChange = (range: DateRange | undefined) => {
+    setDateRange(range);
   };
-  
-  const filteredPosts = selectedCategory === 'all' 
-    ? mockPosts
-    : mockPosts.filter(post => post.categories?.includes(selectedCategory));
-  
-  // Get celebrity users for featured content
-  const celebrityUsers = mockUsers.filter(user => user.isCelebrity);
-  
+
+  const handlePlanFutureVibes = () => {
+    if (dateRange?.from) {
+      const searchParams = new URLSearchParams();
+      searchParams.set('from', dateRange.from.toISOString().split('T')[0]);
+      if (dateRange.to) {
+        searchParams.set('to', dateRange.to.toISOString().split('T')[0]);
+      }
+      navigate(`/explore?${searchParams.toString()}`);
+    } else {
+      navigate('/explore');
+    }
+  };
+
   return (
-    <>
-      <Container className="py-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Main Content Column - 2/3 width on medium screens and above */}
-          <div className="md:col-span-2 space-y-6">
-            {/* Search Bar */}
-            <SearchVibes />
-            
-            {/* Map Toggle Section */}
-            <section className="mb-4 flex justify-between items-center">
-              <h2 className="text-xl font-bold">Nearby Vibes</h2>
-              <Button
-                variant={viewingMap ? "default" : "outline"}
-                onClick={() => setViewingMap(!viewingMap)}
-              >
-                {viewingMap ? "List View" : "Map View"}
-              </Button>
-            </section>
-            
-            {viewingMap ? (
-              <div className="h-[400px] rounded-lg overflow-hidden mb-8">
-                <NearbyVibesMap />
-              </div>
-            ) : (
-              <div className="mb-8">
-                <LocationsNearby />
-              </div>
-            )}
-            
-            {/* Feed Category Filter */}
-            <div className="flex overflow-x-auto space-x-2 pb-2 mb-4">
+    <Layout>
+      <main className="container py-6">
+        <div className="flex flex-col md:flex-row gap-6">
+          <div className="w-full md:w-3/4">
+            <div className="flex flex-col md:flex-row items-center justify-between mb-6">
+              <h1 className="text-3xl font-bold vibe-gradient-text mb-3 md:mb-0">
+                Discover the Vibe Right Now
+              </h1>
               <Button 
-                variant={selectedCategory === 'all' ? "default" : "outline"}
-                size="sm"
-                onClick={() => handleCategorySelect('all')}
-                className="rounded-full"
+                variant="outline" 
+                className="flex items-center gap-2 bg-gradient-to-r from-indigo-50 to-purple-50 hover:from-indigo-100 hover:to-purple-100"
+                onClick={() => setShowDatePicker(!showDatePicker)}
               >
-                All
-              </Button>
-              <Button 
-                variant={selectedCategory === 'food' ? "default" : "outline"}
-                size="sm"
-                onClick={() => handleCategorySelect('food')}
-                className="rounded-full"
-              >
-                Food
-              </Button>
-              <Button 
-                variant={selectedCategory === 'entertainment' ? "default" : "outline"}
-                size="sm"
-                onClick={() => handleCategorySelect('entertainment')}
-                className="rounded-full"
-              >
-                Entertainment
-              </Button>
-              <Button 
-                variant={selectedCategory === 'nightlife' ? "default" : "outline"}
-                size="sm"
-                onClick={() => handleCategorySelect('nightlife')}
-                className="rounded-full"
-              >
-                Nightlife
-              </Button>
-              <Button 
-                variant={selectedCategory === 'outdoors' ? "default" : "outline"}
-                size="sm"
-                onClick={() => handleCategorySelect('outdoors')}
-                className="rounded-full"
-              >
-                Outdoors
+                <CalendarRange className="h-4 w-4" />
+                Plan Future Vibes
               </Button>
             </div>
+
+            {showDatePicker && (
+              <Card className="mb-6 bg-indigo-50 border-indigo-100">
+                <CardContent className="p-4">
+                  <h3 className="text-lg font-semibold mb-3 text-indigo-800">Find Future Vibes</h3>
+                  <p className="text-sm text-indigo-700 mb-3">Select dates to explore events, concerts, games and more in the coming months</p>
+                  <DateRangeSelector 
+                    dateRange={dateRange} 
+                    onDateRangeChange={handleDateRangeChange} 
+                  />
+                  <div className="flex justify-end mt-4">
+                    <Button
+                      className="bg-indigo-600 hover:bg-indigo-700"
+                      onClick={handlePlanFutureVibes}
+                      disabled={!dateRange?.from}
+                    >
+                      <Calendar className="h-4 w-4 mr-2" />
+                      Explore Future Vibes
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
             
-            {/* Post Feed */}
-            <section>
-              <h2 className="text-xl font-bold mb-4">Latest Posts</h2>
-              <PostFeed 
-                posts={filteredPosts} 
-                loading={loadingPosts} 
-              />
-            </section>
+            <PostFeed celebrityFeatured={featuredUsers} />
           </div>
           
-          {/* Sidebar Column - 1/3 width on medium screens and above */}
-          <div className="space-y-6">
-            {/* Recommendations Section */}
-            <section>
-              <h2 className="text-xl font-bold mb-4">Recommended for You</h2>
-              <RecommendedForYou />
-            </section>
-            
-            {/* Trending Locations Section */}
-            <section>
-              <h2 className="text-xl font-bold mb-4">Trending Locations</h2>
+          {!isMobile ? (
+            <div className="w-full md:w-1/4 space-y-6">
+              <NearbyVibesMap />
+              <RecommendedForYou featuredLocations={["5", "7", "10", "13", "20"]} />
               <TrendingLocations />
-            </section>
-            
-            {/* Discount Locations */}
-            <section>
-              <h2 className="text-xl font-bold mb-4">Places with Discounts</h2>
               <DiscountLocations />
-            </section>
-          </div>
+            </div>
+          ) : null}
         </div>
-      </Container>
+        
+        {isMobile && (
+          <div className="mt-8 space-y-6">
+            <h2 className="text-xl font-bold mb-4 vibe-gradient-text">Around You</h2>
+            <NearbyVibesMap />
+            <RecommendedForYou featuredLocations={["5", "7", "10", "13", "20"]} />
+            <TrendingLocations />
+            <DiscountLocations />
+          </div>
+        )}
+      </main>
       
-      {/* Vernon Chat */}
-      <VernonChat />
-    </>
+      <CameraButton />
+      <VernonNext />
+    </Layout>
   );
 };
 

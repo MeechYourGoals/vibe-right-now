@@ -13,9 +13,11 @@ const BusinessHours = ({ venue }: BusinessHoursProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   
   // Ensure venue has hours data
-  const hours = venue.hours || generateBusinessHours();
+  if (!venue.hours) {
+    venue.hours = generateBusinessHours(venue);
+  }
   
-  const todaysHours = getTodaysHours(hours);
+  const todaysHours = getTodaysHours(venue);
   
   return (
     <div className="mt-2">
@@ -41,31 +43,31 @@ const BusinessHours = ({ venue }: BusinessHoursProps) => {
         <div className="mt-2 text-sm grid grid-cols-2 gap-1">
           <div className="flex justify-between pr-2">
             <span className="text-muted-foreground">Monday:</span>
-            <span>{typeof hours.monday === 'string' ? hours.monday : `${hours.monday.open} - ${hours.monday.close}`}</span>
+            <span>{venue.hours.monday}</span>
           </div>
           <div className="flex justify-between pr-2">
             <span className="text-muted-foreground">Tuesday:</span>
-            <span>{typeof hours.tuesday === 'string' ? hours.tuesday : `${hours.tuesday.open} - ${hours.tuesday.close}`}</span>
+            <span>{venue.hours.tuesday}</span>
           </div>
           <div className="flex justify-between pr-2">
             <span className="text-muted-foreground">Wednesday:</span>
-            <span>{typeof hours.wednesday === 'string' ? hours.wednesday : `${hours.wednesday.open} - ${hours.wednesday.close}`}</span>
+            <span>{venue.hours.wednesday}</span>
           </div>
           <div className="flex justify-between pr-2">
             <span className="text-muted-foreground">Thursday:</span>
-            <span>{typeof hours.thursday === 'string' ? hours.thursday : `${hours.thursday.open} - ${hours.thursday.close}`}</span>
+            <span>{venue.hours.thursday}</span>
           </div>
           <div className="flex justify-between pr-2">
             <span className="text-muted-foreground">Friday:</span>
-            <span>{typeof hours.friday === 'string' ? hours.friday : `${hours.friday.open} - ${hours.friday.close}`}</span>
+            <span>{venue.hours.friday}</span>
           </div>
           <div className="flex justify-between pr-2">
             <span className="text-muted-foreground">Saturday:</span>
-            <span>{typeof hours.saturday === 'string' ? hours.saturday : `${hours.saturday.open} - ${hours.saturday.close}`}</span>
+            <span>{venue.hours.saturday}</span>
           </div>
           <div className="flex justify-between pr-2">
             <span className="text-muted-foreground">Sunday:</span>
-            <span>{typeof hours.sunday === 'string' ? hours.sunday : `${hours.sunday.open} - ${hours.sunday.close}`}</span>
+            <span>{venue.hours.sunday}</span>
           </div>
         </div>
       )}

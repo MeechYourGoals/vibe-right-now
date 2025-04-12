@@ -1,118 +1,110 @@
 
-import React from 'react';
+import { useState } from "react";
 import { Layout } from "@/components/Layout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { User, Bell, Globe, Shield, PaintBucket, MessageSquare, Search } from "lucide-react";
-import ProviderSettings from "@/components/settings/ProviderSettings";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
+
+import SettingsHeader from "@/components/settings/SettingsHeader";
+import SettingsTabs from "@/components/settings/SettingsTabs";
+import PreferencesTab from "./settings/PreferencesTab";
+import PrivacyTab from "./settings/PrivacyTab";
+import TransportationTab from "./settings/TransportationTab";
+import TicketingTab from "./settings/TicketingTab";
+import AccountTab from "./settings/AccountTab";
+import VenueManagementTab from "./settings/VenueManagementTab";
+import MarketingTab from "./settings/MarketingTab";
 
 const Settings = () => {
+  const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState("preferences");
+  const [isVenueMode, setIsVenueMode] = useState(false);
+  const [subscriptionTier, setSubscriptionTier] = useState<'standard' | 'plus' | 'premium' | 'pro'>('standard');
+
+  const handleSaveSettings = () => {
+    toast({
+      title: "Settings saved",
+      description: "Your preferences have been updated successfully.",
+    });
+  };
+
+  const handleConnectPlatform = (platformId: string) => {
+    toast({
+      title: "Connecting to platform",
+      description: `Initiating connection to ${platformId === 'other' ? "custom platform" : platformId}...`,
+    });
+    // In a real app, this would trigger an OAuth flow or similar
+  };
+
+  const toggleMode = () => {
+    setIsVenueMode(!isVenueMode);
+    toast({
+      title: `Switched to ${!isVenueMode ? "Venue" : "User"} Mode`,
+      description: `Settings are now configured for ${!isVenueMode ? "venue management" : "regular user"}.`,
+    });
+  };
+
+  // Helper function to upgrade subscription tier
+  const upgradeTier = (tier: 'standard' | 'plus' | 'premium' | 'pro') => {
+    setSubscriptionTier(tier);
+    toast({
+      title: `Upgraded to ${tier.charAt(0).toUpperCase() + tier.slice(1)}`,
+      description: `Your subscription has been upgraded to ${tier}.`,
+    });
+  };
+
   return (
     <Layout>
-      <div className="container py-6">
-        <h1 className="text-3xl font-bold mb-6">Settings</h1>
+      <div className="container py-8">
+        <SettingsHeader 
+          isVenueMode={isVenueMode}
+          onModeToggle={toggleMode}
+          subscriptionTier={subscriptionTier}
+          onTierChange={upgradeTier}
+        />
         
-        <Tabs defaultValue="account" className="space-y-4">
-          <TabsList className="w-full flex overflow-x-auto">
-            <TabsTrigger value="account" className="flex items-center gap-2 flex-shrink-0">
-              <User className="h-4 w-4" />
-              Account
-            </TabsTrigger>
-            <TabsTrigger value="notifications" className="flex items-center gap-2 flex-shrink-0">
-              <Bell className="h-4 w-4" />
-              Notifications
-            </TabsTrigger>
-            <TabsTrigger value="appearance" className="flex items-center gap-2 flex-shrink-0">
-              <PaintBucket className="h-4 w-4" />
-              Appearance
-            </TabsTrigger>
-            <TabsTrigger value="providers" className="flex items-center gap-2 flex-shrink-0">
-              <Search className="h-4 w-4" />
-              Providers
-            </TabsTrigger>
-            <TabsTrigger value="privacy" className="flex items-center gap-2 flex-shrink-0">
-              <Shield className="h-4 w-4" />
-              Privacy
-            </TabsTrigger>
-            <TabsTrigger value="language" className="flex items-center gap-2 flex-shrink-0">
-              <Globe className="h-4 w-4" />
-              Language
-            </TabsTrigger>
-          </TabsList>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <SettingsTabs activeTab={activeTab} isVenueMode={isVenueMode} />
           
-          <TabsContent value="account">
-            <Card>
-              <CardHeader>
-                <CardTitle>Account Settings</CardTitle>
-                <CardDescription>
-                  Manage your account information
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p>Account settings will appear here.</p>
-              </CardContent>
-            </Card>
+          <TabsContent value="preferences" className="space-y-6">
+            <PreferencesTab 
+              onSave={handleSaveSettings} 
+              isVenueMode={isVenueMode} 
+              subscriptionTier={subscriptionTier}
+            />
           </TabsContent>
           
-          <TabsContent value="notifications">
-            <Card>
-              <CardHeader>
-                <CardTitle>Notification Settings</CardTitle>
-                <CardDescription>
-                  Configure how you receive notifications
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p>Notification settings will appear here.</p>
-              </CardContent>
-            </Card>
+          <TabsContent value="privacy" className="space-y-6">
+            <PrivacyTab onSave={handleSaveSettings} isVenueMode={isVenueMode} />
           </TabsContent>
           
-          <TabsContent value="appearance">
-            <Card>
-              <CardHeader>
-                <CardTitle>Appearance Settings</CardTitle>
-                <CardDescription>
-                  Customize the look and feel of the app
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p>Appearance settings will appear here.</p>
-              </CardContent>
-            </Card>
-          </TabsContent>
+          {isVenueMode ? (
+            <>
+              <TabsContent value="management" className="space-y-6">
+                <VenueManagementTab 
+                  onSave={handleSaveSettings} 
+                  isVenueMode={isVenueMode} 
+                  subscriptionTier={subscriptionTier} 
+                />
+              </TabsContent>
+              
+              <TabsContent value="marketing" className="space-y-6">
+                <MarketingTab subscriptionTier={subscriptionTier} />
+              </TabsContent>
+            </>
+          ) : (
+            <>
+              <TabsContent value="transportation" className="space-y-6">
+                <TransportationTab onSave={handleSaveSettings} />
+              </TabsContent>
+              
+              <TabsContent value="ticketing" className="space-y-6">
+                <TicketingTab onConnectPlatform={handleConnectPlatform} />
+              </TabsContent>
+            </>
+          )}
           
-          <TabsContent value="providers">
-            <ProviderSettings />
-          </TabsContent>
-          
-          <TabsContent value="privacy">
-            <Card>
-              <CardHeader>
-                <CardTitle>Privacy Settings</CardTitle>
-                <CardDescription>
-                  Control your privacy and security preferences
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p>Privacy settings will appear here.</p>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="language">
-            <Card>
-              <CardHeader>
-                <CardTitle>Language Settings</CardTitle>
-                <CardDescription>
-                  Change language and regional preferences
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p>Language settings will appear here.</p>
-              </CardContent>
-            </Card>
+          <TabsContent value="account" className="space-y-6">
+            <AccountTab onSave={handleSaveSettings} isVenueMode={isVenueMode} />
           </TabsContent>
         </Tabs>
       </div>

@@ -1,92 +1,78 @@
 
+import { formatDate } from "@/lib/utils";
 import { VenueInsights } from "@/types";
 
-export const generateMockInsights = (venueId: string, venueName: string): VenueInsights => {
-  const uniqueVisitors = 100 + Math.floor(Math.random() * 500);
-  const totalVisits = uniqueVisitors + Math.floor(Math.random() * 300);
+// Mock insights data generator
+export const generateVenueInsights = (venueId: string): VenueInsights => {
+  // Use venueId to generate consistent "random" data
+  const seed = venueId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  
+  // Generate visitor trends for the last 14 days
+  const visitorTrends = Array.from({ length: 14 }, (_, i) => {
+    const date = new Date();
+    date.setDate(date.getDate() - (13 - i));
+    
+    // Generate somewhat random count based on the day of week
+    // Weekends have higher numbers
+    const dayOfWeek = date.getDay();
+    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+    const baseCount = isWeekend ? 80 + (seed % 40) : 30 + (seed % 30);
+    
+    return {
+      date: formatDate(date),
+      count: baseCount + Math.floor(Math.random() * 20)
+    };
+  });
   
   return {
-    id: venueId,
-    venueName,
-    totalVisits,
-    uniqueVisitors,
-    visitorCount: uniqueVisitors,
-    checkInCount: Math.floor(totalVisits * 0.7),
-    receiptUploads: Math.floor(totalVisits * 0.4),
-    discountRedemptions: Math.floor(totalVisits * 0.2),
-    averageRating: 3.5 + Math.random() * 1.5,
-    topReasons: [
-      { reason: "Food & Drink", count: Math.floor(uniqueVisitors * 0.6) },
-      { reason: "Atmosphere", count: Math.floor(uniqueVisitors * 0.4) },
-      { reason: "Service", count: Math.floor(uniqueVisitors * 0.3) },
-      { reason: "Entertainment", count: Math.floor(uniqueVisitors * 0.2) },
-    ],
-    demographics: {
+    visitorCount: 1200 + (seed % 800), 
+    checkInCount: 950 + (seed % 600),
+    receiptUploads: 430 + (seed % 300),
+    discountRedemptions: 210 + (seed % 150),
+    popularHours: {
+      "12pm": 15,
+      "1pm": 30,
+      "2pm": 40,
+      "3pm": 25,
+      "4pm": 35,
+      "5pm": 60,
+      "6pm": 90,
+      "7pm": 120,
+      "8pm": 140,
+      "9pm": 125,
+      "10pm": 90,
+      "11pm": 60
+    },
+    demographicData: {
       ageGroups: {
-        "18-24": Math.floor(uniqueVisitors * 0.25),
-        "25-34": Math.floor(uniqueVisitors * 0.4),
-        "35-44": Math.floor(uniqueVisitors * 0.2),
-        "45+": Math.floor(uniqueVisitors * 0.15),
+        "18-24": 20 + (seed % 10),
+        "25-34": 40 + (seed % 15),
+        "35-44": 25 + (seed % 10),
+        "45-54": 10 + (seed % 5),
+        "55+": 5 + (seed % 5)
       },
       gender: {
-        Male: Math.floor(uniqueVisitors * 0.45),
-        Female: Math.floor(uniqueVisitors * 0.5),
-        Other: Math.floor(uniqueVisitors * 0.05),
+        "Male": 48 + (seed % 10),
+        "Female": 48 + (seed % 10),
+        "Other": 4 + (seed % 2)
       }
     },
-    visitsByDay: {
-      Monday: Math.floor(totalVisits * 0.08),
-      Tuesday: Math.floor(totalVisits * 0.1),
-      Wednesday: Math.floor(totalVisits * 0.12),
-      Thursday: Math.floor(totalVisits * 0.15),
-      Friday: Math.floor(totalVisits * 0.25),
-      Saturday: Math.floor(totalVisits * 0.2),
-      Sunday: Math.floor(totalVisits * 0.1),
-    },
-    visitsByHour: {
-      "9-12": Math.floor(totalVisits * 0.2),
-      "12-15": Math.floor(totalVisits * 0.3),
-      "15-18": Math.floor(totalVisits * 0.25),
-      "18-21": Math.floor(totalVisits * 0.15),
-      "21+": Math.floor(totalVisits * 0.1),
-    },
-    competitorAnalysis: [
-      {
-        name: "Competitor A",
-        visitors: Math.floor(uniqueVisitors * 0.8),
-        rating: 3.2 + Math.random() * 1.5,
-        distance: 0.3,
-      },
-      {
-        name: "Competitor B",
-        visitors: Math.floor(uniqueVisitors * 0.6),
-        rating: 3.0 + Math.random() * 1.5,
-        distance: 0.5,
-      },
-      {
-        name: "Competitor C",
-        visitors: Math.floor(uniqueVisitors * 0.4),
-        rating: 2.8 + Math.random() * 1.5,
-        distance: 0.8,
-      },
-    ]
+    visitorTrends,
+    mediaUploads: 280 + (seed % 200)
   };
 };
 
-// Generate weekly data with a venue ID parameter
-export const generateWeeklyData = (venueId: string): Record<string, number> => {
-  return {
-    Monday: 120 + Math.floor(Math.random() * 50),
-    Tuesday: 150 + Math.floor(Math.random() * 50),
-    Wednesday: 180 + Math.floor(Math.random() * 50),
-    Thursday: 220 + Math.floor(Math.random() * 50),
-    Friday: 350 + Math.floor(Math.random() * 100),
-    Saturday: 420 + Math.floor(Math.random() * 100),
-    Sunday: 280 + Math.floor(Math.random() * 80),
-  };
+// Add the missing exported functions for VenueInsights and PerformanceMetrics components
+export const generateWeeklyData = () => {
+  return [
+    { name: 'Mon', photos: 65, videos: 12 },
+    { name: 'Tue', photos: 59, videos: 10 },
+    { name: 'Wed', photos: 80, videos: 15 },
+    { name: 'Thu', photos: 81, videos: 16 },
+    { name: 'Fri', photos: 90, videos: 22 },
+    { name: 'Sat', photos: 120, videos: 35 },
+    { name: 'Sun', photos: 95, videos: 25 },
+  ];
 };
 
-// Return VenueInsights for a specific venue ID
-export const currentInsights = (venueId: string): VenueInsights => {
-  return generateMockInsights(venueId, "Current Venue");
-};
+export const currentInsights = generateVenueInsights("default-venue");

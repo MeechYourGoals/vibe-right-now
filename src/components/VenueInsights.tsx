@@ -15,17 +15,11 @@ import { generateWeeklyData } from "@/utils/insightsData";
 
 const VenueInsights = () => {
   const [subscriptionTier, setSubscriptionTier] = useState<'standard' | 'plus' | 'premium' | 'pro'>('standard');
-  const mediaData = generateWeeklyData("venue-default");
-  
-  // Convert the data to the format expected by MediaEngagementChart
-  const chartData = Object.entries(mediaData).map(([day, value]) => ({ 
-    name: day, 
-    value: value 
-  }));
+  const mediaData = generateWeeklyData();
   
   // Function to simulate upgrading subscription
-  const upgradeSubscription = (tier: 'standard' | 'plus' | 'premium' | 'pro') => {
-    setSubscriptionTier(tier);
+  const upgradeSubscription = (tier: string) => {
+    setSubscriptionTier(tier as 'standard' | 'plus' | 'premium' | 'pro');
   };
   
   return (
@@ -45,7 +39,7 @@ const VenueInsights = () => {
             <CardTitle>Media Engagement</CardTitle>
           </CardHeader>
           <CardContent>
-            <MediaEngagementChart data={chartData} />
+            <MediaEngagementChart data={mediaData} />
           </CardContent>
         </Card>
         <Card>

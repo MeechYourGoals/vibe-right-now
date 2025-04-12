@@ -29,10 +29,10 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 interface SearchVibesProps {
-  onSearch?: (query: string, filterType: string, category: string) => void;
+  onSearch: (query: string, filterType: string, category: string) => void;
 }
 
-const SearchVibes = ({ onSearch = () => {} }: SearchVibesProps) => {
+const SearchVibes = ({ onSearch }: SearchVibesProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("All");
@@ -166,7 +166,10 @@ const SearchVibes = ({ onSearch = () => {} }: SearchVibesProps) => {
                 'location': 'attractions',
                 'event': 'events',
                 'organization': 'other',
-                'consumer_good': 'other'
+                'restaurant': 'restaurants',
+                'bar': 'bars',
+                'entertainment': 'events',
+                'sports': 'sports'
               };
               
               const mappedCategory = categoryMap[category.toLowerCase()];
@@ -230,9 +233,7 @@ const SearchVibes = ({ onSearch = () => {} }: SearchVibesProps) => {
       }
     }
     
-    if (onSearch) {
-      onSearch(searchQuery, selectedFilter, searchCategory);
-    }
+    onSearch(searchQuery, selectedFilter, searchCategory);
     setShowUserSuggestions(false);
     setShowPlaceSuggestions(false);
     setShowVibeSuggestions(false);

@@ -1,162 +1,184 @@
+import { useState, useMemo, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import { Minimize } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { mockLocations, mockPosts, mockComments } from "@/mock/data";
+import CameraButton from "@/components/CameraButton";
+import Header from "@/components/Header";
+import { Comment, Post, Location as VenueLocation } from "@/types"; // Import as VenueLocation to avoid conflicts
+import GoogleMapComponent from "@/components/map/google/GoogleMap";
+import { generateBusinessHours } from "@/utils/businessHoursUtils";
+import { 
+  isPostFromDayOfWeek, 
+  isWithinThreeMonths,
+  createDaySpecificVenuePosts
+} from "@/mock/time-utils";
+import { getVenueContent } from "@/utils/venue/venueContentHelpers";
+import DayOfWeekFilter from "@/components/venue/DayOfWeekFilter";
+import VenueProfileHeader from "@/components/venue/VenueProfileHeader";
+import VenueMap from "@/components/venue/VenueMap";
+import VenuePostsContent from "@/components/venue/VenuePostsContent";
 
-import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { mockLocations, mockPosts } from '@/mock/data';
-import VenueProfileHeader from '@/components/venue/VenueProfileHeader';
-import VenueActionButton from '@/components/venue/VenueActionButton';
-import VenuePostsTabs from '@/components/venue/VenuePostsTabs';
-import VenueMap from '@/components/venue/VenueMap';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Post, Location } from '@/types';
-import { Button } from '@/components/ui/button';
-import { LayoutGrid, ListIcon, Map } from 'lucide-react';
-import { Separator } from '@/components/ui/separator';
-import { Container } from '@/components/ui/container';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
-import VenueInsights from '@/components/VenueInsights';
+// Define an extended Post type that includes venue-specific properties
+interface ExtendedPost extends Post {
+  isVenuePost?: boolean;
+  isPinned?: boolean;
+  isExternalPost?: boolean;
+}
 
 const VenueProfile = () => {
-  const { venueId } = useParams<{ venueId: string }>();
-  const [activeTab, setActiveTab] = useState('posts');
-  const [viewMode, setViewMode] = useState<'list' | 'grid'>('grid');
-  const [showMapModal, setShowMapModal] = useState(false);
-
-  // Find venue from mock data
-  const venue = mockLocations.find((venue) => venue.id === venueId);
+  const { id } = useParams<{ id: string }>();
+  const [activeTab, setActiveTab] = useState("all");
+  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
+  const [isMapExpanded, setIsMapExpanded] = useState(false);
+  const [selectedDays, setSelectedDays] = useState<number[]>([]);
   
-  // Get posts for this venue
-  const venuePosts = mockPosts.filter((post) => post.location.id === venueId);
+  const venue = mockLocations.find(location => location.id === id);
+  
+  if (venue && !venue.hours) {
+    venue.hours = generateBusinessHours(venue);
+  }
+  
+  const venuePosts = useMemo(() => {
+    return mockPosts.filter(post => 
+      post.location.id === id && 
+      isWithinThreeMonths(post.timestamp)
+    );
+  }, [id]);
 
-  const handleMapExpand = () => {
-    setShowMapModal(true);
+  // Generate venue-specific posts for each day of the week
+  const generatedVenuePosts = useMemo(() => {
+    if (!venue) return [];
+    // Create posts and cast the result to Post[]
+    return createDaySpecificVenuePosts(venue.id, venue.type) as unknown as Post[];
+  }, [venue]);
+
+  const filteredPosts = useMemo(() => {
+    if (selectedDays.length === 0) {
+      return venuePosts;
+    }
+    
+    return venuePosts.filter(post => 
+      selectedDays.includes(new Date(post.timestamp).getDay())
+    );
+  }, [venuePosts, selectedDays]);
+
+  const allPosts = useMemo(() => {
+    if (!venue) return [];
+    
+    // Filter venue-specific posts by selected days
+    const filteredVenuePosts = selectedDays.length === 0 
+      ? generatedVenuePosts 
+      : generatedVenuePosts.filter(post => 
+          selectedDays.includes(new Date(post.timestamp).getDay())
+        );
+    
+    // Combine and sort all posts by timestamp
+    const combined = [...filteredPosts, ...filteredVenuePosts].sort((a, b) => 
+      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+    
+    return combined;
+  }, [filteredPosts, venue, generatedVenuePosts, selectedDays]);
+
+  const getPostComments = (postId: string): Comment[] => {
+    return mockComments.filter(comment => comment.postId === postId);
+  };
+
+  const toggleMapExpansion = () => {
+    setIsMapExpanded(!isMapExpanded);
+    
+    setTimeout(() => {
+      if (window.resizeMap) {
+        window.resizeMap();
+      }
+    }, 10);
+  };
+  
+  const handleDayToggle = (dayIndex: number) => {
+    setSelectedDays(prev => {
+      if (prev.includes(dayIndex)) {
+        return prev.filter(day => day !== dayIndex);
+      } else {
+        return [...prev, dayIndex];
+      }
+    });
+  };
+  
+  const clearDayFilters = () => {
+    setSelectedDays([]);
   };
 
   if (!venue) {
-    return <div className="flex justify-center items-center h-screen">Venue not found</div>;
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container py-20 text-center">
+          <h1 className="text-2xl font-bold mb-4">Venue not found</h1>
+          <p className="text-muted-foreground">This venue doesn't exist or has been removed.</p>
+          <Button className="mt-6" onClick={() => window.history.back()}>Go Back</Button>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <Container>
-      <div className="max-w-7xl mx-auto py-6 px-4">
-        {/* Venue Header */}
-        <VenueProfileHeader venue={venue} />
-        
-        {/* Action Buttons */}
-        <div className="flex flex-wrap gap-3 my-5">
-          <VenueActionButton 
-            variant="outline" 
-            className="border-blue-300" 
-            onClick={() => {}} 
-            icon="Check"
-          >
-            Check In
-          </VenueActionButton>
-          
-          <VenueActionButton 
-            variant="outline" 
-            className="border-purple-300" 
-            onClick={() => {}} 
-            icon="Camera"
-          >
-            Post
-          </VenueActionButton>
-          
-          <VenueActionButton 
-            variant="outline" 
-            className="border-green-300" 
-            onClick={() => {}} 
-            icon="Star"
-          >
-            Rate
-          </VenueActionButton>
-          
-          <VenueActionButton 
-            variant="outline" 
-            className="border-amber-300" 
-            onClick={() => setShowMapModal(true)} 
-            icon="Map"
-          >
-            Map
-          </VenueActionButton>
-        </div>
-        
-        <Separator className="my-5" />
-        
-        {/* Main Content Tabs */}
-        <Tabs defaultValue="posts" value={activeTab} onValueChange={setActiveTab}>
+    <div className="min-h-screen bg-background">
+      <Header />
+      
+      {isMapExpanded && (
+        <div className="fixed inset-0 z-50 bg-background p-4">
           <div className="flex justify-between items-center mb-4">
-            <TabsList>
-              <TabsTrigger value="posts">Posts</TabsTrigger>
-              <TabsTrigger value="about">About</TabsTrigger>
-              <TabsTrigger value="insights">Insights</TabsTrigger>
-            </TabsList>
-            
-            <div className="flex items-center gap-2">
-              <Button
-                variant={viewMode === 'list' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setViewMode('list')}
-                className="px-2.5"
-              >
-                <ListIcon className="h-4 w-4" />
-              </Button>
-              <Button
-                variant={viewMode === 'grid' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setViewMode('grid')}
-                className="px-2.5"
-              >
-                <LayoutGrid className="h-4 w-4" />
-              </Button>
-            </div>
+            <h2 className="text-xl font-bold">{venue.name} Location</h2>
+            <Button variant="ghost" size="sm" className="gap-1" onClick={toggleMapExpansion}>
+              <Minimize className="h-4 w-4" />
+              Close Map
+            </Button>
+          </div>
+          <div className="h-[85vh] rounded-lg overflow-hidden">
+            <GoogleMapComponent
+              userLocation={null}
+              locations={[venue]}
+              searchedCity={venue.city}
+              mapStyle="default"
+              selectedLocation={null}
+              onLocationSelect={() => {}}
+              userAddressLocation={null}
+            />
+          </div>
+        </div>
+      )}
+      
+      <main className="container py-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="glass-effect p-6 rounded-xl mb-6">
+            <VenueProfileHeader venue={venue} onMapExpand={toggleMapExpansion} />
+            <VenueMap venue={venue} onExpand={toggleMapExpansion} />
           </div>
           
-          <TabsContent value="posts" className="mt-4">
-            <VenuePostsTabs 
-              posts={venuePosts}
-              venue={venue}
-              viewMode={viewMode}
-            />
-          </TabsContent>
+          <DayOfWeekFilter 
+            selectedDays={selectedDays} 
+            onDayToggle={handleDayToggle} 
+            onClearFilters={clearDayFilters} 
+          />
           
-          <TabsContent value="about">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <h3 className="text-xl font-semibold mb-4">About {venue.name}</h3>
-                <p className="text-gray-700 dark:text-gray-300 mb-4">
-                  {venue.description || "No description available."}
-                </p>
-                
-                <div className="mt-6">
-                  <h4 className="font-medium mb-2">Contact</h4>
-                  <p className="text-sm">{venue.phone || "No phone available"}</p>
-                  <p className="text-sm">{venue.email || "No email available"}</p>
-                  <p className="text-sm">{venue.website ? <a href={venue.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{venue.website}</a> : "No website available"}</p>
-                </div>
-              </div>
-              
-              <div>
-                <VenueMap 
-                  location={venue} 
-                  onMapExpand={handleMapExpand}
-                />
-              </div>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="insights">
-            <VenueInsights />
-          </TabsContent>
-        </Tabs>
-      </div>
+          <VenuePostsContent
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+            allPosts={allPosts}
+            filteredPosts={filteredPosts}
+            generatedVenuePosts={generatedVenuePosts}
+            selectedDays={selectedDays}
+            venue={venue}
+            getPostComments={getPostComments}
+          />
+        </div>
+      </main>
       
-      {/* Map Modal */}
-      <Dialog open={showMapModal} onOpenChange={setShowMapModal}>
-        <DialogContent className="max-w-3xl">
-          <VenueMap location={venue} onMapExpand={handleMapExpand} />
-        </DialogContent>
-      </Dialog>
-    </Container>
+      <CameraButton />
+    </div>
   );
 };
 

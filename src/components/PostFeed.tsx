@@ -1,56 +1,170 @@
-import { useState, useEffect } from 'react';
-import { Post } from '@/types';
-import { comments } from '@/mock/data';
-import PostCard from '@/components/post/PostCard';
-import { Skeleton } from '@/components/ui/skeleton';
+
+import { useState, useMemo } from "react";
+import { mockPosts, mockComments, mockUsers } from "@/mock/data";
+import { PostCard } from "@/components/post";
+import SearchVibes from "@/components/SearchVibes";
+import { Post, User } from "@/types";
+import { isWithinThreeMonths } from "@/mock/time-utils";
 
 interface PostFeedProps {
-  posts: Post[];
-  loading: boolean;
+  celebrityFeatured?: string[];
 }
 
-const PostFeed: React.FC<PostFeedProps> = ({ posts, loading }) => {
-  const [displayedPosts, setDisplayedPosts] = useState<Post[]>([]);
-  const [visiblePosts, setVisiblePosts] = useState(3); // Initial number of posts to display
+const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
+  const [filter, setFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
-  useEffect(() => {
-    if (posts) {
-      setDisplayedPosts(posts.slice(0, visiblePosts));
+  const handleSearch = (query: string, filterType: string) => {
+    setSearchQuery(query);
+    if (filterType !== "All") {
+      setFilter(filterType.toLowerCase());
+    } else {
+      setFilter("all");
     }
-  }, [posts, visiblePosts]);
-
-  const loadMorePosts = () => {
-    setVisiblePosts(prevVisiblePosts => prevVisiblePosts + 3); // Load 3 more posts
   };
 
-  if (loading) {
-    return (
-      <div className="space-y-4">
-        {[...Array(5)].map((_, i) => (
-          <Skeleton key={i} className="w-full h-40" />
-        ))}
-      </div>
-    );
-  }
+  // First, filter posts to only show those from the past 3 months
+  const recentPosts = useMemo(() => {
+    return mockPosts.filter(post => isWithinThreeMonths(post.timestamp));
+  }, []);
 
-  if (!posts || posts.length === 0) {
-    return <p>No posts available.</p>;
-  }
+  // Function to find a user by username
+  const findUserByUsername = (username: string): User | undefined => {
+    return mockUsers.find(user => user.username.toLowerCase() === username.toLowerCase());
+  };
+
+  // Prioritize posts from featured users if provided
+  const prioritizedPosts = useMemo(() => {
+    if (!celebrityFeatured || celebrityFeatured.length === 0) {
+      return recentPosts;
+    }
+
+    // Create a map of usernames (lowercase) for case-insensitive comparison
+    const featuredUsernames = celebrityFeatured.map(username => username.toLowerCase());
+
+    // Find posts from featured users
+    const featuredUserPosts = recentPosts.filter(post => 
+      featuredUsernames.includes(post.user.username.toLowerCase())
+    );
+    
+    // Get the remaining posts
+    const otherPosts = recentPosts.filter(post => 
+      !featuredUsernames.includes(post.user.username.toLowerCase())
+    );
+    
+    // Combine them with featured posts first
+    return [...featuredUserPosts, ...otherPosts];
+  }, [recentPosts, celebrityFeatured]);
+
+  const filteredPosts = useMemo(() => {
+    return prioritizedPosts.filter((post) => {
+      if (filter !== "all" && post.location.type !== filter) {
+        return false;
+      }
+      
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        return (
+          post.location.name.toLowerCase().includes(query) ||
+          post.location.city.toLowerCase().includes(query) ||
+          post.content.toLowerCase().includes(query)
+        );
+      }
+      
+      return true;
+    });
+  }, [prioritizedPosts, filter, searchQuery]);
+
+  // Group posts by location
+  const postsGroupedByLocation = useMemo(() => {
+    const groupedPosts: Record<string, Post[]> = {};
+    
+    filteredPosts.forEach(post => {
+      const locationId = post.location.id;
+      if (!groupedPosts[locationId]) {
+        groupedPosts[locationId] = [];
+      }
+      groupedPosts[locationId].push(post);
+    });
+    
+    // Sort each location's posts by timestamp (most recent first)
+    Object.keys(groupedPosts).forEach(locationId => {
+      groupedPosts[locationId].sort((a, b) => 
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      );
+    });
+    
+    return groupedPosts;
+  }, [filteredPosts]);
+
+  // Calculate the number of posts per location
+  // For demo purposes, add variation to the counts
+  const locationPostCounts = (() => {
+    const counts: Record<string, number> = {};
+    
+    // Define specific counts for certain locations to ensure variety
+    const specificCounts: Record<string, number> = {
+      "1": 15, // Sunset Lounge
+      "2": 23, // Artisan Coffee House
+      "3": 8,  // Summer Music Festival
+      "4": 3,  // Modern Art Museum
+      "5": 42, // Skyline Rooftop Bar
+      "6": 67, // Madison Square Garden
+      "7": 89, // Encore Beach Club
+      "8": 35, // Christ the Redeemer
+      "9": 12, // Aspen Highlands
+      "10": 121, // Allegiant Stadium (Super Bowl)
+      "13": 78, // Houston Rodeo
+      "14": 19, // Laugh Factory
+      "18": 53, // Sydney Opera House
+      "19": 145, // Eiffel Tower
+      "20": 104, // Coachella Valley Music Festival
+      "21": 31, // Gucci Pop-Up
+    };
+    
+    // Apply the specific counts where defined, and calculate naturally for others
+    filteredPosts.forEach(post => {
+      const locationId = post.location.id;
+      if (locationId in specificCounts) {
+        counts[locationId] = specificCounts[locationId];
+      } else {
+        counts[locationId] = (counts[locationId] || 0) + Math.floor(Math.random() * 50) + 1;
+      }
+    });
+    
+    return counts;
+  })();
+
+  // Get post comments
+  const getPostComments = (postId: string) => {
+    return mockComments.filter(comment => comment.postId === postId);
+  };
 
   return (
-    <div>
-      <div className="space-y-4">
-        {displayedPosts.map(post => (
-          <PostCard key={post.id} post={post} />
-        ))}
+    <div className="max-w-3xl mx-auto">
+      <div className="mb-4">
+        <SearchVibes onSearch={handleSearch} />
       </div>
-      {displayedPosts.length < posts.length && (
-        <div className="flex justify-center mt-4">
-          <button onClick={loadMorePosts} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300">
-            Load More
-          </button>
-        </div>
-      )}
+
+      <div className="p-4 space-y-4">
+        {Object.keys(postsGroupedByLocation).length > 0 ? (
+          Object.entries(postsGroupedByLocation).map(([locationId, posts]) => (
+            <PostCard 
+              key={locationId} 
+              posts={posts} 
+              locationPostCount={locationPostCounts[locationId]}
+              getComments={getPostComments}
+            />
+          ))
+        ) : (
+          <div className="text-center py-10">
+            <h3 className="text-xl font-semibold mb-2">No vibes found</h3>
+            <p className="text-muted-foreground">
+              Try adjusting your filters or post your own vibe!
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

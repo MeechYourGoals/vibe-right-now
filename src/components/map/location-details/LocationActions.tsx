@@ -37,9 +37,11 @@ const LocationActions = ({ location, onViewVibes }: LocationActionsProps) => {
   const navigate = useNavigate();
   
   // Ensure location has hours
-  const hours = location.hours || generateBusinessHours();
+  if (!location.hours) {
+    location.hours = generateBusinessHours(location);
+  }
   
-  const todaysHours = getTodaysHours(hours);
+  const todaysHours = getTodaysHours(location);
   
   // Helper function to get ride service URL
   const getRideServiceUrl = (place: Location) => {

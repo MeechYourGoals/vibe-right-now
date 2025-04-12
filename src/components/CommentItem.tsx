@@ -11,7 +11,6 @@ interface CommentItemProps {
 
 const CommentItem = ({ comment }: CommentItemProps) => {
   const timeAgo = formatDistanceToNow(new Date(comment.timestamp), { addSuffix: true });
-  const content = comment.content || comment.text || "";
 
   return (
     <div className={`flex items-start space-x-2 py-2 ${comment.vibedHere ? 'bg-amber-50/30 border border-amber-200/50 rounded-md px-2' : ''}`}>
@@ -30,7 +29,7 @@ const CommentItem = ({ comment }: CommentItemProps) => {
           )}
           <span className="text-xs text-muted-foreground ml-auto">{timeAgo}</span>
         </div>
-        <p className="text-sm mt-1">{content}</p>
+        <p className="text-sm mt-1">{comment.content}</p>
       </div>
     </div>
   );
