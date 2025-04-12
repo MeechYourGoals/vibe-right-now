@@ -1,141 +1,179 @@
 
-import React from 'react';
-import { Button } from "@/components/ui/button";
-import { Share2, ExternalLink } from "lucide-react";
-import VenueActionButton from "./VenueActionButton";
-import TravelSiteComparison from "./TravelSiteComparison";
-import { Location } from "@/types";
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
 import { 
-  shareVenue, 
-  getRideServiceUrl, 
-  getExternalLinkUrl, 
-  getActionButtonText,
-  shouldShowExternalActionButton
-} from "@/utils/venue/venuePostUtils";
-import { isEligibleForPriceComparison } from "@/utils/venue/travelIntegrationUtils";
+  Heart, 
+  MessageCircle, 
+  Share2, 
+  ExternalLink, 
+  SendHorizonal,
+  MapPin
+} from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Location } from '@/types';
+import { Separator } from '@/components/ui/separator';
+import VenueActionButton from './VenueActionButton';
 
 interface VenuePostFooterProps {
+  likes: number;
+  comments: number | any[];
+  liked?: boolean;
+  saved?: boolean;
   venue: Location;
-  officialTicketUrl: string;
-  sourceUrl?: string; // URL to the original post source (Yelp, TripAdvisor, etc.)
-  sourcePlatform?: string; // Name of the source platform
+  variant?: "default" | "minimal";
+  onLike?: () => void;
+  onComment?: () => void;
+  onShare?: () => void;
+  onVisit?: () => void;
+  showLocation?: boolean;
 }
 
-const VenuePostFooter: React.FC<VenuePostFooterProps> = ({ 
-  venue, 
-  officialTicketUrl, 
-  sourceUrl, 
-  sourcePlatform 
-}) => {
-  const rideUrl = getRideServiceUrl(venue);
-  const showExternalButton = shouldShowExternalActionButton(venue, officialTicketUrl);
-  const showPriceComparison = isEligibleForPriceComparison(venue);
-  const isExternalContent = !!sourceUrl;
+const VenuePostFooter = ({
+  likes,
+  comments,
+  liked = false,
+  saved = false,
+  venue,
+  variant = "default",
+  onLike,
+  onComment,
+  onShare,
+  onVisit,
+  showLocation = true
+}: VenuePostFooterProps) => {
+  const [isLiked, setIsLiked] = useState(liked);
+  const [likesCount, setLikesCount] = useState(likes);
 
-  return (
-    <>
-      {showPriceComparison && (
-        <TravelSiteComparison venue={venue} />
-      )}
-      
-      <div className="flex justify-between w-full">
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="flex items-center gap-1"
-          onClick={() => shareVenue(venue)}
-        >
-          <Share2 className="h-4 w-4" />
-          <span>Share</span>
-        </Button>
+  const handleLike = () => {
+    if (isLiked) {
+      setLikesCount(prev => prev - 1);
+    } else {
+      setLikesCount(prev => prev + 1);
+    }
+    setIsLiked(!isLiked);
+    
+    if (onLike) {
+      onLike();
+    }
+  };
+
+  // Determine comments count
+  let commentsCount = 0;
+  if (typeof comments === 'number') {
+    commentsCount = comments;
+  } else if (Array.isArray(comments)) {
+    commentsCount = comments.length;
+  }
+  
+  const handleComment = () => {
+    if (onComment) onComment();
+  };
+  
+  const handleShare = () => {
+    if (onShare) onShare();
+  };
+  
+  const handleVisit = () => {
+    if (onVisit) onVisit();
+  };
+  
+  if (variant === "minimal") {
+    return (
+      <div className="flex items-center justify-between text-sm text-muted-foreground">
+        <div className="flex items-center space-x-4">
+          <button 
+            className={`flex items-center gap-1 ${isLiked ? 'text-red-500' : ''}`}
+            onClick={handleLike}
+          >
+            <Heart className={`h-4 w-4 ${isLiked ? 'fill-current text-red-500' : ''}`} />
+            <span>{likesCount}</span>
+          </button>
+          
+          <button 
+            className="flex items-center gap-1"
+            onClick={handleComment}
+          >
+            <MessageCircle className="h-4 w-4" />
+            <span>{commentsCount}</span>
+          </button>
+        </div>
         
-        <Button 
-          variant="default" 
-          size="sm" 
-          onClick={() => window.location.href = `/venue/${venue.id}`}
+        <div className="flex items-center space-x-2">
+          {showLocation && (
+            <Badge variant="outline" className="flex items-center gap-1 px-2 py-0 h-5">
+              <MapPin className="h-3 w-3" />
+              <span className="text-xs truncate max-w-24">{venue.name}</span>
+            </Badge>
+          )}
+          
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7"
+            onClick={handleShare}
+          >
+            <Share2 className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+      </div>
+    );
+  }
+  
+  return (
+    <div className="space-y-3">
+      <Separator />
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-1">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className={`h-9 w-9 ${isLiked ? 'text-red-500' : ''}`}
+            onClick={handleLike}
+          >
+            <Heart className={`h-5 w-5 ${isLiked ? 'fill-current text-red-500' : ''}`} />
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="icon"
+            className="h-9 w-9"
+            onClick={handleComment}
+          >
+            <MessageCircle className="h-5 w-5" />
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="icon"
+            className="h-9 w-9"
+            onClick={handleShare}
+          >
+            <Share2 className="h-5 w-5" />
+          </Button>
+        </div>
+        
+        <VenueActionButton
+          variant="outline"
+          className="text-xs"
+          onClick={handleVisit}
+          icon="MapPin"
         >
-          View Event
-        </Button>
+          Visit
+        </VenueActionButton>
       </div>
       
-      <div className="flex gap-2 w-full">
-        {isExternalContent ? (
-          <>
-            <a 
-              href={sourceUrl} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="flex-1"
-            >
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="w-full bg-blue-500/20 text-blue-500 border-blue-500/50 hover:bg-blue-500/30"
-              >
-                <ExternalLink className="h-4 w-4 mr-1" />
-                View on {sourcePlatform || "Original Site"}
-              </Button>
-            </a>
-            
-            <a 
-              href={rideUrl} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="flex-1"
-            >
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="w-full"
-              >
-                Order a Ride
-              </Button>
-            </a>
-          </>
-        ) : (
-          <>
-            <VenueActionButton 
-              venue={venue} 
-              variant="outline" 
-              className="flex-1"
-            />
-            
-            <a 
-              href={rideUrl} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="flex-1"
-            >
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="w-full"
-              >
-                Order a Ride
-              </Button>
-            </a>
-            
-            {showExternalButton && (
-              <a 
-                href={getExternalLinkUrl(venue, officialTicketUrl)} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="flex-1"
-              >
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="bg-amber-500/20 text-amber-500 border-amber-500/50 hover:bg-amber-500/30 w-full"
-                >
-                  <ExternalLink className="h-4 w-4 mr-1" />
-                  {getActionButtonText(venue.type)}
-                </Button>
-              </a>
-            )}
-          </>
+      <div className="flex justify-between items-center text-sm">
+        <div>
+          <div className="font-medium">{likesCount} likes</div>
+          <div className="text-muted-foreground">{commentsCount} comments</div>
+        </div>
+        
+        {showLocation && (
+          <Badge variant="outline" className="flex items-center gap-1">
+            <MapPin className="h-3 w-3" />
+            <span className="truncate max-w-24">{venue.name}</span>
+          </Badge>
         )}
       </div>
-    </>
+    </div>
   );
 };
 

@@ -1,106 +1,55 @@
-import { Location, Media } from "@/types";
-import { v4 as uuidv4 } from 'uuid';
+import { Location, Media } from '@/types';
 
-// Function to extract and format media from a location
-export function extractLocationMedia(location: Location): Media[] {
-  if (!location.photos || location.photos.length === 0) {
-    // Return default placeholder image if no photos
-    return [
-      {
-        id: uuidv4(),
-        type: "image",
-        url: '/placeholder.svg'
-      }
-    ];
-  }
-
-  // Convert location photos to media format
-  return location.photos.map(photo => {
-    if (typeof photo === 'string') {
-      return {
-        id: uuidv4(),
-        type: "image",
-        url: photo
-      };
-    }
-    
-    // If photo is already in Media format
-    if (photo.type && photo.url) {
-      return {
-        id: photo.id || uuidv4(),
-        type: photo.type as 'image' | 'video',
-        url: photo.url,
-        thumbnail: photo.thumbnail
-      };
-    }
-    
-    // Fallback
-    return {
-      id: uuidv4(),
-      type: "image",
-      url: '/placeholder.svg'
-    };
-  });
+interface LocationMedia {
+  url: string;
+  type: 'image' | 'video';
+  id: string;
+  thumbnail?: string;
 }
 
-// Get media for a location
-export const getMediaForLocation = (location: Location): Media => {
-  // Return appropriate media based on location type and name
-  const imageMap: Record<string, string> = {
-    // Sports venues
-    "30": "https://images.unsplash.com/photo-1504450758481-7338eba7524a?q=80&w=1000&auto=format&fit=crop",  // Lakers
-    "31": "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?q=80&w=1000&auto=format&fit=crop",  // Rams
-    "32": "https://images.unsplash.com/photo-1566577134624-d9b13555e288?q=80&w=1000&auto=format&fit=crop",  // Dodgers
-    "33": "https://images.unsplash.com/photo-1459865264687-595d652de67e?q=80&w=1000&auto=format&fit=crop",  // LA Galaxy
-    "34": "https://images.unsplash.com/photo-1530915872-13619796d013?q=80&w=1000&auto=format&fit=crop",    // Volleyball
-    "35": "https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?q=80&w=1000&auto=format&fit=crop",  // Golf
-  };
-
-  // Default media based on type if no specific image is available
-  const typeDefaultMedia: Record<string, string> = {
-    "restaurant": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=1000&auto=format&fit=crop",
-    "bar": "https://images.unsplash.com/photo-1572116469696-31de0f17cc34?q=80&w=1000&auto=format&fit=crop",
-    "event": "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=1000&auto=format&fit=crop",
-    "attraction": "https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?q=80&w=1000&auto=format&fit=crop",
-    "sports": "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?q=80&w=1000&auto=format&fit=crop",
-    "other": "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=1000&auto=format&fit=crop",
-  };
-
-  const url = imageMap[location.id] || typeDefaultMedia[location.type] || `https://source.unsplash.com/random/800x600/?${location.type},${location.city}`;
-
-  return {
-    id: `media-${location.id}`,
-    type: "image" as const,
-    url
-  };
-};
-
-export const generateRandomMediaForLocation = (locationId: string): Media[] => {
-  const mediaCount = Math.floor(Math.random() * 3) + 1;
-  const media: Media[] = [];
-  
-  for (let i = 0; i < mediaCount; i++) {
-    const isVideo = Math.random() < 0.2;
-    const mediaItem: Media = {
-      id: `${locationId}-media-${i}`,
-      type: isVideo ? 'video' : 'image',
-      url: isVideo 
-        ? `/images/locations/videos/venue-${Math.floor(Math.random() * 5) + 1}.mp4`
-        : `/images/locations/venue-${Math.floor(Math.random() * 20) + 1}.jpg`,
-      thumbnail: isVideo ? `/images/locations/venue-${Math.floor(Math.random() * 20) + 1}.jpg` : undefined
+// Get an appropriate media item for a location
+export const getMediaForLocation = (location: Location): LocationMedia => {
+  // Default media if no location is provided
+  if (!location) {
+    return {
+      id: 'default',
+      type: 'image',
+      url: 'https://source.unsplash.com/random/200x200/?city'
     };
-    
-    media.push(mediaItem);
   }
   
-  return media;
-};
-
-// For default image place to show on map
-export const getDefaultLocationImage = (): Media => {
+  // If location has photos, use the first one
+  if (location.photos && location.photos.length > 0) {
+    return {
+      id: `${location.id}-photo-1`,
+      type: 'image',
+      url: location.photos[0]
+    };
+  }
+  
+  // Otherwise, generate a random image based on the location type
+  let category = 'place';
+  if (location.type) {
+    if (location.type.toLowerCase().includes('restaurant') || 
+        location.type.toLowerCase().includes('food')) {
+      category = 'restaurant';
+    } else if (location.type.toLowerCase().includes('bar') || 
+               location.type.toLowerCase().includes('club')) {
+      category = 'nightlife';
+    } else if (location.type.toLowerCase().includes('park') || 
+               location.type.toLowerCase().includes('outdoor')) {
+      category = 'nature';
+    } else if (location.type.toLowerCase().includes('museum') || 
+               location.type.toLowerCase().includes('gallery')) {
+      category = 'art';
+    }
+  }
+  
   return {
-    id: 'default-location-image',
+    id: `${location.id}-default`,
     type: 'image',
-    url: '/images/locations/venue-1.jpg'
+    url: `https://source.unsplash.com/random/200x200/?${category},${location.city}`
   };
 };
+
+export default { getMediaForLocation };

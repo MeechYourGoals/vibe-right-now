@@ -40,109 +40,110 @@ const Index = () => {
   // Get celebrity users for featured content
   const celebrityUsers = mockUsers.filter(user => user.isCelebrity);
   
-  const handleSearch = (query, filterType, category) => {
-    console.log(`Searching for ${query} with filter ${filterType} in category ${category}`);
-    // Implement search functionality
-  };
-  
   return (
     <>
       <Container className="py-4">
-        <div className="space-y-6">
-          {/* Search Bar */}
-          <SearchVibes onSearch={handleSearch} />
-          
-          {/* Recommendations Section */}
-          <section className="mb-8">
-            <h2 className="text-xl font-bold mb-4">Recommended for You</h2>
-            <RecommendedForYou />
-          </section>
-          
-          {/* Trending Locations Section */}
-          <section className="mb-8">
-            <h2 className="text-xl font-bold mb-4">Trending Locations</h2>
-            <TrendingLocations />
-          </section>
-          
-          {/* Map Toggle Section */}
-          <section className="mb-4 flex justify-between items-center">
-            <h2 className="text-xl font-bold">Nearby Vibes</h2>
-            <Button
-              variant={viewingMap ? "default" : "outline"}
-              onClick={() => setViewingMap(!viewingMap)}
-            >
-              {viewingMap ? "List View" : "Map View"}
-            </Button>
-          </section>
-          
-          {viewingMap ? (
-            <div className="h-[400px] rounded-lg overflow-hidden mb-8">
-              <NearbyVibesMap />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Main Content Column - 2/3 width on medium screens and above */}
+          <div className="md:col-span-2 space-y-6">
+            {/* Search Bar */}
+            <SearchVibes />
+            
+            {/* Map Toggle Section */}
+            <section className="mb-4 flex justify-between items-center">
+              <h2 className="text-xl font-bold">Nearby Vibes</h2>
+              <Button
+                variant={viewingMap ? "default" : "outline"}
+                onClick={() => setViewingMap(!viewingMap)}
+              >
+                {viewingMap ? "List View" : "Map View"}
+              </Button>
+            </section>
+            
+            {viewingMap ? (
+              <div className="h-[400px] rounded-lg overflow-hidden mb-8">
+                <NearbyVibesMap />
+              </div>
+            ) : (
+              <div className="mb-8">
+                <LocationsNearby />
+              </div>
+            )}
+            
+            {/* Feed Category Filter */}
+            <div className="flex overflow-x-auto space-x-2 pb-2 mb-4">
+              <Button 
+                variant={selectedCategory === 'all' ? "default" : "outline"}
+                size="sm"
+                onClick={() => handleCategorySelect('all')}
+                className="rounded-full"
+              >
+                All
+              </Button>
+              <Button 
+                variant={selectedCategory === 'food' ? "default" : "outline"}
+                size="sm"
+                onClick={() => handleCategorySelect('food')}
+                className="rounded-full"
+              >
+                Food
+              </Button>
+              <Button 
+                variant={selectedCategory === 'entertainment' ? "default" : "outline"}
+                size="sm"
+                onClick={() => handleCategorySelect('entertainment')}
+                className="rounded-full"
+              >
+                Entertainment
+              </Button>
+              <Button 
+                variant={selectedCategory === 'nightlife' ? "default" : "outline"}
+                size="sm"
+                onClick={() => handleCategorySelect('nightlife')}
+                className="rounded-full"
+              >
+                Nightlife
+              </Button>
+              <Button 
+                variant={selectedCategory === 'outdoors' ? "default" : "outline"}
+                size="sm"
+                onClick={() => handleCategorySelect('outdoors')}
+                className="rounded-full"
+              >
+                Outdoors
+              </Button>
             </div>
-          ) : (
-            <div className="mb-8">
-              <LocationsNearby />
-            </div>
-          )}
-          
-          {/* Discount Locations */}
-          <section className="mb-8">
-            <h2 className="text-xl font-bold mb-4">Places with Discounts</h2>
-            <DiscountLocations />
-          </section>
-          
-          {/* Feed Category Filter */}
-          <div className="flex overflow-x-auto space-x-2 pb-2 mb-4">
-            <Button 
-              variant={selectedCategory === 'all' ? "default" : "outline"}
-              size="sm"
-              onClick={() => handleCategorySelect('all')}
-              className="rounded-full"
-            >
-              All
-            </Button>
-            <Button 
-              variant={selectedCategory === 'food' ? "default" : "outline"}
-              size="sm"
-              onClick={() => handleCategorySelect('food')}
-              className="rounded-full"
-            >
-              Food
-            </Button>
-            <Button 
-              variant={selectedCategory === 'entertainment' ? "default" : "outline"}
-              size="sm"
-              onClick={() => handleCategorySelect('entertainment')}
-              className="rounded-full"
-            >
-              Entertainment
-            </Button>
-            <Button 
-              variant={selectedCategory === 'nightlife' ? "default" : "outline"}
-              size="sm"
-              onClick={() => handleCategorySelect('nightlife')}
-              className="rounded-full"
-            >
-              Nightlife
-            </Button>
-            <Button 
-              variant={selectedCategory === 'outdoors' ? "default" : "outline"}
-              size="sm"
-              onClick={() => handleCategorySelect('outdoors')}
-              className="rounded-full"
-            >
-              Outdoors
-            </Button>
+            
+            {/* Post Feed */}
+            <section>
+              <h2 className="text-xl font-bold mb-4">Latest Posts</h2>
+              <PostFeed 
+                posts={filteredPosts} 
+                loading={loadingPosts} 
+              />
+            </section>
           </div>
           
-          {/* Post Feed */}
-          <section>
-            <h2 className="text-xl font-bold mb-4">Latest Posts</h2>
-            <PostFeed 
-              posts={filteredPosts} 
-              loading={loadingPosts} 
-            />
-          </section>
+          {/* Sidebar Column - 1/3 width on medium screens and above */}
+          <div className="space-y-6">
+            {/* Recommendations Section */}
+            <section>
+              <h2 className="text-xl font-bold mb-4">Recommended for You</h2>
+              <RecommendedForYou />
+            </section>
+            
+            {/* Trending Locations Section */}
+            <section>
+              <h2 className="text-xl font-bold mb-4">Trending Locations</h2>
+              <TrendingLocations />
+            </section>
+            
+            {/* Discount Locations */}
+            <section>
+              <h2 className="text-xl font-bold mb-4">Places with Discounts</h2>
+              <DiscountLocations />
+            </section>
+          </div>
         </div>
       </Container>
       

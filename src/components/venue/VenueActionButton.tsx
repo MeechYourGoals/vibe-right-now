@@ -6,7 +6,7 @@ import { Location } from '@/types';
 
 type IconType = 'Check' | 'Camera' | 'Star' | 'Map' | 'MapPin' | 'Clock' | 'Share' | 'Heart' | 'BookOpen' | 'Calendar';
 
-interface VenueActionButtonProps {
+export interface VenueActionButtonProps {
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
   className?: string;
   onClick: () => void;

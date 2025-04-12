@@ -1,25 +1,23 @@
 
-import * as React from "react"
-import { cn } from "@/lib/utils"
+import React from "react";
+import { cn } from "@/lib/utils";
 
 interface ContainerProps {
-  className?: string
-  children: React.ReactNode
+  children: React.ReactNode;
+  className?: string;
 }
 
-export const Container = React.forwardRef<
-  HTMLDivElement,
-  ContainerProps
->(({ className, children, ...props }, ref) => {
+export const Container: React.FC<ContainerProps> = ({ 
+  children, 
+  className,
+  ...props
+}) => {
   return (
-    <div
-      ref={ref}
+    <div 
       className={cn("container mx-auto px-4", className)}
       {...props}
     >
       {children}
     </div>
-  )
-})
-
-Container.displayName = "Container"
+  );
+};
