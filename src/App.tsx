@@ -1,6 +1,6 @@
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Home from "@/pages/Home";
+import Index from "@/pages/Index";
 import Explore from "@/pages/Explore";
 import Profile from "@/pages/Profile";
 import MyPlaces from "@/pages/MyPlaces";
@@ -22,7 +22,7 @@ function App() {
         <div className="min-h-screen bg-background text-foreground">
           <Header />
           <Routes>
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<Index />} />
             <Route path="/explore" element={<Explore />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/my-places" element={<MyPlaces />} />
