@@ -4,44 +4,95 @@ import { ComedySearchService } from './comedy/ComedySearchService';
 import { IntegratedSearchProvider } from './providers/IntegratedSearchProvider';
 import { FallbackResponseGenerator } from './providers';
 import { SearchServiceCore } from './core/SearchServiceCore';
+import { getPrimaryProvider, getFallbackProviders } from '@/services/MultiProviderSystem';
 
 /**
  * Orchestrates multiple search providers to find the best result
+ * Enhanced with MCP (Multiple Chat Providers) support
  */
 export const SearchService = {
   /**
    * Search using multiple providers, trying each one until a result is found
+   * Uses the MCP system to determine provider priority
    * @param query The search query
    * @param categories Optional categories from Cloud Natural Language API
    * @returns The search results as text
    */
   async search(query: string, categories?: string[]): Promise<string> {
     try {
-      console.log('Searching for:', query);
+      console.log('MCP: Searching for:', query);
       if (categories && categories.length > 0) {
-        console.log('With NLP categories:', categories);
+        console.log('MCP: With NLP categories:', categories);
       }
       
-      // First try vector search through AI API (most up-to-date info)
-      const vectorResult = await IntegratedSearchProvider.attemptVectorSearch(query, categories);
-      if (vectorResult) return vectorResult;
+      // Get primary search provider based on MCP priorities
+      const primaryProvider = getPrimaryProvider('search');
+      console.log('MCP: Using primary provider:', primaryProvider?.name);
       
-      // Try using AI directly for a conversational response with current information
-      const aiResult = await IntegratedSearchProvider.attemptDirectAISearch(query, categories);
-      if (aiResult) return aiResult;
+      // First try the primary provider
+      if (primaryProvider) {
+        let result = null;
+        
+        switch (primaryProvider.id) {
+          case 'vertex-ai':
+            result = await IntegratedSearchProvider.attemptDirectAISearch(query, categories);
+            break;
+          case 'vector-search':
+            result = await SearchServiceCore.vectorSearch(query, categories);
+            if (typeof result === 'object' && result !== null) {
+              result = result.results;
+            }
+            break;
+          case 'swirl':
+            result = await IntegratedSearchProvider.attemptSwirlSearch(query);
+            break;
+          default:
+            break;
+        }
+        
+        if (result) {
+          console.log(`MCP: Primary provider ${primaryProvider.name} returned result`);
+          return typeof result === 'string' ? result : JSON.stringify(result);
+        }
+      }
       
-      // Try using Swirl (local search engine)
-      const swirlResult = await IntegratedSearchProvider.attemptSwirlSearch(query);
-      if (swirlResult) return swirlResult;
+      // If primary provider fails, try fallbacks in priority order
+      const fallbackProviders = getFallbackProviders('search');
+      console.log('MCP: Using fallback providers:', fallbackProviders.map(p => p.name).join(', '));
       
-      // Try other providers as fallbacks
-      const providersResult = await IntegratedSearchProvider.attemptAllProviders(query);
-      if (providersResult) return providersResult;
+      for (const provider of fallbackProviders) {
+        let result = null;
+        
+        switch (provider.id) {
+          case 'vertex-ai':
+            result = await IntegratedSearchProvider.attemptDirectAISearch(query, categories);
+            break;
+          case 'vector-search':
+            result = await SearchServiceCore.vectorSearch(query, categories);
+            if (typeof result === 'object' && result !== null) {
+              result = result.results;
+            }
+            break;
+          case 'swirl':
+            result = await IntegratedSearchProvider.attemptSwirlSearch(query);
+            break;
+          case 'google-search':
+            result = await IntegratedSearchProvider.attemptAllProviders(query);
+            break;
+          default:
+            break;
+        }
+        
+        if (result) {
+          console.log(`MCP: Fallback provider ${provider.name} returned result`);
+          return typeof result === 'string' ? result : JSON.stringify(result);
+        }
+      }
       
       // Ultimate fallback if all services fail
       return FallbackResponseGenerator.useFallbackLocalService(query);
     } catch (error) {
-      console.error('Error in search services:', error);
+      console.error('MCP: Error in search services:', error);
       return FallbackResponseGenerator.useFallbackLocalService(query);
     }
   },
@@ -64,5 +115,12 @@ export const SearchService = {
    */
   async vectorSearch(query: string, categories?: string[]): Promise<{results: string, categories: string[]} | string | null> {
     return SearchServiceCore.vectorSearch(query, categories);
-  }
+  },
+  
+  /**
+   * Get a list of all available search providers and their status
+   */
+  getAvailableSearchProviders() {
+    return getPrimaryProvider('search');
+  },
 };

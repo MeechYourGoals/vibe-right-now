@@ -2,7 +2,9 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const GOOGLE_VERTEX_API_KEY = Deno.env.get('GOOGLE_VERTEX_API_KEY');
+const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
 const VERTEX_API_URL = "https://us-central1-aiplatform.googleapis.com/v1/projects/PROJECT_ID/locations/us-central1/publishers/google/models/gemini-1.5-pro:generateContent";
+const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -53,18 +55,28 @@ serve(async (req) => {
   }
 
   try {
-    console.log("Starting Vertex AI function execution");
+    console.log("Starting AI function execution with MCP support");
     
     // Parse request body
     const requestData = await req.json();
-    const { prompt, mode, history, searchMode, categories } = requestData;
+    const { 
+      prompt, 
+      mode, 
+      history, 
+      searchMode, 
+      categories,
+      useGemini = false,
+      provider = 'default'
+    } = requestData;
     
     console.log("Request parameters:", { 
       prompt: prompt?.substring(0, 50) + "...", 
       mode, 
       historyLength: history?.length || 0,
       searchMode, 
-      categoriesCount: categories?.length || 0 
+      categoriesCount: categories?.length || 0,
+      useGemini,
+      provider
     });
     
     // Build conversation history in Vertex AI format
@@ -119,46 +131,82 @@ serve(async (req) => {
       });
     }
     
-    console.log("Preparing to call Vertex AI API with URL:", VERTEX_API_URL);
-    console.log("Contents length:", contents.length);
+    // Determine which AI provider to use
+    const useVertexAI = !useGemini && GOOGLE_VERTEX_API_KEY;
+    const useGeminiAPI = (useGemini || !GOOGLE_VERTEX_API_KEY) && GEMINI_API_KEY;
     
-    if (!GOOGLE_VERTEX_API_KEY) {
-      throw new Error("GOOGLE_VERTEX_API_KEY environment variable is not set");
+    if (!useVertexAI && !useGeminiAPI) {
+      throw new Error("No valid API keys found for AI providers");
     }
     
-    // Call the Vertex AI API
-    const response = await fetch(`${VERTEX_API_URL}?key=${GOOGLE_VERTEX_API_KEY}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        contents: contents,
-        generationConfig: {
-          temperature: searchMode ? 0.1 : 0.7, // Lower temperature for factual search queries
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: 2048,
-        }
-      })
-    });
-
-    console.log("Vertex AI API response status:", response.status);
-
-    if (!response.ok) {
-      const errorData = await response.text();
-      console.error(`Vertex AI API error: ${response.status}`, errorData);
-      return new Response(
-        JSON.stringify({ error: `Error calling Vertex AI API: ${response.status}` }),
-        { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    const data = await response.json();
-    console.log("Vertex AI API response received");
+    let responseText = '';
     
-    // Extract the response text
-    const responseText = data.candidates[0].content.parts[0].text;
+    // Use Vertex AI
+    if (useVertexAI) {
+      console.log("Using Vertex AI provider");
+      const response = await fetch(`${VERTEX_API_URL}?key=${GOOGLE_VERTEX_API_KEY}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          contents: contents,
+          generationConfig: {
+            temperature: searchMode ? 0.1 : 0.7,
+            topK: 40,
+            topP: 0.95,
+            maxOutputTokens: 2048,
+          }
+        })
+      });
+
+      console.log("Vertex AI API response status:", response.status);
+
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error(`Vertex AI API error: ${response.status}`, errorData);
+        throw new Error(`Error calling Vertex AI API: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("Vertex AI API response received");
+      
+      // Extract the response text
+      responseText = data.candidates[0].content.parts[0].text;
+    } 
+    // Use Gemini API
+    else if (useGeminiAPI) {
+      console.log("Using Gemini API provider");
+      const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          contents: contents,
+          generationConfig: {
+            temperature: searchMode ? 0.1 : 0.7,
+            topK: 40,
+            topP: 0.95,
+            maxOutputTokens: 2048,
+          }
+        })
+      });
+
+      console.log("Gemini API response status:", response.status);
+
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error(`Gemini API error: ${response.status}`, errorData);
+        throw new Error(`Error calling Gemini API: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("Gemini API response received");
+      
+      // Extract the response text
+      responseText = data.candidates[0].content.parts[0].text;
+    }
     
     // Add hyperlinks to the Explore page for any locations or events mentioned
     const enhancedResponse = addExplorePageLinks(responseText, prompt);
@@ -168,7 +216,7 @@ serve(async (req) => {
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
-    console.error('Error in vertex-ai function:', error);
+    console.error('Error in AI function:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
