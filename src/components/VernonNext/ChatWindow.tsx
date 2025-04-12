@@ -1,14 +1,14 @@
 
 import React, { RefObject, useState } from 'react';
-import { motion } from 'framer-motion';
-import { X, Minimize2, Maximize2, Mic, MicOff, ArrowRight, CheckCircle2 } from 'lucide-react';
-import { ChatState, Message } from './types';
+import { X, Minimize2, Maximize2, Mic, MicOff, ArrowRight, VolumeX, Volume2 } from 'lucide-react';
+import { ChatState, ChatMessage } from '@/types';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { formatDistanceToNow } from 'date-fns';
 
 interface ChatWindowProps {
   state: ChatState;
@@ -30,8 +30,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   messagesEndRef
 }) => {
   const [inputValue, setInputValue] = useState('');
-  // State for push-to-talk button
-  const [isPushToTalkActive, setIsPushToTalkActive] = useState(false);
   
   // If minimized, show a collapsed header
   if (state.isMinimized) {
@@ -66,77 +64,51 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
     }
   };
   
-  // Push-to-talk handlers
-  const handlePushToTalkStart = () => {
-    setIsPushToTalkActive(true);
-    onToggleListening(); // Start listening
-  };
-  
-  const handlePushToTalkEnd = () => {
-    setIsPushToTalkActive(false);
-    onToggleListening(); // Stop listening
-  };
-  
-  // Speak message handler
-  const handleSpeakMessage = (text: string) => {
-    onSpeak(text);
-  };
-  
-  const renderMessage = (message: Message) => {
-    const isUser = message.sender === 'user';
+  const renderMessage = (message: ChatMessage) => {
+    const isUser = message.role === 'user';
+    const timestamp = formatDistanceToNow(new Date(message.timestamp), { addSuffix: true });
+    
     return (
       <div
         key={message.id}
         className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}
       >
         {!isUser && (
-          <Avatar className="h-8 w-8 mr-2 flex-shrink-0">
+          <Avatar className="h-8 w-8 mr-2 flex-shrink-0 mt-1">
             <AvatarImage src="/vernon-avatar.png" alt="Vernon" />
             <AvatarFallback className="bg-indigo-500 text-white">V</AvatarFallback>
           </Avatar>
         )}
-        <div className={`max-w-[80%] ${isUser ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-800'} rounded-2xl px-4 py-2 shadow-sm`}>
-          <div className="flex items-start">
-            {message.verified && !isUser && (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <CheckCircle2 className="h-4 w-4 text-blue-500 mr-1 flex-shrink-0 mt-1" />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Verified response</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            )}
-            <div className={`${isUser ? 'text-white' : 'text-gray-900 dark:text-gray-100'}`}>
-              {message.text.split('\n').map((line, i) => (
-                <p key={i} className={i > 0 ? 'mt-2' : ''}>{line}</p>
-              ))}
-            </div>
+        <div 
+          className={`max-w-[85%] ${
+            isUser 
+              ? 'bg-blue-600 text-white' 
+              : 'bg-gray-100 dark:bg-gray-800'
+          } rounded-2xl px-4 py-2 shadow-sm`}
+        >
+          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+            {timestamp}
           </div>
-          {message.location && (
-            <div className="mt-2">
-              <a 
-                href={`https://maps.google.com/?q=${message.location.lat},${message.location.lng}`} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="flex items-center text-xs text-blue-500 hover:underline"
-              >
-                View on Map
-                <ArrowRight className="h-3 w-3 ml-1" />
-              </a>
-            </div>
-          )}
+          
+          <div className={`${isUser ? 'text-white' : 'text-gray-900 dark:text-gray-100'}`}>
+            {message.content.split('\n').map((line, i) => (
+              <p key={i} className={i > 0 ? 'mt-2' : ''}>{line}</p>
+            ))}
+          </div>
+          
           {!isUser && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="mt-2 p-1 h-7 text-xs text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900"
-              onClick={() => handleSpeakMessage(message.text)}
-            >
-              🔊 Speak
-            </Button>
+            <div className="mt-2 flex justify-end">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="p-1 h-7 text-xs text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900 flex items-center gap-1"
+                onClick={() => onSpeak(message.content)}
+                disabled={state.isSpeaking}
+              >
+                {state.isSpeaking ? <VolumeX className="h-3 w-3" /> : <Volume2 className="h-3 w-3" />}
+                {state.isSpeaking ? 'Stop' : 'Speak'}
+              </Button>
+            </div>
           )}
         </div>
       </div>
@@ -173,10 +145,10 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
             <h2 className="text-white font-medium flex items-center">
               Vernon
               <Badge variant="outline" className="ml-2 bg-blue-700 text-white border-blue-500 text-xs px-1.5">
-                AI
+                GPT-4o
               </Badge>
             </h2>
-            <p className="text-blue-100 text-xs">Powered by Google Vertex AI</p>
+            <p className="text-blue-100 text-xs">Powered by OpenAI</p>
           </div>
         </div>
         <div className="flex items-center space-x-1">
@@ -214,6 +186,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
             size="icon"
             className={`shrink-0 ${state.isListening ? "bg-red-500 text-white" : ""}`}
             onClick={onToggleListening}
+            disabled={state.isLoading}
           >
             {state.isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
           </Button>
@@ -225,21 +198,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
             className="flex-1 border-blue-200 dark:border-blue-800 bg-white dark:bg-gray-950"
             disabled={state.isLoading}
           />
-          
-          <Button 
-            type="button"
-            className="shrink-0 bg-blue-600 hover:bg-blue-700 px-3" 
-            disabled={state.isLoading}
-            onMouseDown={handlePushToTalkStart}
-            onMouseUp={handlePushToTalkEnd}
-            onMouseLeave={handlePushToTalkEnd}
-            onTouchStart={handlePushToTalkStart}
-            onTouchEnd={handlePushToTalkEnd}
-            onTouchCancel={handlePushToTalkEnd}
-          >
-            <Mic className="h-4 w-4 mr-1" />
-            Talk
-          </Button>
           
           <Button 
             type="submit" 

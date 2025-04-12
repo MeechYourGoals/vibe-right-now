@@ -19,6 +19,7 @@ export interface Location {
   tags?: string[]; // Added tags property for location
   verified?: boolean; // Added verified property
   vibes?: string[]; // Added vibes property
+  userProfile?: any; // Added for locationGenerator.ts
 }
 
 // Add these interfaces to fix the build errors
@@ -46,6 +47,8 @@ export interface User {
   location?: string;
   website?: string;
   joinDate?: string;
+  isPrivate?: boolean; // Added for regularUsers.ts
+  isCelebrity?: boolean; // Added for celebrityUsers.ts
 }
 
 export interface Comment {
@@ -56,6 +59,7 @@ export interface Comment {
   likes: number;
   postId?: string;
   content?: string;
+  vibedHere?: boolean; // Added for comments
 }
 
 export interface Media {
@@ -111,4 +115,38 @@ export interface VenueInsights {
   };
   visitorTrends?: Array<{ date: string; count: number }>;
   mediaUploads?: number;
+}
+
+// Chat-specific interfaces
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  timestamp: Date;
+  verified?: boolean;
+  location?: {
+    lat: number;
+    lng: number;
+  };
+}
+
+export interface ChatState {
+  isOpen: boolean;
+  isMinimized: boolean;
+  isLoading: boolean;
+  isListening: boolean;
+  isSpeaking: boolean;
+  messages: ChatMessage[];
+  searchResults?: any[];
+  transcript: string;
+  interimTranscript: string;
+}
+
+export interface ExtractedIntent {
+  type: 'search' | 'info' | 'question' | 'booking' | 'unknown';
+  location?: string;
+  date?: string;
+  categories?: string[];
+  mood?: string[];
+  keywords?: string[];
 }
