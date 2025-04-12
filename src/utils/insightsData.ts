@@ -1,3 +1,4 @@
+
 import { VenueInsights } from "@/types";
 
 export const generateVenueInsights = (venueId: string): VenueInsights => {
@@ -84,4 +85,31 @@ export const generateVenueInsights = (venueId: string): VenueInsights => {
     demographicData,
     competitiveInsights
   };
+};
+
+// Add the missing currentInsights constant
+export const currentInsights: VenueInsights = generateVenueInsights('default');
+
+// Add the missing generateWeeklyData function
+export const generateWeeklyData = () => {
+  const weeklyData = [];
+  const categories = ['Photos', 'Videos', 'Stories', 'Events'];
+  
+  // Generate 7 days of data for each category
+  for (let i = 0; i < 7; i++) {
+    const date = new Date();
+    date.setDate(date.getDate() - (6 - i)); // Last 7 days
+    const dayData = {
+      date: date.toISOString().split('T')[0],
+    };
+    
+    // Add random values for each category
+    categories.forEach(category => {
+      dayData[category.toLowerCase()] = Math.floor(Math.random() * 100) + 10;
+    });
+    
+    weeklyData.push(dayData);
+  }
+  
+  return weeklyData;
 };
