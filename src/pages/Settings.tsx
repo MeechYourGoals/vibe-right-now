@@ -4,7 +4,7 @@ import { Layout } from "@/components/Layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { UserProfile, Bell, Globe, Shield, PaintBucket, MessageSquare, Search } from "lucide-react";
+import { User, Bell, Globe, Shield, PaintBucket, MessageSquare, Search } from "lucide-react";
 import ProviderSettings from "@/components/settings/ProviderSettings";
 
 const Settings = () => {
@@ -16,7 +16,7 @@ const Settings = () => {
         <Tabs defaultValue="account" className="space-y-4">
           <TabsList className="w-full flex overflow-x-auto">
             <TabsTrigger value="account" className="flex items-center gap-2 flex-shrink-0">
-              <UserProfile className="h-4 w-4" />
+              <User className="h-4 w-4" />
               Account
             </TabsTrigger>
             <TabsTrigger value="notifications" className="flex items-center gap-2 flex-shrink-0">

@@ -38,12 +38,12 @@ const PostFooter: React.FC<PostFooterProps> = ({
       <div className="px-4 py-2 border-t text-sm">
         <div className="flex items-start gap-2">
           <span className="font-semibold">{latestComment.user.username}</span>
-          <p className="text-xs whitespace-pre-wrap">{latestComment.content}</p>
+          <p className="text-xs whitespace-pre-wrap">{latestComment.content || latestComment.text}</p>
         </div>
         
         {comments.length > 1 && (
           <Link to={`/post/${post.id}`} className="text-muted-foreground text-xs mt-1 block">
-            View all {post.comments} comments
+            View all {typeof post.comments === 'number' ? post.comments : post.comments.length} comments
           </Link>
         )}
       </div>
@@ -73,7 +73,7 @@ const PostFooter: React.FC<PostFooterProps> = ({
               className="flex items-center gap-1 px-2"
             >
               <MessageCircle className="h-5 w-5" />
-              <span>{post.comments}</span>
+              <span>{typeof post.comments === 'number' ? post.comments : post.comments.length}</span>
             </Button>
           </Link>
         </div>

@@ -16,12 +16,12 @@ export interface Location {
   phone?: string;
   website?: string;
   photos?: any[];
-  tags?: string[]; // Added tags property for location
-  verified?: boolean; // Added verified property
-  vibes?: string[]; // Added vibes property
+  tags?: string[];
+  verified?: boolean;
+  vibes?: string[];
+  userProfile?: any; // Added userProfile property
 }
 
-// Add these interfaces to fix the build errors
 export interface BusinessHours {
   monday: { open: string; close: string };
   tuesday: { open: string; close: string };
@@ -45,26 +45,35 @@ export interface User {
   location?: string;
   website?: string;
   joinDate?: string;
+  isPrivate?: boolean; // Added isPrivate property
+  isCelebrity?: boolean; // Added isCelebrity property
 }
 
 export interface Comment {
   id: string;
+  postId?: string; // Added postId property
   user: User;
-  text: string;
+  text?: string; // Keep for backward compatibility
+  content?: string; // Added content property
   timestamp: string;
   likes: number;
+  vibedHere?: boolean; // Added vibedHere property
 }
 
 export interface Post {
   id: string;
   user: User;
   location?: Location;
-  text?: string;
+  text?: string; // Keep for backward compatibility
+  content?: string; // Added content property
   media?: Media[];
   timestamp: string;
+  expiresAt?: string; // Added expiresAt property
   likes: number;
-  comments: Comment[];
-  saved: boolean;
+  comments: Comment[] | number; // Allow both Comment[] and number
+  saved?: boolean;
+  isPinned?: boolean; // Added isPinned property
+  isVenuePost?: boolean; // Added isVenuePost property
 }
 
 export interface Media {
@@ -93,4 +102,9 @@ export interface VenueInsights {
     rating: number;
     distance: number;
   }>;
+  // Add missing properties
+  visitorCount?: number;
+  checkInCount?: number;
+  receiptUploads?: number;
+  discountRedemptions?: number;
 }
