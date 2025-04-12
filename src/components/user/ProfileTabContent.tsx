@@ -1,9 +1,12 @@
+
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
-import { User, Post } from '@/types';
+import { User, Post, Comment } from '@/types';
 import PostGridItem from './PostGridItem';
 import UserPlacesContent from './UserPlacesContent';
 import { comments } from '@/mock/data';
+import { Skeleton } from '@/components/ui/skeleton';
+import PostCard from '@/components/post/PostCard';
 
 interface ProfileTabContentProps {
   activeTab: string;
@@ -77,9 +80,7 @@ const ProfileTabContent: React.FC<ProfileTabContentProps> = ({
               Object.entries(postsGroupedByLocation).map(([locationId, posts]) => (
                 <PostCard 
                   key={locationId} 
-                  posts={posts} 
-                  locationPostCount={locationPostCounts[locationId]}
-                  getComments={getComments}
+                  post={posts[0]} 
                 />
               ))
             ) : (

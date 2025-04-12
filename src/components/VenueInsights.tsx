@@ -24,8 +24,8 @@ const VenueInsights = () => {
   }));
   
   // Function to simulate upgrading subscription
-  const upgradeSubscription = (tier: string) => {
-    setSubscriptionTier(tier as 'standard' | 'plus' | 'premium' | 'pro');
+  const upgradeSubscription = (tier: 'standard' | 'plus' | 'premium' | 'pro') => {
+    setSubscriptionTier(tier);
   };
   
   return (

@@ -1,13 +1,13 @@
 
 /**
- * Text generation services using Vertex AI
+ * Text generation services using Vertex AI with Model Context Protocol
  */
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { GenerateTextOptions } from './types';
 
 /**
- * Generate text using Vertex AI
+ * Generate text using Vertex AI with MCP (Model Context Protocol)
  */
 export async function generateText(
   prompt: string, 
@@ -15,7 +15,7 @@ export async function generateText(
   options: GenerateTextOptions = {}
 ): Promise<string> {
   try {
-    console.log(`Generating text with Vertex AI for prompt: "${prompt.substring(0, 50)}..."`);
+    console.log(`Generating text with Vertex AI MCP for prompt: "${prompt.substring(0, 50)}..."`);
     
     const { data, error } = await supabase.functions.invoke('vertex-ai', {
       body: { 
@@ -38,7 +38,16 @@ export async function generateText(
       throw new Error('No text received from Vertex AI');
     }
     
-    return data.text;
+    // Process MCP format if present
+    let responseText = data.text;
+    if (responseText.includes('<response>') && responseText.includes('</response>')) {
+      const responseContent = responseText.match(/<response>(.*?)<\/response>/s);
+      if (responseContent && responseContent[1]) {
+        responseText = responseContent[1].trim();
+      }
+    }
+    
+    return responseText;
   } catch (error) {
     console.error('Error in generateText:', error);
     toast.error('AI text generation encountered an error');
@@ -47,15 +56,24 @@ export async function generateText(
 }
 
 /**
- * Generate factual information using Vertex AI search capabilities
+ * Generate factual information using Vertex AI search capabilities with MCP
  */
 export async function searchWithAI(query: string, categories?: string[]): Promise<string> {
   try {
-    console.log(`Searching with Vertex AI: "${query.substring(0, 50)}..."`);
+    console.log(`Searching with Vertex AI MCP: "${query.substring(0, 50)}..."`);
+    
+    // Format query with MCP if not already formatted
+    let mcpQuery = query;
+    if (!query.includes('<request') && categories && categories.length > 0) {
+      const categoryContext = categories.join(', ');
+      mcpQuery = `<request type="search" categories="${categoryContext}">${query}</request>`;
+    } else if (!query.includes('<request')) {
+      mcpQuery = `<request type="search">${query}</request>`;
+    }
     
     const { data, error } = await supabase.functions.invoke('vertex-ai', {
       body: { 
-        prompt: query,
+        prompt: mcpQuery,
         mode: 'search',
         searchMode: true,
         categories: categories || [],
@@ -72,7 +90,16 @@ export async function searchWithAI(query: string, categories?: string[]): Promis
       throw new Error('No search results received from Vertex AI');
     }
     
-    return data.text;
+    // Process MCP format if present 
+    let responseText = data.text;
+    if (responseText.includes('<response>') && responseText.includes('</response>')) {
+      const responseContent = responseText.match(/<response>(.*?)<\/response>/s);
+      if (responseContent && responseContent[1]) {
+        responseText = responseContent[1].trim();
+      }
+    }
+    
+    return responseText;
   } catch (error) {
     console.error('Error in searchWithAI:', error);
     return "I couldn't find specific information about that. Could you try rephrasing your question?";

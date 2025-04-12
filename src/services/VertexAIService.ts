@@ -7,11 +7,11 @@ import { toast } from 'sonner';
 
 /**
  * Service to interact with Google's Vertex AI API via Supabase Edge Functions
- * Enhanced with MCP (Multiple Chat Providers) support
+ * Enhanced with MCP (Model Context Protocol) support
  */
 export const VertexAIService = {
   /**
-   * Generate a text response using primary AI provider
+   * Generate a text response using Model Context Protocol format
    * @param prompt The user's prompt
    * @param mode The chat mode ('venue' or default user)
    * @param history Previous chat messages for context
@@ -21,10 +21,10 @@ export const VertexAIService = {
     try {
       console.log(`MCP: Generating response for: "${prompt.substring(0, 50)}..."`);
       
-      // Record API key availability in localStorage for MCP
+      // Record API key availability in localStorage for provider management
       const apiKeyCheck = await this.checkApiKeyAvailability();
       
-      // Get primary chat provider based on MCP priorities
+      // Get primary chat provider based on priorities
       const primaryProvider = getPrimaryProvider('chat');
       console.log('MCP: Using primary provider:', primaryProvider?.name);
       
@@ -40,13 +40,16 @@ export const VertexAIService = {
         
         switch (primaryProvider.id) {
           case 'vertex-ai':
-            result = await VertexAIHub.generateText(prompt, formattedHistory, {
+            // Use MCP request format
+            const mcpPrompt = `<request type="${mode === 'venue' ? 'venue_analysis' : 'general'}">${prompt}</request>`;
+            
+            result = await VertexAIHub.generateText(mcpPrompt, formattedHistory, {
               temperature: mode === 'venue' ? 0.5 : 0.7,
               mode: mode
             });
             break;
           case 'gemini':
-            // Use Gemini directly through the Supabase edge function
+            // Use Gemini directly through the Supabase edge function with MCP format
             try {
               const { data, error } = await supabase.functions.invoke('vertex-ai', {
                 body: { 
@@ -87,6 +90,13 @@ export const VertexAIService = {
         
         if (result) {
           console.log(`MCP: Primary provider ${primaryProvider.name} returned result`);
+          // Extract content from MCP response format if present
+          if (result.includes('<response>') && result.includes('</response>')) {
+            const responseContent = result.match(/<response>(.*?)<\/response>/s);
+            if (responseContent && responseContent[1]) {
+              result = responseContent[1].trim();
+            }
+          }
           return result;
         }
       }
@@ -100,7 +110,10 @@ export const VertexAIService = {
         
         switch (provider.id) {
           case 'vertex-ai':
-            result = await VertexAIHub.generateText(prompt, formattedHistory, {
+            // Use MCP request format for fallback
+            const mcpPrompt = `<request type="${mode === 'venue' ? 'venue_analysis' : 'general'}">${prompt}</request>`;
+            
+            result = await VertexAIHub.generateText(mcpPrompt, formattedHistory, {
               temperature: mode === 'venue' ? 0.5 : 0.7,
               mode: mode
             });
@@ -129,6 +142,13 @@ export const VertexAIService = {
         
         if (result) {
           console.log(`MCP: Fallback provider ${provider.name} returned result`);
+          // Extract content from MCP response format if present
+          if (result.includes('<response>') && result.includes('</response>')) {
+            const responseContent = result.match(/<response>(.*?)<\/response>/s);
+            if (responseContent && responseContent[1]) {
+              result = responseContent[1].trim();
+            }
+          }
           return result;
         }
       }
@@ -142,7 +162,7 @@ export const VertexAIService = {
   },
   
   /**
-   * Search for real-world information using available search providers
+   * Search for real-world information using MCP format
    * @param query The search query
    * @param categories Optional categories to help categorize the search
    * @returns The search results from the best available provider
@@ -151,14 +171,30 @@ export const VertexAIService = {
     try {
       console.log(`MCP: Searching with AI providers: "${query.substring(0, 50)}..."`);
       
+      // Format query with MCP
+      let mcpQuery = query;
+      if (categories && categories.length > 0) {
+        const categoryContext = categories.join(', ');
+        mcpQuery = `<request type="search" categories="${categoryContext}">${query}</request>`;
+      } else {
+        mcpQuery = `<request type="search">${query}</request>`;
+      }
+      
       // First try our enhanced search service which already uses MCP
-      const searchResult = await SearchService.search(query, categories);
+      const searchResult = await VertexAIHub.searchWithAI(mcpQuery, categories);
       if (searchResult && searchResult.length > 0) {
+        // Extract content from MCP response format if present
+        if (searchResult.includes('<response>') && searchResult.includes('</response>')) {
+          const responseContent = searchResult.match(/<response>(.*?)<\/response>/s);
+          if (responseContent && responseContent[1]) {
+            return responseContent[1].trim();
+          }
+        }
         return searchResult;
       }
       
-      // Fallback to direct AI hub
-      return await VertexAIHub.searchWithAI(query, categories);
+      // Ultimate fallback if all providers fail
+      return "I couldn't find specific information about that. Could you try rephrasing your question?";
     } catch (error) {
       console.error('MCP: Error in VertexAIService.searchWithVertex:', error);
       return "I couldn't find specific information about that. Could you try rephrasing your question?";
@@ -167,7 +203,7 @@ export const VertexAIService = {
   
   /**
    * Check if the necessary API keys are available and update localStorage
-   * This helps MCP know which providers can be used
+   * This helps know which providers can be used
    */
   async checkApiKeyAvailability(): Promise<boolean> {
     try {
@@ -195,5 +231,5 @@ export const VertexAIService = {
   }
 };
 
-// Type for the service import - helps with proper module organization
+// Type declaration for import in other files
 import { SearchService } from './search/SearchService';

@@ -1,8 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
-import { formatBusinessHours } from '@/utils/businessHoursUtils';
-import type { Location, BusinessHours } from '@/types';
+import type { Location } from '@/types';
 
 interface VenueMapProps {
   location: Location;

@@ -11,41 +11,37 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// System prompts that define the chatbot's personality and behavior
-const SYSTEM_PROMPTS = {
-  default: `You are a helpful and friendly AI assistant within the 'Lovable' app. Your primary goal is to help users discover great places to go and things to do based on their requests.
+// Model Context Protocol - Enhanced system prompts that define behavior
+const MCP_SYSTEM_PROMPTS = {
+  default: `<context>
+  role: You are Vernon, a helpful and friendly AI assistant within the 'Lovable' app. Your primary goal is to help users discover great places to go and things to do based on their requests.
   
-  Respond in a concise, informative, and enthusiastic tone. Be friendly, approachable, and helpful. Offer creative and interesting suggestions.
+  tone: Respond in a concise, informative, and enthusiastic tone. Be friendly, approachable, and helpful.
   
-  Maintain a conversational style that is engaging and encourages users to explore. Avoid being overly verbose. Get straight to the point while still being helpful.
+  capabilities: You can provide recommendations, answer questions about locations, and offer creative suggestions.
   
-  When providing suggestions, briefly explain why you are recommending them based on potential user interests.
+  limitations: You cannot make reservations directly, but you can help users plan their visits.
+  </context>`,
   
-  If the user asks for something specific that isn't readily available, acknowledge it and offer alternative suggestions or ways to find more information within the app.
+  venue: `<context>
+  role: You are Vernon for Venues, a knowledgeable business assistant within the 'Lovable' platform. Your primary goal is to help venue owners understand their business metrics, customer trends, and marketing performance.
   
-  Do not express personal opinions or beliefs. Focus solely on providing information relevant to places and activities. If a user's request is unclear, ask clarifying questions.`,
+  tone: Provide data-driven insights and actionable recommendations in a professional but friendly manner.
   
-  venue: `You are a knowledgeable business assistant within the 'Lovable' platform. Your primary goal is to help venue owners understand their business metrics, customer trends, and marketing performance.
+  capabilities: You can analyze business data, identify trends, and suggest improvements based on metrics.
   
-  Provide data-driven insights and actionable recommendations based on the information available. Be concise, professional, and helpful.
+  limitations: You cannot directly modify business settings or make changes to the venue profile.
+  </context>`,
   
-  When analyzing business data, focus on identifying trends, opportunities, and potential areas for improvement. Support your insights with specific metrics when available.
+  search: `<context>
+  role: You are an AI discovery expert for the 'Lovable' social platform. Your job is to provide factual, accurate information about places and venues.
   
-  If the venue owner asks for something specific that isn't readily available, acknowledge it and suggest alternative approaches or metrics they might consider.
+  tone: Present information in a structured, clear format that is easy to understand and act upon.
   
-  Maintain a professional but friendly tone that builds confidence. Avoid being overly technical unless the user demonstrates expertise in the subject.`,
+  capabilities: You can provide specific details about venues including addresses, hours, and contact information.
   
-  search: `You are an AI discovery expert for the 'Lovable' social platform. Your job is to provide factual, accurate information about places and venues.
-  
-  Always include real venue names, addresses, and other specific details when possible. Format your responses with markdown, including headers and bulleted lists.
-  
-  Present information for venues in a structured format including address, hours, price range, contact information, and other relevant details.
-  
-  For events, include date and time, location, ticket prices, and how to purchase tickets if applicable.
-  
-  Only provide information you're confident is factual. If you don't know something, clearly state that you don't have that specific information.
-  
-  Be concise but thorough. Users are looking for helpful recommendations they can act on immediately.`
+  limitations: You should only provide information you're confident is factual and acknowledge when you don't know something.
+  </context>`
 };
 
 serve(async (req) => {
@@ -97,24 +93,24 @@ serve(async (req) => {
       provider
     });
     
-    // Build conversation history in Vertex AI format
+    // Build conversation history with MCP format
     const contents = [];
     
-    // Select the appropriate system prompt based on mode
-    const systemPrompt = mode === 'venue' 
-      ? SYSTEM_PROMPTS.venue 
-      : (searchMode ? SYSTEM_PROMPTS.search : SYSTEM_PROMPTS.default);
+    // Select the appropriate MCP system prompt based on mode
+    const mcpSystemPrompt = mode === 'venue' 
+      ? MCP_SYSTEM_PROMPTS.venue 
+      : (searchMode ? MCP_SYSTEM_PROMPTS.search : MCP_SYSTEM_PROMPTS.default);
     
-    // Add system prompt
+    // Add MCP system prompt
     contents.push({
       role: "USER",
-      parts: [{ text: systemPrompt }]
+      parts: [{ text: mcpSystemPrompt }]
     });
     
-    // Add model acknowledgment of the system prompt
+    // Add model acknowledgment of the MCP system prompt
     contents.push({
       role: "MODEL",
-      parts: [{ text: "I understand my role and will assist accordingly." }]
+      parts: [{ text: "I understand my role and will assist according to the context provided." }]
     });
     
     // Add conversation history for regular chat mode
@@ -127,25 +123,28 @@ serve(async (req) => {
       }
     }
     
-    // Add the current prompt
-    // For search mode, add extra context
+    // Add the current prompt with additional MCP context for search
     if (searchMode) {
       let enhancedPrompt = prompt;
       
       // Incorporate categories if available
       if (categories && categories.length > 0) {
         const categoryContext = categories.join(', ');
-        enhancedPrompt = `${prompt} (Categories: ${categoryContext})`;
+        enhancedPrompt = `<request type="search" categories="${categoryContext}">${prompt}</request>`;
+      } else {
+        enhancedPrompt = `<request type="search">${prompt}</request>`;
       }
       
       contents.push({
         role: "USER",
-        parts: [{ text: `Search for real factual information about: "${enhancedPrompt}". Include real venue names, addresses, opening hours, and other specific details.` }]
+        parts: [{ text: enhancedPrompt }]
       });
     } else {
+      // Use MCP request format for standard queries
+      const requestType = mode === 'venue' ? 'venue_analysis' : 'general';
       contents.push({
         role: "USER",
-        parts: [{ text: prompt }]
+        parts: [{ text: `<request type="${requestType}">${prompt}</request>` }]
       });
     }
     
@@ -226,6 +225,9 @@ serve(async (req) => {
       responseText = data.candidates[0].content.parts[0].text;
     }
     
+    // Process response through MCP format
+    responseText = `<response>${responseText}</response>`;
+    
     // Add hyperlinks to the Explore page for any locations or events mentioned
     const enhancedResponse = addExplorePageLinks(responseText, prompt);
     
@@ -234,7 +236,8 @@ serve(async (req) => {
       ...corsHeaders,
       'Content-Type': 'application/json',
       'X-MCP-Provider': useVertexAI ? 'vertex-ai' : 'gemini',
-      'X-MCP-Status': 'success'
+      'X-MCP-Status': 'success',
+      'X-MCP-Version': '1.0'
     };
     
     return new Response(
@@ -257,7 +260,8 @@ serve(async (req) => {
         headers: { 
           ...corsHeaders, 
           'Content-Type': 'application/json',
-          'X-MCP-Status': 'error' 
+          'X-MCP-Status': 'error',
+          'X-MCP-Version': '1.0'
         } 
       }
     );
