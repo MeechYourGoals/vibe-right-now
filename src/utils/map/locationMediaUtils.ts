@@ -26,6 +26,6 @@ export const getMediaForLocation = (location: Location): Media => {
 
   return {
     type: "image" as const,
-    url: imageMap[location.id] || typeDefaultMedia[location.type] || `https://source.unsplash.com/random/800x600/?${location.type},${location.city}`
+    url: imageMap[location.id] || typeDefaultMedia[location.type as string] || `https://source.unsplash.com/random/800x600/?${location.type},${location.city}`
   };
 };

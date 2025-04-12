@@ -7,8 +7,8 @@ import { format } from 'date-fns';
  */
 export const generateBusinessHours = (location: Location): BusinessHours => {
   // First check if location has hours already
-  if (location.hours) {
-    return location.hours;
+  if (location.hours && typeof location.hours !== 'boolean') {
+    return location.hours as BusinessHours;
   }
   
   // Some locations are open 24 hours
@@ -28,17 +28,17 @@ export const generateBusinessHours = (location: Location): BusinessHours => {
   }
   
   // Determine opening and closing times based on location type
-  const openingHour = getOpeningHour(location.type);
-  const closingHour = getClosingHour(location.type);
+  const openingHour = getOpeningHour(location.type || 'other');
+  const closingHour = getClosingHour(location.type || 'other');
   
   // Create weekday hours
-  const weekdayHours = `${openingHour}AM - ${closingHour > 12 ? closingHour - 12 : closingHour}${closingHour >= 12 ? 'PM' : 'AM'}`;
+  const weekdayHours = `${openingHour}:00 AM - ${closingHour > 12 ? closingHour - 12 : closingHour}:00${closingHour >= 12 ? ' PM' : ' AM'}`;
   
   // Weekend might have different hours
   const weekendOpeningHour = Math.max(openingHour - 1, 6); // Open earlier on weekends, but not before 6AM
   const weekendClosingHour = Math.min(closingHour + 1, 24); // Close later on weekends, but not after midnight
   
-  const weekendHours = `${weekendOpeningHour}AM - ${weekendClosingHour > 12 ? weekendClosingHour - 12 : weekendClosingHour}${weekendClosingHour >= 12 ? 'PM' : 'AM'}`;
+  const weekendHours = `${weekendOpeningHour}:00 AM - ${weekendClosingHour > 12 ? weekendClosingHour - 12 : weekendClosingHour}:00${weekendClosingHour >= 12 ? ' PM' : ' AM'}`;
   
   return {
     monday: weekdayHours,
@@ -113,5 +113,5 @@ export const getTodaysHours = (location: Location): string => {
     return hours ? 'Open 24 hours' : 'Closed';
   }
   
-  return hours || 'Closed';
+  return hours?.toString() || 'Closed';
 };

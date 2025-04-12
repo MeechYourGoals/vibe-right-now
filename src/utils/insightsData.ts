@@ -25,6 +25,8 @@ export const generateVenueInsights = (venueId: string): VenueInsights => {
   });
   
   return {
+    id: venueId,
+    venueName: `Venue ${venueId}`,
     visitorCount: 1200 + (seed % 800), 
     checkInCount: 950 + (seed % 600),
     receiptUploads: 430 + (seed % 300),
@@ -58,7 +60,55 @@ export const generateVenueInsights = (venueId: string): VenueInsights => {
       }
     },
     visitorTrends,
-    mediaUploads: 280 + (seed % 200)
+    mediaUploads: 280 + (seed % 200),
+    totalVisits: 1200 + (seed % 800),
+    uniqueVisitors: 950 + (seed % 600),
+    averageRating: 4.2 + (seed % 10) / 10,
+    topReasons: [
+      { reason: "Food", count: 45 + (seed % 20) },
+      { reason: "Ambiance", count: 30 + (seed % 15) },
+      { reason: "Drinks", count: 25 + (seed % 10) }
+    ],
+    demographics: {
+      ageGroups: {
+        "18-24": 20 + (seed % 10),
+        "25-34": 40 + (seed % 15),
+        "35-44": 25 + (seed % 10),
+        "45-54": 10 + (seed % 5),
+        "55+": 5 + (seed % 5)
+      },
+      gender: {
+        "Male": 48 + (seed % 10),
+        "Female": 48 + (seed % 10),
+        "Other": 4 + (seed % 2)
+      }
+    },
+    visitsByDay: {
+      "Monday": 120 + (seed % 30),
+      "Tuesday": 150 + (seed % 30),
+      "Wednesday": 180 + (seed % 30),
+      "Thursday": 220 + (seed % 40),
+      "Friday": 350 + (seed % 50),
+      "Saturday": 380 + (seed % 50),
+      "Sunday": 200 + (seed % 40)
+    },
+    visitsByHour: {
+      "9": 10 + (seed % 10),
+      "10": 20 + (seed % 15),
+      "11": 30 + (seed % 20),
+      "12": 45 + (seed % 25),
+      "13": 50 + (seed % 25),
+      "14": 40 + (seed % 20),
+      "15": 35 + (seed % 20),
+      "16": 30 + (seed % 20),
+      "17": 50 + (seed % 25),
+      "18": 70 + (seed % 30),
+      "19": 80 + (seed % 30),
+      "20": 75 + (seed % 30),
+      "21": 60 + (seed % 25),
+      "22": 40 + (seed % 20),
+      "23": 20 + (seed % 15)
+    }
   };
 };
 

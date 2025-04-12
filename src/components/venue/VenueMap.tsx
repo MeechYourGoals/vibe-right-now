@@ -5,6 +5,7 @@ import { Maximize, MapPin } from "lucide-react";
 import { Location } from "@/types";
 import GoogleMapComponent from "@/components/map/google/GoogleMapComponent";
 import { format } from "date-fns";
+import { generateBusinessHours, getTodaysHours } from "@/utils/businessHoursUtils";
 
 interface VenueMapProps {
   venue: Location;
@@ -12,23 +13,12 @@ interface VenueMapProps {
 }
 
 const VenueMap: React.FC<VenueMapProps> = ({ venue, onExpand }) => {
-  const today = new Date();
-  const dayOfWeek = format(today, 'EEEE').toLowerCase();
-  
   // Ensure venue has hours, even if mock
   if (!venue.hours) {
-    venue.hours = {
-      monday: "9:00 AM - 9:00 PM",
-      tuesday: "9:00 AM - 9:00 PM",
-      wednesday: "9:00 AM - 9:00 PM",
-      thursday: "9:00 AM - 9:00 PM",
-      friday: "9:00 AM - 10:00 PM",
-      saturday: "10:00 AM - 10:00 PM",
-      sunday: "10:00 AM - 8:00 PM"
-    };
+    venue.hours = generateBusinessHours(venue);
   }
   
-  const hoursToday = venue.hours[dayOfWeek as keyof typeof venue.hours];
+  const todaysHours = getTodaysHours(venue);
   
   return (
     <div className="mt-4 rounded-md overflow-hidden relative">
@@ -38,7 +28,7 @@ const VenueMap: React.FC<VenueMapProps> = ({ venue, onExpand }) => {
           <span className="font-medium">{venue.address}</span>
         </div>
         <div className="text-right">
-          <span className="font-medium">Today:</span> {hoursToday}
+          <span className="font-medium">Today:</span> {todaysHours}
         </div>
       </div>
       

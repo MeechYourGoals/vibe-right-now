@@ -12,7 +12,7 @@ export interface Location {
   type?: string;
   rating?: number;
   priceLevel?: number;
-  hours?: any;
+  hours?: BusinessHours | any;
   phone?: string;
   website?: string;
   photos?: any[];
@@ -23,14 +23,15 @@ export interface Location {
 
 // Add these interfaces to fix the build errors
 export interface BusinessHours {
-  monday: { open: string; close: string };
-  tuesday: { open: string; close: string };
-  wednesday: { open: string; close: string };
-  thursday: { open: string; close: string };
-  friday: { open: string; close: string };
-  saturday: { open: string; close: string };
-  sunday: { open: string; close: string };
-  [key: string]: { open: string; close: string };
+  monday: string;
+  tuesday: string;
+  wednesday: string;
+  thursday: string;
+  friday: string;
+  saturday: string;
+  sunday: string;
+  isOpen24Hours?: boolean;
+  [key: string]: string | boolean | undefined;
 }
 
 export interface User {
@@ -53,25 +54,31 @@ export interface Comment {
   text: string;
   timestamp: string;
   likes: number;
+  postId?: string;
+  content?: string;
+}
+
+export interface Media {
+  id?: string;
+  type: 'image' | 'video';
+  url: string;
+  thumbnail?: string;
 }
 
 export interface Post {
   id: string;
   user: User;
-  location?: Location;
+  location: Location;
+  content?: string;
   text?: string;
   media?: Media[];
   timestamp: string;
   likes: number;
-  comments: Comment[];
+  comments: number | Comment[];
   saved: boolean;
-}
-
-export interface Media {
-  id: string;
-  type: 'image' | 'video';
-  url: string;
-  thumbnail?: string;
+  expiresAt?: string;
+  isPinned?: boolean;
+  isVenuePost?: boolean;
 }
 
 export interface VenueInsights {
@@ -93,4 +100,15 @@ export interface VenueInsights {
     rating: number;
     distance: number;
   }>;
+  visitorCount?: number;
+  checkInCount?: number;
+  receiptUploads?: number;
+  discountRedemptions?: number;
+  popularHours?: Record<string, number>;
+  demographicData?: {
+    ageGroups: Record<string, number>;
+    gender: Record<string, number>;
+  };
+  visitorTrends?: Array<{ date: string; count: number }>;
+  mediaUploads?: number;
 }
