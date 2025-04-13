@@ -1,38 +1,8 @@
 
 project_id = "yiitqkjrbskxumriujrh"
 
-[api]
-enabled = true
-port = 54321
-schemas = ["public", "storage", "graphql_public"]
+[functions.palantir-sync]
+verify_jwt = true
 
-[db]
-port = 54322
-
-[storage]
-enabled = true
-port = 54323
-
-[auth]
-enabled = true
-port = 54324
-
-[realtime]
-enabled = true
-port = 54325
-
-[analytics]
-enabled = true
-port = 54326
-
-[vector]
-enabled = true
-port = 54327
-
-[functions]
-[functions.openai-chat]
-port = 54328
-verify_jwt = false
-[functions.openai-speech]
-port = 54329
+[functions.palantir-recommendations]
 verify_jwt = false
