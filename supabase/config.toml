@@ -6,3 +6,7 @@ verify_jwt = true
 
 [functions.palantir-recommendations]
 verify_jwt = false
+
+[functions.ticketmaster]
+verify_jwt = false
+
