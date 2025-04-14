@@ -50,19 +50,7 @@ const UpcomingEvents = ({
         <EventHeader />
       </CardHeader>
       <CardContent>
-        {loading ? (
-          <div className="space-y-4">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="space-y-2">
-                <Skeleton className="h-4 w-4/5 bg-gray-700" />
-                <Skeleton className="h-4 w-3/5 bg-gray-700" />
-                <Skeleton className="h-4 w-2/5 bg-gray-700" />
-              </div>
-            ))}
-          </div>
-        ) : (
-          <EventsList events={events} />
-        )}
+        <EventsList events={events} isLoading={loading} />
       </CardContent>
     </Card>
   );

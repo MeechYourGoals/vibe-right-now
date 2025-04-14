@@ -26,6 +26,14 @@ const EventsList = ({ events, showViewAll = true, isLoading = false }: EventsLis
     );
   }
 
+  if (!events || events.length === 0) {
+    return (
+      <div className="text-center py-4 text-gray-400">
+        <p>No events found</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       {events.map(event => (

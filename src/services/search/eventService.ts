@@ -1,10 +1,8 @@
-
 import { EventItem } from "@/components/venue/events/types";
 import { supabase } from '@/integrations/supabase/client';
 
 /**
- * Get music events for a specific city using Bandsintown API
- * This is an unofficial API client that parses the public website data
+ * Get music events for a specific city using OpenRouter search
  */
 export const getMusicEventsForCity = async (
   city: string, 
@@ -15,41 +13,21 @@ export const getMusicEventsForCity = async (
     console.log(`Fetching music events for ${city}, ${state}`);
     
     const location = state ? `${city}, ${state}` : city;
-    const encodedLocation = encodeURIComponent(location);
+    const dateContext = getDateRangeContext(dateRange);
     
-    // Scrape Bandsintown data through our serverless function
-    const { data, error } = await supabase.functions.invoke('event-search', {
-      body: { 
-        provider: 'bandsintown',
-        location: encodedLocation,
-        dateFrom: dateRange?.from?.toISOString(),
-        dateTo: dateRange?.to?.toISOString()
-      }
-    });
-
-    if (error) {
-      console.error('Error fetching Bandsintown events:', error);
-      return generateMockMusicEvents(city, state, dateRange);
+    // Create search query for music events
+    const searchQuery = `music events concerts shows in ${location}${dateContext}`;
+    
+    // Use OpenRouter to search for events
+    const events = await searchEventsWithOpenRouter(searchQuery, "music", city, state);
+    
+    if (events.length > 0) {
+      return events;
     }
-
-    if (!data || !data.events || data.events.length === 0) {
-      console.log('No Bandsintown events found, using mock data');
-      return generateMockMusicEvents(city, state, dateRange);
-    }
-
-    // Map Bandsintown data to our event format
-    return data.events.map((event: any, index: number) => ({
-      id: `music-${city}-${index}`,
-      title: event.title || `${event.artist} Concert`,
-      description: event.description || `Live performance by ${event.artist}`,
-      date: event.date || new Date().toISOString(),
-      time: event.time || '8:00 PM',
-      location: event.venue || `${city} Music Hall`,
-      imageUrl: event.imageUrl || `https://source.unsplash.com/random/800x600/?concert,music`,
-      ticketUrl: event.ticketUrl || 'https://www.bandsintown.com/',
-      price: event.price || 'Various Prices',
-      type: "music"
-    }));
+    
+    // Fallback to mock data if no events found
+    console.log('No music events found via OpenRouter, using mock data');
+    return generateMockMusicEvents(city, state, dateRange);
   } catch (error) {
     console.error('Error getting music events:', error);
     return generateMockMusicEvents(city, state, dateRange);
@@ -57,7 +35,7 @@ export const getMusicEventsForCity = async (
 };
 
 /**
- * Get comedy events for a specific city using Punchup.live website data
+ * Get comedy events for a specific city using OpenRouter search
  */
 export const getComedyEventsForCity = async (
   city: string, 
@@ -67,48 +45,142 @@ export const getComedyEventsForCity = async (
   try {
     console.log(`Fetching comedy events for ${city}, ${state}`);
     
-    // Attempt to get postal code for the location
     const location = state ? `${city}, ${state}` : city;
-    const encodedLocation = encodeURIComponent(location);
+    const dateContext = getDateRangeContext(dateRange);
     
-    // Scrape Punchup data through our serverless function
-    const { data, error } = await supabase.functions.invoke('event-search', {
-      body: { 
-        provider: 'punchup',
-        location: encodedLocation,
-        dateFrom: dateRange?.from?.toISOString(),
-        dateTo: dateRange?.to?.toISOString()
-      }
-    });
-
-    if (error) {
-      console.error('Error fetching Punchup comedy events:', error);
-      return generateMockComedyEvents(city, state, dateRange);
+    // Create search query for comedy events
+    const searchQuery = `comedy shows standup performances in ${location}${dateContext}`;
+    
+    // Use OpenRouter to search for events
+    const events = await searchEventsWithOpenRouter(searchQuery, "comedy", city, state);
+    
+    if (events.length > 0) {
+      return events;
     }
-
-    if (!data || !data.events || data.events.length === 0) {
-      console.log('No Punchup comedy events found, using mock data');
-      return generateMockComedyEvents(city, state, dateRange);
-    }
-
-    // Map Punchup data to our event format
-    return data.events.map((event: any, index: number) => ({
-      id: `comedy-${city}-${index}`,
-      title: event.title || 'Comedy Show',
-      description: event.description || 'Stand-up comedy performance',
-      date: event.date || new Date().toISOString(),
-      time: event.time || '8:00 PM',
-      location: event.venue || `${city} Comedy Club`,
-      imageUrl: event.imageUrl || `https://source.unsplash.com/random/800x600/?comedy,standup`,
-      ticketUrl: event.ticketUrl || 'https://punchup.live/',
-      price: event.price || 'Various Prices',
-      type: "comedy"
-    }));
+    
+    // Fallback to mock data if no events found
+    console.log('No comedy events found via OpenRouter, using mock data');
+    return generateMockComedyEvents(city, state, dateRange);
   } catch (error) {
     console.error('Error getting comedy events:', error);
     return generateMockComedyEvents(city, state, dateRange);
   }
 };
+
+/**
+ * Search for events using OpenRouter
+ */
+async function searchEventsWithOpenRouter(
+  query: string,
+  eventType: "music" | "comedy",
+  city: string,
+  state?: string
+): Promise<EventItem[]> {
+  try {
+    const OPENROUTER_API_KEY = "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";
+    
+    const systemPrompt = `You are an events data extraction assistant. Your task is to:
+    1. Find ${eventType} events in the specified location
+    2. Extract ONLY factual information about real events
+    3. Return data in a structured JSON format containing ONLY an array of events
+    4. Each event must include: title, date (YYYY-MM-DD format), time, location/venue, price (if available)
+    5. Do NOT include any explanatory text or non-event data
+    6. If no events are found, return an empty array []
+    7. Include at least 5-8 events if available`;
+    
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+        "HTTP-Referer": window.location.origin,
+        "X-Title": "Vibe Right Now"
+      },
+      body: JSON.stringify({
+        model: "anthropic/claude-3-haiku",
+        messages: [
+          {
+            role: "system",
+            content: systemPrompt
+          },
+          {
+            role: "user",
+            content: query
+          }
+        ],
+        response_format: { type: "json_object" },
+        temperature: 0.2,
+        max_tokens: 1500,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`OpenRouter API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const responseContent = data.choices[0].message.content;
+    
+    // Parse the JSON response
+    try {
+      const parsedData = JSON.parse(responseContent);
+      const eventsList = parsedData.events || [];
+      
+      if (!Array.isArray(eventsList) || eventsList.length === 0) {
+        return [];
+      }
+      
+      // Map the response to our EventItem format
+      return eventsList.map((event: any, index: number) => ({
+        id: `${eventType}-${city}-${index}`,
+        title: event.title || `${eventType} Event`,
+        description: event.description || `${eventType} event in ${city}`,
+        date: event.date || new Date().toISOString(),
+        time: event.time || '8:00 PM',
+        location: event.location || event.venue || `${city} ${eventType === 'music' ? 'Concert Hall' : 'Comedy Club'}`,
+        imageUrl: event.imageUrl || `https://source.unsplash.com/random/800x600/?${eventType}`,
+        ticketUrl: event.ticketUrl || '#',
+        price: event.price || 'Various Prices',
+        type: eventType
+      }));
+    } catch (parseError) {
+      console.error('Error parsing OpenRouter response:', parseError);
+      return [];
+    }
+  } catch (error) {
+    console.error('Error searching with OpenRouter:', error);
+    return [];
+  }
+}
+
+/**
+ * Get date range context for search queries
+ */
+function getDateRangeContext(dateRange?: { from?: Date, to?: Date }): string {
+  if (!dateRange?.from) return '';
+  
+  const fromDate = new Date(dateRange.from);
+  const fromMonth = fromDate.toLocaleString('default', { month: 'long' });
+  const fromYear = fromDate.getFullYear();
+  
+  if (!dateRange.to) {
+    return ` in ${fromMonth} ${fromYear}`;
+  }
+  
+  const toDate = new Date(dateRange.to);
+  const toMonth = toDate.toLocaleString('default', { month: 'long' });
+  const toYear = toDate.getFullYear();
+  
+  if (fromYear === toYear && fromMonth === toMonth) {
+    return ` in ${fromMonth} ${fromYear}`;
+  }
+  
+  if (fromYear === toYear) {
+    return ` from ${fromMonth} to ${toMonth} ${fromYear}`;
+  }
+  
+  return ` from ${fromMonth} ${fromYear} to ${toMonth} ${toYear}`;
+}
 
 /**
  * Generate mock music events for a city
