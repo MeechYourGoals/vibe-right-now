@@ -8,6 +8,7 @@ const corsHeaders = {
 };
 
 const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
+const OPENROUTER_API_KEY = "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";
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -16,7 +17,7 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, model = "gpt-4o-mini", stream = false, context = "user" } = await req.json();
+    const { messages, model = "anthropic/claude-3-haiku", stream = false, context = "user", useOpenRouter = true } = await req.json();
 
     // Add system prompt based on context
     let systemPrompt = "";
@@ -47,57 +48,105 @@ Do not express personal opinions or beliefs. Focus solely on providing informati
       ...messages
     ];
     
-    console.log("OpenAI API request:", {
+    console.log("API request:", {
+      provider: useOpenRouter ? "OpenRouter" : "OpenAI",
       model,
       messages: fullMessages.map(m => ({ role: m.role, contentLength: m.content.length })),
       stream
     });
     
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${OPENAI_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: model,
-        messages: fullMessages,
-        temperature: 0.7,
-        max_tokens: 1000,
-        stream: stream
-      }),
-    });
-
-    if (!response.ok) {
-      const error = await response.text();
-      console.error("OpenAI API error:", error);
-      throw new Error(`OpenAI API error: ${response.status}`);
-    }
-
-    // If streaming is enabled, handle streaming response
-    if (stream) {
-      // Create a TransformStream to process the streaming response
-      const { readable, writable } = new TransformStream();
-      
-      // Stream the response data
-      response.body?.pipeTo(writable);
-      
-      return new Response(readable, {
+    // Use OpenRouter if specified or as fallback
+    if (useOpenRouter) {
+      // OpenRouter request
+      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
         headers: {
-          ...corsHeaders,
-          "Content-Type": "text/event-stream",
-          "Cache-Control": "no-cache",
-          "Connection": "keep-alive",
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+          "HTTP-Referer": "https://vibe-right-now.web.app",
+          "X-Title": "Vibe Right Now"
         },
+        body: JSON.stringify({
+          model: model, // Use the passed model or default to Claude Haiku
+          messages: fullMessages,
+          temperature: 0.7,
+          max_tokens: 1000,
+          stream: stream
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        console.error("OpenRouter API error:", error);
+        throw new Error(`OpenRouter API error: ${response.status}`);
+      }
+
+      // Handle streaming if enabled
+      if (stream) {
+        const { readable, writable } = new TransformStream();
+        response.body?.pipeTo(writable);
+        
+        return new Response(readable, {
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "text/event-stream",
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+          },
+        });
+      }
+
+      // Handle regular response
+      const data = await response.json();
+      console.log("OpenRouter API response received successfully");
+      return new Response(JSON.stringify({ response: data }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    } else {
+      // Original OpenAI request 
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${OPENAI_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: model, // Use passed model
+          messages: fullMessages,
+          temperature: 0.7,
+          max_tokens: 1000,
+          stream: stream
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        console.error("OpenAI API error:", error);
+        throw new Error(`OpenAI API error: ${response.status}`);
+      }
+
+      // If streaming is enabled, handle streaming response
+      if (stream) {
+        const { readable, writable } = new TransformStream();
+        response.body?.pipeTo(writable);
+        
+        return new Response(readable, {
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "text/event-stream",
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+          },
+        });
+      }
+
+      // Handle regular response
+      const data = await response.json();
+      console.log("OpenAI API response received successfully");
+      return new Response(JSON.stringify({ response: data }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-
-    // Handle regular response
-    const data = await response.json();
-    console.log("OpenAI API response received successfully");
-    return new Response(JSON.stringify({ response: data }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
   } catch (error) {
     console.error("Error in openai-chat function:", error);
     return new Response(JSON.stringify({ error: error.message }), {

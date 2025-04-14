@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 export class OpenAIService {
   /**
-   * Send a chat request to the OpenAI API
+   * Send a chat request to the OpenAI API (now with OpenRouter support)
    */
   static async sendChatRequest(
     messages: { role: string; content: string }[],
@@ -12,14 +12,16 @@ export class OpenAIService {
       context?: string;
       stream?: boolean;
       maxTokens?: number;
+      useOpenRouter?: boolean;
     } = {}
   ) {
     try {
       const {
-        model = 'gpt-4o-mini',
+        model = 'anthropic/claude-3-haiku',
         context = 'user',
         stream = false,
-        maxTokens = 1000
+        maxTokens = 1000,
+        useOpenRouter = true
       } = options;
 
       const { data, error } = await supabase.functions.invoke('openai-chat', {
@@ -27,18 +29,19 @@ export class OpenAIService {
           messages,
           model,
           context,
-          stream
+          stream,
+          useOpenRouter
         }
       });
 
       if (error) {
-        console.error('Error calling OpenAI chat function:', error);
-        throw new Error(`Failed to call OpenAI chat function: ${error.message}`);
+        console.error('Error calling chat function:', error);
+        throw new Error(`Failed to call chat function: ${error.message}`);
       }
 
       return stream ? data : data?.response?.choices?.[0]?.message?.content || '';
     } catch (error) {
-      console.error('Error in OpenAI chat service:', error);
+      console.error('Error in chat service:', error);
       throw error;
     }
   }
