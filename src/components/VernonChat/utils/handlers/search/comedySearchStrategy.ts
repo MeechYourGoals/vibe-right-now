@@ -1,6 +1,7 @@
 
 import { SearchService } from '@/services/search/SearchService';
 import { cleanResponseText } from '../../responseFormatter';
+import { fetchComedyEvents } from '@/services/search/eventService';
 
 /**
  * Handles comedy-related searches
@@ -19,7 +20,43 @@ export const ComedySearchStrategy = {
   async handleComedySearch(inputValue: string): Promise<string> {
     console.log('Comedy-related query detected, using comedy-specific search');
     try {
-      const comedyResponse = await SearchService.comedySearch(inputValue);
+      // Extract city name if present
+      const cityMatch = inputValue.match(/in\s+([a-zA-Z\s]+)(?:,\s*([a-zA-Z\s]+))?/i);
+      let city = "your area";
+      let state = "";
+      
+      if (cityMatch && cityMatch[1]) {
+        city = cityMatch[1].trim();
+        if (cityMatch[2]) {
+          state = cityMatch[2].trim();
+        }
+      }
+      
+      // Try to get real comedy events using OpenRouter
+      const comedyEvents = await fetchComedyEvents(city, state);
+      let comedyResponse = "";
+      
+      if (comedyEvents && comedyEvents.length > 0) {
+        comedyResponse = `Here are some upcoming comedy shows in ${city}${state ? `, ${state}` : ''}:\n\n`;
+        
+        comedyEvents.forEach((event, index) => {
+          const eventDate = new Date(event.date);
+          const formattedDate = eventDate.toLocaleDateString('en-US', { 
+            weekday: 'long', 
+            month: 'long', 
+            day: 'numeric' 
+          });
+          
+          comedyResponse += `${index + 1}. **${event.title}**\n`;
+          comedyResponse += `   - ${formattedDate} at ${event.time}\n`;
+          comedyResponse += `   - Venue: ${event.venue || event.location}\n`;
+          comedyResponse += `   - Tickets: ${event.price}\n\n`;
+        });
+      } else {
+        // Fallback to the search service
+        comedyResponse = await SearchService.comedySearch(inputValue);
+      }
+      
       if (comedyResponse && comedyResponse.length > 100) {
         const comedyExploreLinkText = "\n\nYou can also [view all comedy shows on our Explore page](/explore?q=" + 
           encodeURIComponent(inputValue) + "&tab=comedy) for a better visual experience.";

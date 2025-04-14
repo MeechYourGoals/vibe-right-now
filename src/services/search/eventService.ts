@@ -1,6 +1,7 @@
 
 import { getCitySpecificLocation } from './locationService';
 import { getCitySpecificWebsite } from './locationService';
+import { OpenRouterService } from '../OpenRouterService';
 
 export function generateEventsResponse(city: string): string {
   return `Here are some current and upcoming events in ${city}:
@@ -221,3 +222,106 @@ export function getComedyEventsForCity(city: string, state: string = ""): any[] 
   return events;
 }
 
+/**
+ * Fetch music events for a specific city using OpenRouter
+ */
+export async function fetchMusicEvents(city: string, state: string = "", dateRange?: { from: Date, to?: Date }) {
+  try {
+    // Use OpenRouter to get music events information
+    const dateRangeText = dateRange?.from
+      ? dateRange.to
+        ? ` between ${dateRange.from.toLocaleDateString()} and ${dateRange.to.toLocaleDateString()}`
+        : ` after ${dateRange.from.toLocaleDateString()}`
+      : '';
+    
+    const prompt = `Create a JSON array of 5 realistic music events in ${city}, ${state}${dateRangeText}. 
+    Include these fields for each event: id (string), title (string), description (string), 
+    date (ISO string), time (string like "7:00 PM"), location (string), 
+    imageUrl (placeholder URL), ticketUrl (placeholder URL), price (string like "$40 - $60"), 
+    type (always "music"). Make them diverse and realistic for the location.`;
+    
+    console.log("Fetching music events with prompt:", prompt);
+    
+    const response = await OpenRouterService.getCompletion({
+      prompt,
+      model: "anthropic/claude-3-opus:beta",
+      max_tokens: 2000,
+    });
+    
+    console.log("OpenRouter response for music events:", response);
+    
+    if (!response) {
+      throw new Error("No response from OpenRouter");
+    }
+    
+    // Parse JSON from the response
+    const jsonMatch = response.match(/\[\s*{[\s\S]*}\s*\]/);
+    if (!jsonMatch) {
+      throw new Error("No valid JSON found in the response");
+    }
+    
+    try {
+      const events = JSON.parse(jsonMatch[0]);
+      console.log("Parsed music events:", events);
+      return events;
+    } catch (parseError) {
+      console.error("Error parsing music events JSON:", parseError);
+      throw new Error("Failed to parse music events JSON");
+    }
+  } catch (error) {
+    console.error("Error fetching music events:", error);
+    return [];
+  }
+}
+
+/**
+ * Fetch comedy events for a specific city using OpenRouter
+ */
+export async function fetchComedyEvents(city: string, state: string = "", dateRange?: { from: Date, to?: Date }) {
+  try {
+    // Use OpenRouter to get comedy events information
+    const dateRangeText = dateRange?.from
+      ? dateRange.to
+        ? ` between ${dateRange.from.toLocaleDateString()} and ${dateRange.to.toLocaleDateString()}`
+        : ` after ${dateRange.from.toLocaleDateString()}`
+      : '';
+    
+    const prompt = `Create a JSON array of 5 realistic comedy shows and stand-up performances in ${city}, ${state}${dateRangeText}. 
+    Include these fields for each event: id (string), title (string), comedian (string), description (string), 
+    venue (string), address (string), date (ISO string), time (string like "8:00 PM"), 
+    price (string like "$25 - $40"), imageUrl (placeholder URL), ticketUrl (placeholder URL),
+    type (always "comedy"). Use realistic comedian names and venues for the location.`;
+    
+    console.log("Fetching comedy events with prompt:", prompt);
+    
+    const response = await OpenRouterService.getCompletion({
+      prompt,
+      model: "anthropic/claude-3-haiku",
+      max_tokens: 2000,
+    });
+    
+    console.log("OpenRouter response for comedy events:", response);
+    
+    if (!response) {
+      throw new Error("No response from OpenRouter");
+    }
+    
+    // Parse JSON from the response
+    const jsonMatch = response.match(/\[\s*{[\s\S]*}\s*\]/);
+    if (!jsonMatch) {
+      throw new Error("No valid JSON found in the response");
+    }
+    
+    try {
+      const events = JSON.parse(jsonMatch[0]);
+      console.log("Parsed comedy events:", events);
+      return events;
+    } catch (parseError) {
+      console.error("Error parsing comedy events JSON:", parseError);
+      throw new Error("Failed to parse comedy events JSON");
+    }
+  } catch (error) {
+    console.error("Error fetching comedy events:", error);
+    return getComedyEventsForCity(city, state); // Fallback to mock data
+  }
+}
