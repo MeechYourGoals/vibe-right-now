@@ -419,7 +419,7 @@ const Explore = () => {
           const needsComedy = data.categories.includes('comedy');
           if (needsComedy) {
             try {
-              const comedyEvents = await getComedyEventsForCity(city, state);
+              const comedyEvents = getComedyEventsForCity(city, state);
               setComedyEvents(comedyEvents);
               setActiveTab('comedy');
             } catch (e) {
