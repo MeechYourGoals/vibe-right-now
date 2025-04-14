@@ -14,6 +14,7 @@ export const useSpeechRecognition = (): SpeechRecognitionHookReturn => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [interimTranscript, setInterimTranscript] = useState('');
+  const [isPushToTalkActive, setIsPushToTalkActive] = useState(false);
   
   // Setup speech recognition
   const { 
@@ -58,14 +59,18 @@ export const useSpeechRecognition = (): SpeechRecognitionHookReturn => {
           try {
             const base64Audio = (reader.result as string).split(',')[1];
             
+            console.log('Processing audio with OpenRouter...');
+            
             // Use OpenRouter for speech-to-text
             const transcription = await OpenRouterService.speechToText({
               audioBase64: base64Audio
             });
             
             if (transcription) {
+              console.log('OpenRouter transcription successful:', transcription);
               resolve(transcription);
             } else {
+              console.log('No transcription returned from OpenRouter, falling back...');
               reject('No transcription returned');
             }
           } catch (error) {
@@ -81,6 +86,20 @@ export const useSpeechRecognition = (): SpeechRecognitionHookReturn => {
       console.error('Error in processAudioWithOpenRouter:', error);
       throw error;
     }
+  };
+  
+  // Function to handle push-to-talk start (mousedown)
+  const handlePushToTalkStart = () => {
+    console.log('Push-to-talk started');
+    setIsPushToTalkActive(true);
+    startListening();
+  };
+  
+  // Function to handle push-to-talk end (mouseup)
+  const handlePushToTalkEnd = () => {
+    console.log('Push-to-talk ended');
+    setIsPushToTalkActive(false);
+    stopListening();
   };
   
   // Listening controls (start/stop)
@@ -100,7 +119,7 @@ export const useSpeechRecognition = (): SpeechRecognitionHookReturn => {
     useLocalWhisper,
     mediaRecorder,
     audioChunks,
-    processAudioWithOpenRouter // Add this new function for OpenRouter processing
+    processAudioWithOpenRouter // Add OpenRouter processing
   });
   
   // Process the transcript
@@ -119,6 +138,9 @@ export const useSpeechRecognition = (): SpeechRecognitionHookReturn => {
     interimTranscript,
     startListening,
     stopListening,
-    processTranscript
+    processTranscript,
+    isPushToTalkActive,
+    handlePushToTalkStart,
+    handlePushToTalkEnd
   };
 };

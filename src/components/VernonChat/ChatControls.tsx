@@ -1,153 +1,81 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
+import { Mic, Square } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Mic, MicOff, Loader2, Send } from 'lucide-react';
 import MessageInput from './MessageInput';
 import ChatTranscript from './ChatTranscript';
 
 interface ChatControlsProps {
-  isListening: boolean;
-  isProcessing: boolean;
-  transcript: string;
-  interimTranscript?: string;
-  toggleListening: () => void;
   onSendMessage: (message: string) => void;
   isTyping: boolean;
+  isListening: boolean;
+  transcript: string;
+  interimTranscript: string;
+  startListening: () => void;
+  stopListening: () => void;
+  handlePushToTalkStart?: () => void;
+  handlePushToTalkEnd?: () => void;
+  isProcessing: boolean;
+  disabled?: boolean;
 }
 
 const ChatControls: React.FC<ChatControlsProps> = ({
-  isListening,
-  isProcessing,
-  transcript,
-  interimTranscript = '',
-  toggleListening,
   onSendMessage,
-  isTyping
+  isTyping,
+  isListening,
+  transcript,
+  interimTranscript,
+  startListening,
+  stopListening,
+  handlePushToTalkStart,
+  handlePushToTalkEnd,
+  isProcessing,
+  disabled = false
 }) => {
-  const [inputValue, setInputValue] = useState('');
-  const micButtonRef = useRef<HTMLButtonElement>(null);
-  const [isPushToTalkActive, setIsPushToTalkActive] = useState(false);
-
+  const [showTranscript, setShowTranscript] = useState(true);
+  
   // Combine transcript and interim transcript for display
-  const displayTranscript = (interimTranscript && isListening) 
-    ? interimTranscript 
-    : transcript;
-
-  // Handle input change from keyboard typing
-  const handleInputChange = (value: string) => {
-    setInputValue(value);
-  };
-
-  // Handle manual send from the input field
-  const handleSendMessage = (message: string) => {
-    if (message.trim() && !isTyping) {
-      onSendMessage(message);
-      setInputValue('');
-    }
-  };
-
-  // Handle sending voice transcript
-  const handleSendVoiceTranscript = () => {
-    if (transcript.trim() && !isProcessing) {
-      onSendMessage(transcript);
-      setInputValue('');
-      toggleListening(); // This will stop listening
-    }
-  };
-
-  // Setup push-to-talk handlers
-  useEffect(() => {
-    const startPushToTalk = (e: MouseEvent) => {
-      if (!isPushToTalkActive && !isProcessing) {
-        setIsPushToTalkActive(true);
-        toggleListening(); // Start listening
-      }
-    };
-
-    const stopPushToTalk = (e: MouseEvent) => {
-      if (isPushToTalkActive && !isProcessing) {
-        setIsPushToTalkActive(false);
-        toggleListening(); // Stop listening and process
-      }
-    };
-
-    // Add event listeners for push-to-talk
-    const micButton = micButtonRef.current;
-    if (micButton) {
-      micButton.addEventListener('mousedown', startPushToTalk);
-      micButton.addEventListener('mouseup', stopPushToTalk);
-      micButton.addEventListener('mouseleave', stopPushToTalk);
-      
-      // Touch events for mobile
-      micButton.addEventListener('touchstart', startPushToTalk);
-      micButton.addEventListener('touchend', stopPushToTalk);
-    }
-
-    return () => {
-      // Clean up event listeners
-      if (micButton) {
-        micButton.removeEventListener('mousedown', startPushToTalk);
-        micButton.removeEventListener('mouseup', stopPushToTalk);
-        micButton.removeEventListener('mouseleave', stopPushToTalk);
-        micButton.removeEventListener('touchstart', startPushToTalk);
-        micButton.removeEventListener('touchend', stopPushToTalk);
-      }
-    };
-  }, [isPushToTalkActive, isProcessing, toggleListening]);
-
-  // Clear input value when transcript is processed
-  useEffect(() => {
-    if (isProcessing && transcript) {
-      setInputValue('');
-    }
-  }, [isProcessing, transcript]);
-
+  const displayTranscript = transcript || interimTranscript;
+  
   return (
-    <div className="border-t p-3">
+    <div className="flex flex-col w-full">
       <ChatTranscript 
-        transcript={displayTranscript} 
-        isVisible={isListening || interimTranscript.length > 0}
-        isListening={isListening} 
+        transcript={displayTranscript}
+        isVisible={showTranscript && (isListening || !!displayTranscript)} 
+        isListening={isListening}
       />
-      
+
       <div className="flex items-center">
         <Button
-          ref={micButtonRef}
-          variant={isListening ? "destructive" : "outline"}
-          size="icon"
-          className="mr-2 h-9 w-9 rounded-full select-none"
-          disabled={isProcessing}
-          title={isListening ? "Release to stop listening" : "Push and hold to talk"}
           type="button"
+          size="icon"
+          variant={isListening ? "destructive" : "outline"}
+          className="mr-2 relative overflow-hidden"
+          disabled={disabled || isProcessing}
+          aria-label={isListening ? "Stop listening" : "Start listening"}
+          onClick={isListening ? stopListening : startListening}
+          onMouseDown={handlePushToTalkStart}
+          onMouseUp={handlePushToTalkEnd}
+          onMouseLeave={isListening && handlePushToTalkEnd ? handlePushToTalkEnd : undefined}
+          onTouchStart={handlePushToTalkStart}
+          onTouchEnd={handlePushToTalkEnd}
         >
-          {isProcessing ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : isListening ? (
-            <MicOff className="h-4 w-4" />
+          {isListening ? (
+            <Square className="h-4 w-4" />
           ) : (
             <Mic className="h-4 w-4" />
           )}
+          {isListening && (
+            <span className="absolute inset-0 flex items-center justify-center">
+              <span className="animate-ping absolute inline-flex h-3 w-3 rounded-full bg-red-400 opacity-75"></span>
+            </span>
+          )}
         </Button>
         
-        {(isListening && transcript.trim()) && (
-          <Button
-            variant="default"
-            size="icon"
-            className="mr-2 h-9 w-9 rounded-full"
-            onClick={handleSendVoiceTranscript}
-            disabled={isProcessing}
-            title="Send Voice Message"
-          >
-            <Send className="h-4 w-4" />
-          </Button>
-        )}
-        
         <MessageInput 
-          onSendMessage={handleSendMessage} 
+          onSendMessage={onSendMessage}
           isTyping={isTyping}
-          disabled={isProcessing}
-          value={inputValue}
-          onChange={handleInputChange}
+          disabled={disabled || isProcessing}
         />
       </div>
     </div>

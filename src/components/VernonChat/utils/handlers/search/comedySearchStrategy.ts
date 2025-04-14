@@ -2,6 +2,7 @@
 import { SearchService } from '@/services/search/SearchService';
 import { cleanResponseText } from '../../responseFormatter';
 import { fetchComedyEvents } from '@/services/search/eventService';
+import { OpenRouterService } from '@/services/OpenRouterService';
 
 /**
  * Handles comedy-related searches
@@ -32,8 +33,9 @@ export const ComedySearchStrategy = {
         }
       }
       
-      // Try to get real comedy events using OpenRouter
-      const comedyEvents = await fetchComedyEvents(city, state);
+      // First attempt: Try to get real comedy events using our event service
+      console.log(`Fetching comedy events for ${city}, ${state}`);
+      let comedyEvents = await fetchComedyEvents(city, state);
       let comedyResponse = "";
       
       if (comedyEvents && comedyEvents.length > 0) {
@@ -53,8 +55,32 @@ export const ComedySearchStrategy = {
           comedyResponse += `   - Tickets: ${event.price}\n\n`;
         });
       } else {
-        // Fallback to the search service
-        comedyResponse = await SearchService.comedySearch(inputValue);
+        // Second attempt: Try direct web browsing using OpenRouter
+        console.log('No comedy events found, trying direct web browsing');
+        const searchQuery = `comedy shows in ${city}${state ? `, ${state}` : ''}`;
+        const browserEvents = await OpenRouterService.browseWebAndExtractEvents(searchQuery, 'comedy');
+        
+        if (browserEvents && browserEvents.length > 0) {
+          comedyResponse = `Here are some upcoming comedy shows in ${city}${state ? `, ${state}` : ''}:\n\n`;
+          
+          browserEvents.forEach((event, index) => {
+            const eventDate = event.date ? new Date(event.date) : null;
+            const formattedDate = eventDate ? eventDate.toLocaleDateString('en-US', { 
+              weekday: 'long', 
+              month: 'long', 
+              day: 'numeric' 
+            }) : 'Upcoming';
+            
+            comedyResponse += `${index + 1}. **${event.title || `Comedy Show featuring ${event.comedian}`}**\n`;
+            comedyResponse += `   - ${formattedDate}${event.time ? ` at ${event.time}` : ''}\n`;
+            comedyResponse += `   - Venue: ${event.venue || event.location}\n`;
+            comedyResponse += `   - ${event.price ? `Tickets: ${event.price}` : 'Check website for ticket info'}\n\n`;
+          });
+        } else {
+          // Third attempt: Fallback to the search service
+          console.log('No comedy events found via browsing, using search service');
+          comedyResponse = await SearchService.comedySearch(inputValue);
+        }
       }
       
       if (comedyResponse && comedyResponse.length > 100) {

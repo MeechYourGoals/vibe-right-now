@@ -3,7 +3,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import EventListItem from "./EventListItem";
 import { EventItem } from "./types";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 interface EventsListProps {
   events: EventItem[];
@@ -30,7 +30,6 @@ const EventsList = ({
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center py-6 text-red-300">
-        <AlertCircle className="h-8 w-8 mb-2" />
         <p>{error}</p>
       </div>
     );
@@ -54,7 +53,15 @@ const EventsList = ({
 
       {events.length === 0 && !isLoading && (
         <div className="text-center py-4 text-pro-light">
-          <p>No upcoming events found</p>
+          <p>Looking for upcoming events...</p>
+          <Button 
+            variant="ghost" 
+            size="sm"
+            className="mt-2 text-pro-light hover:text-white hover:bg-pro-dark"
+            onClick={() => window.location.reload()}
+          >
+            Refresh Events
+          </Button>
         </div>
       )}
     </div>

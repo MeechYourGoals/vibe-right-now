@@ -60,7 +60,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
         onChange={handleChange}
         onKeyDown={handleKeyDown}
         placeholder="Ask Vernon anything..."
-        className="flex-1 mr-2 bg-white dark:bg-gray-900 text-black dark:text-white border-gray-300 dark:border-gray-700"
+        className="flex-1 mr-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-700"
         disabled={isTyping || disabled}
       />
       <Button 

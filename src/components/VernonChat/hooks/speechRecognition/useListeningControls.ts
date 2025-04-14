@@ -1,23 +1,6 @@
 
-import { useCallback } from 'react';
+import { UseListeningControlsProps } from './types';
 
-export interface ListeningControlsProps {
-  speechRecognition: React.MutableRefObject<SpeechRecognition | null>;
-  initialized: boolean;
-  isListening: boolean;
-  setIsListening: React.Dispatch<React.SetStateAction<boolean>>;
-  setIsProcessing: React.Dispatch<React.SetStateAction<boolean>>;
-  setTranscript: React.Dispatch<React.SetStateAction<string>>;
-  setInterimTranscript: React.Dispatch<React.SetStateAction<string>>;
-  restartAttempts: React.MutableRefObject<number>;
-  clearSilenceTimer: () => void;
-  useLocalWhisper: boolean;
-  mediaRecorder: React.MutableRefObject<MediaRecorder | null>;
-  audioChunks: React.MutableRefObject<Blob[]>;
-  processAudioWithOpenRouter?: (audioBlob: Blob) => Promise<string>;
-}
-
-// Hook for controlling the listening state
 export const useListeningControls = ({
   speechRecognition,
   initialized,
@@ -26,162 +9,110 @@ export const useListeningControls = ({
   setIsProcessing,
   setTranscript,
   setInterimTranscript,
-  restartAttempts,
   clearSilenceTimer,
   useLocalWhisper,
   mediaRecorder,
   audioChunks,
   processAudioWithOpenRouter
-}: ListeningControlsProps) => {
-  // Start listening for speech
-  const startListening = useCallback(() => {
-    if (!initialized) {
-      console.error('Speech recognition not initialized yet');
-      return;
-    }
-    
-    if (isListening) {
-      console.log('Already listening');
-      return;
-    }
-    
-    try {
-      // Clear any existing transcript
-      setTranscript('');
-      setInterimTranscript('');
-      setIsListening(true);
-      
-      if (useLocalWhisper) {
-        // Start recording for Whisper
-        if (mediaRecorder.current && mediaRecorder.current.state !== 'recording') {
-          // Clear any previous chunks
-          audioChunks.current = [];
-          console.log('Starting audio recording for Whisper');
-          mediaRecorder.current.start(1000); // Collect data every second
-        } else {
-          console.error('Media recorder not initialized properly');
-          setIsListening(false);
-        }
-      } else {
-        // Use the browser's speech recognition
-        if (speechRecognition.current) {
-          console.log('Starting browser speech recognition');
-          speechRecognition.current.start();
-          restartAttempts.current = 0;
-        } else {
-          console.error('Speech recognition not available');
-          setIsListening(false);
-        }
-      }
-    } catch (error) {
-      console.error('Error starting speech recognition:', error);
-      setIsListening(false);
-    }
-  }, [
-    initialized,
-    isListening,
-    setIsListening,
-    setTranscript,
-    setInterimTranscript,
-    speechRecognition,
-    restartAttempts,
-    useLocalWhisper,
-    mediaRecorder,
-    audioChunks
-  ]);
+}: UseListeningControlsProps) => {
   
-  // Stop listening for speech
-  const stopListening = useCallback(() => {
+  const startListening = () => {
+    if (!initialized || isListening) return;
+    
+    clearSilenceTimer();
+    setTranscript('');
+    setInterimTranscript('');
+    
+    if (useLocalWhisper && mediaRecorder) {
+      console.log('Starting MediaRecorder for local whisper');
+      try {
+        audioChunks.length = 0; // Clear previous chunks
+        mediaRecorder.start();
+      } catch (error) {
+        console.error('Error starting media recorder:', error);
+      }
+    } else if (speechRecognition) {
+      try {
+        console.log('Starting speech recognition');
+        speechRecognition.start();
+      } catch (error) {
+        console.error('Error starting speech recognition:', error);
+      }
+    }
+    
+    setIsListening(true);
+  };
+  
+  const stopListening = () => {
+    if (!isListening) return;
+    
     clearSilenceTimer();
     
-    if (!isListening) {
-      return;
-    }
-    
-    try {
-      setIsListening(false);
-      
-      if (useLocalWhisper) {
-        // Stop recording for Whisper
-        if (mediaRecorder.current && mediaRecorder.current.state === 'recording') {
-          console.log('Stopping audio recording for Whisper');
-          mediaRecorder.current.stop();
-          
-          // Add handler to process audio when recording stops
-          mediaRecorder.current.onstop = async () => {
-            if (audioChunks.current.length === 0) {
-              console.warn('No audio recorded');
-              return;
-            }
-            
+    if (useLocalWhisper && mediaRecorder) {
+      console.log('Stopping MediaRecorder for local whisper');
+      try {
+        mediaRecorder.stop();
+        
+        // Process audio with OpenRouter when recording stops
+        mediaRecorder.addEventListener('dataavailable', async (e) => {
+          audioChunks.push(e.data);
+        });
+        
+        mediaRecorder.addEventListener('stop', async () => {
+          if (audioChunks.length > 0) {
+            const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
             setIsProcessing(true);
             
             try {
-              // Create audio blob from chunks
-              const audioBlob = new Blob(audioChunks.current, { type: 'audio/webm' });
+              let finalTranscript = '';
               
+              // Try OpenRouter first if available
               if (processAudioWithOpenRouter) {
-                // Use OpenRouter for speech recognition
                 try {
-                  const result = await processAudioWithOpenRouter(audioBlob);
-                  if (result) {
-                    setTranscript(result);
-                  }
+                  finalTranscript = await processAudioWithOpenRouter(audioBlob);
+                  console.log('OpenRouter transcript:', finalTranscript);
                 } catch (error) {
-                  console.error('Error with OpenRouter transcription:', error);
-                  // Fall back to local Whisper if OpenRouter fails
-                  setInterimTranscript('OpenRouter transcription failed, processing locally...');
-                  
-                  // Local Whisper processing would go here
-                  // This is a placeholder for actual implementation
-                  setTimeout(() => {
-                    setInterimTranscript('');
-                    setIsProcessing(false);
-                  }, 1000);
+                  console.error('Error with OpenRouter transcription, falling back:', error);
                 }
-              } else {
-                // Local Whisper processing logic here
-                setInterimTranscript('Processing audio locally...');
-                
-                // This is a placeholder for actual implementation
-                setTimeout(() => {
-                  setInterimTranscript('');
-                  setIsProcessing(false);
-                }, 1000);
               }
-            } catch (err) {
-              console.error('Error processing audio:', err);
+              
+              // If OpenRouter failed or wasn't used, fall back to local Whisper
+              if (!finalTranscript) {
+                // Add local Whisper processing here if needed
+                console.log('No OpenRouter transcript, would use local Whisper here');
+              }
+              
+              if (finalTranscript) {
+                setTranscript(finalTranscript);
+              } else {
+                setTranscript('');
+              }
+            } catch (error) {
+              console.error('Error processing audio:', error);
+              setTranscript('');
+            } finally {
               setIsProcessing(false);
+              setIsListening(false);
             }
-          };
-        }
-      } else {
-        // Stop the browser's speech recognition
-        if (speechRecognition.current) {
-          console.log('Stopping browser speech recognition');
-          try {
-            speechRecognition.current.abort();
-          } catch (error) {
-            console.error('Error stopping speech recognition:', error);
           }
-        }
+        });
+      } catch (error) {
+        console.error('Error stopping media recorder:', error);
+        setIsProcessing(false);
+        setIsListening(false);
       }
-    } catch (error) {
-      console.error('Error in stopListening:', error);
+    } else if (speechRecognition) {
+      try {
+        console.log('Stopping speech recognition');
+        speechRecognition.stop();
+      } catch (error) {
+        console.error('Error stopping speech recognition:', error);
+        setIsListening(false);
+      }
+    } else {
+      setIsListening(false);
     }
-  }, [
-    isListening,
-    setIsListening,
-    speechRecognition,
-    clearSilenceTimer,
-    useLocalWhisper,
-    mediaRecorder,
-    audioChunks,
-    setIsProcessing,
-    setTranscript,
-    setInterimTranscript,
-    processAudioWithOpenRouter
-  ]);
+  };
   
   return {
     startListening,
