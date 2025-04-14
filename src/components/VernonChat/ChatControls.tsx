@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Mic, MicOff, Loader2, Send } from 'lucide-react';
 import MessageInput from './MessageInput';
@@ -25,6 +25,8 @@ const ChatControls: React.FC<ChatControlsProps> = ({
   isTyping
 }) => {
   const [inputValue, setInputValue] = useState('');
+  const micButtonRef = useRef<HTMLButtonElement>(null);
+  const [isPushToTalkActive, setIsPushToTalkActive] = useState(false);
 
   // Combine transcript and interim transcript for display
   const displayTranscript = (interimTranscript && isListening) 
@@ -53,6 +55,46 @@ const ChatControls: React.FC<ChatControlsProps> = ({
     }
   };
 
+  // Setup push-to-talk handlers
+  useEffect(() => {
+    const startPushToTalk = (e: MouseEvent) => {
+      if (!isPushToTalkActive && !isProcessing) {
+        setIsPushToTalkActive(true);
+        toggleListening(); // Start listening
+      }
+    };
+
+    const stopPushToTalk = (e: MouseEvent) => {
+      if (isPushToTalkActive && !isProcessing) {
+        setIsPushToTalkActive(false);
+        toggleListening(); // Stop listening and process
+      }
+    };
+
+    // Add event listeners for push-to-talk
+    const micButton = micButtonRef.current;
+    if (micButton) {
+      micButton.addEventListener('mousedown', startPushToTalk);
+      micButton.addEventListener('mouseup', stopPushToTalk);
+      micButton.addEventListener('mouseleave', stopPushToTalk);
+      
+      // Touch events for mobile
+      micButton.addEventListener('touchstart', startPushToTalk);
+      micButton.addEventListener('touchend', stopPushToTalk);
+    }
+
+    return () => {
+      // Clean up event listeners
+      if (micButton) {
+        micButton.removeEventListener('mousedown', startPushToTalk);
+        micButton.removeEventListener('mouseup', stopPushToTalk);
+        micButton.removeEventListener('mouseleave', stopPushToTalk);
+        micButton.removeEventListener('touchstart', startPushToTalk);
+        micButton.removeEventListener('touchend', stopPushToTalk);
+      }
+    };
+  }, [isPushToTalkActive, isProcessing, toggleListening]);
+
   // Clear input value when transcript is processed
   useEffect(() => {
     if (isProcessing && transcript) {
@@ -70,12 +112,13 @@ const ChatControls: React.FC<ChatControlsProps> = ({
       
       <div className="flex items-center">
         <Button
+          ref={micButtonRef}
           variant={isListening ? "destructive" : "outline"}
           size="icon"
-          className="mr-2 h-9 w-9 rounded-full"
-          onClick={toggleListening}
+          className="mr-2 h-9 w-9 rounded-full select-none"
           disabled={isProcessing}
-          title={isListening ? "Stop Listening" : "Start Listening"}
+          title={isListening ? "Release to stop listening" : "Push and hold to talk"}
+          type="button"
         >
           {isProcessing ? (
             <Loader2 className="h-4 w-4 animate-spin" />

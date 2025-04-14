@@ -6,6 +6,7 @@ import { useListeningControls } from './useListeningControls';
 import { useTranscriptProcessor } from './useTranscriptProcessor';
 import { useSilenceDetection } from './useSilenceDetection';
 import { SpeechRecognitionHookReturn } from './types';
+import { OpenRouterService } from '@/services/OpenRouterService';
 
 // Main hook that composes other hooks for speech recognition functionality
 export const useSpeechRecognition = (): SpeechRecognitionHookReturn => {
@@ -46,6 +47,41 @@ export const useSpeechRecognition = (): SpeechRecognitionHookReturn => {
     previousInterims,
     resetSilenceTimer
   });
+
+  // Process audio with OpenRouter when available
+  const processAudioWithOpenRouter = async (audioBlob: Blob): Promise<string> => {
+    try {
+      // Convert blob to base64
+      const reader = new FileReader();
+      return new Promise((resolve, reject) => {
+        reader.onloadend = async () => {
+          try {
+            const base64Audio = (reader.result as string).split(',')[1];
+            
+            // Use OpenRouter for speech-to-text
+            const transcription = await OpenRouterService.speechToText({
+              audioBase64: base64Audio
+            });
+            
+            if (transcription) {
+              resolve(transcription);
+            } else {
+              reject('No transcription returned');
+            }
+          } catch (error) {
+            console.error('Error processing audio with OpenRouter:', error);
+            reject(error);
+          }
+        };
+        
+        reader.onerror = reject;
+        reader.readAsDataURL(audioBlob);
+      });
+    } catch (error) {
+      console.error('Error in processAudioWithOpenRouter:', error);
+      throw error;
+    }
+  };
   
   // Listening controls (start/stop)
   const { 
@@ -63,7 +99,8 @@ export const useSpeechRecognition = (): SpeechRecognitionHookReturn => {
     clearSilenceTimer,
     useLocalWhisper,
     mediaRecorder,
-    audioChunks
+    audioChunks,
+    processAudioWithOpenRouter // Add this new function for OpenRouter processing
   });
   
   // Process the transcript

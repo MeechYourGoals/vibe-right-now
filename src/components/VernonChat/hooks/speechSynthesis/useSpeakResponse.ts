@@ -3,6 +3,7 @@ import { useCallback } from 'react';
 import { playAudioBase64 } from '@/components/VernonChat/utils/speech/synthesis';
 import { toast } from "sonner";
 import { VertexAIHub, DEFAULT_MALE_VOICE } from '@/services/VertexAI';
+import { OpenRouterService } from '@/services/OpenRouterService';
 
 interface UseSpeakResponseProps {
   isSpeaking: boolean;
@@ -41,23 +42,19 @@ export const useSpeakResponse = ({
     // Set the current text being spoken
     currentlyPlayingText.current = text;
     
-    console.log('Speaking with Google Vertex AI TTS');
-    
+    // Try OpenRouter TTS first
     let speechSuccess = false;
     
-    // Use Google TTS via Vertex AI Hub with male voice
     try {
-      console.log('Attempting to use Google TTS via Vertex AI Hub...');
-      console.log(`Using voice: ${DEFAULT_MALE_VOICE}`);
+      console.log('Attempting to use OpenRouter for TTS...');
       
-      const audioBase64 = await VertexAIHub.textToSpeech(text, {
-        voice: DEFAULT_MALE_VOICE,  // Use the default male voice constant
-        speakingRate: 1.0,
-        pitch: 0
+      const audioBase64 = await OpenRouterService.textToSpeech({
+        text: text,
+        voice: 'male'
       });
       
       if (audioBase64) {
-        console.log('Google TTS successful, playing audio');
+        console.log('OpenRouter TTS successful, playing audio');
         const audioElement = playAudioBase64(audioBase64);
         if (audioElement) {
           speechSuccess = true;
@@ -68,16 +65,50 @@ export const useSpeakResponse = ({
           }
           return;
         } else {
-          console.warn('Audio element creation failed, falling back to browser TTS');
+          console.warn('Audio element creation failed, falling back');
         }
       } else {
-        console.warn('Google TTS returned null, falling back to browser TTS');
+        console.warn('OpenRouter TTS returned null, falling back');
       }
     } catch (error) {
-      console.error('Google TTS failed, falling back to browser TTS:', error);
+      console.error('OpenRouter TTS failed, falling back:', error);
     }
     
-    // If Google TTS failed, fall back to browser's speech synthesis
+    // If OpenRouter failed, try Vertex AI TTS
+    if (!speechSuccess) {
+      try {
+        console.log('Attempting to use Google Vertex AI TTS...');
+        console.log(`Using voice: ${DEFAULT_MALE_VOICE}`);
+        
+        const audioBase64 = await VertexAIHub.textToSpeech(text, {
+          voice: DEFAULT_MALE_VOICE,
+          speakingRate: 1.0,
+          pitch: 0
+        });
+        
+        if (audioBase64) {
+          console.log('Google TTS successful, playing audio');
+          const audioElement = playAudioBase64(audioBase64);
+          if (audioElement) {
+            speechSuccess = true;
+            
+            // Mark intro as played if this is the first message
+            if (!introHasPlayed.current && text.includes("I'm VeRNon")) {
+              introHasPlayed.current = true;
+            }
+            return;
+          } else {
+            console.warn('Audio element creation failed, falling back to browser TTS');
+          }
+        } else {
+          console.warn('Google TTS returned null, falling back to browser TTS');
+        }
+      } catch (error) {
+        console.error('Google TTS failed, falling back to browser TTS:', error);
+      }
+    }
+    
+    // If both failed, fall back to browser's speech synthesis
     try {
       if (!speechSuccess) {
         console.log('Attempting to use browser speech synthesis...');

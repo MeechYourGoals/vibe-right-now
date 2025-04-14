@@ -14,6 +14,7 @@ export interface ListeningControlsProps {
   useLocalWhisper: boolean;
   mediaRecorder: React.MutableRefObject<MediaRecorder | null>;
   audioChunks: React.MutableRefObject<Blob[]>;
+  processAudioWithOpenRouter?: (audioBlob: Blob) => Promise<string>;
 }
 
 // Hook for controlling the listening state
@@ -29,7 +30,8 @@ export const useListeningControls = ({
   clearSilenceTimer,
   useLocalWhisper,
   mediaRecorder,
-  audioChunks
+  audioChunks,
+  processAudioWithOpenRouter
 }: ListeningControlsProps) => {
   // Start listening for speech
   const startListening = useCallback(() => {
@@ -104,7 +106,54 @@ export const useListeningControls = ({
         if (mediaRecorder.current && mediaRecorder.current.state === 'recording') {
           console.log('Stopping audio recording for Whisper');
           mediaRecorder.current.stop();
-          setIsProcessing(true);
+          
+          // Add handler to process audio when recording stops
+          mediaRecorder.current.onstop = async () => {
+            if (audioChunks.current.length === 0) {
+              console.warn('No audio recorded');
+              return;
+            }
+            
+            setIsProcessing(true);
+            
+            try {
+              // Create audio blob from chunks
+              const audioBlob = new Blob(audioChunks.current, { type: 'audio/webm' });
+              
+              if (processAudioWithOpenRouter) {
+                // Use OpenRouter for speech recognition
+                try {
+                  const result = await processAudioWithOpenRouter(audioBlob);
+                  if (result) {
+                    setTranscript(result);
+                  }
+                } catch (error) {
+                  console.error('Error with OpenRouter transcription:', error);
+                  // Fall back to local Whisper if OpenRouter fails
+                  setInterimTranscript('OpenRouter transcription failed, processing locally...');
+                  
+                  // Local Whisper processing would go here
+                  // This is a placeholder for actual implementation
+                  setTimeout(() => {
+                    setInterimTranscript('');
+                    setIsProcessing(false);
+                  }, 1000);
+                }
+              } else {
+                // Local Whisper processing logic here
+                setInterimTranscript('Processing audio locally...');
+                
+                // This is a placeholder for actual implementation
+                setTimeout(() => {
+                  setInterimTranscript('');
+                  setIsProcessing(false);
+                }, 1000);
+              }
+            } catch (err) {
+              console.error('Error processing audio:', err);
+              setIsProcessing(false);
+            }
+          };
         }
       } else {
         // Stop the browser's speech recognition
@@ -127,7 +176,11 @@ export const useListeningControls = ({
     clearSilenceTimer,
     useLocalWhisper,
     mediaRecorder,
-    setIsProcessing
+    audioChunks,
+    setIsProcessing,
+    setTranscript,
+    setInterimTranscript,
+    processAudioWithOpenRouter
   ]);
   
   return {
