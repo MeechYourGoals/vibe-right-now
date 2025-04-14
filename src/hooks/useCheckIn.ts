@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { Location } from "@/types";
 import { calculateDistance } from "@/components/map/common/DistanceCalculator";
-import { EventTrackingService } from "@/services/EventTrackingService";
 
 export function useCheckIn(venue: Location) {
   const [isOpen, setIsOpen] = useState(false);
@@ -60,7 +59,7 @@ export function useCheckIn(venue: Location) {
     }
   };
 
-  const confirmCheckIn = async (pointsEarned: number) => {
+  const confirmCheckIn = (pointsEarned: number) => {
     setIsCheckedIn(true);
     setIsOpen(false);
     
@@ -69,28 +68,6 @@ export function useCheckIn(venue: Location) {
       description: `You earned ${pointsEarned} points at ${venue.name}`,
       variant: "default"
     });
-    
-    // Track the check-in event for Palantir Foundry
-    try {
-      await EventTrackingService.trackCheckIn({
-        userId: "current-user", // In a real app, get from auth
-        venueId: venue.id,
-        venueName: venue.name,
-        venueType: venue.type,
-        venueLat: venue.lat,
-        venueLng: venue.lng,
-        venueCity: venue.city,
-        venueState: venue.state,
-        hasReceipt: pointsEarned > 10,
-        pointsEarned,
-        distance: distance || undefined
-      });
-      
-      console.log('Check-in tracking successful');
-    } catch (error) {
-      console.error('Error tracking check-in:', error);
-      // Don't show error to user as this is background tracking
-    }
   };
 
   return {

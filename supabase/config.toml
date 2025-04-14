@@ -1,12 +1,38 @@
 
 project_id = "yiitqkjrbskxumriujrh"
 
-[functions.palantir-sync]
-verify_jwt = true
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage", "graphql_public"]
 
-[functions.palantir-recommendations]
+[db]
+port = 54322
+
+[storage]
+enabled = true
+port = 54323
+
+[auth]
+enabled = true
+port = 54324
+
+[realtime]
+enabled = true
+port = 54325
+
+[analytics]
+enabled = true
+port = 54326
+
+[vector]
+enabled = true
+port = 54327
+
+[functions]
+[functions.openai-chat]
+port = 54328
 verify_jwt = false
-
-[functions.ticketmaster]
+[functions.openai-speech]
+port = 54329
 verify_jwt = false
-
