@@ -3,6 +3,7 @@ import { SearchCoordinator } from './search';
 import { extractCategories } from '@/services/VertexAI/analysis';
 import { SearchService } from '@/services/search/SearchService';
 import { OpenAIService } from '@/services/OpenAIService';
+import { getMusicEventsForCity, getComedyEventsForCity } from '@/services/search/eventService';
 
 /**
  * Handle general search queries and location-based queries
@@ -23,6 +24,77 @@ export const handleSearchQuery = async (
         sessionStorage.setItem('nlpCategories', JSON.stringify(categories));
       } catch (e) {
         console.error('Error storing NLP categories in session:', e);
+      }
+    }
+    
+    // Check if this is a music or comedy specific query
+    const isMusicQuery = /music|concert|band|artist|festival|gig|performance|tour/i.test(inputValue);
+    const isComedyQuery = /comedy|comedian|stand[ -]?up|improv|funny|laugh|jokes/i.test(inputValue);
+    
+    // If it's a specific query for events, try to get real data
+    if (isMusicQuery || isComedyQuery) {
+      try {
+        // Extract location from query if possible
+        const locationMatch = inputValue.match(/in\s+([A-Za-z\s]+)(?:,|\s|$)/i);
+        const city = locationMatch ? locationMatch[1].trim() : '';
+        const stateMatch = inputValue.match(/([A-Za-z\s]+),\s+([A-Za-z]{2})/i);
+        const state = stateMatch ? stateMatch[2].trim() : '';
+        
+        if (city) {
+          if (isMusicQuery) {
+            const musicEvents = await getMusicEventsForCity(city, state);
+            if (musicEvents && musicEvents.length > 0) {
+              // Format the music events for chat display
+              const eventsList = musicEvents.map(event => `
+- **${event.title}** 
+  - ${new Date(event.date).toLocaleDateString()} at ${event.time}
+  - ${event.location}
+  - ${event.price}
+              `).join('\n');
+              
+              const response = `Here are some music events in ${city}${state ? `, ${state}` : ''}:\n\n${eventsList}`;
+              
+              const musicExploreLinkText = "\n\nYou can also [view all music events on our Explore page](/explore?q=" + 
+                encodeURIComponent(inputValue) + "&tab=music) for a better visual experience.";
+              
+              try {
+                sessionStorage.setItem('lastSearchCategories', JSON.stringify(['music']));
+                sessionStorage.setItem('lastSearchQuery', inputValue);
+              } catch (e) {
+                console.error('Error setting categories in sessionStorage:', e);
+              }
+              
+              return response + musicExploreLinkText;
+            }
+          } else if (isComedyQuery) {
+            const comedyEvents = await getComedyEventsForCity(city, state);
+            if (comedyEvents && comedyEvents.length > 0) {
+              // Format the comedy events for chat display
+              const eventsList = comedyEvents.map(event => `
+- **${event.title}** 
+  - ${new Date(event.date).toLocaleDateString()} at ${event.time}
+  - ${event.location}
+  - ${event.price}
+              `).join('\n');
+              
+              const response = `Here are some comedy shows in ${city}${state ? `, ${state}` : ''}:\n\n${eventsList}`;
+              
+              const comedyExploreLinkText = "\n\nYou can also [view all comedy shows on our Explore page](/explore?q=" + 
+                encodeURIComponent(inputValue) + "&tab=comedy) for a better visual experience.";
+              
+              try {
+                sessionStorage.setItem('lastSearchCategories', JSON.stringify(['comedy']));
+                sessionStorage.setItem('lastSearchQuery', inputValue);
+              } catch (e) {
+                console.error('Error setting categories in sessionStorage:', e);
+              }
+              
+              return response + comedyExploreLinkText;
+            }
+          }
+        }
+      } catch (eventError) {
+        console.error('Error handling specific event query:', eventError);
       }
     }
     
