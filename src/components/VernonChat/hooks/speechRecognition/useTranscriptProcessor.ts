@@ -1,34 +1,43 @@
 
-import { useCallback } from 'react';
-
-export interface TranscriptProcessorProps {
-  transcript: string;
-  setIsProcessing: (value: boolean) => void;
-  setTranscript: (value: string) => void;
-  setInterimTranscript: (value: string) => void;
-}
+import { UseTranscriptProcessorParams, UseTranscriptProcessorReturn } from './types';
 
 export const useTranscriptProcessor = ({
   transcript,
-  setIsProcessing,
   setTranscript,
+  setIsProcessing,
   setInterimTranscript
-}: TranscriptProcessorProps) => {
+}: UseTranscriptProcessorParams): UseTranscriptProcessorReturn => {
   
-  // Get the current complete transcript for processing
-  const processTranscript = useCallback(() => {
-    if (transcript.trim()) {
-      setIsProcessing(true);
+  // Process the full transcript when requested
+  const processTranscript = async (): Promise<string> => {
+    if (!transcript.trim()) {
+      return Promise.resolve('');
+    }
+    
+    console.log('Processing transcript:', transcript);
+    setIsProcessing(true);
+    
+    try {
+      // Here, we would typically send the transcript to a server for processing
+      // For now, we'll just return the transcript as-is
       
-      // Return the transcript for further processing
-      const currentTranscript = transcript.trim();
-      setTranscript('');
+      // Clear the interim and transcript state after processing
       setInterimTranscript('');
       
-      return currentTranscript;
+      // Return the final transcript
+      const finalTranscript = transcript;
+      setTranscript('');
+      setIsProcessing(false);
+      
+      return Promise.resolve(finalTranscript);
+    } catch (error) {
+      console.error('Error processing transcript:', error);
+      setIsProcessing(false);
+      return Promise.resolve('');
     }
-    return '';
-  }, [transcript, setIsProcessing, setTranscript, setInterimTranscript]);
+  };
   
-  return { processTranscript };
+  return {
+    processTranscript
+  };
 };

@@ -1,17 +1,6 @@
-
 import { useEffect } from 'react';
 import { handleSpeechRecognitionError } from '../../utils/speech/recognition';
-
-interface RecognitionEventHandlersProps {
-  speechRecognition: React.MutableRefObject<SpeechRecognition | null>;
-  setTranscript: React.Dispatch<React.SetStateAction<string>>;
-  setInterimTranscript: React.Dispatch<React.SetStateAction<string>>;
-  setIsListening: React.Dispatch<React.SetStateAction<boolean>>;
-  isListening: boolean;
-  restartAttempts: React.MutableRefObject<number>;
-  previousInterims: React.MutableRefObject<string[]>;
-  resetSilenceTimer: () => void;
-}
+import { UseRecognitionEventHandlersProps } from './types';
 
 // Hook to set up event handlers for speech recognition
 export const useRecognitionEventHandlers = ({
@@ -23,40 +12,35 @@ export const useRecognitionEventHandlers = ({
   restartAttempts,
   previousInterims,
   resetSilenceTimer,
-}: RecognitionEventHandlersProps) => {
+}: UseRecognitionEventHandlersProps) => {
   useEffect(() => {
-    if (!speechRecognition.current || !isListening) return;
-    
-    const recognition = speechRecognition.current;
+    if (!speechRecognition || !isListening) return;
     
     // On speech recognition start
-    recognition.onstart = () => {
+    speechRecognition.onstart = () => {
       console.log('Speech recognition started');
       setIsListening(true);
-      // Reset the restart attempts counter when recognition starts successfully
-      restartAttempts.current = 0;
     };
     
     // On speech recognition end
-    recognition.onend = () => {
+    speechRecognition.onend = () => {
       console.log('Speech recognition ended');
       
       // If still supposed to be listening, restart
       if (isListening) {
         // If too many restart attempts, just give up to avoid infinite loops
-        if (restartAttempts.current > 5) {
+        if (restartAttempts > 5) {
           console.error('Too many speech recognition restart attempts, stopping');
           setIsListening(false);
           return;
         }
         
-        console.log(`Restarting speech recognition (attempt ${restartAttempts.current + 1})`);
-        restartAttempts.current += 1;
+        console.log(`Restarting speech recognition (attempt ${restartAttempts + 1})`);
         
         // Short delay before restarting
         setTimeout(() => {
           try {
-            recognition.start();
+            speechRecognition.start();
           } catch (error) {
             console.error('Error restarting speech recognition:', error);
             setIsListening(false);
@@ -68,7 +52,7 @@ export const useRecognitionEventHandlers = ({
     };
     
     // On speech recognition error
-    recognition.onerror = (event) => {
+    speechRecognition.onerror = (event) => {
       const errorEvent = event as SpeechRecognitionErrorEvent;
       handleSpeechRecognitionError(errorEvent.error);
       
@@ -82,7 +66,7 @@ export const useRecognitionEventHandlers = ({
     };
     
     // On speech recognition results
-    recognition.onresult = (event) => {
+    speechRecognition.onresult = (event) => {
       resetSilenceTimer(); // Reset silence timer when we get results
       
       const resultEvent = event as SpeechRecognitionEvent;
@@ -113,22 +97,27 @@ export const useRecognitionEventHandlers = ({
         });
         
         // Reset any interim transcripts being tracked
-        previousInterims.current = [];
+        const updatedPreviousInterims = new Map(previousInterims);
+        updatedPreviousInterims.clear();
       }
       
       // Update state with interim transcript
       if (interimTranscript !== '') {
         console.log('Got interim transcript:', interimTranscript);
         
-        // Track interim transcripts to detect "stuck" recognition
-        previousInterims.current.push(interimTranscript);
-        
-        // Only keep the last 5 interim transcripts
-        if (previousInterims.current.length > 5) {
-          previousInterims.current.shift();
-        }
-        
+        // Update the interim transcript state
         setInterimTranscript(interimTranscript);
+
+        // Track interim transcripts to detect "stuck" recognition
+        const updatedPreviousInterims = new Map(previousInterims);
+        updatedPreviousInterims.set(interimTranscript, Date.now());
+        
+        // Only keep recent interims
+        for (const [key, timestamp] of updatedPreviousInterims.entries()) {
+          if (Date.now() - timestamp > 10000) {
+            updatedPreviousInterims.delete(key);
+          }
+        }
       } else {
         setInterimTranscript('');
       }
@@ -136,10 +125,10 @@ export const useRecognitionEventHandlers = ({
     
     // Cleanup function
     return () => {
-      recognition.onstart = null;
-      recognition.onend = null;
-      recognition.onerror = null;
-      recognition.onresult = null;
+      speechRecognition.onstart = null;
+      speechRecognition.onend = null;
+      speechRecognition.onerror = null;
+      speechRecognition.onresult = null;
     };
   }, [
     speechRecognition, 

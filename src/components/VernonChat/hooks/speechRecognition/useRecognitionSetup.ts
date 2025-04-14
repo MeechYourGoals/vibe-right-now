@@ -1,16 +1,17 @@
 
 import { useRef, useEffect, useState } from 'react';
 import { initializeSpeechRecognition } from '../../utils/speech';
+import { UseRecognitionSetupReturn } from './types';
 import { WhisperSpeechService } from '@/services/WhisperSpeechService';
 
-export const useRecognitionSetup = () => {
+export const useRecognitionSetup = (): UseRecognitionSetupReturn => {
   const [initialized, setInitialized] = useState(false);
   const [useLocalWhisper, setUseLocalWhisper] = useState(true);
-  const speechRecognition = useRef<SpeechRecognition | null>(null);
-  const restartAttempts = useRef<number>(0);
-  const previousInterims = useRef<string[]>([]);
-  const mediaRecorder = useRef<MediaRecorder | null>(null);
-  const audioChunks = useRef<Blob[]>([]);
+  const [speechRecognition, setSpeechRecognition] = useState<SpeechRecognition | null>(null);
+  const [restartAttempts, setRestartAttempts] = useState(0);
+  const [previousInterims, setPreviousInterims] = useState<Map<string, number>>(new Map());
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+  const [audioChunks, setAudioChunks] = useState<Blob[]>([]);
   
   // Check if Whisper service is available in this browser
   useEffect(() => {
@@ -36,12 +37,13 @@ export const useRecognitionSetup = () => {
           .catch(err => console.error('Error preloading Whisper model:', err));
       } else {
         // Fall back to browser's speech recognition
-        speechRecognition.current = initializeSpeechRecognition();
+        const recognition = initializeSpeechRecognition();
+        setSpeechRecognition(recognition);
         
-        if (speechRecognition.current) {
+        if (recognition) {
           // Configure recognition
-          speechRecognition.current.continuous = true;
-          speechRecognition.current.interimResults = true;
+          recognition.continuous = true;
+          recognition.interimResults = true;
           setInitialized(true);
           console.log('Browser speech recognition initialized');
         } else {
@@ -57,26 +59,28 @@ export const useRecognitionSetup = () => {
       console.log('Requesting microphone access for Whisper');
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       
-      mediaRecorder.current = new MediaRecorder(stream, {
+      const recorder = new MediaRecorder(stream, {
         mimeType: 'audio/webm' // Using webm for better compatibility
       });
       
-      mediaRecorder.current.ondataavailable = (event) => {
+      let chunks: Blob[] = [];
+      
+      recorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
-          audioChunks.current.push(event.data);
+          chunks.push(event.data);
         }
       };
       
-      mediaRecorder.current.onstop = async () => {
+      recorder.onstop = async () => {
         console.log('Audio recording stopped, processing with Whisper');
         // Process audio with Whisper
-        if (audioChunks.current.length === 0) {
+        if (chunks.length === 0) {
           console.warn('No audio chunks collected');
           return;
         }
         
         // Combine all chunks into a single blob
-        const audioBlob = new Blob(audioChunks.current, { type: 'audio/webm' });
+        const audioBlob = new Blob(chunks, { type: 'audio/webm' });
         console.log('Audio blob created, size:', audioBlob.size);
         
         // Use Whisper for transcription
@@ -99,20 +103,23 @@ export const useRecognitionSetup = () => {
         }
         
         // Reset chunks for next recording
-        audioChunks.current = [];
+        chunks = [];
       };
       
+      setMediaRecorder(recorder);
+      setAudioChunks(chunks);
       setInitialized(true);
       console.log('Whisper audio recording setup complete');
     } catch (error) {
       console.error('Error setting up audio recording for Whisper:', error);
       // Fall back to browser's speech recognition
       console.log('Falling back to browser speech recognition');
-      speechRecognition.current = initializeSpeechRecognition();
+      const recognition = initializeSpeechRecognition();
+      setSpeechRecognition(recognition);
       
-      if (speechRecognition.current) {
-        speechRecognition.current.continuous = true;
-        speechRecognition.current.interimResults = true;
+      if (recognition) {
+        recognition.continuous = true;
+        recognition.interimResults = true;
         setInitialized(true);
       }
     }

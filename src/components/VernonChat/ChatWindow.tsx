@@ -21,6 +21,8 @@ interface ChatWindowProps {
   isProcessing?: boolean;
   transcript?: string;
   interimTranscript?: string;
+  startListening?: () => void;
+  stopListening?: () => void;
   toggleListening?: () => void;
   isSpeaking?: boolean;
 }
@@ -39,6 +41,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   isProcessing = false,
   transcript = '',
   interimTranscript = '',
+  startListening = () => {},
+  stopListening = () => {},
   toggleListening = () => {},
   isSpeaking = false
 }) => {
@@ -81,7 +85,10 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
         isProcessing={isProcessing}
         transcript={transcript}
         interimTranscript={interimTranscript}
-        toggleListening={toggleListening}
+        startListening={startListening}
+        stopListening={stopListening}
+        handlePushToTalkStart={isListening ? undefined : toggleListening}
+        handlePushToTalkEnd={isListening ? toggleListening : undefined}
         onSendMessage={onSendMessage}
         isTyping={isTyping}
       />

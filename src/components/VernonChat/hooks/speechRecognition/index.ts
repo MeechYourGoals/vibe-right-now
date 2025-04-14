@@ -37,18 +37,6 @@ export const useSpeechRecognition = (): SpeechRecognitionHookReturn => {
     }
   });
   
-  // Set up event handlers for speech recognition
-  useRecognitionEventHandlers({
-    speechRecognition,
-    setTranscript,
-    setInterimTranscript,
-    setIsListening,
-    isListening,
-    restartAttempts,
-    previousInterims,
-    resetSilenceTimer
-  });
-
   // Process audio with OpenRouter when available
   const processAudioWithOpenRouter = async (audioBlob: Blob): Promise<string> => {
     try {
@@ -87,6 +75,18 @@ export const useSpeechRecognition = (): SpeechRecognitionHookReturn => {
       throw error;
     }
   };
+  
+  // Set up event handlers for speech recognition
+  useRecognitionEventHandlers({
+    speechRecognition,
+    setTranscript,
+    setInterimTranscript,
+    setIsListening,
+    isListening,
+    restartAttempts,
+    previousInterims,
+    resetSilenceTimer
+  });
   
   // Function to handle push-to-talk start (mousedown)
   const handlePushToTalkStart = () => {
