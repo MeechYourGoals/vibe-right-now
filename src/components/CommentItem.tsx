@@ -29,9 +29,7 @@ const CommentItem = ({ comment }: CommentItemProps) => {
           )}
           <span className="text-xs text-muted-foreground ml-auto">{timeAgo}</span>
         </div>
-        <p className={`text-sm mt-1 ${comment.vibedHere ? 'text-amber-700 font-medium' : ''}`}>
-          {comment.content}
-        </p>
+        <p className="text-sm mt-1">{comment.content}</p>
       </div>
     </div>
   );

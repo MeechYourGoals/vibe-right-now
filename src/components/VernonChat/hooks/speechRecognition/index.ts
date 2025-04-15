@@ -15,7 +15,6 @@ export const useSpeechRecognition = (): SpeechRecognitionHookReturn => {
   const [transcript, setTranscript] = useState('');
   const [interimTranscript, setInterimTranscript] = useState('');
   const [isPushToTalkActive, setIsPushToTalkActive] = useState(false);
-  const [resultsAvailable, setResultsAvailable] = useState(false);
   
   // Setup speech recognition
   const { 
@@ -79,13 +78,14 @@ export const useSpeechRecognition = (): SpeechRecognitionHookReturn => {
   
   // Set up event handlers for speech recognition
   useRecognitionEventHandlers({
-    recognition: speechRecognition,
+    speechRecognition,
     setTranscript,
     setInterimTranscript,
     setIsListening,
-    setResultsAvailable,
-    silenceCallback: resetSilenceTimer,
-    stopListening: () => stopListening()
+    isListening,
+    restartAttempts,
+    previousInterims,
+    resetSilenceTimer
   });
   
   // Function to handle push-to-talk start (mousedown)
