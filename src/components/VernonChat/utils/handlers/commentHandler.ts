@@ -4,7 +4,8 @@ import { AgentService } from '@/services/AgentService';
 export class CommentHandler {
   static async handleAgentCommentsGeneration(query: string) {
     try {
-      const result = await AgentService.processQuery(query);
+      // Use the search method instead of processQuery which doesn't exist
+      const result = await AgentService.search(query);
       return result;
     } catch (error) {
       console.error("Error in CommentHandler:", error);
