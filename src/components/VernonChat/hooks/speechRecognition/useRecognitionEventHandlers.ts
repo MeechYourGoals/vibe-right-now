@@ -1,80 +1,84 @@
-import { useCallback, useEffect } from 'react';
-import { SpeechRecognitionHookProps, UseRecognitionEventHandlersProps } from './types';
+
+import { useCallback } from 'react';
+import { UseRecognitionEventHandlersProps, UseRecognitionEventHandlersReturn } from './types';
 
 export const useRecognitionEventHandlers = ({
   recognition,
-  status,
-  setStatus,
-  transcript,
   setTranscript,
-  interimTranscript,
   setInterimTranscript,
-  onFinalTranscript,
   setIsListening,
-  confidenceThreshold,
-  onNoMatch,
-  onError
-}: UseRecognitionEventHandlersProps) => {
-  const handleStart = useCallback(() => {
-    console.log('Speech recognition started');
-    setStatus('listening');
-    setIsListening(true);
-  }, [setStatus, setIsListening]);
+  setResultsAvailable,
+  silenceCallback,
+  stopListening,
+}: UseRecognitionEventHandlersProps): UseRecognitionEventHandlersReturn => {
+  
+  const handleRecognitionResult = useCallback((event: SpeechRecognitionEvent) => {
+    let interimTranscript = '';
+    let finalTranscript = '';
 
-  const handleResult = useCallback((event: SpeechRecognitionEvent) => {
-    let newInterimTranscript = '';
-    for (let i = event.resultIndex; i < event.results.length; ++i) {
+    for (let i = event.resultIndex; i < event.results.length; i++) {
       if (event.results[i].isFinal) {
-        if (event.results[i][0].confidence >= confidenceThreshold) {
-          const finalTranscriptItem = event.results[i][0].transcript.trim();
-          setTranscript((prevTranscript) => prevTranscript + ' ' + finalTranscriptItem);
-          onFinalTranscript(finalTranscriptItem);
-        } else {
-          console.log(`Low confidence: ${event.results[i][0].confidence}`);
-          onNoMatch(event.results[i][0].transcript.trim());
-        }
+        finalTranscript += event.results[i][0].transcript;
       } else {
-        newInterimTranscript += event.results[i][0].transcript;
+        interimTranscript += event.results[i][0].transcript;
       }
     }
-    setInterimTranscript(newInterimTranscript);
-  }, [setTranscript, setInterimTranscript, onFinalTranscript, confidenceThreshold, onNoMatch]);
 
-  const handleEnd = useCallback(() => {
-    console.log('Speech recognition ended.');
-    setStatus('inactive');
-    setIsListening(false);
-  }, [setStatus, setIsListening]);
-
-  const handleError = useCallback((event: SpeechRecognitionErrorEvent) => {
-    console.error('Speech recognition error:', event.error);
-    onError(event.error);
-    setStatus('error');
-    setIsListening(false);
-  }, [setStatus, setIsListening, onError]);
-
-  const handleNoMatch = useCallback((event: SpeechRecognitionEvent) => {
-    console.warn('No match found:', event);
-    if (event.results && event.results[0] && event.results[0][0]) {
-      onNoMatch(event.results[0][0].transcript.trim());
+    if (finalTranscript) {
+      setTranscript(prev => `${prev} ${finalTranscript}`.trim());
     }
-  }, [onNoMatch]);
+    
+    setInterimTranscript(interimTranscript);
+    setResultsAvailable(true);
+  }, [setTranscript, setInterimTranscript, setResultsAvailable]);
 
-  useEffect(() => {
-    if (!recognition) return;
-
-    recognition.onstart = handleStart;
-    recognition.onresult = handleResult;
-    recognition.onend = handleEnd;
-    recognition.onerror = handleError;
-    recognition.onnomatch = handleNoMatch;
-
-    return () => {
-      recognition.onstart = null;
+  const handleRecognitionEnd = useCallback(() => {
+    setIsListening(false);
+    if (recognition) {
       recognition.onresult = null;
       recognition.onend = null;
       recognition.onerror = null;
-      recognition.onnomatch = null;
-    };
-  }, [recognition, handleStart, handleResult, handleEnd, handleError, handleNoMatch]);
+    }
+  }, [recognition, setIsListening]);
+
+  const handleRecognitionError = useCallback((event: SpeechRecognitionErrorEvent) => {
+    console.error('Speech recognition error:', event.error);
+    if (event.error === 'no-speech') {
+      silenceCallback();
+    }
+    stopListening();
+  }, [silenceCallback, stopListening]);
+
+  const handleSilence = useCallback(() => {
+    console.log('Silence detected');
+    stopListening();
+  }, [stopListening]);
+
+  const handleAudioProcess = useCallback(() => {
+    // Handle audio processing here
+  }, []);
+
+  const handleAudioEnd = useCallback(() => {
+    // Handle audio end here
+  }, []);
+
+  const handleNoMatch = useCallback(() => {
+    console.log('No speech was recognized');
+  }, []);
+
+  const handleUpdateTranscript = useCallback((text: string) => {
+    // Changed from function to string parameter to fix the error
+    setTranscript(text);
+  }, [setTranscript]);
+
+  return {
+    handleRecognitionResult,
+    handleRecognitionEnd,
+    handleRecognitionError,
+    handleSilence,
+    handleAudioProcess,
+    handleAudioEnd,
+    handleNoMatch,
+    handleUpdateTranscript,
+  };
 };
