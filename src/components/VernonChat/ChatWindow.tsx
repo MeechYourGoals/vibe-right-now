@@ -87,10 +87,10 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
         interimTranscript={interimTranscript}
         startListening={startListening}
         stopListening={stopListening}
-        handlePushToTalkStart={isListening ? undefined : toggleListening}
-        handlePushToTalkEnd={isListening ? toggleListening : undefined}
         onSendMessage={onSendMessage}
         isTyping={isTyping}
+        handlePushToTalkStart={isListening ? undefined : startListening}
+        handlePushToTalkEnd={isListening ? stopListening : undefined}
       />
     </>
   );

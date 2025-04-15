@@ -8,6 +8,7 @@ import { MapPin, Star, Clock, Car, ExternalLink, Calendar, UserPlus } from "luci
 import { Button } from "@/components/ui/button";
 import PlaceCard from "@/components/places/PlaceCard";
 import TripsList from "@/components/places/TripsList";
+import VibeWithMe from "@/components/places/VibeWithMe";
 import { useState } from "react";
 
 const MyPlaces = () => {
@@ -38,30 +39,38 @@ const MyPlaces = () => {
           </Button>
         </div>
         
-        {activeSection === "places" ? (
-          <Tabs defaultValue="visited" className="w-full">
-            <TabsList className="mb-4">
-              <TabsTrigger value="visited">Visited</TabsTrigger>
-              <TabsTrigger value="want-to-visit">Want to Visit</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="visited" className="space-y-4">
-              <p className="text-muted-foreground mb-4">Places you've checked in at or marked as visited.</p>
-              {visitedPlaces.map((place) => (
-                <PlaceCard key={place.id} place={place} visitType="visited" />
-              ))}
-            </TabsContent>
-            
-            <TabsContent value="want-to-visit" className="space-y-4">
-              <p className="text-muted-foreground mb-4">Places you've saved to visit in the future.</p>
-              {wantToVisitPlaces.map((place) => (
-                <PlaceCard key={place.id} place={place} visitType="planned" />
-              ))}
-            </TabsContent>
-          </Tabs>
-        ) : (
-          <TripsList />
-        )}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          <div className="lg:col-span-2">
+            {activeSection === "places" ? (
+              <Tabs defaultValue="visited" className="w-full">
+                <TabsList className="mb-4">
+                  <TabsTrigger value="visited">Visited</TabsTrigger>
+                  <TabsTrigger value="want-to-visit">Want to Visit</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="visited" className="space-y-4">
+                  <p className="text-muted-foreground mb-4">Places you've checked in at or marked as visited.</p>
+                  {visitedPlaces.map((place) => (
+                    <PlaceCard key={place.id} place={place} visitType="visited" />
+                  ))}
+                </TabsContent>
+                
+                <TabsContent value="want-to-visit" className="space-y-4">
+                  <p className="text-muted-foreground mb-4">Places you've saved to visit in the future.</p>
+                  {wantToVisitPlaces.map((place) => (
+                    <PlaceCard key={place.id} place={place} visitType="planned" />
+                  ))}
+                </TabsContent>
+              </Tabs>
+            ) : (
+              <TripsList />
+            )}
+          </div>
+          
+          <div>
+            <VibeWithMe className="mb-6" />
+          </div>
+        </div>
         
         <div className="mt-8 rounded-lg bg-muted/50 p-4 text-xs text-muted-foreground">
           <p className="font-medium">Community Guidelines</p>

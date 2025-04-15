@@ -4,6 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { PlusCircle, X } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 export interface PrivacyTabProps {
   onSave: () => void;
@@ -15,6 +18,20 @@ const PrivacyTab = ({ onSave, isVenueMode = false }: PrivacyTabProps) => {
   const [profileVisibility, setProfileVisibility] = useState("public");
   const [dataSharing, setDataSharing] = useState(true);
   const [activityTracking, setActivityTracking] = useState(true);
+  const [vibeWithMeEnabled, setVibeWithMeEnabled] = useState(false);
+  const [closeFriendInput, setCloseFriendInput] = useState("");
+  const [closeFriends, setCloseFriends] = useState<string[]>([]);
+  
+  const handleAddCloseFriend = () => {
+    if (closeFriendInput.trim() && !closeFriends.includes(closeFriendInput.trim())) {
+      setCloseFriends([...closeFriends, closeFriendInput.trim()]);
+      setCloseFriendInput("");
+    }
+  };
+  
+  const handleRemoveCloseFriend = (friend: string) => {
+    setCloseFriends(closeFriends.filter(f => f !== friend));
+  };
   
   return (
     <div className="bg-card p-6 rounded-lg border shadow-sm">
@@ -102,6 +119,66 @@ const PrivacyTab = ({ onSave, isVenueMode = false }: PrivacyTabProps) => {
             </div>
           </div>
         </div>
+        
+        {!isVenueMode && (
+          <div className="space-y-4 p-4 border rounded-lg bg-muted/20">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-medium">Vibe With Me</h3>
+                <p className="text-sm text-muted-foreground">
+                  Allow close friends to see when you're going to a location
+                </p>
+              </div>
+              <Switch
+                id="vibe-with-me"
+                checked={vibeWithMeEnabled}
+                onCheckedChange={setVibeWithMeEnabled}
+              />
+            </div>
+            
+            {vibeWithMeEnabled && (
+              <div className="space-y-3 mt-3">
+                <Label htmlFor="close-friends">Add Close Friends</Label>
+                <p className="text-xs text-muted-foreground mb-2">
+                  Only users who mutually follow you and are on this list will see your Vibe With Me broadcasts
+                </p>
+                
+                <div className="flex gap-2">
+                  <Input
+                    id="close-friends"
+                    placeholder="Enter username"
+                    value={closeFriendInput}
+                    onChange={(e) => setCloseFriendInput(e.target.value)}
+                    className="text-foreground"
+                  />
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="icon"
+                    onClick={handleAddCloseFriend}
+                  >
+                    <PlusCircle className="h-4 w-4" />
+                  </Button>
+                </div>
+                
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {closeFriends.map(friend => (
+                    <Badge key={friend} variant="secondary" className="flex items-center gap-1 py-1">
+                      {friend}
+                      <button onClick={() => handleRemoveCloseFriend(friend)} className="ml-1">
+                        <X className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+                
+                {closeFriends.length === 0 && (
+                  <p className="text-xs text-muted-foreground italic">No close friends added yet</p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
         
         <div className="space-y-4">
           <h3 className="text-lg font-medium">Data Sharing & Analytics</h3>

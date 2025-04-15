@@ -6,6 +6,8 @@ import { useToast } from "@/hooks/use-toast";
 import UploadSection from "./file-upload/UploadSection";
 import FilePreview from "./file-upload/FilePreview";
 import AnalysisResults from "./file-upload/AnalysisResults";
+import POSServicesConnector from "./POSServicesConnector";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 const AnalyticsFileUpload = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -67,37 +69,50 @@ const AnalyticsFileUpload = () => {
   
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Upload className="h-5 w-5" />
-            AI-Powered Financial Analysis
-          </CardTitle>
-          <CardDescription>
-            Upload your business records for advanced AI insights
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <UploadSection onFileChange={handleFileChange} />
-          
-          {file && (
-            <FilePreview 
-              file={file} 
-              isUploading={isUploading} 
-              isAnalyzing={isAnalyzing} 
-              onUpload={handleUpload} 
-            />
-          )}
-          
-          {(showResults || isAnalyzing || analysisError) && (
-            <AnalysisResults 
-              isLoading={isAnalyzing}
-              error={analysisError}
-              onRetry={handleRetryAnalysis}
-            />
-          )}
-        </CardContent>
-      </Card>
+      <Tabs defaultValue="file-upload" className="w-full">
+        <TabsList className="mb-4">
+          <TabsTrigger value="file-upload">File Upload</TabsTrigger>
+          <TabsTrigger value="pos-integration">POS Integration</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="file-upload">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Upload className="h-5 w-5" />
+                AI-Powered Financial Analysis
+              </CardTitle>
+              <CardDescription>
+                Upload your business records for advanced AI insights
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <UploadSection onFileChange={handleFileChange} />
+              
+              {file && (
+                <FilePreview 
+                  file={file} 
+                  isUploading={isUploading} 
+                  isAnalyzing={isAnalyzing} 
+                  onUpload={handleUpload} 
+                />
+              )}
+              
+              {(showResults || isAnalyzing || analysisError) && (
+                <AnalysisResults 
+                  isLoading={isAnalyzing}
+                  error={analysisError}
+                  onRetry={handleRetryAnalysis}
+                />
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="pos-integration">
+          <POSServicesConnector />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
