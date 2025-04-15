@@ -40,14 +40,24 @@ export interface UseListeningControlsProps {
 }
 
 export interface UseRecognitionEventHandlersProps {
-  speechRecognition: SpeechRecognition | null;
-  setTranscript: (transcript: string) => void;
-  setInterimTranscript: (interimTranscript: string) => void;
-  setIsListening: (listening: boolean) => void;
-  isListening: boolean;
-  restartAttempts: number;
-  previousInterims: Map<string, number>;
-  resetSilenceTimer: () => void;
+  recognition: SpeechRecognition | null;
+  setTranscript: (value: React.SetStateAction<string>) => void;
+  setInterimTranscript: (value: React.SetStateAction<string>) => void;
+  setIsListening: (value: React.SetStateAction<boolean>) => void;
+  setResultsAvailable: (value: React.SetStateAction<boolean>) => void;
+  silenceCallback: () => void;
+  stopListening: () => void;
+}
+
+export interface UseRecognitionEventHandlersReturn {
+  handleRecognitionResult: (event: SpeechRecognitionEvent) => void;
+  handleRecognitionEnd: () => void;
+  handleRecognitionError: (event: SpeechRecognitionErrorEvent) => void;
+  handleSilence: () => void;
+  handleAudioProcess: () => void;
+  handleAudioEnd: () => void;
+  handleNoMatch: () => void;
+  handleUpdateTranscript: (text: string) => void;
 }
 
 export interface UseSilenceDetectionProps {

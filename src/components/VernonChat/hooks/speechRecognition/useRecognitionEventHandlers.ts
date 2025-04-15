@@ -1,6 +1,6 @@
 
 import { useCallback } from 'react';
-import { UseRecognitionEventHandlersParams, UseRecognitionEventHandlersReturn } from './types';
+import { UseRecognitionEventHandlersProps, UseRecognitionEventHandlersReturn } from './types';
 
 export const useRecognitionEventHandlers = ({
   recognition,
@@ -10,7 +10,7 @@ export const useRecognitionEventHandlers = ({
   setResultsAvailable,
   silenceCallback,
   stopListening,
-}: UseRecognitionEventHandlersParams): UseRecognitionEventHandlersReturn => {
+}: UseRecognitionEventHandlersProps): UseRecognitionEventHandlersReturn => {
   
   const handleRecognitionResult = useCallback((event: SpeechRecognitionEvent) => {
     let interimTranscript = '';

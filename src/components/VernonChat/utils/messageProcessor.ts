@@ -5,6 +5,7 @@ import { extractPaginationParams } from './pagination';
 import { handleVenueQuery } from './handlers/venueQueryHandler';
 import { handleSearchQuery } from './handlers/searchQueryHandler';
 import { handleBookingQuery } from './handlers/bookingQueryHandler';
+import { AgentHandler } from './handlers/agentHandler';
 import { VertexAIService } from '@/services/VertexAIService';
 import { OpenAIService } from '@/services/OpenAIService';
 
@@ -57,6 +58,22 @@ export const processMessageInput = async (
       setIsTyping(false);
       setIsSearching(false);
       return;
+    }
+    
+    // Check if this query should be handled by the Agent system
+    const shouldUseAgent = AgentHandler.shouldUseAgent(inputValue);
+    if (shouldUseAgent) {
+      const isAgentHandled = await AgentHandler.handleAgentQuery(
+        inputValue, 
+        setMessages,
+        isVenueMode
+      );
+      
+      if (isAgentHandled) {
+        setIsTyping(false);
+        setIsSearching(false);
+        return;
+      }
     }
     
     // Detect if this is likely a location/venue search query
