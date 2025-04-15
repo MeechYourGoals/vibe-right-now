@@ -67,7 +67,6 @@ export const useRecognitionEventHandlers = ({
   }, []);
 
   const handleUpdateTranscript = useCallback((text: string) => {
-    // Changed from function to string parameter to fix the error
     setTranscript(text);
   }, [setTranscript]);
 
