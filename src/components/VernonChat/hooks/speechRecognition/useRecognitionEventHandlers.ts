@@ -1,64 +1,73 @@
+
 import { useCallback, useEffect } from 'react';
-import { SpeechRecognitionHookProps, UseRecognitionEventHandlersProps } from './types';
+import { SpeechRecognitionHookProps } from './types';
 
 export const useRecognitionEventHandlers = ({
   recognition,
-  status,
-  setStatus,
-  transcript,
   setTranscript,
-  interimTranscript,
   setInterimTranscript,
-  onFinalTranscript,
   setIsListening,
-  confidenceThreshold,
-  onNoMatch,
-  onError
-}: UseRecognitionEventHandlersProps) => {
+  isListening,
+  restartAttempts,
+  previousInterims,
+  resetSilenceTimer
+}) => {
   const handleStart = useCallback(() => {
     console.log('Speech recognition started');
-    setStatus('listening');
     setIsListening(true);
-  }, [setStatus, setIsListening]);
+  }, [setIsListening]);
 
-  const handleResult = useCallback((event: SpeechRecognitionEvent) => {
+  const handleResult = useCallback((event) => {
     let newInterimTranscript = '';
+    let finalTranscript = '';
+    
     for (let i = event.resultIndex; i < event.results.length; ++i) {
       if (event.results[i].isFinal) {
-        if (event.results[i][0].confidence >= confidenceThreshold) {
-          const finalTranscriptItem = event.results[i][0].transcript.trim();
-          setTranscript((prevTranscript) => prevTranscript + ' ' + finalTranscriptItem);
-          onFinalTranscript(finalTranscriptItem);
-        } else {
-          console.log(`Low confidence: ${event.results[i][0].confidence}`);
-          onNoMatch(event.results[i][0].transcript.trim());
-        }
+        finalTranscript += event.results[i][0].transcript;
+        console.log('Final transcript:', finalTranscript);
       } else {
         newInterimTranscript += event.results[i][0].transcript;
       }
     }
+    
+    if (finalTranscript) {
+      setTranscript(prev => {
+        const newValue = prev ? `${prev} ${finalTranscript}` : finalTranscript;
+        console.log('Setting final transcript:', newValue);
+        return newValue;
+      });
+    }
+    
     setInterimTranscript(newInterimTranscript);
-  }, [setTranscript, setInterimTranscript, onFinalTranscript, confidenceThreshold, onNoMatch]);
+    
+    // Reset the silence timer whenever we get new speech
+    if (newInterimTranscript || finalTranscript) {
+      resetSilenceTimer();
+    }
+    
+    // Track interim results to detect repetition
+    if (newInterimTranscript) {
+      previousInterims.set(newInterimTranscript, Date.now());
+      
+      // Clean up old interims (older than 10 seconds)
+      const now = Date.now();
+      previousInterims.forEach((timestamp, text) => {
+        if (now - timestamp > 10000) {
+          previousInterims.delete(text);
+        }
+      });
+    }
+  }, [setTranscript, setInterimTranscript, previousInterims, resetSilenceTimer]);
 
   const handleEnd = useCallback(() => {
-    console.log('Speech recognition ended.');
-    setStatus('inactive');
+    console.log('Speech recognition ended');
     setIsListening(false);
-  }, [setStatus, setIsListening]);
+  }, [setIsListening]);
 
-  const handleError = useCallback((event: SpeechRecognitionErrorEvent) => {
+  const handleError = useCallback((event) => {
     console.error('Speech recognition error:', event.error);
-    onError(event.error);
-    setStatus('error');
     setIsListening(false);
-  }, [setStatus, setIsListening, onError]);
-
-  const handleNoMatch = useCallback((event: SpeechRecognitionEvent) => {
-    console.warn('No match found:', event);
-    if (event.results && event.results[0] && event.results[0][0]) {
-      onNoMatch(event.results[0][0].transcript.trim());
-    }
-  }, [onNoMatch]);
+  }, [setIsListening]);
 
   useEffect(() => {
     if (!recognition) return;
@@ -67,14 +76,12 @@ export const useRecognitionEventHandlers = ({
     recognition.onresult = handleResult;
     recognition.onend = handleEnd;
     recognition.onerror = handleError;
-    recognition.onnomatch = handleNoMatch;
 
     return () => {
       recognition.onstart = null;
       recognition.onresult = null;
       recognition.onend = null;
       recognition.onerror = null;
-      recognition.onnomatch = null;
     };
-  }, [recognition, handleStart, handleResult, handleEnd, handleError, handleNoMatch]);
+  }, [recognition, handleStart, handleResult, handleEnd, handleError]);
 };

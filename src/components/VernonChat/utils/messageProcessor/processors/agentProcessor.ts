@@ -1,5 +1,5 @@
 
-import { AgentHandler } from '../../handlers/agent';
+import { AgentHandler } from '../../handlers/agentHandler';
 import { MessageContext, MessageProcessor } from '../types';
 import { Message } from '../../../types';
 

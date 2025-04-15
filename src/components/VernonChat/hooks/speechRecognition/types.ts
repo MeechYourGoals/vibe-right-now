@@ -44,34 +44,8 @@ export interface UseRecognitionEventHandlersProps {
   setTranscript: (value: React.SetStateAction<string>) => void;
   setInterimTranscript: (value: React.SetStateAction<string>) => void;
   setIsListening: (value: React.SetStateAction<boolean>) => void;
-  setResultsAvailable: (value: React.SetStateAction<boolean>) => void;
-  silenceCallback: () => void;
-  stopListening: () => void;
-}
-
-export interface UseRecognitionEventHandlersReturn {
-  handleRecognitionResult: (event: SpeechRecognitionEvent) => void;
-  handleRecognitionEnd: () => void;
-  handleRecognitionError: (event: SpeechRecognitionErrorEvent) => void;
-  handleSilence: () => void;
-  handleAudioProcess: () => void;
-  handleAudioEnd: () => void;
-  handleNoMatch: () => void;
-  handleUpdateTranscript: (text: string) => void;
-}
-
-export interface UseSilenceDetectionProps {
-  onSilenceDetected: () => void;
-  silenceThreshold?: number;
-}
-
-export interface UseTranscriptProcessorParams {
-  transcript: string;
-  setTranscript: (transcript: string) => void;
-  setIsProcessing: (processing: boolean) => void;
-  setInterimTranscript: (interimTranscript: string) => void;
-}
-
-export interface UseTranscriptProcessorReturn {
-  processTranscript: () => Promise<string>;
+  isListening: boolean;
+  restartAttempts: number;
+  previousInterims: Map<string, number>;
+  resetSilenceTimer: () => void;
 }
