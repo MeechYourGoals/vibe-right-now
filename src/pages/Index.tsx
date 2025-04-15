@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Layout } from "@/components/Layout";
 import PostFeed from "@/components/PostFeed";
@@ -62,17 +63,17 @@ const Index = () => {
             </div>
 
             {showDatePicker && (
-              <Card className="mb-6 bg-indigo-50 border-indigo-100">
+              <Card className="mb-6 bg-gray-900 border-indigo-900 text-white shadow-lg">
                 <CardContent className="p-4">
-                  <h3 className="text-lg font-semibold mb-3 text-indigo-800">Find Future Vibes</h3>
-                  <p className="text-sm text-indigo-700 mb-3">Select dates to explore events, concerts, games and more in the coming months</p>
+                  <h3 className="text-lg font-semibold mb-3 text-indigo-200">Find Future Vibes</h3>
+                  <p className="text-sm text-indigo-300 mb-3">Select dates to explore events, concerts, games and more in the coming months</p>
                   <DateRangeSelector 
                     dateRange={dateRange} 
                     onDateRangeChange={handleDateRangeChange} 
                   />
                   <div className="flex justify-end mt-4">
                     <Button
-                      className="bg-indigo-600 hover:bg-indigo-700"
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white"
                       onClick={handlePlanFutureVibes}
                       disabled={!dateRange?.from}
                     >

@@ -17,56 +17,75 @@ interface CommentListProps {
 const CommentList = ({ postId, commentsCount }: CommentListProps) => {
   const [newComment, setNewComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showAllComments, setShowAllComments] = useState(false);
 
   // Filter comments for this specific post
   let postComments = mockComments.filter(comment => comment.postId === postId);
   
-  // If no comments found in mock data, generate example comments
-  if (postComments.length === 0 && commentsCount > 0) {
-    // Generate 2-3 example comments
-    const commentCount = Math.min(commentsCount, Math.floor(Math.random() * 2) + 2);
-    const exampleComments: Comment[] = [];
+  // If no comments found in mock data or not enough comments, generate example comments
+  if (postComments.length < commentsCount) {
+    // Calculate how many more comments to generate
+    const additionalCommentsNeeded = Math.max(
+      commentsCount - postComments.length,
+      Math.min(5, commentsCount) // Always show at least a few comments but no more than 5 by default
+    );
     
-    // Regular comment
-    exampleComments.push({
-      id: `example-${postId}-1`,
-      postId: postId,
-      user: mockUsers[Math.floor(Math.random() * mockUsers.length)],
-      content: "This place looks amazing! How's the crowd right now?",
-      text: "This place looks amazing! How's the crowd right now?", // Add text matching content
-      timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30 minutes ago
-      vibedHere: false,
-      likes: 0 // Add likes property
-    });
-    
-    // "Vibed Here" comment
-    exampleComments.push({
-      id: `example-${postId}-2`,
-      postId: postId,
-      user: mockUsers[Math.floor(Math.random() * mockUsers.length)],
-      content: "I was here yesterday and it was incredible! The line moves fast if you go around to the side entrance.",
-      text: "I was here yesterday and it was incredible! The line moves fast if you go around to the side entrance.", // Add text matching content
-      timestamp: new Date(Date.now() - 1000 * 60 * 120).toISOString(), // 2 hours ago
-      vibedHere: true,
-      likes: 0 // Add likes property
-    });
-    
-    // Add a third comment if needed
-    if (commentCount > 2) {
-      exampleComments.push({
-        id: `example-${postId}-3`,
+    for (let i = 0; i < additionalCommentsNeeded; i++) {
+      const randomUser = mockUsers[Math.floor(Math.random() * mockUsers.length)];
+      const hasVibedHere = Math.random() > 0.6; // 40% chance of having vibed at the venue before
+      const minutesAgo = Math.floor(Math.random() * 120) + 1; // 1-120 minutes ago
+      
+      let commentContent = "";
+      if (hasVibedHere) {
+        const vibedHereComments = [
+          "I was here last night! The crowd was amazing and the music was on point.",
+          "Just left this place. The line moves fast if you go around to the side entrance.",
+          "Been here 3 times this week! The staff recognizes me now haha.",
+          "I'm actually here right now! The DJ just switched and it's getting even better!",
+          "Was here yesterday and can confirm it was incredible. Going back tonight!",
+          "This is my favorite spot in the city! Always good vibes here.",
+          "I practically live here at this point. The drinks are always on point!",
+          "Just checked in an hour ago. It's not too crowded if you come now.",
+          "My third time here this month. Never disappoints!",
+          "I'm a regular and can confirm this place is fire tonight!"
+        ];
+        commentContent = vibedHereComments[Math.floor(Math.random() * vibedHereComments.length)];
+      } else {
+        const regularComments = [
+          "This looks amazing! How's the crowd right now?",
+          "Is it worth heading over? Stuck in traffic but could reroute.",
+          "What time do they close tonight?",
+          "Is there a cover charge?",
+          "How long is the wait for a table?",
+          "Any recommendations on what to order?",
+          "Can't wait to check this place out next weekend!",
+          "Do they take reservations or is it walk-in only?",
+          "Parking easy to find nearby?",
+          "Is it kid friendly or more of an adult vibe?"
+        ];
+        commentContent = regularComments[Math.floor(Math.random() * regularComments.length)];
+      }
+      
+      postComments.push({
+        id: `generated-${postId}-${i}`,
         postId: postId,
-        user: mockUsers[Math.floor(Math.random() * mockUsers.length)],
-        content: "Heading there now! Anyone want to meet up?",
-        text: "Heading there now! Anyone want to meet up?", // Add text matching content
-        timestamp: new Date(Date.now() - 1000 * 60 * 10).toISOString(), // 10 minutes ago
-        vibedHere: Math.random() > 0.5, // 50% chance of being "Vibed Here"
-        likes: 0 // Add likes property
+        user: randomUser,
+        content: commentContent,
+        text: commentContent,
+        timestamp: new Date(Date.now() - 1000 * 60 * minutesAgo).toISOString(),
+        vibedHere: hasVibedHere,
+        likes: Math.floor(Math.random() * 5)
       });
     }
     
-    postComments = exampleComments;
+    // Sort by timestamp (newest first)
+    postComments.sort((a, b) => 
+      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
   }
+
+  // Show a limited number of comments unless "Show all" is clicked
+  const displayComments = showAllComments ? postComments : postComments.slice(0, 3);
 
   const handleSubmitComment = () => {
     if (!newComment.trim()) return;
@@ -90,9 +109,9 @@ const CommentList = ({ postId, commentsCount }: CommentListProps) => {
         </h4>
       </div>
       
-      {postComments.length > 0 ? (
+      {displayComments.length > 0 ? (
         <div className="space-y-1 max-h-80 overflow-y-auto pr-1">
-          {postComments.map((comment) => (
+          {displayComments.map((comment) => (
             <CommentItem key={comment.id} comment={comment} />
           ))}
         </div>
@@ -100,6 +119,16 @@ const CommentList = ({ postId, commentsCount }: CommentListProps) => {
         <div className="text-center py-4 text-muted-foreground text-sm">
           No comments yet. Be the first to comment!
         </div>
+      )}
+      
+      {!showAllComments && postComments.length > 3 && (
+        <Button 
+          variant="ghost" 
+          className="w-full text-sm mt-2 text-muted-foreground"
+          onClick={() => setShowAllComments(true)}
+        >
+          View all {postComments.length} comments
+        </Button>
       )}
       
       <div className="mt-3 flex gap-2">
