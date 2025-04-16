@@ -49,3 +49,14 @@ export interface UseRecognitionEventHandlersProps {
   previousInterims: Map<string, number>;
   resetSilenceTimer: () => void;
 }
+
+export interface UseTranscriptProcessorParams {
+  transcript: string;
+  isProcessing: boolean;
+  setIsProcessing: (processing: boolean) => void;
+  setTranscript: (transcript: string) => void;
+}
+
+export interface UseTranscriptProcessorReturn {
+  processTranscript: () => Promise<string>;
+}

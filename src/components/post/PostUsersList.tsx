@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Location } from "@/types";
-import { mockUsers } from "@/mock/data";
+import { mockUsers } from "@/mock/users";
 
 interface PostUsersListProps {
   location: Location;
