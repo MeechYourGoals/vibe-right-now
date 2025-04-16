@@ -9,6 +9,7 @@ export interface Location {
   city: string;
   state?: string;
   country: string;
+  zip?: string; // Added for compatibility
   lat: number;
   lng: number;
   type: "restaurant" | "bar" | "event" | "attraction" | "sports" | "other";

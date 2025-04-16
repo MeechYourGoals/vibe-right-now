@@ -31,7 +31,7 @@ export class MessageFactory {
     return this.createAssistantMessage(content);
   }
 
-  static createErrorMessage(content: string) {
+  static createErrorMessage(content: string = "I'm sorry, I couldn't process that request. Please try again.") {
     return {
       id: Date.now().toString(),
       content,
@@ -44,3 +44,12 @@ export class MessageFactory {
     return this.createSystemMessage("Hi! I'm Vernon, your personal concierge. How can I help you today?");
   }
 }
+
+// Export individual functions for backward compatibility
+export const createUserMessage = (content: string) => MessageFactory.createUserMessage(content);
+export const createAssistantMessage = (content: string) => MessageFactory.createAssistantMessage(content);
+export const createSystemMessage = (content: string) => MessageFactory.createSystemMessage(content);
+export const createAIMessage = (content: string) => MessageFactory.createAIMessage(content);
+export const createErrorMessage = (content: string = "I'm sorry, I couldn't process that request. Please try again.") => 
+  MessageFactory.createErrorMessage(content);
+export const INITIAL_MESSAGE = MessageFactory.INITIAL_MESSAGE;
