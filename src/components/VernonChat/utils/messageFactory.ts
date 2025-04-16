@@ -27,7 +27,6 @@ export class MessageFactory {
     };
   }
 
-  // New message types to fix import errors
   static createAIMessage(content: string) {
     return this.createAssistantMessage(content);
   }
@@ -41,7 +40,6 @@ export class MessageFactory {
     };
   }
 
-  // Add initial message constant to fix import errors
   static get INITIAL_MESSAGE() {
     return this.createSystemMessage("Hi! I'm Vernon, your personal concierge. How can I help you today?");
   }
