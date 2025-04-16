@@ -1,6 +1,6 @@
 
 import { Message } from "../../types";
-import { MessageFactory } from "../messageFactory";
+import { MessageFactory } from "../../utils/messageFactory";
 import { AgentService } from "../../../../services/AgentService";
 
 // Common patterns that indicate a query should be handled by an agent
@@ -64,7 +64,7 @@ export class AgentHandler {
       console.log(`[AgentHandler] Processing ${useVenueAgent ? 'venue' : 'event'} agent query: ${query}`);
 
       // Get agent response
-      const response = await AgentService.generateAgentResponse(query, useVenueAgent);
+      const response = await AgentService.generateResponse(query, useVenueAgent);
       
       // Calculate response time
       const responseTime = ((performance.now() - startTime) / 1000).toFixed(2);

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Layout } from "@/components/Layout";
 import PostFeed from "@/components/PostFeed";
@@ -20,7 +21,8 @@ import { Card, CardContent } from "@/components/ui/card";
 
 const Index = () => {
   const isMobile = useIsMobile();
-  const featuredUsers = getFeaturedUsers();
+  // Make sure to include all our five main featured users
+  const featuredUsers = ['sarah_vibes', 'jay_experiences', 'adventure_alex', 'marco_travels', 'local_explorer'];
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const navigate = useNavigate();

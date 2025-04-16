@@ -3,9 +3,9 @@ import React, { useState } from "react";
 import { PostCard } from "@/components/post";
 import { Skeleton } from "@/components/ui/skeleton";
 import PostGridItem from "./PostGridItem";
-import { mockPosts, mockComments } from "@/mock/data";
 import { Post, Comment } from "@/types";
-import { isWithinThreeMonths } from "@/mock/time-utils";
+import { Badge } from "@/components/ui/badge";
+import { Sparkles } from "lucide-react";
 
 interface ProfileTabContentProps {
   activeTab: string;
@@ -54,6 +54,48 @@ const ProfileTabContent: React.FC<ProfileTabContentProps> = ({
     return counts;
   }, [userPosts]);
 
+  // Render vibe tags for a post
+  const renderVibeTags = (post: Post) => {
+    if (!post.vibeTags || post.vibeTags.length === 0) return null;
+    
+    return (
+      <div className="flex flex-wrap gap-1 mt-2">
+        {post.vibeTags.map((tag, index) => (
+          <Badge key={index} variant="outline" className="bg-primary/10 text-primary text-xs">
+            <Sparkles className="h-3 w-3 mr-1" />
+            {tag}
+          </Badge>
+        ))}
+      </div>
+    );
+  };
+
+  // Enhanced PostCard component with vibe tags
+  const EnhancedPostCard = ({ posts, locationPostCount }: { posts: Post[], locationPostCount: number }) => {
+    const postCard = (
+      <PostCard 
+        posts={posts} 
+        locationPostCount={locationPostCount}
+        getComments={getComments}
+      />
+    );
+    
+    // Check if any post has vibe tags
+    const hasVibeTags = posts.some(post => post.vibeTags && post.vibeTags.length > 0);
+    
+    if (!hasVibeTags) return postCard;
+    
+    // Add vibe tags below the post card
+    return (
+      <div className="space-y-2">
+        {postCard}
+        <div className="pl-4">
+          {renderVibeTags(posts[0])}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-4">
       {isLoading ? (
@@ -77,18 +119,29 @@ const ProfileTabContent: React.FC<ProfileTabContentProps> = ({
           {Object.keys(postsGroupedByLocation).length > 0 ? (
             viewMode === "list" ? (
               Object.entries(postsGroupedByLocation).map(([locationId, posts]) => (
-                <PostCard 
+                <EnhancedPostCard 
                   key={locationId} 
                   posts={posts} 
                   locationPostCount={locationPostCounts[locationId]}
-                  getComments={getComments}
                 />
               ))
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {Object.entries(postsGroupedByLocation).map(([locationId, posts]) => (
                   posts.map(post => (
-                    <PostGridItem key={post.id} post={post} />
+                    <div key={post.id} className="space-y-2">
+                      <PostGridItem post={post} />
+                      {post.vibeTags && post.vibeTags.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {post.vibeTags.map((tag, index) => (
+                            <Badge key={index} variant="outline" className="bg-primary/10 text-primary text-xs">
+                              <Sparkles className="h-3 w-3 mr-1" />
+                              {tag}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   ))
                 ))}
               </div>

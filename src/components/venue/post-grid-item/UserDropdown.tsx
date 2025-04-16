@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -18,11 +17,24 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ userCount, post }) => {
   const [showAllUsers, setShowAllUsers] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Get a sample of users based on post ID for consistency
+  // Get a sample of users with deterministic selection including our five featured users
   const getSampleUsers = () => {
-    const seed = post.id.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
-    const shuffled = [...mockUsers].sort(() => 0.5 - Math.random() + (seed * 0.0001));
-    return shuffled.slice(0, 5);
+    // Always include our main users in sample
+    const featuredUsernames = ['sarah_vibes', 'jay_experiences', 'adventure_alex', 'marco_travels', 'local_explorer'];
+    const featuredUsers = mockUsers.filter(user => featuredUsernames.includes(user.username));
+    
+    // If we have all five, return them in a predictable order
+    if (featuredUsers.length === 5) {
+      return featuredUsers;
+    }
+    
+    // Otherwise, fill with other users
+    const seed = parseInt(post.id) || post.id.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
+    const otherUsers = mockUsers.filter(user => !featuredUsernames.includes(user.username));
+    const shuffled = [...otherUsers].sort(() => 0.5 - Math.random() + (seed * 0.0001));
+    const additionalNeeded = 5 - featuredUsers.length;
+    
+    return [...featuredUsers, ...shuffled.slice(0, additionalNeeded)];
   };
 
   const sampleUsers = getSampleUsers();

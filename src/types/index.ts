@@ -2,21 +2,10 @@
 export interface User {
   id: string;
   username: string;
-  fullName?: string;  // Made optional to accommodate mock data
-  name?: string;      // Added to accommodate mock data
-  avatarUrl?: string; // Made optional to accommodate mock data
-  avatar?: string;    // Added to accommodate mock data
-  bio?: string;
-  location?: string;
-  website?: string;
-  email?: string;
-  phone?: string;
-  isVerified?: boolean;
-  
-  // Added properties to match existing code
-  verified?: boolean;
+  name: string;
+  avatar: string;
   isPrivate?: boolean;
-  isCelebrity?: boolean;
+  bio?: string;
 }
 
 export interface Location {
@@ -25,23 +14,19 @@ export interface Location {
   address: string;
   city: string;
   state: string;
-  country: string;
+  zip: string;
   lat: number;
   lng: number;
-  type: string;
-  verified: boolean;
-  
-  // Added properties to match existing code
-  hours?: BusinessHours;
-  vibes?: string[];
+  type?: string;
+  phone?: string;
+  website?: string;
+  rating?: number;
+  price?: string;
+  hours?: Record<string, string>;
+  description?: string;
   tags?: string[];
-  userProfile?: MockUserProfile;
-}
-
-export interface Media {
-  type: "image" | "video";
-  url: string;
-  thumbnail?: string;
+  images?: string[];
+  verified?: boolean;
 }
 
 export interface Post {
@@ -49,15 +34,11 @@ export interface Post {
   user: User;
   location: Location;
   content: string;
-  media: Media[];
+  media: string[];
   timestamp: string;
-  expiresAt: string;
   likes: number;
-  comments: number | Comment[]; // Updated to be either a number or array
-  isPinned?: boolean;
-  saved: boolean;
-  isVenuePost?: boolean;
-  text?: string; // For backward compatibility
+  comments: number;
+  vibeTags?: string[]; // Array of vibe tags for the post
 }
 
 export interface Comment {
@@ -65,102 +46,56 @@ export interface Comment {
   postId: string;
   user: User;
   content: string;
-  text?: string; // For backward compatibility
   timestamp: string;
-  vibedHere: boolean;
-  likes?: number;
+  likes: number;
 }
 
-export interface Vibe {
+export interface Event {
   id: string;
-  name: string;
-  icon: string;
-  color: string;
+  title: string;
+  description: string;
+  location: Location;
+  startDate: string;
+  endDate: string;
+  media?: string[];
+  ticketUrl?: string;
+  price?: string;
+  tags?: string[];
+  attendees?: number;
+  interested?: number;
 }
 
-// Add BusinessHours interface
-export interface BusinessHours {
-  monday: string;
-  tuesday: string;
-  wednesday: string;
-  thursday: string;
-  friday: string;
-  saturday: string;
-  sunday: string;
-  isOpen24Hours?: boolean;
-}
-
-// Add VenueInsights interface
-export interface VenueInsights {
-  totalViews: number;
-  totalVisits: number;
-  totalSaves: number;
-  totalShares: number;
-  averageRating: number;
-  ratingCount: number;
-  totalReviews: number;
-  visitorCount: number;
-  checkInCount: number;
-  receiptUploads: number;
-  discountRedemptions: number;
-  dailyViews: Record<string, number>;
-  peakHours: Record<string, number>;
-  demographicData: {
-    age: Record<string, number>;
-    gender: Record<string, number>;
-    location: Record<string, number>;
-    ageGroups?: Record<string, number>;
-  };
-  competitiveInsights: {
-    rank: number;
-    totalCompetitors: number;
-    marketShare: number;
-    averageCompetitorRating: number;
-  };
-}
-
-// Add ChatState interface for VernonNext component
-export interface ChatMessage {
+export interface Trip {
   id: string;
-  role: 'user' | 'assistant' | 'system';
-  content: string;
-  timestamp: Date;
-  verified?: boolean;
-  location?: {
-    lat: number;
-    lng: number;
-    name: string;
-  };
+  title: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+  creator: User;
+  collaborators: User[];
+  places: TripPlace[];
+  visibility: 'public' | 'private' | 'friends';
+  status: 'planning' | 'in-progress' | 'completed';
 }
 
-export interface ChatState {
-  isOpen: boolean;
-  isMinimized: boolean;
-  isLoading: boolean;
-  isListening: boolean;
-  isSpeaking: boolean;
-  messages: ChatMessage[];
-  searchResults?: any[];
-  transcript: string;
-  interimTranscript: string;
-}
-
-export type IntentType = 'search' | 'info' | 'question' | 'booking' | 'unknown';
-
-export interface ExtractedIntent {
-  type: IntentType;
-  location?: string;
+export interface TripPlace {
+  id: string;
+  tripId: string;
+  location: Location;
+  notes?: string;
   date?: string;
-  categories?: string[];
-  keywords?: string[];
-  mood?: string[];
+  order: number;
+  status: 'must-see' | 'tentative' | 'visited';
 }
 
-// Add MockUserProfile for compatibility with existing code
-export interface MockUserProfile {
+export interface Notification {
   id: string;
-  username: string;
-  avatar: string;
-  bio?: string;
-  verified: boolean;
+  type: 'like' | 'comment' | 'follow' | 'mention' | 'trip-invite' | 'trip-update' | 'check-in';
+  read: boolean;
+  timestamp: string;
+  user: User;
+  post?: Post;
+  trip?: Trip;
+  location?: Location;
+  content?: string;
 }

@@ -5,6 +5,15 @@ import { PostCard } from "@/components/post";
 import SearchVibes from "@/components/SearchVibes";
 import { Post, User } from "@/types";
 import { isWithinThreeMonths } from "@/mock/time-utils";
+import { Badge } from "@/components/ui/badge";
+import { Sparkles, Filter } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { vibeTags } from "@/hooks/useUserProfile";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 interface PostFeedProps {
   celebrityFeatured?: string[];
@@ -13,6 +22,7 @@ interface PostFeedProps {
 const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
   const [filter, setFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedVibeTags, setSelectedVibeTags] = useState<string[]>([]);
 
   const handleSearch = (query: string, filterType: string) => {
     setSearchQuery(query);
@@ -23,15 +33,35 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
     }
   };
 
-  // First, filter posts to only show those from the past 3 months
-  const recentPosts = useMemo(() => {
-    return mockPosts.filter(post => isWithinThreeMonths(post.timestamp));
+  // Toggle vibe tag selection
+  const toggleVibeTag = (tag: string) => {
+    if (selectedVibeTags.includes(tag)) {
+      setSelectedVibeTags(selectedVibeTags.filter(t => t !== tag));
+    } else {
+      setSelectedVibeTags([...selectedVibeTags, tag]);
+    }
+  };
+
+  // Generate vibe tags for posts
+  const postsWithVibeTags = useMemo(() => {
+    return mockPosts.map(post => {
+      // Generate 1-4 vibe tags per post
+      const seed = parseInt(post.id) || post.id.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
+      const tagCount = 1 + (seed % 4);
+      const shuffledTags = [...vibeTags].sort(() => 0.5 - (seed * 0.0001));
+      const postVibeTags = shuffledTags.slice(0, tagCount);
+      
+      return {
+        ...post,
+        vibeTags: postVibeTags
+      };
+    });
   }, []);
 
-  // Function to find a user by username
-  const findUserByUsername = (username: string): User | undefined => {
-    return mockUsers.find(user => user.username.toLowerCase() === username.toLowerCase());
-  };
+  // First, filter posts to only show those from the past 3 months
+  const recentPosts = useMemo(() => {
+    return postsWithVibeTags.filter(post => isWithinThreeMonths(post.timestamp));
+  }, [postsWithVibeTags]);
 
   // Prioritize posts from featured users if provided
   const prioritizedPosts = useMemo(() => {
@@ -58,22 +88,32 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
 
   const filteredPosts = useMemo(() => {
     return prioritizedPosts.filter((post) => {
+      // Filter by location type if specified
       if (filter !== "all" && post.location.type !== filter) {
         return false;
       }
       
+      // Filter by vibe tags if any are selected
+      if (selectedVibeTags.length > 0) {
+        // Check if post has any of the selected vibe tags (inclusive filtering)
+        const hasMatchingTag = post.vibeTags?.some(tag => selectedVibeTags.includes(tag));
+        if (!hasMatchingTag) return false;
+      }
+      
+      // Filter by search query if specified
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
         return (
           post.location.name.toLowerCase().includes(query) ||
           post.location.city.toLowerCase().includes(query) ||
-          post.content.toLowerCase().includes(query)
+          post.content.toLowerCase().includes(query) ||
+          post.vibeTags?.some(tag => tag.toLowerCase().includes(query))
         );
       }
       
       return true;
     });
-  }, [prioritizedPosts, filter, searchQuery]);
+  }, [prioritizedPosts, filter, searchQuery, selectedVibeTags]);
 
   // Group posts by location
   const postsGroupedByLocation = useMemo(() => {
@@ -140,20 +180,120 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
     return mockComments.filter(comment => comment.postId === postId);
   };
 
+  // Render vibe tags for a post
+  const renderVibeTags = (post: Post) => {
+    if (!post.vibeTags || post.vibeTags.length === 0) return null;
+    
+    return (
+      <div className="flex flex-wrap gap-1 mt-2">
+        {post.vibeTags.map((tag, index) => (
+          <Badge 
+            key={index} 
+            variant="outline" 
+            className={`${selectedVibeTags.includes(tag) ? 'bg-primary text-white' : 'bg-primary/10 text-primary'} text-xs`}
+          >
+            <Sparkles className="h-3 w-3 mr-1" />
+            {tag}
+          </Badge>
+        ))}
+      </div>
+    );
+  };
+
+  // Enhanced PostCard component with vibe tags
+  const EnhancedPostCard = ({ posts, locationPostCount }: { posts: Post[], locationPostCount: number }) => {
+    const postCard = (
+      <PostCard 
+        posts={posts} 
+        locationPostCount={locationPostCount}
+        getComments={getPostComments}
+      />
+    );
+    
+    // Check if any post has vibe tags
+    const hasVibeTags = posts.some(post => post.vibeTags && post.vibeTags.length > 0);
+    
+    if (!hasVibeTags) return postCard;
+    
+    // Add vibe tags below the post card
+    return (
+      <div className="space-y-2">
+        {postCard}
+        <div className="pl-4">
+          {renderVibeTags(posts[0])}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="max-w-3xl mx-auto">
       <div className="mb-4">
         <SearchVibes onSearch={handleSearch} />
+        
+        <div className="mt-2 flex items-center space-x-2">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button 
+                variant={selectedVibeTags.length > 0 ? "default" : "outline"} 
+                size="sm" 
+                className="flex items-center gap-1"
+              >
+                <Filter className="h-4 w-4" />
+                Vibe Filters {selectedVibeTags.length > 0 && `(${selectedVibeTags.length})`}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-2" align="start">
+              <div className="grid grid-cols-2 gap-1 min-w-[280px]">
+                {vibeTags.map(tag => (
+                  <Badge 
+                    key={tag}
+                    variant={selectedVibeTags.includes(tag) ? "default" : "outline"}
+                    className="cursor-pointer justify-start"
+                    onClick={() => toggleVibeTag(tag)}
+                  >
+                    <Sparkles className="h-3 w-3 mr-1" />
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+              {selectedVibeTags.length > 0 && (
+                <Button 
+                  variant="link" 
+                  size="sm" 
+                  className="mt-2" 
+                  onClick={() => setSelectedVibeTags([])}
+                >
+                  Clear all filters
+                </Button>
+              )}
+            </PopoverContent>
+          </Popover>
+          
+          {selectedVibeTags.length > 0 && (
+            <div className="flex flex-wrap gap-1 items-center">
+              {selectedVibeTags.map(tag => (
+                <Badge 
+                  key={tag}
+                  variant="default"
+                  className="cursor-pointer"
+                  onClick={() => toggleVibeTag(tag)}
+                >
+                  {tag} ×
+                </Badge>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="p-4 space-y-4">
         {Object.keys(postsGroupedByLocation).length > 0 ? (
           Object.entries(postsGroupedByLocation).map(([locationId, posts]) => (
-            <PostCard 
+            <EnhancedPostCard 
               key={locationId} 
               posts={posts} 
               locationPostCount={locationPostCounts[locationId]}
-              getComments={getPostComments}
             />
           ))
         ) : (

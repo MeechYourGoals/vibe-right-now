@@ -1,188 +1,56 @@
 
-// AgentService.ts - Handles API calls to our Agent2Agent protocol
+// Agent Service for generating responses to user queries
 
-import { supabase } from '@/integrations/supabase/client';
-
-interface AgentRequest {
-  query: string;
-  task: 'search' | 'browse' | 'extract' | 'analyze';
-  context?: Record<string, any>;
-}
-
-interface SearchResults {
-  results: any[];
-  source: string;
-  metadata?: Record<string, any>;
-}
-
-export const AgentService = {
-  /**
-   * Performs a search task using the Agent2Agent protocol
-   */
-  async search(query: string, context?: Record<string, any>): Promise<SearchResults> {
+class AgentServiceClass {
+  // Generate a response for a given query
+  async generateResponse(query: string, isVenueMode: boolean = false): Promise<string> {
     try {
-      console.log(`Searching for: ${query}`);
+      console.log(`Generating ${isVenueMode ? 'venue' : 'event'} agent response for: ${query}`);
       
-      const { data, error } = await supabase.functions.invoke('agent-protocol', {
-        body: {
-          query,
-          task: 'search',
-          context
-        }
-      });
+      // Here you would typically make an API call to an LLM service
+      // For now, we'll return mock responses based on the query type
       
-      if (error) {
-        console.error('Error in agent search:', error);
-        throw error;
+      if (isVenueMode) {
+        return this.generateVenueResponse(query);
+      } else {
+        return this.generateEventResponse(query);
       }
-      
-      return data;
     } catch (error) {
-      console.error('Error in AgentService.search:', error);
-      return { 
-        results: [], 
-        source: 'error',
-        metadata: { error: error.message }
-      };
-    }
-  },
-
-  /**
-   * Browses a website to extract information
-   */
-  async browse(url: string, context?: Record<string, any>): Promise<any> {
-    try {
-      console.log(`Browsing: ${url}`);
-      
-      const { data, error } = await supabase.functions.invoke('agent-protocol', {
-        body: {
-          query: url,
-          task: 'browse',
-          context
-        }
-      });
-      
-      if (error) {
-        console.error('Error in agent browse:', error);
-        throw error;
-      }
-      
-      return data;
-    } catch (error) {
-      console.error('Error in AgentService.browse:', error);
-      return { error: error.message };
-    }
-  },
-
-  /**
-   * Extracts specific information from content
-   */
-  async extract(content: string, extractionType: string = 'general'): Promise<any> {
-    try {
-      console.log(`Extracting ${extractionType} information`);
-      
-      const { data, error } = await supabase.functions.invoke('agent-protocol', {
-        body: {
-          query: content,
-          task: 'extract',
-          context: { extractionType }
-        }
-      });
-      
-      if (error) {
-        console.error('Error in agent extract:', error);
-        throw error;
-      }
-      
-      return data;
-    } catch (error) {
-      console.error('Error in AgentService.extract:', error);
-      return { error: error.message };
-    }
-  },
-
-  /**
-   * Analyzes content for insights
-   */
-  async analyze(content: string, analysisType: string = 'general'): Promise<any> {
-    try {
-      console.log(`Analyzing content with ${analysisType} analysis`);
-      
-      const { data, error } = await supabase.functions.invoke('agent-protocol', {
-        body: {
-          query: content,
-          task: 'analyze',
-          context: { analysisType }
-        }
-      });
-      
-      if (error) {
-        console.error('Error in agent analyze:', error);
-        throw error;
-      }
-      
-      return data;
-    } catch (error) {
-      console.error('Error in AgentService.analyze:', error);
-      return { error: error.message };
-    }
-  },
-  
-  /**
-   * Searches for events based on parameters
-   */
-  async searchEvents(location: string, eventType: string, date?: string): Promise<any[]> {
-    try {
-      console.log(`Searching for ${eventType} events in ${location}`);
-      
-      const query = `${eventType} events in ${location}${date ? ` on ${date}` : ''}`;
-      const context = {
-        eventType,
-        location,
-        date,
-        extractStructured: true
-      };
-      
-      const result = await this.search(query, context);
-      return result.results || [];
-    } catch (error) {
-      console.error('Error searching for events:', error);
-      return [];
-    }
-  },
-  
-  /**
-   * Gets venue information by scraping websites
-   */
-  async getVenueInfo(venueName: string, location?: string): Promise<any> {
-    try {
-      console.log(`Getting venue info for ${venueName}`);
-      
-      const searchQuery = `${venueName} ${location || ''}`;
-      const searchResults = await this.search(searchQuery, { 
-        focus: 'venue',
-        includeDetails: true 
-      });
-      
-      if (searchResults.results && searchResults.results.length > 0) {
-        // Use the first result as the most relevant
-        const venueData = searchResults.results[0];
-        
-        // If there's a website URL in the search results, scrape it for more data
-        if (venueData.website) {
-          const websiteData = await this.browse(venueData.website, { extractType: 'venue' });
-          
-          // Merge website data with search data, prioritizing website data
-          return { ...venueData, ...websiteData };
-        }
-        
-        return venueData;
-      }
-      
-      return { error: 'No venue information found' };
-    } catch (error) {
-      console.error('Error getting venue info:', error);
-      return { error: error.message };
+      console.error('Error in agent service:', error);
+      throw new Error('Failed to generate agent response');
     }
   }
-};
+  
+  // Generate venue-specific responses
+  private generateVenueResponse(query: string): string {
+    // Mock venue-specific responses
+    const responses = [
+      "Based on market research, the best way to promote your venue is through targeted social media campaigns focusing on your unique atmosphere and special events.",
+      "To increase foot traffic, consider partnering with local businesses for cross-promotion and implementing a loyalty program that rewards frequent visitors.",
+      "Analyzing your competitors reveals opportunities to differentiate through unique themed nights or special menu offerings that highlight local ingredients.",
+      "The data suggests that Thursday through Saturday evenings are optimal for running promotions, with peak engagement times between 7-9pm.",
+      "To improve your online presence, focus on consistent posting schedules, engaging storytelling, and high-quality visual content that showcases your venue's unique atmosphere."
+    ];
+    
+    // Return a response based on query content or a random one
+    return responses[Math.floor(Math.random() * responses.length)];
+  }
+  
+  // Generate event-specific responses
+  private generateEventResponse(query: string): string {
+    // Mock event planning responses
+    const responses = [
+      "I've created a customized 3-day itinerary that balances popular attractions with hidden gems, allowing plenty of time to experience the local culture.",
+      "Based on historical weather data and tourist patterns, the best time to visit would be early June or late September when crowds are thinner and temperatures are pleasant.",
+      "For a family-friendly trip, I recommend focusing on these interactive museums, outdoor parks, and kid-approved restaurants that balance entertainment with educational value.",
+      "Comparing these two destinations, one offers better cultural experiences and dining options while the other excels in outdoor activities and affordability.",
+      "Here's a curated list of upcoming events happening during your planned dates, including festivals, live performances, and special exhibitions."
+    ];
+    
+    // Return a response based on query content or a random one
+    return responses[Math.floor(Math.random() * responses.length)];
+  }
+}
+
+// Export a singleton instance
+export const AgentService = new AgentServiceClass();

@@ -16,7 +16,7 @@ export const regularUsers: User[] = [
     name: "Jay Johnson",
     avatar: "https://randomuser.me/api/portraits/men/1.jpg",
     isPrivate: false,
-    bio: "Concert photographer by night, coffee shop explorer by day. Searching for the perfect sound and the perfect latte in every city I visit. 🎵☕️📸",
+    bio: "Concert photographer by night, coffee shop explorer by day. Searching for the perfect sound and the perfect latte in every city I visit. 🎵☕️📸 Currently on tour with indie bands across the West Coast.",
   },
   {
     id: "3",
@@ -24,7 +24,7 @@ export const regularUsers: User[] = [
     name: "Alex Kim",
     avatar: "https://randomuser.me/api/portraits/women/2.jpg",
     isPrivate: false,
-    bio: "Adrenaline junkie and outdoor enthusiast. If it's thrilling or has a beautiful view, I'm there! Currently planning my next mountain climbing trip. 🏔️🧗‍♀️🌄",
+    bio: "Adrenaline junkie and outdoor enthusiast. If it's thrilling or has a beautiful view, I'm there! Currently planning my next mountain climbing trip in Colorado. Follow for hiking trails, scenic spots and extreme sports recommendations. 🏔️🧗‍♀️🌄",
   },
   {
     id: "4",
@@ -32,7 +32,7 @@ export const regularUsers: User[] = [
     name: "Marco Williams",
     avatar: "https://randomuser.me/api/portraits/men/2.jpg",
     isPrivate: false,
-    bio: "Digital nomad traveling the world one city at a time. Passionate about street food, local culture, and finding the perfect sunset spot. 🌍✈️🌇",
+    bio: "Digital nomad traveling the world one city at a time. Passionate about street food, local culture, and finding the perfect sunset spot. Currently exploring Southeast Asia and documenting every amazing place I find. 🌍✈️🌇",
   },
   {
     id: "5",
@@ -40,7 +40,7 @@ export const regularUsers: User[] = [
     name: "Jamie Chen",
     avatar: "https://randomuser.me/api/portraits/women/3.jpg",
     isPrivate: false,
-    bio: "Native New Yorker who knows all the best kept secrets in town. From speakeasies to underground art shows, I'll help you experience the city like a local. 🗽🍸🎭",
+    bio: "Native New Yorker who knows all the best kept secrets in town. From speakeasies to underground art shows, I'll help you experience the city like a local. Ask me about hidden gems in any neighborhood! 🗽🍸🎭",
   },
   {
     id: "6",

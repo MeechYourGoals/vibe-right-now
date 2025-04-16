@@ -1,6 +1,6 @@
 
 import { useCallback, useEffect } from 'react';
-import { SpeechRecognitionHookProps } from './types';
+import { UseRecognitionEventHandlersProps } from './types';
 
 export const useRecognitionEventHandlers = ({
   recognition,
@@ -11,7 +11,7 @@ export const useRecognitionEventHandlers = ({
   restartAttempts,
   previousInterims,
   resetSilenceTimer
-}) => {
+}: UseRecognitionEventHandlersProps) => {
   const handleStart = useCallback(() => {
     console.log('Speech recognition started');
     setIsListening(true);

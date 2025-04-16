@@ -13,6 +13,17 @@ export interface SpeechRecognitionHookReturn {
   handlePushToTalkEnd?: () => void;
 }
 
+export interface SpeechRecognitionHookProps {
+  recognition: SpeechRecognition | null;
+  setTranscript: React.Dispatch<React.SetStateAction<string>>;
+  setInterimTranscript: React.Dispatch<React.SetStateAction<string>>;
+  setIsListening: React.Dispatch<React.SetStateAction<boolean>>;
+  isListening: boolean;
+  restartAttempts: number;
+  previousInterims: Map<string, number>;
+  resetSilenceTimer: () => void;
+}
+
 export interface UseRecognitionSetupReturn {
   speechRecognition: SpeechRecognition | null;
   initialized: boolean;
@@ -55,6 +66,7 @@ export interface UseTranscriptProcessorParams {
   isProcessing: boolean;
   setIsProcessing: (processing: boolean) => void;
   setTranscript: (transcript: string) => void;
+  setInterimTranscript: (interimTranscript: string) => void;
 }
 
 export interface UseTranscriptProcessorReturn {
