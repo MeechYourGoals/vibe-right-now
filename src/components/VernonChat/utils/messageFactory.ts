@@ -26,4 +26,23 @@ export class MessageFactory {
       timestamp: new Date().toISOString()
     };
   }
+
+  // New message types to fix import errors
+  static createAIMessage(content: string) {
+    return this.createAssistantMessage(content);
+  }
+
+  static createErrorMessage(content: string) {
+    return {
+      id: Date.now().toString(),
+      content,
+      role: 'error',
+      timestamp: new Date().toISOString()
+    };
+  }
+
+  // Add initial message constant to fix import errors
+  static get INITIAL_MESSAGE() {
+    return this.createSystemMessage("Hi! I'm Vernon, your personal concierge. How can I help you today?");
+  }
 }

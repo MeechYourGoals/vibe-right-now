@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, Github, AlertCircle } from "lucide-react";
+import { Mail, Github, AlertCircle, Fingerprint, Lock } from "lucide-react";
+import { useAuth0Auth } from "@/hooks/useAuth0Auth";
 
 interface AuthDialogProps {
   open: boolean;
@@ -19,13 +20,12 @@ export function AuthDialog({ open, onOpenChange, mode, onModeChange }: AuthDialo
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { login, googleLogin, isLoading } = useAuth0Auth();
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-
+    
     try {
       // Basic validation
       if (!email.trim() || !password) {
@@ -35,19 +35,8 @@ export function AuthDialog({ open, onOpenChange, mode, onModeChange }: AuthDialo
       if (mode === 'signup' && password !== confirmPassword) {
         throw new Error("Passwords do not match");
       }
-
-      // Here you would normally connect to your auth provider
-      // This is a placeholder for demonstration
       
-      // Simulate successful auth
-      setTimeout(() => {
-        toast({
-          title: mode === 'signin' ? "Signed in successfully" : "Account created successfully",
-          description: "Welcome to Vibe Right Now!",
-        });
-        onOpenChange(false);
-        setIsLoading(false);
-      }, 1000);
+      await login();
       
     } catch (error) {
       toast({
@@ -60,32 +49,31 @@ export function AuthDialog({ open, onOpenChange, mode, onModeChange }: AuthDialo
           </Button>
         ),
       });
-      setIsLoading(false);
     }
   };
 
-  const handleGoogleAuth = () => {
-    setIsLoading(true);
-    // Placeholder for Google auth integration
-    setTimeout(() => {
+  const handleGoogleAuth = async () => {
+    try {
+      await googleLogin();
+    } catch (error) {
       toast({
-        title: "Google authentication",
-        description: "Google authentication would happen here.",
+        variant: "destructive",
+        title: "Google authentication error",
+        description: error instanceof Error ? error.message : "Something went wrong with Google sign-in",
       });
-      setIsLoading(false);
-    }, 1000);
+    }
   };
 
-  const handleGithubAuth = () => {
-    setIsLoading(true);
-    // Placeholder for GitHub auth integration
-    setTimeout(() => {
+  const handlePasskeyAuth = async () => {
+    try {
+      await login();
+    } catch (error) {
       toast({
-        title: "GitHub authentication",
-        description: "GitHub authentication would happen here.",
+        variant: "destructive",
+        title: "Passkey authentication error",
+        description: error instanceof Error ? error.message : "Something went wrong with passkey sign-in",
       });
-      setIsLoading(false);
-    }, 1000);
+    }
   };
 
   return (
@@ -145,22 +133,24 @@ export function AuthDialog({ open, onOpenChange, mode, onModeChange }: AuthDialo
               </div>
             </div>
             
-            <div className="flex gap-2">
+            <div className="flex flex-col gap-2">
               <Button 
                 variant="outline" 
                 className="w-full" 
                 onClick={handleGoogleAuth}
                 disabled={isLoading}
+                type="button"
               >
                 <Mail className="mr-2 h-4 w-4" /> Google
               </Button>
               <Button 
                 variant="outline" 
                 className="w-full" 
-                onClick={handleGithubAuth}
+                onClick={handlePasskeyAuth}
                 disabled={isLoading}
+                type="button"
               >
-                <Github className="mr-2 h-4 w-4" /> GitHub
+                <Fingerprint className="mr-2 h-4 w-4" /> Passkey
               </Button>
             </div>
           </TabsContent>
@@ -212,22 +202,24 @@ export function AuthDialog({ open, onOpenChange, mode, onModeChange }: AuthDialo
               </div>
             </div>
             
-            <div className="flex gap-2">
+            <div className="flex flex-col gap-2">
               <Button 
                 variant="outline" 
                 className="w-full" 
                 onClick={handleGoogleAuth}
                 disabled={isLoading}
+                type="button"
               >
                 <Mail className="mr-2 h-4 w-4" /> Google
               </Button>
               <Button 
                 variant="outline" 
                 className="w-full" 
-                onClick={handleGithubAuth}
+                onClick={handlePasskeyAuth}
                 disabled={isLoading}
+                type="button"
               >
-                <Github className="mr-2 h-4 w-4" /> GitHub
+                <Fingerprint className="mr-2 h-4 w-4" /> Passkey
               </Button>
             </div>
           </TabsContent>

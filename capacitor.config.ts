@@ -18,6 +18,17 @@ const config: CapacitorConfig = {
   },
   android: {
     backgroundColor: '#121212'
+  },
+  plugins: {
+    // Add this configuration for Auth0 redirects
+    CapacitorCustomTabs: {
+      allowsThirdPartyCookies: true
+    },
+    // Handle deep links for Auth0 redirects
+    DeepLinks: {
+      customScheme: 'vibe-right-now',
+      appleTouchIconLink: 'apple-touch-icon.png'
+    }
   }
 };
 

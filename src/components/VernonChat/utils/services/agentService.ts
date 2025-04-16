@@ -27,6 +27,22 @@ export class AgentServiceClass {
       }
     ];
   }
+
+  // Add authentication-related methods
+  async verifyAuth(token: string) {
+    console.log("Verifying authentication token:", token);
+    return { valid: true, userId: "user-123" };
+  }
+
+  async getUserProfile(userId: string) {
+    console.log("Getting user profile for:", userId);
+    return {
+      id: userId,
+      name: "Test User",
+      email: "user@example.com",
+      preferences: {}
+    };
+  }
 }
 
 // Singleton instance

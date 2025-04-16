@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@11labs/react": "^0.1.2",
+    "@auth0/auth0-spa-js": "^2.1.3",
     "@capacitor/cli": "^5.7.3",
     "@capacitor/core": "^7.2.0",
     "@capacitor/ios": "^7.2.0",

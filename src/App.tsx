@@ -4,6 +4,7 @@ import { Suspense, lazy, useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import VernonNext from '@/components/VernonNext';
+import { Auth0Provider } from "./auth/Auth0Provider";
 
 // Lazy-loaded components
 const Index = lazy(() => import("@/pages/Index"));
@@ -49,30 +50,33 @@ function App() {
   }, []);
 
   return (
-    <ThemeProvider defaultTheme="dark" storageKey="vibe-theme">
-      <BrowserRouter>
-        <Suspense fallback={<div className="h-screen w-screen flex items-center justify-center">Loading...</div>}>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/explore" element={<Explore />} />
-            <Route path="/explore/:city" element={<Explore />} />
-            <Route path="/my-places" element={<MyPlaces />} />
-            <Route path="/my-places/trip/:tripId" element={<TripDetails />} />
-            <Route path="/trip/:tripId" element={<TripDetails />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/points" element={<UserPoints />} />
-            <Route path="/pinned" element={<PinnedVibes />} />
-            <Route path="/venue/:id" element={<VenueProfile />} />
-            <Route path="/profile" element={<ProfileBio />} />
-            <Route path="/user/:username" element={<UserProfile />} />
-            <Route path="/data-insights" element={<DataInsights />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Suspense>
-        <VernonNext />
-        <Toaster />
-      </BrowserRouter>
-    </ThemeProvider>
+    <Auth0Provider>
+      <ThemeProvider defaultTheme="dark" storageKey="vibe-theme">
+        <BrowserRouter>
+          <Suspense fallback={<div className="h-screen w-screen flex items-center justify-center">Loading...</div>}>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/explore" element={<Explore />} />
+              <Route path="/explore/:city" element={<Explore />} />
+              <Route path="/my-places" element={<MyPlaces />} />
+              <Route path="/my-places/trip/:tripId" element={<TripDetails />} />
+              <Route path="/trip/:tripId" element={<TripDetails />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/points" element={<UserPoints />} />
+              <Route path="/pinned" element={<PinnedVibes />} />
+              <Route path="/venue/:id" element={<VenueProfile />} />
+              <Route path="/profile" element={<ProfileBio />} />
+              <Route path="/user/:username" element={<UserProfile />} />
+              <Route path="/data-insights" element={<DataInsights />} />
+              <Route path="/mcp-callback" element={<div>Processing authentication...</div>} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
+          <VernonNext />
+          <Toaster />
+        </BrowserRouter>
+      </ThemeProvider>
+    </Auth0Provider>
   );
 }
 
