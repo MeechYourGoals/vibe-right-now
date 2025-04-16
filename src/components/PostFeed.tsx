@@ -3,7 +3,7 @@ import { useState, useMemo } from "react";
 import { mockPosts, mockComments, mockUsers } from "@/mock/data";
 import { PostCard } from "@/components/post";
 import SearchVibes from "@/components/SearchVibes";
-import { Post, User } from "@/types";
+import { Post, User, Media } from "@/types";
 import { isWithinThreeMonths } from "@/mock/time-utils";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, Filter } from "lucide-react";
@@ -18,6 +18,29 @@ import {
 interface PostFeedProps {
   celebrityFeatured?: string[];
 }
+
+// Helper function to ensure media is in the correct format
+const ensureMediaFormat = (media: any[]): Media[] => {
+  return media.map(item => {
+    if (typeof item === 'string') {
+      // Determine type based on extension
+      const isVideo = item.endsWith('.mp4') || item.endsWith('.mov') || item.endsWith('.avi');
+      return {
+        type: isVideo ? 'video' : 'image',
+        url: item
+      };
+    } else if (typeof item === 'object' && item !== null) {
+      // Already in correct format
+      return item;
+    }
+    
+    // Default fallback
+    return {
+      type: 'image',
+      url: 'https://via.placeholder.com/500'
+    };
+  });
+};
 
 const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
   const [filter, setFilter] = useState("all");
@@ -45,16 +68,21 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
   // Generate vibe tags for posts
   const postsWithVibeTags = useMemo(() => {
     return mockPosts.map(post => {
-      // Generate 1-4 vibe tags per post
-      const seed = parseInt(post.id) || post.id.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
-      const tagCount = 1 + (seed % 4);
-      const shuffledTags = [...vibeTags].sort(() => 0.5 - (seed * 0.0001));
-      const postVibeTags = shuffledTags.slice(0, tagCount);
+      // Ensure post has vibe tags
+      if (!post.vibeTags || post.vibeTags.length === 0) {
+        // Generate 1-4 vibe tags per post
+        const seed = parseInt(post.id) || post.id.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
+        const tagCount = 1 + (seed % 4);
+        const shuffledTags = [...vibeTags].sort(() => 0.5 - (seed * 0.0001));
+        const postVibeTags = shuffledTags.slice(0, tagCount);
+        
+        post.vibeTags = postVibeTags;
+      }
       
-      return {
-        ...post,
-        vibeTags: postVibeTags
-      };
+      // Ensure media is in the correct format
+      post.media = ensureMediaFormat(post.media);
+      
+      return post;
     });
   }, []);
 

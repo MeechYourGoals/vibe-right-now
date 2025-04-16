@@ -1,4 +1,3 @@
-
 import { User } from "@/types";
 
 export const regularUsers: User[] = [
@@ -8,7 +7,8 @@ export const regularUsers: User[] = [
     name: "Sarah Miller",
     avatar: "https://randomuser.me/api/portraits/women/1.jpg",
     isPrivate: false,
-    bio: "Food lover and travel enthusiast. Always looking for the next great vibe! Currently exploring Miami's hidden gems and documenting the best spots for dinner and drinks. 🌮🍹✨",
+    verified: true,
+    bio: "Food enthusiast and cocktail connoisseur. Always on the hunt for the next great dining experience! 🍹🍣",
   },
   {
     id: "2",
@@ -16,7 +16,8 @@ export const regularUsers: User[] = [
     name: "Jay Johnson",
     avatar: "https://randomuser.me/api/portraits/men/1.jpg",
     isPrivate: false,
-    bio: "Concert photographer by night, coffee shop explorer by day. Searching for the perfect sound and the perfect latte in every city I visit. 🎵☕️📸 Currently on tour with indie bands across the West Coast.",
+    verified: true,
+    bio: "Music venue expert and coffee shop explorer. Creating memories one experience at a time. 🎵☕",
   },
   {
     id: "3",
@@ -24,7 +25,8 @@ export const regularUsers: User[] = [
     name: "Alex Kim",
     avatar: "https://randomuser.me/api/portraits/women/2.jpg",
     isPrivate: false,
-    bio: "Adrenaline junkie and outdoor enthusiast. If it's thrilling or has a beautiful view, I'm there! Currently planning my next mountain climbing trip in Colorado. Follow for hiking trails, scenic spots and extreme sports recommendations. 🏔️🧗‍♀️🌄",
+    verified: true,
+    bio: "Outdoor enthusiast and adrenaline junkie. Life is too short to stay indoors! 🏔️🧗‍♀️",
   },
   {
     id: "4",
@@ -32,7 +34,8 @@ export const regularUsers: User[] = [
     name: "Marco Williams",
     avatar: "https://randomuser.me/api/portraits/men/2.jpg",
     isPrivate: false,
-    bio: "Digital nomad traveling the world one city at a time. Passionate about street food, local culture, and finding the perfect sunset spot. Currently exploring Southeast Asia and documenting every amazing place I find. 🌍✈️🌇",
+    verified: true,
+    bio: "Cultural explorer and global citizen. Sharing international experiences and hidden landmarks. 🗺️✈️",
   },
   {
     id: "5",
@@ -40,7 +43,8 @@ export const regularUsers: User[] = [
     name: "Jamie Chen",
     avatar: "https://randomuser.me/api/portraits/women/3.jpg",
     isPrivate: false,
-    bio: "Native New Yorker who knows all the best kept secrets in town. From speakeasies to underground art shows, I'll help you experience the city like a local. Ask me about hidden gems in any neighborhood! 🗽🍸🎭",
+    verified: true,
+    bio: "Finding the hidden gems in every city. Local spots with the best vibes! 🏙️🔍",
   },
   {
     id: "6",

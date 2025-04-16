@@ -6,6 +6,20 @@ export interface User {
   avatar: string;
   isPrivate?: boolean;
   bio?: string;
+  verified?: boolean;
+  isCelebrity?: boolean;
+}
+
+export interface Media {
+  type: "image" | "video";
+  url: string;
+}
+
+export interface BusinessHours {
+  [day: string]: {
+    open: string;
+    close: string;
+  };
 }
 
 export interface Location {
@@ -27,6 +41,8 @@ export interface Location {
   tags?: string[];
   images?: string[];
   verified?: boolean;
+  country?: string;
+  vibes?: string[];
 }
 
 export interface Post {
@@ -34,11 +50,15 @@ export interface Post {
   user: User;
   location: Location;
   content: string;
-  media: string[];
+  media: Media[];
   timestamp: string;
   likes: number;
   comments: number;
   vibeTags?: string[]; // Array of vibe tags for the post
+  isVenuePost?: boolean;
+  isPinned?: boolean;
+  expiresAt?: string;
+  saved?: boolean;
 }
 
 export interface Comment {
@@ -48,6 +68,8 @@ export interface Comment {
   content: string;
   timestamp: string;
   likes: number;
+  text?: string; // For backward compatibility
+  vibedHere?: boolean;
 }
 
 export interface Event {
@@ -57,7 +79,7 @@ export interface Event {
   location: Location;
   startDate: string;
   endDate: string;
-  media?: string[];
+  media?: Media[];
   ticketUrl?: string;
   price?: string;
   tags?: string[];
@@ -98,4 +120,46 @@ export interface Notification {
   trip?: Trip;
   location?: Location;
   content?: string;
+}
+
+// VernonChat types
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  timestamp: string;
+}
+
+export interface ChatState {
+  messages: ChatMessage[];
+  loading: boolean;
+  error: string | null;
+}
+
+export interface ExtractedIntent {
+  intent: string;
+  entities: Record<string, any>;
+  confidence: number;
+}
+
+// Venue insights types
+export interface VenueInsights {
+  visitors: number;
+  visitorsChange: number;
+  posts: number;
+  postsChange: number;
+  engagement: number;
+  engagementChange: number;
+  likes: number;
+  likesChange: number;
+  comments: number;
+  commentsChange: number;
+  topPosts: Post[];
+  demographics: {
+    ageGroups: Record<string, number>;
+    gender: Record<string, number>;
+    interests: Record<string, number>;
+  };
+  visitorsByTime: Record<string, number>;
+  visitorsByDay: Record<string, number>;
 }

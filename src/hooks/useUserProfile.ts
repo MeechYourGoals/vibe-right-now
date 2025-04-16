@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { User, Post, Location, Comment } from "@/types";
+import { User, Post, Location, Comment, Media } from "@/types";
 import { mockUsers, mockPosts, mockComments, mockLocations } from "@/mock/data";
 import { hashString, generateUserBio } from "@/mock/users";
 
@@ -18,6 +18,29 @@ const generateVibeTags = (locationId: string, username: string): string[] => {
   
   const shuffledTags = [...vibeTags].sort(() => 0.5 - (seed * 0.0001));
   return shuffledTags.slice(0, tagCount);
+};
+
+// Convert plain media strings to Media objects if needed
+const ensureMediaFormat = (media: any[]): Media[] => {
+  return media.map(item => {
+    if (typeof item === 'string') {
+      // Determine type based on extension
+      const isVideo = item.endsWith('.mp4') || item.endsWith('.mov') || item.endsWith('.avi');
+      return {
+        type: isVideo ? 'video' : 'image',
+        url: item
+      };
+    } else if (typeof item === 'object' && item !== null) {
+      // Already in correct format
+      return item;
+    }
+    
+    // Default fallback
+    return {
+      type: 'image',
+      url: 'https://via.placeholder.com/500'
+    };
+  });
 };
 
 export const useUserProfile = (username: string | undefined) => {
@@ -46,7 +69,14 @@ export const useUserProfile = (username: string | undefined) => {
     console.log("Found user:", foundUser);
     
     if (foundUser) {
-      setUser(foundUser);
+      // Ensure user has all required properties
+      const completeUser: User = {
+        ...foundUser,
+        verified: foundUser.verified || false,
+        isCelebrity: foundUser.isCelebrity || false
+      };
+      
+      setUser(completeUser);
       
       // Find posts by this user - use username for deterministic posts
       const usernameHash = hashString(foundUser.username);
@@ -100,20 +130,36 @@ export const useUserProfile = (username: string | undefined) => {
       // Select posts, prioritizing preferred types
       for (let i = 0; i < Math.min(postCount, preferredLocations.length); i++) {
         const index = (usernameHash + i) % preferredLocations.length;
-        selectedPosts.push({...preferredLocations[index], user: foundUser});
+        const post = {...preferredLocations[index]};
+        
+        // Ensure media is in the correct format
+        post.media = ensureMediaFormat(post.media);
+        
+        // Assign this user as the post creator
+        post.user = completeUser;
+        
+        selectedPosts.push(post);
       }
       
       // Fill remaining posts if needed
       const additionalNeeded = postCount - selectedPosts.length;
       for (let i = 0; i < additionalNeeded; i++) {
         const index = (usernameHash + i) % shuffledRemaining.length;
-        selectedPosts.push({...shuffledRemaining[index], user: foundUser});
+        const post = {...shuffledRemaining[index]};
+        
+        // Ensure media is in the correct format
+        post.media = ensureMediaFormat(post.media);
+        
+        // Assign this user as the post creator
+        post.user = completeUser;
+        
+        selectedPosts.push(post);
       }
       
-      // Add vibe tags to each post
+      // Add vibe tags to each post if they don't already have them
       const postsWithTags = selectedPosts.map(post => ({
         ...post,
-        vibeTags: generateVibeTags(post.location.id, foundUser.username)
+        vibeTags: post.vibeTags || generateVibeTags(post.location.id, foundUser.username)
       }));
       
       setUserPosts(postsWithTags);

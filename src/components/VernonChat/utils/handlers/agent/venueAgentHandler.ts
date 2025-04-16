@@ -1,52 +1,35 @@
 
-import { AgentService } from '@/services/AgentService';
-import { Message } from '../../../types';
-import { createAIMessage } from '../../messageFactory';
+import { AgentService } from "../../services/agentService";
+import { MessageFactory } from "../../messageFactory";
 
-/**
- * Handles venue-related agent operations
- */
 export class VenueAgentHandler {
-  /**
-   * Handle venue-related queries
-   */
-  static async handleVenueQuery(
-    query: string,
-    setMessages: React.Dispatch<React.SetStateAction<Message[]>>,
-    location: string
-  ): Promise<boolean> {
+  static async handleVenueQuery(venueId: string, query: string, setMessages: any): Promise<boolean> {
+    console.log("Handling venue query for venue:", venueId, "Query:", query);
+    
     try {
-      // Extract venue name - this is a simplistic extraction, could be improved
-      const venueName = query.replace(/tell me about|information on|details for|hours for|address of/ig, '').trim();
+      // Add user message to chat
+      setMessages((prev: any) => [...prev, MessageFactory.createUserMessage(query)]);
       
-      const results = await AgentService.getVenueInfo(venueName, location);
+      // Get venue information
+      const venueInfo = await AgentService.getVenueInfo(venueId);
       
-      if (results && !results.error) {
-        let responseText = `Here's what I found about ${venueName}:\n\n`;
-        
-        if (results.name) responseText += `**${results.name}**\n`;
-        if (results.address) responseText += `Address: ${results.address}\n`;
-        if (results.hours) responseText += `Hours: ${results.hours}\n`;
-        if (results.phone) responseText += `Phone: ${results.phone}\n`;
-        if (results.website) responseText += `Website: ${results.website}\n`;
-        if (results.rating) responseText += `Rating: ${results.rating}/5\n`;
-        if (results.description) responseText += `\n${results.description}\n`;
-        if (results.events && results.events.length > 0) {
-          responseText += `\nUpcoming events:\n`;
-          results.events.slice(0, 3).forEach((event, index) => {
-            responseText += `- ${event.name || event.title} (${event.date || 'Date TBA'})\n`;
-          });
-        }
-        
-        const message = createAIMessage(responseText);
-        setMessages(prev => [...prev, message]);
-        return true;
-      }
+      // Simulate processing time
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      return false;
+      // Add assistant response
+      setMessages((prev: any) => [
+        ...prev, 
+        MessageFactory.createAssistantMessage(`Here's information about ${venueInfo.name}: ${JSON.stringify(venueInfo)}`)
+      ]);
+      
+      return true;
     } catch (error) {
-      console.error('Error handling venue query:', error);
-      return false; // Let the main error handler deal with it
+      console.error("Error handling venue query:", error);
+      setMessages((prev: any) => [
+        ...prev, 
+        MessageFactory.createAssistantMessage("Sorry, I had trouble getting information about this venue.")
+      ]);
+      return false;
     }
   }
 }

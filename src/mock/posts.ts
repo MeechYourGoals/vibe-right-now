@@ -1,4 +1,4 @@
-import { Post } from "@/types";
+import { Post, Media } from "@/types";
 import { mockUsers } from "./users";
 import { mockLocations } from "./locations";
 import { getRecentTime, getExpiryTime } from "./time-utils";
@@ -24,7 +24,8 @@ export const mockPosts: Post[] = [
     likes: 42,
     comments: 7,
     isPinned: true,
-    saved: false // Add saved property
+    saved: false,
+    vibeTags: ["Lively", "Upscale", "NightOwl"]
   },
   {
     id: "2",
@@ -97,7 +98,8 @@ export const mockPosts: Post[] = [
     likes: 56,
     comments: 11,
     isPinned: true,
-    saved: false
+    saved: false,
+    vibeTags: ["Lively", "Upscale", "NightOwl"]
   },
   {
     id: "6",
@@ -183,7 +185,8 @@ export const mockPosts: Post[] = [
     likes: 256,
     comments: 42,
     isPinned: true,
-    saved: false
+    saved: false,
+    vibeTags: ["Lively", "Upscale", "NightOwl"]
   },
   {
     id: "11",

@@ -1,24 +1,26 @@
 
-import { useState } from 'react';
-import { useRecognitionSetup } from './useRecognitionSetup';
+import { useState, useCallback, useEffect } from 'react';
+import { 
+  SpeechRecognitionHookReturn,
+  UseRecognitionSetupReturn,
+  UseListeningControlsProps,
+  UseTranscriptProcessorParams,
+  UseTranscriptProcessorReturn
+} from './types';
 import { useRecognitionEventHandlers } from './useRecognitionEventHandlers';
-import { useListeningControls } from './useListeningControls';
-import { useTranscriptProcessor } from './useTranscriptProcessor';
-import { useSilenceDetection } from './useSilenceDetection';
-import { SpeechRecognitionHookReturn } from './types';
-import { OpenRouterService } from '@/services/OpenRouterService';
 
-// Main hook that composes other hooks for speech recognition functionality
+// Main hook for speech recognition
 export const useSpeechRecognition = (): SpeechRecognitionHookReturn => {
-  const [isListening, setIsListening] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [interimTranscript, setInterimTranscript] = useState('');
+  const [isListening, setIsListening] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [silenceTimer, setSilenceTimer] = useState<NodeJS.Timeout | null>(null);
   const [isPushToTalkActive, setIsPushToTalkActive] = useState(false);
   
-  // Setup speech recognition
+  // Setup recognition
   const { 
-    speechRecognition, 
+    speechRecognition,
     initialized,
     restartAttempts,
     previousInterims,
@@ -26,59 +28,35 @@ export const useSpeechRecognition = (): SpeechRecognitionHookReturn => {
     mediaRecorder,
     audioChunks
   } = useRecognitionSetup();
-
-  // Set up silence detection for auto-stopping
-  const { resetSilenceTimer, clearSilenceTimer } = useSilenceDetection({
-    onSilenceDetected: () => {
-      if (isListening) {
-        console.log('Silence detected, stopping listening');
+  
+  // Reset silence timer
+  const resetSilenceTimer = useCallback(() => {
+    if (silenceTimer) {
+      clearTimeout(silenceTimer);
+    }
+    
+    // Auto-stop after 3 seconds of silence
+    const newTimer = setTimeout(() => {
+      if (isListening && !isProcessing) {
+        console.log("Stopping due to silence");
         stopListening();
       }
-    }
-  });
+    }, 3000);
+    
+    setSilenceTimer(newTimer);
+  }, [isListening, isProcessing, silenceTimer]);
   
-  // Process audio with OpenRouter when available
-  const processAudioWithOpenRouter = async (audioBlob: Blob): Promise<string> => {
-    try {
-      // Convert blob to base64
-      const reader = new FileReader();
-      return new Promise((resolve, reject) => {
-        reader.onloadend = async () => {
-          try {
-            const base64Audio = (reader.result as string).split(',')[1];
-            
-            console.log('Processing audio with OpenRouter...');
-            
-            // Use OpenRouter for speech-to-text
-            const transcription = await OpenRouterService.speechToText({
-              audioBase64: base64Audio
-            });
-            
-            if (transcription) {
-              console.log('OpenRouter transcription successful:', transcription);
-              resolve(transcription);
-            } else {
-              console.log('No transcription returned from OpenRouter, falling back...');
-              reject('No transcription returned');
-            }
-          } catch (error) {
-            console.error('Error processing audio with OpenRouter:', error);
-            reject(error);
-          }
-        };
-        
-        reader.onerror = reject;
-        reader.readAsDataURL(audioBlob);
-      });
-    } catch (error) {
-      console.error('Error in processAudioWithOpenRouter:', error);
-      throw error;
+  // Clear silence timer
+  const clearSilenceTimer = useCallback(() => {
+    if (silenceTimer) {
+      clearTimeout(silenceTimer);
+      setSilenceTimer(null);
     }
-  };
+  }, [silenceTimer]);
   
-  // Set up event handlers for speech recognition
+  // Setup event handlers
   useRecognitionEventHandlers({
-    speechRecognition,
+    recognition: speechRecognition,
     setTranscript,
     setInterimTranscript,
     setIsListening,
@@ -88,25 +66,8 @@ export const useSpeechRecognition = (): SpeechRecognitionHookReturn => {
     resetSilenceTimer
   });
   
-  // Function to handle push-to-talk start (mousedown)
-  const handlePushToTalkStart = () => {
-    console.log('Push-to-talk started');
-    setIsPushToTalkActive(true);
-    startListening();
-  };
-  
-  // Function to handle push-to-talk end (mouseup)
-  const handlePushToTalkEnd = () => {
-    console.log('Push-to-talk ended');
-    setIsPushToTalkActive(false);
-    stopListening();
-  };
-  
-  // Listening controls (start/stop)
-  const { 
-    startListening, 
-    stopListening 
-  } = useListeningControls({
+  // Configure listening controls
+  const { startListening, stopListening } = useListeningControls({
     speechRecognition,
     initialized,
     isListening,
@@ -118,17 +79,28 @@ export const useSpeechRecognition = (): SpeechRecognitionHookReturn => {
     clearSilenceTimer,
     useLocalWhisper,
     mediaRecorder,
-    audioChunks,
-    processAudioWithOpenRouter // Add OpenRouter processing
+    audioChunks
   });
   
-  // Process the transcript
+  // Configure transcript processor
   const { processTranscript } = useTranscriptProcessor({
     transcript,
-    setTranscript,
+    isProcessing,
     setIsProcessing,
+    setTranscript,
     setInterimTranscript
   });
+  
+  // Handle push-to-talk
+  const handlePushToTalkStart = useCallback(() => {
+    setIsPushToTalkActive(true);
+    startListening();
+  }, [startListening]);
+  
+  const handlePushToTalkEnd = useCallback(() => {
+    setIsPushToTalkActive(false);
+    stopListening();
+  }, [stopListening]);
   
   return {
     isListening,
@@ -143,4 +115,150 @@ export const useSpeechRecognition = (): SpeechRecognitionHookReturn => {
     handlePushToTalkStart,
     handlePushToTalkEnd
   };
+};
+
+// Set up recognition
+const useRecognitionSetup = (): UseRecognitionSetupReturn => {
+  const [speechRecognition, setSpeechRecognition] = useState<SpeechRecognition | null>(null);
+  const [initialized, setInitialized] = useState(false);
+  const [restartAttempts] = useState(0);
+  const [previousInterims] = useState(new Map<string, number>());
+  const [useLocalWhisper] = useState(false);
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+  const [audioChunks] = useState<Blob[]>([]);
+  
+  useEffect(() => {
+    try {
+      // Check if browser supports SpeechRecognition
+      const SpeechRecognition = window.SpeechRecognition || (window as any).webkitSpeechRecognition;
+      
+      if (SpeechRecognition) {
+        const recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = 'en-US';
+        setSpeechRecognition(recognition);
+        setInitialized(true);
+        console.log("Speech recognition initialized");
+      } else {
+        console.warn("Speech recognition not supported in this browser");
+        setInitialized(false);
+      }
+    } catch (error) {
+      console.error("Error initializing speech recognition:", error);
+      setInitialized(false);
+    }
+    
+    return () => {
+      if (speechRecognition) {
+        speechRecognition.abort();
+      }
+    };
+  }, []);
+  
+  return {
+    speechRecognition,
+    initialized,
+    restartAttempts,
+    previousInterims,
+    useLocalWhisper,
+    mediaRecorder,
+    audioChunks
+  };
+};
+
+// Controls for starting and stopping listening
+const useListeningControls = ({
+  speechRecognition,
+  initialized,
+  isListening,
+  setIsListening,
+  setIsProcessing,
+  setTranscript,
+  setInterimTranscript,
+  restartAttempts,
+  clearSilenceTimer,
+  useLocalWhisper,
+  mediaRecorder,
+  audioChunks
+}: UseListeningControlsProps) => {
+  const startListening = useCallback(() => {
+    if (!initialized || !speechRecognition) {
+      console.warn("Speech recognition not initialized");
+      return;
+    }
+    
+    if (isListening) {
+      console.log("Already listening");
+      return;
+    }
+    
+    try {
+      speechRecognition.start();
+      setIsListening(true);
+      console.log("Started listening");
+    } catch (error) {
+      console.error("Error starting speech recognition:", error);
+      setIsListening(false);
+    }
+  }, [initialized, speechRecognition, isListening, setIsListening]);
+  
+  const stopListening = useCallback(() => {
+    if (!initialized || !speechRecognition) {
+      return;
+    }
+    
+    if (!isListening) {
+      return;
+    }
+    
+    try {
+      speechRecognition.stop();
+      setIsListening(false);
+      clearSilenceTimer();
+      console.log("Stopped listening");
+    } catch (error) {
+      console.error("Error stopping speech recognition:", error);
+    }
+  }, [initialized, speechRecognition, isListening, setIsListening, clearSilenceTimer]);
+  
+  return { startListening, stopListening };
+};
+
+// Process transcript
+const useTranscriptProcessor = ({
+  transcript,
+  isProcessing,
+  setIsProcessing,
+  setTranscript,
+  setInterimTranscript
+}: UseTranscriptProcessorParams): UseTranscriptProcessorReturn => {
+  const processTranscript = useCallback(async () => {
+    if (!transcript.trim() || isProcessing) {
+      return '';
+    }
+    
+    setIsProcessing(true);
+    console.log("Processing transcript:", transcript);
+    
+    try {
+      // Here you would typically send the transcript to your backend for processing
+      // For now, we'll just return the transcript after a simulated delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Clear the transcript and interim transcript
+      const finalTranscript = transcript;
+      setTranscript('');
+      setInterimTranscript('');
+      setIsProcessing(false);
+      
+      return finalTranscript;
+    } catch (error) {
+      console.error("Error processing transcript:", error);
+      setIsProcessing(false);
+      return '';
+    }
+  }, [transcript, isProcessing, setIsProcessing, setTranscript, setInterimTranscript]);
+  
+  return { processTranscript };
 };

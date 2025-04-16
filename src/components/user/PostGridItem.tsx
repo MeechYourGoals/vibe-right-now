@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Heart } from "lucide-react";
-import { Post } from "@/types";
+import { Post, Media } from "@/types";
 import { formatDistanceToNow } from "date-fns";
 import UserDropdown from "@/components/venue/post-grid-item/UserDropdown";
 
@@ -12,9 +12,39 @@ interface PostGridItemProps {
   post: Post;
 }
 
+// Helper function to ensure media is in the correct format
+const ensureMediaFormat = (media: any[]): Media[] => {
+  if (!media || media.length === 0) {
+    return [];
+  }
+  
+  return media.map(item => {
+    if (typeof item === 'string') {
+      // Determine type based on extension
+      const isVideo = item.endsWith('.mp4') || item.endsWith('.mov') || item.endsWith('.avi');
+      return {
+        type: isVideo ? 'video' : 'image',
+        url: item
+      };
+    } else if (typeof item === 'object' && item !== null) {
+      // Already in correct format
+      return item;
+    }
+    
+    // Default fallback
+    return {
+      type: 'image',
+      url: 'https://via.placeholder.com/500'
+    };
+  });
+};
+
 const PostGridItem = ({ post }: PostGridItemProps) => {
   const [liked, setLiked] = useState(false);
   const navigate = useNavigate();
+  
+  // Ensure media is in the correct format
+  const formattedMedia = ensureMediaFormat(post.media);
   
   const handleLike = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -36,15 +66,15 @@ const PostGridItem = ({ post }: PostGridItemProps) => {
 
   return (
     <div className="group relative block aspect-square overflow-hidden rounded-lg">
-      {post.media[0]?.type === "image" ? (
+      {formattedMedia.length > 0 && formattedMedia[0].type === "image" ? (
         <img 
-          src={post.media[0].url}
+          src={formattedMedia[0].url}
           alt={`Post by ${post.user.username}`}
           className="h-full w-full object-cover transition-transform group-hover:scale-105"
         />
-      ) : post.media[0]?.type === "video" ? (
+      ) : formattedMedia.length > 0 && formattedMedia[0].type === "video" ? (
         <video
-          src={post.media[0].url}
+          src={formattedMedia[0].url}
           className="h-full w-full object-cover"
           poster="https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
         />
