@@ -18,3 +18,30 @@ export interface Location {
   vibes?: string[];
   userProfile?: MockUserProfile;
 }
+
+// VernonChat types
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant' | 'system' | 'error';
+  content: string;
+  timestamp: string;
+  // For compatibility with older format
+  text?: string;
+  sender?: 'user' | 'ai';
+}
+
+export interface ChatState {
+  messages: ChatMessage[];
+  loading: boolean;
+  error: string | null;
+  isOpen?: boolean;
+  isMinimized?: boolean;
+  isLoading?: boolean;
+  isListening?: boolean;
+  isSpeaking?: boolean;
+  searchResults?: any[];
+  transcript?: string;
+  interimTranscript?: string;
+}
+
+export * from "./index";

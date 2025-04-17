@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
 import { OpenAIService } from '@/services/OpenAIService';
-import { ChatMessage, ChatState, ExtractedIntent, Message } from '@/types';
+import { ChatState, Message } from '@/components/VernonNext/types';
 
 // Default messages to initialize the chat
 const defaultWelcomeMessage: Message = {
