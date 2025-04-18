@@ -24,7 +24,7 @@ export interface ChatMessage {
   id: string;
   role: 'user' | 'assistant' | 'system' | 'error';
   content: string;
-  timestamp: string;
+  timestamp: Date | string;
   // For compatibility with older format
   text?: string;
   sender?: 'user' | 'ai';

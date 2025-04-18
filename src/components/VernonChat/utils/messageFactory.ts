@@ -5,7 +5,7 @@ export class MessageFactory {
       id: Date.now().toString(),
       content,
       role: 'user',
-      timestamp: new Date().toISOString(),
+      timestamp: new Date(),
       // For compatibility with VernonNext
       text: content,
       sender: 'user' as const
@@ -17,7 +17,7 @@ export class MessageFactory {
       id: Date.now().toString(),
       content,
       role: 'assistant',
-      timestamp: new Date().toISOString(),
+      timestamp: new Date(),
       // For compatibility with VernonNext
       text: content,
       sender: 'ai' as const
@@ -29,7 +29,7 @@ export class MessageFactory {
       id: Date.now().toString(),
       content,
       role: 'system',
-      timestamp: new Date().toISOString(),
+      timestamp: new Date(),
       // For compatibility with VernonNext
       text: content,
       sender: 'ai' as const
@@ -45,7 +45,7 @@ export class MessageFactory {
       id: Date.now().toString(),
       content,
       role: 'error',
-      timestamp: new Date().toISOString(),
+      timestamp: new Date(),
       // For compatibility with VernonNext
       text: content,
       sender: 'ai' as const
