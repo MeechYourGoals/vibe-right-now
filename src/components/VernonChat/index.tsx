@@ -1,7 +1,7 @@
-
 import { useState, useEffect } from 'react';
 import ChatButton from './ChatButton';
 import ChatWindow from './ChatWindow';
+import { ChatMessage } from '@/types';
 import { useTheme } from '@/components/ThemeProvider';
 import { toast } from 'sonner';
 import VernonThemeToggle from './components/VernonThemeToggle';

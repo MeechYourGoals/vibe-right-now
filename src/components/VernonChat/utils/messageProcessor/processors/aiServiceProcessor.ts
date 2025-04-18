@@ -1,6 +1,6 @@
 
+import { ChatMessage } from '@/types';
 import { MessageContext, MessageProcessor } from '../types';
-import { Message } from '../../../types';
 import { OpenAIService } from '@/services/OpenAIService';
 import { VertexAIService } from '@/services/VertexAIService';
 import { createAIMessage } from '../../messageFactory';
@@ -13,14 +13,14 @@ export class AIServiceProcessor implements MessageProcessor {
 
   async process(
     context: MessageContext,
-    setMessages: React.Dispatch<React.SetStateAction<Message[]>>
+    setMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>
   ): Promise<boolean> {
     try {
       // Convert contextMessages to format expected by OpenAI
       const contextMessages = context.messages.slice(-10);
       const openAIMessages = contextMessages.map(msg => ({
-        role: msg.sender === 'user' ? 'user' : 'assistant',
-        content: msg.text
+        role: msg.role === 'user' ? 'user' : 'assistant',
+        content: msg.content
       }));
       
       // Add the new user message

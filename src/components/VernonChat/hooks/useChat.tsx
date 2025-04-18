@@ -1,7 +1,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Message } from '../types';
+import { ChatMessage } from '@/types';
 import { INITIAL_MESSAGE } from '../utils/messageFactory';
 import { useMessageProcessor } from './useMessageProcessor';
 
@@ -9,13 +9,15 @@ export const useChat = (isProPlan: boolean = false, isVenueMode: boolean = false
   const initialMessage = isVenueMode 
     ? {
         id: '1',
+        content: "Hi there! I'm VeRNon for Venues, your business insights assistant. I can help you understand your venue metrics, customer trends, and marketing performance. What would you like to know about your venue's performance?",
+        role: 'system' as const,
+        timestamp: new Date(),
         text: "Hi there! I'm VeRNon for Venues, your business insights assistant. I can help you understand your venue metrics, customer trends, and marketing performance. What would you like to know about your venue's performance?",
-        sender: 'ai' as const,
-        timestamp: new Date()
+        sender: 'ai' as const
       }
     : INITIAL_MESSAGE;
   
-  const [messages, setMessages] = useState<Message[]>([initialMessage]);
+  const [messages, setMessages] = useState<ChatMessage[]>([initialMessage]);
   const navigate = useNavigate();
   
   const {
@@ -31,7 +33,7 @@ export const useChat = (isProPlan: boolean = false, isVenueMode: boolean = false
     if (lastMessage && lastMessage.sender === 'ai') {
       // Look for explore page links in the format [view all these results on our Explore page](/explore?q=...)
       const exploreRegex = /\[(.*?explore.*?)\]\(\/explore\?q=(.*?)\)/i;
-      const match = lastMessage.text.match(exploreRegex);
+      const match = lastMessage.text ? lastMessage.text.match(exploreRegex) : lastMessage.content.match(exploreRegex);
       
       if (match && match[2]) {
         const query = decodeURIComponent(match[2]);
@@ -84,16 +86,6 @@ export const useChat = (isProPlan: boolean = false, isVenueMode: boolean = false
         }
       }
       
-      // Add user message immediately
-      const userMessage: Message = {
-        id: Date.now().toString(),
-        text: inputValue,
-        sender: 'user',
-        timestamp: new Date()
-      };
-      
-      setMessages(prev => [...prev, userMessage]);
-      
       // Process the message to get AI response
       await processMessage(inputValue, setMessages);
     } catch (error) {
@@ -103,9 +95,11 @@ export const useChat = (isProPlan: boolean = false, isVenueMode: boolean = false
         ...prev,
         {
           id: Date.now().toString(),
+          content: "I'm sorry, I encountered an error. Please try again.",
+          role: 'error' as const,
+          timestamp: new Date(),
           text: "I'm sorry, I encountered an error. Please try again.",
-          sender: 'ai',
-          timestamp: new Date()
+          sender: 'ai' as const
         }
       ]);
     }

@@ -1,5 +1,5 @@
 
-import { Message } from '../../types';
+import { ChatMessage } from '@/types';
 
 export interface ProcessMessageOptions {
   isVenueMode: boolean;
@@ -10,7 +10,7 @@ export interface ProcessMessageOptions {
 }
 
 export interface MessageContext {
-  messages: Message[];
+  messages: ChatMessage[];
   query: string;
   paginationState: Record<string, number>;
   options: ProcessMessageOptions;
@@ -18,5 +18,5 @@ export interface MessageContext {
 
 export interface MessageProcessor {
   canProcess: (context: MessageContext) => boolean;
-  process: (context: MessageContext, setMessages: React.Dispatch<React.SetStateAction<Message[]>>) => Promise<boolean>;
+  process: (context: MessageContext, setMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>) => Promise<boolean>;
 }

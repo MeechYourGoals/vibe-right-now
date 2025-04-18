@@ -1,6 +1,8 @@
 
+import { ChatMessage } from '@/types';
+
 export class MessageFactory {
-  static createUserMessage(content: string) {
+  static createUserMessage(content: string): ChatMessage {
     return {
       id: Date.now().toString(),
       content,
@@ -12,7 +14,7 @@ export class MessageFactory {
     };
   }
 
-  static createAssistantMessage(content: string) {
+  static createAssistantMessage(content: string): ChatMessage {
     return {
       id: Date.now().toString(),
       content,
@@ -24,7 +26,7 @@ export class MessageFactory {
     };
   }
 
-  static createSystemMessage(content: string) {
+  static createSystemMessage(content: string): ChatMessage {
     return {
       id: Date.now().toString(),
       content,
@@ -36,11 +38,11 @@ export class MessageFactory {
     };
   }
 
-  static createAIMessage(content: string) {
+  static createAIMessage(content: string): ChatMessage {
     return this.createAssistantMessage(content);
   }
 
-  static createErrorMessage(content: string = "I'm sorry, I couldn't process that request. Please try again.") {
+  static createErrorMessage(content: string = "I'm sorry, I couldn't process that request. Please try again."): ChatMessage {
     return {
       id: Date.now().toString(),
       content,
@@ -52,16 +54,16 @@ export class MessageFactory {
     };
   }
 
-  static get INITIAL_MESSAGE() {
+  static get INITIAL_MESSAGE(): ChatMessage {
     return this.createSystemMessage("Hi! I'm Vernon, your personal concierge. How can I help you today?");
   }
 }
 
 // Export individual functions for backward compatibility
-export const createUserMessage = (content: string) => MessageFactory.createUserMessage(content);
-export const createAssistantMessage = (content: string) => MessageFactory.createAssistantMessage(content);
-export const createSystemMessage = (content: string) => MessageFactory.createSystemMessage(content);
-export const createAIMessage = (content: string) => MessageFactory.createAIMessage(content);
-export const createErrorMessage = (content: string = "I'm sorry, I couldn't process that request. Please try again.") => 
+export const createUserMessage = (content: string): ChatMessage => MessageFactory.createUserMessage(content);
+export const createAssistantMessage = (content: string): ChatMessage => MessageFactory.createAssistantMessage(content);
+export const createSystemMessage = (content: string): ChatMessage => MessageFactory.createSystemMessage(content);
+export const createAIMessage = (content: string): ChatMessage => MessageFactory.createAIMessage(content);
+export const createErrorMessage = (content: string = "I'm sorry, I couldn't process that request. Please try again."): ChatMessage => 
   MessageFactory.createErrorMessage(content);
 export const INITIAL_MESSAGE = MessageFactory.INITIAL_MESSAGE;

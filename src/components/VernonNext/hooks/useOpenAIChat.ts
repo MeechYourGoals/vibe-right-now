@@ -1,22 +1,25 @@
+
 import { useState, useCallback, useRef } from 'react';
 import { OpenAIService } from '@/services/OpenAIService';
-import { ChatState, Message } from '@/components/VernonNext/types';
+import { ChatMessage, ChatState } from '@/types';
 
 // Default messages to initialize the chat
-const defaultWelcomeMessage: Message = {
+const defaultWelcomeMessage: ChatMessage = {
   id: '1',
-  text: "Hi there! I'm Vernon, your AI assistant powered by GPT-4o. I can help you discover amazing places to go and things to do based on your interests. Try asking about restaurants, events, attractions, or specific activities you're interested in. What are you looking for today?",
-  sender: 'ai',
+  content: "Hi there! I'm Vernon, your AI assistant powered by GPT-4o. I can help you discover amazing places to go and things to do based on your interests. Try asking about restaurants, events, attractions, or specific activities you're interested in. What are you looking for today?",
+  role: 'system',
   timestamp: new Date(),
-  verified: true
+  text: "Hi there! I'm Vernon, your AI assistant powered by GPT-4o. I can help you discover amazing places to go and things to do based on your interests. Try asking about restaurants, events, attractions, or specific activities you're interested in. What are you looking for today?",
+  sender: 'ai'
 };
 
-const venueWelcomeMessage: Message = {
+const venueWelcomeMessage: ChatMessage = {
   id: '1',
-  text: "Hello! I'm Vernon for Venues, your AI business assistant powered by GPT-4o. I can help you analyze your venue data, understand customer trends, and optimize your business performance. What would you like to know about your venue today?",
-  sender: 'ai',
+  content: "Hello! I'm Vernon for Venues, your AI business assistant powered by GPT-4o. I can help you analyze your venue data, understand customer trends, and optimize your business performance. What would you like to know about your venue today?",
+  role: 'system',
   timestamp: new Date(),
-  verified: true
+  text: "Hello! I'm Vernon for Venues, your AI business assistant powered by GPT-4o. I can help you analyze your venue data, understand customer trends, and optimize your business performance. What would you like to know about your venue today?",
+  sender: 'ai'
 };
 
 export const useOpenAIChat = (isVenueMode: boolean = false) => {
@@ -24,32 +27,36 @@ export const useOpenAIChat = (isVenueMode: boolean = false) => {
   const [state, setState] = useState<ChatState>({
     isOpen: false,
     isMinimized: false,
-    isLoading: false,
+    loading: false,
     isListening: false,
     isSpeaking: false,
     messages: [isVenueMode ? venueWelcomeMessage : defaultWelcomeMessage],
     searchResults: [],
     transcript: '',
-    interimTranscript: ''
+    interimTranscript: '',
+    error: null
   });
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   
   // Helper function to create a user message
-  const createUserMessage = (content: string): Message => ({
+  const createUserMessage = (content: string): ChatMessage => ({
     id: Date.now().toString(),
+    content,
+    role: 'user',
+    timestamp: new Date(),
     text: content,
-    sender: 'user',
-    timestamp: new Date()
+    sender: 'user'
   });
   
   // Helper function to create an assistant message
-  const createAssistantMessage = (content: string): Message => ({
+  const createAssistantMessage = (content: string): ChatMessage => ({
     id: Date.now().toString(),
-    text: content,
-    sender: 'ai',
+    content,
+    role: 'assistant',
     timestamp: new Date(),
-    verified: true
+    text: content,
+    sender: 'ai'
   });
   
   // Send a text message to the chat
@@ -61,16 +68,16 @@ export const useOpenAIChat = (isVenueMode: boolean = false) => {
     setState(prev => ({
       ...prev,
       messages: [...prev.messages, userMessage],
-      isLoading: true
+      loading: true
     }));
     
     try {
       // Format messages for OpenAI API
       const chatMessages = state.messages
-        .filter(msg => msg.sender !== 'system') // Filter out system messages
+        .filter(msg => msg.role !== 'system') // Filter out system messages
         .map(msg => ({
-          role: msg.sender === 'user' ? 'user' : 'assistant',
-          content: msg.text
+          role: msg.role === 'user' ? 'user' : 'assistant',
+          content: msg.content
         }));
       
       // Add the new user message
@@ -90,7 +97,7 @@ export const useOpenAIChat = (isVenueMode: boolean = false) => {
       setState(prev => ({
         ...prev,
         messages: [...prev.messages, assistantMessage],
-        isLoading: false
+        loading: false
       }));
       
     } catch (error) {
@@ -103,7 +110,8 @@ export const useOpenAIChat = (isVenueMode: boolean = false) => {
       setState(prev => ({
         ...prev,
         messages: [...prev.messages, errorMessage],
-        isLoading: false
+        loading: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
       }));
     }
   }, [state.messages, isVenueMode]);
@@ -141,7 +149,7 @@ export const useOpenAIChat = (isVenueMode: boolean = false) => {
               setState(prev => ({ 
                 ...prev, 
                 isListening: false,
-                isLoading: true,
+                loading: true,
                 interimTranscript: 'Processing your audio...'
               }));
               
@@ -153,7 +161,7 @@ export const useOpenAIChat = (isVenueMode: boolean = false) => {
                 ...prev, 
                 transcript,
                 interimTranscript: '',
-                isLoading: false
+                loading: false
               }));
               
               // If we got a transcript, send it as a message
@@ -166,8 +174,9 @@ export const useOpenAIChat = (isVenueMode: boolean = false) => {
             setState(prev => ({ 
               ...prev, 
               isListening: false, 
-              isLoading: false,
-              interimTranscript: 'Error processing audio. Please try again.'
+              loading: false,
+              interimTranscript: 'Error processing audio. Please try again.',
+              error: error instanceof Error ? error.message : 'Error processing audio'
             }));
           }
         };
@@ -195,7 +204,8 @@ export const useOpenAIChat = (isVenueMode: boolean = false) => {
       setState(prev => ({ 
         ...prev, 
         isListening: false,
-        interimTranscript: 'Could not access microphone. Please check permissions.'
+        interimTranscript: 'Could not access microphone. Please check permissions.',
+        error: error instanceof Error ? error.message : 'Error accessing microphone'
       }));
       return null;
     }
@@ -240,13 +250,21 @@ export const useOpenAIChat = (isVenueMode: boolean = false) => {
       
       audioRef.current.onerror = () => {
         console.error('Audio playback error');
-        setState(prev => ({ ...prev, isSpeaking: false }));
+        setState(prev => ({ 
+          ...prev, 
+          isSpeaking: false,
+          error: 'Audio playback error'
+        }));
       };
       
       await audioRef.current.play();
     } catch (error) {
       console.error('Error speaking text:', error);
-      setState(prev => ({ ...prev, isSpeaking: false }));
+      setState(prev => ({ 
+        ...prev, 
+        isSpeaking: false,
+        error: error instanceof Error ? error.message : 'Error speaking text'
+      }));
     }
   }, []);
   
