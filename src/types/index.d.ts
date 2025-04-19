@@ -1,5 +1,4 @@
 
-// If this file doesn't exist, we're creating it
 import { MockUserProfile } from "@/utils/locations/types";
 
 export interface Location {
@@ -9,6 +8,7 @@ export interface Location {
   city: string;
   state?: string;
   country: string;
+  zip?: string; // Making zip optional to avoid breaking existing code
   lat: number;
   lng: number;
   type: "restaurant" | "bar" | "event" | "attraction" | "sports" | "other";
@@ -16,5 +16,5 @@ export interface Location {
   hours?: Record<string, string>;
   vibes?: string[];
   userProfile?: MockUserProfile;
-  isPremium?: boolean;
+  description?: string;
 }

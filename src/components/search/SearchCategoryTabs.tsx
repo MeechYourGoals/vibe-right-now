@@ -1,26 +1,23 @@
 
-import React from 'react';
-import { Search, Building, User, Sparkles } from 'lucide-react';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
+import { Search, Building, MapPin, User, Tag, TrendingUp, Sparkles } from "lucide-react";
 
 interface SearchCategoryTabsProps {
-  value: string;
-  onChange: (value: string) => void;
+  searchCategory: string;
+  handleCategoryChange: (category: string) => void;
 }
 
-const SearchCategoryTabs: React.FC<SearchCategoryTabsProps> = ({ value, onChange }) => {
+const SearchCategoryTabs: React.FC<SearchCategoryTabsProps> = ({
+  searchCategory,
+  handleCategoryChange,
+}) => {
   return (
     <Tabs 
-      value={value} 
-      onValueChange={onChange} 
+      value={searchCategory} 
+      onValueChange={handleCategoryChange} 
       className="w-full mb-3"
     >
-      <TabsList className="grid grid-cols-4 w-full">
+      <TabsList className="grid grid-cols-7 w-full">
         <TabsTrigger value="all" className="flex items-center gap-1">
           <Search className="h-3.5 w-3.5" />
           <span>All</span>
@@ -29,9 +26,21 @@ const SearchCategoryTabs: React.FC<SearchCategoryTabsProps> = ({ value, onChange
           <Building className="h-3.5 w-3.5" />
           <span>Places</span>
         </TabsTrigger>
+        <TabsTrigger value="nearby" className="flex items-center gap-1">
+          <MapPin className="h-3.5 w-3.5" />
+          <span>Nearby</span>
+        </TabsTrigger>
         <TabsTrigger value="users" className="flex items-center gap-1">
           <User className="h-3.5 w-3.5" />
           <span>Users</span>
+        </TabsTrigger>
+        <TabsTrigger value="deals" className="flex items-center gap-1">
+          <Tag className="h-3.5 w-3.5" />
+          <span>Deals</span>
+        </TabsTrigger>
+        <TabsTrigger value="trending" className="flex items-center gap-1">
+          <TrendingUp className="h-3.5 w-3.5" />
+          <span>Trending</span>
         </TabsTrigger>
         <TabsTrigger value="vibes" className="flex items-center gap-1">
           <Sparkles className="h-3.5 w-3.5" />

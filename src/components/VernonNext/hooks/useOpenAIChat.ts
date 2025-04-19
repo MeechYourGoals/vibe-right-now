@@ -1,14 +1,14 @@
 
 import { useState, useCallback, useRef } from 'react';
 import { OpenAIService } from '@/services/OpenAIService';
-import { ChatState, ChatMessage } from '@/components/VernonNext/types';
+import { ChatMessage, ChatState, ExtractedIntent } from '@/types';
 
 // Default messages to initialize the chat
 const defaultWelcomeMessage: ChatMessage = {
   id: '1',
   role: 'assistant',
   content: "Hi there! I'm Vernon, your AI assistant powered by GPT-4o. I can help you discover amazing places to go and things to do based on your interests. Try asking about restaurants, events, attractions, or specific activities you're interested in. What are you looking for today?",
-  timestamp: new Date().toISOString(),
+  timestamp: new Date(),
   verified: true
 };
 
@@ -16,7 +16,7 @@ const venueWelcomeMessage: ChatMessage = {
   id: '1',
   role: 'assistant',
   content: "Hello! I'm Vernon for Venues, your AI business assistant powered by GPT-4o. I can help you analyze your venue data, understand customer trends, and optimize your business performance. What would you like to know about your venue today?",
-  timestamp: new Date().toISOString(),
+  timestamp: new Date(),
   verified: true
 };
 
@@ -29,7 +29,6 @@ export const useOpenAIChat = (isVenueMode: boolean = false) => {
     isListening: false,
     isSpeaking: false,
     messages: [isVenueMode ? venueWelcomeMessage : defaultWelcomeMessage],
-    searchResults: [],
     transcript: '',
     interimTranscript: ''
   });
@@ -41,7 +40,7 @@ export const useOpenAIChat = (isVenueMode: boolean = false) => {
     id: Date.now().toString(),
     role: 'user',
     content,
-    timestamp: new Date().toISOString()
+    timestamp: new Date()
   });
   
   // Helper function to create an assistant message
@@ -49,7 +48,7 @@ export const useOpenAIChat = (isVenueMode: boolean = false) => {
     id: Date.now().toString(),
     role: 'assistant',
     content,
-    timestamp: new Date().toISOString(),
+    timestamp: new Date(),
     verified: true
   });
   

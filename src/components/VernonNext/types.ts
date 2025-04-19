@@ -10,14 +10,8 @@ export interface Message {
     lng: number;
     name: string;
   };
-}
-
-export interface ChatMessage {
-  id: string;
-  role: 'user' | 'assistant' | 'system' | 'error';
-  content: string;
-  timestamp: string;
-  verified?: boolean;
+  content?: string;
+  role?: 'user' | 'assistant' | 'system' | 'error';
 }
 
 export interface ChatOptions {
@@ -46,10 +40,11 @@ export interface ChatState {
   isLoading: boolean;
   isListening: boolean;
   isSpeaking: boolean;
-  messages: ChatMessage[];
+  messages: Message[];
   searchResults: SearchResult[];
   transcript: string;
   interimTranscript: string;
+  loading?: boolean;
 }
 
 export type IntentType = 'search' | 'info' | 'question' | 'booking' | 'unknown';

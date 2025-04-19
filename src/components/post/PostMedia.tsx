@@ -1,75 +1,100 @@
 
 import React, { useState } from "react";
 import { Media } from "@/types";
-import { ArrowLeft, ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { Play } from "lucide-react";
 
 interface PostMediaProps {
   media: Media[];
+  aspectRatio?: number;
 }
 
-const PostMedia: React.FC<PostMediaProps> = ({ media }) => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const hasMultipleMedia = media.length > 1;
-
-  const nextMedia = () => {
-    setCurrentIndex((prev) => (prev + 1) % media.length);
+const PostMedia: React.FC<PostMediaProps> = ({ 
+  media, 
+  aspectRatio = 4/3 
+}) => {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  
+  if (!media || media.length === 0) {
+    return null;
+  }
+  
+  const activeMedia = media[activeIndex];
+  
+  const handlePlayVideo = () => {
+    setIsPlaying(true);
+    // Find the video element and play it
+    const videoElement = document.getElementById(`video-${activeIndex}`) as HTMLVideoElement;
+    if (videoElement) {
+      videoElement.play();
+    }
   };
-
-  const prevMedia = () => {
-    setCurrentIndex((prev) => (prev - 1 + media.length) % media.length);
+  
+  const renderMedia = () => {
+    if (!activeMedia) return null;
+    
+    if (activeMedia.type === "video") {
+      const thumbnailUrl = activeMedia.thumbnail || activeMedia.url;
+      
+      return (
+        <div className="relative overflow-hidden w-full h-full">
+          {!isPlaying ? (
+            <>
+              <img 
+                src={thumbnailUrl} 
+                alt="Video thumbnail" 
+                className="object-cover w-full h-full"
+              />
+              <button 
+                className="absolute inset-0 flex items-center justify-center bg-black/30"
+                onClick={handlePlayVideo}
+              >
+                <Play className="h-12 w-12 text-white" />
+              </button>
+            </>
+          ) : (
+            <video
+              id={`video-${activeIndex}`}
+              src={activeMedia.url}
+              controls
+              className="w-full h-full object-contain"
+              onEnded={() => setIsPlaying(false)}
+            />
+          )}
+        </div>
+      );
+    }
+    
+    return (
+      <img 
+        src={activeMedia.url} 
+        alt="Post image" 
+        className="object-cover w-full h-full"
+      />
+    );
   };
-
-  const currentMedia = media[currentIndex];
-
+  
   return (
-    <div className="relative mb-2">
-      {currentMedia.type === "image" ? (
-        <img
-          src={currentMedia.url}
-          alt="Post media"
-          className="w-full object-cover max-h-[500px]"
-        />
-      ) : (
-        <video
-          src={currentMedia.url}
-          controls
-          className="w-full max-h-[500px]"
-          poster={currentMedia.thumbnail}
-        />
-      )}
-
-      {hasMultipleMedia && (
-        <>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/20 text-white hover:bg-black/40 rounded-full h-8 w-8"
-            onClick={prevMedia}
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/20 text-white hover:bg-black/40 rounded-full h-8 w-8"
-            onClick={nextMedia}
-          >
-            <ArrowRight className="h-4 w-4" />
-          </Button>
-          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+    <AspectRatio ratio={aspectRatio} className="overflow-hidden bg-muted">
+      {renderMedia()}
+      
+      {media.length > 1 && (
+        <div className="absolute bottom-2 w-full flex justify-center">
+          <div className="flex gap-1 px-2 py-1 bg-black/40 rounded-full">
             {media.map((_, index) => (
-              <div
+              <button
                 key={index}
-                className={`h-1.5 rounded-full ${
-                  index === currentIndex ? "w-4 bg-white" : "w-1.5 bg-white/50"
+                className={`w-2 h-2 rounded-full ${
+                  index === activeIndex ? 'bg-white' : 'bg-white/40'
                 }`}
+                onClick={() => setActiveIndex(index)}
               />
             ))}
           </div>
-        </>
+        </div>
       )}
-    </div>
+    </AspectRatio>
   );
 };
 

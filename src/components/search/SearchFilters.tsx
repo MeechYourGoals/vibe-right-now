@@ -1,7 +1,6 @@
 
-import React from 'react';
-import { Button } from "@/components/ui/button";
-import { X, ChevronDown, Map } from 'lucide-react';
+import { Button } from "../ui/button";
+import { X, Map, ChevronDown } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,25 +9,25 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "../ui/dropdown-menu";
 
 interface SearchFiltersProps {
-  open: boolean;
-  filters: string[];
+  showFilters: boolean;
   activeFilters: string[];
-  toggleFilter: (filter: string) => void;
+  filters: string[];
   clearFilters: () => void;
+  toggleFilter: (filter: string) => void;
 }
 
 const SearchFilters: React.FC<SearchFiltersProps> = ({
-  open,
-  filters,
+  showFilters,
   activeFilters,
+  filters,
+  clearFilters,
   toggleFilter,
-  clearFilters
 }) => {
-  if (!open) return null;
-  
+  if (!showFilters) return null;
+
   return (
     <div className="bg-muted/20 p-3 rounded-md glass-effect">
       <div className="flex justify-between items-center mb-2">

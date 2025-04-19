@@ -1,12 +1,13 @@
 
 import React, { RefObject, useState } from 'react';
 import { X, Minimize2, Maximize2, Mic, MicOff, ArrowRight, VolumeX, Volume2 } from 'lucide-react';
-import { ChatState, ChatMessage } from '../VernonNext/types';
+import { ChatState, ChatMessage } from '@/types';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatDistanceToNow } from 'date-fns';
 
 interface ChatWindowProps {
