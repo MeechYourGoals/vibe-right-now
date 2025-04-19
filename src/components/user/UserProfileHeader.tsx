@@ -27,20 +27,6 @@ const UserProfileHeader = ({ user, getUserBio }: UserProfileHeaderProps) => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Safety check for undefined user
-  if (!user) {
-    return (
-      <div className="glass-effect p-6 rounded-xl mb-6">
-        <div className="text-center">
-          <p>User information is loading or not available.</p>
-          <Button className="mt-4" variant="outline" onClick={() => window.history.back()}>
-            Go Back
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
   const handleFollowToggle = () => {
     setIsFollowing(!isFollowing);
     

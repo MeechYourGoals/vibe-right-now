@@ -43,11 +43,6 @@ const PostGridItem = ({ post }: PostGridItemProps) => {
   const [liked, setLiked] = useState(false);
   const navigate = useNavigate();
   
-  // Safety check for post having a valid user
-  if (!post || !post.user || !post.user.username) {
-    return null;
-  }
-  
   // Ensure media is in the correct format
   const formattedMedia = ensureMediaFormat(post.media);
   
