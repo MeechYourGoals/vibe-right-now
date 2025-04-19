@@ -5,7 +5,9 @@ export class MessageFactory {
       id: Date.now().toString(),
       content,
       role: 'user',
-      timestamp: new Date().toISOString()
+      text: content,
+      sender: 'user',
+      timestamp: new Date()
     };
   }
 
@@ -14,7 +16,9 @@ export class MessageFactory {
       id: Date.now().toString(),
       content,
       role: 'assistant',
-      timestamp: new Date().toISOString()
+      text: content,
+      sender: 'ai',
+      timestamp: new Date()
     };
   }
 
@@ -23,7 +27,9 @@ export class MessageFactory {
       id: Date.now().toString(),
       content,
       role: 'system',
-      timestamp: new Date().toISOString()
+      text: content,
+      sender: 'ai',
+      timestamp: new Date()
     };
   }
 
@@ -32,12 +38,14 @@ export class MessageFactory {
     return this.createAssistantMessage(content);
   }
 
-  static createErrorMessage(content: string) {
+  static createErrorMessage(content: string = "Sorry, I couldn't process that request. Please try again.") {
     return {
       id: Date.now().toString(),
       content,
       role: 'error',
-      timestamp: new Date().toISOString()
+      text: content,
+      sender: 'ai',
+      timestamp: new Date()
     };
   }
 
@@ -46,3 +54,11 @@ export class MessageFactory {
     return this.createSystemMessage("Hi! I'm Vernon, your personal concierge. How can I help you today?");
   }
 }
+
+// Export singleton functions for backward compatibility
+export const createUserMessage = MessageFactory.createUserMessage;
+export const createAssistantMessage = MessageFactory.createAssistantMessage;
+export const createSystemMessage = MessageFactory.createSystemMessage;
+export const createAIMessage = MessageFactory.createAIMessage;
+export const createErrorMessage = MessageFactory.createErrorMessage;
+export const INITIAL_MESSAGE = MessageFactory.INITIAL_MESSAGE;
