@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -32,7 +33,7 @@ const UserProfile = () => {
   // Find user in mock data if not found in regular data
   useEffect(() => {
     if (!user && username) {
-      const mockUser = [...mockUsers].find(u => u.username === username);
+      const mockUser = mockUsers.find(u => u.username === username);
       if (mockUser) {
         // Set user data from mock
         setTimeout(() => {

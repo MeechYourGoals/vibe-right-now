@@ -43,6 +43,12 @@ const PostGridItem = ({ post }: PostGridItemProps) => {
   const [liked, setLiked] = useState(false);
   const navigate = useNavigate();
   
+  // Ensure post has a valid user
+  if (!post.user) {
+    console.error('Post is missing user information:', post);
+    return null;
+  }
+  
   // Ensure media is in the correct format
   const formattedMedia = ensureMediaFormat(post.media);
   

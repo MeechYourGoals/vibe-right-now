@@ -1,5 +1,6 @@
+
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Map, X, ChevronDown, User, Building, Sparkles } from "lucide-react";
@@ -45,6 +46,7 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
 
   const suggestedUsers = mockUsers.slice(0, 5);
@@ -106,9 +108,7 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
       setSearchQuery(vibe);
       setSearchCategory("vibes");
     }
-  }, [location.search]);
-
-  const location = useLocation();
+  }, [location.search, toast]);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);

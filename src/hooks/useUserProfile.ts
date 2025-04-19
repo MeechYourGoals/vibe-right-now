@@ -22,6 +22,10 @@ const generateVibeTags = (locationId: string, username: string): string[] => {
 
 // Convert plain media strings to Media objects if needed
 const ensureMediaFormat = (media: any[]): Media[] => {
+  if (!media || !Array.isArray(media)) {
+    return [];
+  }
+  
   return media.map(item => {
     if (typeof item === 'string') {
       // Determine type based on extension
@@ -51,6 +55,11 @@ export const useUserProfile = (username: string | undefined) => {
   const [wantToVisitPlaces, setWantToVisitPlaces] = useState<Location[]>([]);
   
   useEffect(() => {
+    if (!username) {
+      console.log("No username provided");
+      return;
+    }
+    
     console.log("Looking for username:", username);
     
     // Find user by username or id (for backward compatibility)
@@ -120,7 +129,12 @@ export const useUserProfile = (username: string | undefined) => {
       
       // If we have preference, start with those
       const preferredLocations = preferredLocationTypes.length > 0 
-        ? allPosts.filter(post => preferredLocationTypes.includes(post.location.type || ''))
+        ? allPosts.filter(post => {
+            if (!post.location || !post.location.type) {
+              return false;
+            }
+            return preferredLocationTypes.includes(post.location.type);
+          })
         : [];
       
       // Fill with random posts if needed
@@ -157,10 +171,21 @@ export const useUserProfile = (username: string | undefined) => {
       }
       
       // Add vibe tags to each post if they don't already have them
-      const postsWithTags = selectedPosts.map(post => ({
-        ...post,
-        vibeTags: post.vibeTags || generateVibeTags(post.location.id, foundUser.username)
-      }));
+      const postsWithTags = selectedPosts.map(post => {
+        if (!post.location) {
+          // Ensure post has a valid location
+          return {
+            ...post,
+            location: mockLocations[0], // Use a default location
+            vibeTags: post.vibeTags || vibeTags.slice(0, 3) // Use default vibe tags
+          };
+        }
+        
+        return {
+          ...post,
+          vibeTags: post.vibeTags || generateVibeTags(post.location.id, foundUser.username)
+        };
+      });
       
       setUserPosts(postsWithTags);
       

@@ -102,12 +102,12 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
 
     // Find posts from featured users
     const featuredUserPosts = recentPosts.filter(post => 
-      featuredUsernames.includes(post.user.username.toLowerCase())
+      post.user && post.user.username && featuredUsernames.includes(post.user.username.toLowerCase())
     );
     
     // Get the remaining posts
     const otherPosts = recentPosts.filter(post => 
-      !featuredUsernames.includes(post.user.username.toLowerCase())
+      !post.user || !post.user.username || !featuredUsernames.includes(post.user.username.toLowerCase())
     );
     
     // Combine them with featured posts first
@@ -117,7 +117,7 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
   const filteredPosts = useMemo(() => {
     return prioritizedPosts.filter((post) => {
       // Filter by location type if specified
-      if (filter !== "all" && post.location.type !== filter) {
+      if (filter !== "all" && post.location && post.location.type !== filter) {
         return false;
       }
       
@@ -132,10 +132,10 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
         return (
-          post.location.name.toLowerCase().includes(query) ||
-          post.location.city.toLowerCase().includes(query) ||
-          post.content.toLowerCase().includes(query) ||
-          post.vibeTags?.some(tag => tag.toLowerCase().includes(query))
+          (post.location && post.location.name && post.location.name.toLowerCase().includes(query)) ||
+          (post.location && post.location.city && post.location.city.toLowerCase().includes(query)) ||
+          (post.content && post.content.toLowerCase().includes(query)) ||
+          (post.vibeTags && post.vibeTags.some(tag => tag.toLowerCase().includes(query)))
         );
       }
       
@@ -148,11 +148,13 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
     const groupedPosts: Record<string, Post[]> = {};
     
     filteredPosts.forEach(post => {
-      const locationId = post.location.id;
-      if (!groupedPosts[locationId]) {
-        groupedPosts[locationId] = [];
+      if (post.location) {
+        const locationId = post.location.id;
+        if (!groupedPosts[locationId]) {
+          groupedPosts[locationId] = [];
+        }
+        groupedPosts[locationId].push(post);
       }
-      groupedPosts[locationId].push(post);
     });
     
     // Sort each location's posts by timestamp (most recent first)
@@ -192,11 +194,13 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
     
     // Apply the specific counts where defined, and calculate naturally for others
     filteredPosts.forEach(post => {
-      const locationId = post.location.id;
-      if (locationId in specificCounts) {
-        counts[locationId] = specificCounts[locationId];
-      } else {
-        counts[locationId] = (counts[locationId] || 0) + Math.floor(Math.random() * 50) + 1;
+      if (post.location) {
+        const locationId = post.location.id;
+        if (locationId in specificCounts) {
+          counts[locationId] = specificCounts[locationId];
+        } else {
+          counts[locationId] = (counts[locationId] || 0) + Math.floor(Math.random() * 50) + 1;
+        }
       }
     });
     
