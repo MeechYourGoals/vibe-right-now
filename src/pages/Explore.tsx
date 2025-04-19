@@ -23,6 +23,58 @@ import { supabase } from '@/integrations/supabase/client';
 import { getComedyEventsForCity } from "@/services/search/eventService";
 import DateRangeSelector from "@/components/DateRangeSelector";
 
+const generateMockMusicVenues = (city: string) => {
+  return [
+    'Arena ' + city,
+    'The ' + city + ' Theatre',
+    'Club ' + city,
+    'The ' + city + ' Concert Hall',
+    'Underground ' + city,
+    'The ' + city + ' Amphitheatre',
+    'Jazz Club ' + city
+  ];
+};
+
+const generateMockArtists = () => {
+  return [
+    'The Rolling Stones',
+    'Taylor Swift',
+    'Ed Sheeran',
+    'Lady Gaga',
+    'Drake',
+    'Beyoncé',
+    'Coldplay',
+    'The Weeknd',
+    'Bad Bunny',
+    'BTS',
+    'Harry Styles',
+    'Post Malone',
+    'Dua Lipa',
+    'Billie Eilish',
+    'Bruno Mars'
+  ];
+};
+
+const generateMockComedians = () => {
+  return [
+    'Dave Chappelle',
+    'Kevin Hart',
+    'John Mulaney',
+    'Ali Wong',
+    'Bill Burr',
+    'Trevor Noah',
+    'Amy Schumer',
+    'Chris Rock',
+    'Jerry Seinfeld',
+    'Jim Gaffigan',
+    'Sebastian Maniscalco',
+    'Wanda Sykes',
+    'Jo Koy',
+    'Tom Segura',
+    'Bert Kreischer'
+  ];
+};
+
 const getCitySpecificContent = (city: string, type: string) => {
   return `Check out this amazing ${type} in ${city}! The vibes are incredible right now.`;
 };
@@ -125,45 +177,44 @@ const getAdditionalTags = (location: Location) => {
 const generateMusicEvents = (city: string, state: string, dateRange?: DateRange): EventItem[] => {
   if (!city) return [];
   
-  const musicArtists = [
-    "Taylor Swift", "The Weeknd", "Bad Bunny", "Billie Eilish", 
-    "Drake", "BTS", "Dua Lipa", "Post Malone", "Harry Styles"
-  ];
-  
-  const venues = [
-    `${city} Arena`, `${city} Amphitheater`, `Downtown ${city} Concert Hall`, 
-    `${city} Stadium`, `${city} Center`
-  ];
-  
-  const now = new Date();
+  const venues = generateMockMusicVenues(city);
+  const artists = generateMockArtists();
   const events: EventItem[] = [];
   
-  const count = Math.floor(Math.random() * 6) + 3;
+  // Generate at least 6 events, even for small cities
+  const minEvents = 6;
+  const maxExtra = 6;
+  const totalEvents = minEvents + Math.floor(Math.random() * maxExtra);
   
-  for (let i = 0; i < count; i++) {
-    const artist = musicArtists[Math.floor(Math.random() * musicArtists.length)];
+  const now = new Date();
+  const basePrice = 30 + Math.floor(Math.random() * 120);
+  
+  for (let i = 0; i < totalEvents; i++) {
+    const artist = artists[Math.floor(Math.random() * artists.length)];
     const venue = venues[Math.floor(Math.random() * venues.length)];
     
     let date = new Date();
     if (dateRange?.from && dateRange?.to) {
       const start = new Date(dateRange.from);
       const end = new Date(dateRange.to);
-      const daysBetween = Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
       date = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
     } else {
       date.setDate(now.getDate() + Math.floor(Math.random() * 90));
     }
     
+    const hour = 19 + Math.floor(Math.random() * 4);
+    const price = basePrice + Math.floor(Math.random() * 100);
+    
     events.push({
       id: `music-${city}-${i}`,
-      title: `${artist} Concert`,
-      description: `Live performance by ${artist}`,
+      title: `${artist} Live in Concert`,
+      description: `Don't miss ${artist} performing live at ${venue}! An unforgettable night of music awaits.`,
       date: date.toISOString(),
-      time: `${7 + Math.floor(Math.random() * 4)}:00 PM`,
+      time: `${hour}:00`,
       location: venue,
       imageUrl: `https://source.unsplash.com/random/800x600/?concert,${artist.split(' ').join(',')}`,
-      ticketUrl: `https://www.${venue.toLowerCase().replace(/\s+/g, '')}.com/tickets`,
-      price: `$${45 + Math.floor(Math.random() * 150)}`,
+      ticketUrl: `https://tickets.example.com/${artist.toLowerCase().replace(/\s+/g, '-')}`,
+      price: `$${price}`,
       type: "music"
     });
   }
@@ -174,24 +225,30 @@ const generateMusicEvents = (city: string, state: string, dateRange?: DateRange)
 const generateComedyEvents = (city: string, state: string, dateRange?: DateRange): EventItem[] => {
   if (!city) return [];
   
-  const comedians = [
-    "Dave Chappelle", "Kevin Hart", "John Mulaney", "Ali Wong", 
-    "Bill Burr", "Hannah Gadsby", "Trevor Noah", "Wanda Sykes", "Jim Gaffigan"
+  const comedyVenues = [
+    `${city} Comedy Club`,
+    `Laugh Factory ${city}`,
+    `${city} Improv`,
+    `Funny Bone ${city}`,
+    `Comedy Cellar ${city}`,
+    `Jokes & Notes ${city}`,
+    `The Comedy Store ${city}`
   ];
   
-  const venues = [
-    `${city} Comedy Club`, `Laugh Factory ${city}`, `${city} Improv`, 
-    `Funny Bone ${city}`, `Comedy Cellar ${city}`
-  ];
-  
-  const now = new Date();
+  const comedians = generateMockComedians();
   const events: EventItem[] = [];
   
-  const count = Math.floor(Math.random() * 5) + 3;
+  // Always generate at least 5 comedy shows
+  const minEvents = 5;
+  const maxExtra = 5;
+  const totalEvents = minEvents + Math.floor(Math.random() * maxExtra);
   
-  for (let i = 0; i < count; i++) {
+  const now = new Date();
+  const basePrice = 25 + Math.floor(Math.random() * 50);
+  
+  for (let i = 0; i < totalEvents; i++) {
     const comedian = comedians[Math.floor(Math.random() * comedians.length)];
-    const venue = venues[Math.floor(Math.random() * venues.length)];
+    const venue = comedyVenues[Math.floor(Math.random() * comedyVenues.length)];
     
     let date = new Date();
     if (dateRange?.from && dateRange?.to) {
@@ -199,19 +256,22 @@ const generateComedyEvents = (city: string, state: string, dateRange?: DateRange
       const end = new Date(dateRange.to);
       date = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
     } else {
-      date.setDate(now.getDate() + Math.floor(Math.random() * 90));
+      date.setDate(now.getDate() + Math.floor(Math.random() * 60));
     }
+    
+    const hour = 19 + Math.floor(Math.random() * 3);
+    const price = basePrice + Math.floor(Math.random() * 40);
     
     events.push({
       id: `comedy-${city}-${i}`,
-      title: `${comedian} Stand-Up`,
-      description: `Comedy show featuring ${comedian}`,
+      title: `${comedian} - Live Standup`,
+      description: `Join us for a night of laughter with ${comedian} performing their latest material live at ${venue}.`,
       date: date.toISOString(),
-      time: `${7 + Math.floor(Math.random() * 3)}:00 PM`,
+      time: `${hour}:00`,
       location: venue,
-      imageUrl: `https://source.unsplash.com/random/800x600/?comedian,standup`,
-      ticketUrl: `https://www.${venue.toLowerCase().replace(/\s+/g, '')}.com/tickets`,
-      price: `$${30 + Math.floor(Math.random() * 70)}`,
+      imageUrl: `https://source.unsplash.com/random/800x600/?comedian,standup,microphone`,
+      ticketUrl: `https://tickets.example.com/comedy/${comedian.toLowerCase().replace(/\s+/g, '-')}`,
+      price: `$${price}`,
       type: "comedy"
     });
   }
@@ -666,13 +726,24 @@ const Explore = () => {
     return "Explore Vibes";
   };
 
-  const NoEventsMessage = () => (
-    <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-      <AlertTriangle className="w-12 h-12 mb-4" />
-      <h3 className="text-xl font-semibold mb-2">No Shows Right Now</h3>
-      <p>There are no upcoming shows in this area for the next week.</p>
-    </div>
-  );
+  const ComedyEventsSection = () => {
+    return (
+      <div className="space-y-4">
+        <EventsList events={comedyEvents.map(event => ({
+          id: event.id,
+          title: event.title,
+          description: event.description,
+          date: event.date,
+          time: event.time,
+          location: event.location,
+          imageUrl: event.imageUrl,
+          ticketUrl: event.ticketUrl,
+          price: event.price,
+          type: "comedy"
+        }))} />
+      </div>
+    );
+  };
 
   const NightlifeSection = () => {
     if (nightlifeVenues.length === 0) {
@@ -724,35 +795,6 @@ const Explore = () => {
             </CardContent>
           </Card>
         ))}
-      </div>
-    );
-  };
-
-  const ComedyEventsSection = () => {
-    if (comedyEvents.length === 0) {
-      return (
-        <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-          <AlertTriangle className="w-12 h-12 mb-4" />
-          <h3 className="text-xl font-semibold mb-2">No Comedy Shows Found</h3>
-          <p>We couldn't find any comedy shows in {searchedCity || "this area"} for the next few weeks. Try searching for another location.</p>
-        </div>
-      );
-    }
-    
-    return (
-      <div className="space-y-4">
-        <EventsList events={comedyEvents.map(event => ({
-          id: event.id,
-          title: event.title,
-          description: event.description,
-          date: event.date,
-          time: event.time,
-          location: event.location,
-          imageUrl: event.imageUrl,
-          ticketUrl: event.ticketUrl,
-          price: event.price,
-          type: "comedy"
-        }))} />
       </div>
     );
   };
@@ -990,7 +1032,11 @@ const Explore = () => {
                       <EventsList events={musicEvents} />
                     </div>
                   ) : (
-                    <NoEventsMessage />
+                    <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                      <AlertTriangle className="w-12 h-12 mb-4" />
+                      <h3 className="text-xl font-semibold mb-2">No Shows Right Now</h3>
+                      <p>There are no upcoming shows in this area for the next week.</p>
+                    </div>
                   )}
                 </div>
               )}
