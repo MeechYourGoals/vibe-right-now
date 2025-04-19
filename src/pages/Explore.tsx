@@ -10,11 +10,13 @@ import { LocationsNearby } from "@/components/LocationsNearby";
 import TrendingLocations from "@/components/TrendingLocations";
 import DiscountLocations from "@/components/DiscountLocations";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import GoogleMapComponent from "@/components/map/google/GoogleMapComponent";
 
 const Explore = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState("All");
   const location = useLocation();
+  const [mapStyle, setMapStyle] = useState<"default" | "terrain" | "satellite">("default");
   
   // Parse date params from URL if available
   const searchParams = new URLSearchParams(location.search);
@@ -57,6 +59,17 @@ const Explore = () => {
             </Card>
           )}
           <SearchVibes onSearch={handleSearch} />
+        </div>
+        
+        {/* Map Section */}
+        <div className="mb-6 h-[400px] rounded-lg overflow-hidden border">
+          <GoogleMapComponent 
+            userLocation={null}
+            locations={[]}
+            searchedCity=""
+            mapStyle={mapStyle}
+            onLocationSelect={() => {}}
+          />
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
