@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -6,7 +7,8 @@ import {
 } from "@/components/ui/popover";
 import { Filter, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { vibeTags } from '@/constants/vibeTags';
+import { vibeTags } from "@/hooks/useVibeFilters";
+import VibeTags from "./VibeTags";
 
 interface VibeFilterButtonProps {
   selectedTags: string[];

@@ -1,3 +1,4 @@
+
 import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -5,7 +6,7 @@ import { Sparkles } from "lucide-react";
 import { mockLocations } from "@/mock/locations";
 import LocationCard from "@/components/LocationCard";
 import VibeTags from "@/components/VibeTags";
-import { vibeTags } from "@/constants/vibeTags";
+import { vibeTags } from "@/hooks/useVibeFilters";
 import { Location } from "@/types";
 
 const VibeSection = () => {

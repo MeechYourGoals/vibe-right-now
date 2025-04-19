@@ -27,7 +27,6 @@ import { cityCoordinates } from "@/utils/cityLocations";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { fuzzyMatch } from "@/utils/searchUtils";
 
 interface SearchVibesProps {
   onSearch: (query: string, filterType: string, category: string) => void;

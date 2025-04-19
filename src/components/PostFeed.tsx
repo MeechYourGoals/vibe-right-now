@@ -1,10 +1,11 @@
+
 import { useState, useMemo } from "react";
 import { mockPosts, mockComments } from "@/mock/data";
 import { PostCard } from "@/components/post";
 import SearchVibes from "@/components/SearchVibes";
 import { Post, User, Media } from "@/types";
 import { isWithinThreeMonths } from "@/mock/time-utils";
-import { vibeTags } from "@/constants/vibeTags";
+import { vibeTags } from "@/hooks/useUserProfile";
 import VibeFilterButton from "@/components/VibeFilterButton";
 
 interface PostFeedProps {

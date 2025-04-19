@@ -1,6 +1,6 @@
+
 import { Badge } from "@/components/ui/badge";
 import { Sparkles } from "lucide-react";
-import { vibeTags } from '@/constants/vibeTags';
 
 interface VibeTagsProps {
   tags: string[];
