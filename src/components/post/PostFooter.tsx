@@ -38,12 +38,17 @@ const PostFooter: React.FC<PostFooterProps> = ({
       return null; // Comments are rendered separately in detail view
     }
     
-    if (comments.length === 0) {
+    if (!comments || comments.length === 0) {
       return null;
     }
     
     // Show the most recent comment
     const latestComment = comments[0];
+    
+    // Add null/undefined checks before accessing properties
+    if (!latestComment || !latestComment.user) {
+      return null;
+    }
     
     return (
       <div className="px-4 py-2 border-t text-sm">

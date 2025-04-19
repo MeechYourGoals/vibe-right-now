@@ -241,6 +241,15 @@ export const useUserProfile = (username: string | undefined) => {
       setWantToVisitPlaces(wantToVisitList);
     } else {
       console.log("User not found:", username);
+      
+      // Default to sarah_vibes as fallback when no user is found
+      const sarahUser = mockUsers.find(u => u.username === 'sarah_vibes');
+      if (sarahUser) {
+        console.log("Falling back to sarah_vibes profile");
+        // Recursively call the same effect with sarah_vibes
+        return useUserProfile("sarah_vibes").user;
+      }
+      
       setUser(null);
       setUserPosts([]);
       setFollowedVenues([]);
@@ -250,7 +259,29 @@ export const useUserProfile = (username: string | undefined) => {
   }, [username]);
 
   const getPostComments = (postId: string): Comment[] => {
-    return mockComments.filter(comment => comment.postId === postId);
+    // Get comments from mock data
+    const comments = mockComments.filter(comment => comment.postId === postId);
+    
+    // Ensure each comment has a valid user object
+    return comments.map(comment => {
+      // If comment already has a valid user, return it as is
+      if (comment.user && comment.user.username) {
+        return comment;
+      }
+      
+      // Otherwise, assign a default user
+      const defaultUser = mockUsers[0] || {
+        id: 'default-user',
+        username: 'default_user',
+        name: 'Default User',
+        avatar: 'https://avatars.dicebear.com/api/human/default.svg'
+      };
+      
+      return {
+        ...comment,
+        user: defaultUser
+      };
+    });
   };
 
   const getUserBio = () => {
