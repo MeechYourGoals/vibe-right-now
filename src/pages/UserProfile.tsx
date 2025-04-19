@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
@@ -10,6 +9,7 @@ import { useUserProfile } from "@/hooks/useUserProfile";
 import PrivateProfileContent from "@/components/user/PrivateProfileContent";
 import UserPlacesContent from "@/components/user/UserPlacesContent";
 import FollowedVenuesSection from "@/components/user/FollowedVenuesSection";
+import { mockUsers } from "@/mock/users";
 
 const UserProfile = () => {
   const { username } = useParams<{ username: string }>();
@@ -28,6 +28,19 @@ const UserProfile = () => {
     getUserBio,
     isPrivateProfile
   } = useUserProfile(username);
+
+  // Find user in mock data if not found in regular data
+  useEffect(() => {
+    if (!user && username) {
+      const mockUser = [...mockUsers].find(u => u.username === username);
+      if (mockUser) {
+        // Set user data from mock
+        setTimeout(() => {
+          navigate(`/user/${username}`, { replace: true });
+        }, 0);
+      }
+    }
+  }, [username, user, navigate]);
 
   if (!user) {
     return (
