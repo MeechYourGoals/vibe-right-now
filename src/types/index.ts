@@ -13,7 +13,6 @@ export interface User {
 export interface Media {
   type: "image" | "video";
   url: string;
-  thumbnail?: string;
 }
 
 export interface BusinessHours {
@@ -29,7 +28,7 @@ export interface Location {
   address: string;
   city: string;
   state: string;
-  zip?: string; // Making zip optional to fix the error
+  zip: string;
   lat: number;
   lng: number;
   type?: string;
@@ -41,7 +40,6 @@ export interface Location {
   description?: string;
   tags?: string[];
   images?: string[];
-  photos?: string[]; // Add photos property
   verified?: boolean;
   country?: string;
   vibes?: string[];
@@ -56,7 +54,6 @@ export interface Post {
   timestamp: string;
   likes: number;
   comments: number;
-  text?: string; // Add text property for backward compatibility
   vibeTags?: string[]; // Array of vibe tags for the post
   isVenuePost?: boolean;
   isPinned?: boolean;

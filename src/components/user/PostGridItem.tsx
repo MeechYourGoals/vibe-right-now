@@ -43,11 +43,6 @@ const PostGridItem = ({ post }: PostGridItemProps) => {
   const [liked, setLiked] = useState(false);
   const navigate = useNavigate();
   
-  // Safety check for post having a valid user
-  if (!post || !post.user || !post.user.username) {
-    return null;
-  }
-  
   // Ensure media is in the correct format
   const formattedMedia = ensureMediaFormat(post.media);
   
@@ -60,9 +55,7 @@ const PostGridItem = ({ post }: PostGridItemProps) => {
   const navigateToUserProfile = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (post.user && post.user.username) {
-      navigate(`/user/${post.user.username}`);
-    }
+    navigate(`/user/${post.user.username}`);
   };
 
   // Generate a semi-random user count based on post ID
@@ -103,8 +96,8 @@ const PostGridItem = ({ post }: PostGridItemProps) => {
               className="h-6 w-6 border border-white cursor-pointer hover:ring-2 hover:ring-primary transition-all"
               onClick={navigateToUserProfile}
             >
-              <AvatarImage src={post.user.avatar} alt={post.user.name || 'User'} />
-              <AvatarFallback>{post.user.name ? post.user.name.charAt(0) : 'U'}</AvatarFallback>
+              <AvatarImage src={post.user.avatar} alt={post.user.name} />
+              <AvatarFallback>{post.user.name.charAt(0)}</AvatarFallback>
             </Avatar>
             <span 
               className="text-xs font-medium text-white cursor-pointer hover:underline"

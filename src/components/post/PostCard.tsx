@@ -53,14 +53,7 @@ const PostCard: React.FC<PostCardProps> = ({
   
   // Handle multiple posts mode (used in feed)
   if (posts && posts.length > 0 && getComments) {
-    // Ensure we have valid posts
-    const validPosts = posts.filter(p => p && p.user && p.location);
-    
-    if (validPosts.length === 0) {
-      return null;
-    }
-    
-    const firstPost = validPosts[0];
+    const firstPost = posts[0];
     
     return (
       <Card className="overflow-hidden">
@@ -112,7 +105,7 @@ const PostCard: React.FC<PostCardProps> = ({
           </p>
         </div>
         
-        {validPosts.map(post => {
+        {posts.map(post => {
           // Determine if the post is from the venue itself
           const isVenuePost = post.isVenuePost || post.location?.id === firstPost.location.id;
           
@@ -161,15 +154,6 @@ const PostCard: React.FC<PostCardProps> = ({
     return null;
   }
 
-  // Ensure post has a valid user
-  if (!post.user) {
-    return (
-      <Card className="overflow-hidden p-4">
-        <p className="text-muted-foreground">This post is missing user information</p>
-      </Card>
-    );
-  }
-
   const handleDelete = () => {
     if (venue && deletePost(post.id, venue)) {
       setIsDeleted(true);
@@ -194,7 +178,7 @@ const PostCard: React.FC<PostCardProps> = ({
       />
       
       <div className="px-4 py-2 flex justify-end">
-        <UserDropdown userCount={post.location ? getUserCount(post.location.id) : 10} post={post} />
+        <UserDropdown userCount={getUserCount(post.location.id)} post={post} />
       </div>
       
       <PostContent content={post.content} />

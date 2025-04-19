@@ -10,8 +10,6 @@ export interface Message {
     lng: number;
     name: string;
   };
-  content?: string;
-  role?: 'user' | 'assistant' | 'system' | 'error';
 }
 
 export interface ChatOptions {
@@ -44,7 +42,6 @@ export interface ChatState {
   searchResults: SearchResult[];
   transcript: string;
   interimTranscript: string;
-  loading?: boolean;
 }
 
 export type IntentType = 'search' | 'info' | 'question' | 'booking' | 'unknown';
