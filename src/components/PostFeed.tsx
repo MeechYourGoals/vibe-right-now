@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { mockPosts } from '@/mock/posts';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
@@ -8,9 +9,10 @@ import { formatDistanceToNow } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Post } from '@/types';
 
 const PostFeed = () => {
-  const [posts, setPosts] = useState(mockPosts);
+  const [posts, setPosts] = useState<Post[]>(mockPosts);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('all');
 
@@ -112,7 +114,7 @@ const PostFeed = () => {
                   {post.media && post.media.length > 0 && (
                     <div className="rounded-md overflow-hidden mb-4">
                       <img 
-                        src={post.media[0]} 
+                        src={post.media[0].url} 
                         alt="Post media" 
                         className="w-full h-auto object-cover"
                       />
@@ -137,7 +139,7 @@ const PostFeed = () => {
                   </Button>
                   <Button variant="ghost" size="sm" className="text-muted-foreground">
                     <MessageCircle className="h-5 w-5 mr-1" />
-                    {post.comments ? post.comments.length : 0}
+                    {typeof post.comments === 'number' ? post.comments : post.comments.length}
                   </Button>
                   <Button variant="ghost" size="sm" className="text-muted-foreground">
                     <Share2 className="h-5 w-5 mr-1" />

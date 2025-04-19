@@ -1,182 +1,126 @@
 
-import { useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useState, useCallback } from 'react';
 import { SearchResult, ExtractedIntent } from '../types';
 
+const mockPlaces: SearchResult[] = [
+  {
+    id: 'place1',
+    name: 'The Coffee Shop',
+    description: 'Trendy coffee shop with artisanal brews',
+    address: '123 Main St, Anytown, USA',
+    type: 'cafe',
+    distance: '0.2 miles',
+    rating: 4.5,
+    imageUrl: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?ixlib=rb-1.2.1&auto=format&fit=crop&w=1050&q=80',
+    price: '$$',
+    category: 'cafe'
+  },
+  {
+    id: 'place2',
+    name: 'Urban Restaurant',
+    description: 'Modern American cuisine in a sophisticated setting',
+    address: '456 Oak Ave, Anytown, USA',
+    type: 'restaurant',
+    distance: '0.5 miles',
+    rating: 4.8,
+    imageUrl: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?ixlib=rb-1.2.1&auto=format&fit=crop&w=1050&q=80',
+    price: '$$$',
+    category: 'restaurant'
+  },
+  {
+    id: 'place3',
+    name: 'Nightlife Lounge',
+    description: 'Popular nightclub with craft cocktails and DJ music',
+    address: '789 Broadway, Anytown, USA',
+    type: 'nightlife',
+    distance: '1.2 miles',
+    rating: 4.3,
+    imageUrl: 'https://images.unsplash.com/photo-1566417713940-fe7c737a9ef2?ixlib=rb-1.2.1&auto=format&fit=crop&w=1050&q=80',
+    price: '$$$',
+    category: 'nightlife'
+  }
+];
+
 export const useGooglePlacesService = () => {
-  // Function to search for places using Google Places API
+  const [loading, setLoading] = useState(false);
+  const [results, setResults] = useState<SearchResult[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
   const searchPlaces = useCallback(async (
-    query: string, 
-    intent: ExtractedIntent
-  ): Promise<SearchResult[]> => {
+    query: string,
+    intent?: ExtractedIntent,
+    options?: { 
+      latitude?: number; 
+      longitude?: number; 
+      radius?: number;
+      type?: string;
+    }
+  ) => {
+    setLoading(true);
+    setError(null);
+
     try {
-      // Construct a search query based on intent
-      let searchQuery = query;
+      // This is where we would normally make an API call to the Google Places API
+      // For now, we're just simulating a response with mock data
       
-      // If we have mood keywords, add them to the query
-      if (intent.mood && intent.mood.length > 0) {
-        const moods = intent.mood.join(' ');
-        searchQuery = `${moods} ${searchQuery}`;
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API delay
+      
+      // Filter mock results based on query
+      let filtered = [...mockPlaces];
+      
+      if (query) {
+        const lowerQuery = query.toLowerCase();
+        filtered = filtered.filter(place => 
+          place.name.toLowerCase().includes(lowerQuery) ||
+          place.description?.toLowerCase().includes(lowerQuery) ||
+          place.type?.toLowerCase().includes(lowerQuery) ||
+          place.category?.toLowerCase().includes(lowerQuery)
+        );
       }
       
-      // Ensure we have a location
-      if (!intent.location) {
-        // Try to extract from the original query
-        const locationMatch = query.match(/in\s+([A-Za-z\s,]+)(?:\s|$)/i);
-        if (locationMatch) {
-          intent.location = locationMatch[1].trim();
+      // Filter by type if provided
+      if (options?.type) {
+        filtered = filtered.filter(place => 
+          place.type?.toLowerCase() === options.type?.toLowerCase()
+        );
+      }
+      
+      // Use intent to enhance search
+      if (intent) {
+        // If we have mood keywords, prioritize places that match the mood
+        if (intent.mood && intent.mood.length > 0) {
+          filtered.sort((a, b) => {
+            const aDesc = a.description?.toLowerCase() || '';
+            const bDesc = b.description?.toLowerCase() || '';
+            
+            const aMatchCount = intent.mood?.filter(mood => 
+              aDesc.includes(mood.toLowerCase())
+            ).length || 0;
+            
+            const bMatchCount = intent.mood?.filter(mood => 
+              bDesc.includes(mood.toLowerCase())
+            ).length || 0;
+            
+            return bMatchCount - aMatchCount;
+          });
         }
       }
       
-      // Call Google Places API via Supabase Edge Function
-      const { data, error } = await supabase.functions.invoke('google-places', {
-        body: {
-          query: searchQuery,
-          type: getPlaceType(intent),
-          location: intent.location
-        }
-      });
-      
-      if (error) {
-        console.error('Error calling Places service:', error);
-        return [];
-      }
-      
-      if (!data?.results) {
-        return [];
-      }
-      
-      // Transform to our format
-      return data.results.slice(0, 5).map((place: any) => ({
-        id: place.place_id,
-        name: place.name,
-        address: place.formatted_address,
-        rating: place.rating,
-        types: place.types,
-        location: place.geometry?.location,
-        url: `https://www.google.com/maps/place/?q=place_id:${place.place_id}`
-      }));
-    } catch (error) {
-      console.error('Error in searchPlaces:', error);
-      return [];
+      setResults(filtered);
+    } catch (err) {
+      console.error('Error searching places:', err);
+      setError('Failed to search places. Please try again.');
+      setResults([]);
+    } finally {
+      setLoading(false);
     }
   }, []);
-  
-  // Function to get place details
-  const getPlaceDetails = useCallback(async (
-    placeId: string
-  ): Promise<any> => {
-    try {
-      const { data, error } = await supabase.functions.invoke('google-places', {
-        body: {
-          placeId,
-          fields: [
-            'name', 'formatted_address', 'formatted_phone_number', 
-            'opening_hours', 'website', 'rating', 'reviews', 'photos'
-          ]
-        }
-      });
-      
-      if (error) {
-        console.error('Error calling Places details service:', error);
-        return null;
-      }
-      
-      return data?.result;
-    } catch (error) {
-      console.error('Error in getPlaceDetails:', error);
-      return null;
-    }
-  }, []);
-  
-  // Function to get nearby places
-  const getNearbyPlaces = useCallback(async (
-    location: { lat: number, lng: number },
-    radius: number = 5000,
-    type?: string,
-    keyword?: string
-  ): Promise<SearchResult[]> => {
-    try {
-      const { data, error } = await supabase.functions.invoke('google-places', {
-        body: {
-          location,
-          radius,
-          type,
-          keyword
-        }
-      });
-      
-      if (error) {
-        console.error('Error calling Places nearby service:', error);
-        return [];
-      }
-      
-      if (!data?.results) {
-        return [];
-      }
-      
-      // Transform to our format
-      return data.results.slice(0, 5).map((place: any) => ({
-        id: place.place_id,
-        name: place.name,
-        address: place.vicinity,
-        rating: place.rating,
-        types: place.types,
-        location: place.geometry?.location,
-        url: `https://www.google.com/maps/place/?q=place_id:${place.place_id}`
-      }));
-    } catch (error) {
-      console.error('Error in getNearbyPlaces:', error);
-      return [];
-    }
-  }, []);
-  
-  // Helper to determine place type
-  const getPlaceType = (intent: ExtractedIntent): string | undefined => {
-    if (!intent.keywords || intent.keywords.length === 0) {
-      return undefined;
-    }
-    
-    // Map keywords to place types
-    const keywordToTypeMap: Record<string, string> = {
-      'restaurant': 'restaurant',
-      'food': 'restaurant',
-      'cafe': 'cafe',
-      'coffee': 'cafe',
-      'dinner': 'restaurant',
-      'lunch': 'restaurant',
-      'breakfast': 'restaurant',
-      'bar': 'bar',
-      'nightclub': 'night_club',
-      'museum': 'museum',
-      'gallery': 'art_gallery',
-      'park': 'park',
-      'movie': 'movie_theater',
-      'theater': 'movie_theater',
-      'cinema': 'movie_theater',
-      'concert': 'event_venue',
-      'shop': 'shopping_mall',
-      'mall': 'shopping_mall',
-      'hotel': 'lodging',
-      'spa': 'spa',
-      'gym': 'gym',
-      'beach': 'natural_feature',
-      'hiking': 'park'
-    };
-    
-    // Find the first matching keyword
-    for (const keyword of intent.keywords) {
-      if (keywordToTypeMap[keyword.toLowerCase()]) {
-        return keywordToTypeMap[keyword.toLowerCase()];
-      }
-    }
-    
-    return undefined;
-  };
-  
+
   return {
     searchPlaces,
-    getPlaceDetails,
-    getNearbyPlaces
+    results,
+    loading,
+    error,
+    clearResults: () => setResults([])
   };
 };

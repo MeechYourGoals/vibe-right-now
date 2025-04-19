@@ -1,4 +1,3 @@
-
 export interface User {
   id: string;
   username: string;
@@ -29,7 +28,7 @@ export interface Location {
   address: string;
   city: string;
   state: string;
-  zip?: string; // Making zip optional to fix the error
+  zip?: string;
   lat: number;
   lng: number;
   type?: string;
@@ -41,10 +40,11 @@ export interface Location {
   description?: string;
   tags?: string[];
   images?: string[];
-  photos?: string[]; // Add photos property
+  photos?: string[];
   verified?: boolean;
   country?: string;
   vibes?: string[];
+  userProfile?: any;
 }
 
 export interface Post {
@@ -55,9 +55,10 @@ export interface Post {
   media: Media[];
   timestamp: string;
   likes: number;
-  comments: number;
-  text?: string; // Add text property for backward compatibility
-  vibeTags?: string[]; // Array of vibe tags for the post
+  comments: number | Comment[];
+  text?: string;
+  vibeTags?: string[];
+  vibes?: string[];
   isVenuePost?: boolean;
   isPinned?: boolean;
   expiresAt?: string;
@@ -71,7 +72,7 @@ export interface Comment {
   content: string;
   timestamp: string;
   likes: number;
-  text?: string; // For backward compatibility
+  text?: string;
   vibedHere?: boolean;
 }
 
@@ -125,7 +126,6 @@ export interface Notification {
   content?: string;
 }
 
-// VernonChat types
 export interface ChatMessage {
   id: string;
   role: 'user' | 'assistant' | 'system';
@@ -145,7 +145,6 @@ export interface ExtractedIntent {
   confidence: number;
 }
 
-// Venue insights types
 export interface VenueInsights {
   visitors: number;
   visitorsChange: number;
@@ -165,4 +164,36 @@ export interface VenueInsights {
   };
   visitorsByTime: Record<string, number>;
   visitorsByDay: Record<string, number>;
+  
+  visitorCount: number;
+  checkInCount: number;
+  receiptUploads: number;
+  discountRedemptions: number;
+  totalViews?: number;
+  totalVisits?: number;
+  totalSaves?: number;
+  totalShares?: number;
+  averageRating?: number;
+  ratingCount?: number;
+  totalReviews?: number;
+  dailyViews?: Record<string, number>;
+  peakHours?: Record<string, number>;
+  demographicData?: any;
+  competitiveInsights?: any;
+  
+  visitorChart?: {
+    labels: string[];
+    data: number[];
+  };
+  engagementChart?: {
+    labels: string[];
+    data: {
+      comments: number[];
+      likes: number[];
+      shares: number[];
+    };
+  };
+  period?: string;
+  name?: string;
+  id?: string;
 }
