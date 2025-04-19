@@ -27,18 +27,6 @@ const UserProfileHeader = ({ user, getUserBio }: UserProfileHeaderProps) => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Guard against undefined user
-  if (!user) {
-    return (
-      <div className="glass-effect p-6 rounded-xl mb-6">
-        <div className="text-center">
-          <div className="text-2xl font-bold">User not found</div>
-          <p className="text-muted-foreground">This user profile is not available</p>
-        </div>
-      </div>
-    );
-  }
-
   const handleFollowToggle = () => {
     setIsFollowing(!isFollowing);
     

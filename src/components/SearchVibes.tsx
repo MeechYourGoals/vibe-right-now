@@ -1,9 +1,17 @@
-
 import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Map, X, ChevronDown, User, Building, Sparkles } from "lucide-react";
+import { Search, Map, X, ChevronDown, User, Building, Calendar, MapPin, Star, Sparkles } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Tabs,
   TabsContent,
@@ -12,15 +20,13 @@ import {
 } from "@/components/ui/tabs";
 import { mockUsers } from "@/mock/users";
 import { mockLocations } from "@/mock/locations";
-import UserSuggestions from "./search/UserSuggestions";
-import PlaceSuggestions from "./search/PlaceSuggestions";
-import VibeSuggestions from "./search/VibeSuggestions";
-import SearchFilters from "./search/SearchFilters";
-import { vibeTags } from "@/hooks/useVibeFilters";
-import { useToast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Card } from "@/components/ui/card";
+import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { cityCoordinates } from "@/utils/cityLocations";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface SearchVibesProps {
   onSearch: (query: string, filterType: string, category: string) => void;
@@ -45,15 +51,23 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
   const [nlpAnalysis, setNlpAnalysis] = useState<any>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  const navigate = useNavigate();
   const location = useLocation();
+  const navigate = useNavigate();
   const { toast } = useToast();
 
-  const suggestedUsers = mockUsers.slice(0, 5);
   const filters = [
-    "Restaurants", "Bars", "Sports", "Events", "Attractions",
-    "Outdoor Vibes", "Happening Tonight", "Free Events", "Ticketed Events"
+    "Restaurants",
+    "Bars",
+    "Sports",
+    "Events",
+    "Attractions",
+    "Outdoor Vibes",
+    "Happening Tonight",
+    "Free Events",
+    "Ticketed Events"
   ];
+
+  const suggestedUsers = mockUsers.slice(0, 5);
   
   const premiumPlaces = mockLocations
     .filter(location => location.verified)
@@ -62,7 +76,7 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
       ...location,
       isPremium: Math.random() > 0.4
     }));
-
+    
   const allCities = Object.values(cityCoordinates).map(city => 
     `${city.name}${city.state ? `, ${city.state}` : ''}, ${city.country}`
   );
@@ -108,7 +122,7 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
       setSearchQuery(vibe);
       setSearchCategory("vibes");
     }
-  }, [location.search, toast]);
+  }, [location.search]);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -338,7 +352,11 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
         </div>
       )}
 
-      <Tabs value={searchCategory} onValueChange={handleCategoryChange} className="w-full mb-3">
+      <Tabs 
+        value={searchCategory} 
+        onValueChange={handleCategoryChange} 
+        className="w-full mb-3"
+      >
         <TabsList className="grid grid-cols-4 w-full">
           <TabsTrigger value="all" className="flex items-center gap-1">
             <Search className="h-3.5 w-3.5" />
@@ -404,32 +422,196 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
         </div>
       </div>
 
-      <UserSuggestions 
-        showSuggestions={showUserSuggestions && searchCategory === "users"}
-        searchQuery={searchQuery}
-        suggestedUsers={suggestedUsers}
-        onUserSelect={handleUserSelect}
-      />
+      <Collapsible open={showCitySuggestions && searchCategory === "places"} className="w-full">
+        <CollapsibleContent className="overflow-hidden">
+          <Card className="mt-1 w-full p-2 shadow-md border border-border">
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground px-2 py-1">Suggested Cities</p>
+              {citySuggestions.map((city, index) => (
+                <div 
+                  key={index} 
+                  className="flex items-center gap-2 p-2 hover:bg-muted rounded-md cursor-pointer"
+                  onClick={() => handleCitySelect(city)}
+                >
+                  <div className="h-8 w-8 flex items-center justify-center rounded-md bg-primary/10">
+                    <MapPin className="h-4 w-4 text-primary" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium">{city}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </CollapsibleContent>
+      </Collapsible>
 
-      <PlaceSuggestions
-        showSuggestions={showPlaceSuggestions && searchCategory === "places"}
-        premiumPlaces={premiumPlaces}
-        onPlaceSelect={handlePlaceSelect}
-      />
+      <Collapsible open={showUserSuggestions && searchCategory === "users"} className="w-full">
+        <CollapsibleContent className="overflow-hidden">
+          <Card className="mt-1 w-full p-2 shadow-md border border-border">
+            <div className="space-y-1">
+              {searchQuery.length === 0 ? (
+                <>
+                  <p className="text-xs text-muted-foreground px-2 py-1">Featured Users</p>
+                  {suggestedUsers.map((user) => (
+                    <div 
+                      key={user.id} 
+                      className="flex items-center gap-2 p-2 hover:bg-muted rounded-md cursor-pointer"
+                      onClick={() => handleUserSelect(user.username)}
+                    >
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={user.avatar} alt={user.name} />
+                        <AvatarFallback>{user.name.substring(0, 2)}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium">{user.name}</span>
+                        <span className="text-xs text-muted-foreground">@{user.username}</span>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              ) : suggestedUsers.length > 0 ? (
+                <>
+                  <p className="text-xs text-muted-foreground px-2 py-1">Search Results</p>
+                  {suggestedUsers
+                    .filter(user => 
+                      user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                      user.name.toLowerCase().includes(searchQuery.toLowerCase())
+                    )
+                    .map((user) => (
+                      <div 
+                        key={user.id} 
+                        className="flex items-center gap-2 p-2 hover:bg-muted rounded-md cursor-pointer"
+                        onClick={() => handleUserSelect(user.username)}
+                      >
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage src={user.avatar} alt={user.name} />
+                          <AvatarFallback>{user.name.substring(0, 2)}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium">{user.name}</span>
+                          <span className="text-xs text-muted-foreground">@{user.username}</span>
+                        </div>
+                      </div>
+                    ))}
+                </>
+              ) : (
+                <div className="p-4 text-center text-muted-foreground">
+                  <p>No users found</p>
+                </div>
+              )}
+            </div>
+          </Card>
+        </CollapsibleContent>
+      </Collapsible>
 
-      <VibeSuggestions
-        showSuggestions={showVibeSuggestions && searchCategory === "vibes"}
-        vibeSuggestions={vibeTags}
-        onVibeSelect={handleVibeSelect}
-      />
+      <Collapsible open={showPlaceSuggestions && searchCategory === "places"} className="w-full">
+        <CollapsibleContent className="overflow-hidden">
+          <Card className="mt-1 w-full p-2 shadow-md border border-border">
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground px-2 py-1 flex items-center">
+                Featured Venues <Star className="h-3 w-3 text-amber-500 ml-1 fill-amber-500" />
+              </p>
+              {premiumPlaces.map((place) => (
+                <div 
+                  key={place.id} 
+                  className={`flex items-center gap-2 p-2 hover:bg-muted rounded-md cursor-pointer my-1 ${place.isPremium ? 'bg-amber-500/10 border border-amber-500/30' : ''}`}
+                  onClick={() => handlePlaceSelect(place.name)}
+                >
+                  <div className={`h-8 w-8 flex items-center justify-center rounded-md ${place.isPremium ? 'bg-amber-500/20' : 'bg-primary/10'}`}>
+                    <MapPin className={`h-4 w-4 ${place.isPremium ? 'text-amber-500' : 'text-primary'}`} />
+                  </div>
+                  <div className="flex flex-col flex-1">
+                    <span className="text-sm font-medium flex items-center">
+                      {place.name}
+                      {place.isPremium && <Star className="h-3 w-3 text-amber-500 ml-1 fill-amber-500" />}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {place.city}, {place.state}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </CollapsibleContent>
+      </Collapsible>
 
-      <SearchFilters 
-        showFilters={showFilters}
-        activeFilters={activeFilters}
-        filters={filters}
-        onToggleFilter={toggleFilter}
-        onClearFilters={clearFilters}
-      />
+      <Collapsible open={showVibeSuggestions && searchCategory === "vibes"} className="w-full">
+        <CollapsibleContent className="overflow-hidden">
+          <Card className="mt-1 w-full p-2 shadow-md border border-border">
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground px-2 py-1">Popular Vibes</p>
+              <div className="flex flex-wrap gap-2 p-2">
+                {vibeSuggestions.map((vibe, index) => (
+                  <Badge 
+                    key={index} 
+                    className="bg-indigo-100 text-indigo-800 hover:bg-indigo-200 cursor-pointer flex items-center"
+                    onClick={() => handleVibeSelect(vibe)}
+                  >
+                    <Sparkles className="h-3 w-3 mr-1" />
+                    {vibe}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          </Card>
+        </CollapsibleContent>
+      </Collapsible>
+
+      {showFilters && (
+        <div className="bg-muted/20 p-3 rounded-md glass-effect">
+          <div className="flex justify-between items-center mb-2">
+            <h4 className="text-sm font-medium">Filter by</h4>
+            {activeFilters.length > 0 && (
+              <Button variant="ghost" size="sm" onClick={clearFilters} className="h-7 text-xs">
+                Clear all
+              </Button>
+            )}
+          </div>
+          
+          <div className="flex flex-wrap gap-2">
+            {filters.map((filter) => (
+              <Button
+                key={filter}
+                variant={activeFilters.includes(filter.toLowerCase()) ? "secondary" : "outline"}
+                size="sm"
+                onClick={() => toggleFilter(filter.toLowerCase())}
+                className="h-7 text-xs"
+              >
+                {filter}
+                {activeFilters.includes(filter.toLowerCase()) && (
+                  <X className="ml-1 h-3 w-3" />
+                )}
+              </Button>
+            ))}
+          </div>
+          
+          <div className="flex justify-between mt-3">
+            <Button variant="ghost" size="sm" className="text-xs gap-1">
+              <Map className="h-3 w-3" /> 
+              Near me
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="text-xs gap-1">
+                  Sort by <ChevronDown className="h-3 w-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-40">
+                <DropdownMenuLabel>Sort options</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  <DropdownMenuItem>Most Recent</DropdownMenuItem>
+                  <DropdownMenuItem>Most Popular</DropdownMenuItem>
+                  <DropdownMenuItem>Closest to Me</DropdownMenuItem>
+                  <DropdownMenuItem>Happening Now</DropdownMenuItem>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
