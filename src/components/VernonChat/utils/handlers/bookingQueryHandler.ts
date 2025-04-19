@@ -1,5 +1,5 @@
 
-import { ChatMessage } from '@/types';
+import { Message } from '../../types';
 import { BookingAgent } from '../bookingAgent';
 import { createAIMessage } from '../messageFactory';
 
@@ -8,7 +8,7 @@ import { createAIMessage } from '../messageFactory';
  */
 export const handleBookingQuery = async (
   inputValue: string,
-  setMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>
+  setMessages: React.Dispatch<React.SetStateAction<Message[]>>
 ): Promise<boolean> => {
   if (BookingAgent.isBookingRequest(inputValue)) {
     const bookingDetails = BookingAgent.extractBookingDetails(inputValue);
@@ -21,7 +21,7 @@ export const handleBookingQuery = async (
       const confirmationText = BookingAgent.generateBookingConfirmation(bookingResult);
       
       setMessages(prev => prev.map(msg => 
-        msg.id === processingMessage.id ? {...msg, content: confirmationText, text: confirmationText} : msg
+        msg.id === processingMessage.id ? {...msg, text: confirmationText} : msg
       ));
       
       return true;

@@ -1,69 +1,48 @@
 
-import { ChatMessage } from '@/types';
-
 export class MessageFactory {
-  static createUserMessage(content: string): ChatMessage {
+  static createUserMessage(content: string) {
     return {
       id: Date.now().toString(),
       content,
       role: 'user',
-      timestamp: new Date(),
-      // For compatibility with VernonNext
-      text: content,
-      sender: 'user' as const
+      timestamp: new Date().toISOString()
     };
   }
 
-  static createAssistantMessage(content: string): ChatMessage {
+  static createAssistantMessage(content: string) {
     return {
       id: Date.now().toString(),
       content,
       role: 'assistant',
-      timestamp: new Date(),
-      // For compatibility with VernonNext
-      text: content,
-      sender: 'ai' as const
+      timestamp: new Date().toISOString()
     };
   }
 
-  static createSystemMessage(content: string): ChatMessage {
+  static createSystemMessage(content: string) {
     return {
       id: Date.now().toString(),
       content,
       role: 'system',
-      timestamp: new Date(),
-      // For compatibility with VernonNext
-      text: content,
-      sender: 'ai' as const
+      timestamp: new Date().toISOString()
     };
   }
 
-  static createAIMessage(content: string): ChatMessage {
+  // New message types to fix import errors
+  static createAIMessage(content: string) {
     return this.createAssistantMessage(content);
   }
 
-  static createErrorMessage(content: string = "I'm sorry, I couldn't process that request. Please try again."): ChatMessage {
+  static createErrorMessage(content: string) {
     return {
       id: Date.now().toString(),
       content,
       role: 'error',
-      timestamp: new Date(),
-      // For compatibility with VernonNext
-      text: content,
-      sender: 'ai' as const
+      timestamp: new Date().toISOString()
     };
   }
 
-  static get INITIAL_MESSAGE(): ChatMessage {
+  // Add initial message constant to fix import errors
+  static get INITIAL_MESSAGE() {
     return this.createSystemMessage("Hi! I'm Vernon, your personal concierge. How can I help you today?");
   }
 }
-
-// Export individual functions for backward compatibility
-export const createUserMessage = (content: string): ChatMessage => MessageFactory.createUserMessage(content);
-export const createAssistantMessage = (content: string): ChatMessage => MessageFactory.createAssistantMessage(content);
-export const createSystemMessage = (content: string): ChatMessage => MessageFactory.createSystemMessage(content);
-export const createAIMessage = (content: string): ChatMessage => MessageFactory.createAIMessage(content);
-export const createErrorMessage = (content: string = "I'm sorry, I couldn't process that request. Please try again."): ChatMessage => 
-  MessageFactory.createErrorMessage(content);
-export const INITIAL_MESSAGE = MessageFactory.INITIAL_MESSAGE;

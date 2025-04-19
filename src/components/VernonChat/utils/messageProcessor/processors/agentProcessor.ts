@@ -1,7 +1,7 @@
 
-import { ChatMessage } from '@/types';
 import { AgentHandler } from '../../handlers/agentHandler';
 import { MessageContext, MessageProcessor } from '../types';
+import { Message } from '../../../types';
 
 export class AgentProcessor implements MessageProcessor {
   canProcess(context: MessageContext): boolean {
@@ -10,7 +10,7 @@ export class AgentProcessor implements MessageProcessor {
 
   async process(
     context: MessageContext,
-    setMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>
+    setMessages: React.Dispatch<React.SetStateAction<Message[]>>
   ): Promise<boolean> {
     return await AgentHandler.handleAgentQuery(
       context.query, 

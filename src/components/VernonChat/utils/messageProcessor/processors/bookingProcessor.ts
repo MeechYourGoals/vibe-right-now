@@ -1,6 +1,6 @@
 
-import { ChatMessage } from '@/types';
 import { MessageContext, MessageProcessor } from '../types';
+import { Message } from '../../../types';
 import { BookingAgent } from '../../bookingAgent';
 import { createAIMessage } from '../../messageFactory';
 
@@ -11,7 +11,7 @@ export class BookingProcessor implements MessageProcessor {
 
   async process(
     context: MessageContext,
-    setMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>
+    setMessages: React.Dispatch<React.SetStateAction<Message[]>>
   ): Promise<boolean> {
     const bookingDetails = BookingAgent.extractBookingDetails(context.query);
     
@@ -23,7 +23,7 @@ export class BookingProcessor implements MessageProcessor {
       const confirmationText = BookingAgent.generateBookingConfirmation(bookingResult);
       
       setMessages(prev => prev.map(msg => 
-        msg.id === processingMessage.id ? {...msg, content: confirmationText, text: confirmationText} : msg
+        msg.id === processingMessage.id ? {...msg, text: confirmationText} : msg
       ));
       
       return true;

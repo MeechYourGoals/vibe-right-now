@@ -1,32 +1,3 @@
-// If this file doesn't exist, we're creating it
-import { MockUserProfile } from "@/utils/locations/types";
-
-export interface Location {
-  id: string;
-  name: string;
-  address: string;
-  city: string;
-  state: string;
-  zip: string;
-  country: string;
-  lat: number;
-  lng: number;
-  type?: string;
-  phone?: string;
-  website?: string;
-  rating?: number;
-  price?: string;
-  hours?: BusinessHours;
-  description?: string;
-  tags?: string[];
-  images?: string[];
-  verified?: boolean;
-  vibes?: string[];
-}
-
-export interface BusinessHours {
-  [day: string]: string;
-}
 
 export interface User {
   id: string;
@@ -42,7 +13,36 @@ export interface User {
 export interface Media {
   type: "image" | "video";
   url: string;
-  thumbnail?: string; // Adding for backward compatibility
+}
+
+export interface BusinessHours {
+  [day: string]: {
+    open: string;
+    close: string;
+  };
+}
+
+export interface Location {
+  id: string;
+  name: string;
+  address: string;
+  city: string;
+  state: string;
+  zip: string;
+  lat: number;
+  lng: number;
+  type?: string;
+  phone?: string;
+  website?: string;
+  rating?: number;
+  price?: string;
+  hours?: Record<string, string>;
+  description?: string;
+  tags?: string[];
+  images?: string[];
+  verified?: boolean;
+  country?: string;
+  vibes?: string[];
 }
 
 export interface Post {
@@ -50,7 +50,6 @@ export interface Post {
   user: User;
   location: Location;
   content: string;
-  text?: string; // Added for backward compatibility
   media: Media[];
   timestamp: string;
   likes: number;
@@ -163,10 +162,4 @@ export interface VenueInsights {
   };
   visitorsByTime: Record<string, number>;
   visitorsByDay: Record<string, number>;
-  
-  // Adding these properties to fix build errors
-  visitorCount?: number;
-  checkInCount?: number;
-  receiptUploads?: number;
-  discountRedemptions?: number;
 }

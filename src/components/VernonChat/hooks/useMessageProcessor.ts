@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { ChatMessage } from '@/types';
+import { Message } from '../types';
 import { usePaginationState } from '../utils/pagination/usePaginationState';
 import { processMessageInput } from '../utils/messageProcessor';
 
@@ -11,7 +11,7 @@ export const useMessageProcessor = (isProPlan: boolean = false, isVenueMode: boo
 
   const processMessage = async (
     inputValue: string,
-    setMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>
+    setMessages: React.Dispatch<React.SetStateAction<Message[]>>
   ) => {
     // Skip processing if the input is empty
     if (!inputValue || inputValue.trim() === '') {
@@ -42,11 +42,9 @@ export const useMessageProcessor = (isProPlan: boolean = false, isVenueMode: boo
           ...prev,
           {
             id: Date.now().toString(),
-            content: "I'm sorry, I encountered an error processing your request. Please try again or ask something different.",
-            role: 'error',
-            timestamp: new Date(),
             text: "I'm sorry, I encountered an error processing your request. Please try again or ask something different.",
-            sender: 'ai'
+            sender: 'ai',
+            timestamp: new Date()
           }
         ]);
       }

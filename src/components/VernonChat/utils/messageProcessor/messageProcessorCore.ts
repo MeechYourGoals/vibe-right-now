@@ -1,5 +1,5 @@
 
-import { ChatMessage } from '@/types';
+import { Message } from '../../types';
 import { createUserMessage, createErrorMessage } from '../messageFactory';
 import { extractPaginationParams } from '../pagination';
 import { MessageContext, MessageProcessor, ProcessMessageOptions } from './types';
@@ -21,7 +21,7 @@ export class MessageProcessorCore {
 
   async processMessage(
     inputValue: string,
-    setMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>,
+    setMessages: React.Dispatch<React.SetStateAction<Message[]>>,
     options: ProcessMessageOptions
   ): Promise<void> {
     // Skip processing if the input is empty
@@ -41,7 +41,7 @@ export class MessageProcessorCore {
       setMessages(prev => [...prev, userMessage]);
       
       // Get current messages for context
-      let messageHistory: ChatMessage[] = [];
+      let messageHistory: Message[] = [];
       setMessages(prevMessages => {
         messageHistory = [...prevMessages];
         return prevMessages;

@@ -58,7 +58,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (inputValue.trim() && !state.loading) {
+    if (inputValue.trim() && !state.isLoading) {
       onSendMessage(inputValue);
       setInputValue('');
     }
@@ -163,7 +163,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       
       <CardContent className="flex-1 overflow-y-auto p-4 pb-0">
         {state.messages.map(renderMessage)}
-        {state.loading && renderTypingIndicator()}
+        {state.isLoading && renderTypingIndicator()}
         <div ref={messagesEndRef} />
       </CardContent>
       
@@ -186,7 +186,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
             size="icon"
             className={`shrink-0 ${state.isListening ? "bg-red-500 text-white" : ""}`}
             onClick={onToggleListening}
-            disabled={state.loading}
+            disabled={state.isLoading}
           >
             {state.isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
           </Button>
@@ -196,13 +196,13 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
             onChange={(e) => setInputValue(e.target.value)}
             placeholder="Ask Vernon anything..."
             className="flex-1 border-blue-200 dark:border-blue-800 bg-white dark:bg-gray-950"
-            disabled={state.loading}
+            disabled={state.isLoading}
           />
           
           <Button 
             type="submit" 
             className="shrink-0 bg-blue-600 hover:bg-blue-700" 
-            disabled={state.loading || !inputValue.trim()}
+            disabled={state.isLoading || !inputValue.trim()}
           >
             <ArrowRight className="h-4 w-4" />
           </Button>

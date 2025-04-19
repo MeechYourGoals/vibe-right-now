@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Location } from "@/types";
+import { BusinessHours as BusinessHoursType, Location } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Clock, ChevronDown, ChevronUp } from "lucide-react";
 import { generateBusinessHours, getTodaysHours } from "@/utils/businessHoursUtils";

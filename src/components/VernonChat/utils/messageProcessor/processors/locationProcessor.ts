@@ -1,6 +1,6 @@
 
-import { ChatMessage } from '@/types';
 import { MessageContext, MessageProcessor } from '../types';
+import { Message } from '../../../types';
 import { handleSearchQuery } from '../../handlers/searchQueryHandler';
 import { createAIMessage } from '../../messageFactory';
 
@@ -16,7 +16,7 @@ export class LocationProcessor implements MessageProcessor {
 
   async process(
     context: MessageContext,
-    setMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>
+    setMessages: React.Dispatch<React.SetStateAction<Message[]>>
   ): Promise<boolean> {
     try {
       console.log('Location/city query detected, using search pipeline with OpenAI');
