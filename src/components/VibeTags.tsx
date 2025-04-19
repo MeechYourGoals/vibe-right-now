@@ -38,7 +38,7 @@ const VibeTags = ({ tags, selectedTags = [], onTagClick, size = "md" }: VibeTags
             selectedTags.includes(tag) 
               ? 'bg-primary text-primary-foreground' 
               : 'bg-primary/10 text-primary hover:bg-primary/20'
-          } ${getTagSize()} cursor-pointer`}
+          } ${getTagSize()} ${onTagClick ? 'cursor-pointer' : ''}`}
           onClick={() => onTagClick && onTagClick(tag)}
         >
           <Sparkles className={getIconSize()} />

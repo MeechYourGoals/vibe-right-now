@@ -19,39 +19,70 @@ const UserProfile = () => {
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [placesTabValue, setPlacesTabValue] = useState("visited");
   
+  // Map of display names to usernames for our featured users
+  const featuredUserMap: Record<string, string> = {
+    // Standard username variants
+    'sarah_vibes': 'sarah_vibes',
+    'jay_experiences': 'jay_experiences',
+    'adventure_alex': 'adventure_alex',
+    'marco_travels': 'marco_travels',
+    'local_explorer': 'local_explorer',
+    
+    // Common name variations (case insensitive)
+    'sarah': 'sarah_vibes',
+    'jay': 'jay_experiences',
+    'alex': 'adventure_alex',
+    'marco': 'marco_travels',
+    'jamie': 'local_explorer',
+    
+    // Full names
+    'sarah miller': 'sarah_vibes',
+    'jay johnson': 'jay_experiences',
+    'alex kim': 'adventure_alex',
+    'marco williams': 'marco_travels',
+    'jamie chen': 'local_explorer',
+    
+    // Formal variants
+    'sarah_miller': 'sarah_vibes',
+    'jay_johnson': 'jay_experiences',
+    'alex_kim': 'adventure_alex',
+    'marco_williams': 'marco_travels',
+    'jamie_chen': 'local_explorer'
+  };
+  
   // Ensure we have a valid username for our featured users
   useEffect(() => {
-    if (username) {
-      // List of our featured users for easy checking
-      const featuredUsernames = ['sarah_vibes', 'jay_experiences', 'adventure_alex', 'marco_travels', 'local_explorer'];
+    if (!username) return;
+    
+    // Normalize the input username to lowercase for case-insensitive comparison
+    const normalizedInput = username.toLowerCase();
+    
+    // Check if the username is one of our featured users or a variation
+    if (normalizedInput in featuredUserMap) {
+      const correctUsername = featuredUserMap[normalizedInput];
       
-      // Check if the username is close to one of our featured users (case insensitive comparison)
-      const normalizedUsername = username.toLowerCase();
-      for (const featuredUsername of featuredUsernames) {
-        // If there's a direct match or a close match, redirect to the correct username
-        if (normalizedUsername === featuredUsername.toLowerCase() && normalizedUsername !== featuredUsername) {
-          navigate(`/user/${featuredUsername}`, { replace: true });
-          break;
-        }
+      // Only redirect if we're not already at the correct username
+      if (normalizedInput !== correctUsername) {
+        navigate(`/user/${correctUsername}`, { replace: true });
       }
-      
-      // Handle common name variations that might be typed
-      const nameMapping: Record<string, string> = {
-        'sarah': 'sarah_vibes',
-        'jay': 'jay_experiences',
-        'alex': 'adventure_alex',
-        'marco': 'marco_travels',
-        'jamie': 'local_explorer',
-        'sarah_miller': 'sarah_vibes',
-        'jay_johnson': 'jay_experiences',
-        'alex_kim': 'adventure_alex',
-        'marco_williams': 'marco_travels',
-        'jamie_chen': 'local_explorer'
-      };
-      
-      if (nameMapping[normalizedUsername]) {
-        navigate(`/user/${nameMapping[normalizedUsername]}`, { replace: true });
+      return;
+    }
+    
+    // Check for partial matches (first name, last name components)
+    for (const [key, value] of Object.entries(featuredUserMap)) {
+      if (key.includes(normalizedInput) || normalizedInput.includes(key)) {
+        navigate(`/user/${value}`, { replace: true });
+        return;
       }
+    }
+    
+    // Finally check for usernames in mockUsers data
+    const foundMockUser = mockUsers.find(user => 
+      user.username && user.username.toLowerCase() === normalizedInput
+    );
+    
+    if (foundMockUser && foundMockUser.username !== username) {
+      navigate(`/user/${foundMockUser.username}`, { replace: true });
     }
   }, [username, navigate]);
   
@@ -65,42 +96,6 @@ const UserProfile = () => {
     getUserBio,
     isPrivateProfile
   } = useUserProfile(username);
-
-  // Find user in mock data if not found in regular data
-  useEffect(() => {
-    if (!user && username) {
-      console.log("Attempting to find mock user for:", username);
-      
-      // Check for exact match first
-      let mockUser = mockUsers.find(u => u.username === username);
-      
-      // If no exact match, try case-insensitive match
-      if (!mockUser) {
-        mockUser = mockUsers.find(u => u.username && u.username.toLowerCase() === username.toLowerCase());
-      }
-      
-      // If still no match, check if username matches any part of a mockUser's name (for search-friendly URLs)
-      if (!mockUser) {
-        const lowerUsername = username.toLowerCase();
-        
-        // Check if username contains part of a real name
-        mockUser = mockUsers.find(u => 
-          u.name && u.name.toLowerCase().includes(lowerUsername) ||
-          u.username && u.username.toLowerCase().includes(lowerUsername)
-        );
-      }
-      
-      if (mockUser) {
-        console.log("Found mock user, redirecting to:", mockUser.username);
-        // Set user data from mock
-        setTimeout(() => {
-          navigate(`/user/${mockUser.username}`, { replace: true });
-        }, 0);
-      } else {
-        console.log("No mock user found for:", username);
-      }
-    }
-  }, [username, user, navigate]);
 
   if (!user) {
     return (

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { User, Post, Location, Comment, Media } from "@/types";
 import { mockUsers, mockPosts, mockComments, mockLocations } from "@/mock/data";
@@ -8,6 +9,15 @@ export const vibeTags = [
   "Cozy", "Upscale", "Trendy", "Casual", "Romantic", "Lively", "Intimate", 
   "Family Friendly", "NightOwl", "Chill", "Energetic", "Artistic", "Sophisticated",
   "Rustic", "Modern", "Nostalgic", "Peaceful", "Vibrant", "Adventurous"
+];
+
+// Featured users with their full names
+export const featuredUsers = [
+  { username: 'sarah_vibes', fullName: 'Sarah Miller' },
+  { username: 'jay_experiences', fullName: 'Jay Johnson' },
+  { username: 'adventure_alex', fullName: 'Alex Kim' },
+  { username: 'marco_travels', fullName: 'Marco Williams' },
+  { username: 'local_explorer', fullName: 'Jamie Chen' }
 ];
 
 // Function to generate vibe tags for a post based on location and user
@@ -21,6 +31,8 @@ const generateVibeTags = (locationId: string, username: string): string[] => {
 
 // Convert plain media strings to Media objects if needed
 const ensureMediaFormat = (media: any[]): Media[] => {
+  if (!media || !Array.isArray(media)) return [];
+  
   return media.map(item => {
     if (typeof item === 'string') {
       // Determine type based on extension
@@ -57,19 +69,56 @@ export const useUserProfile = (username: string | undefined) => {
     
     console.log("Looking for username:", username);
     
-    // Find user by username or id (for backward compatibility)
-    const isUserId = username && !isNaN(Number(username));
+    // Featured usernames list for easy checking
+    const featuredUsernames = featuredUsers.map(u => u.username);
+    const normalizedSearchUsername = username.toLowerCase();
     
-    let foundUser: User | undefined;
+    // Check for different variations of usernames (full name, username, etc.)
+    const nameVariations = [
+      { type: 'sarah', username: 'sarah_vibes' },
+      { type: 'jay', username: 'jay_experiences' },
+      { type: 'alex', username: 'adventure_alex' },
+      { type: 'marco', username: 'marco_travels' },
+      { type: 'jamie', username: 'local_explorer' },
+      { type: 'sarah miller', username: 'sarah_vibes' },
+      { type: 'jay johnson', username: 'jay_experiences' },
+      { type: 'alex kim', username: 'adventure_alex' },
+      { type: 'marco williams', username: 'marco_travels' },
+      { type: 'jamie chen', username: 'local_explorer' },
+      { type: 'sarah_miller', username: 'sarah_vibes' },
+      { type: 'jay_johnson', username: 'jay_experiences' },
+      { type: 'alex_kim', username: 'adventure_alex' },
+      { type: 'marco_williams', username: 'marco_travels' },
+      { type: 'jamie_chen', username: 'local_explorer' }
+    ];
     
-    if (isUserId) {
-      // If it's an ID, look for a user with that ID
-      foundUser = mockUsers.find((user) => user.id === username);
-    } else {
-      // Otherwise look for a user with that username
-      foundUser = mockUsers.find((user) => 
-        user.username && user.username.toLowerCase() === username.toLowerCase()
-      );
+    // First check for direct match
+    let foundUser: User | undefined = mockUsers.find(
+      user => user.username && user.username.toLowerCase() === normalizedSearchUsername
+    );
+    
+    // If no direct match, check for name variations
+    if (!foundUser) {
+      const variation = nameVariations.find(v => v.type.toLowerCase() === normalizedSearchUsername);
+      if (variation) {
+        foundUser = mockUsers.find(user => user.username === variation.username);
+      }
+    }
+    
+    // If still no match, check if username contains parts of any featured user
+    if (!foundUser) {
+      for (const featured of featuredUsers) {
+        // If any part of the featured username or full name is in the search, use that user
+        if (
+          featured.username.toLowerCase().includes(normalizedSearchUsername) || 
+          normalizedSearchUsername.includes(featured.username.toLowerCase()) ||
+          featured.fullName.toLowerCase().includes(normalizedSearchUsername) ||
+          normalizedSearchUsername.includes(featured.fullName.toLowerCase())
+        ) {
+          foundUser = mockUsers.find(user => user.username === featured.username);
+          break;
+        }
+      }
     }
     
     console.log("Found user:", foundUser);
@@ -92,7 +141,7 @@ export const useUserProfile = (username: string | undefined) => {
       const usernameHash = hashString(completeUser.username);
       
       // For our featured users, ensure they have more posts to showcase their profiles
-      const isFeaturedUser = ['sarah_vibes', 'jay_experiences', 'adventure_alex', 'marco_travels', 'local_explorer'].includes(completeUser.username);
+      const isFeaturedUser = featuredUsernames.includes(completeUser.username);
       const postCount = isFeaturedUser ? 8 + (usernameHash % 4) : 3 + (usernameHash % 5); // 8-12 posts for featured users, 3-8 for others
       
       // Find posts by this user with deterministic selection based on username
@@ -129,7 +178,7 @@ export const useUserProfile = (username: string | undefined) => {
       
       // If we have preference, start with those
       const preferredLocations = preferredLocationTypes.length > 0 
-        ? allPosts.filter(post => preferredLocationTypes.includes(post.location.type || ''))
+        ? allPosts.filter(post => post.location && preferredLocationTypes.includes(post.location.type || ''))
         : [];
       
       // Fill with random posts if needed

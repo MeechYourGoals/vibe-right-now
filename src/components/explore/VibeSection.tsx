@@ -40,6 +40,7 @@ const VibeSection = () => {
         .slice(0, 6);
     }
     
+    // Inclusive filtering - show locations that have ANY of the selected vibes
     return locationsWithVibes.filter(location => 
       selectedVibes.some(vibe => location.vibes?.includes(vibe))
     );
@@ -94,7 +95,7 @@ const VibeSection = () => {
             filteredLocations.slice(0, 6).map((location) => (
               <LocationCard 
                 key={location.id} 
-                location={location as Location} 
+                location={location} 
                 vibes={location.vibes}
               />
             ))
