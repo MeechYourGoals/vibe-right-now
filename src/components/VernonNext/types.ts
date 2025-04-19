@@ -1,4 +1,3 @@
-
 export type ChatMessage = {
   id: string;
   role: 'user' | 'assistant' | 'system';
@@ -15,7 +14,6 @@ export type ChatState = {
   isSpeaking: boolean;
   transcript: string;
   interimTranscript: string;
-  isLoading: boolean;
 };
 
 export type MessagePayload = {

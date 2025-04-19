@@ -1,4 +1,3 @@
-
 declare module '@/types' {
   export interface User {
     id: string;
