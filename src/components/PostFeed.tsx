@@ -100,12 +100,12 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
     // Create a map of usernames (lowercase) for case-insensitive comparison
     const featuredUsernames = celebrityFeatured.map(username => username.toLowerCase());
 
-    // Find posts from featured users
+    // Find posts from featured users - with null check for users
     const featuredUserPosts = recentPosts.filter(post => 
       post.user && post.user.username && featuredUsernames.includes(post.user.username.toLowerCase())
     );
     
-    // Get the remaining posts
+    // Get the remaining posts - with null check for users
     const otherPosts = recentPosts.filter(post => 
       !post.user || !post.user.username || !featuredUsernames.includes(post.user.username.toLowerCase())
     );

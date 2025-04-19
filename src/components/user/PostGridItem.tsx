@@ -43,8 +43,8 @@ const PostGridItem = ({ post }: PostGridItemProps) => {
   const [liked, setLiked] = useState(false);
   const navigate = useNavigate();
   
-  // Ensure post has a valid user
-  if (!post.user) {
+  // Check if post has valid user information
+  if (!post || !post.user) {
     console.error('Post is missing user information:', post);
     return null;
   }
@@ -61,7 +61,10 @@ const PostGridItem = ({ post }: PostGridItemProps) => {
   const navigateToUserProfile = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    navigate(`/user/${post.user.username}`);
+    
+    if (post.user && post.user.username) {
+      navigate(`/user/${post.user.username}`);
+    }
   };
 
   // Generate a semi-random user count based on post ID

@@ -55,6 +55,11 @@ const PostCard: React.FC<PostCardProps> = ({
   if (posts && posts.length > 0 && getComments) {
     const firstPost = posts[0];
     
+    // Guard against missing location data
+    if (!firstPost || !firstPost.location) {
+      return null;
+    }
+    
     return (
       <Card className="overflow-hidden">
         <div className="p-4">
@@ -106,8 +111,13 @@ const PostCard: React.FC<PostCardProps> = ({
         </div>
         
         {posts.map(post => {
+          // Skip posts with invalid user data
+          if (!post || !post.user) {
+            return null;
+          }
+          
           // Determine if the post is from the venue itself
-          const isVenuePost = post.isVenuePost || post.location?.id === firstPost.location.id;
+          const isVenuePost = post.isVenuePost || (post.location?.id === firstPost.location.id);
           
           return (
             <div 
@@ -152,6 +162,17 @@ const PostCard: React.FC<PostCardProps> = ({
   // Don't render if the post has been deleted
   if (isDeleted) {
     return null;
+  }
+
+  // Guard against missing user data
+  if (!post.user) {
+    return (
+      <Card className="overflow-hidden p-4">
+        <div className="text-center text-muted-foreground">
+          Post data is incomplete
+        </div>
+      </Card>
+    );
   }
 
   const handleDelete = () => {
