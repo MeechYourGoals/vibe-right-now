@@ -1,13 +1,13 @@
-
 import { useState, useCallback } from 'react';
 import { Post } from '@/types';
+import { vibeTags } from '@/constants/vibeTags';
 
 // List of available vibe tags
-export const vibeTags = [
-  "Cozy", "Upscale", "Trendy", "Casual", "Romantic", "Lively", "Intimate", 
-  "Family Friendly", "NightOwl", "Chill", "Energetic", "Artistic", "Sophisticated",
-  "Rustic", "Modern", "Nostalgic", "Peaceful", "Vibrant", "Adventurous"
-];
+// export const vibeTags = [
+//   "Cozy", "Upscale", "Trendy", "Casual", "Romantic", "Lively", "Intimate", 
+//   "Family Friendly", "NightOwl", "Chill", "Energetic", "Artistic", "Sophisticated",
+//   "Rustic", "Modern", "Nostalgic", "Peaceful", "Vibrant", "Adventurous"
+// ];
 
 export const useVibeFilters = () => {
   const [selectedVibeTags, setSelectedVibeTags] = useState<string[]>([]);
@@ -52,3 +52,5 @@ export const useVibeFilters = () => {
     filterPostsByVibes
   };
 };
+
+export { vibeTags };
