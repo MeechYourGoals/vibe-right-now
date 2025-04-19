@@ -24,11 +24,15 @@ export const useNearbyLocations = () => {
         (error) => {
           console.error("Error getting location:", error);
           setLoading(false);
+          // Fall back to mock locations if geolocation fails
+          setNearbyLocations(mockLocations.slice(0, 10));
         },
         { enableHighAccuracy: true }
       );
     } else {
       setLoading(false);
+      // Fall back to mock locations if geolocation is not supported
+      setNearbyLocations(mockLocations.slice(0, 10));
     }
   }, []);
 

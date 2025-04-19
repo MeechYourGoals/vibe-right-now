@@ -1,3 +1,4 @@
+
 import { useEffect, useState, useMemo } from "react";
 import { mockLocations } from "@/mock/locations";
 import LocationCard from "@/components/LocationCard";
@@ -6,14 +7,19 @@ import { useNearbyLocations } from "@/hooks/useNearbyLocations";
 
 export const LocationsNearby = ({ category = "", searchQuery = "" }) => {
   const { 
-    locations, 
+    nearbyLocations, 
     loading,
-    setSearchQuery,
+    setSearchedCity,
   } = useNearbyLocations();
 
   // Use a combination of category and search query to filter locations
   const filteredLocations = useMemo(() => {
-    let filtered = [...locations];
+    // Guard against null or undefined nearbyLocations
+    if (!nearbyLocations) {
+      return [];
+    }
+    
+    let filtered = [...nearbyLocations];
     
     if (category) {
       filtered = filtered.filter(loc => loc.type.toLowerCase() === category.toLowerCase());
@@ -29,7 +35,14 @@ export const LocationsNearby = ({ category = "", searchQuery = "" }) => {
     }
     
     return filtered;
-  }, [locations, category, searchQuery]);
+  }, [nearbyLocations, category, searchQuery]);
+
+  // Update search query in the hook when it changes in props
+  useEffect(() => {
+    if (searchQuery) {
+      setSearchedCity(searchQuery);
+    }
+  }, [searchQuery, setSearchedCity]);
 
   if (loading) {
     return <p>Loading...</p>;
