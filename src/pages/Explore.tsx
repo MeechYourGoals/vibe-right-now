@@ -7,8 +7,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { LocationsNearby } from "@/components/LocationsNearby";
-import { TrendingLocations } from "@/components/TrendingLocations";
-import { DiscountLocations } from "@/components/DiscountLocations";
+import TrendingLocations from "@/components/TrendingLocations";
+import DiscountLocations from "@/components/DiscountLocations";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 const Explore = () => {
