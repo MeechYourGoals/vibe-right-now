@@ -1,171 +1,96 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { ArrowRight, TrendingUp } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Location } from "@/types";
 import { mockLocations } from "@/mock/locations";
+import { Location } from "@/types";
+import LocationCard from "./LocationCard";
 import { getTrendingLocationsForCity } from "@/mock/cityLocations";
-import { toast } from "sonner";
+import { Button } from "./ui/button";
+import { ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Skeleton } from "./ui/skeleton";
 
-// Event bus for updating trending locations from VernonChat
-export const eventBus = {
-  listeners: new Map<string, Function[]>(),
-  
-  on(event: string, callback: Function) {
-    if (!this.listeners.has(event)) {
-      this.listeners.set(event, []);
-    }
-    this.listeners.get(event)?.push(callback);
-  },
-  
-  emit(event: string, data: any) {
-    if (this.listeners.has(event)) {
-      this.listeners.get(event)?.forEach(callback => callback(data));
-    }
-  }
-};
+interface TrendingLocationsProps {
+  city?: string | null;
+}
 
-// Export function for VernonChat to update trending locations
-export const updateTrendingLocations = (cityName: string, events: Location[]) => {
-  eventBus.emit('trending-locations-update', { cityName, events });
-};
-
-const TrendingLocations = () => {
-  // Default to some popular locations if no city is specified
-  const [trendingLocations, setTrendingLocations] = useState(mockLocations.slice(0, 3));
-  const [currentCity, setCurrentCity] = useState("Los Angeles");
-  const [geolocationAttempted, setGeolocationAttempted] = useState(false);
-  
-  // Use Google Maps to determine user's location
-  useEffect(() => {
-    if (!geolocationAttempted && navigator.geolocation) {
-      setGeolocationAttempted(true);
-      
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          try {
-            // Use Google's Geocoding API to get the city name from coordinates
-            const response = await fetch(
-              `https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.coords.latitude},${position.coords.longitude}&key=AIzaSyAWm0vayRrQJHpMc6XcShcge52hGTt9BV4`
-            );
-            
-            if (response.ok) {
-              const data = await response.json();
-              
-              if (data.results && data.results.length > 0) {
-                // Try to find the city component
-                const addressComponents = data.results[0].address_components;
-                const cityComponent = addressComponents.find(
-                  (component: any) => 
-                    component.types.includes('locality') || 
-                    component.types.includes('administrative_area_level_1')
-                );
-                
-                if (cityComponent) {
-                  const detectedCity = cityComponent.long_name;
-                  setCurrentCity(detectedCity);
-                  
-                  // Get trending locations for the detected city
-                  const cityTrending = getTrendingLocationsForCity(detectedCity);
-                  if (cityTrending.length > 0) {
-                    setTrendingLocations(cityTrending);
-                  }
-                }
-              }
-            }
-          } catch (error) {
-            console.error("Error getting city from coordinates:", error);
-            // Fall back to default trending locations
-            const defaultTrending = getTrendingLocationsForCity("Los Angeles");
-            if (defaultTrending.length > 0) {
-              setTrendingLocations(defaultTrending);
-            }
-          }
-        },
-        (error) => {
-          console.error("Error getting location:", error);
-          // Fall back to default trending locations
-          const defaultTrending = getTrendingLocationsForCity("Los Angeles");
-          if (defaultTrending.length > 0) {
-            setTrendingLocations(defaultTrending);
-          }
-        }
-      );
-    }
-  }, [geolocationAttempted]);
-  
-  // Initialize with trending locations for a default city if geolocation fails
-  useEffect(() => {
-    if (!geolocationAttempted) {
-      const defaultTrending = getTrendingLocationsForCity("Los Angeles");
-      if (defaultTrending.length > 0) {
-        setTrendingLocations(defaultTrending);
-      }
-    }
-  }, [geolocationAttempted]);
+const TrendingLocations = ({ city }: TrendingLocationsProps) => {
+  const [locations, setLocations] = useState<Location[]>([]);
+  const [loading, setLoading] = useState(true);
   
   useEffect(() => {
-    // Listen for updates from VernonChat
-    const handleUpdate = (data: { cityName: string, events: Location[] }) => {
-      const { cityName, events } = data;
+    setLoading(true);
+    
+    // Simulate API call delay
+    setTimeout(() => {
+      let trendingLocations: Location[];
       
-      setCurrentCity(cityName);
-      
-      // Replace trending locations with the new events
-      if (events && events.length > 0) {
-        setTrendingLocations(events);
+      if (city) {
+        // Get trending locations for the specified city
+        trendingLocations = getTrendingLocationsForCity(city);
         
-        // Show toast notification
-        toast.success(`Updated trending locations for ${cityName}`);
-      } else {
-        // If no events were provided, get trending locations for the city
-        const cityTrending = getTrendingLocationsForCity(cityName);
-        if (cityTrending.length > 0) {
-          setTrendingLocations(cityTrending);
+        // If no locations found for this city, fall back to random locations
+        if (trendingLocations.length === 0) {
+          trendingLocations = mockLocations
+            .filter(loc => loc.trending)
+            .slice(0, 3);
         }
+      } else {
+        // Get random trending locations if no city is specified
+        trendingLocations = mockLocations
+          .filter(loc => loc.trending)
+          .sort(() => Math.random() - 0.5)
+          .slice(0, 3);
       }
-    };
-    
-    eventBus.on('trending-locations-update', handleUpdate);
-    
-    // Cleanup listener on unmount
-    return () => {
-      eventBus.listeners.delete('trending-locations-update');
-    };
-  }, []);
+      
+      setLocations(trendingLocations);
+      setLoading(false);
+    }, 1000);
+  }, [city]);
+  
+  if (loading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Trending Right Now</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="rounded-md overflow-hidden">
+                <Skeleton className="h-24 w-full" />
+                <div className="mt-2 space-y-1">
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-3 w-1/2" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
   
   return (
     <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-xl flex items-center">
-          <TrendingUp className="h-5 w-5 mr-2" />
-          <span>Trending in {currentCity}</span>
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <CardTitle className="text-lg">
+          {city ? `Trending in ${city}` : "Trending Right Now"}
         </CardTitle>
+        <Button variant="ghost" size="sm" asChild>
+          <Link to="/explore?category=trending">
+            See All <ArrowRight className="ml-1 h-4 w-4" />
+          </Link>
+        </Button>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          {trendingLocations.map((location) => (
-            <div 
+        <div className="space-y-3">
+          {locations.map((location) => (
+            <LocationCard 
               key={location.id} 
-              className="p-3 border rounded-lg flex justify-between items-center hover:bg-accent/10 transition-colors"
-            >
-              <div>
-                <div className="font-medium">{location.name}</div>
-                <div className="text-sm text-muted-foreground flex items-center gap-2">
-                  <span>{location.city}, {location.state || location.country}</span>
-                  <Badge variant="outline" className="text-xs">
-                    {location.type}
-                  </Badge>
-                </div>
-              </div>
-              <Button variant="ghost" size="sm" className="h-8" asChild>
-                <a href={`/venue/${location.id}`}>
-                  <ArrowRight className="h-4 w-4" />
-                </a>
-              </Button>
-            </div>
+              location={location}
+              vibes={location.vibes || ["Trendy", "Busy"]} 
+            />
           ))}
         </div>
       </CardContent>
