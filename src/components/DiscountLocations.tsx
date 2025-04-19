@@ -1,100 +1,68 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { mockPosts } from "@/mock/posts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { mockLocations } from "@/mock/locations";
-import { Location } from "@/types";
-import LocationCard from "./LocationCard";
-import { getLocationsByCity } from "@/mock/cityLocations";
-import { Button } from "./ui/button";
-import { ArrowRight } from "lucide-react";
-import { Link } from "react-router-dom";
-import { Skeleton } from "./ui/skeleton";
+import { Badge } from "@/components/ui/badge";
+import { ArrowRight, Ticket, Tag } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Link, useNavigate } from "react-router-dom";
 
-interface DiscountLocationsProps {
-  city?: string | null;
-}
-
-const DiscountLocations = ({ city }: DiscountLocationsProps) => {
-  const [locations, setLocations] = useState<Location[]>([]);
-  const [loading, setLoading] = useState(true);
-  
-  useEffect(() => {
-    setLoading(true);
-    
-    // Simulate API call delay
-    setTimeout(() => {
-      let availableLocations: Location[];
-      
-      if (city) {
-        // Get locations for the specified city
-        availableLocations = getLocationsByCity(city);
-      } else {
-        // Use all locations if no city is specified
-        availableLocations = mockLocations;
-      }
-      
-      // Filter to locations with discounts (for demo, we're randomly assigning discounts)
-      const discountLocations = availableLocations
-        .map(location => ({
-          ...location,
-          discountAmount: Math.floor(Math.random() * 30) + 10
-        }))
-        .sort(() => Math.random() - 0.5)
-        .slice(0, 3);
-      
-      setLocations(discountLocations);
-      setLoading(false);
-    }, 1200);
-  }, [city]);
-  
-  if (loading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Special Deals</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="rounded-md overflow-hidden">
-                <Skeleton className="h-24 w-full" />
-                <div className="mt-2 space-y-1">
-                  <Skeleton className="h-4 w-3/4" />
-                  <Skeleton className="h-3 w-1/2" />
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-  
-  if (locations.length === 0) {
-    return null;
-  }
+const DiscountLocations = () => {
+  const navigate = useNavigate();
+  // Filter posts with discount offers (posts 29-32 are our discount posts)
+  const discountPosts = mockPosts.filter(post => 
+    ["29", "30", "31", "32"].includes(post.id)
+  );
   
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-lg">
-          {city ? `Deals in ${city}` : "Special Deals"}
+      <CardHeader className="pb-2">
+        <CardTitle className="text-xl flex items-center">
+          <Tag className="h-5 w-5 mr-2" />
+          <span>Currently Offering Discounts</span>
         </CardTitle>
-        <Button variant="ghost" size="sm" asChild>
-          <Link to="/explore?category=deals">
-            See All <ArrowRight className="ml-1 h-4 w-4" />
-          </Link>
-        </Button>
       </CardHeader>
       <CardContent>
-        <div className="space-y-3">
-          {locations.map((location) => (
-            <LocationCard 
-              key={location.id} 
-              location={location}
-              vibes={location.vibes || ["Discount", "Value"]}
-              discount={location.discountAmount || 15}
-            />
+        <div className="space-y-4">
+          {discountPosts.map((post) => (
+            <div 
+              key={post.id} 
+              className="p-3 border rounded-lg flex justify-between items-start hover:bg-accent/10 transition-colors"
+            >
+              <div className="flex gap-3">
+                <Avatar className="h-10 w-10">
+                  <AvatarImage 
+                    src={post.media[0]?.url || `https://source.unsplash.com/random/200x200/?${post.location.type}`} 
+                    alt={post.location.name} 
+                  />
+                  <AvatarFallback>{post.location.name.charAt(0)}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <div className="font-medium">{post.location.name}</div>
+                  <div className="text-sm text-muted-foreground">
+                    {post.location.city}, {post.location.state}
+                  </div>
+                  <div className="mt-1">
+                    <Badge variant="secondary" className="text-xs">
+                      <Ticket className="h-3 w-3 mr-1" />
+                      {post.content.includes("FREE TICKETS") ? "Free Tickets" :
+                        post.content.includes("FREE COVER") ? "Free Entry" :
+                        post.content.includes("FREE pastry") ? "Free Item w/ Purchase" :
+                        "VIP Access"}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-8" 
+                onClick={() => navigate(`/venue/${post.location.id}`)}
+              >
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </div>
           ))}
         </div>
       </CardContent>

@@ -46,7 +46,7 @@ const VernonNext: React.FC = () => {
 
   // Handle sending a message
   const handleSendMessage = async (text: string) => {
-    if (!text.trim() || state.loading) return;
+    if (!text.trim() || state.isLoading) return;
     await sendMessage(text);
   };
 

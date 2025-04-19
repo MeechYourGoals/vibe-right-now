@@ -11,14 +11,7 @@ export const useUserProfile = (username: string | undefined) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const userPosts = posts;
-  const followedVenues = savedLocations.slice(0, 3);
-  const visitedPlaces = savedLocations;
-  const wantToVisitPlaces = savedLocations.slice(0, 2);
-  const getPostComments = () => posts.flatMap(post => post.comments || []);
-  const getUserBio = () => user?.bio || '';
-  const isPrivateProfile = false;  // Default value, adjust as needed
-
+  // Function to fetch user profile data
   const fetchUserProfile = (): User | null => {
     if (!username) {
       setError('No username provided');
@@ -26,6 +19,7 @@ export const useUserProfile = (username: string | undefined) => {
       return null;
     }
 
+    // Find user in mock data
     const foundUser = mockUsers.find(
       (u) => u.username.toLowerCase() === username.toLowerCase()
     );
@@ -39,29 +33,36 @@ export const useUserProfile = (username: string | undefined) => {
     return foundUser;
   };
 
+  // Function to fetch user posts
   const fetchUserPosts = (userId: string) => {
     return mockPosts.filter((post) => post.user.id === userId);
   };
 
+  // Function to fetch saved locations
   const fetchSavedLocations = (userId: string) => {
+    // In a real app, you would fetch this from an API
+    // For now, return a subset of locations as saved
     return mockLocations
       .slice(0, 5)
       .map((location) => ({ ...location, savedAt: new Date().toISOString() }));
   };
 
   useEffect(() => {
+    // Reset states when username changes
     setUser(null);
     setPosts([]);
     setSavedLocations([]);
     setError(null);
     setLoading(true);
 
+    // Using setTimeout to simulate API call delay
     const timer = setTimeout(() => {
       const foundUser = fetchUserProfile();
       
       if (foundUser) {
         setUser(foundUser);
         
+        // Fetch related data
         const userPosts = fetchUserPosts(foundUser.id);
         const userSavedLocations = fetchSavedLocations(foundUser.id);
         
@@ -81,12 +82,5 @@ export const useUserProfile = (username: string | undefined) => {
     savedLocations,
     loading,
     error,
-    userPosts,
-    followedVenues,
-    visitedPlaces,
-    wantToVisitPlaces,
-    getPostComments,
-    getUserBio,
-    isPrivateProfile
   };
 };
