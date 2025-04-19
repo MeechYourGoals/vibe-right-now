@@ -10,9 +10,7 @@ import NearbyVibesMap from "@/components/NearbyVibesMap";
 import RecommendedForYou from "@/components/RecommendedForYou";
 import VernonNext from "@/components/VernonNext";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { getFeaturedUsers } from "@/mock/users";
 import { DateRange } from "react-day-picker";
-import { format, addMonths } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Calendar, CalendarRange } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -21,7 +19,6 @@ import { Card, CardContent } from "@/components/ui/card";
 
 const Index = () => {
   const isMobile = useIsMobile();
-  // Make sure to include all our five main featured users
   const featuredUsers = ['sarah_vibes', 'jay_experiences', 'adventure_alex', 'marco_travels', 'local_explorer'];
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
@@ -47,9 +44,10 @@ const Index = () => {
   return (
     <Layout>
       <main className="container py-6">
-        <div className="flex flex-col md:flex-row gap-6">
-          <div className="w-full md:w-3/4">
-            <div className="flex flex-col md:flex-row items-center justify-between mb-6">
+        <div className="flex flex-col gap-6">
+          {/* Main content area */}
+          <div className="flex flex-col gap-6">
+            <div className="flex flex-col md:flex-row items-center justify-between mb-2">
               <h1 className="text-3xl font-bold vibe-gradient-text mb-3 md:mb-0">
                 Discover the Vibe Right Now
               </h1>
@@ -64,7 +62,7 @@ const Index = () => {
             </div>
 
             {showDatePicker && (
-              <Card className="mb-6 bg-indigo-50 border-indigo-100">
+              <Card className="mb-4 bg-indigo-50 border-indigo-100">
                 <CardContent className="p-4">
                   <h3 className="text-lg font-semibold mb-3 text-indigo-800">Find Future Vibes</h3>
                   <p className="text-sm text-indigo-700 mb-3">Select dates to explore events, concerts, games and more in the coming months</p>
@@ -85,29 +83,37 @@ const Index = () => {
                 </CardContent>
               </Card>
             )}
-            
-            <PostFeed celebrityFeatured={featuredUsers} />
+
+            {/* Map positioned between search bar and filters */}
+            <div className="w-full mb-4">
+              <NearbyVibesMap />
+            </div>
+
+            {/* Posts feed and sidebar layout */}
+            <div className="flex flex-col md:flex-row gap-6">
+              <div className="w-full md:w-3/4">
+                <PostFeed celebrityFeatured={featuredUsers} />
+              </div>
+              
+              {!isMobile && (
+                <div className="w-full md:w-1/4 space-y-6">
+                  <RecommendedForYou featuredLocations={["5", "7", "10", "13", "20"]} />
+                  <TrendingLocations />
+                  <DiscountLocations />
+                </div>
+              )}
+            </div>
           </div>
           
-          {!isMobile ? (
-            <div className="w-full md:w-1/4 space-y-6">
-              <NearbyVibesMap />
+          {isMobile && (
+            <div className="mt-8 space-y-6">
+              <h2 className="text-xl font-bold mb-4 vibe-gradient-text">Around You</h2>
               <RecommendedForYou featuredLocations={["5", "7", "10", "13", "20"]} />
               <TrendingLocations />
               <DiscountLocations />
             </div>
-          ) : null}
+          )}
         </div>
-        
-        {isMobile && (
-          <div className="mt-8 space-y-6">
-            <h2 className="text-xl font-bold mb-4 vibe-gradient-text">Around You</h2>
-            <NearbyVibesMap />
-            <RecommendedForYou featuredLocations={["5", "7", "10", "13", "20"]} />
-            <TrendingLocations />
-            <DiscountLocations />
-          </div>
-        )}
       </main>
       
       <CameraButton />
