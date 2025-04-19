@@ -33,7 +33,7 @@ const PostFeed = () => {
       if (tab === 'all') {
         setPosts(mockPosts);
       } else if (tab === 'following') {
-        setPosts(mockPosts.filter(post => post.user.verified));
+        setPosts(mockPosts.filter(post => post.user?.verified));
       } else if (tab === 'nearby') {
         setPosts(mockPosts.filter(post => post.location));
       }
@@ -64,6 +64,23 @@ const PostFeed = () => {
     </Card>
   );
 
+  // Helper function to safely get post comment count
+  const getCommentCount = (post: Post) => {
+    if (typeof post.comments === 'number') {
+      return post.comments;
+    }
+    if (Array.isArray(post.comments)) {
+      return post.comments.length;
+    }
+    return 0;
+  };
+  
+  // Helper function to get user initials for avatar fallback
+  const getUserInitials = (user: Post['user']) => {
+    if (!user || !user.name) return 'U';
+    return user.name.substring(0, 2);
+  };
+
   return (
     <div className="space-y-4">
       <Tabs defaultValue="all" className="w-full">
@@ -86,13 +103,16 @@ const PostFeed = () => {
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center space-x-4">
                       <Avatar>
-                        <AvatarImage src={post.user.avatar} alt={post.user.name} />
-                        <AvatarFallback>{post.user.name.substring(0, 2)}</AvatarFallback>
+                        {post.user?.avatar ? (
+                          <AvatarImage src={post.user.avatar} alt={post.user?.name || 'User'} />
+                        ) : (
+                          <AvatarFallback>{getUserInitials(post.user)}</AvatarFallback>
+                        )}
                       </Avatar>
                       <div>
                         <div className="flex items-center">
-                          <p className="font-medium">{post.user.name}</p>
-                          {post.user.verified && (
+                          <p className="font-medium">{post.user?.name || 'Anonymous'}</p>
+                          {post.user?.verified && (
                             <span className="ml-1 text-blue-500">✓</span>
                           )}
                         </div>
@@ -135,11 +155,11 @@ const PostFeed = () => {
                 <CardFooter className="flex justify-between border-t px-6 py-3">
                   <Button variant="ghost" size="sm" className="text-muted-foreground">
                     <Heart className="h-5 w-5 mr-1" />
-                    {post.likes}
+                    {post.likes || 0}
                   </Button>
                   <Button variant="ghost" size="sm" className="text-muted-foreground">
                     <MessageCircle className="h-5 w-5 mr-1" />
-                    {typeof post.comments === 'number' ? post.comments : post.comments.length}
+                    {getCommentCount(post)}
                   </Button>
                   <Button variant="ghost" size="sm" className="text-muted-foreground">
                     <Share2 className="h-5 w-5 mr-1" />

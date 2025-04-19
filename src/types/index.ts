@@ -1,3 +1,4 @@
+
 export interface User {
   id: string;
   username: string;
@@ -146,6 +147,7 @@ export interface ExtractedIntent {
 }
 
 export interface VenueInsights {
+  // Required legacy fields
   visitors: number;
   visitorsChange: number;
   posts: number;
@@ -165,10 +167,11 @@ export interface VenueInsights {
   visitorsByTime: Record<string, number>;
   visitorsByDay: Record<string, number>;
   
-  visitorCount: number;
-  checkInCount: number;
-  receiptUploads: number;
-  discountRedemptions: number;
+  // Additional fields
+  visitorCount?: number;
+  checkInCount?: number;
+  receiptUploads?: number;
+  discountRedemptions?: number;
   totalViews?: number;
   totalVisits?: number;
   totalSaves?: number;
