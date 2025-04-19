@@ -40,6 +40,25 @@ const PostHeader: React.FC<PostHeaderProps> = ({
   canDelete = false,
   onDelete
 }) => {
+  // Guard clause for undefined user
+  if (!user || typeof user !== 'object') {
+    return (
+      <div className="p-4 flex justify-between items-start">
+        <div className="flex gap-3">
+          <Avatar>
+            <AvatarFallback>U</AvatarFallback>
+          </Avatar>
+          <div>
+            <div className="font-semibold">Unknown User</div>
+            <div className="text-sm text-muted-foreground">
+              {timestamp ? formatDistanceToNow(new Date(timestamp), { addSuffix: true }) : 'Unknown time'}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
   // Format the timestamp as a relative time (e.g., "2 hours ago")
   const timeAgo = formatDistanceToNow(new Date(timestamp), { addSuffix: true });
   
