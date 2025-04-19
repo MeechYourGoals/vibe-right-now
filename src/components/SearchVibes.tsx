@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Map, X, ChevronDown, User, Building, Calendar, MapPin, Star, Sparkles } from "lucide-react";
+import { Search, Map, X, ChevronDown, User, Building, Calendar, MapPin, Star, Sparkles, Tag, TrendingUp } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -363,7 +363,7 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
         onValueChange={handleCategoryChange} 
         className="w-full mb-3"
       >
-        <TabsList className="grid grid-cols-4 w-full">
+        <TabsList className="grid grid-cols-7 w-full">
           <TabsTrigger value="all" className="flex items-center gap-1">
             <Search className="h-3.5 w-3.5" />
             <span>All</span>
@@ -372,9 +372,21 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
             <Building className="h-3.5 w-3.5" />
             <span>Places</span>
           </TabsTrigger>
+          <TabsTrigger value="nearby" className="flex items-center gap-1">
+            <MapPin className="h-3.5 w-3.5" />
+            <span>Nearby</span>
+          </TabsTrigger>
           <TabsTrigger value="users" className="flex items-center gap-1">
             <User className="h-3.5 w-3.5" />
             <span>Users</span>
+          </TabsTrigger>
+          <TabsTrigger value="deals" className="flex items-center gap-1">
+            <Tag className="h-3.5 w-3.5" />
+            <span>Deals</span>
+          </TabsTrigger>
+          <TabsTrigger value="trending" className="flex items-center gap-1">
+            <TrendingUp className="h-3.5 w-3.5" />
+            <span>Trending</span>
           </TabsTrigger>
           <TabsTrigger value="vibes" className="flex items-center gap-1">
             <Sparkles className="h-3.5 w-3.5" />

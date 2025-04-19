@@ -1,15 +1,15 @@
+
 import { useState } from "react";
 import { Layout } from "@/components/Layout";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import SearchVibes from "@/components/SearchVibes";
-import LocationsNearby from "@/components/LocationsNearby";
-import TrendingLocations from "@/components/TrendingLocations";
-import DiscountLocations from "@/components/DiscountLocations";
-import VibeSection from "@/components/explore/VibeSection";
 import { useLocation } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, MapPin } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Calendar } from "lucide-react";
 import { format } from "date-fns";
+import { LocationsNearby } from "@/components/LocationsNearby";
+import { TrendingLocations } from "@/components/TrendingLocations";
+import { DiscountLocations } from "@/components/DiscountLocations";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 const Explore = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -23,7 +23,7 @@ const Explore = () => {
   
   const hasDateRange = fromParam || toParam;
   
-  const handleSearch = (query: string, type: string, category: string) => {
+  const handleSearch = (query: string, type: string) => {
     setSearchQuery(query);
     setFilterType(type);
   };
@@ -60,49 +60,28 @@ const Explore = () => {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:col-span-2 space-y-6">
-            <Tabs defaultValue="nearby">
+          <div className="md:col-span-2">
+            <Tabs defaultValue="restaurants" className="w-full">
               <TabsList className="mb-4">
-                <TabsTrigger value="nearby">Nearby</TabsTrigger>
-                <TabsTrigger value="trending">Trending</TabsTrigger>
-                <TabsTrigger value="vibes">Vibes</TabsTrigger>
-                <TabsTrigger value="deals">Deals</TabsTrigger>
+                <TabsTrigger value="restaurants">Restaurants</TabsTrigger>
+                <TabsTrigger value="bars">Bars</TabsTrigger>
+                <TabsTrigger value="sports">Sports</TabsTrigger>
+                <TabsTrigger value="comedy">Comedy</TabsTrigger>
+                <TabsTrigger value="nightlife">Nightlife</TabsTrigger>
+                <TabsTrigger value="events">Events</TabsTrigger>
               </TabsList>
               
-              <TabsContent value="nearby">
-                <LocationsNearby searchQuery={searchQuery} filterType={filterType} />
-              </TabsContent>
-              
-              <TabsContent value="trending">
-                <TrendingLocations />
-              </TabsContent>
-              
-              <TabsContent value="vibes">
-                <VibeSection />
-              </TabsContent>
-              
-              <TabsContent value="deals">
-                <DiscountLocations />
-              </TabsContent>
+              {["restaurants", "bars", "sports", "comedy", "nightlife", "events"].map((tab) => (
+                <TabsContent key={tab} value={tab}>
+                  <LocationsNearby category={tab} searchQuery={searchQuery} />
+                </TabsContent>
+              ))}
             </Tabs>
           </div>
           
           <div className="space-y-6">
-            <Card className="overflow-hidden">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2">
-                  <MapPin className="h-5 w-5" />
-                  Near You
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-0 aspect-square">
-                <div className="h-full bg-muted rounded-md">
-                  {/* Map component goes here */}
-                </div>
-              </CardContent>
-            </Card>
-            
             <TrendingLocations />
+            <DiscountLocations />
           </div>
         </div>
       </main>
