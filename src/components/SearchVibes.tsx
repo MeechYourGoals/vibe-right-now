@@ -1,19 +1,25 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { Sparkles } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Search, Map, X, ChevronDown, User, Building, Sparkles } from "lucide-react";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 import { mockUsers } from "@/mock/users";
 import { mockLocations } from "@/mock/locations";
-import { vibeTags } from "@/hooks/useVibeFilters";
-import { useToast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { cityCoordinates } from "@/utils/cityLocations";
 import UserSuggestions from "./search/UserSuggestions";
 import PlaceSuggestions from "./search/PlaceSuggestions";
 import VibeSuggestions from "./search/VibeSuggestions";
 import SearchFilters from "./search/SearchFilters";
-import SearchInput from "./search/SearchInput";
-import SearchCategoryTabs from "./search/SearchCategoryTabs";
+import { vibeTags } from "@/hooks/useVibeFilters";
+import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { cityCoordinates } from "@/utils/cityLocations";
+import { Badge } from "@/components/ui/badge";
 
 interface SearchVibesProps {
   onSearch: (query: string, filterType: string, category: string) => void;
@@ -39,7 +45,7 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const navigate = useNavigate();
-  const location = useLocation();
+  const { toast } = useToast();
 
   const suggestedUsers = mockUsers.slice(0, 5);
   const filters = [
@@ -101,6 +107,8 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
       setSearchCategory("vibes");
     }
   }, [location.search]);
+
+  const location = useLocation();
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -299,21 +307,6 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
     }
   };
 
-  const getSearchPlaceholder = () => {
-    if (searchCategory === "users") {
-      return "Search users by name or username...";
-    }
-    if (searchCategory === "places") {
-      return isNaturalLanguageSearch 
-        ? "Try natural language: 'Upscale restaurants in Chicago for a family lunch...'" 
-        : "Search cities, venues, events or use natural language...";
-    }
-    if (searchCategory === "vibes") {
-      return "Search for vibes like Cozy, Trendy, NightOwl...";
-    }
-    return "Search venues, events, vibes, users or use natural language...";
-  };
-
   return (
     <div className="space-y-3 sticky top-16 z-10 bg-background p-4">
       {isNaturalLanguageSearch && (
@@ -345,21 +338,71 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
         </div>
       )}
 
-      <SearchCategoryTabs
-        searchCategory={searchCategory}
-        onCategoryChange={handleCategoryChange}
-      />
+      <Tabs value={searchCategory} onValueChange={handleCategoryChange} className="w-full mb-3">
+        <TabsList className="grid grid-cols-4 w-full">
+          <TabsTrigger value="all" className="flex items-center gap-1">
+            <Search className="h-3.5 w-3.5" />
+            <span>All</span>
+          </TabsTrigger>
+          <TabsTrigger value="places" className="flex items-center gap-1">
+            <Building className="h-3.5 w-3.5" />
+            <span>Places</span>
+          </TabsTrigger>
+          <TabsTrigger value="users" className="flex items-center gap-1">
+            <User className="h-3.5 w-3.5" />
+            <span>Users</span>
+          </TabsTrigger>
+          <TabsTrigger value="vibes" className="flex items-center gap-1">
+            <Sparkles className="h-3.5 w-3.5" />
+            <span>Vibes</span>
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
 
-      <SearchInput
-        searchQuery={searchQuery}
-        searchCategory={searchCategory}
-        isAnalyzing={isAnalyzing}
-        placeholder={getSearchPlaceholder()}
-        onInputChange={handleSearchInputChange}
-        onInputClick={handleInputClick}
-        onSearch={handleSearch}
-        onFilterToggle={() => setShowFilters(!showFilters)}
-      />
+      <div className="relative flex">
+        <Input
+          type="search"
+          placeholder={
+            searchCategory === "users" 
+              ? "Search users by name or username..." 
+              : searchCategory === "places"
+                ? isNaturalLanguageSearch 
+                  ? "Try natural language: 'Upscale restaurants in Chicago for a family lunch...'" 
+                  : "Search cities, venues, events or use natural language..."
+                : searchCategory === "vibes"
+                  ? "Search for vibes like Cozy, Trendy, NightOwl..."
+                  : "Search venues, events, vibes, users or use natural language..."
+          }
+          value={searchQuery}
+          onChange={handleSearchInputChange}
+          onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+          onClick={handleInputClick}
+          className="pr-20"
+        />
+        <div className="absolute right-0 top-0 flex h-full">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => setShowFilters(!showFilters)}
+            className="h-full rounded-none"
+          >
+            <ChevronDown className="h-4 w-4" />
+          </Button>
+          <Button 
+            variant={isAnalyzing ? "secondary" : "ghost"}
+            size="icon" 
+            onClick={handleSearch}
+            disabled={isAnalyzing}
+            className="h-full rounded-none rounded-r-md"
+          >
+            {isAnalyzing ? (
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-solid border-current border-r-transparent" />
+            ) : (
+              <Search className="h-4 w-4" />
+            )}
+          </Button>
+        </div>
+      </div>
 
       <UserSuggestions 
         showSuggestions={showUserSuggestions && searchCategory === "users"}
