@@ -41,7 +41,7 @@ const PostHeader: React.FC<PostHeaderProps> = ({
   onDelete
 }) => {
   // Guard clause for undefined user
-  if (!user || typeof user !== 'object' || !user.username) {
+  if (!user || typeof user !== 'object') {
     return (
       <div className="p-4 flex justify-between items-start">
         <div className="flex gap-3">
@@ -80,15 +80,15 @@ const PostHeader: React.FC<PostHeaderProps> = ({
       <div className="flex gap-3">
         <Link to={`/user/${user.username}`}>
           <Avatar>
-            <AvatarImage src={user.avatar} alt={user.name || 'User'} />
-            <AvatarFallback>{user.name ? user.name.charAt(0) : 'U'}</AvatarFallback>
+            <AvatarImage src={user.avatar} alt={user.name} />
+            <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
           </Avatar>
         </Link>
         
         <div>
           <div className="flex items-center gap-2">
             <Link to={`/user/${user.username}`} className="font-semibold hover:underline">
-              {user.name || 'Anonymous User'}
+              {user.name}
             </Link>
             {user.verified && (
               <VerifiedIcon className="h-4 w-4 text-blue-500" />

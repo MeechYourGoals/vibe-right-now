@@ -1,12 +1,19 @@
 
 import { useState, useMemo } from "react";
-import { mockPosts, mockComments } from "@/mock/data";
+import { mockPosts, mockComments, mockUsers } from "@/mock/data";
 import { PostCard } from "@/components/post";
 import SearchVibes from "@/components/SearchVibes";
 import { Post, User, Media } from "@/types";
 import { isWithinThreeMonths } from "@/mock/time-utils";
+import { Badge } from "@/components/ui/badge";
+import { Sparkles, Filter } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { vibeTags } from "@/hooks/useUserProfile";
-import VibeFilterButton from "@/components/VibeFilterButton";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 interface PostFeedProps {
   celebrityFeatured?: string[];
@@ -14,8 +21,6 @@ interface PostFeedProps {
 
 // Helper function to ensure media is in the correct format
 const ensureMediaFormat = (media: any[]): Media[] => {
-  if (!media || !Array.isArray(media)) return [];
-  
   return media.map(item => {
     if (typeof item === 'string') {
       // Determine type based on extension
@@ -59,17 +64,10 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
       setSelectedVibeTags([...selectedVibeTags, tag]);
     }
   };
-  
-  // Clear all selected vibe tags
-  const clearVibeTags = () => {
-    setSelectedVibeTags([]);
-  };
 
   // Generate vibe tags for posts
   const postsWithVibeTags = useMemo(() => {
     return mockPosts.map(post => {
-      if (!post || !post.user) return null;
-      
       // Ensure post has vibe tags
       if (!post.vibeTags || post.vibeTags.length === 0) {
         // Generate 1-4 vibe tags per post
@@ -85,7 +83,7 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
       post.media = ensureMediaFormat(post.media);
       
       return post;
-    }).filter(Boolean) as Post[];
+    });
   }, []);
 
   // First, filter posts to only show those from the past 3 months
@@ -102,14 +100,14 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
     // Create a map of usernames (lowercase) for case-insensitive comparison
     const featuredUsernames = celebrityFeatured.map(username => username.toLowerCase());
 
-    // Find posts from featured users (safely check for user existence)
+    // Find posts from featured users
     const featuredUserPosts = recentPosts.filter(post => 
-      post.user && post.user.username && featuredUsernames.includes(post.user.username.toLowerCase())
+      featuredUsernames.includes(post.user.username.toLowerCase())
     );
     
     // Get the remaining posts
     const otherPosts = recentPosts.filter(post => 
-      !(post.user && post.user.username && featuredUsernames.includes(post.user.username.toLowerCase()))
+      !featuredUsernames.includes(post.user.username.toLowerCase())
     );
     
     // Combine them with featured posts first
@@ -119,24 +117,24 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
   const filteredPosts = useMemo(() => {
     return prioritizedPosts.filter((post) => {
       // Filter by location type if specified
-      if (filter !== "all" && post.location && post.location.type !== filter) {
+      if (filter !== "all" && post.location.type !== filter) {
         return false;
       }
       
-      // Filter by vibe tags if any are selected (inclusive filtering)
+      // Filter by vibe tags if any are selected
       if (selectedVibeTags.length > 0) {
-        // Check if post has ANY of the selected vibe tags
-        const hasAnySelectedTag = post.vibeTags?.some(tag => selectedVibeTags.includes(tag));
-        if (!hasAnySelectedTag) return false;
+        // Check if post has any of the selected vibe tags (inclusive filtering)
+        const hasMatchingTag = post.vibeTags?.some(tag => selectedVibeTags.includes(tag));
+        if (!hasMatchingTag) return false;
       }
       
       // Filter by search query if specified
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
         return (
-          post.location?.name?.toLowerCase().includes(query) ||
-          post.location?.city?.toLowerCase().includes(query) ||
-          post.content?.toLowerCase().includes(query) ||
+          post.location.name.toLowerCase().includes(query) ||
+          post.location.city.toLowerCase().includes(query) ||
+          post.content.toLowerCase().includes(query) ||
           post.vibeTags?.some(tag => tag.toLowerCase().includes(query))
         );
       }
@@ -150,8 +148,6 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
     const groupedPosts: Record<string, Post[]> = {};
     
     filteredPosts.forEach(post => {
-      if (!post.location) return;
-      
       const locationId = post.location.id;
       if (!groupedPosts[locationId]) {
         groupedPosts[locationId] = [];
@@ -196,8 +192,6 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
     
     // Apply the specific counts where defined, and calculate naturally for others
     filteredPosts.forEach(post => {
-      if (!post.location) return;
-      
       const locationId = post.location.id;
       if (locationId in specificCounts) {
         counts[locationId] = specificCounts[locationId];
@@ -214,30 +208,121 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
     return mockComments.filter(comment => comment.postId === postId);
   };
 
+  // Render vibe tags for a post
+  const renderVibeTags = (post: Post) => {
+    if (!post.vibeTags || post.vibeTags.length === 0) return null;
+    
+    return (
+      <div className="flex flex-wrap gap-1 mt-2">
+        {post.vibeTags.map((tag, index) => (
+          <Badge 
+            key={index} 
+            variant="outline" 
+            className={`${selectedVibeTags.includes(tag) ? 'bg-primary text-white' : 'bg-primary/10 text-primary'} text-xs`}
+          >
+            <Sparkles className="h-3 w-3 mr-1" />
+            {tag}
+          </Badge>
+        ))}
+      </div>
+    );
+  };
+
+  // Enhanced PostCard component with vibe tags
+  const EnhancedPostCard = ({ posts, locationPostCount }: { posts: Post[], locationPostCount: number }) => {
+    const postCard = (
+      <PostCard 
+        posts={posts} 
+        locationPostCount={locationPostCount}
+        getComments={getPostComments}
+      />
+    );
+    
+    // Check if any post has vibe tags
+    const hasVibeTags = posts.some(post => post.vibeTags && post.vibeTags.length > 0);
+    
+    if (!hasVibeTags) return postCard;
+    
+    // Add vibe tags below the post card
+    return (
+      <div className="space-y-2">
+        {postCard}
+        <div className="pl-4">
+          {renderVibeTags(posts[0])}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="max-w-3xl mx-auto">
       <div className="mb-4">
         <SearchVibes onSearch={handleSearch} />
         
-        <div className="mt-2">
-          <VibeFilterButton 
-            selectedTags={selectedVibeTags}
-            toggleTag={toggleVibeTag}
-            clearTags={clearVibeTags}
-          />
+        <div className="mt-2 flex items-center space-x-2">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button 
+                variant={selectedVibeTags.length > 0 ? "default" : "outline"} 
+                size="sm" 
+                className="flex items-center gap-1"
+              >
+                <Filter className="h-4 w-4" />
+                Vibe Filters {selectedVibeTags.length > 0 && `(${selectedVibeTags.length})`}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-2" align="start">
+              <div className="grid grid-cols-2 gap-1 min-w-[280px]">
+                {vibeTags.map(tag => (
+                  <Badge 
+                    key={tag}
+                    variant={selectedVibeTags.includes(tag) ? "default" : "outline"}
+                    className="cursor-pointer justify-start"
+                    onClick={() => toggleVibeTag(tag)}
+                  >
+                    <Sparkles className="h-3 w-3 mr-1" />
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+              {selectedVibeTags.length > 0 && (
+                <Button 
+                  variant="link" 
+                  size="sm" 
+                  className="mt-2" 
+                  onClick={() => setSelectedVibeTags([])}
+                >
+                  Clear all filters
+                </Button>
+              )}
+            </PopoverContent>
+          </Popover>
+          
+          {selectedVibeTags.length > 0 && (
+            <div className="flex flex-wrap gap-1 items-center">
+              {selectedVibeTags.map(tag => (
+                <Badge 
+                  key={tag}
+                  variant="default"
+                  className="cursor-pointer"
+                  onClick={() => toggleVibeTag(tag)}
+                >
+                  {tag} ×
+                </Badge>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
       <div className="p-4 space-y-4">
         {Object.keys(postsGroupedByLocation).length > 0 ? (
           Object.entries(postsGroupedByLocation).map(([locationId, posts]) => (
-            <div key={locationId} className="space-y-2">
-              <PostCard 
-                posts={posts} 
-                locationPostCount={locationPostCounts[locationId]}
-                getComments={getPostComments}
-              />
-            </div>
+            <EnhancedPostCard 
+              key={locationId} 
+              posts={posts} 
+              locationPostCount={locationPostCounts[locationId]}
+            />
           ))
         ) : (
           <div className="text-center py-10">

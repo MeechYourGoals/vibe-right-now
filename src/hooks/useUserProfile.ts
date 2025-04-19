@@ -2,22 +2,12 @@ import { useState, useEffect } from "react";
 import { User, Post, Location, Comment, Media } from "@/types";
 import { mockUsers, mockPosts, mockComments, mockLocations } from "@/mock/data";
 import { hashString, generateUserBio } from "@/mock/users";
-import { fuzzyMatch } from "@/utils/searchUtils";
 
 // List of vibe tags that can be assigned to posts
 export const vibeTags = [
   "Cozy", "Upscale", "Trendy", "Casual", "Romantic", "Lively", "Intimate", 
   "Family Friendly", "NightOwl", "Chill", "Energetic", "Artistic", "Sophisticated",
   "Rustic", "Modern", "Nostalgic", "Peaceful", "Vibrant", "Adventurous"
-];
-
-// Featured users with their full names
-export const featuredUsers = [
-  { username: 'sarah_vibes', fullName: 'Sarah Miller' },
-  { username: 'jay_experiences', fullName: 'Jay Johnson' },
-  { username: 'adventure_alex', fullName: 'Alex Kim' },
-  { username: 'marco_travels', fullName: 'Marco Williams' },
-  { username: 'local_explorer', fullName: 'Jamie Chen' }
 ];
 
 // Function to generate vibe tags for a post based on location and user
@@ -31,8 +21,6 @@ const generateVibeTags = (locationId: string, username: string): string[] => {
 
 // Convert plain media strings to Media objects if needed
 const ensureMediaFormat = (media: any[]): Media[] => {
-  if (!media || !Array.isArray(media)) return [];
-  
   return media.map(item => {
     if (typeof item === 'string') {
       // Determine type based on extension
@@ -67,37 +55,24 @@ export const useUserProfile = (username: string | undefined) => {
       return;
     }
     
-    const normalizedSearchUsername = username.toLowerCase().trim();
+    console.log("Looking for username:", username);
     
-    // Helper function for fuzzy name matching
-    const findBestUserMatch = (searchTerm: string) => {
-      let bestMatch: User | undefined;
-      let bestScore = 0;
-      
-      // Check each user's username, name, and variations
-      mockUsers.forEach(user => {
-        const variations = [
-          user.username,
-          user.name,
-          user.name.replace(/\s+/g, ''),
-          user.name.replace(/\s+/g, '_'),
-          user.username.replace(/_/g, ' ')
-        ];
-        
-        variations.forEach(variation => {
-          const score = fuzzyMatch(searchTerm, variation);
-          if (score > bestScore) {
-            bestScore = score;
-            bestMatch = user;
-          }
-        });
-      });
-      
-      return bestScore > 0.3 ? bestMatch : undefined;
-    };
+    // Find user by username or id (for backward compatibility)
+    const isUserId = username && !isNaN(Number(username));
     
-    // Try to find the best matching user
-    const foundUser = findBestUserMatch(normalizedSearchUsername);
+    let foundUser: User | undefined;
+    
+    if (isUserId) {
+      // If it's an ID, look for a user with that ID
+      foundUser = mockUsers.find((user) => user.id === username);
+    } else {
+      // Otherwise look for a user with that username
+      foundUser = mockUsers.find((user) => 
+        user.username && user.username.toLowerCase() === username.toLowerCase()
+      );
+    }
+    
+    console.log("Found user:", foundUser);
     
     if (foundUser) {
       // Ensure user has all required properties
@@ -117,7 +92,7 @@ export const useUserProfile = (username: string | undefined) => {
       const usernameHash = hashString(completeUser.username);
       
       // For our featured users, ensure they have more posts to showcase their profiles
-      const isFeaturedUser = featuredUsers.map(u => u.username).includes(completeUser.username);
+      const isFeaturedUser = ['sarah_vibes', 'jay_experiences', 'adventure_alex', 'marco_travels', 'local_explorer'].includes(completeUser.username);
       const postCount = isFeaturedUser ? 8 + (usernameHash % 4) : 3 + (usernameHash % 5); // 8-12 posts for featured users, 3-8 for others
       
       // Find posts by this user with deterministic selection based on username
@@ -154,7 +129,7 @@ export const useUserProfile = (username: string | undefined) => {
       
       // If we have preference, start with those
       const preferredLocations = preferredLocationTypes.length > 0 
-        ? allPosts.filter(post => post.location && preferredLocationTypes.includes(post.location.type || ''))
+        ? allPosts.filter(post => preferredLocationTypes.includes(post.location.type || ''))
         : [];
       
       // Fill with random posts if needed
@@ -241,15 +216,6 @@ export const useUserProfile = (username: string | undefined) => {
       setWantToVisitPlaces(wantToVisitList);
     } else {
       console.log("User not found:", username);
-      
-      // Default to sarah_vibes as fallback when no user is found
-      const sarahUser = mockUsers.find(u => u.username === 'sarah_vibes');
-      if (sarahUser) {
-        console.log("Falling back to sarah_vibes profile");
-        // Recursively call the same effect with sarah_vibes
-        return useUserProfile("sarah_vibes").user;
-      }
-      
       setUser(null);
       setUserPosts([]);
       setFollowedVenues([]);
@@ -259,29 +225,7 @@ export const useUserProfile = (username: string | undefined) => {
   }, [username]);
 
   const getPostComments = (postId: string): Comment[] => {
-    // Get comments from mock data
-    const comments = mockComments.filter(comment => comment.postId === postId);
-    
-    // Ensure each comment has a valid user object
-    return comments.map(comment => {
-      // If comment already has a valid user, return it as is
-      if (comment.user && comment.user.username) {
-        return comment;
-      }
-      
-      // Otherwise, assign a default user
-      const defaultUser = mockUsers[0] || {
-        id: 'default-user',
-        username: 'default_user',
-        name: 'Default User',
-        avatar: 'https://avatars.dicebear.com/api/human/default.svg'
-      };
-      
-      return {
-        ...comment,
-        user: defaultUser
-      };
-    });
+    return mockComments.filter(comment => comment.postId === postId);
   };
 
   const getUserBio = () => {

@@ -44,7 +44,6 @@ export interface ChatState {
   searchResults: SearchResult[];
   transcript: string;
   interimTranscript: string;
-  loading?: boolean;
 }
 
 export type IntentType = 'search' | 'info' | 'question' | 'booking' | 'unknown';

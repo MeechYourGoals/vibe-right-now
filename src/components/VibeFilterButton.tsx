@@ -5,7 +5,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Filter, Sparkles } from "lucide-react";
+import { Filter } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { vibeTags } from "@/hooks/useVibeFilters";
 import VibeTags from "./VibeTags";
@@ -37,21 +37,12 @@ const VibeFilterButton = ({ selectedTags, toggleTag, clearTags }: VibeFilterButt
               Select vibes to filter your feed
             </p>
             <div className="grid grid-cols-2 gap-1 min-w-[280px]">
-              {vibeTags.map(tag => (
-                <Badge 
-                  key={tag}
-                  variant={selectedTags.includes(tag) ? "default" : "outline"}
-                  className={`${
-                    selectedTags.includes(tag) 
-                      ? 'bg-primary text-primary-foreground' 
-                      : 'bg-primary/10 text-primary hover:bg-primary/20'
-                  } text-xs cursor-pointer flex items-center justify-start`}
-                  onClick={() => toggleTag(tag)}
-                >
-                  <Sparkles className="h-3 w-3 mr-1" />
-                  {tag}
-                </Badge>
-              ))}
+              <VibeTags 
+                tags={vibeTags} 
+                selectedTags={selectedTags} 
+                onTagClick={toggleTag} 
+                size="sm"
+              />
             </div>
             {selectedTags.length > 0 && (
               <Button 

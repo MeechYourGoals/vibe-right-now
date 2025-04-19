@@ -16,5 +16,4 @@ export interface Location {
   hours?: Record<string, string>;
   vibes?: string[];
   userProfile?: MockUserProfile;
-  description?: string;
 }
