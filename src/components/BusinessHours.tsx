@@ -13,7 +13,9 @@ const BusinessHours = ({ venue }: BusinessHoursProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   
   // Ensure venue has hours data
-  const venueHours = venue.hours || generateBusinessHours(venue);
+  if (!venue.hours) {
+    venue.hours = generateBusinessHours(venue);
+  }
   
   const todaysHours = getTodaysHours(venue);
   
@@ -41,31 +43,31 @@ const BusinessHours = ({ venue }: BusinessHoursProps) => {
         <div className="mt-2 text-sm grid grid-cols-2 gap-1">
           <div className="flex justify-between pr-2">
             <span className="text-muted-foreground">Monday:</span>
-            <span>{venueHours.monday}</span>
+            <span>{venue.hours.monday}</span>
           </div>
           <div className="flex justify-between pr-2">
             <span className="text-muted-foreground">Tuesday:</span>
-            <span>{venueHours.tuesday}</span>
+            <span>{venue.hours.tuesday}</span>
           </div>
           <div className="flex justify-between pr-2">
             <span className="text-muted-foreground">Wednesday:</span>
-            <span>{venueHours.wednesday}</span>
+            <span>{venue.hours.wednesday}</span>
           </div>
           <div className="flex justify-between pr-2">
             <span className="text-muted-foreground">Thursday:</span>
-            <span>{venueHours.thursday}</span>
+            <span>{venue.hours.thursday}</span>
           </div>
           <div className="flex justify-between pr-2">
             <span className="text-muted-foreground">Friday:</span>
-            <span>{venueHours.friday}</span>
+            <span>{venue.hours.friday}</span>
           </div>
           <div className="flex justify-between pr-2">
             <span className="text-muted-foreground">Saturday:</span>
-            <span>{venueHours.saturday}</span>
+            <span>{venue.hours.saturday}</span>
           </div>
           <div className="flex justify-between pr-2">
             <span className="text-muted-foreground">Sunday:</span>
-            <span>{venueHours.sunday}</span>
+            <span>{venue.hours.sunday}</span>
           </div>
         </div>
       )}

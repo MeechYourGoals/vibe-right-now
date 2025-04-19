@@ -2,7 +2,6 @@
 import { AgentHandler } from '../../handlers/agentHandler';
 import { MessageContext, MessageProcessor } from '../types';
 import { Message } from '../../../types';
-import { createAIMessage } from '../../messageFactory';
 
 export class AgentProcessor implements MessageProcessor {
   canProcess(context: MessageContext): boolean {

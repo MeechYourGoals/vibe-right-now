@@ -5,6 +5,7 @@ export interface Message {
   sender: 'user' | 'ai';
   timestamp: Date;
   verified?: boolean;
-  role?: 'user' | 'assistant' | 'system' | 'error';
+  // For compatibility with newer format
   content?: string;
+  role?: 'user' | 'assistant' | 'system' | 'error';
 }

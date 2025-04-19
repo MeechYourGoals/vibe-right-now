@@ -1,21 +1,20 @@
-
 import { useState, useCallback, useRef } from 'react';
 import { OpenAIService } from '@/services/OpenAIService';
-import { ChatMessage, ChatState, ExtractedIntent } from '@/types';
+import { ChatState, Message } from '@/components/VernonNext/types';
 
 // Default messages to initialize the chat
-const defaultWelcomeMessage: ChatMessage = {
+const defaultWelcomeMessage: Message = {
   id: '1',
-  role: 'assistant',
-  content: "Hi there! I'm Vernon, your AI assistant powered by GPT-4o. I can help you discover amazing places to go and things to do based on your interests. Try asking about restaurants, events, attractions, or specific activities you're interested in. What are you looking for today?",
+  text: "Hi there! I'm Vernon, your AI assistant powered by GPT-4o. I can help you discover amazing places to go and things to do based on your interests. Try asking about restaurants, events, attractions, or specific activities you're interested in. What are you looking for today?",
+  sender: 'ai',
   timestamp: new Date(),
   verified: true
 };
 
-const venueWelcomeMessage: ChatMessage = {
+const venueWelcomeMessage: Message = {
   id: '1',
-  role: 'assistant',
-  content: "Hello! I'm Vernon for Venues, your AI business assistant powered by GPT-4o. I can help you analyze your venue data, understand customer trends, and optimize your business performance. What would you like to know about your venue today?",
+  text: "Hello! I'm Vernon for Venues, your AI business assistant powered by GPT-4o. I can help you analyze your venue data, understand customer trends, and optimize your business performance. What would you like to know about your venue today?",
+  sender: 'ai',
   timestamp: new Date(),
   verified: true
 };
@@ -29,6 +28,7 @@ export const useOpenAIChat = (isVenueMode: boolean = false) => {
     isListening: false,
     isSpeaking: false,
     messages: [isVenueMode ? venueWelcomeMessage : defaultWelcomeMessage],
+    searchResults: [],
     transcript: '',
     interimTranscript: ''
   });
@@ -36,18 +36,18 @@ export const useOpenAIChat = (isVenueMode: boolean = false) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   
   // Helper function to create a user message
-  const createUserMessage = (content: string): ChatMessage => ({
+  const createUserMessage = (content: string): Message => ({
     id: Date.now().toString(),
-    role: 'user',
-    content,
+    text: content,
+    sender: 'user',
     timestamp: new Date()
   });
   
   // Helper function to create an assistant message
-  const createAssistantMessage = (content: string): ChatMessage => ({
+  const createAssistantMessage = (content: string): Message => ({
     id: Date.now().toString(),
-    role: 'assistant',
-    content,
+    text: content,
+    sender: 'ai',
     timestamp: new Date(),
     verified: true
   });
@@ -67,10 +67,10 @@ export const useOpenAIChat = (isVenueMode: boolean = false) => {
     try {
       // Format messages for OpenAI API
       const chatMessages = state.messages
-        .filter(msg => msg.role !== 'system') // Filter out system messages
+        .filter(msg => msg.sender !== 'system') // Filter out system messages
         .map(msg => ({
-          role: msg.role,
-          content: msg.content
+          role: msg.sender === 'user' ? 'user' : 'assistant',
+          content: msg.text
         }));
       
       // Add the new user message

@@ -1,66 +1,67 @@
 
-import { Message } from '../types';
-
 export class MessageFactory {
-  static createUserMessage(content: string): Message {
+  static createUserMessage(content: string) {
     return {
       id: Date.now().toString(),
       content,
       role: 'user',
+      timestamp: new Date().toISOString(),
+      // For compatibility with VernonNext
       text: content,
-      sender: 'user',
-      timestamp: new Date()
+      sender: 'user' as const
     };
   }
 
-  static createAssistantMessage(content: string): Message {
+  static createAssistantMessage(content: string) {
     return {
       id: Date.now().toString(),
       content,
       role: 'assistant',
+      timestamp: new Date().toISOString(),
+      // For compatibility with VernonNext
       text: content,
-      sender: 'ai',
-      timestamp: new Date()
+      sender: 'ai' as const
     };
   }
 
-  static createSystemMessage(content: string): Message {
+  static createSystemMessage(content: string) {
     return {
       id: Date.now().toString(),
       content,
       role: 'system',
+      timestamp: new Date().toISOString(),
+      // For compatibility with VernonNext
       text: content,
-      sender: 'ai',
-      timestamp: new Date()
+      sender: 'ai' as const
     };
   }
 
-  // New message types to fix import errors
-  static createAIMessage(content: string): Message {
+  static createAIMessage(content: string) {
     return this.createAssistantMessage(content);
   }
 
-  static createErrorMessage(content: string = "Sorry, I couldn't process that request. Please try again."): Message {
+  static createErrorMessage(content: string = "I'm sorry, I couldn't process that request. Please try again.") {
     return {
       id: Date.now().toString(),
       content,
       role: 'error',
+      timestamp: new Date().toISOString(),
+      // For compatibility with VernonNext
       text: content,
-      sender: 'ai',
-      timestamp: new Date()
+      sender: 'ai' as const
     };
   }
 
-  // Add initial message constant to fix import errors
-  static get INITIAL_MESSAGE(): Message {
+  static get INITIAL_MESSAGE() {
     return this.createSystemMessage("Hi! I'm Vernon, your personal concierge. How can I help you today?");
   }
 }
 
-// Export singleton functions for backward compatibility
-export const createUserMessage = MessageFactory.createUserMessage;
-export const createAssistantMessage = MessageFactory.createAssistantMessage;
-export const createSystemMessage = MessageFactory.createSystemMessage;
-export const createAIMessage = MessageFactory.createAIMessage;
-export const createErrorMessage = MessageFactory.createErrorMessage;
+// Export individual functions for backward compatibility
+export const createUserMessage = (content: string) => MessageFactory.createUserMessage(content);
+export const createAssistantMessage = (content: string) => MessageFactory.createAssistantMessage(content);
+export const createSystemMessage = (content: string) => MessageFactory.createSystemMessage(content);
+export const createAIMessage = (content: string) => MessageFactory.createAIMessage(content);
+export const createErrorMessage = (content: string = "I'm sorry, I couldn't process that request. Please try again.") => 
+  MessageFactory.createErrorMessage(content);
 export const INITIAL_MESSAGE = MessageFactory.INITIAL_MESSAGE;
