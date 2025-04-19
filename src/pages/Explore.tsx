@@ -1,28 +1,32 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { DateRange } from "react-day-picker";
-import { format, addMonths } from "date-fns";
 import Header from "@/components/Header";
 import { mockLocations } from "@/mock/data";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { MapPin, Search, VerifiedIcon, Music, Mic, AlertTriangle, Moon, Sparkles, Coffee, X, Calendar, CalendarRange } from "lucide-react";
+import { Music, Mic, Moon, Sparkles, AlertTriangle, MapPin, VerifiedIcon, Calendar, CalendarRange, X } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
 import CameraButton from "@/components/CameraButton";
 import SearchVibes from "@/components/SearchVibes";
 import NearbyVibesMap from "@/components/NearbyVibesMap";
-import { Location } from "@/types";
 import VenuePost from "@/components/VenuePost";
-import EventsList from "@/components/venue/events/EventsList";
-import { EventItem } from "@/components/venue/events/types";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from '@/integrations/supabase/client';
-import { getComedyEventsForCity } from "@/services/search/eventService";
-import DateRangeSelector from "@/components/DateRangeSelector";
 import { generateMusicVenues, generateComedyClubs, generateNightlifeVenues } from "@/utils/locations/mockVenueGenerators";
+import { generateMusicEvents, generateComedyEvents, getComedyEventsForCity } from "@/services/search/eventService";
+import DateFilterSection from "@/components/explore/DateFilterSection";
+import MusicSection from "@/components/explore/MusicSection";
+import ComedySection from "@/components/explore/ComedySection";
+import NightlifeSection from "@/components/explore/NightlifeSection";
+import LocationsGrid from "@/components/explore/LocationsGrid";
+import { format, addMonths } from "date-fns";
+import { Location } from "@/types";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import DateRangeSelector from "@/components/DateRangeSelector";
+import { EventItem } from "@/components/venue/events/types";
 
 const generateMockMusicVenues = (city: string) => {
   return [
@@ -76,8 +80,8 @@ const generateMockComedians = () => {
   ];
 };
 
-const getCitySpecificContent = (city: string, type: string) => {
-  return `Check out this amazing ${type} in ${city}! The vibes are incredible right now.`;
+const getCitySpecificContent = (location: Location) => {
+  return `Check out this amazing ${location.type} in ${location.city}! The vibes are incredible right now.`;
 };
 
 const getMediaForLocation = (location: Location) => {
@@ -180,109 +184,6 @@ const getAdditionalTags = (location: Location) => {
     .slice(0, numberOfTags);
   
   return additionalTags;
-};
-
-const generateMusicEvents = (city: string, state: string, dateRange?: DateRange): EventItem[] => {
-  if (!city) return [];
-  
-  const venues = generateMockMusicVenues(city);
-  const artists = generateMockArtists();
-  const events: EventItem[] = [];
-  
-  const minEvents = 6;
-  const maxExtra = 6;
-  const totalEvents = minEvents + Math.floor(Math.random() * maxExtra);
-  
-  const now = new Date();
-  const basePrice = 30 + Math.floor(Math.random() * 120);
-  
-  for (let i = 0; i < totalEvents; i++) {
-    const artist = artists[Math.floor(Math.random() * artists.length)];
-    const venue = venues[Math.floor(Math.random() * venues.length)];
-    
-    let date = new Date();
-    if (dateRange?.from && dateRange?.to) {
-      const start = new Date(dateRange.from);
-      const end = new Date(dateRange.to);
-      date = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
-    } else {
-      date.setDate(now.getDate() + Math.floor(Math.random() * 90));
-    }
-    
-    const hour = 19 + Math.floor(Math.random() * 4);
-    const price = basePrice + Math.floor(Math.random() * 100);
-    
-    events.push({
-      id: `music-${city}-${i}`,
-      title: `${artist} Live in Concert`,
-      description: `Don't miss ${artist} performing live at ${venue}! An unforgettable night of music awaits.`,
-      date: date.toISOString(),
-      time: `${hour}:00`,
-      location: venue,
-      imageUrl: `https://source.unsplash.com/random/800x600/?concert,${artist.split(' ').join(',')}`,
-      ticketUrl: `https://tickets.example.com/${artist.toLowerCase().replace(/\s+/g, '-')}`,
-      price: `$${price}`,
-      type: "music"
-    });
-  }
-  
-  return events.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-};
-
-const generateComedyEvents = (city: string, state: string, dateRange?: DateRange): EventItem[] => {
-  if (!city) return [];
-  
-  const comedyVenues = [
-    `${city} Comedy Club`,
-    `Laugh Factory ${city}`,
-    `${city} Improv`,
-    `Funny Bone ${city}`,
-    `Comedy Cellar ${city}`,
-    `Jokes & Notes ${city}`,
-    `The Comedy Store ${city}`
-  ];
-  
-  const comedians = generateMockComedians();
-  const events: EventItem[] = [];
-  
-  const minEvents = 5;
-  const maxExtra = 5;
-  const totalEvents = minEvents + Math.floor(Math.random() * maxExtra);
-  
-  const now = new Date();
-  const basePrice = 25 + Math.floor(Math.random() * 50);
-  
-  for (let i = 0; i < totalEvents; i++) {
-    const comedian = comedians[Math.floor(Math.random() * comedians.length)];
-    const venue = comedyVenues[Math.floor(Math.random() * comedyVenues.length)];
-    
-    let date = new Date();
-    if (dateRange?.from && dateRange?.to) {
-      const start = new Date(dateRange.from);
-      const end = new Date(dateRange.to);
-      date = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
-    } else {
-      date.setDate(now.getDate() + Math.floor(Math.random() * 60));
-    }
-    
-    const hour = 19 + Math.floor(Math.random() * 3);
-    const price = basePrice + Math.floor(Math.random() * 40);
-    
-    events.push({
-      id: `comedy-${city}-${i}`,
-      title: `${comedian} - Live Standup`,
-      description: `Join us for a night of laughter with ${comedian} performing their latest material live at ${venue}.`,
-      date: date.toISOString(),
-      time: `${hour}:00`,
-      location: venue,
-      imageUrl: `https://source.unsplash.com/random/800x600/?comedian,standup,microphone`,
-      ticketUrl: `https://tickets.example.com/comedy/${comedian.toLowerCase().replace(/\s+/g, '-')}`,
-      price: `$${price}`,
-      type: "comedy"
-    });
-  }
-  
-  return events.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 };
 
 const generateNightlifeVenues = (city: string, state: string): Location[] => {
@@ -441,7 +342,7 @@ const Explore = () => {
         navigate(`/explore?${searchParams.toString()}`, { replace: true });
       }
     }
-  }, [location.search, navigate]);
+  }, [location.search, navigate, dateRange]);
   
   useEffect(() => {
     if (searchedCity) {
@@ -732,157 +633,6 @@ const Explore = () => {
     return "Explore Vibes";
   };
 
-  const ComedyEventsSection = () => {
-    return (
-      <div className="space-y-4">
-        <EventsList events={comedyEvents.map(event => ({
-          id: event.id,
-          title: event.title,
-          description: event.description,
-          date: event.date,
-          time: event.time,
-          location: event.location,
-          imageUrl: event.imageUrl,
-          ticketUrl: event.ticketUrl,
-          price: event.price,
-          type: "comedy"
-        }))} />
-      </div>
-    );
-  };
-
-  const NightlifeSection = () => {
-    if (nightlifeVenues.length === 0) {
-      return (
-        <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-          <Moon className="w-12 h-12 mb-4" />
-          <h3 className="text-xl font-semibold mb-2">No Nightlife Venues Found</h3>
-          <p>We couldn't find any nightlife venues in this area. Try searching for another location.</p>
-        </div>
-      );
-    }
-    
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {nightlifeVenues.map((venue) => (
-          <Card key={venue.id} className="vibe-card-hover bg-indigo-50 border-indigo-200 hover:bg-indigo-100">
-            <CardContent className="p-4">
-              <div className="flex justify-between items-start mb-2">
-                <h3 className="text-lg font-semibold flex items-center">
-                  {venue.name}
-                  {venue.verified && (
-                    <VerifiedIcon className="h-4 w-4 ml-1 text-indigo-500" />
-                  )}
-                </h3>
-                <Badge variant="outline" className="bg-indigo-100 border-indigo-300 text-indigo-700">Nightlife</Badge>
-              </div>
-              
-              <div className="text-sm text-muted-foreground mb-3 flex items-center">
-                <MapPin className="h-4 w-4 mr-1" />
-                <span>
-                  {venue.address}, {venue.city}, {venue.state}
-                </span>
-              </div>
-              
-              {venue.vibes && venue.vibes.length > 0 && (
-                <div className="flex flex-wrap gap-1 mb-3">
-                  {venue.vibes.map((vibe, index) => (
-                    <Badge key={index} variant="outline" className="bg-indigo-50 text-indigo-700 border-indigo-200">
-                      <Sparkles className="h-3 w-3 mr-1 text-indigo-500" />
-                      {vibe}
-                    </Badge>
-                  ))}
-                </div>
-              )}
-              
-              <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white" asChild>
-                <Link to={`/venue/${venue.id}`}>View Vibes</Link>
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    );
-  };
-
-  const handleDateRangeChange = (range: DateRange | undefined) => {
-    setDateRange(range);
-    
-    if (range?.from) {
-      const searchParams = new URLSearchParams(location.search);
-      searchParams.set('from', range.from.toISOString().split('T')[0]);
-      
-      if (range.to) {
-        searchParams.set('to', range.to.toISOString().split('T')[0]);
-      } else {
-        searchParams.delete('to');
-      }
-      
-      navigate(`/explore?${searchParams.toString()}`, { replace: true });
-      
-      if (searchedCity) {
-        setMusicEvents(generateMusicEvents(searchedCity, searchedState, range));
-        setComedyEvents(generateComedyEvents(searchedCity, searchedState, range));
-      }
-      
-      toast({
-        title: "Date filter applied",
-        description: range.to 
-          ? `Showing events from ${format(range.from, "MMM d, yyyy")} to ${format(range.to, "MMM d, yyyy")}` 
-          : `Showing events from ${format(range.from, "MMM d, yyyy")}`,
-        duration: 3000,
-      });
-    } else {
-      const searchParams = new URLSearchParams(location.search);
-      searchParams.delete('from');
-      searchParams.delete('to');
-      navigate(`/explore?${searchParams.toString()}`, { replace: true });
-      
-      if (searchedCity) {
-        setMusicEvents(generateMusicEvents(searchedCity, searchedState));
-        setComedyEvents(generateComedyEvents(searchedCity, searchedState));
-      }
-      
-      toast({
-        title: "Date filter cleared",
-        description: "Showing events for all upcoming dates",
-        duration: 3000,
-      });
-    }
-  };
-
-  const toggleDateFilter = () => {
-    setShowDateFilter(!showDateFilter);
-    if (!showDateFilter && !dateRange) {
-      const today = new Date();
-      setDateRange({ 
-        from: today, 
-        to: addMonths(today, 1) 
-      });
-    }
-  };
-
-  const clearDateFilter = () => {
-    setDateRange(undefined);
-    setShowDateFilter(false);
-    
-    const searchParams = new URLSearchParams(location.search);
-    searchParams.delete('from');
-    searchParams.delete('to');
-    navigate(`/explore?${searchParams.toString()}`, { replace: true });
-    
-    if (searchedCity) {
-      setMusicEvents(generateMusicEvents(searchedCity, searchedState));
-      setComedyEvents(generateComedyEvents(searchedCity, searchedState));
-    }
-    
-    toast({
-      title: "Date filter cleared",
-      description: "Showing events for all upcoming dates",
-      duration: 3000,
-    });
-  };
-
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -897,95 +647,19 @@ const Explore = () => {
             <SearchVibes onSearch={handleSearch} />
           </div>
           
-          <div className="max-w-xl mx-auto mb-4 flex flex-col gap-2">
-            {isNaturalLanguageSearch && (
-              <div className="p-3 bg-indigo-50 rounded-lg border border-indigo-100">
-                <h3 className="text-sm font-medium flex items-center text-indigo-700">
-                  <Sparkles className="h-4 w-4 mr-2 text-indigo-500" />
-                  Smart Search Results
-                </h3>
-                <p className="text-xs text-indigo-600">
-                  Showing results for "{searchQuery.substring(0, 75)}
-                  {searchQuery.length > 75 ? '...' : ''}"
-                </p>
-                {searchCategories.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mt-2">
-                    {searchCategories.map((category, index) => (
-                      <Badge 
-                        key={index} 
-                        variant="outline" 
-                        className="bg-indigo-100 text-indigo-700 border-indigo-200 text-xs"
-                      >
-                        {category}
-                      </Badge>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-            
-            <div className="flex items-center justify-between">
-              {vibeFilter && (
-                <Badge className="bg-indigo-100 text-indigo-800 px-3 py-1 text-sm flex items-center">
-                  <Sparkles className="h-4 w-4 mr-1" />
-                  Filtering by vibe: {vibeFilter}
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-5 w-5 ml-2 rounded-full" 
-                    onClick={() => {
-                      setVibeFilter("");
-                      handleSearch(searchQuery, "All", searchCategory);
-                    }}
-                  >
-                    <X className="h-3 w-3" />
-                  </Button>
-                </Badge>
-              )}
-              
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className={showDateFilter ? "bg-indigo-100 text-indigo-800" : ""}
-                onClick={toggleDateFilter}
-              >
-                <CalendarRange className="h-4 w-4 mr-2" />
-                {showDateFilter ? "Hide Date Filter" : "Filter by Date"}
-              </Button>
-            </div>
-            
-            {showDateFilter && (
-              <div className="p-3 bg-indigo-50 rounded-lg border border-indigo-100">
-                <div className="flex justify-between items-center mb-2">
-                  <h3 className="text-sm font-medium flex items-center text-indigo-700">
-                    <Calendar className="h-4 w-4 mr-2 text-indigo-500" />
-                    Find Future Vibes
-                  </h3>
-                  {dateRange && (
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="h-7 text-xs" 
-                      onClick={clearDateFilter}
-                    >
-                      Clear Dates
-                    </Button>
-                  )}
-                </div>
-                <DateRangeSelector 
-                  dateRange={dateRange} 
-                  onDateRangeChange={handleDateRangeChange} 
-                />
-                {dateRange?.from && (
-                  <p className="text-xs text-indigo-600 mt-2">
-                    {dateRange.to 
-                      ? `Showing events from ${format(dateRange.from, "MMM d, yyyy")} to ${format(dateRange.to, "MMM d, yyyy")}` 
-                      : `Showing events from ${format(dateRange.from, "MMM d, yyyy")}`}
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
+          <DateFilterSection
+            dateRange={dateRange}
+            setDateRange={setDateRange}
+            showDateFilter={showDateFilter}
+            setShowDateFilter={setShowDateFilter}
+            searchedCity={searchedCity}
+            handleDateRangeChange={handleDateRangeChange}
+            vibeFilter={vibeFilter}
+            setVibeFilter={setVibeFilter}
+            searchQuery={searchQuery}
+            searchCategory={searchCategory}
+            handleSearch={handleSearch}
+          />
           
           <Tabs defaultValue="all" value={activeTab} onValueChange={handleTabChange} className="max-w-2xl mx-auto">
             <TabsList className="grid grid-cols-2 md:grid-cols-10">
@@ -1023,58 +697,27 @@ const Explore = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="md:col-span-2">
               {activeTab === "music" && (
-                <div className="mb-6">
-                  <h2 className="text-xl font-semibold mb-4 flex items-center">
-                    Music Events in {searchedCity}
-                    {dateRange?.from && (
-                      <Badge className="ml-2 bg-indigo-100 text-indigo-800">
-                        {format(dateRange.from, "MMM yyyy")}
-                        {dateRange.to && ` - ${format(dateRange.to, "MMM yyyy")}`}
-                      </Badge>
-                    )}
-                  </h2>
-                  {musicEvents.length > 0 ? (
-                    <div className="space-y-4">
-                      <EventsList events={musicEvents} />
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                      <AlertTriangle className="w-12 h-12 mb-4" />
-                      <h3 className="text-xl font-semibold mb-2">No Shows Right Now</h3>
-                      <p>There are no upcoming shows in this area for the next week.</p>
-                    </div>
-                  )}
-                </div>
+                <MusicSection
+                  musicEvents={musicEvents}
+                  searchedCity={searchedCity}
+                  dateRange={dateRange}
+                />
               )}
               
               {activeTab === "comedy" && (
-                <div className="mb-6">
-                  <h2 className="text-xl font-semibold mb-4 flex items-center">
-                    Comedy Shows in {searchedCity}
-                    {dateRange?.from && (
-                      <Badge className="ml-2 bg-indigo-100 text-indigo-800">
-                        {format(dateRange.from, "MMM yyyy")}
-                        {dateRange.to && ` - ${format(dateRange.to, "MMM yyyy")}`}
-                      </Badge>
-                    )}
-                  </h2>
-                  <ComedyEventsSection />
-                </div>
+                <ComedySection
+                  comedyEvents={comedyEvents}
+                  searchedCity={searchedCity}
+                  dateRange={dateRange}
+                />
               )}
               
               {activeTab === "nightlife" && (
-                <div className="mb-6">
-                  <h2 className="text-xl font-semibold mb-4 flex items-center">
-                    Nightlife in {searchedCity}
-                    {dateRange?.from && (
-                      <Badge className="ml-2 bg-indigo-100 text-indigo-800">
-                        {format(dateRange.from, "MMM yyyy")}
-                        {dateRange.to && ` - ${format(dateRange.to, "MMM yyyy")}`}
-                      </Badge>
-                    )}
-                  </h2>
-                  <NightlifeSection />
-                </div>
+                <NightlifeSection
+                  nightlifeVenues={nightlifeVenues}
+                  searchedCity={searchedCity}
+                  dateRange={dateRange}
+                />
               )}
               
               {searchCategory === "places" && searchedCity && activeTab === "sports" && (
@@ -1096,7 +739,7 @@ const Explore = () => {
                         <VenuePost
                           key={location.id}
                           venue={location}
-                          content={getCitySpecificContent(location.city, 'sports event')}
+                          content={getCitySpecificContent(location)}
                           media={getMediaForLocation(location)}
                           timestamp={new Date().toISOString()}
                         />
@@ -1106,58 +749,10 @@ const Explore = () => {
               )}
               
               {activeTab !== "music" && activeTab !== "comedy" && activeTab !== "nightlife" && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {filteredLocations.length > 0 ? (
-                    filteredLocations.map((location) => (
-                      <Card key={location.id} className="vibe-card-hover">
-                        <CardContent className="p-4">
-                          <div className="flex justify-between items-start mb-2">
-                            <h3 className="text-lg font-semibold flex items-center">
-                              {location.name}
-                              {location.verified && (
-                                <VerifiedIcon className="h-4 w-4 ml-1 text-primary" />
-                              )}
-                            </h3>
-                            <HoverCard>
-                              <HoverCardTrigger asChild>
-                                <Badge variant="outline" className="cursor-help">{location.type}</Badge>
-                              </HoverCardTrigger>
-                              <HoverCardContent className="w-auto">
-                                <div className="space-y-2">
-                                  <h4 className="text-sm font-semibold">More Tags</h4>
-                                  <div className="flex flex-wrap gap-1.5">
-                                    <Badge variant="outline" className="bg-primary/10">{location.type}</Badge>
-                                    {locationTags[location.id]?.map((tag, index) => (
-                                      <Badge key={index} variant="outline" className="bg-muted/40">{tag}</Badge>
-                                    ))}
-                                  </div>
-                                </div>
-                              </HoverCardContent>
-                            </HoverCard>
-                          </div>
-                          
-                          <div className="text-sm text-muted-foreground mb-3 flex items-center">
-                            <MapPin className="h-4 w-4 mr-1" />
-                            <span>
-                              {location.address}, {location.city}, {location.state}
-                            </span>
-                          </div>
-                          
-                          <Button className="w-full bg-gradient-vibe" asChild>
-                            <Link to={`/venue/${location.id}`}>View Vibes</Link>
-                          </Button>
-                        </CardContent>
-                      </Card>
-                    ))
-                  ) : (
-                    <div className="col-span-full text-center py-10">
-                      <h3 className="text-xl font-semibold mb-2">No locations found</h3>
-                      <p className="text-muted-foreground">
-                        Try adjusting your search or filters
-                      </p>
-                    </div>
-                  )}
-                </div>
+                <LocationsGrid
+                  locations={filteredLocations}
+                  locationTags={locationTags}
+                />
               )}
             </div>
             
@@ -1167,7 +762,9 @@ const Explore = () => {
               {searchedCity && dateRange?.from && (
                 <Card className="mt-6 bg-indigo-50 border-indigo-200">
                   <CardContent className="p-4">
-                    <h3 className="text-lg font-semibold mb-2 text-indigo-800">Planning Your Trip</h3>
+                    <h3 className="text-lg font-semibold mb-2 text-indigo-800">
+                      Planning Your Trip
+                    </h3>
                     <p className="text-sm text-indigo-700 mb-4">
                       Looking at events in {searchedCity} for
                       {dateRange.to
