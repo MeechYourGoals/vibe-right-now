@@ -12,6 +12,14 @@ export interface Message {
   };
 }
 
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant' | 'system' | 'error';
+  content: string;
+  timestamp: string;
+  verified?: boolean;
+}
+
 export interface ChatOptions {
   useVoice: boolean;
   useLocation: boolean;
@@ -38,7 +46,7 @@ export interface ChatState {
   isLoading: boolean;
   isListening: boolean;
   isSpeaking: boolean;
-  messages: Message[];
+  messages: ChatMessage[];
   searchResults: SearchResult[];
   transcript: string;
   interimTranscript: string;
