@@ -22,6 +22,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from '@/integrations/supabase/client';
 import { getComedyEventsForCity } from "@/services/search/eventService";
 import DateRangeSelector from "@/components/DateRangeSelector";
+import { generateMusicVenues, generateComedyClubs, generateNightlifeVenues } from "@/utils/locations/mockVenueGenerators";
 
 const generateMockMusicVenues = (city: string) => {
   return [
@@ -106,7 +107,7 @@ const getMediaForLocation = (location: Location) => {
 
 const generateMockLocationsForCity = (city: string, state: string) => {
   const types = ["restaurant", "bar", "event", "attraction", "sports", "other"];
-  const mockCityLocations: Location[] = [];
+  let mockCityLocations: Location[] = [];
   
   types.forEach((type, typeIndex) => {
     const count = Math.floor(Math.random() * 2) + 2;
@@ -149,6 +150,13 @@ const generateMockLocationsForCity = (city: string, state: string) => {
       });
     }
   });
+
+  mockCityLocations = [
+    ...mockCityLocations,
+    ...generateMusicVenues(city, state),
+    ...generateComedyClubs(city, state),
+    ...generateNightlifeVenues(city, state)
+  ];
   
   return mockCityLocations;
 };
@@ -181,7 +189,6 @@ const generateMusicEvents = (city: string, state: string, dateRange?: DateRange)
   const artists = generateMockArtists();
   const events: EventItem[] = [];
   
-  // Generate at least 6 events, even for small cities
   const minEvents = 6;
   const maxExtra = 6;
   const totalEvents = minEvents + Math.floor(Math.random() * maxExtra);
@@ -238,7 +245,6 @@ const generateComedyEvents = (city: string, state: string, dateRange?: DateRange
   const comedians = generateMockComedians();
   const events: EventItem[] = [];
   
-  // Always generate at least 5 comedy shows
   const minEvents = 5;
   const maxExtra = 5;
   const totalEvents = minEvents + Math.floor(Math.random() * maxExtra);
