@@ -13,12 +13,16 @@ export const LocationsNearby: React.FC<LocationsNearbyProps> = ({
   searchQuery = "" 
 }) => {
   const filteredLocations = mockLocations.filter(location => {
+    // Show all locations when category is "all"
     if (category === "all") return true;
-    return location.type?.toLowerCase() === category.toLowerCase();
-  }).filter(location => {
-    if (!searchQuery) return true;
-    return location.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-           location.description?.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    // Show locations matching the category for other tabs
+    if (location.type?.toLowerCase() === category.toLowerCase()) {
+      if (!searchQuery) return true;
+      return location.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+             location.description?.toLowerCase().includes(searchQuery.toLowerCase());
+    }
+    return false;
   });
 
   if (filteredLocations.length === 0) {
@@ -37,3 +41,4 @@ export const LocationsNearby: React.FC<LocationsNearbyProps> = ({
     </div>
   );
 };
+
