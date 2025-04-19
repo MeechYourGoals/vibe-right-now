@@ -282,25 +282,31 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
       setIsNaturalLanguageSearch(false);
     }
     
-    if (searchCategory === 'places' && value.length > 1) {
-      const filtered = allCities.filter(city => 
-        city.toLowerCase().includes(value.toLowerCase())
-      ).slice(0, 5);
+    if (searchCategory === 'places') {
+      const matchedCities = allCities
+        .filter(city => fuzzyMatch(value, city) > 0.3)
+        .slice(0, 5);
       
-      setCitySuggestions(filtered);
-      setShowCitySuggestions(filtered.length > 0);
-    } else if (searchCategory === 'vibes' && value.length > 0) {
-      const filtered = vibeSuggestions.filter(vibe => 
-        vibe.toLowerCase().includes(value.toLowerCase())
-      );
+      setCitySuggestions(matchedCities);
+      setShowCitySuggestions(matchedCities.length > 0);
+    } else if (searchCategory === 'vibes') {
+      const matchedVibes = vibeSuggestions
+        .filter(vibe => fuzzyMatch(value, vibe) > 0.3);
       
-      setVibeSuggestions(filtered.length > 0 ? filtered : [
+      setVibeSuggestions(matchedVibes.length > 0 ? matchedVibes : [
         "Cozy", "Family Friendly", "NightOwl", "Trendy", "Chill", 
         "Upscale", "Casual", "Romantic", "Lively", "Intimate"
       ]);
       setShowVibeSuggestions(true);
-    } else {
-      setShowCitySuggestions(false);
+    } else if (searchCategory === 'users') {
+      const filteredUsers = mockUsers
+        .filter(user => 
+          fuzzyMatch(value, user.username) > 0.3 ||
+          fuzzyMatch(value, user.name) > 0.3
+        )
+        .slice(0, 5);
+      
+      setShowUserSuggestions(filteredUsers.length > 0);
     }
   };
   

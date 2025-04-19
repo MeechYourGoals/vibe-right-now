@@ -1,8 +1,8 @@
-
 import { useState, useEffect } from "react";
 import { User, Post, Location, Comment, Media } from "@/types";
 import { mockUsers, mockPosts, mockComments, mockLocations } from "@/mock/data";
 import { hashString, generateUserBio } from "@/mock/users";
+import { fuzzyMatch } from "@/utils/searchUtils";
 
 // List of vibe tags that can be assigned to posts
 export const vibeTags = [
@@ -67,61 +67,37 @@ export const useUserProfile = (username: string | undefined) => {
       return;
     }
     
-    console.log("Looking for username:", username);
+    const normalizedSearchUsername = username.toLowerCase().trim();
     
-    // Featured usernames list for easy checking
-    const featuredUsernames = featuredUsers.map(u => u.username);
-    const normalizedSearchUsername = username.toLowerCase();
+    // Helper function for fuzzy name matching
+    const findBestUserMatch = (searchTerm: string) => {
+      let bestMatch: User | undefined;
+      let bestScore = 0;
+      
+      // Check each user's username, name, and variations
+      mockUsers.forEach(user => {
+        const variations = [
+          user.username,
+          user.name,
+          user.name.replace(/\s+/g, ''),
+          user.name.replace(/\s+/g, '_'),
+          user.username.replace(/_/g, ' ')
+        ];
+        
+        variations.forEach(variation => {
+          const score = fuzzyMatch(searchTerm, variation);
+          if (score > bestScore) {
+            bestScore = score;
+            bestMatch = user;
+          }
+        });
+      });
+      
+      return bestScore > 0.3 ? bestMatch : undefined;
+    };
     
-    // Check for different variations of usernames (full name, username, etc.)
-    const nameVariations = [
-      { type: 'sarah', username: 'sarah_vibes' },
-      { type: 'jay', username: 'jay_experiences' },
-      { type: 'alex', username: 'adventure_alex' },
-      { type: 'marco', username: 'marco_travels' },
-      { type: 'jamie', username: 'local_explorer' },
-      { type: 'sarah miller', username: 'sarah_vibes' },
-      { type: 'jay johnson', username: 'jay_experiences' },
-      { type: 'alex kim', username: 'adventure_alex' },
-      { type: 'marco williams', username: 'marco_travels' },
-      { type: 'jamie chen', username: 'local_explorer' },
-      { type: 'sarah_miller', username: 'sarah_vibes' },
-      { type: 'jay_johnson', username: 'jay_experiences' },
-      { type: 'alex_kim', username: 'adventure_alex' },
-      { type: 'marco_williams', username: 'marco_travels' },
-      { type: 'jamie_chen', username: 'local_explorer' }
-    ];
-    
-    // First check for direct match
-    let foundUser: User | undefined = mockUsers.find(
-      user => user.username && user.username.toLowerCase() === normalizedSearchUsername
-    );
-    
-    // If no direct match, check for name variations
-    if (!foundUser) {
-      const variation = nameVariations.find(v => v.type.toLowerCase() === normalizedSearchUsername);
-      if (variation) {
-        foundUser = mockUsers.find(user => user.username === variation.username);
-      }
-    }
-    
-    // If still no match, check if username contains parts of any featured user
-    if (!foundUser) {
-      for (const featured of featuredUsers) {
-        // If any part of the featured username or full name is in the search, use that user
-        if (
-          featured.username.toLowerCase().includes(normalizedSearchUsername) || 
-          normalizedSearchUsername.includes(featured.username.toLowerCase()) ||
-          featured.fullName.toLowerCase().includes(normalizedSearchUsername) ||
-          normalizedSearchUsername.includes(featured.fullName.toLowerCase())
-        ) {
-          foundUser = mockUsers.find(user => user.username === featured.username);
-          break;
-        }
-      }
-    }
-    
-    console.log("Found user:", foundUser);
+    // Try to find the best matching user
+    const foundUser = findBestUserMatch(normalizedSearchUsername);
     
     if (foundUser) {
       // Ensure user has all required properties
@@ -141,7 +117,7 @@ export const useUserProfile = (username: string | undefined) => {
       const usernameHash = hashString(completeUser.username);
       
       // For our featured users, ensure they have more posts to showcase their profiles
-      const isFeaturedUser = featuredUsernames.includes(completeUser.username);
+      const isFeaturedUser = featuredUsers.map(u => u.username).includes(completeUser.username);
       const postCount = isFeaturedUser ? 8 + (usernameHash % 4) : 3 + (usernameHash % 5); // 8-12 posts for featured users, 3-8 for others
       
       // Find posts by this user with deterministic selection based on username

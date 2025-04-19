@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -11,6 +10,7 @@ import PrivateProfileContent from "@/components/user/PrivateProfileContent";
 import UserPlacesContent from "@/components/user/UserPlacesContent";
 import FollowedVenuesSection from "@/components/user/FollowedVenuesSection";
 import { mockUsers } from "@/mock/users";
+import { fuzzyMatch } from "@/utils/searchUtils";
 
 const UserProfile = () => {
   const { username } = useParams<{ username: string }>();
@@ -50,42 +50,42 @@ const UserProfile = () => {
     'jamie_chen': 'local_explorer'
   };
   
-  // Ensure we have a valid username for our featured users
+  // Redirect to best matching profile if exact match not found
   useEffect(() => {
     if (!username) return;
     
-    // Normalize the input username to lowercase for case-insensitive comparison
-    const normalizedInput = username.toLowerCase();
+    const normalizedInput = username.toLowerCase().trim();
+    let targetUsername = normalizedInput;
     
-    // Check if the username is one of our featured users or a variation
-    if (normalizedInput in featuredUserMap) {
-      const correctUsername = featuredUserMap[normalizedInput];
-      
-      // Only redirect if we're not already at the correct username
-      if (normalizedInput !== correctUsername) {
-        navigate(`/user/${correctUsername}`, { replace: true });
-      }
-      return;
-    }
-    
-    // Check for partial matches (first name, last name components)
-    for (const [key, value] of Object.entries(featuredUserMap)) {
-      if (key.includes(normalizedInput) || normalizedInput.includes(key)) {
-        navigate(`/user/${value}`, { replace: true });
-        return;
-      }
-    }
-    
-    // Finally check for usernames in mockUsers data
-    const foundMockUser = mockUsers.find(user => 
-      user.username && user.username.toLowerCase() === normalizedInput
+    // Check for best match among featured users first
+    const featuredMatch = mockUsers.find(user => 
+      fuzzyMatch(normalizedInput, user.username) > 0.3 ||
+      fuzzyMatch(normalizedInput, user.name) > 0.3
     );
     
-    if (foundMockUser && foundMockUser.username !== username) {
-      navigate(`/user/${foundMockUser.username}`, { replace: true });
+    if (featuredMatch) {
+      targetUsername = featuredMatch.username;
+    } else {
+      // Check mock users for best match
+      const userMatch = mockUsers.find(user => 
+        fuzzyMatch(normalizedInput, user.username) > 0.3 ||
+        fuzzyMatch(normalizedInput, user.name) > 0.3
+      );
+      
+      if (userMatch) {
+        targetUsername = userMatch.username;
+      } else {
+        // Default to sarah_vibes as fallback
+        targetUsername = 'sarah_vibes';
+      }
+    }
+    
+    // Only redirect if we're not already at the target username
+    if (targetUsername !== username) {
+      navigate(`/user/${targetUsername}`, { replace: true });
     }
   }, [username, navigate]);
-  
+
   const { 
     user, 
     userPosts,
