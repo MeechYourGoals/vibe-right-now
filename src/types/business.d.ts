@@ -1,6 +1,6 @@
 
 export interface BusinessHours {
-  [day: string]: string; // Changed from { open: string; close: string }
+  [day: string]: string;
 }
 
 export interface BusinessInfo {

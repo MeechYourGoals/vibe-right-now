@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { BusinessHours as BusinessHoursType, Location } from "@/types";
+import { Location } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Clock, ChevronDown, ChevronUp } from "lucide-react";
 import { generateBusinessHours, getTodaysHours } from "@/utils/businessHoursUtils";
@@ -13,9 +13,7 @@ const BusinessHours = ({ venue }: BusinessHoursProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   
   // Ensure venue has hours data
-  if (!venue.hours) {
-    venue.hours = generateBusinessHours(venue);
-  }
+  const venueHours = venue.hours || generateBusinessHours(venue);
   
   const todaysHours = getTodaysHours(venue);
   
@@ -43,31 +41,31 @@ const BusinessHours = ({ venue }: BusinessHoursProps) => {
         <div className="mt-2 text-sm grid grid-cols-2 gap-1">
           <div className="flex justify-between pr-2">
             <span className="text-muted-foreground">Monday:</span>
-            <span>{venue.hours.monday}</span>
+            <span>{venueHours.monday}</span>
           </div>
           <div className="flex justify-between pr-2">
             <span className="text-muted-foreground">Tuesday:</span>
-            <span>{venue.hours.tuesday}</span>
+            <span>{venueHours.tuesday}</span>
           </div>
           <div className="flex justify-between pr-2">
             <span className="text-muted-foreground">Wednesday:</span>
-            <span>{venue.hours.wednesday}</span>
+            <span>{venueHours.wednesday}</span>
           </div>
           <div className="flex justify-between pr-2">
             <span className="text-muted-foreground">Thursday:</span>
-            <span>{venue.hours.thursday}</span>
+            <span>{venueHours.thursday}</span>
           </div>
           <div className="flex justify-between pr-2">
             <span className="text-muted-foreground">Friday:</span>
-            <span>{venue.hours.friday}</span>
+            <span>{venueHours.friday}</span>
           </div>
           <div className="flex justify-between pr-2">
             <span className="text-muted-foreground">Saturday:</span>
-            <span>{venue.hours.saturday}</span>
+            <span>{venueHours.saturday}</span>
           </div>
           <div className="flex justify-between pr-2">
             <span className="text-muted-foreground">Sunday:</span>
-            <span>{venue.hours.sunday}</span>
+            <span>{venueHours.sunday}</span>
           </div>
         </div>
       )}

@@ -1,6 +1,8 @@
 
+import { Message } from '../types';
+
 export class MessageFactory {
-  static createUserMessage(content: string) {
+  static createUserMessage(content: string): Message {
     return {
       id: Date.now().toString(),
       content,
@@ -11,7 +13,7 @@ export class MessageFactory {
     };
   }
 
-  static createAssistantMessage(content: string) {
+  static createAssistantMessage(content: string): Message {
     return {
       id: Date.now().toString(),
       content,
@@ -22,7 +24,7 @@ export class MessageFactory {
     };
   }
 
-  static createSystemMessage(content: string) {
+  static createSystemMessage(content: string): Message {
     return {
       id: Date.now().toString(),
       content,
@@ -34,11 +36,11 @@ export class MessageFactory {
   }
 
   // New message types to fix import errors
-  static createAIMessage(content: string) {
+  static createAIMessage(content: string): Message {
     return this.createAssistantMessage(content);
   }
 
-  static createErrorMessage(content: string = "Sorry, I couldn't process that request. Please try again.") {
+  static createErrorMessage(content: string = "Sorry, I couldn't process that request. Please try again."): Message {
     return {
       id: Date.now().toString(),
       content,
@@ -50,7 +52,7 @@ export class MessageFactory {
   }
 
   // Add initial message constant to fix import errors
-  static get INITIAL_MESSAGE() {
+  static get INITIAL_MESSAGE(): Message {
     return this.createSystemMessage("Hi! I'm Vernon, your personal concierge. How can I help you today?");
   }
 }
