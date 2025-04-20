@@ -11,6 +11,8 @@ export interface EventItem {
   ticketsAvailable: number;
   type: "music" | "comedy" | "sports" | "festival" | "theater" | "other";
   image?: string;
+  imageUrl?: string;
+  ticketUrl?: string;
 }
 
 export interface EventSectionProps {

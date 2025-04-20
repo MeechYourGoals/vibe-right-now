@@ -1,7 +1,7 @@
 
 import React, { RefObject, useState } from 'react';
 import { X, Minimize2, Maximize2, Mic, MicOff, ArrowRight, VolumeX, Volume2 } from 'lucide-react';
-import { ChatState, ChatMessage } from '@/types';
+import { ChatState, ChatMessage, Message } from '@/components/VernonNext/types';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
@@ -34,7 +34,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   // If minimized, show a collapsed header
   if (state.isMinimized) {
     return (
-      <Card className="w-80 shadow-lg bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950 overflow-hidden border-blue-200 dark:border-blue-800">
+      <Card className="w-80 shadow-lg bg-gradient-to-br from-gray-800 to-gray-900 dark:from-gray-800 dark:to-gray-900 overflow-hidden border-gray-700 dark:border-gray-700">
         <CardHeader className="py-2 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 flex flex-row justify-between items-center">
           <div className="flex items-center space-x-2">
             <Avatar className="h-6 w-6 border-2 border-white">
@@ -64,9 +64,10 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
     }
   };
   
-  const renderMessage = (message: ChatMessage) => {
-    const isUser = message.role === 'user';
+  const renderMessage = (message: Message) => {
+    const isUser = message.role === 'user' || message.sender === 'user';
     const timestamp = formatDistanceToNow(new Date(message.timestamp), { addSuffix: true });
+    const messageContent = message.content || message.text || '';
     
     return (
       <div
@@ -83,15 +84,15 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
           className={`max-w-[85%] ${
             isUser 
               ? 'bg-blue-600 text-white' 
-              : 'bg-gray-100 dark:bg-gray-800'
+              : 'bg-gray-700 dark:bg-gray-700 text-white'
           } rounded-2xl px-4 py-2 shadow-sm`}
         >
-          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+          <div className="text-xs text-gray-400 dark:text-gray-400 mb-1">
             {timestamp}
           </div>
           
-          <div className={`${isUser ? 'text-white' : 'text-gray-900 dark:text-gray-100'}`}>
-            {message.content.split('\n').map((line, i) => (
+          <div className={`${isUser ? 'text-white' : 'text-white'}`}>
+            {messageContent.split('\n').map((line, i) => (
               <p key={i} className={i > 0 ? 'mt-2' : ''}>{line}</p>
             ))}
           </div>
@@ -101,8 +102,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="p-1 h-7 text-xs text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900 flex items-center gap-1"
-                onClick={() => onSpeak(message.content)}
+                className="p-1 h-7 text-xs text-blue-300 hover:bg-blue-800 dark:hover:bg-blue-900 flex items-center gap-1"
+                onClick={() => onSpeak(messageContent)}
                 disabled={state.isSpeaking}
               >
                 {state.isSpeaking ? <VolumeX className="h-3 w-3" /> : <Volume2 className="h-3 w-3" />}
@@ -122,7 +123,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
           <AvatarImage src="/vernon-avatar.png" alt="Vernon" />
           <AvatarFallback className="bg-indigo-500 text-white">V</AvatarFallback>
         </Avatar>
-        <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl px-4 py-3 shadow-sm">
+        <div className="bg-gray-700 dark:bg-gray-700 rounded-2xl px-4 py-3 shadow-sm">
           <div className="flex space-x-2">
             <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" />
             <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce delay-100" />
@@ -134,7 +135,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   };
   
   return (
-    <Card className="w-80 md:w-96 h-[600px] max-h-[80vh] shadow-xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950 overflow-hidden border-blue-200 dark:border-blue-800 flex flex-col">
+    <Card className="w-80 md:w-96 h-[600px] max-h-[80vh] shadow-xl bg-gradient-to-br from-gray-800 to-gray-900 dark:from-gray-800 dark:to-gray-900 overflow-hidden border-gray-700 dark:border-gray-700 flex flex-col">
       <CardHeader className="py-3 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 flex flex-row justify-between items-center border-b border-blue-700 shrink-0">
         <div className="flex items-center">
           <Avatar className="h-8 w-8 border-2 border-white mr-3">
@@ -161,30 +162,30 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
         </div>
       </CardHeader>
       
-      <CardContent className="flex-1 overflow-y-auto p-4 pb-0">
+      <CardContent className="flex-1 overflow-y-auto p-4 pb-0 text-white">
         {state.messages.map(renderMessage)}
         {state.isLoading && renderTypingIndicator()}
         <div ref={messagesEndRef} />
       </CardContent>
       
       {(state.transcript || state.interimTranscript) && (
-        <div className="mx-4 my-2 px-3 py-2 bg-blue-100 dark:bg-blue-900 rounded-md">
-          <p className="text-xs font-medium text-blue-700 dark:text-blue-300">
+        <div className="mx-4 my-2 px-3 py-2 bg-blue-900 dark:bg-blue-900 rounded-md">
+          <p className="text-xs font-medium text-blue-300 dark:text-blue-300">
             {state.isListening ? 'Listening...' : 'Transcript:'}
           </p>
-          <p className="text-sm text-blue-800 dark:text-blue-200">
+          <p className="text-sm text-blue-200 dark:text-blue-200">
             {state.interimTranscript || state.transcript}
           </p>
         </div>
       )}
       
-      <CardFooter className="p-4 pt-2 border-t border-gray-200 dark:border-gray-800 shrink-0">
+      <CardFooter className="p-4 pt-2 border-t border-gray-700 dark:border-gray-700 shrink-0">
         <form onSubmit={handleSubmit} className="flex w-full space-x-2">
           <Button
             type="button"
             variant={state.isListening ? "destructive" : "outline"}
             size="icon"
-            className={`shrink-0 ${state.isListening ? "bg-red-500 text-white" : ""}`}
+            className={`shrink-0 ${state.isListening ? "bg-red-500 text-white" : "bg-gray-700 text-white border-gray-600"}`}
             onClick={onToggleListening}
             disabled={state.isLoading}
           >
@@ -195,7 +196,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             placeholder="Ask Vernon anything..."
-            className="flex-1 border-blue-200 dark:border-blue-800 bg-white dark:bg-gray-950"
+            className="flex-1 border-gray-600 dark:border-gray-600 bg-gray-700 dark:bg-gray-700 text-white placeholder:text-gray-400"
             disabled={state.isLoading}
           />
           

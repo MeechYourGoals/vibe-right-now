@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useRef } from 'react';
 import { OpenAIService } from '@/services/OpenAIService';
 import { ChatState, Message } from '@/components/VernonNext/types';
@@ -8,7 +9,8 @@ const defaultWelcomeMessage: Message = {
   text: "Hi there! I'm Vernon, your AI assistant powered by GPT-4o. I can help you discover amazing places to go and things to do based on your interests. Try asking about restaurants, events, attractions, or specific activities you're interested in. What are you looking for today?",
   sender: 'ai',
   timestamp: new Date(),
-  verified: true
+  verified: true,
+  content: "Hi there! I'm Vernon, your AI assistant powered by GPT-4o. I can help you discover amazing places to go and things to do based on your interests. Try asking about restaurants, events, attractions, or specific activities you're interested in. What are you looking for today?"
 };
 
 const venueWelcomeMessage: Message = {
@@ -16,7 +18,8 @@ const venueWelcomeMessage: Message = {
   text: "Hello! I'm Vernon for Venues, your AI business assistant powered by GPT-4o. I can help you analyze your venue data, understand customer trends, and optimize your business performance. What would you like to know about your venue today?",
   sender: 'ai',
   timestamp: new Date(),
-  verified: true
+  verified: true,
+  content: "Hello! I'm Vernon for Venues, your AI business assistant powered by GPT-4o. I can help you analyze your venue data, understand customer trends, and optimize your business performance. What would you like to know about your venue today?"
 };
 
 export const useOpenAIChat = (isVenueMode: boolean = false) => {
@@ -40,7 +43,9 @@ export const useOpenAIChat = (isVenueMode: boolean = false) => {
     id: Date.now().toString(),
     text: content,
     sender: 'user',
-    timestamp: new Date()
+    timestamp: new Date(),
+    content: content,
+    role: 'user'
   });
   
   // Helper function to create an assistant message
@@ -49,7 +54,9 @@ export const useOpenAIChat = (isVenueMode: boolean = false) => {
     text: content,
     sender: 'ai',
     timestamp: new Date(),
-    verified: true
+    verified: true,
+    content: content,
+    role: 'assistant'
   });
   
   // Send a text message to the chat
