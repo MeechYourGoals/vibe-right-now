@@ -3,7 +3,10 @@ import { Location } from "@/types";
 import { cityCoordinates } from "./cityDatabase";
 
 export function generateMusicVenues(city: string, state: string): Location[] {
-  if (!city) return [];
+  if (!city) {
+    city = "San Francisco";
+    state = "CA";
+  }
   
   const musicVenues = [
     { name: `${city} Arena`, type: "Large Arena" },
@@ -33,7 +36,10 @@ export function generateMusicVenues(city: string, state: string): Location[] {
 }
 
 export function generateComedyClubs(city: string, state: string): Location[] {
-  if (!city) return [];
+  if (!city) {
+    city = "San Francisco";
+    state = "CA";
+  }
   
   const comedyVenues = [
     { name: `${city} Comedy Club`, type: "Stand-up Club" },
@@ -61,7 +67,10 @@ export function generateComedyClubs(city: string, state: string): Location[] {
 }
 
 export function generateNightlifeVenues(city: string, state: string): Location[] {
-  if (!city) return [];
+  if (!city) {
+    city = "San Francisco";
+    state = "CA";
+  }
   
   const nightlifeVenues = [
     { name: `${city} Rooftop Lounge`, type: "Rooftop Bar" },

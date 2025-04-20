@@ -59,7 +59,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   }
 
   return (
-    <div className="bg-muted border border-border rounded-lg overflow-hidden shadow-lg flex flex-col h-full">
+    <div className="bg-gray-800 text-white border border-gray-700 rounded-lg overflow-hidden shadow-lg flex flex-col h-full">
       <ChatHeader
         isMinimized={isMinimized}
         toggleMinimize={toggleMinimize}
@@ -91,6 +91,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
         isTyping={isTyping}
         handlePushToTalkStart={isListening ? undefined : startListening}
         handlePushToTalkEnd={isListening ? stopListening : undefined}
+        toggleListening={toggleListening}
       />
     </div>
   );

@@ -37,6 +37,9 @@ export const createAIMessage = (text: string): Message => {
   };
 };
 
+// Alias for createAIMessage for backward compatibility
+export const createAssistantMessage = createAIMessage;
+
 // Create an error message
 export const createErrorMessage = (): Message => {
   return createAIMessage(
@@ -94,5 +97,6 @@ export const MessageFactory = {
   createLocationSearchMessage,
   createSearchMessage,
   createProcessingMessage,
-  createBookingConfirmationMessage
+  createBookingConfirmationMessage,
+  createAssistantMessage: createAIMessage
 };

@@ -9,6 +9,8 @@ interface MessageItemProps {
 
 // Function to convert markdown links to HTML
 const renderLinks = (text: string) => {
+  if (!text) return '';
+  
   // Regex to match markdown links [text](url)
   const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
   
@@ -68,6 +70,7 @@ const renderLinks = (text: string) => {
 
 // Function to process the message text and convert it to React elements
 const processMessageText = (text: string) => {
+  if (!text) return '';
   // Process links and other text formatting
   return renderLinks(text);
 };
@@ -90,7 +93,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
         className={`px-3 py-2 rounded-lg max-w-[75%] ${
           message.sender === 'user' 
             ? 'bg-primary text-primary-foreground' 
-            : 'bg-card text-card-foreground border border-border'
+            : 'bg-gray-700 text-white border border-gray-600'
         }`}
       >
         {message.sender === 'ai' ? (

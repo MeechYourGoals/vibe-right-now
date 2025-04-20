@@ -10,6 +10,8 @@ export interface Message {
     lng: number;
     name: string;
   };
+  content?: string;
+  role?: 'user' | 'assistant' | 'system';
 }
 
 export interface ChatOptions {
@@ -43,6 +45,7 @@ export interface ChatState {
   transcript: string;
   interimTranscript: string;
   loading?: boolean; // Added for backward compatibility
+  error?: string; // Required by some components
 }
 
 export type IntentType = 'search' | 'info' | 'question' | 'booking' | 'unknown';
@@ -54,4 +57,11 @@ export interface ExtractedIntent {
   categories?: string[];
   keywords?: string[];
   mood?: string[];
+}
+
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  timestamp: string | Date;
 }
