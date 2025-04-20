@@ -13,7 +13,7 @@ import NearbyVibesMap from "@/components/NearbyVibesMap";
 import VenuePost from "@/components/VenuePost";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from '@/integrations/supabase/client';
-import { generateMusicVenues, generateComedyClubs, generateNightlifeVenues } from "@/utils/locations/mockVenueGenerators";
+import { generateMusicVenues, generateComedyClubs } from "@/utils/locations/mockVenueGenerators";
 import { generateMusicEvents, generateComedyEvents, getComedyEventsForCity } from "@/services/search/eventService";
 import DateFilterSection from "@/components/explore/DateFilterSection";
 import MusicSection from "@/components/explore/MusicSection";
@@ -158,8 +158,7 @@ const generateMockLocationsForCity = (city: string, state: string) => {
   mockCityLocations = [
     ...mockCityLocations,
     ...generateMusicVenues(city, state),
-    ...generateComedyClubs(city, state),
-    ...generateNightlifeVenues(city, state)
+    ...generateComedyClubs(city, state)
   ];
   
   return mockCityLocations;
@@ -186,7 +185,7 @@ const getAdditionalTags = (location: Location) => {
   return additionalTags;
 };
 
-const generateNightlifeVenues = (city: string, state: string): Location[] => {
+const generateLocalNightlifeVenues = (city: string, state: string): Location[] => {
   if (!city) return [];
   
   const nightlifeVenues = [
@@ -209,6 +208,7 @@ const generateNightlifeVenues = (city: string, state: string): Location[] => {
       city,
       state,
       country: "USA",
+      zip: `${10000 + Math.floor(Math.random() * 90000)}`,
       lat: 40 + Math.random(),
       lng: -75 + Math.random(),
       type: "bar",
@@ -303,7 +303,7 @@ const Explore = () => {
         
         setMusicEvents(generateMusicEvents(city, state, dateRange));
         setComedyEvents(generateComedyEvents(city, state, dateRange));
-        setNightlifeVenues(generateNightlifeVenues(city, state));
+        setNightlifeVenues(generateLocalNightlifeVenues(city, state));
       }
       
       setSearchCategory("places");
@@ -312,7 +312,7 @@ const Explore = () => {
       setSearchedState("CA");
       setMusicEvents(generateMusicEvents("San Francisco", "CA", dateRange));
       setComedyEvents(generateComedyEvents("San Francisco", "CA", dateRange));
-      setNightlifeVenues(generateNightlifeVenues("San Francisco", "CA", dateRange));
+      setNightlifeVenues(generateLocalNightlifeVenues("San Francisco", "CA", dateRange));
     }
     
     if (tab) {
@@ -354,13 +354,13 @@ const Explore = () => {
     if (searchedCity) {
       setMusicEvents(generateMusicEvents(searchedCity, searchedState, dateRange));
       setComedyEvents(generateComedyEvents(searchedCity, searchedState, dateRange));
-      setNightlifeVenues(generateNightlifeVenues(searchedCity, searchedState));
+      setNightlifeVenues(generateLocalNightlifeVenues(searchedCity, searchedState));
     } else if (!musicEvents.length || !comedyEvents.length || !nightlifeVenues.length) {
       const defaultCity = "San Francisco";
       const defaultState = "CA";
       setMusicEvents(generateMusicEvents(defaultCity, defaultState, dateRange));
       setComedyEvents(generateComedyEvents(defaultCity, defaultState, dateRange));
-      setNightlifeVenues(generateNightlifeVenues(defaultCity, defaultState));
+      setNightlifeVenues(generateLocalNightlifeVenues(defaultCity, defaultState));
     }
   }, [dateRange, searchedCity, searchedState]);
   
@@ -410,7 +410,7 @@ const Explore = () => {
             setComedyEvents(generateComedyEvents(city, state, dateRange));
           }
           
-          setNightlifeVenues(generateNightlifeVenues(city, state));
+          setNightlifeVenues(generateLocalNightlifeVenues(city, state));
           
           let results = generateMockLocationsForCity(city, state);
           
@@ -527,7 +527,7 @@ const Explore = () => {
       
       setMusicEvents(generateMusicEvents(city, state, dateRange));
       setComedyEvents(generateComedyEvents(city, state, dateRange));
-      setNightlifeVenues(generateNightlifeVenues(city, state));
+      setNightlifeVenues(generateLocalNightlifeVenues(city, state));
     } else {
       setSearchedCity("");
       setSearchedState("");
@@ -715,29 +715,29 @@ const Explore = () => {
             <div className="md:col-span-2">
               {activeTab === "music" && (
                 <MusicSection
-                  musicEvents={musicEvents}
-                  searchedCity={searchedCity}
+                  musicEvents={musicEvents.length > 0 ? musicEvents : generateMusicEvents(searchedCity || "San Francisco", searchedState || "CA", dateRange)}
+                  searchedCity={searchedCity || "San Francisco"}
                   dateRange={dateRange}
                 />
               )}
               
               {activeTab === "comedy" && (
                 <ComedySection
-                  comedyEvents={comedyEvents}
-                  searchedCity={searchedCity}
+                  comedyEvents={comedyEvents.length > 0 ? comedyEvents : generateComedyEvents(searchedCity || "San Francisco", searchedState || "CA", dateRange)}
+                  searchedCity={searchedCity || "San Francisco"}
                   dateRange={dateRange}
                 />
               )}
               
               {activeTab === "nightlife" && (
                 <NightlifeSection
-                  nightlifeVenues={nightlifeVenues}
-                  searchedCity={searchedCity}
+                  nightlifeVenues={nightlifeVenues.length > 0 ? nightlifeVenues : generateLocalNightlifeVenues(searchedCity || "San Francisco", searchedState || "CA")}
+                  searchedCity={searchedCity || "San Francisco"}
                   dateRange={dateRange}
                 />
               )}
               
-              {searchCategory === "places" && searchedCity && activeTab === "sports" && (
+              {searchCategory === "places" && activeTab === "sports" && (
                 <div className="mb-6">
                   <h2 className="text-xl font-semibold mb-4 flex items-center">
                     Trending Sports Events
@@ -767,7 +767,7 @@ const Explore = () => {
               
               {activeTab !== "music" && activeTab !== "comedy" && activeTab !== "nightlife" && (
                 <LocationsGrid
-                  locations={filteredLocations}
+                  locations={filteredLocations.length > 0 ? filteredLocations : generateMockLocationsForCity(searchedCity || "San Francisco", searchedState || "CA")}
                   locationTags={locationTags}
                 />
               )}

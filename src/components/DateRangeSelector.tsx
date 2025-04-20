@@ -51,7 +51,7 @@ export function DateRangeSelector({
             )}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0 bg-muted dark:bg-card border-input" align="start">
+        <PopoverContent className="w-auto p-0 bg-gray-900 border-gray-700" align="start">
           <Calendar
             initialFocus
             mode="range"
@@ -59,7 +59,7 @@ export function DateRangeSelector({
             selected={dateRange}
             onSelect={onDateRangeChange}
             numberOfMonths={2}
-            className={cn("p-3 pointer-events-auto bg-muted dark:bg-gray-800 text-foreground")}
+            className={cn("p-3 pointer-events-auto bg-gray-900 dark:bg-gray-900 text-white")}
           />
         </PopoverContent>
       </Popover>

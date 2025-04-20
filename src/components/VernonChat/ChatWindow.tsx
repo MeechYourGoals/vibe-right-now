@@ -59,7 +59,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   }
 
   return (
-    <div className="bg-gray-800 text-white border border-gray-700 rounded-lg overflow-hidden shadow-lg flex flex-col h-full">
+    <div className="bg-gray-900 text-white border border-gray-700 rounded-lg overflow-hidden shadow-lg flex flex-col h-full">
       <ChatHeader
         isMinimized={isMinimized}
         toggleMinimize={toggleMinimize}

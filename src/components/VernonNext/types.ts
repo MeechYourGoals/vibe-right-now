@@ -10,7 +10,7 @@ export interface Message {
     lng: number;
     name: string;
   };
-  content?: string;
+  content: string;
   role?: 'user' | 'assistant' | 'system';
 }
 

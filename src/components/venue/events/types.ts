@@ -2,21 +2,24 @@
 export interface EventItem {
   id: string;
   title: string;
-  description: string;
-  date: string; // ISO string format
+  date: string;
   time: string;
+  venue: string;
   location: string;
-  imageUrl: string;
-  ticketUrl: string;
+  description: string;
   price: string;
-  type: "music" | "comedy" | "sports" | "festival" | "theater" | string;
+  ticketsAvailable: number;
+  type: "music" | "comedy" | "sports" | "festival" | "theater" | "other";
+  image?: string;
 }
 
-export interface EventLocation {
-  name: string;
-  address: string;
-  city: string;
-  state: string;
-  zipCode: string;
-  country: string;
+export interface EventSectionProps {
+  title: string;
+  events: EventItem[];
+  viewAll?: boolean;
+}
+
+export interface EventCardProps {
+  event: EventItem;
+  featured?: boolean;
 }

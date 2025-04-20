@@ -54,10 +54,10 @@ const ChatControls: React.FC<ChatControlsProps> = ({
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex flex-col border-t border-gray-700 p-3 bg-gray-800"
+      className="flex flex-col border-t border-gray-700 p-3 bg-gray-900"
     >
       {(isListening || isProcessing || transcript || interimTranscript) && (
-        <div className="flex items-center mb-2 p-2 rounded bg-gray-700 border border-gray-600 text-sm text-white">
+        <div className="flex items-center mb-2 p-2 rounded bg-gray-800 border border-gray-700 text-sm text-white">
           <Mic className={`h-4 w-4 mr-2 ${isListening ? 'text-red-500' : 'text-gray-400'}`} />
           <p>
             {isListening 
@@ -75,7 +75,7 @@ const ChatControls: React.FC<ChatControlsProps> = ({
           variant={isListening ? "destructive" : "outline"}
           size="icon"
           className={`h-10 w-10 rounded-full flex-shrink-0 ${
-            isListening ? "bg-red-500 text-white" : "bg-gray-700 text-white border-gray-600"
+            isListening ? "bg-red-500 text-white" : "bg-gray-800 text-white border-gray-700"
           }`}
           onClick={toggleListening}
           onTouchStart={handlePushToTalkStart}
@@ -94,7 +94,7 @@ const ChatControls: React.FC<ChatControlsProps> = ({
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Message Vernon..."
-            className="pr-10 border-gray-600 bg-gray-700 text-white"
+            className="pr-10 border-gray-700 bg-gray-800 text-white"
             disabled={isTyping || isListening}
           />
           {inputValue.trim() && (
