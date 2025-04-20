@@ -38,7 +38,7 @@ export class MessageProcessorCore {
     try {
       // Create and add the user message
       const userMessage = createUserMessage(inputValue);
-      setMessages(prev => [...prev, userMessage]);
+      setMessages(prev => [...prev, userMessage as Message]); // Type assertion to ensure compatibility
       
       // Get current messages for context
       let messageHistory: Message[] = [];
@@ -73,12 +73,12 @@ export class MessageProcessorCore {
       // If no processor handled the message, show an error
       if (!handled) {
         const errorMessage = createErrorMessage();
-        setMessages(prev => [...prev, errorMessage]);
+        setMessages(prev => [...prev, errorMessage as Message]); // Type assertion for compatibility
       }
     } catch (error) {
       console.error('Error processing message:', error);
       const errorMessage = createErrorMessage();
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages(prev => [...prev, errorMessage as Message]); // Type assertion for compatibility
     } finally {
       options.setIsTyping(false);
       options.setIsSearching(false);

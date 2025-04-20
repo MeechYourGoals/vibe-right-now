@@ -1,67 +1,77 @@
 
-export class MessageFactory {
-  static createUserMessage(content: string) {
-    return {
-      id: Date.now().toString(),
-      content,
-      role: 'user',
-      timestamp: new Date().toISOString(),
-      // For compatibility with VernonNext
-      text: content,
-      sender: 'user' as const
-    };
-  }
+import { v4 as uuidv4 } from 'uuid';
+import { Message } from '../types';
 
-  static createAssistantMessage(content: string) {
-    return {
-      id: Date.now().toString(),
-      content,
-      role: 'assistant',
-      timestamp: new Date().toISOString(),
-      // For compatibility with VernonNext
-      text: content,
-      sender: 'ai' as const
-    };
-  }
+// Create a user message
+export const createUserMessage = (text: string): Message => {
+  return {
+    id: uuidv4(),
+    text: text,
+    sender: 'user',
+    timestamp: new Date(),
+    role: 'user',
+    content: text
+  };
+};
 
-  static createSystemMessage(content: string) {
-    return {
-      id: Date.now().toString(),
-      content,
-      role: 'system',
-      timestamp: new Date().toISOString(),
-      // For compatibility with VernonNext
-      text: content,
-      sender: 'ai' as const
-    };
-  }
+// Create an AI response message
+export const createAIMessage = (text: string): Message => {
+  return {
+    id: uuidv4(),
+    text: text,
+    sender: 'ai',
+    timestamp: new Date(),
+    role: 'assistant',
+    content: text,
+    verified: true
+  };
+};
 
-  static createAIMessage(content: string) {
-    return this.createAssistantMessage(content);
-  }
+// Create an error message
+export const createErrorMessage = (): Message => {
+  return createAIMessage(
+    "I'm sorry, I'm having trouble processing your request right now. Could you try rephrasing your question or asking something else?"
+  );
+};
 
-  static createErrorMessage(content: string = "I'm sorry, I couldn't process that request. Please try again.") {
-    return {
-      id: Date.now().toString(),
-      content,
-      role: 'error',
-      timestamp: new Date().toISOString(),
-      // For compatibility with VernonNext
-      text: content,
-      sender: 'ai' as const
-    };
+// Create a location search message
+export const createLocationSearchMessage = (locations: any[]): Message => {
+  let responseText = '';
+  
+  if (locations.length === 0) {
+    responseText = "I couldn't find any matching locations. Could you try a different search?";
+  } else {
+    responseText = `Here are some locations that match your search:\n\n${
+      locations.map((loc, index) => `${index + 1}. ${loc.name} - ${loc.address || loc.city}`).join('\n')
+    }`;
   }
+  
+  return createAIMessage(responseText);
+};
 
-  static get INITIAL_MESSAGE() {
-    return this.createSystemMessage("Hi! I'm Vernon, your personal concierge. How can I help you today?");
+// Create a search message
+export const createSearchMessage = (results: any[]): Message => {
+  let responseText = '';
+  
+  if (results.length === 0) {
+    responseText = "I couldn't find any results matching your search. Could you try a different query?";
+  } else {
+    responseText = `Here are the search results:\n\n${
+      results.map((result, index) => `${index + 1}. ${result.title || result.name} - ${result.description || ''}`).join('\n')
+    }`;
   }
-}
+  
+  return createAIMessage(responseText);
+};
 
-// Export individual functions for backward compatibility
-export const createUserMessage = (content: string) => MessageFactory.createUserMessage(content);
-export const createAssistantMessage = (content: string) => MessageFactory.createAssistantMessage(content);
-export const createSystemMessage = (content: string) => MessageFactory.createSystemMessage(content);
-export const createAIMessage = (content: string) => MessageFactory.createAIMessage(content);
-export const createErrorMessage = (content: string = "I'm sorry, I couldn't process that request. Please try again.") => 
-  MessageFactory.createErrorMessage(content);
-export const INITIAL_MESSAGE = MessageFactory.INITIAL_MESSAGE;
+// Create a processing message
+export const createProcessingMessage = (): Message => {
+  return createAIMessage("I'm processing your request. This might take a moment...");
+};
+
+// Create a booking confirmation message
+export const createBookingConfirmationMessage = (details: any): Message => {
+  return createAIMessage(
+    `Great! I've confirmed your booking for ${details.venueName} on ${details.date} at ${details.time}. You'll receive a confirmation email shortly.`
+  );
+};

@@ -19,11 +19,13 @@ const VenuePostContent: React.FC<VenuePostContentProps> = ({
   timestamp, 
   venueType 
 }) => {
+  // Make sure content is always a string
+  const displayContent = content || "";
   const timeAgo = formatDistanceToNow(new Date(timestamp), { addSuffix: true });
 
   return (
     <>
-      <p className="mb-3">{content}</p>
+      <p className="mb-3">{displayContent}</p>
       <div className="rounded-lg overflow-hidden">
         {media.type === "image" ? (
           <img

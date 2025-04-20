@@ -5,11 +5,11 @@ export interface Message {
   sender: 'user' | 'ai';
   timestamp: Date;
   verified?: boolean;
-  content?: string;
+  content?: string; // Add content property to ensure it's always defined
   role?: 'user' | 'assistant' | 'system' | 'error';
 }
 
 export interface ChatMessage extends Message {
   role: 'user' | 'assistant' | 'system' | 'error';
-  content: string;
+  content: string; // Ensure content is required in ChatMessage
 }

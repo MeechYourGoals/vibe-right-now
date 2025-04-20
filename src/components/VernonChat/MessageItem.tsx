@@ -73,6 +73,9 @@ const processMessageText = (text: string) => {
 };
 
 const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
+  // Use message.text as the primary content, falling back to message.content if needed
+  const displayText = message.text || message.content || "";
+  
   return (
     <div 
       className={`mb-3 flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
@@ -92,10 +95,10 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
       >
         {message.sender === 'ai' ? (
           <div className="prose prose-sm dark:prose-invert">
-            {processMessageText(message.text)}
+            {processMessageText(displayText)}
           </div>
         ) : (
-          message.text
+          displayText
         )}
       </div>
     </div>
