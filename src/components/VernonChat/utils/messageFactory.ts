@@ -1,6 +1,16 @@
 
 import { v4 as uuidv4 } from 'uuid';
-import { Message } from '../types';
+import { Message, ChatMessage } from '../types';
+
+// Initial message displayed when the chat is opened
+export const INITIAL_MESSAGE: Message = {
+  id: 'initial-message',
+  text: "Hi there! I'm Vernon, your AI assistant for discovering the best venues and events. How can I help you today?",
+  sender: 'ai',
+  timestamp: new Date(),
+  role: 'assistant',
+  content: "Hi there! I'm Vernon, your AI assistant for discovering the best venues and events. How can I help you today?"
+};
 
 // Create a user message
 export const createUserMessage = (text: string): Message => {
@@ -74,4 +84,15 @@ export const createBookingConfirmationMessage = (details: any): Message => {
   return createAIMessage(
     `Great! I've confirmed your booking for ${details.venueName} on ${details.date} at ${details.time}. You'll receive a confirmation email shortly.`
   );
+};
+
+// Add MessageFactory for backwards compatibility
+export const MessageFactory = {
+  createUserMessage,
+  createAIMessage,
+  createErrorMessage,
+  createLocationSearchMessage,
+  createSearchMessage,
+  createProcessingMessage,
+  createBookingConfirmationMessage
 };

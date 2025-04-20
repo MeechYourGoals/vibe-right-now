@@ -295,8 +295,8 @@ const Explore = () => {
         processComplexQuery(q);
       } else {
         const parts = q.split(',');
-        const city = parts[0].trim();
-        const state = parts.length > 1 ? parts[1].trim() : "";
+        const city = parts[0].trim() || "San Francisco";
+        const state = parts.length > 1 ? parts[1].trim() : "CA";
         
         setSearchedCity(city);
         setSearchedState(state);
@@ -307,6 +307,12 @@ const Explore = () => {
       }
       
       setSearchCategory("places");
+    } else {
+      setSearchedCity("San Francisco");
+      setSearchedState("CA");
+      setMusicEvents(generateMusicEvents("San Francisco", "CA", dateRange));
+      setComedyEvents(generateComedyEvents("San Francisco", "CA", dateRange));
+      setNightlifeVenues(generateNightlifeVenues("San Francisco", "CA", dateRange));
     }
     
     if (tab) {
@@ -348,6 +354,13 @@ const Explore = () => {
     if (searchedCity) {
       setMusicEvents(generateMusicEvents(searchedCity, searchedState, dateRange));
       setComedyEvents(generateComedyEvents(searchedCity, searchedState, dateRange));
+      setNightlifeVenues(generateNightlifeVenues(searchedCity, searchedState));
+    } else if (!musicEvents.length || !comedyEvents.length || !nightlifeVenues.length) {
+      const defaultCity = "San Francisco";
+      const defaultState = "CA";
+      setMusicEvents(generateMusicEvents(defaultCity, defaultState, dateRange));
+      setComedyEvents(generateComedyEvents(defaultCity, defaultState, dateRange));
+      setNightlifeVenues(generateNightlifeVenues(defaultCity, defaultState));
     }
   }, [dateRange, searchedCity, searchedState]);
   
@@ -633,6 +646,10 @@ const Explore = () => {
     return "Explore Vibes";
   };
 
+  const handleDateRangeChange = (range: DateRange | undefined) => {
+    setDateRange(range);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -652,7 +669,7 @@ const Explore = () => {
             setDateRange={setDateRange}
             showDateFilter={showDateFilter}
             setShowDateFilter={setShowDateFilter}
-            searchedCity={searchedCity}
+            searchedCity={searchedCity || "San Francisco"}
             handleDateRangeChange={handleDateRangeChange}
             vibeFilter={vibeFilter}
             setVibeFilter={setVibeFilter}

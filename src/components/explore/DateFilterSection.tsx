@@ -5,7 +5,7 @@ import { format, addMonths } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, CalendarRange, X } from "lucide-react";
+import { Calendar, CalendarRange, X, Sparkles } from "lucide-react";
 import DateRangeSelector from "@/components/DateRangeSelector";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -72,13 +72,13 @@ const DateFilterSection = ({
     <div className="max-w-xl mx-auto mb-4 flex flex-col gap-2">
       <div className="flex items-center justify-between">
         {vibeFilter && (
-          <Badge className="bg-indigo-100 text-indigo-800 px-3 py-1 text-sm flex items-center">
-            <Sparkles className="h-4 w-4 mr-1" />
+          <Badge className="bg-indigo-800 dark:bg-indigo-900 text-white px-3 py-1 text-sm flex items-center">
+            <Sparkles className="h-4 w-4 mr-1 text-amber-300" />
             Filtering by vibe: {vibeFilter}
             <Button 
               variant="ghost" 
               size="icon" 
-              className="h-5 w-5 ml-2 rounded-full" 
+              className="h-5 w-5 ml-2 rounded-full text-white hover:bg-indigo-700" 
               onClick={() => {
                 setVibeFilter("");
                 handleSearch(searchQuery, "All", searchCategory);
@@ -92,7 +92,7 @@ const DateFilterSection = ({
         <Button 
           variant="outline" 
           size="sm" 
-          className={showDateFilter ? "bg-indigo-100 text-indigo-800" : ""}
+          className={`bg-background text-foreground ${showDateFilter ? "border-primary" : "border-input"}`}
           onClick={toggleDateFilter}
         >
           <CalendarRange className="h-4 w-4 mr-2" />
@@ -101,10 +101,10 @@ const DateFilterSection = ({
       </div>
       
       {showDateFilter && (
-        <div className="p-3 bg-indigo-50 rounded-lg border border-indigo-100">
+        <div className="p-3 bg-card border border-input rounded-lg">
           <div className="flex justify-between items-center mb-2">
-            <h3 className="text-sm font-medium flex items-center text-indigo-700">
-              <Calendar className="h-4 w-4 mr-2 text-indigo-500" />
+            <h3 className="text-sm font-medium flex items-center">
+              <Calendar className="h-4 w-4 mr-2 text-primary" />
               Find Future Vibes
             </h3>
             {dateRange && (
@@ -123,7 +123,7 @@ const DateFilterSection = ({
             onDateRangeChange={handleDateRangeChange} 
           />
           {dateRange?.from && (
-            <p className="text-xs text-indigo-600 mt-2">
+            <p className="text-xs text-foreground mt-2">
               {dateRange.to 
                 ? `Showing events from ${format(dateRange.from, "MMM d, yyyy")} to ${format(dateRange.to, "MMM d, yyyy")}` 
                 : `Showing events from ${format(dateRange.from, "MMM d, yyyy")}`}

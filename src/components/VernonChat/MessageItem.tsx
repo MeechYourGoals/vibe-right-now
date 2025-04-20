@@ -90,7 +90,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
         className={`px-3 py-2 rounded-lg max-w-[75%] ${
           message.sender === 'user' 
             ? 'bg-primary text-primary-foreground' 
-            : 'bg-muted'
+            : 'bg-card text-card-foreground border border-border'
         }`}
       >
         {message.sender === 'ai' ? (

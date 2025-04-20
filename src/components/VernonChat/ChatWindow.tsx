@@ -59,7 +59,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   }
 
   return (
-    <>
+    <div className="bg-muted border border-border rounded-lg overflow-hidden shadow-lg flex flex-col h-full">
       <ChatHeader
         isMinimized={isMinimized}
         toggleMinimize={toggleMinimize}
@@ -92,7 +92,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
         handlePushToTalkStart={isListening ? undefined : startListening}
         handlePushToTalkEnd={isListening ? stopListening : undefined}
       />
-    </>
+    </div>
   );
 };
 
