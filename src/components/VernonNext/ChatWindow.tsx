@@ -92,7 +92,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
           </div>
           
           <div className={`${isUser ? 'text-white' : 'text-white'}`}>
-            {messageContent.split('\n').map((line, i) => (
+            {messageContent && messageContent.split('\n').map((line, i) => (
               <p key={i} className={i > 0 ? 'mt-2' : ''}>{line}</p>
             ))}
           </div>

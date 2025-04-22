@@ -74,7 +74,7 @@ export const useOpenAIChat = (isVenueMode: boolean = false) => {
     try {
       // Format messages for OpenAI API
       const chatMessages = state.messages
-        .filter(msg => msg.sender !== 'system') // Filter out system messages
+        .filter(msg => msg.sender !== 'system') // Filter out system messages, use type check instead of equality
         .map(msg => ({
           role: msg.sender === 'user' ? 'user' : 'assistant',
           content: msg.text

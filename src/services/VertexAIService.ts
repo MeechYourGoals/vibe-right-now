@@ -1,110 +1,168 @@
 
-import { supabase } from '@/integrations/supabase/client';
+import { httpsCallable } from 'firebase/functions';
+import { functions } from '@/firebase/config';
 
-/**
- * Service for interacting with Google Vertex AI API
- */
+interface GenerateTextOptions {
+  temperature?: number;
+  maxTokens?: number;
+  topK?: number;
+  topP?: number;
+  modelVersion?: string;
+  safetySettings?: any[];
+  mode?: string;
+}
+
+interface VertexAIRequest {
+  text: string;
+  history?: Array<{ role: string; content: string }>;
+  options?: GenerateTextOptions;
+}
+
 export class VertexAIService {
-  // Text-to-speech voice configuration
-  static DEFAULT_MALE_VOICE = "en-US-Neural2-D";
-  static DEFAULT_FEMALE_VOICE = "en-US-Neural2-F";
-
-  /**
-   * Generate a response using Vertex AI API
-   * @param prompt The prompt to send to the model
-   * @param mode The mode to use (default, search, venue)
-   * @param context Optional context for the conversation
-   * @returns The generated response
-   */
-  static async generateResponse(
-    prompt: string, 
-    mode: 'default' | 'search' | 'venue' = 'default', 
-    context: any[] = []
+  // Text generation using Vertex AI (Gemini)
+  static async generateText(
+    prompt: string,
+    history: Array<{ role: string; content: string }> = [],
+    options: GenerateTextOptions = {}
   ): Promise<string> {
-    // For now, we'll delegate to OpenAI since that's what we have configured
     try {
-      // Convert context to the format expected by OpenAI
-      const messages = context.map(msg => ({
-        role: msg.sender === 'user' ? 'user' : 'assistant',
-        content: msg.text
-      }));
+      const generateTextFn = httpsCallable<VertexAIRequest, { text: string }>(
+        functions, 
+        'generateText'
+      );
       
-      // Add the new prompt
-      messages.push({
-        role: 'user',
-        content: prompt
+      const result = await generateTextFn({
+        text: prompt,
+        history,
+        options
       });
       
-      // Determine the context based on mode
-      const chatContext = mode === 'venue' ? 'venue' : 'user';
-      
-      return await OpenAIService.sendChatRequest(messages, { context: chatContext });
+      return result.data.text;
     } catch (error) {
-      console.error('Error generating response with Vertex AI:', error);
-      throw error;
+      console.error('Error generating text with Vertex AI:', error);
+      return "I'm having trouble connecting to my AI services right now. Please try again later.";
     }
   }
-
-  /**
-   * Search for information using Vertex AI
-   * @param query The search query
-   * @param categories Optional categories to filter the search
-   * @returns The search results as text
-   */
-  static async searchWithVertex(
-    query: string,
-    categories?: string[]
-  ): Promise<string> {
+  
+  // Speech to text using Vertex AI Speech API
+  static async speechToText(audioBase64: string): Promise<string> {
     try {
-      console.log('Searching with Vertex AI:', query);
-      if (categories && categories.length > 0) {
-        console.log('With categories:', categories);
-      }
+      const speechToTextFn = httpsCallable<{ audio: string }, { transcript: string }>(
+        functions,
+        'speechToText'
+      );
       
-      // Since we're using OpenAI as our backend, delegate the search
-      const enhancedPrompt = `
-        Please provide real information about "${query}".
-        ${categories && categories.length > 0 ? `Focusing on these categories: ${categories.join(', ')}` : ''}
-        Include:
-        - Names of specific places or events
-        - Actual addresses and locations if known
-        - Opening hours and pricing when available
-        - Any other helpful details
-        
-        Format your response in a clear, readable way.
-      `;
+      const result = await speechToTextFn({ audio: audioBase64 });
       
-      // Convert to OpenAI format
-      return await OpenAIService.sendChatRequest([
-        {
-          role: 'system',
-          content: 'You are a helpful assistant that provides accurate information about places, events, and things to do.'
-        },
-        {
-          role: 'user',
-          content: enhancedPrompt
-        }
-      ]);
+      return result.data.transcript;
     } catch (error) {
-      console.error('Error in Vertex AI search:', error);
-      return `I couldn't find specific information about "${query}". Please try a different search.`;
+      console.error('Error in speech to text conversion:', error);
+      return '';
     }
   }
-
-  /**
-   * Convert text to speech using Vertex AI API
-   * @param text The text to convert to speech
-   * @param options Options for the text-to-speech conversion
-   * @returns The audio data as a base64 string
-   */
+  
+  // Text to speech using Vertex AI Text-to-Speech API
   static async textToSpeech(
-    text: string, 
+    text: string,
     options: { voice?: string; speakingRate?: number; pitch?: number } = {}
   ): Promise<string> {
-    // For now, we'll delegate to OpenAI since that's what we have configured
-    return OpenAIService.textToSpeech(text);
+    try {
+      const textToSpeechFn = httpsCallable<
+        { text: string; options: any },
+        { audioContent: string }
+      >(functions, 'textToSpeech');
+      
+      const result = await textToSpeechFn({
+        text,
+        options: {
+          voice: options.voice || 'en-US-Neural2-D',
+          speakingRate: options.speakingRate || 1.0,
+          pitch: options.pitch || 0
+        }
+      });
+      
+      return result.data.audioContent;
+    } catch (error) {
+      console.error('Error in text to speech conversion:', error);
+      return '';
+    }
+  }
+  
+  // Send chat request to Vertex AI
+  static async sendChatRequest(
+    messages: Array<{ role: string; content: string }>,
+    options: { context?: string; model?: string } = {}
+  ): Promise<string> {
+    try {
+      const chatCompletionFn = httpsCallable<
+        { messages: any[]; options: any },
+        { text: string }
+      >(functions, 'chatCompletion');
+      
+      const result = await chatCompletionFn({
+        messages,
+        options: {
+          model: options.model || 'gemini-1.5-pro',
+          context: options.context || 'user'
+        }
+      });
+      
+      return result.data.text;
+    } catch (error) {
+      console.error('Error in chat completion:', error);
+      return "I'm sorry, I encountered an error processing your request. Please try again.";
+    }
+  }
+  
+  // Content moderation using Vertex AI Content API
+  static async moderateContent(text: string): Promise<{
+    isFlagged: boolean;
+    categories: Record<string, number>;
+  }> {
+    try {
+      const moderateContentFn = httpsCallable<
+        { text: string },
+        { isFlagged: boolean; categories: Record<string, number> }
+      >(functions, 'moderateContent');
+      
+      const result = await moderateContentFn({ text });
+      
+      return result.data;
+    } catch (error) {
+      console.error('Error in content moderation:', error);
+      return { isFlagged: false, categories: {} };
+    }
+  }
+  
+  // Vector search for similar content
+  static async vectorSearch(
+    query: string,
+    collection: string,
+    limit: number = 5
+  ): Promise<any[]> {
+    try {
+      const vectorSearchFn = httpsCallable<
+        { query: string; collection: string; limit: number },
+        { results: any[] }
+      >(functions, 'vectorSearch');
+      
+      const result = await vectorSearchFn({
+        query,
+        collection,
+        limit
+      });
+      
+      return result.data.results;
+    } catch (error) {
+      console.error('Error in vector search:', error);
+      return [];
+    }
   }
 }
 
-// Import OpenAIService for fallback
-import { OpenAIService } from './OpenAIService';
+// Create an adapter to maintain compatibility with existing OpenAIService calls
+export const OpenAIService = {
+  sendChatRequest: VertexAIService.sendChatRequest,
+  speechToText: VertexAIService.speechToText,
+  textToSpeech: VertexAIService.textToSpeech
+};
