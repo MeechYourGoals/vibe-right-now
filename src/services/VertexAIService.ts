@@ -1,6 +1,7 @@
 
 import { httpsCallable } from 'firebase/functions';
 import { functions } from '@/firebase/config';
+import { Message } from '@/components/VernonChat/types';
 
 interface GenerateTextOptions {
   temperature?: number;
@@ -41,6 +42,56 @@ export class VertexAIService {
     } catch (error) {
       console.error('Error generating text with Vertex AI:', error);
       return "I'm having trouble connecting to my AI services right now. Please try again later.";
+    }
+  }
+  
+  // Generate response for Vernon Chat
+  static async generateResponse(
+    prompt: string,
+    mode: 'venue' | 'default' = 'default',
+    messages: Message[] = []
+  ): Promise<string> {
+    try {
+      // Convert messages to the format expected by Vertex AI
+      const history = messages.map(msg => ({
+        role: msg.sender === 'user' ? 'user' : 'assistant',
+        content: msg.text
+      }));
+      
+      // Call generateText with the mode option
+      return await VertexAIService.generateText(prompt, history, { 
+        mode,
+        temperature: mode === 'venue' ? 0.3 : 0.7 // More precise for business data
+      });
+    } catch (error) {
+      console.error('Error generating response:', error);
+      return "I'm having trouble processing your request right now.";
+    }
+  }
+  
+  // Search with Vertex AI for more context-aware results
+  static async searchWithVertex(
+    query: string, 
+    options: { city?: string; category?: string } = {}
+  ): Promise<string> {
+    try {
+      const searchFn = httpsCallable<
+        { query: string; options: any },
+        { text: string }
+      >(functions, 'vertexSearch');
+      
+      const result = await searchFn({
+        query,
+        options: {
+          ...options,
+          searchMode: true
+        }
+      });
+      
+      return result.data.text;
+    } catch (error) {
+      console.error('Error in Vertex AI search:', error);
+      return "I couldn't find specific information about that. Could you try asking in a different way?";
     }
   }
   
@@ -87,82 +138,28 @@ export class VertexAIService {
       return '';
     }
   }
-  
-  // Send chat request to Vertex AI
-  static async sendChatRequest(
-    messages: Array<{ role: string; content: string }>,
-    options: { context?: string; model?: string } = {}
-  ): Promise<string> {
-    try {
-      const chatCompletionFn = httpsCallable<
-        { messages: any[]; options: any },
-        { text: string }
-      >(functions, 'chatCompletion');
-      
-      const result = await chatCompletionFn({
-        messages,
-        options: {
-          model: options.model || 'gemini-1.5-pro',
-          context: options.context || 'user'
-        }
-      });
-      
-      return result.data.text;
-    } catch (error) {
-      console.error('Error in chat completion:', error);
-      return "I'm sorry, I encountered an error processing your request. Please try again.";
-    }
-  }
-  
-  // Content moderation using Vertex AI Content API
-  static async moderateContent(text: string): Promise<{
-    isFlagged: boolean;
-    categories: Record<string, number>;
-  }> {
-    try {
-      const moderateContentFn = httpsCallable<
-        { text: string },
-        { isFlagged: boolean; categories: Record<string, number> }
-      >(functions, 'moderateContent');
-      
-      const result = await moderateContentFn({ text });
-      
-      return result.data;
-    } catch (error) {
-      console.error('Error in content moderation:', error);
-      return { isFlagged: false, categories: {} };
-    }
-  }
-  
-  // Vector search for similar content
-  static async vectorSearch(
-    query: string,
-    collection: string,
-    limit: number = 5
-  ): Promise<any[]> {
-    try {
-      const vectorSearchFn = httpsCallable<
-        { query: string; collection: string; limit: number },
-        { results: any[] }
-      >(functions, 'vectorSearch');
-      
-      const result = await vectorSearchFn({
-        query,
-        collection,
-        limit
-      });
-      
-      return result.data.results;
-    } catch (error) {
-      console.error('Error in vector search:', error);
-      return [];
-    }
-  }
 }
 
-// Create an adapter to maintain compatibility with existing OpenAIService calls
+// Create an adapter to maintain compatibility with existing code
 export const OpenAIService = {
-  sendChatRequest: VertexAIService.sendChatRequest,
+  sendChatRequest: async (messages: any[], options: any = {}) => {
+    try {
+      const latestMessage = messages[messages.length - 1];
+      const prompt = latestMessage.content;
+      
+      const history = messages.slice(0, -1).map(msg => ({
+        role: msg.role,
+        content: msg.content
+      }));
+      
+      const mode = options.context === 'venue' ? 'venue' : 'default';
+      
+      return await VertexAIService.generateText(prompt, history, { mode });
+    } catch (error) {
+      console.error('Error in sendChatRequest:', error);
+      return "I'm sorry, I encountered an error processing your request.";
+    }
+  },
   speechToText: VertexAIService.speechToText,
   textToSpeech: VertexAIService.textToSpeech
 };

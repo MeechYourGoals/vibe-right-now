@@ -3,7 +3,26 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User } from 'firebase/auth';
 import { auth, db } from '@/firebase/config';
 import { doc, getDoc } from 'firebase/firestore';
-import { UserProfile } from '@/services/FirebaseAuthService';
+
+// Define the user profile shape
+export interface UserProfile {
+  uid: string;
+  email: string;
+  displayName: string | null;
+  photoURL: string | null;
+  role: 'user' | 'admin' | 'venue_partner';
+  createdAt: Date;
+  lastLogin: Date;
+  preferences?: {
+    location?: {
+      city: string;
+      state: string;
+      country: string;
+    };
+    notifications?: boolean;
+    categories?: string[];
+  };
+}
 
 interface FirebaseContextType {
   user: User | null;

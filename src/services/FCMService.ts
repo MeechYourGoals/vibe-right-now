@@ -1,176 +1,172 @@
 
-import { getMessaging, getToken, onMessage, Messaging } from 'firebase/messaging';
+import { auth, db } from '@/firebase/config';
+import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 import { httpsCallable } from 'firebase/functions';
-import { functions, db } from '@/firebase/config';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { auth } from '@/firebase/config';
+import { functions } from '@/firebase/config';
+import { doc, setDoc, deleteDoc, collection } from 'firebase/firestore';
 
-// FCM Configuration
-const PUBLIC_VAPID_KEY = 'YOUR_VAPID_KEY'; // Replace with your VAPID key
+class FCMService {
+  private messaging: any = null;
+  private initialized = false;
 
-// Initialize Firebase Cloud Messaging
-let messaging: Messaging | null = null;
-try {
-  messaging = getMessaging();
-} catch (error) {
-  console.error('Error initializing FCM:', error);
-}
+  async init() {
+    try {
+      if (!this.initialized) {
+        // Import messaging dynamically to avoid SSR issues
+        const { getMessaging } = await import('firebase/messaging');
+        this.messaging = getMessaging();
+        this.initialized = true;
+        console.log('FCM initialized successfully');
+      }
+    } catch (error) {
+      console.error('Failed to initialize FCM:', error);
+    }
+  }
 
-// Request permission and get FCM token
-export const requestNotificationPermission = async (): Promise<string | null> => {
-  if (!messaging) return null;
-  
-  try {
-    const permission = await Notification.requestPermission();
-    
-    if (permission === 'granted') {
-      // Get FCM token
-      const currentToken = await getToken(messaging, { vapidKey: PUBLIC_VAPID_KEY });
+  async requestPermission() {
+    try {
+      await this.init();
       
-      if (currentToken) {
-        // Store token in Firestore for the current user
-        const user = auth.currentUser;
-        if (user) {
-          await setDoc(
-            doc(db, 'users', user.uid),
-            {
-              fcmTokens: {
-                [currentToken]: {
-                  createdAt: serverTimestamp(),
-                  platform: getPlatform(),
-                  deviceInfo: getDeviceInfo()
-                }
-              }
-            },
-            { merge: true }
-          );
-        }
-        
-        return currentToken;
+      // Request notification permission
+      const permission = await Notification.requestPermission();
+      
+      if (permission === 'granted') {
+        return await this.getToken();
       } else {
-        console.error('No FCM registration token available');
+        console.log('Notification permission denied');
         return null;
       }
-    } else {
-      console.warn('Notification permission denied');
+    } catch (error) {
+      console.error('Error requesting notification permission:', error);
       return null;
     }
-  } catch (error) {
-    console.error('Error requesting notification permission:', error);
-    return null;
   }
-};
 
-// Listen for FCM messages
-export const setupFCMListeners = (onNotificationReceived: (payload: any) => void): (() => void) => {
-  if (!messaging) return () => {};
-  
-  const unsubscribe = onMessage(messaging, (payload) => {
-    console.log('Message received:', payload);
-    onNotificationReceived(payload);
-    
-    // Show notification if app is in foreground
-    if (payload.notification) {
-      const { title, body } = payload.notification;
+  async getToken() {
+    try {
+      await this.init();
       
-      if (Notification.permission === 'granted') {
-        new Notification(title as string, {
-          body: body as string,
-          icon: '/logo.png'
-        });
+      // Get FCM token
+      const vapidKey = 'YOUR_VAPID_KEY'; // Replace with your VAPID key from Firebase console
+      const token = await getToken(this.messaging, { vapidKey });
+      
+      if (token) {
+        console.log('FCM token:', token);
+        await this.saveToken(token);
+        return token;
+      } else {
+        console.log('No registration token available');
+        return null;
       }
+    } catch (error) {
+      console.error('Error getting FCM token:', error);
+      return null;
     }
-  });
-  
-  return unsubscribe;
-};
-
-// Send notification to specific user
-export const sendNotificationToUser = async (
-  userId: string,
-  title: string,
-  body: string,
-  data: Record<string, string> = {}
-): Promise<void> => {
-  try {
-    const sendNotification = httpsCallable(functions, 'sendNotification');
-    await sendNotification({
-      userId,
-      notification: {
-        title,
-        body
-      },
-      data
-    });
-  } catch (error) {
-    console.error('Error sending notification:', error);
-    throw error;
   }
-};
 
-// Send notification to topic subscribers
-export const sendNotificationToTopic = async (
-  topic: string,
-  title: string,
-  body: string,
-  data: Record<string, string> = {}
-): Promise<void> => {
-  try {
-    const sendTopicNotification = httpsCallable(functions, 'sendTopicNotification');
-    await sendTopicNotification({
-      topic,
-      notification: {
-        title,
-        body
-      },
-      data
-    });
-  } catch (error) {
-    console.error('Error sending topic notification:', error);
-    throw error;
+  async saveToken(token: string) {
+    try {
+      const user = auth.currentUser;
+      
+      if (user) {
+        const tokenRef = doc(collection(db, 'users', user.uid, 'fcmTokens'), token);
+        await setDoc(tokenRef, {
+          token,
+          createdAt: new Date(),
+          platform: this.getPlatform(),
+          userAgent: navigator.userAgent
+        });
+        
+        console.log('FCM token saved to database');
+      }
+    } catch (error) {
+      console.error('Error saving FCM token:', error);
+    }
   }
-};
 
-// Subscribe to a topic
-export const subscribeToTopic = async (topic: string): Promise<void> => {
-  try {
-    const token = await requestNotificationPermission();
+  async deleteToken(token: string) {
+    try {
+      const user = auth.currentUser;
+      
+      if (user) {
+        const tokenRef = doc(collection(db, 'users', user.uid, 'fcmTokens'), token);
+        await deleteDoc(tokenRef);
+        
+        console.log('FCM token deleted from database');
+      }
+    } catch (error) {
+      console.error('Error deleting FCM token:', error);
+    }
+  }
+
+  onMessage(callback: (payload: any) => void) {
+    try {
+      if (!this.initialized) {
+        this.init().then(() => {
+          onMessage(this.messaging, callback);
+        });
+      } else {
+        onMessage(this.messaging, callback);
+      }
+    } catch (error) {
+      console.error('Error setting up FCM message handler:', error);
+    }
+  }
+
+  // Send FCM message to a specific topic
+  async sendToTopic(topic: string, title: string, body: string, data?: Record<string, string>) {
+    try {
+      const sendToTopicFn = httpsCallable(functions, 'sendFCMToTopic');
+      
+      return await sendToTopicFn({
+        topic,
+        message: {
+          notification: {
+            title,
+            body
+          },
+          data
+        }
+      });
+    } catch (error) {
+      console.error('Error sending FCM message to topic:', error);
+    }
+  }
+
+  // Send FCM message to specific tokens
+  async sendToTokens(tokens: string[], title: string, body: string, data?: Record<string, string>) {
+    try {
+      const sendToTokensFn = httpsCallable(functions, 'sendFCMToTokens');
+      
+      return await sendToTokensFn({
+        tokens,
+        message: {
+          notification: {
+            title,
+            body
+          },
+          data
+        }
+      });
+    } catch (error) {
+      console.error('Error sending FCM message to tokens:', error);
+    }
+  }
+
+  // Get the current platform (browser, iOS, Android)
+  private getPlatform() {
+    const userAgent = navigator.userAgent || navigator.vendor;
     
-    if (token) {
-      const subscribeTopic = httpsCallable(functions, 'subscribeTopic');
-      await subscribeTopic({ token, topic });
+    if (/android/i.test(userAgent)) {
+      return 'android';
     }
-  } catch (error) {
-    console.error('Error subscribing to topic:', error);
-    throw error;
-  }
-};
-
-// Unsubscribe from a topic
-export const unsubscribeFromTopic = async (topic: string): Promise<void> => {
-  try {
-    const token = await requestNotificationPermission();
     
-    if (token) {
-      const unsubscribeTopic = httpsCallable(functions, 'unsubscribeTopic');
-      await unsubscribeTopic({ token, topic });
+    if (/iPad|iPhone|iPod/.test(userAgent)) {
+      return 'ios';
     }
-  } catch (error) {
-    console.error('Error unsubscribing from topic:', error);
-    throw error;
+    
+    return 'web';
   }
-};
+}
 
-// Helper functions
-const getPlatform = (): string => {
-  return navigator.userAgent;
-};
-
-const getDeviceInfo = (): object => {
-  return {
-    language: navigator.language,
-    platform: navigator.platform,
-    userAgent: navigator.userAgent,
-    vendor: navigator.vendor
-  };
-};
+export const fcmService = new FCMService();
