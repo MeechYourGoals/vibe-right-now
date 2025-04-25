@@ -1,130 +1,134 @@
-import { generateMusicVenues, generateComedyClubs, generateNightlifeVenues } from '@/utils/locations/mockVenueGenerators';
+
 import { VertexAIService } from '@/services/VertexAIService';
+import { cleanResponseText } from '../../responseFormatter';
+import { extractCategories } from '@/services/VertexAI/analysis';
+import { OpenAIService } from '@/services/OpenAIService';
 
-interface SearchParams {
-  city?: string;
-  state?: string;
-  category?: string;
-  query: string;
-  paginationState?: Record<string, number>;
-}
-
-interface LocationSearchResult {
-  contextualResponse: string;
-  locationInfo?: {
-    city: string;
-    state: string;
-    category?: string;
-  };
-}
-
-export class LocationSearchStrategy {
-  private extractLocationFromQuery(query: string): { city?: string; state?: string } {
-    // Extract location from a query like "restaurants in San Francisco" or "things to do in Miami, FL"
-    const cityStateRegex = /(?:in|near|around)\s+([A-Za-z\s.]+)(?:,\s*([A-Za-z]{2}))?/i;
-    const match = query.match(cityStateRegex);
+/**
+ * Handles location-based searches using OpenAI search capabilities
+ */
+export const LocationSearchStrategy = {
+  /**
+   * Detects if a query is likely related to locations or events
+   */
+  isLocationQuery(inputValue: string): boolean {
+    const locationKeywords = /what|where|when|how|things\s+to\s+do|events|places|restaurants|bars|attractions|activities|visit|in|at|near|around/i;
+    const cityNames = /miami|new york|los angeles|chicago|san francisco|boston|seattle|austin|denver|nashville|atlanta|portland|dallas|houston|phoenix|philadelphia|san diego|las vegas|orlando|washington|dc/i;
     
-    if (match) {
-      return {
-        city: match[1]?.trim(),
-        state: match[2]?.trim() || undefined
-      };
-    }
-    
-    return { city: undefined, state: undefined };
-  }
+    return locationKeywords.test(inputValue) || cityNames.test(inputValue);
+  },
   
-  private extractCategoryFromQuery(query: string): string | undefined {
-    const categoryMap: Record<string, string[]> = {
-      'restaurant': ['restaurant', 'dine', 'dining', 'food', 'eat', 'bistro', 'cafe'],
-      'bar': ['bar', 'pub', 'drinks', 'cocktail', 'brewery', 'beer', 'wine'],
-      'nightlife': ['nightlife', 'club', 'dancing', 'night out', 'party'],
-      'music': ['music', 'concert', 'live music', 'band', 'show'],
-      'comedy': ['comedy', 'stand-up', 'standup', 'improv', 'comedian', 'laugh'],
-      'attraction': ['attraction', 'sightseeing', 'landmark', 'tour', 'tourism'],
-      'museum': ['museum', 'gallery', 'exhibition', 'art'],
-      'outdoor': ['outdoor', 'park', 'hike', 'hiking', 'trail', 'nature'],
-      'sport': ['sport', 'game', 'match', 'stadium', 'arena', 'tournament']
-    };
-    
-    const lowerQuery = query.toLowerCase();
-    
-    for (const [category, keywords] of Object.entries(categoryMap)) {
-      if (keywords.some(keyword => lowerQuery.includes(keyword))) {
-        return category;
-      }
-    }
-    
-    return undefined;
-  }
-  
-  private async generateContextualResponse(city: string, state: string, category?: string, query?: string): Promise<string> {
+  /**
+   * Processes a location-based query using OpenAI search and Cloud Natural Language API
+   */
+  async handleLocationSearch(inputValue: string): Promise<{response: string, categories: string[]}> {
+    console.log('Location query detected, using OpenAI search');
     try {
-      let promptPrefix = '';
+      // First, extract categories using the Cloud Natural Language API
+      const extractedCategories = await extractCategories(inputValue);
+      console.log('Extracted categories using Cloud NLP:', extractedCategories);
       
-      if (category) {
-        promptPrefix = `I'm looking for ${category} in ${city}${state ? ', ' + state : ''}. `;
-      } else {
-        promptPrefix = `What are some interesting places to visit in ${city}${state ? ', ' + state : ''}? `;
-      }
+      // Enhance the prompt for location-specific information
+      const enhancedPrompt = `
+        Please provide real information about "${inputValue}".
+        Include:
+        - Names of specific venues, attractions or events
+        - Actual addresses and locations
+        - Opening hours and pricing when available
+        - Links to official websites if possible
+        
+        Focus on giving practical information that would help someone planning to visit.
+        Group information by categories (dining, nightlife, attractions, events, etc.)
+      `;
       
-      // Use Vertex AI for generating contextual information
-      const vertexResponse = await VertexAIService.searchWithVertex(
-        promptPrefix + (query || ''),
-        {
-          city,
-          category
+      // Create system message to guide OpenAI response
+      const systemMessage = {
+        role: 'system',
+        content: 'You are a helpful assistant specialized in providing accurate information about places, venues, events, and things to do. Your responses should be detailed, well-organized, and include specific information like addresses, hours, and prices when available.'
+      };
+      
+      // Use OpenAI chat completion for better results
+      const openAIResponse = await OpenAIService.sendChatRequest([
+        systemMessage,
+        { role: 'user', content: enhancedPrompt }
+      ], {
+        model: 'gpt-4o',
+        context: 'user'
+      });
+      
+      if (openAIResponse && openAIResponse.length > 100) {
+        console.log('Got real-world information from OpenAI');
+        
+        // Extract likely categories based on content
+        const contentCategories: string[] = [];
+        const categoryKeywords = {
+          'dining': /restaurant|dining|food|eat|cuisine|menu|chef|brunch|dinner|lunch/i,
+          'nightlife': /bar|club|nightlife|pub|cocktail|brewery|dance|dj|party/i,
+          'attractions': /museum|park|gallery|attraction|sight|tour|historical|memorial|zoo|aquarium/i,
+          'events': /show|concert|performance|festival|event|theater|theatre|exhibition|game/i,
+          'comedy': /comedy|comedian|stand[\s-]?up|improv|funny|laugh|jokes/i
+        };
+        
+        Object.entries(categoryKeywords).forEach(([category, regex]) => {
+          if (regex.test(openAIResponse)) {
+            contentCategories.push(category);
+          }
+        });
+        
+        // Combine extracted categories from NLP API with content-based categories
+        const allCategories = [...new Set([...extractedCategories, ...contentCategories])];
+        
+        // Set categories in sessionStorage for the Explore page to use
+        if (allCategories.length > 0) {
+          try {
+            sessionStorage.setItem('lastSearchCategories', JSON.stringify(allCategories));
+            sessionStorage.setItem('lastSearchQuery', inputValue);
+            sessionStorage.setItem('lastSearchTimestamp', new Date().toISOString());
+            console.log('Set search categories in session storage:', allCategories);
+          } catch (e) {
+            console.error('Error setting categories in sessionStorage:', e);
+          }
         }
-      );
-      
-      return vertexResponse;
-    } catch (error) {
-      console.error('Error generating contextual response:', error);
-      
-      // Fallback to a simpler response
-      return `Here are some popular ${category || 'places'} in ${city}${state ? ', ' + state : ''}:
-      
-1. ${category === 'restaurant' ? city + ' Grill' : category === 'bar' ? city + ' Craft Beer' : city + ' Main Attraction'}
-2. ${category === 'restaurant' ? 'Downtown ' + city + ' Bistro' : category === 'bar' ? city + ' Rooftop Bar' : city + ' Museum'}
-3. ${category === 'restaurant' ? city + ' Fine Dining' : category === 'bar' ? city + ' Nightclub' : city + ' Park'}
-
-I recommend checking out reviews and opening hours before you visit.`;
-    }
-  }
-  
-  public async search(params: SearchParams): Promise<LocationSearchResult> {
-    const { city: providedCity, state: providedState, category: providedCategory, query } = params;
-    
-    // If city and state are provided directly, use them
-    let city = providedCity;
-    let state = providedState;
-    let category = providedCategory;
-    
-    // Otherwise try to extract them from the query
-    if (!city || !state) {
-      const extractedLocation = this.extractLocationFromQuery(query);
-      city = city || extractedLocation.city;
-      state = state || extractedLocation.state;
-    }
-    
-    // Try to extract category from query if not provided
-    if (!category) {
-      category = this.extractCategoryFromQuery(query);
-    }
-    
-    // Default to San Francisco if no city found
-    city = city || 'San Francisco';
-    state = state || 'CA';
-    
-    const contextualResponse = await this.generateContextualResponse(city, state, category, query);
-    
-    return {
-      contextualResponse,
-      locationInfo: {
-        city,
-        state,
-        category
+        
+        // Include a link to the Explore page for a better visual experience
+        const exploreLinkText = "\n\nYou can also [view all these results on our Explore page](/explore?q=" + 
+          encodeURIComponent(inputValue) + ") for a better visual experience.";
+        
+        return {
+          response: cleanResponseText(openAIResponse + exploreLinkText),
+          categories: allCategories
+        };
       }
-    };
+      
+      // Fall back to VertexAI if OpenAI fails
+      const vertexResponse = await VertexAIService.searchWithVertex(enhancedPrompt);
+      
+      if (vertexResponse && vertexResponse.length > 100) {
+        // Similar processing as above for VertexAI response
+        return {
+          response: cleanResponseText(vertexResponse),
+          categories: extractedCategories
+        };
+      }
+      
+      return { response: '', categories: extractedCategories };
+    } catch (error) {
+      console.error('OpenAI search failed:', error);
+      
+      // Fall back to VertexAI
+      try {
+        const vertexResponse = await VertexAIService.searchWithVertex(inputValue);
+        if (vertexResponse && vertexResponse.length > 100) {
+          return {
+            response: cleanResponseText(vertexResponse),
+            categories: []
+          };
+        }
+      } catch (vertexError) {
+        console.error('Vertex AI search also failed:', vertexError);
+      }
+      
+      return { response: '', categories: [] };
+    }
   }
-}
+};

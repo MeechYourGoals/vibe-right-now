@@ -1,102 +1,63 @@
 
-import { Location } from '@/types';
-import { EventItem } from '@/components/venue/events/types'; 
 import { getCitySpecificEvent, getEventWebsite } from './eventService';
+import { getCitySpecificRestaurant, getRestaurantWebsite, getLocalFood } from './restaurantService';
+import { getCitySpecificBar, getBarWebsite } from './nightlifeService';
+import { getCitySpecificAttraction, getAttractionWebsite } from './attractionService';
+import { getCitySpecificSportsEvent, getSportsEventWebsite } from './sportsService';
+import { getCitySpecificLocation, getCitySpecificNeighborhood, getCitySpecificPark, getCitySpecificWeather, getCitySpecificSeason } from './locationService';
 
-export interface CombinedResponseOptions {
-  includeEvents?: boolean;
-  includeLocations?: boolean;
-  maxEvents?: number;
-  maxLocations?: number;
-  eventsFirst?: boolean;
+// Combined response for general "what's going on" queries
+export function generateCombinedCityResponse(city: string): string {
+  return `Here's what's happening in ${city} right now:
+
+**Events:**
+- ${getCitySpecificEvent(city)} - ${getEventWebsite(city)}
+- Local Farmers Market at ${getCitySpecificLocation(city)} - Open Saturday mornings
+
+**Food & Dining:**
+- ${getCitySpecificRestaurant(city, "upscale")} - Award-winning fine dining - ${getRestaurantWebsite(city, "upscale")}
+- ${getCitySpecificRestaurant(city, "casual")} - Local favorite for ${getLocalFood(city)} - ${getRestaurantWebsite(city, "casual")}
+
+**Nightlife:**
+- ${getCitySpecificBar(city, "cocktail")} - Craft cocktails and live music - ${getBarWebsite(city)}
+- ${getCitySpecificBar(city, "club")} - Popular dance club with guest DJs
+
+**Attractions:**
+- ${getCitySpecificAttraction(city)} - ${getAttractionWebsite(city)}
+- ${city} Outdoor Market - Open daily in the downtown area
+
+**Sports:**
+- ${getCitySpecificSportsEvent(city)} - ${getSportsEventWebsite(city)}
+
+Would you like more specific recommendations for any of these categories?`;
 }
 
-export function generateCombinedResponse(
-  query: string,
-  locations: Location[],
-  events: EventItem[],
-  options: CombinedResponseOptions = {}
-): string {
-  const {
-    includeEvents = true,
-    includeLocations = true,
-    maxEvents = 3,
-    maxLocations = 3,
-    eventsFirst = false
-  } = options;
-  
-  let response = `Here's what I found for "${query}":\n\n`;
-  
-  const selectedLocations = locations.slice(0, maxLocations);
-  const selectedEvents = events.slice(0, maxEvents);
-  
-  const sections = [];
-  
-  if (includeLocations && selectedLocations.length > 0) {
-    const locationsSection = generateLocationsSection(selectedLocations);
-    sections.push(locationsSection);
-  }
-  
-  if (includeEvents && selectedEvents.length > 0) {
-    const eventsSection = generateEventsSection(selectedEvents);
-    sections.push(eventsSection);
-  }
-  
-  // Order the sections based on the eventsFirst option
-  if (eventsFirst) {
-    sections.reverse();
-  }
-  
-  response += sections.join('\n\n');
-  
-  if (sections.length === 0) {
-    response = `I couldn't find any specific results for "${query}". Please try a different search or browse our featured content.`;
-  }
-  
-  return response;
-}
+export function generateGeneralCityResponse(city: string): string {
+  return `${city} is a vibrant city with plenty to offer visitors and locals alike. Here's a general overview:
 
-function generateLocationsSection(locations: Location[]): string {
-  let section = '**Places You Might Like**:\n\n';
-  
-  locations.forEach((location, index) => {
-    section += `${index + 1}. **${location.name}** - ${location.address}, ${location.city}\n`;
-    if (location.type) {
-      section += `   Type: ${location.type.charAt(0).toUpperCase() + location.type.slice(1)}\n`;
-    }
-    if (location.verified) {
-      section += '   ✓ Verified Location\n';
-    }
-    section += '\n';
-  });
-  
-  return section;
-}
+**Popular Areas:**
+- Downtown ${city} - The urban heart with shopping, dining, and entertainment
+- ${getCitySpecificNeighborhood(city)} District - Known for its charming shops and cafes
+- ${getCitySpecificLocation(city, "waterfront")} - Beautiful views and recreational activities
 
-function generateEventsSection(events: EventItem[]): string {
-  let section = '**Upcoming Events**:\n\n';
-  
-  events.forEach((event, index) => {
-    section += `${index + 1}. **${event.title}** - ${event.date} at ${event.time}\n`;
-    section += `   Venue: ${event.venue}\n`;
-    section += `   ${event.price} ${event.ticketsAvailable > 0 ? '- Tickets Available!' : '- Sold Out!'}\n\n`;
-  });
-  
-  return section;
-}
+**Top Attractions:**
+- ${getCitySpecificAttraction(city)} - ${getAttractionWebsite(city)}
+- ${getCitySpecificPark(city)} - Perfect for outdoor activities
 
-export function generateSpecificEventResponse(eventType: string, city: string, dateRange?: string): string {
-  const eventTitle = getCitySpecificEvent(eventType, city);
-  const website = getEventWebsite(eventType);
-  const date = dateRange || 'This weekend';
-  
-  return `
-## ${eventTitle}
+**Local Cuisine:**
+- Known for ${getLocalFood(city)}
+- Popular restaurants include ${getCitySpecificRestaurant(city, "upscale")} and ${getCitySpecificRestaurant(city, "casual")}
 
-**When**: ${date}
-**Where**: ${city}
-**Website**: ${website}
+**Transportation:**
+The city offers public transportation including buses and possibly light rail. Rideshare services are also widely available throughout ${city}.
 
-Don't miss this amazing event! Get your tickets early as they might sell out fast.
-  `;
+**Weather:**
+${getCitySpecificWeather(city)}
+
+**Local Tips:**
+- The city is busiest during ${getCitySpecificSeason(city)}
+- Many locals recommend exploring the ${getCitySpecificNeighborhood(city)} neighborhood for authentic experiences
+- Street parking can be challenging in popular areas, so consider public transportation or parking garages
+
+For more specific information about ${city}, feel free to ask about restaurants, events, attractions, or nightlife.`;
 }

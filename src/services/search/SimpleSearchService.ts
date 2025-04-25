@@ -1,118 +1,72 @@
-
 import { generateEventsResponse, getCitySpecificEvent, getEventWebsite } from './eventService';
-import { Location } from '@/types';
-import { VertexAIService } from '@/services/VertexAIService';
+import { generateRestaurantsResponse, getCitySpecificRestaurant, getRestaurantWebsite, getLocalFood, getLocalRestaurantName } from './restaurantService';
+import { generateNightlifeResponse, getCitySpecificBar, getBarWebsite } from './nightlifeService';
+import { generateAttractionsResponse, getCitySpecificAttraction, getAttractionWebsite, getCitySpecificMuseum } from './attractionService';
+import { generateSportsResponse, getCitySpecificSportsTeam, getCitySpecificSportsEvent, getSportsEventWebsite, getCitySpecificStadium, getCitySpecificArena, getSportsWebsite, getCitySpecificCollege } from './sportsService';
+import { getCitySpecificLocation, getCitySpecificNeighborhood, getCitySpecificWebsite, getCitySpecificPark, getCitySpecificWeather, getCitySpecificSeason } from './locationService';
+import { generateCombinedCityResponse, generateGeneralCityResponse } from './combinedResponseService';
 
-export type SearchResponse = {
-  type: 'ai' | 'location' | 'event';
-  content: string;
-  items?: Location[];
+// The main search service that interfaces with all specialized services
+export const SimpleSearchService = {
+  async searchForCityInfo(query: string): Promise<string> {
+    // Extract the city name from the query
+    const cityPattern = /(?:in|at|near|around|for)\s+([a-zA-Z\s]+)(?:\?|$|\.)/i;
+    const cityMatch = query.match(cityPattern);
+    const city = cityMatch ? cityMatch[1].trim() : "the area";
+    
+    console.log('Searching for information about:', city);
+    
+    // Check if the query is seeking a specific category
+    const isSpecificQuery = 
+      query.toLowerCase().includes("restaurant") || 
+      query.toLowerCase().includes("food") || 
+      query.toLowerCase().includes("eat") ||
+      query.toLowerCase().includes("bar") || 
+      query.toLowerCase().includes("drink") ||
+      query.toLowerCase().includes("club") ||
+      query.toLowerCase().includes("nightlife") ||
+      query.toLowerCase().includes("concert") ||
+      query.toLowerCase().includes("show") ||
+      query.toLowerCase().includes("sports") ||
+      query.toLowerCase().includes("game") ||
+      query.toLowerCase().includes("outdoor") ||
+      query.toLowerCase().includes("park") ||
+      query.toLowerCase().includes("museum");
+    
+    // If it's a general query like "what's going on in X city"
+    if (!isSpecificQuery && 
+        (query.toLowerCase().includes("what's going on") || 
+         query.toLowerCase().includes("whats going on") ||
+         query.toLowerCase().includes("what is going on") ||
+         query.toLowerCase().includes("what's happening") ||
+         query.toLowerCase().includes("things to do"))) {
+      
+      return generateCombinedCityResponse(city);
+    }
+    
+    // Otherwise, create a response based on the query content
+    if (query.toLowerCase().includes("events") || 
+        query.toLowerCase().includes("happening") || 
+        query.toLowerCase().includes("going on")) {
+      return generateEventsResponse(city);
+    } else if (query.toLowerCase().includes("restaurant") || 
+               query.toLowerCase().includes("food") || 
+               query.toLowerCase().includes("eat")) {
+      return generateRestaurantsResponse(city);
+    } else if (query.toLowerCase().includes("nightlife") || 
+               query.toLowerCase().includes("bar") || 
+               query.toLowerCase().includes("club")) {
+      return generateNightlifeResponse(city);
+    } else if (query.toLowerCase().includes("attraction") || 
+               query.toLowerCase().includes("visit") || 
+               query.toLowerCase().includes("see")) {
+      return generateAttractionsResponse(city);
+    } else if (query.toLowerCase().includes("sports") ||
+               query.toLowerCase().includes("game") ||
+               query.toLowerCase().includes("team")) {
+      return generateSportsResponse(city);
+    } else {
+      return generateGeneralCityResponse(city);
+    }
+  }
 };
-
-export class SimpleSearchService {
-  static async search(query: string, location?: string): Promise<SearchResponse> {
-    if (!query) {
-      return { 
-        type: 'ai', 
-        content: 'Please enter a search query.' 
-      };
-    }
-    
-    // Detect what kind of search this is
-    if (this.isEventQuery(query)) {
-      const eventsResponse = await this.generateEventResponse(query, location);
-      return {
-        type: 'event',
-        content: eventsResponse
-      };
-    }
-    
-    if (this.isLocationQuery(query)) {
-      const locationResponse = await this.generateLocationResponse(query, location);
-      return {
-        type: 'location',
-        content: locationResponse
-      };
-    }
-    
-    // Default to AI response
-    return {
-      type: 'ai',
-      content: await this.getAIResponse(query, location)
-    };
-  }
-  
-  private static isEventQuery(query: string): boolean {
-    const eventKeywords = [
-      'event', 'show', 'concert', 'performance', 'game', 'match',
-      'festival', 'play', 'theater', 'theatre', 'musical', 'comedy',
-      'standup', 'stand-up', 'movie', 'screening', 'premiere'
-    ];
-    
-    const lowerQuery = query.toLowerCase();
-    return eventKeywords.some(keyword => lowerQuery.includes(keyword));
-  }
-  
-  private static isLocationQuery(query: string): boolean {
-    const locationKeywords = [
-      'where', 'place', 'restaurant', 'bar', 'club', 'cafe', 'hotel',
-      'park', 'museum', 'gallery', 'store', 'shop', 'mall', 'center',
-      'theatre', 'theater', 'cinema', 'stadium', 'arena'
-    ];
-    
-    const lowerQuery = query.toLowerCase();
-    return locationKeywords.some(keyword => lowerQuery.includes(keyword));
-  }
-  
-  private static async getAIResponse(query: string, location?: string): Promise<string> {
-    try {
-      let aiPrompt = query;
-      
-      if (location) {
-        aiPrompt = `[Looking in ${location}] ${query}`;
-      }
-      
-      return await VertexAIService.generateText(aiPrompt, [], {
-        temperature: 0.7,
-        maxTokens: 300
-      });
-    } catch (error) {
-      console.error('Error getting AI response:', error);
-      return "I'm sorry, I couldn't process your request right now.";
-    }
-  }
-  
-  private static async generateEventResponse(query: string, location?: string): Promise<string> {
-    try {
-      let eventQuery = query;
-      
-      if (location) {
-        eventQuery = `${query} in ${location}`;
-      }
-      
-      return await generateEventsResponse(eventQuery);
-    } catch (error) {
-      console.error('Error generating event response:', error);
-      return "I couldn't find specific events matching your query.";
-    }
-  }
-  
-  private static async generateLocationResponse(query: string, location?: string): Promise<string> {
-    try {
-      let locationQuery = query;
-      
-      if (location) {
-        locationQuery = `${query} in ${location}`;
-      }
-      
-      const response = await VertexAIService.searchWithVertex(locationQuery, {
-        city: location
-      });
-      
-      return response;
-    } catch (error) {
-      console.error('Error generating location response:', error);
-      return "I couldn't find specific locations matching your query.";
-    }
-  }
-}

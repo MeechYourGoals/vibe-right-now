@@ -1,165 +1,110 @@
 
-import { httpsCallable } from 'firebase/functions';
-import { functions } from '@/firebase/config';
-import { Message } from '@/components/VernonChat/types';
+import { supabase } from '@/integrations/supabase/client';
 
-interface GenerateTextOptions {
-  temperature?: number;
-  maxTokens?: number;
-  topK?: number;
-  topP?: number;
-  modelVersion?: string;
-  safetySettings?: any[];
-  mode?: string;
-}
-
-interface VertexAIRequest {
-  text: string;
-  history?: Array<{ role: string; content: string }>;
-  options?: GenerateTextOptions;
-}
-
+/**
+ * Service for interacting with Google Vertex AI API
+ */
 export class VertexAIService {
-  // Text generation using Vertex AI (Gemini)
-  static async generateText(
-    prompt: string,
-    history: Array<{ role: string; content: string }> = [],
-    options: GenerateTextOptions = {}
-  ): Promise<string> {
-    try {
-      const generateTextFn = httpsCallable<VertexAIRequest, { text: string }>(
-        functions, 
-        'generateText'
-      );
-      
-      const result = await generateTextFn({
-        text: prompt,
-        history,
-        options
-      });
-      
-      return result.data.text;
-    } catch (error) {
-      console.error('Error generating text with Vertex AI:', error);
-      return "I'm having trouble connecting to my AI services right now. Please try again later.";
-    }
-  }
-  
-  // Generate response for Vernon Chat
+  // Text-to-speech voice configuration
+  static DEFAULT_MALE_VOICE = "en-US-Neural2-D";
+  static DEFAULT_FEMALE_VOICE = "en-US-Neural2-F";
+
+  /**
+   * Generate a response using Vertex AI API
+   * @param prompt The prompt to send to the model
+   * @param mode The mode to use (default, search, venue)
+   * @param context Optional context for the conversation
+   * @returns The generated response
+   */
   static async generateResponse(
-    prompt: string,
-    mode: 'venue' | 'default' = 'default',
-    messages: Message[] = []
+    prompt: string, 
+    mode: 'default' | 'search' | 'venue' = 'default', 
+    context: any[] = []
   ): Promise<string> {
+    // For now, we'll delegate to OpenAI since that's what we have configured
     try {
-      // Convert messages to the format expected by Vertex AI
-      const history = messages.map(msg => ({
+      // Convert context to the format expected by OpenAI
+      const messages = context.map(msg => ({
         role: msg.sender === 'user' ? 'user' : 'assistant',
         content: msg.text
       }));
       
-      // Call generateText with the mode option
-      return await VertexAIService.generateText(prompt, history, { 
-        mode,
-        temperature: mode === 'venue' ? 0.3 : 0.7 // More precise for business data
+      // Add the new prompt
+      messages.push({
+        role: 'user',
+        content: prompt
       });
+      
+      // Determine the context based on mode
+      const chatContext = mode === 'venue' ? 'venue' : 'user';
+      
+      return await OpenAIService.sendChatRequest(messages, { context: chatContext });
     } catch (error) {
-      console.error('Error generating response:', error);
-      return "I'm having trouble processing your request right now.";
+      console.error('Error generating response with Vertex AI:', error);
+      throw error;
     }
   }
-  
-  // Search with Vertex AI for more context-aware results
+
+  /**
+   * Search for information using Vertex AI
+   * @param query The search query
+   * @param categories Optional categories to filter the search
+   * @returns The search results as text
+   */
   static async searchWithVertex(
-    query: string, 
-    options: { city?: string; category?: string } = {}
+    query: string,
+    categories?: string[]
   ): Promise<string> {
     try {
-      const searchFn = httpsCallable<
-        { query: string; options: any },
-        { text: string }
-      >(functions, 'vertexSearch');
+      console.log('Searching with Vertex AI:', query);
+      if (categories && categories.length > 0) {
+        console.log('With categories:', categories);
+      }
       
-      const result = await searchFn({
-        query,
-        options: {
-          ...options,
-          searchMode: true
+      // Since we're using OpenAI as our backend, delegate the search
+      const enhancedPrompt = `
+        Please provide real information about "${query}".
+        ${categories && categories.length > 0 ? `Focusing on these categories: ${categories.join(', ')}` : ''}
+        Include:
+        - Names of specific places or events
+        - Actual addresses and locations if known
+        - Opening hours and pricing when available
+        - Any other helpful details
+        
+        Format your response in a clear, readable way.
+      `;
+      
+      // Convert to OpenAI format
+      return await OpenAIService.sendChatRequest([
+        {
+          role: 'system',
+          content: 'You are a helpful assistant that provides accurate information about places, events, and things to do.'
+        },
+        {
+          role: 'user',
+          content: enhancedPrompt
         }
-      });
-      
-      return result.data.text;
+      ]);
     } catch (error) {
       console.error('Error in Vertex AI search:', error);
-      return "I couldn't find specific information about that. Could you try asking in a different way?";
+      return `I couldn't find specific information about "${query}". Please try a different search.`;
     }
   }
-  
-  // Speech to text using Vertex AI Speech API
-  static async speechToText(audioBase64: string): Promise<string> {
-    try {
-      const speechToTextFn = httpsCallable<{ audio: string }, { transcript: string }>(
-        functions,
-        'speechToText'
-      );
-      
-      const result = await speechToTextFn({ audio: audioBase64 });
-      
-      return result.data.transcript;
-    } catch (error) {
-      console.error('Error in speech to text conversion:', error);
-      return '';
-    }
-  }
-  
-  // Text to speech using Vertex AI Text-to-Speech API
+
+  /**
+   * Convert text to speech using Vertex AI API
+   * @param text The text to convert to speech
+   * @param options Options for the text-to-speech conversion
+   * @returns The audio data as a base64 string
+   */
   static async textToSpeech(
-    text: string,
+    text: string, 
     options: { voice?: string; speakingRate?: number; pitch?: number } = {}
   ): Promise<string> {
-    try {
-      const textToSpeechFn = httpsCallable<
-        { text: string; options: any },
-        { audioContent: string }
-      >(functions, 'textToSpeech');
-      
-      const result = await textToSpeechFn({
-        text,
-        options: {
-          voice: options.voice || 'en-US-Neural2-D',
-          speakingRate: options.speakingRate || 1.0,
-          pitch: options.pitch || 0
-        }
-      });
-      
-      return result.data.audioContent;
-    } catch (error) {
-      console.error('Error in text to speech conversion:', error);
-      return '';
-    }
+    // For now, we'll delegate to OpenAI since that's what we have configured
+    return OpenAIService.textToSpeech(text);
   }
 }
 
-// Create an adapter to maintain compatibility with existing code
-export const OpenAIService = {
-  sendChatRequest: async (messages: any[], options: any = {}) => {
-    try {
-      const latestMessage = messages[messages.length - 1];
-      const prompt = latestMessage.content;
-      
-      const history = messages.slice(0, -1).map(msg => ({
-        role: msg.role,
-        content: msg.content
-      }));
-      
-      const mode = options.context === 'venue' ? 'venue' : 'default';
-      
-      return await VertexAIService.generateText(prompt, history, { mode });
-    } catch (error) {
-      console.error('Error in sendChatRequest:', error);
-      return "I'm sorry, I encountered an error processing your request.";
-    }
-  },
-  speechToText: VertexAIService.speechToText,
-  textToSpeech: VertexAIService.textToSpeech
-};
+// Import OpenAIService for fallback
+import { OpenAIService } from './OpenAIService';

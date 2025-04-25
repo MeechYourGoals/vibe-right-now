@@ -1,25 +1,27 @@
 
-// If this file doesn't exist, create it
-
 export interface EventItem {
   id: string;
   title: string;
-  description: string;
   date: string;
   time: string;
   venue: string;
-  venueId?: string; 
   location: string;
-  type: string;
+  description: string;
   price: string;
   ticketsAvailable: number;
-  imageUrl: string;
-  ticketUrl: string;
-  tags?: string[];
-  ownerId?: string;
+  type: "music" | "comedy" | "sports" | "festival" | "theater" | "other";
+  image?: string;
+  imageUrl?: string;
+  ticketUrl?: string;
+}
+
+export interface EventSectionProps {
+  title: string;
+  events: EventItem[];
+  viewAll?: boolean;
+}
+
+export interface EventCardProps {
+  event: EventItem;
   featured?: boolean;
-  coordinates?: {
-    latitude: number;
-    longitude: number;
-  };
 }

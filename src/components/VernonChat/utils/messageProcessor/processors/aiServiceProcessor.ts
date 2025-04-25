@@ -41,12 +41,7 @@ export class AIServiceProcessor implements MessageProcessor {
         } catch (error) {
           console.error('Error with OpenAI for venue mode:', error);
           // Fall back to Vertex AI
-          responseText = await VertexAIService.generateText(context.query, 
-            contextMessages.map(msg => ({
-              role: msg.sender === 'user' ? 'user' : 'assistant',
-              content: msg.text
-            })), 
-            { mode: 'venue' });
+          responseText = await VertexAIService.generateResponse(context.query, 'venue', contextMessages);
         }
       } else {
         // For conversational queries, use standard model
@@ -58,12 +53,7 @@ export class AIServiceProcessor implements MessageProcessor {
         } catch (error) {
           console.error('Error with OpenAI for conversational mode:', error);
           // Fall back to Vertex AI
-          responseText = await VertexAIService.generateText(context.query, 
-            contextMessages.map(msg => ({
-              role: msg.sender === 'user' ? 'user' : 'assistant',
-              content: msg.text
-            })), 
-            { mode: 'default' });
+          responseText = await VertexAIService.generateResponse(context.query, 'default', contextMessages);
         }
       }
       
