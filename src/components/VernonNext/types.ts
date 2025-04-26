@@ -8,6 +8,11 @@ export interface Message {
   text?: string; // For backward compatibility
 }
 
+export interface ChatMessage {
+  role: string;
+  content: string;
+}
+
 export interface ChatState {
   messages: Message[];
   isLoading: boolean;
@@ -19,3 +24,18 @@ export interface ChatState {
   isMinimized: boolean;
   searchResults?: any[];
 }
+
+export interface SearchResult {
+  id: string;
+  title: string;
+  description: string;
+  url: string;
+  score: number;
+}
+
+export interface ExtractedIntent {
+  intent: string;
+  entities: Record<string, any>;
+  confidence: number;
+}
+
