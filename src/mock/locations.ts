@@ -98,6 +98,7 @@ export const mockLocations: Location[] = [
     address: "Parque Nacional da Tijuca",
     city: "Rio de Janeiro",
     state: "",
+    zip: "20531-410",
     country: "Brazil",
     lat: -22.9519,
     lng: -43.2106,
@@ -453,6 +454,19 @@ export const mockLocations: Location[] = [
     lat: 33.6402,
     lng: -111.8938,
     type: "sports",
+    verified: true,
+  },
+  {
+    id: "95",
+    name: "Old Port Pub",
+    address: "789 Harbor Street",
+    city: "Portland",
+    state: "ME",
+    zip: "04101", // Added zip code
+    country: "USA",
+    lat: 43.6591,
+    lng: -70.2568,
+    type: "bar",
     verified: true,
   },
 ];

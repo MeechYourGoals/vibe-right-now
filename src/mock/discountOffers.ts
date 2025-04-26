@@ -17,7 +17,7 @@ const createDiscountVenue = (postId: string, discount: DiscountOffer): VenueWith
     zip: post.location.zip || "10001", // Ensure zip is always provided
     lat: post.location.lat,
     lng: post.location.lng,
-    verified: post.location.verified,
+    verified: post.location.verified || false,
     discount
   };
 };

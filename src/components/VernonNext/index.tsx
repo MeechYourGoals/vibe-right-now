@@ -1,5 +1,5 @@
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import ChatButton from './ChatButton';
 import ChatWindow from './ChatWindow';
@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 const VernonNext: React.FC = () => {
   const mediaRecorderRef = useRef<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [isOpen, setIsOpen] = useState(false);
   
   const {
     state,
@@ -18,7 +19,7 @@ const VernonNext: React.FC = () => {
     speakText,
     toggleChat,
     toggleMinimize
-  } = useOpenAIChat(false); // Set to true for venue mode
+  } = useOpenAIChat();
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -59,14 +60,14 @@ const VernonNext: React.FC = () => {
   return (
     <>
       <AnimatePresence>
-        {!state.isOpen ? (
+        {!isOpen ? (
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.8, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 500, damping: 30 }}
           >
-            <ChatButton onClick={toggleChat} />
+            <ChatButton onClick={() => setIsOpen(true)} />
           </motion.div>
         ) : (
           <motion.div
@@ -79,7 +80,7 @@ const VernonNext: React.FC = () => {
             <ChatWindow
               state={state}
               onSendMessage={handleSendMessage}
-              onClose={toggleChat}
+              onClose={() => setIsOpen(false)}
               onMinimize={toggleMinimize}
               onToggleListening={handleToggleListening}
               onSpeak={handleSpeakMessage}

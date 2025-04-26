@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { discountOffers } from "@/mock/discountOffers";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, MapPin, Tag, Ticket } from "lucide-react";
+import { ArrowRight, MapPin, Ticket } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { VenueWithDiscount } from "@/components/venue/events/types";
 import { Location } from "@/types";
@@ -25,14 +25,7 @@ const convertToLocation = (venue: VenueWithDiscount): Location => {
     lat: venue.lat,
     lng: venue.lng,
     verified: venue.verified,
-    // Add any other required Location properties with default values
-    hours: null,
-    phone: "",
-    website: "",
-    description: venue.discount.description,
-    amenities: [],
-    rating: 0,
-    reviews: []
+    description: venue.discount.description
   };
 };
 

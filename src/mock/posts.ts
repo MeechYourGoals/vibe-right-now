@@ -109,7 +109,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1504450758481-7338eba7524a?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1504450758481-7efbbe195018?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
       },
     ],
     timestamp: getRecentTime(0.3),
@@ -351,6 +351,7 @@ export const mockPosts: Post[] = [
       city: "Las Vegas",
       state: "NV",
       country: "USA",
+      zip: "89101", // Added zip code
       lat: 36.1318,
       lng: -115.1516,
       type: "event",

@@ -1,5 +1,3 @@
-// If this file doesn't exist, we're creating it
-import { MockUserProfile } from "@/utils/locations/types";
 
 export interface Location {
   id: string;
@@ -22,6 +20,10 @@ export interface Location {
   images?: string[];
   verified?: boolean;
   vibes?: string[];
+  userProfile?: any; // Adding for compatibility with locationGenerator
+  amenities?: any[]; // Adding for compatibility with Discounts.tsx
+  reviews?: any[]; // Adding for compatibility
+  distance?: string; // Adding for compatibility
 }
 
 export interface BusinessHours {
@@ -54,7 +56,7 @@ export interface Post {
   media: Media[];
   timestamp: string;
   likes: number;
-  comments: number;
+  comments: number | any[]; // Updated to support both number and array types
   vibeTags?: string[]; // Array of vibe tags for the post
   isVenuePost?: boolean;
   isPinned?: boolean;
@@ -146,6 +148,7 @@ export interface ExtractedIntent {
 // Venue insights types
 export interface VenueInsights {
   visitors: number;
+  visitorsCount?: number;
   visitorsChange: number;
   posts: number;
   postsChange: number;
@@ -169,4 +172,5 @@ export interface VenueInsights {
   checkInCount?: number;
   receiptUploads?: number;
   discountRedemptions?: number;
+  totalViews?: number; // For compatibility
 }

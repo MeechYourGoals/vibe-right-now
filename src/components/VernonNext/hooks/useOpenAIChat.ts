@@ -1,110 +1,162 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useCompletion } from 'ai/react';
-import { useToast } from "@/components/ui/use-toast"
-import { ChatCompletionMessage } from 'ai';
+import { useState, useCallback } from 'react';
+import { useToast } from "@/components/ui/use-toast";
+import { v4 as uuidv4 } from 'uuid';
+import { Message } from '../types';
 
 interface UseOpenAIChatProps {
-  initialMessages?: ChatCompletionMessage[];
+  initialMessages?: Message[];
   onContentChange?: (content: string) => void;
 }
 
 export const useOpenAIChat = ({ initialMessages = [], onContentChange }: UseOpenAIChatProps = {}) => {
-  const [messages, setMessages] = useState<ChatCompletionMessage[]>(initialMessages);
-  const { toast } = useToast()
-  const {
-    completion,
-    input,
-    setInput,
-    handleInputChange,
-    handleSubmit,
-    isLoading,
-    stop,
-    setCompletion,
-  } = useCompletion({
-    api: '/api/chat',
-    initialMessages: initialMessages,
-    onFinish: (message) => {
-      console.log("VernonNext COMPLETED", message)
-    },
-    onContentChange: (content) => {
-      if (onContentChange) {
-        onContentChange(content);
-      }
-    },
-  });
+  const [messages, setMessages] = useState<Message[]>(initialMessages);
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [transcript, setTranscript] = useState('');
+  const [interimTranscript, setInterimTranscript] = useState('');
+  const [completion, setCompletion] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(false);
+  const { toast } = useToast();
 
-  // Update local messages state when completion changes
-  useEffect(() => {
-    if (completion && completion.length > 0) {
-      // Find the last AI message
-      const lastAiMessageIndex = messages.findLastIndex(m => m.role === 'ai');
-      
-      if (lastAiMessageIndex !== -1) {
-        // Update the content of the last AI message
-        const newMessages = [...messages];
-        newMessages[lastAiMessageIndex] = { ...newMessages[lastAiMessageIndex], content: completion };
-        setMessages(newMessages);
-      } else {
-        // If there's no AI message, add a new one
-        setMessages(prevMessages => [...prevMessages, { role: 'ai', content: completion }]);
-      }
+  const sendMessage = useCallback(async (text: string) => {
+    if (!text.trim()) {
+      toast({
+        title: "Please enter a message",
+      });
+      return;
     }
-  }, [completion, setMessages]);
 
-  // Custom handleSubmit function
-  const customHandleSubmit = useCallback(
-    async (e: React.FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
+    // Create a user message
+    const userMessage: Message = {
+      id: uuidv4(),
+      role: 'user',
+      content: text,
+      timestamp: new Date().toISOString(),
+      sender: 'user'
+    };
+
+    // Optimistically update messages with the user's input
+    setMessages(prevMessages => [...prevMessages, userMessage]);
+    setInput('');
+    
+    // Simulate API call
+    setIsLoading(true);
+    
+    try {
+      // In a real implementation, this would call your OpenAI API
+      // For now, we'll simulate a response after a delay
+      setTimeout(() => {
+        const aiResponse: Message = {
+          id: uuidv4(),
+          role: 'assistant',
+          content: `I received your message: "${text}". This is a simulated response since we're not connecting to the OpenAI API in this demo.`,
+          timestamp: new Date().toISOString(),
+          sender: 'ai'
+        };
+        
+        setMessages(prevMessages => [...prevMessages, aiResponse]);
+        setCompletion(aiResponse.content);
+        if (onContentChange) {
+          onContentChange(aiResponse.content);
+        }
+        setIsLoading(false);
+      }, 1500);
       
-      if (!input.trim()) {
-        toast({
-          title: "Please enter a message",
-        })
-        return;
-      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast({
+        title: "Error sending message",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+    }
+  }, [toast, onContentChange]);
 
-      // Optimistically update the messages state with the user's input
-      const userMessage: ChatCompletionMessage = { role: 'user', content: input };
-      setMessages(prevMessages => [...prevMessages, userMessage]);
-      setInput('');
+  // Mocked functions for voice interactions
+  const startListening = useCallback(async () => {
+    setIsListening(true);
+    setTranscript('');
+    setInterimTranscript('Listening...');
+    
+    // Return a mock MediaRecorder
+    return {
+      start: () => console.log('Started recording'),
+      stop: () => console.log('Stopped recording')
+    };
+  }, []);
 
-      // Call the original handleSubmit to send the message to the API
-      handleSubmit(e);
-    },
-    [input, handleSubmit, setInput, toast]
-  );
+  const stopListening = useCallback((recorder: any) => {
+    if (recorder) {
+      recorder.stop();
+    }
+    setIsListening(false);
+    setInterimTranscript('');
+    // Simulate getting a transcript
+    setTranscript('This is a simulated transcript');
+  }, []);
 
-  // Custom function to append a message to the chat
-  const appendMessage = useCallback(
-    (message: ChatCompletionMessage) => {
-      if (message.content && message.content.trim() !== "") {
-        // Basic check to prevent adding empty messages
-        setMessages(prevMessages => {
-          const trimmedContent = message.content.trim();
+  const speakText = useCallback(async (text: string) => {
+    if (isSpeaking) return;
+    
+    setIsSpeaking(true);
+    
+    // In a real implementation, this would use the Web Speech API or a TTS service
+    console.log('Speaking:', text);
+    
+    // Simulate speech duration based on text length
+    const duration = Math.min(2000 + text.length * 50, 10000);
+    
+    setTimeout(() => {
+      setIsSpeaking(false);
+    }, duration);
+  }, [isSpeaking]);
 
-          // Fix the error - comparing "user" | "ai" with "system" 
-          // Change this:
-          // if (message.role === "system") {
-          // To this:
-          if (message.role === "user" || message.role === "ai") {
-            return [...prevMessages, { ...message, content: trimmedContent }];
-          }
-          return prevMessages;
-        });
-      }
-    },
-    [setMessages]
-  );
+  const toggleChat = useCallback(() => {
+    setIsOpen(prev => !prev);
+  }, []);
 
+  const toggleMinimize = useCallback(() => {
+    setIsMinimized(prev => !prev);
+  }, []);
+
+  // Return the state and functions needed by components
   return {
+    state: {
+      messages,
+      isLoading,
+      isListening,
+      isSpeaking,
+      transcript,
+      interimTranscript,
+      isOpen,
+      isMinimized,
+    },
+    sendMessage,
+    startListening,
+    stopListening,
+    speakText,
+    toggleChat,
+    toggleMinimize,
+    
+    // Keep original properties for compatibility
     messages,
     input,
     completion,
-    handleInputChange,
-    handleSubmit: customHandleSubmit,
+    handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => setInput(e.target.value),
+    handleSubmit: async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      await sendMessage(input);
+    },
     isLoading,
-    stop,
-    appendMessage,
+    stop: () => console.log('Stopping generation'),
+    appendMessage: (message: Message) => {
+      if (message.content && message.content.trim() !== "") {
+        setMessages(prevMessages => [...prevMessages, message]);
+      }
+    },
     setInput,
     setCompletion
   };
