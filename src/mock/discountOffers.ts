@@ -14,7 +14,7 @@ const createDiscountVenue = (postId: string, discount: DiscountOffer): VenueWith
     city: post.location.city,
     state: post.location.state,
     country: post.location.country,
-    zip: post.location.zip || "10001",
+    zip: post.location.zip || "10001", // Ensure zip is always provided
     lat: post.location.lat,
     lng: post.location.lng,
     verified: post.location.verified,

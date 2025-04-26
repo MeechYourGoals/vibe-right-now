@@ -1,63 +1,44 @@
 
+import { generateRestaurantsResponse } from './restaurantService';
 import { getCitySpecificEvent, getEventWebsite } from './eventService';
-import { getCitySpecificRestaurant, getRestaurantWebsite, getLocalFood } from './restaurantService';
-import { getCitySpecificBar, getBarWebsite } from './nightlifeService';
-import { getCitySpecificAttraction, getAttractionWebsite } from './attractionService';
-import { getCitySpecificSportsEvent, getSportsEventWebsite } from './sportsService';
-import { getCitySpecificLocation, getCitySpecificNeighborhood, getCitySpecificPark, getCitySpecificWeather, getCitySpecificSeason } from './locationService';
+import { getCitySpecificBar } from './nightlifeService';
+import { getCitySpecificAttraction } from './attractionService';
+import { getCitySpecificSportsTeam } from './sportsService';
 
-// Combined response for general "what's going on" queries
-export function generateCombinedCityResponse(city: string): string {
-  return `Here's what's happening in ${city} right now:
+export const generateCombinedCityResponse = (city: string): string => {
+  return `Here's what's happening in ${city}:
 
-**Events:**
-- ${getCitySpecificEvent(city)} - ${getEventWebsite(city)}
-- Local Farmers Market at ${getCitySpecificLocation(city)} - Open Saturday mornings
+EVENTS:
+🎵 ${getCitySpecificEvent(city)} is in town this weekend.
+🎭 There are several shows playing at the local theaters.
+🏙️ The downtown area has street festivals every Saturday this month.
 
-**Food & Dining:**
-- ${getCitySpecificRestaurant(city, "upscale")} - Award-winning fine dining - ${getRestaurantWebsite(city, "upscale")}
-- ${getCitySpecificRestaurant(city, "casual")} - Local favorite for ${getLocalFood(city)} - ${getRestaurantWebsite(city, "casual")}
+FOOD & DRINK:
+🍽️ Check out the trending restaurants in the ${city} food scene.
+🍸 ${getCitySpecificBar(city)} is the hot spot for cocktails right now.
+🍺 There are several craft breweries offering weekend tours.
 
-**Nightlife:**
-- ${getCitySpecificBar(city, "cocktail")} - Craft cocktails and live music - ${getBarWebsite(city)}
-- ${getCitySpecificBar(city, "club")} - Popular dance club with guest DJs
+ATTRACTIONS:
+🏛️ ${getCitySpecificAttraction(city)} is a must-visit.
+🏞️ The local parks have walking tours and outdoor activities.
+🏙️ Downtown has several guided city tours available.
 
-**Attractions:**
-- ${getCitySpecificAttraction(city)} - ${getAttractionWebsite(city)}
-- ${city} Outdoor Market - Open daily in the downtown area
+SPORTS:
+⚾ ${getCitySpecificSportsTeam(city)} has home games this week.
+🏃‍♀️ There's a 5K charity run this Saturday morning.
+🏈 College sports are in full swing with lots of local events.
 
-**Sports:**
-- ${getCitySpecificSportsEvent(city)} - ${getSportsEventWebsite(city)}
+Would you like more specific information about any of these categories?`;
+};
 
-Would you like more specific recommendations for any of these categories?`;
-}
+export const generateGeneralCityResponse = (city: string): string => {
+  return `${city} has a lot happening right now! Here are some highlights:
 
-export function generateGeneralCityResponse(city: string): string {
-  return `${city} is a vibrant city with plenty to offer visitors and locals alike. Here's a general overview:
+The weather is great for exploring the city's neighborhoods. 
+Many local restaurants have special seasonal menus this month.
+There are cultural events and performances scheduled throughout the week.
+${getCitySpecificAttraction(city)} is especially beautiful this time of year.
+The local ${getCitySpecificSportsTeam(city)} fans are excited about the upcoming season.
 
-**Popular Areas:**
-- Downtown ${city} - The urban heart with shopping, dining, and entertainment
-- ${getCitySpecificNeighborhood(city)} District - Known for its charming shops and cafes
-- ${getCitySpecificLocation(city, "waterfront")} - Beautiful views and recreational activities
-
-**Top Attractions:**
-- ${getCitySpecificAttraction(city)} - ${getAttractionWebsite(city)}
-- ${getCitySpecificPark(city)} - Perfect for outdoor activities
-
-**Local Cuisine:**
-- Known for ${getLocalFood(city)}
-- Popular restaurants include ${getCitySpecificRestaurant(city, "upscale")} and ${getCitySpecificRestaurant(city, "casual")}
-
-**Transportation:**
-The city offers public transportation including buses and possibly light rail. Rideshare services are also widely available throughout ${city}.
-
-**Weather:**
-${getCitySpecificWeather(city)}
-
-**Local Tips:**
-- The city is busiest during ${getCitySpecificSeason(city)}
-- Many locals recommend exploring the ${getCitySpecificNeighborhood(city)} neighborhood for authentic experiences
-- Street parking can be challenging in popular areas, so consider public transportation or parking garages
-
-For more specific information about ${city}, feel free to ask about restaurants, events, attractions, or nightlife.`;
-}
+What specifically are you interested in doing in ${city}? I can give you more targeted recommendations for restaurants, events, nightlife, attractions, or sports.`;
+};

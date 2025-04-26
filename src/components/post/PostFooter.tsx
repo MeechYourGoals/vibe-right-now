@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Post, Comment } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -38,7 +37,7 @@ const PostFooter: React.FC<PostFooterProps> = ({
       return null; // Comments are rendered separately in detail view
     }
     
-    if (comments.length === 0) {
+    if (post.comments && post.comments.length === 0) {
       return null;
     }
     

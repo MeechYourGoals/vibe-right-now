@@ -172,6 +172,24 @@ export const getComedyEventsForCity = (city: string, state: string): EventItem[]
   return generateComedyEvents(city, state);
 };
 
+// Add these missing exports that are imported in SimpleSearchService
+export const generateEventsResponse = (city: string): string => {
+  return `Here are some upcoming events in ${city}:\n\n` +
+    generateMusicEvents(city, "").slice(0, 3).map(event => 
+      `- ${event.title} at ${event.venue} on ${event.date} at ${event.time}`
+    ).join('\n');
+};
+
+export const getCitySpecificEvent = (city: string): string => {
+  const events = generateMusicEvents(city, "");
+  const randomEvent = events[Math.floor(Math.random() * events.length)];
+  return randomEvent ? randomEvent.title : `Concert in ${city}`;
+};
+
+export const getEventWebsite = (city: string): string => {
+  return `https://ticketmaster.com/events/${city.toLowerCase().replace(/\s/g, '-')}`;
+};
+
 // Add this function for backward compatibility with imports
 export const fetchMusicEvents = (city: string, state: string): Promise<EventItem[]> => {
   return Promise.resolve(generateMusicEvents(city, state));

@@ -9,19 +9,52 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, MapPin, Tag, Ticket } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { VenueWithDiscount } from "@/components/venue/events/types";
+import { Location } from "@/types";
+
+// Convert VenueWithDiscount to Location for MapContainer compatibility
+const convertToLocation = (venue: VenueWithDiscount): Location => {
+  return {
+    id: venue.id,
+    name: venue.name,
+    type: venue.type,
+    address: venue.address,
+    city: venue.city,
+    state: venue.state,
+    country: venue.country,
+    zip: venue.zip,
+    lat: venue.lat,
+    lng: venue.lng,
+    verified: venue.verified,
+    // Add any other required Location properties with default values
+    hours: null,
+    phone: "",
+    website: "",
+    description: venue.discount.description,
+    amenities: [],
+    rating: 0,
+    reviews: []
+  };
+};
 
 const Discounts = () => {
   const navigate = useNavigate();
-  const [selectedLocation, setSelectedLocation] = useState<VenueWithDiscount | null>(null);
+  const [selectedVenue, setSelectedVenue] = useState<VenueWithDiscount | null>(null);
   const [mapExpanded, setMapExpanded] = useState(false);
 
-  const handleLocationSelect = (location: VenueWithDiscount) => {
-    setSelectedLocation(location);
+  const handleVenueSelect = (location: Location) => {
+    // Find the corresponding venue from discountOffers
+    const venue = discountOffers.find(v => v.id === location.id);
+    if (venue) {
+      setSelectedVenue(venue);
+    }
   };
 
   const handleCloseLocation = () => {
-    setSelectedLocation(null);
+    setSelectedVenue(null);
   };
+
+  // Convert discount venues to Location type for map compatibility
+  const locationsForMap = discountOffers.map(convertToLocation);
 
   return (
     <Layout>
@@ -43,13 +76,13 @@ const Discounts = () => {
             loading={false}
             isExpanded={mapExpanded}
             userLocation={null}
-            locations={discountOffers}
+            locations={locationsForMap}
             searchedCity=""
             mapStyle="default"
-            selectedLocation={selectedLocation}
+            selectedLocation={selectedVenue ? convertToLocation(selectedVenue) : null}
             showDistances={true}
             userAddressLocation={null}
-            onLocationSelect={handleLocationSelect}
+            onLocationSelect={handleVenueSelect}
             onCloseLocation={handleCloseLocation}
             nearbyCount={discountOffers.length}
             onToggleDistances={() => {}}

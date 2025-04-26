@@ -1,3 +1,4 @@
+
 export interface EventItem {
   id: string;
   title: string;
@@ -36,7 +37,19 @@ export interface DiscountOffer {
   originalPrice?: string;
 }
 
-export interface VenueWithDiscount extends Location {
+// Modified to properly extend Location type without directly implementing it
+export interface VenueWithDiscount {
+  id: string;
+  name: string;
+  type: string;
+  address: string;
+  city: string;
+  state: string;
+  country: string;
+  zip: string;
+  lat: number;
+  lng: number;
+  verified: boolean;
   discount: DiscountOffer;
   distance?: string;
 }
