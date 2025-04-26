@@ -1,4 +1,3 @@
-
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Suspense, lazy, useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
@@ -19,6 +18,7 @@ const ProfileBio = lazy(() => import("@/pages/ProfileBio"));
 const UserProfile = lazy(() => import("@/pages/UserProfile"));
 const DataInsights = lazy(() => import("@/pages/DataInsights"));
 const TripDetails = lazy(() => import("@/components/places/TripDetails"));
+const Discounts = lazy(() => import("@/pages/Discounts"));
 
 function App() {
   // Add a useEffect to handle mobile view adjustments
@@ -69,6 +69,7 @@ function App() {
               <Route path="/user/:username" element={<UserProfile />} />
               <Route path="/data-insights" element={<DataInsights />} />
               <Route path="/mcp-callback" element={<div>Processing authentication...</div>} />
+              <Route path="/discounts" element={<Discounts />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>

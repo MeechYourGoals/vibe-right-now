@@ -13,14 +13,16 @@ const DiscountLocations = () => {
   // Filter posts with discount offers (posts 29-32 are our discount posts)
   const discountPosts = mockPosts.filter(post => 
     ["29", "30", "31", "32"].includes(post.id)
-  );
+  ).slice(0, 3); // Only show first 3 in the sidebar
   
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-xl flex items-center">
-          <Tag className="h-5 w-5 mr-2" />
-          <span>Currently Offering Discounts</span>
+        <CardTitle className="text-xl flex items-center justify-between">
+          <div className="flex items-center">
+            <Tag className="h-5 w-5 mr-2" />
+            <span>Currently Offering Discounts</span>
+          </div>
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -64,6 +66,15 @@ const DiscountLocations = () => {
               </Button>
             </div>
           ))}
+
+          <Button 
+            variant="outline" 
+            className="w-full mt-4"
+            onClick={() => navigate('/discounts')}
+          >
+            View All Discounts
+            <ArrowRight className="h-4 w-4 ml-2" />
+          </Button>
         </div>
       </CardContent>
     </Card>

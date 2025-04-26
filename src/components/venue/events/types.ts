@@ -1,4 +1,3 @@
-
 export interface EventItem {
   id: string;
   title: string;
@@ -24,4 +23,20 @@ export interface EventSectionProps {
 export interface EventCardProps {
   event: EventItem;
   featured?: boolean;
+}
+
+export interface DiscountOffer {
+  id: string;
+  type: "freeItem" | "percentOff" | "freeEntry" | "vipAccess" | "bogo";
+  description: string;
+  expiresAt?: string;
+  conditions?: string;
+  code?: string;
+  value?: number; // For percentage or fixed amount discounts
+  originalPrice?: string;
+}
+
+export interface VenueWithDiscount extends Location {
+  discount: DiscountOffer;
+  distance?: string;
 }
