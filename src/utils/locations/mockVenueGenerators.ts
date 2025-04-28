@@ -1,100 +1,95 @@
+import { Location } from '@/components/VernonNext/types';
 
-import { Location } from "@/types";
-import { cityCoordinates } from "./cityDatabase";
-
-export function generateMusicVenues(city: string, state: string): Location[] {
-  if (!city) {
-    city = "San Francisco";
-    state = "CA";
-  }
-  
-  const musicVenues = [
-    { name: `${city} Arena`, type: "Large Arena" },
-    { name: `The ${city} Theatre`, type: "Historic Theatre" },
-    { name: `${city} Jazz Club`, type: "Jazz Venue" },
-    { name: `Underground ${city}`, type: "Live Music Bar" },
-    { name: `${city} Symphony Hall`, type: "Classical" },
-    { name: `The Sound Bar ${city}`, type: "Club" },
-    { name: `${city} House of Blues`, type: "Blues Venue" }
+export const generateMusicVenues = (city: string, state: string): Location[] => {
+  return [
+    {
+      id: `${city.toLowerCase()}-music-1`,
+      name: `${city} Arena`,
+      address: "123 Music Ave",
+      city,
+      state,
+      country: "USA",
+      zip: "12345",
+      lat: 40.7128,
+      lng: -74.0060,
+      type: "music",
+      verified: true,
+      vibes: ["Live Music", "High Energy", "Trending"]
+    },
+    {
+      id: `${city.toLowerCase()}-music-2`,
+      name: `The ${city} Theatre`,
+      address: "456 Stage St",
+      city,
+      state,
+      country: "USA",
+      zip: "67890",
+      lat: 40.730610,
+      lng: -73.935242,
+      type: "music",
+      verified: false,
+      vibes: ["Concert", "Acoustic", "Indie"]
+    },
+    {
+      id: `${city.toLowerCase()}-music-3`,
+      name: `Club ${city}`,
+      address: "789 Beat Blvd",
+      city,
+      state,
+      country: "USA",
+      zip: "10112",
+      lat: 34.052235,
+      lng: -118.243683,
+      type: "music",
+      verified: true,
+      vibes: ["DJ", "Dance", "Nightlife"]
+    }
   ];
-  
-  return musicVenues.map((venue, index) => ({
-    id: `music-${city.toLowerCase().replace(/\s+/g, '-')}-${index}`,
-    name: venue.name,
-    address: `${100 + index} Music Row`,
-    city,
-    state,
-    country: "USA",
-    zip: `${10000 + Math.floor(Math.random() * 90000)}`,
-    lat: cityCoordinates[city]?.lat || (40 + Math.random()),
-    lng: cityCoordinates[city]?.lng || (-75 + Math.random()),
-    type: "music",
-    verified: Math.random() > 0.3,
-    venueType: venue.type,
-    vibes: ["Live Music", "Entertainment", "Nightlife"]
-  }));
-}
+};
 
-export function generateComedyClubs(city: string, state: string): Location[] {
-  if (!city) {
-    city = "San Francisco";
-    state = "CA";
-  }
-  
-  const comedyVenues = [
-    { name: `${city} Comedy Club`, type: "Stand-up Club" },
-    { name: `Laugh Factory ${city}`, type: "Comedy Chain" },
-    { name: `${city} Improv`, type: "Improv Theatre" },
-    { name: `Funny Bone ${city}`, type: "Comedy Club" },
-    { name: `Comedy Cellar ${city}`, type: "Underground Club" }
+export const generateComedyClubs = (city: string, state: string): Location[] => {
+  return [
+    {
+      id: `${city.toLowerCase()}-comedy-1`,
+      name: `${city} Comedy Club`,
+      address: "456 Laugh Lane",
+      city,
+      state,
+      country: "USA",
+      zip: "12345",
+      lat: 40.7128,
+      lng: -74.0060,
+      type: "comedy",
+      verified: true,
+      vibes: ["Comedy", "Nightlife", "Entertainment"]
+    },
+    {
+      id: `${city.toLowerCase()}-comedy-2`,
+      name: `The ${city} Chuckle House`,
+      address: "789 Joke Junction",
+      city,
+      state,
+      country: "USA",
+      zip: "54321",
+      lat: 34.0522,
+      lng: -118.2437,
+      type: "comedy",
+      verified: false,
+      vibes: ["Stand-up", "Improv", "Drinks"]
+    },
+    {
+      id: `${city.toLowerCase()}-comedy-3`,
+      name: `Giggles ${city}`,
+      address: "101 Hilarity Heights",
+      city,
+      state,
+      country: "USA",
+      zip: "98765",
+      lat: 41.8781,
+      lng: -87.6298,
+      type: "comedy",
+      verified: true,
+      vibes: ["Open Mic", "Sketch", "Late Night"]
+    }
   ];
-  
-  return comedyVenues.map((venue, index) => ({
-    id: `comedy-${city.toLowerCase().replace(/\s+/g, '-')}-${index}`,
-    name: venue.name,
-    address: `${200 + index} Comedy Lane`,
-    city,
-    state,
-    country: "USA",
-    zip: `${10000 + Math.floor(Math.random() * 90000)}`,
-    lat: cityCoordinates[city]?.lat || (40 + Math.random()),
-    lng: cityCoordinates[city]?.lng || (-75 + Math.random()),
-    type: "comedy",
-    verified: Math.random() > 0.3,
-    venueType: venue.type,
-    vibes: ["Comedy", "Entertainment", "Nightlife"]
-  }));
-}
-
-export function generateNightlifeVenues(city: string, state: string): Location[] {
-  if (!city) {
-    city = "San Francisco";
-    state = "CA";
-  }
-  
-  const nightlifeVenues = [
-    { name: `${city} Rooftop Lounge`, type: "Rooftop Bar" },
-    { name: `Club ${city}`, type: "Nightclub" },
-    { name: `The ${city} Speakeasy`, type: "Cocktail Bar" },
-    { name: `${city} Ultra Lounge`, type: "Upscale Club" },
-    { name: `Sky ${city}`, type: "Rooftop Club" },
-    { name: `The ${city} Social`, type: "Lounge" },
-    { name: `Velvet ${city}`, type: "VIP Club" }
-  ];
-  
-  return nightlifeVenues.map((venue, index) => ({
-    id: `nightlife-${city.toLowerCase().replace(/\s+/g, '-')}-${index}`,
-    name: venue.name,
-    address: `${300 + index} Night Ave`,
-    city,
-    state,
-    country: "USA",
-    zip: `${10000 + Math.floor(Math.random() * 90000)}`,
-    lat: cityCoordinates[city]?.lat || (40 + Math.random()),
-    lng: cityCoordinates[city]?.lng || (-75 + Math.random()),
-    type: "nightlife",
-    verified: Math.random() > 0.3,
-    venueType: venue.type,
-    vibes: ["Nightlife", "Entertainment", "Drinks"]
-  }));
-}
+};

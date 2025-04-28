@@ -1,4 +1,3 @@
-
 // OpenRouterService.ts - Handles API calls to OpenRouter
 
 interface CompletionOptions {
@@ -76,7 +75,6 @@ export const OpenRouterService = {
     }
   },
 
-  // Speech-to-text functionality
   async speechToText({ audioBase64 }: SpeechToTextOptions): Promise<string> {
     try {
       console.log('Processing speech to text with OpenRouter...');
@@ -148,7 +146,6 @@ export const OpenRouterService = {
     }
   },
 
-  // Text-to-speech functionality
   async textToSpeech({ text, voice = 'default' }: TextToSpeechOptions): Promise<string> {
     try {
       console.log('Converting text to speech...');
@@ -206,8 +203,53 @@ export const OpenRouterService = {
       return ''; // Fall back to browser's speech synthesis
     }
   },
-  
-  // Function to browse the web and extract event information
+
+  async browse(query: string, options: {
+    model?: string;
+    temperature?: number;
+    systemPrompt?: string;
+  } = {}): Promise<string> {
+    try {
+      console.log('Browsing with OpenRouter:', query);
+      
+      const response = await fetch(`${this.baseUrl}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.apiKey}`,
+          'HTTP-Referer': window.location.origin,
+          'X-Title': 'VibesApp'
+        },
+        body: JSON.stringify({
+          model: options.model || "anthropic/claude-3-haiku",
+          messages: [
+            {
+              role: "system",
+              content: options.systemPrompt || "You are a helpful assistant that provides accurate information about places and events."
+            },
+            {
+              role: "user",
+              content: query
+            }
+          ],
+          temperature: options.temperature || 0.7,
+          top_p: 0.9,
+          max_tokens: 2000
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`OpenRouter API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data.choices[0].message.content;
+    } catch (error) {
+      console.error('Error in OpenRouter browse:', error);
+      throw error;
+    }
+  },
+
   async browseWebAndExtractEvents(searchQuery: string, eventType: string): Promise<any[]> {
     try {
       console.log(`Browsing for ${eventType} events: ${searchQuery}`);
@@ -267,4 +309,3 @@ export const OpenRouterService = {
     }
   }
 };
-

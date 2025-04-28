@@ -37,5 +37,33 @@ export interface ExtractedIntent {
   intent: string;
   entities: Record<string, any>;
   confidence: number;
+  type?: string;
+  location?: string;
+  keywords?: string[];
+  mood?: string;
+}
+
+export interface Location {
+  id: string;
+  name: string;
+  address: string;
+  city: string;
+  state: string;
+  country: string;
+  zip: string;
+  lat: number;
+  lng: number;
+  type: string;
+  verified: boolean;
+  vibes?: string[];
+  hours?: {
+    monday: string;
+    tuesday: string;
+    wednesday: string;
+    thursday: string;
+    friday: string;
+    saturday: string;
+    sunday: string;
+  };
 }
 
