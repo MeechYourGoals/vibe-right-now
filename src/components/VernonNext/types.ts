@@ -1,3 +1,4 @@
+
 export interface Message {
   id: string;
   role: 'user' | 'assistant' | 'system' | 'error';
@@ -49,7 +50,7 @@ export interface Location {
   city: string;
   state: string;
   country: string;
-  zip?: string; // Made optional since not all locations will have it
+  zip?: string; // Keeping this optional as per design
   lat: number;
   lng: number;
   type: string;

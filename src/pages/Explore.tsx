@@ -27,6 +27,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import DateRangeSelector from "@/components/DateRangeSelector";
 import { EventItem } from "@/components/venue/events/types";
+import { ExploreFilters } from "@/components/explore/ExploreFilters";
 
 const generateMockMusicVenues = (city: string) => {
   return [
@@ -312,7 +313,7 @@ const Explore = () => {
       setSearchedState("CA");
       setMusicEvents(generateMusicEvents("San Francisco", "CA", dateRange));
       setComedyEvents(generateComedyEvents("San Francisco", "CA", dateRange));
-      setNightlifeVenues(generateLocalNightlifeVenues("San Francisco", "CA", dateRange));
+      setNightlifeVenues(generateLocalNightlifeVenues("San Francisco", "CA"));
     }
     
     if (tab) {
@@ -664,18 +665,13 @@ const Explore = () => {
             <SearchVibes onSearch={handleSearch} />
           </div>
           
-          <DateFilterSection
+          <ExploreFilters
             dateRange={dateRange}
-            setDateRange={setDateRange}
             showDateFilter={showDateFilter}
             setShowDateFilter={setShowDateFilter}
-            searchedCity={searchedCity || "San Francisco"}
             handleDateRangeChange={handleDateRangeChange}
             vibeFilter={vibeFilter}
             setVibeFilter={setVibeFilter}
-            searchQuery={searchQuery}
-            searchCategory={searchCategory}
-            handleSearch={handleSearch}
           />
           
           <Tabs defaultValue="all" value={activeTab} onValueChange={handleTabChange} className="max-w-2xl mx-auto">

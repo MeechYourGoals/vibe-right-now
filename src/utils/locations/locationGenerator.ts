@@ -114,6 +114,16 @@ const createCoordinate = (baseLat: number, baseLng: number, index: number) => {
   };
 };
 
+// Function to generate a random ZIP code based on the city and state
+const generateRandomZip = (city: string, state: string): string => {
+  // This is a simple implementation; in a real app, you'd use a ZIP code database
+  // Create a deterministic but "random-looking" ZIP based on city and state names
+  const cityHash = Array.from(city).reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const stateHash = Array.from(state || "").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const zipBase = (10000 + (cityHash + stateHash) % 89999); // Generate a 5-digit ZIP between 10000-99999
+  return zipBase.toString();
+};
+
 // Function to generate venues for a specific city
 export const generateCityLocations = (cityKey: string): Location[] => {
   const city = cityCoordinates[cityKey.toLowerCase()];
@@ -129,8 +139,9 @@ export const generateCityLocations = (cityKey: string): Location[] => {
     name: getSportsVenueName(city.name),
     address: `${100 + Math.floor(Math.random() * 900)} Sports Blvd`,
     city: city.name,
-    state: city.state,
+    state: city.state || "",
     country: city.country,
+    zip: generateRandomZip(city.name, city.state || ""), // Add generated ZIP code
     lat: sportCoords.lat,
     lng: sportCoords.lng,
     type: "sports",
@@ -148,8 +159,9 @@ export const generateCityLocations = (cityKey: string): Location[] => {
     name: getLoungeName(city.name),
     address: `${100 + Math.floor(Math.random() * 900)} Nightlife Ave`,
     city: city.name,
-    state: city.state,
+    state: city.state || "",
     country: city.country,
+    zip: generateRandomZip(city.name, city.state || ""), // Add generated ZIP code
     lat: loungeCoords.lat,
     lng: loungeCoords.lng,
     type: "bar",
@@ -167,8 +179,9 @@ export const generateCityLocations = (cityKey: string): Location[] => {
     name: getRestaurantName(city.name),
     address: `${100 + Math.floor(Math.random() * 900)} Culinary Lane`,
     city: city.name,
-    state: city.state,
+    state: city.state || "",
     country: city.country,
+    zip: generateRandomZip(city.name, city.state || ""), // Add generated ZIP code
     lat: restaurantCoords.lat,
     lng: restaurantCoords.lng,
     type: "restaurant",
@@ -186,8 +199,9 @@ export const generateCityLocations = (cityKey: string): Location[] => {
     name: getEventName(city.name),
     address: `${100 + Math.floor(Math.random() * 900)} Festival Way`,
     city: city.name,
-    state: city.state,
+    state: city.state || "",
     country: city.country,
+    zip: generateRandomZip(city.name, city.state || ""), // Add generated ZIP code
     lat: eventCoords.lat,
     lng: eventCoords.lng,
     type: "event",
@@ -205,8 +219,9 @@ export const generateCityLocations = (cityKey: string): Location[] => {
     name: getComedyClubName(city.name),
     address: `${100 + Math.floor(Math.random() * 900)} Laughter Road`,
     city: city.name,
-    state: city.state,
+    state: city.state || "",
     country: city.country,
+    zip: generateRandomZip(city.name, city.state || ""), // Add generated ZIP code
     lat: comedyCoords.lat,
     lng: comedyCoords.lng,
     type: "event",
@@ -224,8 +239,9 @@ export const generateCityLocations = (cityKey: string): Location[] => {
     name: getFitnessClassName(city.name),
     address: `${100 + Math.floor(Math.random() * 900)} Fitness Drive`,
     city: city.name,
-    state: city.state,
+    state: city.state || "",
     country: city.country,
+    zip: generateRandomZip(city.name, city.state || ""), // Add generated ZIP code
     lat: fitnessCoords.lat,
     lng: fitnessCoords.lng,
     type: "other",
@@ -243,8 +259,9 @@ export const generateCityLocations = (cityKey: string): Location[] => {
     name: getAttractionName(city.name),
     address: `${100 + Math.floor(Math.random() * 900)} Landmark Plaza`,
     city: city.name,
-    state: city.state,
+    state: city.state || "",
     country: city.country,
+    zip: generateRandomZip(city.name, city.state || ""), // Add generated ZIP code
     lat: attractionCoords.lat,
     lng: attractionCoords.lng,
     type: "attraction",
