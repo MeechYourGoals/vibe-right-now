@@ -110,6 +110,15 @@ const getMediaForLocation = (location: Location) => {
   };
 };
 
+// Generate a random ZIP code based on the city and state
+const generateRandomZip = (city: string, state: string): string => {
+  // This is a simple implementation; in a real app, you'd use a ZIP code database
+  const cityHash = Array.from(city).reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const stateHash = Array.from(state || "").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const zipBase = (10000 + (cityHash + stateHash) % 89999); // Generate a 5-digit ZIP between 10000-99999
+  return zipBase.toString();
+};
+
 const generateMockLocationsForCity = (city: string, state: string) => {
   const types = ["restaurant", "bar", "event", "attraction", "sports", "other"];
   let mockCityLocations: Location[] = [];
@@ -148,6 +157,7 @@ const generateMockLocationsForCity = (city: string, state: string) => {
         city,
         state,
         country: "USA",
+        zip: generateRandomZip(city, state), // Add generated ZIP code
         lat: 40 + Math.random(),
         lng: -75 + Math.random(),
         type: type as any,
@@ -762,48 +772,4 @@ const Explore = () => {
               )}
               
               {activeTab !== "music" && activeTab !== "comedy" && activeTab !== "nightlife" && (
-                <LocationsGrid
-                  locations={filteredLocations.length > 0 ? filteredLocations : generateMockLocationsForCity(searchedCity || "San Francisco", searchedState || "CA")}
-                  locationTags={locationTags}
-                />
-              )}
-            </div>
-            
-            <div className="hidden md:block">
-              <NearbyVibesMap />
-              
-              {searchedCity && dateRange?.from && (
-                <Card className="mt-6 bg-indigo-50 border-indigo-200">
-                  <CardContent className="p-4">
-                    <h3 className="text-lg font-semibold mb-2 text-indigo-800">
-                      Planning Your Trip
-                    </h3>
-                    <p className="text-sm text-indigo-700 mb-4">
-                      Looking at events in {searchedCity} for
-                      {dateRange.to
-                        ? ` ${format(dateRange.from, "MMM d")} - ${format(dateRange.to, "MMM d, yyyy")}`
-                        : ` ${format(dateRange.from, "MMM d, yyyy")}`
-                      }
-                    </p>
-                    <div className="space-y-2">
-                      <Button variant="default" className="w-full bg-indigo-600 hover:bg-indigo-700">
-                        Save This Trip
-                      </Button>
-                      <Button variant="outline" className="w-full border-indigo-300 text-indigo-700 hover:bg-indigo-100">
-                        Share With Friends
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-          </div>
-        )}
-      </main>
-      
-      <CameraButton />
-    </div>
-  );
-};
-
-export default Explore;
+                <

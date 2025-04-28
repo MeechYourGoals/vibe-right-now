@@ -50,7 +50,7 @@ export interface Location {
   city: string;
   state: string;
   country: string;
-  zip?: string; // Keeping this optional as per design
+  zip?: string; // Making this optional to match other definitions
   lat: number;
   lng: number;
   type: string;

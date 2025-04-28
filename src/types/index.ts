@@ -1,11 +1,10 @@
-
 export interface Location {
   id: string;
   name: string;
   address: string;
   city: string;
   state: string;
-  zip: string;
+  zip?: string;
   country: string;
   lat: number;
   lng: number;
@@ -20,10 +19,10 @@ export interface Location {
   images?: string[];
   verified?: boolean;
   vibes?: string[];
-  userProfile?: any; // Adding for compatibility with locationGenerator
-  amenities?: any[]; // Adding for compatibility with Discounts.tsx
-  reviews?: any[]; // Adding for compatibility
-  distance?: string; // Adding for compatibility
+  userProfile?: any;
+  amenities?: any[];
+  reviews?: any[];
+  distance?: string;
 }
 
 export interface BusinessHours {
@@ -44,7 +43,7 @@ export interface User {
 export interface Media {
   type: "image" | "video";
   url: string;
-  thumbnail?: string; // Adding for backward compatibility
+  thumbnail?: string;
 }
 
 export interface Post {
@@ -52,12 +51,12 @@ export interface Post {
   user: User;
   location: Location;
   content: string;
-  text?: string; // Added for backward compatibility
+  text?: string;
   media: Media[];
   timestamp: string;
   likes: number;
-  comments: number | any[]; // Updated to support both number and array types
-  vibeTags?: string[]; // Array of vibe tags for the post
+  comments: number | any[];
+  vibeTags?: string[];
   isVenuePost?: boolean;
   isPinned?: boolean;
   expiresAt?: string;
@@ -71,7 +70,7 @@ export interface Comment {
   content: string;
   timestamp: string;
   likes: number;
-  text?: string; // For backward compatibility
+  text?: string;
   vibedHere?: boolean;
 }
 
@@ -125,7 +124,6 @@ export interface Notification {
   content?: string;
 }
 
-// VernonChat types
 export interface ChatMessage {
   id: string;
   role: 'user' | 'assistant' | 'system';
@@ -145,32 +143,39 @@ export interface ExtractedIntent {
   confidence: number;
 }
 
-// Venue insights types
 export interface VenueInsights {
-  visitors: number;
+  visitors?: number;
   visitorsCount?: number;
-  visitorsChange: number;
-  posts: number;
-  postsChange: number;
-  engagement: number;
-  engagementChange: number;
-  likes: number;
-  likesChange: number;
-  comments: number;
-  commentsChange: number;
-  topPosts: Post[];
-  demographics: {
+  visitorsChange?: number;
+  posts?: number;
+  postsChange?: number;
+  engagement?: number;
+  engagementChange?: number;
+  likes?: number;
+  likesChange?: number;
+  comments?: number;
+  commentsChange?: number;
+  topPosts?: Post[];
+  demographics?: {
     ageGroups: Record<string, number>;
     gender: Record<string, number>;
     interests: Record<string, number>;
   };
-  visitorsByTime: Record<string, number>;
-  visitorsByDay: Record<string, number>;
-  
-  // Adding these properties to fix build errors
+  visitorsByTime?: Record<string, number>;
+  visitorsByDay?: Record<string, number>;
   visitorCount?: number;
   checkInCount?: number;
   receiptUploads?: number;
   discountRedemptions?: number;
-  totalViews?: number; // For compatibility
+  totalViews?: number;
+  totalVisits?: number;
+  totalSaves?: number;
+  totalShares?: number;
+  averageRating?: number;
+  ratingCount?: number;
+  totalReviews?: number;
+  dailyViews?: Record<string, number>;
+  peakHours?: Record<string, number>;
+  demographicData?: any;
+  competitiveInsights?: any;
 }
