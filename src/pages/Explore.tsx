@@ -28,6 +28,7 @@ import { Input } from "@/components/ui/input";
 import DateRangeSelector from "@/components/DateRangeSelector";
 import { EventItem } from "@/components/venue/events/types";
 import { ExploreFilters } from "@/components/explore/ExploreFilters";
+import { searchTripAdvisor } from "@/services/tripAdvisorService";
 
 const generateMockMusicVenues = (city: string) => {
   return [
@@ -110,12 +111,10 @@ const getMediaForLocation = (location: Location) => {
   };
 };
 
-// Generate a random ZIP code based on the city and state
 const generateRandomZip = (city: string, state: string): string => {
-  // This is a simple implementation; in a real app, you'd use a ZIP code database
   const cityHash = Array.from(city).reduce((acc, char) => acc + char.charCodeAt(0), 0);
   const stateHash = Array.from(state || "").reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const zipBase = (10000 + (cityHash + stateHash) % 89999); // Generate a 5-digit ZIP between 10000-99999
+  const zipBase = (10000 + (cityHash + stateHash) % 89999);
   return zipBase.toString();
 };
 
@@ -157,7 +156,7 @@ const generateMockLocationsForCity = (city: string, state: string) => {
         city,
         state,
         country: "USA",
-        zip: generateRandomZip(city, state), // Add generated ZIP code
+        zip: generateRandomZip(city, state),
         lat: 40 + Math.random(),
         lng: -75 + Math.random(),
         type: type as any,
@@ -269,6 +268,7 @@ const Explore = () => {
   const [isLoadingResults, setIsLoadingResults] = useState(false);
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [showDateFilter, setShowDateFilter] = useState(false);
+  const [realDataResults, setRealDataResults] = useState<Location[]>([]);
   
   const location = useLocation();
   const navigate = useNavigate();
@@ -312,6 +312,8 @@ const Explore = () => {
         setSearchedCity(city);
         setSearchedState(state);
         
+        fetchRealData(q, city, state);
+        
         setMusicEvents(generateMusicEvents(city, state, dateRange));
         setComedyEvents(generateComedyEvents(city, state, dateRange));
         setNightlifeVenues(generateLocalNightlifeVenues(city, state));
@@ -321,6 +323,9 @@ const Explore = () => {
     } else {
       setSearchedCity("San Francisco");
       setSearchedState("CA");
+      
+      fetchRealData("San Francisco, CA", "San Francisco", "CA");
+      
       setMusicEvents(generateMusicEvents("San Francisco", "CA", dateRange));
       setComedyEvents(generateComedyEvents("San Francisco", "CA", dateRange));
       setNightlifeVenues(generateLocalNightlifeVenues("San Francisco", "CA"));
@@ -360,6 +365,69 @@ const Explore = () => {
       }
     }
   }, [location.search, navigate, dateRange]);
+  
+  const fetchRealData = async (query: string, city: string, state: string) => {
+    setIsLoadingResults(true);
+    
+    try {
+      toast({
+        title: "Searching for real data",
+        description: "Looking for venues on TripAdvisor...",
+        duration: 3000,
+      });
+      
+      const searchQuery = query || `${city}, ${state}`;
+      const results = await searchTripAdvisor(searchQuery);
+      
+      if (results && results.length > 0) {
+        console.log('Found real data results:', results.length);
+        setRealDataResults(results);
+        
+        const newLocationTags: Record<string, string[]> = {...locationTags};
+        
+        results.forEach(location => {
+          if (!newLocationTags[location.id]) {
+            newLocationTags[location.id] = getAdditionalTags(location);
+          }
+        });
+        
+        setLocationTags(newLocationTags);
+        
+        setFilteredLocations(prevLocations => {
+          const combinedResults = [...results];
+          
+          if (combinedResults.length < 10) {
+            const mockResults = generateMockLocationsForCity(city, state);
+            combinedResults.push(...mockResults.slice(0, 10 - combinedResults.length));
+          }
+          
+          return combinedResults;
+        });
+        
+        toast({
+          title: "Real data found!",
+          description: `Found ${results.length} real venues to explore`,
+          duration: 3000,
+        });
+      } else {
+        console.log('No real data found, falling back to mock data');
+        const mockResults = generateMockLocationsForCity(city, state);
+        setFilteredLocations(mockResults);
+        
+        toast({
+          title: "Using mock data",
+          description: "Couldn't find real data, showing similar venues instead",
+          duration: 3000,
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching real data:', error);
+      const mockResults = generateMockLocationsForCity(city, state);
+      setFilteredLocations(mockResults);
+    } finally {
+      setIsLoadingResults(false);
+    }
+  };
   
   useEffect(() => {
     if (searchedCity) {
@@ -406,6 +474,8 @@ const Explore = () => {
           
           setSearchedCity(city);
           setSearchedState(state);
+          
+          await fetchRealData(queryText, city, state);
           
           const needsComedy = data.categories.includes('comedy');
           if (needsComedy) {
@@ -465,6 +535,11 @@ const Explore = () => {
             }
           }
           
+          if (realDataResults.length > 0) {
+            results = [...realDataResults, ...results.filter(mock => 
+              !realDataResults.some(real => real.name === mock.name))];
+          }
+          
           setFilteredLocations(results);
         }
       }
@@ -489,7 +564,7 @@ const Explore = () => {
     setLocationTags(tagsMap);
   }, []);
   
-  const handleSearch = (query: string, filterType: string, category: string) => {
+  const handleSearch = async (query: string, filterType: string, category: string) => {
     setSearchQuery(query);
     setSearchCategory(category);
     
@@ -536,6 +611,8 @@ const Explore = () => {
       setSearchedCity(city);
       setSearchedState(state);
       
+      await fetchRealData(query, city, state);
+      
       setMusicEvents(generateMusicEvents(city, state, dateRange));
       setComedyEvents(generateComedyEvents(city, state, dateRange));
       setNightlifeVenues(generateLocalNightlifeVenues(city, state));
@@ -545,12 +622,26 @@ const Explore = () => {
       setMusicEvents([]);
       setComedyEvents([]);
       setNightlifeVenues([]);
+      
+      if (!query) {
+        fetchRealData("San Francisco, CA", "San Francisco", "CA");
+      }
     }
     
     let results = [...mockLocations];
     
     if (category === "places" && city) {
-      results = generateMockLocationsForCity(city, state);
+      if (realDataResults.length > 0) {
+        results = [...realDataResults];
+        
+        if (results.length < 10) {
+          const mockCityResults = generateMockLocationsForCity(city, state);
+          results = [...results, ...mockCityResults.filter(mock => 
+            !results.some(real => real.name === mock.name))];
+        }
+      } else {
+        results = generateMockLocationsForCity(city, state);
+      }
       
       results.forEach(location => {
         if (!location.vibes) {
@@ -558,7 +649,8 @@ const Explore = () => {
         }
       });
     } else if (query) {
-      results = mockLocations.filter(location => {
+      const allLocations = [...realDataResults, ...mockLocations];
+      results = allLocations.filter(location => {
         const locationMatches = 
           location.name.toLowerCase().includes(query.toLowerCase()) ||
           location.city.toLowerCase().includes(query.toLowerCase()) ||
@@ -623,7 +715,17 @@ const Explore = () => {
     }
     
     if (searchCategory === "places" && searchedCity) {
-      results = generateMockLocationsForCity(searchedCity, searchedState);
+      if (realDataResults.length > 0) {
+        results = [...realDataResults];
+        
+        if (results.length < 10) {
+          const mockCityResults = generateMockLocationsForCity(searchedCity, searchedState);
+          results = [...results, ...mockCityResults.filter(mock => 
+            !results.some(real => real.name === mock.name))];
+        }
+      } else {
+        results = generateMockLocationsForCity(searchedCity, searchedState);
+      }
       
       results.forEach(location => {
         if (!location.vibes) {
@@ -772,4 +874,85 @@ const Explore = () => {
               )}
               
               {activeTab !== "music" && activeTab !== "comedy" && activeTab !== "nightlife" && (
-                <
+                <div className="mb-6">
+                  <h2 className="text-xl font-semibold mb-4">
+                    {activeTab === "all" ? "Popular Venues" : `Popular ${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}s`}
+                  </h2>
+                  <LocationsGrid 
+                    locations={filteredLocations.filter(loc => 
+                      activeTab === "all" ? true : loc.type === activeTab
+                    )} 
+                    locationTags={locationTags} 
+                  />
+                </div>
+              )}
+            </div>
+            
+            <div className="md:col-span-1">
+              <Card>
+                <CardContent className="p-4">
+                  <h3 className="text-lg font-semibold mb-2">Nearby Map</h3>
+                  <NearbyVibesMap 
+                    height={250} 
+                    locations={filteredLocations.slice(0, 10)} 
+                  />
+                  
+                  <div className="mt-4">
+                    <h4 className="text-sm font-medium mb-2">Quick Filters</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {["Trending", "Popular", "Local Favorite", "New Opening"].map((tag) => (
+                        <Badge 
+                          key={tag} 
+                          variant="outline" 
+                          className="cursor-pointer hover:bg-primary/10"
+                          onClick={() => {
+                            toast({
+                              title: `${tag} Filter Applied`,
+                              description: "Showing venues with this tag",
+                              duration: 2000,
+                            });
+                          }}
+                        >
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div className="mt-6">
+                    <h4 className="text-sm font-medium mb-2">Data Sources</h4>
+                    <div className="text-xs text-muted-foreground">
+                      <p className="mb-1">Using data from:</p>
+                      <div className="flex flex-wrap gap-2">
+                        <Badge variant="secondary" className="text-xs">TripAdvisor</Badge>
+                        {realDataResults.length > 0 ? (
+                          <Badge variant="success" className="text-xs bg-green-100 text-green-800">{realDataResults.length} Real Venues</Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-xs">Mock Data</Badge>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <div className="mt-4">
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => {
+                    navigate("/map");
+                  }}
+                >
+                  <MapPin className="h-4 w-4 mr-2" /> View Full Map
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
+    </div>
+  );
+};
+
+export default Explore;
