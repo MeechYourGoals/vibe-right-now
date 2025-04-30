@@ -1,13 +1,17 @@
 
 import React from 'react';
 import { Location } from '@/types';
+import { mockLocations } from '@/mock/data';
 
 interface NearbyVibesMapProps {
   height?: number;
-  locations: Location[];
+  locations?: Location[];
 }
 
-const NearbyVibesMap: React.FC<NearbyVibesMapProps> = ({ height = 300, locations }) => {
+const NearbyVibesMap: React.FC<NearbyVibesMapProps> = ({ 
+  height = 300, 
+  locations = [] 
+}) => {
   return (
     <div 
       className="rounded-lg border overflow-hidden" 

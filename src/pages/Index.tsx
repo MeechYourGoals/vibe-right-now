@@ -16,6 +16,7 @@ import { Calendar, CalendarRange } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import DateRangeSelector from "@/components/DateRangeSelector";
 import { Card, CardContent } from "@/components/ui/card";
+import { mockLocations } from "@/mock/data";
 
 const Index = () => {
   const isMobile = useIsMobile();
@@ -86,7 +87,7 @@ const Index = () => {
 
             {/* Map positioned between search bar and filters */}
             <div className="w-full mb-4">
-              <NearbyVibesMap />
+              <NearbyVibesMap locations={mockLocations.slice(0, 5)} />
             </div>
 
             {/* Posts feed and sidebar layout */}
