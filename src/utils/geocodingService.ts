@@ -1,34 +1,155 @@
 
-import { toast } from "sonner";
+/**
+ * Utility service for geocoding operations
+ */
 
-export async function geocodeAddress(address: string) {
-  if (!address.trim()) {
-    toast.error("Please enter an address");
-    return null;
-  }
-  
+// Get city and state from coordinates using reverse geocoding
+export const getCityStateFromCoordinates = async (lat: number, lng: number): Promise<{city: string, state: string}> => {
   try {
-    // Using Nominatim (OpenStreetMap) for geocoding - no API key required
-    const response = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`
-    );
+    // First try using free Nominatim OpenStreetMap service
+    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
     
     if (!response.ok) {
-      throw new Error('Failed to geocode address');
+      throw new Error(`Geocoding error: ${response.status}`);
     }
     
     const data = await response.json();
     
-    if (data && data.length > 0) {
-      // Nominatim returns lat/lon (not lon/lat as we need for MapBox/OSM)
-      return [parseFloat(data[0].lon), parseFloat(data[0].lat)] as [number, number];
-    } else {
-      toast.error("Address not found. Please try again with a more specific address.");
-      return null;
+    // Extract city and state from address components
+    let city = data.address.city || 
+               data.address.town || 
+               data.address.village || 
+               data.address.hamlet || 
+               "";
+               
+    // For US, state is typically state or state_code
+    // For other countries, it might be county, state, region, etc.
+    let state = data.address.state ||
+                data.address.county ||
+                data.address.region ||
+                "";
+    
+    // If in US, try to convert state name to state code
+    if (data.address.country_code === "us" && state && state.length > 2) {
+      const stateCode = getStateCodeFromName(state);
+      if (stateCode) {
+        state = stateCode;
+      }
     }
+    
+    return { city, state };
   } catch (error) {
     console.error("Geocoding error:", error);
-    toast.error("Error finding address. Please try again.");
-    return null;
+    
+    // Try using backup geocoding service if primary fails
+    try {
+      const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`);
+      
+      if (!response.ok) {
+        throw new Error(`Backup geocoding error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      return {
+        city: data.city || data.locality || "",
+        state: data.principalSubdivisionCode ? 
+               data.principalSubdivisionCode.split('-')[1] : 
+               data.principalSubdivision || ""
+      };
+    } catch (backupError) {
+      console.error("Backup geocoding error:", backupError);
+      return { city: "", state: "" };
+    }
   }
-}
+};
+
+// Mapping of US state full names to state codes
+const usStateMap: Record<string, string> = {
+  'alabama': 'AL',
+  'alaska': 'AK',
+  'arizona': 'AZ',
+  'arkansas': 'AR',
+  'california': 'CA',
+  'colorado': 'CO',
+  'connecticut': 'CT',
+  'delaware': 'DE',
+  'florida': 'FL',
+  'georgia': 'GA',
+  'hawaii': 'HI',
+  'idaho': 'ID',
+  'illinois': 'IL',
+  'indiana': 'IN',
+  'iowa': 'IA',
+  'kansas': 'KS',
+  'kentucky': 'KY',
+  'louisiana': 'LA',
+  'maine': 'ME',
+  'maryland': 'MD',
+  'massachusetts': 'MA',
+  'michigan': 'MI',
+  'minnesota': 'MN',
+  'mississippi': 'MS',
+  'missouri': 'MO',
+  'montana': 'MT',
+  'nebraska': 'NE',
+  'nevada': 'NV',
+  'new hampshire': 'NH',
+  'new jersey': 'NJ',
+  'new mexico': 'NM',
+  'new york': 'NY',
+  'north carolina': 'NC',
+  'north dakota': 'ND',
+  'ohio': 'OH',
+  'oklahoma': 'OK',
+  'oregon': 'OR',
+  'pennsylvania': 'PA',
+  'rhode island': 'RI',
+  'south carolina': 'SC',
+  'south dakota': 'SD',
+  'tennessee': 'TN',
+  'texas': 'TX',
+  'utah': 'UT',
+  'vermont': 'VT',
+  'virginia': 'VA',
+  'washington': 'WA',
+  'west virginia': 'WV',
+  'wisconsin': 'WI',
+  'wyoming': 'WY'
+};
+
+// Get state code from state name
+export const getStateCodeFromName = (stateName: string): string => {
+  return usStateMap[stateName.toLowerCase()] || stateName;
+};
+
+// Get state name from state code
+export const getStateNameFromCode = (stateCode: string): string => {
+  const stateCodeLower = stateCode.toLowerCase();
+  for (const [name, code] of Object.entries(usStateMap)) {
+    if (code.toLowerCase() === stateCodeLower) {
+      return name.charAt(0).toUpperCase() + name.slice(1);
+    }
+  }
+  return stateCode;
+};
+
+// Helper function to get city and state from search query
+export const parseCityStateFromQuery = (query: string): { city: string, state: string } => {
+  const parts = query.split(',').map(part => part.trim());
+  const city = parts[0];
+  let state = parts.length > 1 ? parts[1] : "";
+  
+  // Convert state code to standard format if possible
+  if (state.length === 2) {
+    state = state.toUpperCase();
+  } else if (state.length > 2) {
+    // Try to convert state name to code
+    const stateCode = getStateCodeFromName(state);
+    if (stateCode) {
+      state = stateCode;
+    }
+  }
+  
+  return { city, state };
+};

@@ -5,10 +5,11 @@ import { LocalDataStrategy } from './localDataStrategy';
 import { ComplexQueryStrategy } from './complexQueryStrategy';
 import { ComedySearchStrategy } from './comedySearchStrategy';
 import { LocationSearchStrategy } from './locationSearchStrategy';
+import { parseCityStateFromQuery } from '@/utils/geocodingService';
 
 /**
  * Central coordinator for all search strategies
- * Now with Google Cloud NLP integration support
+ * Now with Google Cloud NLP integration support and improved location detection
  */
 export const SearchCoordinator = {
   /**
@@ -25,6 +26,11 @@ export const SearchCoordinator = {
     // First check if it's a location query
     if (LocationSearchStrategy.isLocationQuery(inputValue)) {
       console.log('Detected location query, using LocationSearchStrategy');
+      
+      // Parse city and state more accurately
+      const { city, state } = parseCityStateFromQuery(inputValue);
+      console.log(`Parsed location: ${city}, ${state}`);
+      
       const locationResult = await LocationSearchStrategy.handleLocationSearch(inputValue);
       
       if (locationResult && locationResult.response && locationResult.response.length > 50) {

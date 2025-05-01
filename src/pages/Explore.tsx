@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { DateRange } from "react-day-picker";
@@ -27,6 +26,7 @@ import { generateMockLocationsForCity, getMediaForLocation, getAdditionalTags, g
 import { useExploreData } from "@/hooks/useExploreData";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { parseCityStateFromQuery } from "@/utils/geocodingService";
 
 const Explore = () => {
   const { 
@@ -64,7 +64,8 @@ const Explore = () => {
     setShowDateFilter,
     realDataResults,
     setRealDataResults,
-    hasRealData
+    hasRealData,
+    isDetectingLocation
   } = useExploreData();
   
   const location = useLocation();
@@ -91,6 +92,7 @@ const Explore = () => {
       setShowDateFilter(true);
     }
     
+    // If we have a query parameter, search for it immediately
     if (q) {
       setSearchQuery(q);
       
@@ -102,12 +104,11 @@ const Explore = () => {
       if (isComplexQuery) {
         processComplexQuery(q);
       } else {
-        const parts = q.split(',');
-        const city = parts[0].trim() || "San Francisco";
-        const state = parts.length > 1 ? parts[1].trim() : "CA";
+        // Parse city and state more intelligently
+        const { city, state } = parseCityStateFromQuery(q);
         
-        setSearchedCity(city);
-        setSearchedState(state);
+        setSearchedCity(city || "San Francisco");
+        setSearchedState(state || "CA");
         
         fetchRealData(q, city, state);
         
@@ -117,15 +118,14 @@ const Explore = () => {
       }
       
       setSearchCategory("places");
-    } else {
-      setSearchedCity("San Francisco");
-      setSearchedState("CA");
+    } else if (searchedCity) {
+      // If no query but we have a detected city (from geolocation), search for it
+      const searchText = `${searchedCity}${searchedState ? ', ' + searchedState : ''}`;
+      fetchRealData(searchText, searchedCity, searchedState);
       
-      fetchRealData("San Francisco, CA", "San Francisco", "CA");
-      
-      setMusicEvents(generateMusicEvents("San Francisco", "CA", dateRange));
-      setComedyEvents(generateComedyEvents("San Francisco", "CA", dateRange));
-      setNightlifeVenues(generateLocalNightlifeVenues("San Francisco", "CA"));
+      setMusicEvents(generateMusicEvents(searchedCity, searchedState, dateRange));
+      setComedyEvents(generateComedyEvents(searchedCity, searchedState, dateRange));
+      setNightlifeVenues(generateLocalNightlifeVenues(searchedCity, searchedState));
     }
     
     if (tab) {
@@ -161,7 +161,7 @@ const Explore = () => {
         navigate(`/explore?${searchParams.toString()}`, { replace: true });
       }
     }
-  }, [location.search, navigate, dateRange]);
+  }, [location.search, navigate, dateRange, searchedCity, searchedState]);
   
   const fetchRealData = async (query: string, city: string, state: string) => {
     setIsLoadingResults(true);
@@ -169,7 +169,7 @@ const Explore = () => {
     try {
       toast({
         title: "Searching for real data",
-        description: "Looking for venues on TripAdvisor...",
+        description: "Looking for venues in " + (city || query) + "...",
         duration: 3000,
       });
       
@@ -402,9 +402,11 @@ const Explore = () => {
     if (isComplexQuery) {
       processComplexQuery(query);
     } else if (query && !detectedVibe) {
-      const parts = query.split(',');
-      city = parts[0].trim();
-      state = parts.length > 1 ? parts[1].trim() : "";
+      // Parse city and state using our improved utility
+      const locationInfo = parseCityStateFromQuery(query);
+      city = locationInfo.city;
+      state = locationInfo.state;
+      
       setSearchedCity(city);
       setSearchedState(state);
       
@@ -414,12 +416,7 @@ const Explore = () => {
       setComedyEvents(generateComedyEvents(city, state, dateRange));
       setNightlifeVenues(generateLocalNightlifeVenues(city, state));
     } else {
-      setSearchedCity("");
-      setSearchedState("");
-      setMusicEvents([]);
-      setComedyEvents([]);
-      setNightlifeVenues([]);
-      
+      // Don't clear the city if we're just filtering by vibe
       if (!query) {
         fetchRealData("San Francisco, CA", "San Francisco", "CA");
       }
@@ -548,7 +545,9 @@ const Explore = () => {
   };
 
   const getPageTitle = () => {
-    if (isNaturalLanguageSearch) {
+    if (isDetectingLocation) {
+      return "Detecting your location...";
+    } else if (isNaturalLanguageSearch) {
       return "Smart Search Results";
     } else if (searchedCity) {
       return `Explore Vibes in ${searchedCity}${searchedState ? `, ${searchedState}` : ''}`;

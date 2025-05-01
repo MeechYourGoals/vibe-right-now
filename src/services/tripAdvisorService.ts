@@ -1,5 +1,9 @@
+
 import { Location } from "@/types";
 import { toast } from "sonner";
+
+// API key for TripAdvisor service via Apify
+const APIFY_API_KEY = "apify_api_AhrL7ckIO65JyOsJKpCra1YRxZl87t1bTPwz";
 
 export interface TripAdvisorResult {
   name: string;
@@ -115,8 +119,7 @@ export const searchTripAdvisor = async (query: string): Promise<Location[]> => {
     // Notify the user
     toast("Error fetching real data", {
       description: "Falling back to mockdata. Please try again later.",
-      duration: 5000,
-      variant: "destructive"
+      duration: 5000
     });
     
     return [];
