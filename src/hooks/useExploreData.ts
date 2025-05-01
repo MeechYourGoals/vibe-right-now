@@ -23,11 +23,17 @@ export const useExploreData = () => {
   const [comedyEvents, setComedyEvents] = useState<EventItem[]>([]);
   const [nightlifeVenues, setNightlifeVenues] = useState<Location[]>([]);
   const [realDataResults, setRealDataResults] = useState<Location[]>([]);
+  const [hasRealData, setHasRealData] = useState<boolean>(false);
 
   // UI states
   const [isLoadingResults, setIsLoadingResults] = useState<boolean>(false);
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [showDateFilter, setShowDateFilter] = useState<boolean>(false);
+
+  // Update hasRealData flag whenever realDataResults changes
+  useEffect(() => {
+    setHasRealData(realDataResults.length > 0);
+  }, [realDataResults]);
 
   return {
     // Search and filtering states
@@ -61,6 +67,7 @@ export const useExploreData = () => {
     setNightlifeVenues,
     realDataResults,
     setRealDataResults,
+    hasRealData,
     
     // UI states
     isLoadingResults,

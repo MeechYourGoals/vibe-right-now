@@ -87,7 +87,10 @@ const Index = () => {
 
             {/* Map positioned between search bar and filters */}
             <div className="w-full mb-4">
-              <NearbyVibesMap locations={mockLocations.slice(0, 5)} />
+              <NearbyVibesMap 
+                locations={mockLocations.slice(0, 5)}
+                isRealData={false}
+              />
             </div>
 
             {/* Posts feed and sidebar layout */}

@@ -4,15 +4,16 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
-import { MapPin, VerifiedIcon } from "lucide-react";
+import { MapPin, VerifiedIcon, Check, Globe } from "lucide-react";
 import { Location } from "@/types";
 
 interface LocationsGridProps {
   locations: Location[];
   locationTags: Record<string, string[]>;
+  isRealData?: boolean;
 }
 
-const LocationsGrid = ({ locations, locationTags }: LocationsGridProps) => {
+const LocationsGrid = ({ locations, locationTags, isRealData = false }: LocationsGridProps) => {
   if (locations.length === 0) {
     return (
       <div className="col-span-full text-center py-10">
@@ -27,13 +28,21 @@ const LocationsGrid = ({ locations, locationTags }: LocationsGridProps) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {locations.map((location) => (
-        <Card key={location.id} className="vibe-card-hover">
+        <Card 
+          key={location.id} 
+          className={`vibe-card-hover ${isRealData || location.verified ? 'border-green-400' : ''}`}
+        >
           <CardContent className="p-4">
             <div className="flex justify-between items-start mb-2">
               <h3 className="text-lg font-semibold flex items-center">
                 {location.name}
                 {location.verified && (
                   <VerifiedIcon className="h-4 w-4 ml-1 text-primary" />
+                )}
+                {isRealData && (
+                  <Badge variant="outline" className="ml-2 bg-green-100 text-green-800 border-green-300">
+                    <Check className="h-3 w-3 mr-1" /> Real
+                  </Badge>
                 )}
               </h3>
               <HoverCard>
@@ -67,7 +76,21 @@ const LocationsGrid = ({ locations, locationTags }: LocationsGridProps) => {
               </span>
             </div>
             
-            <Button className="w-full bg-gradient-vibe" asChild>
+            {isRealData && location.website && (
+              <div className="mb-3 text-sm flex items-center">
+                <Globe className="h-4 w-4 mr-1 text-green-600" />
+                <a 
+                  href={location.website} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-green-600 hover:underline truncate"
+                >
+                  Official Website
+                </a>
+              </div>
+            )}
+            
+            <Button className={`w-full ${isRealData ? 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700' : 'bg-gradient-vibe'}`} asChild>
               <Link to={`/venue/${location.id}`}>View Vibes</Link>
             </Button>
           </CardContent>

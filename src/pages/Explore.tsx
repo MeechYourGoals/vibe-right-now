@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { DateRange } from "react-day-picker";
@@ -62,7 +63,8 @@ const Explore = () => {
     showDateFilter,
     setShowDateFilter,
     realDataResults,
-    setRealDataResults
+    setRealDataResults,
+    hasRealData
   } = useExploreData();
   
   const location = useLocation();
@@ -663,12 +665,18 @@ const Explore = () => {
                 <div className="mb-6">
                   <h2 className="text-xl font-semibold mb-4">
                     {activeTab === "all" ? "Popular Venues" : `Popular ${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}s`}
+                    {hasRealData && realDataResults.length > 0 && (
+                      <Badge variant="success" className="ml-2">
+                        {realDataResults.length} Real Results
+                      </Badge>
+                    )}
                   </h2>
                   <LocationsGrid 
                     locations={filteredLocations.filter(loc => 
                       activeTab === "all" ? true : loc.type === activeTab
                     )} 
-                    locationTags={locationTags} 
+                    locationTags={locationTags}
+                    isRealData={hasRealData && realDataResults.length > 0}
                   />
                 </div>
               )}
@@ -680,7 +688,8 @@ const Explore = () => {
                   <h3 className="text-lg font-semibold mb-2">Nearby Map</h3>
                   <NearbyVibesMap 
                     height={250} 
-                    locations={filteredLocations.slice(0, 10)} 
+                    locations={filteredLocations.slice(0, 10)}
+                    isRealData={hasRealData && realDataResults.length > 0}
                   />
                   
                   <div className="mt-4">
