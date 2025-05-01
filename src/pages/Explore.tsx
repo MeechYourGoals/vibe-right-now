@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import Header from "@/components/Header";
 import { useToast } from "@/components/ui/use-toast";
@@ -8,6 +8,8 @@ import { useExploreSearch } from "@/hooks/useExploreSearch";
 import SearchSection from "@/components/explore/SearchSection";
 import ExploreContent from "@/components/explore/ExploreContent";
 import ExploreSidebar from "@/components/explore/ExploreSidebar";
+import { mockLocations } from "@/mock/data";
+import { getAdditionalTags } from "@/utils/explore/exploreHelpers";
 
 const Explore = () => {
   const { 
@@ -19,6 +21,7 @@ const Explore = () => {
     searchCategory,
     filteredLocations,
     locationTags,
+    setLocationTags,
     musicEvents,
     comedyEvents,
     nightlifeVenues,
@@ -43,14 +46,14 @@ const Explore = () => {
   const location = useLocation();
   const { toast } = useToast();
   
+  // Initialize location tags
   useEffect(() => {
-    // Initialize location tags
     const tagsMap: Record<string, string[]> = {};
     mockLocations.forEach(location => {
       tagsMap[location.id] = getAdditionalTags(location);
     });
     setLocationTags(tagsMap);
-  }, []);
+  }, [setLocationTags]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -104,10 +107,5 @@ const Explore = () => {
     </div>
   );
 };
-
-// Import needed things
-import { useEffect } from "react";
-import { mockLocations } from "@/mock/data";
-import { getAdditionalTags } from "@/utils/explore/exploreHelpers";
 
 export default Explore;

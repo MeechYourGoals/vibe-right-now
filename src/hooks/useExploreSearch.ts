@@ -10,7 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from "@/components/ui/use-toast";
 import { generateMockLocationsForCity } from "@/utils/explore/exploreHelpers";
 import { Location } from "@/types";
-import { generateLocalNightlifeVenues } from "@/utils/locations/venueHelpers";
+import { generateLocalNightlifeVenues, generateRandomVibes } from "@/utils/locations/venueHelpers";
 import { getAdditionalTags } from "@/utils/explore/exploreHelpers";
 
 export const useExploreSearch = () => {
