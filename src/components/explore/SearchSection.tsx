@@ -1,9 +1,9 @@
-
 import React from "react";
 import SearchVibes from "@/components/SearchVibes";
 import { ExploreFilters } from "@/components/explore/ExploreFilters";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DateRange } from "react-day-picker";
+import { Switch, Label, InfoCircle } from "@/components/ui/switch";
 
 interface SearchSectionProps {
   searchQuery: string;
@@ -20,6 +20,8 @@ interface SearchSectionProps {
   searchedCity: string;
   searchedState: string;
   isNaturalLanguageSearch: boolean;
+  isAIEnabled?: boolean;
+  setIsAIEnabled?: (enabled: boolean) => void;
 }
 
 const SearchSection: React.FC<SearchSectionProps> = ({
@@ -37,6 +39,8 @@ const SearchSection: React.FC<SearchSectionProps> = ({
   searchedCity,
   searchedState,
   isNaturalLanguageSearch,
+  isAIEnabled = true,
+  setIsAIEnabled = () => {},
 }) => {
   const getPageTitle = () => {
     if (isDetectingLocation) {
@@ -67,6 +71,23 @@ const SearchSection: React.FC<SearchSectionProps> = ({
         vibeFilter={vibeFilter}
         setVibeFilter={setVibeFilter}
       />
+      
+      {/* Add AI personalization toggle */}
+      <div className="flex items-center gap-2 mt-2 text-xs">
+        <Switch 
+          id="ai-personalization" 
+          checked={isAIEnabled}
+          onCheckedChange={setIsAIEnabled}
+          size="sm" 
+        />
+        <Label htmlFor="ai-personalization" className="text-xs cursor-pointer">
+          AI Personalization
+        </Label>
+        <InfoCircle 
+          className="h-3 w-3 text-muted-foreground cursor-help" 
+          title="Personalizes results based on your preferences"
+        />
+      </div>
       
       <Tabs defaultValue="all" value={activeTab} onValueChange={handleTabChange} className="max-w-2xl mx-auto">
         <TabsList className="grid grid-cols-2 md:grid-cols-10">

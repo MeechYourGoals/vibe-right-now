@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Badge } from "@/components/ui/badge";
 import { Location } from "@/types";
@@ -25,6 +24,7 @@ interface ExploreContentProps {
   hasRealData: boolean;
   realDataResults: Location[];
   isLoadingResults: boolean;
+  isAIPersonalized?: boolean;
 }
 
 const ExploreContent: React.FC<ExploreContentProps> = ({
@@ -40,6 +40,7 @@ const ExploreContent: React.FC<ExploreContentProps> = ({
   hasRealData,
   realDataResults,
   isLoadingResults,
+  isAIPersonalized = false,
 }) => {
   if (isLoadingResults) {
     return (
@@ -53,7 +54,7 @@ const ExploreContent: React.FC<ExploreContentProps> = ({
   }
 
   return (
-    <>
+    <div className="space-y-6">
       {activeTab === "music" && (
         <MusicSection
           musicEvents={musicEvents}
@@ -125,7 +126,14 @@ const ExploreContent: React.FC<ExploreContentProps> = ({
           />
         </div>
       )}
-    </>
+      
+      {isAIPersonalized && activeTab === "all" && (
+        <div className="rounded-md bg-primary/5 p-2 text-xs flex items-center gap-2 border border-primary/10">
+          <Sparkles className="h-3 w-3 text-primary" />
+          <span>Results personalized based on your preferences</span>
+        </div>
+      )}
+    </div>
   );
 };
 
