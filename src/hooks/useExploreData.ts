@@ -91,7 +91,7 @@ export const useExploreData = () => {
         setSearchedState("CA");
       }
     }
-  }, []);
+  }, [searchedCity]);
 
   // Update hasRealData flag whenever realDataResults changes
   useEffect(() => {
