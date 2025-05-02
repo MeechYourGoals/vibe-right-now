@@ -13,12 +13,14 @@ interface ExploreSidebarProps {
   filteredLocations: Location[];
   hasRealData: boolean;
   realDataResults: Location[];
+  isAIPersonalized?: boolean;
 }
 
 const ExploreSidebar: React.FC<ExploreSidebarProps> = ({
   filteredLocations,
   hasRealData,
   realDataResults,
+  isAIPersonalized = false,
 }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -70,6 +72,12 @@ const ExploreSidebar: React.FC<ExploreSidebarProps> = ({
               </div>
             </div>
           </div>
+          
+          {isAIPersonalized && (
+            <div className="mt-4 text-xs text-muted-foreground border-t pt-2">
+              <p>Results are personalized based on your preferences</p>
+            </div>
+          )}
         </CardContent>
       </Card>
       

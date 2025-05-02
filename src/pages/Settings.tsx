@@ -20,15 +20,13 @@ const Settings = () => {
   const [subscriptionTier, setSubscriptionTier] = useState<'standard' | 'plus' | 'premium' | 'pro'>('standard');
 
   const handleSaveSettings = () => {
-    toast({
-      title: "Settings saved",
+    toast("Settings saved", {
       description: "Your preferences have been updated successfully.",
     });
   };
 
   const handleConnectPlatform = (platformId: string) => {
-    toast({
-      title: "Connecting to platform",
+    toast("Connecting to platform", {
       description: `Initiating connection to ${platformId === 'other' ? "custom platform" : platformId}...`,
     });
     // In a real app, this would trigger an OAuth flow or similar
@@ -36,8 +34,7 @@ const Settings = () => {
 
   const toggleMode = () => {
     setIsVenueMode(!isVenueMode);
-    toast({
-      title: `Switched to ${!isVenueMode ? "Venue" : "User"} Mode`,
+    toast(`Switched to ${!isVenueMode ? "Venue" : "User"} Mode`, {
       description: `Settings are now configured for ${!isVenueMode ? "venue management" : "regular user"}.`,
     });
   };
@@ -45,8 +42,7 @@ const Settings = () => {
   // Helper function to upgrade subscription tier
   const upgradeTier = (tier: 'standard' | 'plus' | 'premium' | 'pro') => {
     setSubscriptionTier(tier);
-    toast({
-      title: `Upgraded to ${tier.charAt(0).toUpperCase() + tier.slice(1)}`,
+    toast(`Upgraded to ${tier.charAt(0).toUpperCase() + tier.slice(1)}`, {
       description: `Your subscription has been upgraded to ${tier}.`,
     });
   };

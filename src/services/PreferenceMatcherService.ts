@@ -1,178 +1,98 @@
 
+import { Location } from "@/types";
 import { localAI } from "./LocalAIService";
 
-type ContentItem = {
-  id: string;
-  name?: string;
-  description?: string;
-  tags?: string[];
-  vibes?: string[];
-  category?: string;
-  type?: string;
-  [key: string]: any;
-};
-
-export class PreferenceMatcherService {
-  private static instance: PreferenceMatcherService;
-  private cache: Map<string, number> = new Map();
-
-  private constructor() {}
-
-  static getInstance(): PreferenceMatcherService {
-    if (!PreferenceMatcherService.instance) {
-      PreferenceMatcherService.instance = new PreferenceMatcherService();
-    }
-    return PreferenceMatcherService.instance;
-  }
-
+class PreferenceMatcherService {
   /**
-   * Check if a content item matches user preferences
-   * @param item Content item to check
-   * @param preferences User preferences
-   * @returns Score between 0 and 1 indicating match quality
+   * Sorts locations based on how well they match user preferences
+   * @param locations Array of locations to sort
+   * @param userPreferences Array of user preference strings
+   * @returns Sorted array of locations
    */
-  async getPreferenceMatchScore(
-    item: ContentItem,
-    preferences: string[]
-  ): Promise<number> {
-    if (!preferences.length) return 0.5;
-
-    // Create cache key
-    const itemStr = JSON.stringify(item);
-    const prefStr = JSON.stringify(preferences);
-    const cacheKey = `${itemStr}-${prefStr}`;
-
-    // Check cache
-    if (this.cache.has(cacheKey)) {
-      return this.cache.get(cacheKey)!;
+  async sortByPreferenceMatch(locations: Location[], userPreferences: string[]): Promise<Location[]> {
+    if (!userPreferences.length || !locations.length) {
+      return locations;
     }
 
     try {
-      // Extract all text properties from the item
-      const itemText = this.getItemText(item);
+      // Create a single text representation of user preferences
+      const userPreferencesText = userPreferences.join(", ");
       
-      // Join preferences into a single text
-      const preferencesText = preferences.join(", ");
-      
-      // Calculate similarity using local AI
-      const similarityScore = await localAI.calculateTextSimilarity(
-        itemText,
-        preferencesText
-      );
-      
-      // Direct tag/vibe matching boost
-      let directMatchBoost = 0;
-      
-      // Check for exact matches in tags/vibes
-      if (item.tags || item.vibes) {
-        const allTags = [...(item.tags || []), ...(item.vibes || [])];
-        
-        for (const pref of preferences) {
-          if (allTags.some(tag => tag.toLowerCase() === pref.toLowerCase())) {
-            directMatchBoost += 0.2; // 20% boost per direct match
-          }
-        }
-      }
-      
-      // Combine semantic similarity with direct matches
-      let finalScore = similarityScore + directMatchBoost;
-      
-      // Cap at 1.0
-      finalScore = Math.min(finalScore, 1.0);
-      
-      // Store in cache
-      this.cache.set(cacheKey, finalScore);
-      
-      return finalScore;
-    } catch (error) {
-      console.error('Error calculating preference match:', error);
-      return 0.5; // Neutral score on error
-    }
-  }
+      const scoredLocations = await Promise.all(
+        locations.map(async (location) => {
+          // Create a text representation of the location
+          const locationText = [
+            location.name,
+            location.description || "",
+            location.type || "",
+            location.vibes?.join(", ") || "",
+            location.tags?.join(", ") || ""
+          ].join(" ");
 
-  /**
-   * Sort items by preference match score
-   * @param items Array of content items
-   * @param preferences User preferences
-   * @returns Sorted items with highest match first
-   */
-  async sortByPreferenceMatch<T extends ContentItem>(
-    items: T[],
-    preferences: string[]
-  ): Promise<T[]> {
-    if (!preferences.length) return items;
-    
-    try {
-      // Create array of items with scores
-      const itemsWithScores = await Promise.all(
-        items.map(async item => {
-          const score = await this.getPreferenceMatchScore(item, preferences);
-          return { item, score };
+          // Calculate similarity score based on text embedding comparison
+          const similarityScore = await this.calculateSimilarityScore(
+            locationText,
+            userPreferencesText
+          );
+
+          return {
+            location,
+            score: similarityScore
+          };
         })
       );
-      
-      // Sort by score (highest first)
-      const sortedItems = itemsWithScores
+
+      // Sort locations by similarity score (descending)
+      const sortedLocations = scoredLocations
         .sort((a, b) => b.score - a.score)
-        .map(({ item }) => item);
-      
-      return sortedItems;
+        .map(item => item.location);
+
+      return sortedLocations;
     } catch (error) {
-      console.error('Error sorting items by preference:', error);
-      return items; // Return original array on error
+      console.error("Error in preference matching:", error);
+      return locations; // Return original order if error occurs
     }
   }
 
   /**
-   * Filter items that match user preferences above a threshold
-   * @param items Array of content items
-   * @param preferences User preferences
-   * @param threshold Minimum score (0-1) to include item
-   * @returns Filtered items that match preferences
+   * Calculates similarity between two texts using embeddings
    */
-  async filterByPreferenceMatch<T extends ContentItem>(
-    items: T[],
-    preferences: string[],
-    threshold: number = 0.5
-  ): Promise<T[]> {
-    if (!preferences.length) return items;
-    
+  private async calculateSimilarityScore(text1: string, text2: string): Promise<number> {
     try {
-      const filtered = [];
+      // Get embeddings for both texts
+      const [embedding1, embedding2] = await Promise.all([
+        localAI.getTextEmbedding(text1),
+        localAI.getTextEmbedding(text2)
+      ]);
       
-      for (const item of items) {
-        const score = await this.getPreferenceMatchScore(item, preferences);
-        if (score >= threshold) {
-          filtered.push(item);
-        }
-      }
-      
-      return filtered;
+      // Calculate cosine similarity
+      return this.cosineSimilarity(embedding1, embedding2);
     } catch (error) {
-      console.error('Error filtering items by preference:', error);
-      return items; // Return original array on error
+      console.error("Error calculating similarity:", error);
+      return 0.5; // Neutral score as fallback
     }
   }
 
   /**
-   * Extract text representation of an item
-   * @param item Content item
-   * @returns Concatenated text representing the item
+   * Calculate cosine similarity between two vectors
    */
-  private getItemText(item: ContentItem): string {
-    const textParts: string[] = [];
+  private cosineSimilarity(vecA: number[], vecB: number[]): number {
+    let dotProduct = 0;
+    let normA = 0;
+    let normB = 0;
     
-    if (item.name) textParts.push(item.name);
-    if (item.description) textParts.push(item.description);
-    if (item.category) textParts.push(item.category);
-    if (item.type) textParts.push(item.type);
+    for (let i = 0; i < vecA.length; i++) {
+      dotProduct += vecA[i] * vecB[i];
+      normA += vecA[i] ** 2;
+      normB += vecB[i] ** 2;
+    }
     
-    // Add tags and vibes
-    if (item.tags && item.tags.length) textParts.push(item.tags.join(" "));
-    if (item.vibes && item.vibes.length) textParts.push(item.vibes.join(" "));
+    if (normA === 0 || normB === 0) {
+      return 0; // Handle zero vectors
+    }
     
-    return textParts.join(" ");
+    return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
   }
 }
 
-export const preferenceMatcher = PreferenceMatcherService.getInstance();
+export const preferenceMatcher = new PreferenceMatcherService();

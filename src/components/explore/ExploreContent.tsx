@@ -10,6 +10,7 @@ import LocationsGrid from "@/components/explore/LocationsGrid";
 import VenuePost from "@/components/VenuePost";
 import { EventItem } from "@/components/venue/events/types";
 import { getCitySpecificContent, getMediaForLocation } from "@/utils/explore/exploreHelpers";
+import { Sparkles } from "lucide-react";
 
 interface ExploreContentProps {
   activeTab: string;
@@ -129,7 +130,7 @@ const ExploreContent: React.FC<ExploreContentProps> = ({
       
       {isAIPersonalized && activeTab === "all" && (
         <div className="rounded-md bg-primary/5 p-2 text-xs flex items-center gap-2 border border-primary/10">
-          <SparklesIcon className="h-3 w-3 text-primary" />
+          <Sparkles className="h-3 w-3 text-primary" />
           <span>Results personalized based on your preferences</span>
         </div>
       )}

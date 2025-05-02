@@ -1,22 +1,15 @@
+
 import React, { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import Header from "@/components/Header";
 import { useToast } from "@/components/ui/use-toast";
 import { useExploreData } from "@/hooks/useExploreData";
-import { useExploreSearchWithAI } from "@/hooks/useExploreSearchWithAI"; // Updated import
+import useExploreSearchWithAI from "@/hooks/useExploreSearchWithAI"; // Fixed import
 import SearchSection from "@/components/explore/SearchSection";
 import ExploreContent from "@/components/explore/ExploreContent";
 import ExploreSidebar from "@/components/explore/ExploreSidebar";
 import { mockLocations } from "@/mock/data";
 import { getAdditionalTags } from "@/utils/explore/exploreHelpers";
-
-// Fix the ExploreSidebar props issue by adding isAIPersonalized to ExploreSidebarProps interface
-interface ExploreSidebarProps {
-  filteredLocations: any;
-  hasRealData: boolean;
-  realDataResults: any;
-  isAIPersonalized: boolean;
-}
 
 const Explore = () => {
   const { 
@@ -49,9 +42,9 @@ const Explore = () => {
     handleTabChange,
     handleDateRangeChange,
     isAIReady,
-    isAIEnabled,
-    setIsAIEnabled
-  } = useExploreSearchWithAI(); // Using AI-enhanced search
+    isAIPersonalized,
+    setIsAIPersonalized
+  } = useExploreSearchWithAI(); 
 
   const location = useLocation();
   const { toast } = useToast();
@@ -67,14 +60,14 @@ const Explore = () => {
 
   // Notify when AI is ready for personalization
   useEffect(() => {
-    if (isAIReady && isAIEnabled) {
+    if (isAIReady && isAIPersonalized) {
       toast({
         title: "AI Personalization Ready",
         description: "Search results will be customized to your preferences",
         duration: 4000
       });
     }
-  }, [isAIReady, toast]);
+  }, [isAIReady, toast, isAIPersonalized]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -96,8 +89,8 @@ const Explore = () => {
           searchedCity={searchedCity}
           searchedState={searchedState}
           isNaturalLanguageSearch={isNaturalLanguageSearch}
-          isAIEnabled={isAIEnabled}
-          setIsAIEnabled={setIsAIEnabled}
+          isAIEnabled={isAIPersonalized}
+          setIsAIEnabled={setIsAIPersonalized}
         />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -115,7 +108,7 @@ const Explore = () => {
               hasRealData={hasRealData}
               realDataResults={realDataResults}
               isLoadingResults={isLoadingResults}
-              isAIPersonalized={isAIReady && isAIEnabled}
+              isAIPersonalized={isAIReady && isAIPersonalized}
             />
           </div>
           
@@ -124,7 +117,7 @@ const Explore = () => {
               filteredLocations={filteredLocations}
               hasRealData={hasRealData}
               realDataResults={realDataResults}
-              isAIPersonalized={isAIReady && isAIEnabled}
+              isAIPersonalized={isAIReady && isAIPersonalized}
             />
           </div>
         </div>

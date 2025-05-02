@@ -7,6 +7,7 @@ import { DateRange } from "react-day-picker";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { InfoIcon } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface SearchSectionProps {
   searchQuery: string;
@@ -85,10 +86,16 @@ const SearchSection: React.FC<SearchSectionProps> = ({
         <Label htmlFor="ai-personalization" className="text-xs cursor-pointer">
           AI Personalization
         </Label>
-        <InfoIcon 
-          className="h-3 w-3 text-muted-foreground cursor-help" 
-          title="Personalizes results based on your preferences"
-        />
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <InfoIcon className="h-3 w-3 text-muted-foreground cursor-help" />
+            </TooltipTrigger>
+            <TooltipContent>
+              Personalizes results based on your preferences
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
       
       <Tabs defaultValue="all" value={activeTab} onValueChange={handleTabChange} className="max-w-2xl mx-auto">

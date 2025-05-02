@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useDebounce } from './useDebounce';
@@ -6,7 +7,7 @@ import { localAI } from '@/services/LocalAIService';
 import { preferenceMatcher } from '@/services/PreferenceMatcherService';
 import { useUserPreferences } from './useUserPreferences';
 
-const useExploreSearchWithAI = () => {
+export const useExploreSearchWithAI = () => {
   const [searchParams] = useSearchParams();
   const initialSearchQuery = searchParams.get('q') || '';
   const initialCategory = searchParams.get('category') || 'all';
@@ -84,6 +85,8 @@ const useExploreSearchWithAI = () => {
     searchLocationsWithAI,
     filteredLocations,
     setFilteredLocations,
+    isAIEnabled: isAIPersonalized,
+    setIsAIEnabled: setIsAIPersonalized
   };
 };
 
