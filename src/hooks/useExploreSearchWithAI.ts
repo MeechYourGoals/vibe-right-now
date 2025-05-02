@@ -1,122 +1,90 @@
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { useDebounce } from './useDebounce';
+import { Location } from '@/types';
+import { localAI } from '@/services/LocalAIService';
+import { preferenceMatcher } from '@/services/PreferenceMatcherService';
+import { useUserPreferences } from './useUserPreferences';
 
-import { useExploreSearch } from "./useExploreSearch";
-import { useUserPreferences } from "./useUserPreferences";
-import { preferenceMatcher } from "@/services/PreferenceMatcherService";
-import { localAI } from "@/services/LocalAIService";
-import { useState, useEffect } from "react";
-import { toast } from "sonner";
-import { Location } from "@/types";
+const useExploreSearchWithAI = () => {
+  const [searchParams] = useSearchParams();
+  const initialSearchQuery = searchParams.get('q') || '';
+  const initialCategory = searchParams.get('category') || 'all';
 
-/**
- * Enhanced version of useExploreSearch with local AI personalization
- */
-export const useExploreSearchWithAI = () => {
-  const [isAIEnabled, setIsAIEnabled] = useState(true);
+  const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
+  const [category, setCategory] = useState(initialCategory);
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(initialSearchQuery);
   const [isAIReady, setIsAIReady] = useState(false);
   const [aiLoadError, setAiLoadError] = useState<string | null>(null);
-  
-  // Get base explore search functionality
-  const exploreSearch = useExploreSearch();
-  
-  // Get user preferences
-  const { getAllPreferencesFlat } = useUserPreferences();
-  
-  // Initial AI loading check
+  const [isAIPersonalized, setIsAIPersonalized] = useState(true);
+  const [filteredLocations, setFilteredLocations] = useState<Location[]>([]);
+
+  const { preferences, isLoading: isPreferencesLoading } = useUserPreferences();
+  const debouncedValue = useDebounce(searchQuery, 500);
+
   useEffect(() => {
-    const checkAIStatus = async () => {
+    setDebouncedSearchQuery(debouncedValue);
+  }, [debouncedValue]);
+
+  useEffect(() => {
+    setSearchQuery(initialSearchQuery);
+    setCategory(initialCategory);
+    setDebouncedSearchQuery(initialSearchQuery);
+  }, [initialSearchQuery, initialCategory]);
+
+  useEffect(() => {
+    const initializeAI = async () => {
       try {
         await localAI.initModels();
         setIsAIReady(true);
       } catch (error) {
-        console.error('Failed to initialize AI models:', error);
-        setAILoadError('Failed to load AI models');
-        setIsAIEnabled(false);
+        console.error('Error initializing local AI:', error);
+        setAiLoadError('Failed to initialize AI personalization');
       }
     };
-    
-    checkAIStatus();
+
+    initializeAI();
   }, []);
-  
-  // Wrap the handle search function with AI personalization
-  const handleSearchWithAI = async (
-    query: string, 
-    filterType: string, 
-    category: string
-  ) => {
-    // First call the original search function
-    await exploreSearch.handleSearch(query, filterType, category);
-    
-    // Then apply AI personalization if enabled
-    if (isAIEnabled && isAIReady) {
-      try {
-        const preferences = getAllPreferencesFlat();
-        
-        // Skip personalization if no preferences
-        if (!preferences || preferences.length === 0) return;
-        
-        // Wait for the base search to complete and then personalize results
-        setTimeout(async () => {
-          const locations = exploreSearch.filteredLocations;
-          
-          if (locations && locations.length > 0) {
-            const personalizedLocations = await preferenceMatcher.sortByPreferenceMatch(
-              locations,
-              preferences
-            );
-            
-            // Update the filtered locations with personalized ordering
-            exploreSearch.setFilteredLocations(personalizedLocations);
-            
-            toast.success('Results personalized based on your preferences', {
-              duration: 2000
-            });
-          }
-        }, 300);
-      } catch (error) {
-        console.error('Error personalizing search results:', error);
-      }
+
+  const initLocalAI = async () => {
+    try {
+      await localAI.initModels();
+      setIsAIReady(true);
+    } catch (error) {
+      console.error('Error initializing local AI:', error);
+      setAiLoadError('Failed to initialize AI personalization');
     }
   };
-  
-  // Wrap tab change with AI personalization
-  const handleTabChangeWithAI = async (tabValue: string) => {
-    // First call the original tab change function
-    exploreSearch.handleTabChange(tabValue);
-    
-    // Then apply AI personalization if enabled
-    if (isAIEnabled && isAIReady) {
-      try {
-        const preferences = getAllPreferencesFlat();
-        
-        // Skip personalization if no preferences
-        if (!preferences || preferences.length === 0) return;
-        
-        // Wait for the tab change to complete and then personalize results
-        setTimeout(async () => {
-          const locations = exploreSearch.filteredLocations;
-          
-          if (locations && locations.length > 0) {
-            const personalizedLocations = await preferenceMatcher.sortByPreferenceMatch(
-              locations,
-              preferences
-            );
-            
-            // Update the filtered locations with personalized ordering
-            exploreSearch.setFilteredLocations(personalizedLocations);
-          }
-        }, 300);
-      } catch (error) {
-        console.error('Error personalizing tab results:', error);
-      }
+
+  const searchLocationsWithAI = async (locations: Location[]): Promise<Location[]> => {
+    if (!isAIReady || isPreferencesLoading || !isAIPersonalized) {
+      return locations;
+    }
+
+    try {
+      const userPrefs = preferences.interests.concat(preferences.vibes).concat(preferences.categories);
+      const aiEnhancedLocations = await preferenceMatcher.sortByPreferenceMatch(locations, userPrefs);
+      return aiEnhancedLocations;
+    } catch (error) {
+      console.error('Error searching locations with AI:', error);
+      return locations;
     }
   };
-  
+
   return {
-    ...exploreSearch,
-    handleSearch: handleSearchWithAI,
-    handleTabChange: handleTabChangeWithAI,
-    isAIEnabled,
-    setIsAIEnabled,
-    isAIReady
+    searchQuery,
+    setSearchQuery,
+    category,
+    setCategory,
+    debouncedSearchQuery,
+    isAIReady,
+    aiLoadError,
+    isAIPersonalized,
+    setIsAIPersonalized,
+    searchLocationsWithAI,
+    filteredLocations,
+    setFilteredLocations,
   };
 };
+
+export default useExploreSearchWithAI;

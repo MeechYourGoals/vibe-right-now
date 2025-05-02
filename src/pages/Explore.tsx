@@ -1,4 +1,3 @@
-
 import React, { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import Header from "@/components/Header";
@@ -10,6 +9,14 @@ import ExploreContent from "@/components/explore/ExploreContent";
 import ExploreSidebar from "@/components/explore/ExploreSidebar";
 import { mockLocations } from "@/mock/data";
 import { getAdditionalTags } from "@/utils/explore/exploreHelpers";
+
+// Fix the ExploreSidebar props issue by adding isAIPersonalized to ExploreSidebarProps interface
+interface ExploreSidebarProps {
+  filteredLocations: any;
+  hasRealData: boolean;
+  realDataResults: any;
+  isAIPersonalized: boolean;
+}
 
 const Explore = () => {
   const { 

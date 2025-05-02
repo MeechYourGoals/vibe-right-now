@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Layout } from "@/components/Layout";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 import SettingsHeader from "@/components/settings/SettingsHeader";
 import SettingsTabs from "@/components/settings/SettingsTabs";
@@ -15,7 +15,6 @@ import VenueManagementTab from "./settings/VenueManagementTab";
 import MarketingTab from "./settings/MarketingTab";
 
 const Settings = () => {
-  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("preferences");
   const [isVenueMode, setIsVenueMode] = useState(false);
   const [subscriptionTier, setSubscriptionTier] = useState<'standard' | 'plus' | 'premium' | 'pro'>('standard');

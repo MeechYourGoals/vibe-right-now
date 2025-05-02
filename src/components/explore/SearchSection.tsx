@@ -1,9 +1,12 @@
+
 import React from "react";
 import SearchVibes from "@/components/SearchVibes";
 import { ExploreFilters } from "@/components/explore/ExploreFilters";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DateRange } from "react-day-picker";
-import { Switch, Label, InfoCircle } from "@/components/ui/switch";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { InfoIcon } from "lucide-react";
 
 interface SearchSectionProps {
   searchQuery: string;
@@ -78,12 +81,11 @@ const SearchSection: React.FC<SearchSectionProps> = ({
           id="ai-personalization" 
           checked={isAIEnabled}
           onCheckedChange={setIsAIEnabled}
-          size="sm" 
         />
         <Label htmlFor="ai-personalization" className="text-xs cursor-pointer">
           AI Personalization
         </Label>
-        <InfoCircle 
+        <InfoIcon 
           className="h-3 w-3 text-muted-foreground cursor-help" 
           title="Personalizes results based on your preferences"
         />

@@ -129,7 +129,7 @@ const ExploreContent: React.FC<ExploreContentProps> = ({
       
       {isAIPersonalized && activeTab === "all" && (
         <div className="rounded-md bg-primary/5 p-2 text-xs flex items-center gap-2 border border-primary/10">
-          <Sparkles className="h-3 w-3 text-primary" />
+          <SparklesIcon className="h-3 w-3 text-primary" />
           <span>Results personalized based on your preferences</span>
         </div>
       )}
