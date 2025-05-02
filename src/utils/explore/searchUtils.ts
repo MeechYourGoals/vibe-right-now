@@ -1,4 +1,3 @@
-
 import { DateRange } from "react-day-picker";
 import { Location } from "@/types";
 import { parseCityStateFromQuery } from "@/utils/geocodingService";
@@ -158,7 +157,7 @@ export const fetchRealData = async (
   try {
     toast({
       title: "Searching for real data",
-      description: "Looking for venues in " + (city || query) + "...",
+      description: `Looking for venues in ${city || query}...`,
     });
     
     const searchQuery = query || `${city}${state ? ', ' + state : ''}`;
@@ -178,16 +177,15 @@ export const fetchRealData = async (
       
       setLocationTags(newLocationTags);
       
-      setFilteredLocations(prevLocations => {
-        const combinedResults = [...results];
-        
-        if (combinedResults.length < 10) {
-          const mockResults = generateMockLocationsForCity(city, state);
-          combinedResults.push(...mockResults.slice(0, 10 - combinedResults.length));
-        }
-        
-        return combinedResults;
-      });
+      // Fix the type error here - we need to directly set the locations array
+      const combinedResults: Location[] = [...results];
+      
+      if (combinedResults.length < 10) {
+        const mockResults = generateMockLocationsForCity(city, state);
+        combinedResults.push(...mockResults.slice(0, 10 - combinedResults.length));
+      }
+      
+      setFilteredLocations(combinedResults);
       
       toast({
         title: "Real data found!",

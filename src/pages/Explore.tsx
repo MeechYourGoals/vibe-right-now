@@ -8,6 +8,7 @@ import { useExploreSearch } from "@/hooks/useExploreSearch";
 import SearchSection from "@/components/explore/SearchSection";
 import ExploreContent from "@/components/explore/ExploreContent";
 import ExploreSidebar from "@/components/explore/ExploreSidebar";
+import SearchDebugPanel from "@/components/explore/SearchDebugPanel";
 import { mockLocations } from "@/mock/data";
 import { getAdditionalTags } from "@/utils/explore/exploreHelpers";
 
@@ -55,6 +56,12 @@ const Explore = () => {
     setLocationTags(tagsMap);
   }, [setLocationTags]);
 
+  // Get search URL parameters for testing
+  const searchParams = new URLSearchParams(location.search);
+  const queryParam = searchParams.get('q');
+  const vibeParam = searchParams.get('vibe');
+  const tabParam = searchParams.get('tab');
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -76,6 +83,23 @@ const Explore = () => {
           searchedState={searchedState}
           isNaturalLanguageSearch={isNaturalLanguageSearch}
         />
+
+        {/* Debug panel - visible only in development for testing */}
+        {process.env.NODE_ENV !== 'production' && (
+          <SearchDebugPanel 
+            searchQuery={searchQuery}
+            activeTab={activeTab}
+            searchedCity={searchedCity}
+            searchedState={searchedState}
+            vibeFilter={vibeFilter}
+            dateRange={dateRange}
+            isNaturalLanguageSearch={isNaturalLanguageSearch}
+            realDataResultsCount={realDataResults.length}
+            filteredLocationsCount={filteredLocations.length}
+            isDetectingLocation={isDetectingLocation}
+            isLoadingResults={isLoadingResults}
+          />
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-2">
