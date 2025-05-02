@@ -1,16 +1,23 @@
 
-import React from "react";
-import ReactDOM from "react-dom/client";
-import App from "./App";
-import "./index.css";
+import { createRoot } from 'react-dom/client'
+import App from './App.tsx'
+import './index.css'
 
-// Import for testing - this will be tree-shaken in production
-if (process.env.NODE_ENV !== 'production') {
-  import("./utils/explore/__tests__/testSearch").catch(console.error);
+// Ensure we're creating the root element properly
+const rootElement = document.getElementById("root");
+if (!rootElement) throw new Error("Failed to find the root element");
+
+// Adding error boundary at the top level
+try {
+  createRoot(rootElement).render(<App />);
+} catch (error) {
+  console.error("Failed to render the app:", error);
+  // Show a fallback UI instead of a blank screen
+  rootElement.innerHTML = `
+    <div style="padding: 20px; text-align: center;">
+      <h2>Something went wrong</h2>
+      <p>Please refresh the page to try again.</p>
+      <p>Error: ${error instanceof Error ? error.message : 'Unknown error'}</p>
+    </div>
+  `;
 }
-
-ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);

@@ -52,14 +52,19 @@ export const useExploreData = () => {
             // Get city and state from coordinates
             const { city, state } = await getCityStateFromCoordinates(coords.lat, coords.lng);
             
-            if (city) {
+            if (city && !searchedCity) {
               setSearchedCity(city);
               setSearchedState(state || "");
             }
           } catch (error) {
             console.error("Error getting location name:", error);
             setLocationDetectionError("Could not determine your location");
-            // No default city set if geolocation fails
+            
+            // Default to San Francisco if geolocation fails
+            if (!searchedCity) {
+              setSearchedCity("San Francisco");
+              setSearchedState("CA");
+            }
           }
           setIsDetectingLocation(false);
         },
@@ -67,14 +72,24 @@ export const useExploreData = () => {
           console.error("Error getting geolocation:", error);
           setLocationDetectionError(`Location detection error: ${error.message}`);
           setIsDetectingLocation(false);
-          // No default city set if geolocation fails
+          
+          // Default to San Francisco if geolocation fails
+          if (!searchedCity) {
+            setSearchedCity("San Francisco");
+            setSearchedState("CA");
+          }
         },
         { enableHighAccuracy: true, timeout: 10000 }
       );
     } else {
       setLocationDetectionError("Geolocation is not supported by your browser");
       setIsDetectingLocation(false);
-      // No default city set if geolocation not supported
+      
+      // Default to San Francisco if geolocation not supported
+      if (!searchedCity) {
+        setSearchedCity("San Francisco");
+        setSearchedState("CA");
+      }
     }
   }, []);
 

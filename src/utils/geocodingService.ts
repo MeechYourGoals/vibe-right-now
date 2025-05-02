@@ -2,63 +2,6 @@
 /**
  * Utility service for geocoding operations
  */
-import { cityCoordinates } from "@/utils/cityLocations";
-
-// Major US cities and their states
-const majorCities: Record<string, string> = {
-  "new york": "NY",
-  "los angeles": "CA",
-  "chicago": "IL",
-  "houston": "TX",
-  "phoenix": "AZ",
-  "philadelphia": "PA",
-  "san antonio": "TX",
-  "san diego": "CA",
-  "dallas": "TX",
-  "austin": "TX",
-  "san jose": "CA",
-  "fort worth": "TX",
-  "jacksonville": "FL",
-  "columbus": "OH",
-  "charlotte": "NC",
-  "san francisco": "CA",
-  "indianapolis": "IN",
-  "seattle": "WA",
-  "denver": "CO",
-  "washington": "DC",
-  "boston": "MA",
-  "nashville": "TN",
-  "baltimore": "MD",
-  "portland": "OR",
-  "las vegas": "NV",
-  "milwaukee": "WI",
-  "albuquerque": "NM",
-  "tucson": "AZ",
-  "fresno": "CA",
-  "sacramento": "CA",
-  "long beach": "CA",
-  "kansas city": "MO",
-  "mesa": "AZ",
-  "atlanta": "GA",
-  "miami": "FL",
-  "oakland": "CA",
-  "minneapolis": "MN",
-  "tulsa": "OK",
-  "cleveland": "OH",
-  "wichita": "KS",
-  "arlington": "TX",
-  "new orleans": "LA",
-  "tampa": "FL",
-  "honolulu": "HI",
-  "aurora": "CO",
-  "detroit": "MI",
-  "pittsburgh": "PA",
-  "memphis": "TN",
-  "st. louis": "MO",
-  "cincinnati": "OH",
-  "raleigh": "NC",
-  "orlando": "FL"
-};
 
 // Get city and state from coordinates using reverse geocoding
 export const getCityStateFromCoordinates = async (lat: number, lng: number): Promise<{city: string, state: string}> => {
@@ -193,19 +136,9 @@ export const getStateNameFromCode = (stateCode: string): string => {
 
 // Helper function to get city and state from search query
 export const parseCityStateFromQuery = (query: string): { city: string, state: string } => {
-  // Check for comma-separated input first
   const parts = query.split(',').map(part => part.trim());
   const city = parts[0];
   let state = parts.length > 1 ? parts[1] : "";
-  
-  // If only city is provided, try to look up the correct state for major cities
-  if (!state && city) {
-    const lowerCityName = city.toLowerCase();
-    if (majorCities[lowerCityName]) {
-      state = majorCities[lowerCityName];
-      console.log(`Found state ${state} for city ${city}`);
-    }
-  }
   
   // Convert state code to standard format if possible
   if (state.length === 2) {
@@ -219,19 +152,4 @@ export const parseCityStateFromQuery = (query: string): { city: string, state: s
   }
   
   return { city, state };
-};
-
-// Helper to find city by name and return its coordinates
-export const findCityCoordinates = (cityName: string): { lat: number, lng: number } | null => {
-  const lowerCityName = cityName.toLowerCase();
-  
-  // Try to match the city name in our database
-  for (const key in cityCoordinates) {
-    const city = cityCoordinates[key];
-    if (city.name.toLowerCase() === lowerCityName) {
-      return { lat: city.lat, lng: city.lng };
-    }
-  }
-  
-  return null;
 };
