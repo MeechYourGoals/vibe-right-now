@@ -12,6 +12,7 @@ import { generateMockLocationsForCity } from "@/utils/explore/exploreHelpers";
 import { Location } from "@/types";
 import { generateLocalNightlifeVenues } from "@/utils/locations/venueHelpers";
 import { getAdditionalTags } from "@/utils/explore/exploreHelpers";
+import { generateRandomVibes } from "@/utils/explore/vibeUtils";
 
 export const useExploreSearch = () => {
   const {
