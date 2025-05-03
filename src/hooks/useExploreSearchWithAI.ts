@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useDebounce } from './useDebounce';
+import { useDebounce } from '@/hooks/useDebounce';
 import { Location } from '@/types';
 import { localAI } from '@/services/LocalAIService';
 import { preferenceMatcher } from '@/services/PreferenceMatcherService';
