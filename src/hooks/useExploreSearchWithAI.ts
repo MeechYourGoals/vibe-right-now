@@ -6,9 +6,12 @@ import { Location } from '@/types';
 import { localAI } from '@/services/LocalAIService';
 import { preferenceMatcher } from '@/services/PreferenceMatcherService';
 import { useUserPreferences } from './useUserPreferences';
+import { DateRange } from "react-day-picker";
+import { useNavigate } from "react-router-dom";
 
 export const useExploreSearchWithAI = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const initialSearchQuery = searchParams.get('q') || '';
   const initialCategory = searchParams.get('category') || 'all';
 
@@ -72,6 +75,35 @@ export const useExploreSearchWithAI = () => {
     }
   };
 
+  // Add the missing methods
+  const handleSearch = (query: string, filterType: string, category: string) => {
+    setSearchQuery(query);
+    setCategory(category);
+
+    // Update URL with search parameters
+    const searchParams = new URLSearchParams();
+    if (query) searchParams.set('q', query);
+    if (category !== 'all') searchParams.set('category', category);
+    
+    navigate(`/explore?${searchParams.toString()}`);
+  };
+
+  const handleTabChange = (value: string) => {
+    setCategory(value);
+    
+    // Update URL with new tab value
+    const searchParams = new URLSearchParams(window.location.search);
+    searchParams.set('category', value);
+    
+    navigate(`/explore?${searchParams.toString()}`);
+  };
+
+  const handleDateRangeChange = (range: DateRange | undefined) => {
+    // This is a stub method to fix the error - the actual implementation
+    // will be used from useExploreSearch
+    console.log("Date range changed:", range);
+  };
+
   return {
     searchQuery,
     setSearchQuery,
@@ -86,7 +118,10 @@ export const useExploreSearchWithAI = () => {
     filteredLocations,
     setFilteredLocations,
     isAIEnabled: isAIPersonalized,
-    setIsAIEnabled: setIsAIPersonalized
+    setIsAIEnabled: setIsAIPersonalized,
+    handleSearch,
+    handleTabChange,
+    handleDateRangeChange
   };
 };
 

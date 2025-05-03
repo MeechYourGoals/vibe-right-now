@@ -70,6 +70,39 @@ class LocalAIService {
       return new Array(384).fill(0); // Return zero vector as fallback
     }
   }
+
+  // Add the missing calculateTextSimilarity method
+  async calculateTextSimilarity(text1: string, text2: string): Promise<number> {
+    try {
+      const embedding1 = await this.getTextEmbedding(text1);
+      const embedding2 = await this.getTextEmbedding(text2);
+      
+      // Calculate cosine similarity between the embeddings
+      return this.cosineSimilarity(embedding1, embedding2);
+    } catch (error) {
+      console.error("Error calculating text similarity:", error);
+      return 0.5; // Return neutral score as fallback
+    }
+  }
+  
+  // Helper function to calculate cosine similarity
+  private cosineSimilarity(a: number[], b: number[]): number {
+    let dotProduct = 0;
+    let normA = 0;
+    let normB = 0;
+    
+    for (let i = 0; i < a.length; i++) {
+      dotProduct += a[i] * b[i];
+      normA += a[i] ** 2;
+      normB += b[i] ** 2;
+    }
+    
+    if (normA === 0 || normB === 0) {
+      return 0;
+    }
+    
+    return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+  }
 }
 
 export const localAI = new LocalAIService();
