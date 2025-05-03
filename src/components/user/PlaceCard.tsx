@@ -29,7 +29,7 @@ export const PlaceCard = ({ place }: PlaceCardProps) => {
             <h4 className="font-medium">{place.name}</h4>
             <div className="flex items-center text-sm text-muted-foreground">
               <MapPin className="h-3 w-3 mr-1" />
-              <span>{place.city}, {place.state || place.country}</span>
+              <span>{place.city}, {place.state || place.country || "USA"}</span>
             </div>
             <Badge variant="outline" className="mt-1 text-xs bg-muted">
               {place.type}
@@ -40,3 +40,5 @@ export const PlaceCard = ({ place }: PlaceCardProps) => {
     </Card>
   );
 };
+
+export default PlaceCard;

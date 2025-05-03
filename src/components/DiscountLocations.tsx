@@ -15,6 +15,19 @@ const DiscountLocations = () => {
     ["29", "30", "31", "32"].includes(post.id)
   ).slice(0, 3); // Only show first 3 in the sidebar
   
+  // Helper function to get media URL
+  const getMediaUrl = (media: any) => {
+    if (!media || !media[0]) return null;
+    
+    if (typeof media[0] === 'string') {
+      return media[0];
+    } else if (typeof media[0] === 'object' && media[0] !== null && 'url' in media[0]) {
+      return media[0].url;
+    }
+    
+    return null;
+  };
+  
   return (
     <Card>
       <CardHeader className="pb-2">
@@ -35,7 +48,7 @@ const DiscountLocations = () => {
               <div className="flex gap-3">
                 <Avatar className="h-10 w-10">
                   <AvatarImage 
-                    src={post.media[0]?.url || `https://source.unsplash.com/random/200x200/?${post.location.type}`} 
+                    src={getMediaUrl(post.media) || `https://source.unsplash.com/random/200x200/?${post.location.type}`} 
                     alt={post.location.name} 
                   />
                   <AvatarFallback>{post.location.name.charAt(0)}</AvatarFallback>

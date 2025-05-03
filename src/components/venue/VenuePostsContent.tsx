@@ -3,7 +3,7 @@ import React, { useState, useMemo } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Grid3X3, LayoutList, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Location, Post, Comment } from "@/types";
+import { Location, Post, Comment, Media } from "@/types";
 import PostItem from "@/components/PostItem";
 import PostCardGrid from "@/components/PostCardGrid";
 import VenuePost from "@/components/VenuePost";
@@ -63,6 +63,31 @@ const VenuePostsContent: React.FC<VenuePostsContentProps> = ({
     setReviewSummary(summary);
   };
 
+  // Helper function to convert string arrays to Media objects
+  const convertToMediaArray = (mediaItems: string[] | Media[]): Media[] => {
+    if (!mediaItems || mediaItems.length === 0) return [];
+    
+    return mediaItems.map(item => {
+      if (typeof item === 'string') {
+        // Determine type based on extension
+        const isVideo = item.endsWith('.mp4') || item.endsWith('.mov') || item.endsWith('.avi');
+        return {
+          type: isVideo ? 'video' : 'image',
+          url: item
+        };
+      } else if (typeof item === 'object' && item !== null && 'url' in item) {
+        // Already in correct format
+        return item;
+      }
+      
+      // Default fallback
+      return {
+        type: 'image',
+        url: 'https://via.placeholder.com/500'
+      };
+    });
+  };
+
   return (
     <div className="mt-6">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
@@ -110,7 +135,7 @@ const VenuePostsContent: React.FC<VenuePostsContentProps> = ({
                     key={post.id}
                     venue={venue}
                     content={post.content}
-                    media={post.media}
+                    media={convertToMediaArray(post.media || [])}
                     timestamp={post.timestamp}
                   />
                 ))}
@@ -156,7 +181,7 @@ const VenuePostsContent: React.FC<VenuePostsContentProps> = ({
                     key={post.id}
                     venue={venue}
                     content={post.content || getVenueContent(venue, new Date(post.timestamp))}
-                    media={post.media}
+                    media={convertToMediaArray(post.media || [])}
                     timestamp={post.timestamp}
                     isPinned={post.isPinned}
                     isVenuePost={true}
