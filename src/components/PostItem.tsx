@@ -6,6 +6,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Heart, MessageCircle, Share2, Clock, Pin } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { getMediaType, getMediaUrl, hasMedia } from "@/utils/mediaUtils";
 
 interface PostItemProps {
   post: Post;
@@ -49,17 +50,17 @@ const PostItem = ({ post }: PostItemProps) => {
           <p className="text-sm">{post.content}</p>
         </div>
 
-        {post.media && post.media.length > 0 && (
+        {hasMedia(post.media) && (
           <div className="mt-3 grid grid-cols-1 gap-2">
-            {post.media[0].type === "image" ? (
+            {getMediaType(post.media[0]) === "image" ? (
               <img
-                src={post.media[0].url}
+                src={getMediaUrl(post.media[0])}
                 alt="Post content"
                 className="rounded-md w-full object-cover max-h-96"
               />
             ) : (
               <video
-                src={post.media[0].url}
+                src={getMediaUrl(post.media[0])}
                 controls
                 className="rounded-md w-full"
               />
@@ -86,7 +87,7 @@ const PostItem = ({ post }: PostItemProps) => {
           </button>
           <button className="flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors">
             <MessageCircle className="h-4 w-4" />
-            <span className="text-xs">{post.comments}</span>
+            <span className="text-xs">{typeof post.comments === 'number' ? post.comments : 0}</span>
           </button>
         </div>
         <button className="text-muted-foreground hover:text-primary transition-colors">

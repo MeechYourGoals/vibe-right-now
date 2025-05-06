@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Post } from "@/types";
+import { getMediaType, getMediaUrl, hasMedia } from "@/utils/mediaUtils";
 
 interface PostCardGridProps {
   posts: Post[];
@@ -31,16 +32,16 @@ const PostCardGrid = ({ posts, onPostClick, className = "", columns = 3 }: PostC
           className="aspect-square overflow-hidden rounded-md bg-muted relative group cursor-pointer"
           onClick={() => onPostClick(post)}
         >
-          {post.media && post.media.length > 0 ? (
-            post.media[0].type === "image" ? (
+          {hasMedia(post.media) ? (
+            getMediaType(post.media[0]) === "image" ? (
               <img
-                src={post.media[0].url}
+                src={getMediaUrl(post.media[0])}
                 alt="Post content"
                 className="h-full w-full object-cover transition-transform group-hover:scale-105"
               />
             ) : (
               <video
-                src={post.media[0].url}
+                src={getMediaUrl(post.media[0])}
                 className="h-full w-full object-cover"
                 poster="https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
               />

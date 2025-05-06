@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Media } from "@/types";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { getMediaType, getMediaUrl } from "@/utils/mediaUtils";
 
 interface PostMediaProps {
   media: Media[];
@@ -21,21 +22,24 @@ const PostMedia: React.FC<PostMediaProps> = ({ media }) => {
   };
 
   const currentMedia = media[currentIndex];
+  const mediaType = getMediaType(currentMedia);
+  const mediaUrl = getMediaUrl(currentMedia);
+  const thumbnail = typeof currentMedia === 'object' ? currentMedia.thumbnail : undefined;
 
   return (
     <div className="relative mb-2">
-      {currentMedia.type === "image" ? (
+      {mediaType === "image" ? (
         <img
-          src={currentMedia.url}
+          src={mediaUrl}
           alt="Post media"
           className="w-full object-cover max-h-[500px]"
         />
       ) : (
         <video
-          src={currentMedia.url}
+          src={mediaUrl}
           controls
           className="w-full max-h-[500px]"
-          poster={currentMedia.thumbnail}
+          poster={thumbnail}
         />
       )}
 

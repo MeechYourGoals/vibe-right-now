@@ -1,11 +1,11 @@
 
 import React, { useState } from 'react';
-import { Post } from "@/types";
+import { Post, Comment } from "@/types";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
-  Heart, MessageCircle, Share2, MoreHorizontal, Clock, Pin, 
+  Heart, MessageCircle, Share2, MoreHorizontal, Pin, 
   ChevronDown, ChevronUp, Bookmark, BookmarkCheck 
 } from "lucide-react";
 import {
@@ -16,37 +16,26 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
+import { getMediaType, getMediaUrl, hasMedia } from "@/utils/mediaUtils";
 
-interface PostCardProps {
+export interface PostCardProps {
   post: Post;
+  comments?: Comment[];
+  locationPostCount?: number;
+  getComments?: (postId: string) => Comment[];
+  canDelete?: boolean;
+  venue?: any;
+  onPostDeleted?: (postId: string) => void;
+  posts?: Post[];
 }
 
-const PostCard = ({ post }: PostCardProps) => {
+const PostCard = ({ post, comments, locationPostCount, getComments, canDelete, venue, onPostDeleted }: PostCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isSaved, setIsSaved] = useState(post.saved || false);
   
-  // Safe way to handle media that might be strings or Media objects
-  const safeMedia = () => {
-    if (!post.media || post.media.length === 0) return [];
-    
-    return post.media.map(media => {
-      if (typeof media === 'string') {
-        // If it's a string, convert to Media object with assumed image type
-        return { type: 'image' as const, url: media };
-      }
-      return media;
-    });
-  };
+  // Get post comments if a getter function is provided
+  const postComments = comments || (getComments ? getComments(post.id) : []);
   
-  // Safe way to get the media URL
-  const getMediaUrl = (index: number = 0): string => {
-    const media = safeMedia();
-    if (media.length === 0) return '';
-    
-    const item = media[index];
-    return item.url;
-  };
-
   const toggleSaved = () => {
     setIsSaved(!isSaved);
   };
@@ -79,17 +68,17 @@ const PostCard = ({ post }: PostCardProps) => {
             <div className="flex items-center gap-3">
               <Avatar className="h-10 w-10 border">
                 <AvatarImage src={post.user?.avatar} alt={post.user?.username} />
-                <AvatarFallback>{post.user?.name.substring(0, 2)}</AvatarFallback>
+                <AvatarFallback>{post.user?.name?.substring(0, 2) || "UN"}</AvatarFallback>
               </Avatar>
               <div>
                 <div className="flex items-center">
-                  <h3 className="text-sm font-medium">{post.user?.name}</h3>
+                  <h3 className="text-sm font-medium">{post.user?.name || "Unknown User"}</h3>
                   {post.user?.verified && (
                     <span className="ml-1 text-blue-500">✓</span>
                   )}
                 </div>
                 <div className="flex items-center text-xs text-muted-foreground">
-                  <p>@{post.user?.username}</p>
+                  <p>@{post.user?.username || "user"}</p>
                   <span className="mx-1">•</span>
                   <span>{formatDistanceToNow(new Date(post.timestamp))} ago</span>
                 </div>
@@ -144,20 +133,22 @@ const PostCard = ({ post }: PostCardProps) => {
         </div>
         
         {/* Post Media */}
-        {post.media && post.media.length > 0 && (
+        {hasMedia(post.media) && (
           <div className="mt-2">
-            {safeMedia()[0].type === "image" ? (
-              <img
-                src={getMediaUrl()}
-                alt="Post"
-                className="w-full object-cover max-h-96"
-              />
-            ) : (
-              <video
-                src={getMediaUrl()}
-                controls
-                className="w-full max-h-96"
-              />
+            {post.media && post.media.length > 0 && (
+              getMediaType(post.media[0]) === "image" ? (
+                <img
+                  src={getMediaUrl(post.media[0])}
+                  alt="Post"
+                  className="w-full object-cover max-h-96"
+                />
+              ) : (
+                <video
+                  src={getMediaUrl(post.media[0])}
+                  controls
+                  className="w-full max-h-96"
+                />
+              )
             )}
           </div>
         )}
@@ -172,7 +163,7 @@ const PostCard = ({ post }: PostCardProps) => {
           </Button>
           <Button variant="ghost" size="sm" className="h-8 px-2">
             <MessageCircle className="h-4 w-4 mr-1" />
-            <span className="text-xs">{post.comments}</span>
+            <span className="text-xs">{typeof post.comments === 'number' ? post.comments : (postComments?.length || 0)}</span>
           </Button>
           <Button variant="ghost" size="sm" className="h-8 px-2">
             <Share2 className="h-4 w-4" />

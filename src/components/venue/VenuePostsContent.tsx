@@ -6,6 +6,7 @@ import PostItem from '@/components/PostItem';
 import PostCardGrid from '@/components/PostCardGrid';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { mockPosts } from '@/mock/data';
+import { getMediaType, getMediaUrl, hasMedia } from "@/utils/mediaUtils";
 
 interface VenuePostsContentProps {
   venue: Location;
@@ -96,31 +97,33 @@ const VenuePostsContent = ({ venue, posts, reviewsCount = 0 }: VenuePostsContent
         
         <TabsContent value="photos" className="mt-0">
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-            {posts.filter(post => post.media && post.media.length > 0).map(post => (
-              <div 
-                key={post.id}
-                className="aspect-square rounded-md overflow-hidden cursor-pointer"
-                onClick={() => handlePostClick(post)}
-              >
-                {post.media && post.media.length > 0 && (
-                  post.media[0].type === "image" ? (
+            {posts.filter(post => hasMedia(post.media)).map(post => {
+              if (!post.media || post.media.length === 0) return null;
+              
+              return (
+                <div 
+                  key={post.id}
+                  className="aspect-square rounded-md overflow-hidden cursor-pointer"
+                  onClick={() => handlePostClick(post)}
+                >
+                  {getMediaType(post.media[0]) === "image" ? (
                     <img 
-                      src={post.media[0].url} 
+                      src={getMediaUrl(post.media[0])} 
                       alt="Venue" 
                       className="w-full h-full object-cover"
                     />
                   ) : (
                     <video 
-                      src={post.media[0].url} 
+                      src={getMediaUrl(post.media[0])} 
                       className="w-full h-full object-cover"
                     />
-                  )
-                )}
-              </div>
-            ))}
+                  )}
+                </div>
+              );
+            })}
           </div>
           
-          {posts.filter(post => post.media && post.media.length > 0).length === 0 && (
+          {posts.filter(post => hasMedia(post.media)).length === 0 && (
             <div className="text-center py-8">
               <p className="text-muted-foreground">No photos available yet.</p>
             </div>

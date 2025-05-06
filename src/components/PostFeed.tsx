@@ -1,9 +1,8 @@
-
 import { useState, useMemo } from "react";
-import { mockPosts, mockComments, mockUsers } from "@/mock/data";
+import { mockPosts, mockComments } from "@/mock/data";
 import { PostCard } from "@/components/post";
 import SearchVibes from "@/components/SearchVibes";
-import { Post, User, Media } from "@/types";
+import { Post, Comment, Media } from "@/types";
 import { isWithinThreeMonths } from "@/mock/time-utils";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, Filter } from "lucide-react";
@@ -14,6 +13,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { ensureMediaFormat } from "@/utils/mediaUtils";
 
 interface PostFeedProps {
   celebrityFeatured?: string[];
@@ -42,7 +42,7 @@ const ensureMediaFormat = (media: any[]): Media[] => {
   });
 };
 
-const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
+const PostFeed = ({ celebrityFeatured }: { celebrityFeatured?: string[] }) => {
   const [filter, setFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedVibeTags, setSelectedVibeTags] = useState<string[]>([]);
@@ -80,7 +80,18 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
       }
       
       // Ensure media is in the correct format
-      post.media = ensureMediaFormat(post.media);
+      if (post.media) {
+        post.media = ensureMediaFormat(post.media);
+      }
+      
+      // Ensure required fields for Post type
+      if (!post.authorId) {
+        post.authorId = post.user?.id || '';
+      }
+      
+      if (!post.locationId && post.location) {
+        post.locationId = post.location.id;
+      }
       
       return post;
     });
@@ -230,26 +241,22 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
 
   // Enhanced PostCard component with vibe tags
   const EnhancedPostCard = ({ posts, locationPostCount }: { posts: Post[], locationPostCount: number }) => {
-    const postCard = (
-      <PostCard 
-        posts={posts} 
-        locationPostCount={locationPostCount}
-        getComments={getPostComments}
-      />
-    );
+    if (!posts || posts.length === 0) return null;
     
-    // Check if any post has vibe tags
-    const hasVibeTags = posts.some(post => post.vibeTags && post.vibeTags.length > 0);
+    const mainPost = posts[0];
     
-    if (!hasVibeTags) return postCard;
-    
-    // Add vibe tags below the post card
     return (
       <div className="space-y-2">
-        {postCard}
-        <div className="pl-4">
-          {renderVibeTags(posts[0])}
-        </div>
+        <PostCard 
+          post={mainPost}
+          comments={getPostComments(mainPost.id)}
+          locationPostCount={locationPostCount}
+        />
+        {mainPost.vibeTags && mainPost.vibeTags.length > 0 && (
+          <div className="pl-4">
+            {renderVibeTags(mainPost)}
+          </div>
+        )}
       </div>
     );
   };
@@ -316,12 +323,13 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
       </div>
 
       <div className="p-4 space-y-4">
-        {Object.keys(postsGroupedByLocation).length > 0 ? (
-          Object.entries(postsGroupedByLocation).map(([locationId, posts]) => (
+        {/* Use the filtered and grouped posts */}
+        {Object.entries(postsGroupedByLocation || {}).length > 0 ? (
+          Object.entries(postsGroupedByLocation || {}).map(([locationId, posts]) => (
             <EnhancedPostCard 
               key={locationId} 
               posts={posts} 
-              locationPostCount={locationPostCounts[locationId]}
+              locationPostCount={locationPostCounts[locationId] || 0}
             />
           ))
         ) : (

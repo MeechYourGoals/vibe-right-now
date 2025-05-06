@@ -7,7 +7,9 @@ export const mockPosts: Post[] = [
   {
     id: "1",
     user: mockUsers[0],
+    authorId: mockUsers[0].id,
     location: mockLocations[0],
+    locationId: mockLocations[0].id,
     content: "The sunset view here is incredible tonight! DJ is playing the best vibes 🎵",
     media: [
       {
@@ -30,7 +32,9 @@ export const mockPosts: Post[] = [
   {
     id: "2",
     user: mockUsers[1],
+    authorId: mockUsers[1].id,
     location: mockLocations[1],
+    locationId: mockLocations[1].id,
     content: "They just put out fresh pastries! Get here quick, there's no line right now.",
     media: [
       {
@@ -47,7 +51,9 @@ export const mockPosts: Post[] = [
   {
     id: "3",
     user: mockUsers[2],
+    authorId: mockUsers[2].id,
     location: mockLocations[2],
+    locationId: mockLocations[2].id,
     content: "The headline act is about to start! Crowd is energetic but not too packed yet.",
     media: [
       {
@@ -68,7 +74,9 @@ export const mockPosts: Post[] = [
   {
     id: "4",
     user: mockUsers[3],
+    authorId: mockUsers[3].id,
     location: mockLocations[3],
+    locationId: mockLocations[3].id,
     content: "New exhibit just opened! Only a small crowd so far, perfect time to check it out.",
     media: [
       {
@@ -85,7 +93,9 @@ export const mockPosts: Post[] = [
   {
     id: "5",
     user: mockUsers[4],
+    authorId: mockUsers[4].id,
     location: mockLocations[4],
+    locationId: mockLocations[4].id,
     content: "Line is around the block tonight! But the view is worth the wait.",
     media: [
       {
@@ -104,7 +114,9 @@ export const mockPosts: Post[] = [
   {
     id: "6",
     user: mockUsers[5],
+    authorId: mockUsers[5].id,
     location: mockLocations[5],
+    locationId: mockLocations[5].id,
     content: "Knicks vs Lakers game is 🔥! Court side seats are insane, can see all the action up close.",
     media: [
       {
@@ -121,7 +133,9 @@ export const mockPosts: Post[] = [
   {
     id: "7",
     user: mockUsers[6],
+    authorId: mockUsers[6].id,
     location: mockLocations[6],
+    locationId: mockLocations[6].id,
     content: "Pool party is going crazy right now! DJs just switched and the energy is insane 🎉",
     media: [
       {
@@ -138,7 +152,9 @@ export const mockPosts: Post[] = [
   {
     id: "8",
     user: mockUsers[7],
+    authorId: mockUsers[7].id,
     location: mockLocations[7],
+    locationId: mockLocations[7].id,
     content: "The view from Christ the Redeemer is breathtaking! Clear skies today, you can see all of Rio!",
     media: [
       {
@@ -155,7 +171,9 @@ export const mockPosts: Post[] = [
   {
     id: "9",
     user: mockUsers[8],
+    authorId: mockUsers[8].id,
     location: mockLocations[8],
+    locationId: mockLocations[8].id,
     content: "Top of the mountain at Aspen Highlands! Fresh powder and no lines for the lift right now.",
     media: [
       {
@@ -172,7 +190,9 @@ export const mockPosts: Post[] = [
   {
     id: "10",
     user: mockUsers[9],
+    authorId: mockUsers[9].id,
     location: mockLocations[9],
+    locationId: mockLocations[9].id,
     content: "Super Bowl from a field suite! The energy is electric and halftime show setup looks epic.",
     media: [
       {
@@ -191,7 +211,9 @@ export const mockPosts: Post[] = [
   {
     id: "11",
     user: mockUsers[10],
+    authorId: mockUsers[10].id,
     location: mockLocations[10],
+    locationId: mockLocations[10].id,
     content: "Dinner at Mama's Fish House with the sunset view is perfection. Got the last oceanfront table!",
     media: [
       {
@@ -208,7 +230,9 @@ export const mockPosts: Post[] = [
   {
     id: "12",
     user: mockUsers[11],
+    authorId: mockUsers[11].id,
     location: mockLocations[11],
+    locationId: mockLocations[11].id,
     content: "Outdoor workout at Barry's today! Special beach class is killing it - spots still open for the 10am.",
     media: [
       {
@@ -225,7 +249,9 @@ export const mockPosts: Post[] = [
   {
     id: "13",
     user: mockUsers[12],
+    authorId: mockUsers[12].id,
     location: mockLocations[12],
+    locationId: mockLocations[12].id,
     content: "Houston Rodeo is wild tonight! Bull riding competition just started and the crowd is going crazy!",
     media: [
       {
@@ -242,7 +268,9 @@ export const mockPosts: Post[] = [
   {
     id: "14",
     user: mockUsers[13],
+    authorId: mockUsers[13].id,
     location: mockLocations[1],
+    locationId: mockLocations[1].id,
     content: "New seasonal latte just dropped and it's incredible! Lavender honey flavor is perfect.",
     media: [
       {
@@ -259,7 +287,9 @@ export const mockPosts: Post[] = [
   {
     id: "15",
     user: mockUsers[14],
+    authorId: mockUsers[14].id,
     location: mockLocations[1],
+    locationId: mockLocations[1].id,
     content: "The back corner by the bookshelf is empty and it's the best spot to work from! Great wifi today.",
     media: [
       {
@@ -276,7 +306,9 @@ export const mockPosts: Post[] = [
   {
     id: "16",
     user: mockUsers[0],
+    authorId: mockUsers[0].id,
     location: mockLocations[7],
+    locationId: mockLocations[7].id,
     content: "Made it to the top! The climb was worth it - barely any crowds this early in the morning.",
     media: [
       {
@@ -293,7 +325,9 @@ export const mockPosts: Post[] = [
   {
     id: "17",
     user: mockUsers[1],
+    authorId: mockUsers[1].id,
     location: mockLocations[21], // Bitcoin Conference location
+    locationId: mockLocations[21].id,
     content: "Bitcoin Conference is packed today! Great keynotes happening on the main stage with minimal wait times for entry.",
     media: [
       {
@@ -310,7 +344,9 @@ export const mockPosts: Post[] = [
   {
     id: "18",
     user: mockUsers[2],
+    authorId: mockUsers[2].id,
     location: mockLocations[22], // InvestFest location
+    locationId: mockLocations[22].id,
     content: "InvestFest workshops are incredible! The west wing has shorter lines for the top speakers right now.",
     media: [
       {
@@ -327,7 +363,9 @@ export const mockPosts: Post[] = [
   {
     id: "19",
     user: mockUsers[3],
+    authorId: mockUsers[3].id,
     location: mockLocations[9], // Keep one Allegiant Stadium post
+    locationId: mockLocations[9].id,
     content: "VIP entrance on south side has no wait right now! Regular entrances are packed.",
     media: [
       {
@@ -344,6 +382,7 @@ export const mockPosts: Post[] = [
   {
     id: "20",
     user: mockUsers[4],
+    authorId: mockUsers[4].id,
     location: {
       id: "29",
       name: "CES Las Vegas",
@@ -357,6 +396,7 @@ export const mockPosts: Post[] = [
       type: "event",
       verified: true,
     },
+    locationId: "29",
     content: "Just spotted the newest tech innovations at CES! North hall is less crowded if you want to see the automotive displays.",
     media: [
       {
@@ -373,7 +413,9 @@ export const mockPosts: Post[] = [
   {
     id: "21",
     user: mockUsers[15],
+    authorId: mockUsers[15].id,
     location: mockLocations[13],
+    locationId: mockLocations[13].id,
     content: "Thanks for the free tix VRN! Can't believe I'm getting to see a comedy legend right now. The opening act just finished and everyone is crying laughing already!",
     media: [
       {
@@ -390,7 +432,9 @@ export const mockPosts: Post[] = [
   {
     id: "22",
     user: mockUsers[16],
+    authorId: mockUsers[16].id,
     location: mockLocations[14],
+    locationId: mockLocations[14].id,
     content: "Day 2 on the Disney Wonder and it's magical! Character breakfast just ended and the kids are loving it. Almost no wait for the water slide right now!",
     media: [
       {
@@ -407,7 +451,9 @@ export const mockPosts: Post[] = [
   {
     id: "23",
     user: mockUsers[17],
+    authorId: mockUsers[17].id,
     location: mockLocations[15],
+    locationId: mockLocations[15].id,
     content: "This new bakery in Des Moines is incredible! They just took out fresh croissants and they smell amazing. Get here before they sell out!",
     media: [
       {
@@ -424,7 +470,9 @@ export const mockPosts: Post[] = [
   {
     id: "24",
     user: mockUsers[18],
+    authorId: mockUsers[18].id,
     location: mockLocations[16],
+    locationId: mockLocations[16].id,
     content: "Sunset cocktails at the Waldorf Rooftop Bar are unmatched! Just got seated with no wait - seems like a hidden gem tonight. View of downtown LA is spectacular!",
     media: [
       {
@@ -441,7 +489,9 @@ export const mockPosts: Post[] = [
   {
     id: "25",
     user: mockUsers[19],
+    authorId: mockUsers[19].id,
     location: mockLocations[17],
+    locationId: mockLocations[17].id,
     content: "Sydney Opera House is absolutely stunning tonight! Special light show happening right now with barely any crowds.",
     media: [
       {
@@ -458,7 +508,9 @@ export const mockPosts: Post[] = [
   {
     id: "26",
     user: mockUsers[20],
+    authorId: mockUsers[20].id,
     location: mockLocations[18],
+    locationId: mockLocations[18].id,
     content: "Perfect evening at the Eiffel Tower! The lights just turned on and it's magical. Pro tip: south side entrance has almost no line right now.",
     media: [
       {
@@ -475,7 +527,9 @@ export const mockPosts: Post[] = [
   {
     id: "27",
     user: mockUsers[22],
+    authorId: mockUsers[22].id,
     location: mockLocations[19],
+    locationId: mockLocations[19].id,
     content: "Coachella day 2 is UNREAL! Just caught the surprise guest performance - mind blown! Main stage area still has room if you hurry.",
     media: [
       {
@@ -492,7 +546,9 @@ export const mockPosts: Post[] = [
   {
     id: "28",
     user: mockUsers[21],
+    authorId: mockUsers[21].id,
     location: mockLocations[20],
+    locationId: mockLocations[20].id,
     content: "Gucci pop-up on Rodeo Drive is a must-see! They're giving out free champagne and the limited collection just dropped. Still some pieces left!",
     media: [
       {
@@ -509,7 +565,9 @@ export const mockPosts: Post[] = [
   {
     id: "29",
     user: mockUsers[8],
+    authorId: mockUsers[8].id,
     location: mockLocations[24],  // The Comedy Cellar (id: "25")
+    locationId: mockLocations[24].id,
     content: "Comedy Cellar is offering FREE TICKETS tonight! Just mention 'VRN' at the door. The 9pm show has plenty of seats but they're going fast!",
     media: [
       {
@@ -526,7 +584,9 @@ export const mockPosts: Post[] = [
   {
     id: "30",
     user: mockUsers[12],
+    authorId: mockUsers[12].id,
     location: mockLocations[25],  // Skyline Nightclub (id: "26")
+    locationId: mockLocations[25].id,
     content: "Skyline is offering FREE COVER until midnight! Just show this post at the door. DJ started at 10 and the dance floor is filling up!",
     media: [
       {
@@ -543,7 +603,9 @@ export const mockPosts: Post[] = [
   {
     id: "31",
     user: mockUsers[15],
+    authorId: mockUsers[15].id,
     location: mockLocations[26],  // Sunrise Bakery (id: "27")
+    locationId: mockLocations[26].id,
     content: "New bakery alert! Sunrise is offering a FREE pastry with any large coffee purchase until noon. The chocolate croissants are incredible and still warm from the oven!",
     media: [
       {
@@ -560,7 +622,9 @@ export const mockPosts: Post[] = [
   {
     id: "32",
     user: mockUsers[19],
+    authorId: mockUsers[19].id,
     location: mockLocations[27],  // Coachella VIP Experience (id: "28")
+    locationId: mockLocations[27].id,
     content: "American Express Tent access included with VIP ticket purchase! Just picked up my credentials and the lounge has free drinks, charging stations and AC. Perfect escape from the heat!",
     media: [
       {

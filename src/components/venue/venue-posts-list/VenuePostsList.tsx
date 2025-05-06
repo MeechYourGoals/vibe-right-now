@@ -1,46 +1,61 @@
 
-import React from 'react';
-import { Post, Comment, Location } from "@/types";
-import PostCard from "@/components/post/PostCard";
+import React, { useState } from 'react';
+import { Location, Post, Comment } from "@/types";
+import { canDeleteUserPosts } from '@/utils/venue/postManagementUtils';
+import { VenuePostsGrid, VenuePostsListView, EmptyState } from './venue-posts-list';
 
-interface VenuePostsListViewProps {
+interface VenuePostsListProps {
   posts: Post[];
   venue: Location;
+  viewMode: "list" | "grid";
   getComments: (postId: string) => Comment[];
-  canDelete: boolean;
+  subscriptionTier?: 'standard' | 'plus' | 'premium' | 'pro';
   onPostDeleted?: (postId: string) => void;
 }
 
-const VenuePostsListView: React.FC<VenuePostsListViewProps> = ({
+const VenuePostsList: React.FC<VenuePostsListProps> = ({
   posts,
   venue,
+  viewMode,
   getComments,
-  canDelete,
+  subscriptionTier = 'standard',
   onPostDeleted
 }) => {
-  if (posts.length === 0) {
-    return null;
+  const [localPosts, setLocalPosts] = useState<Post[]>(posts);
+  
+  // Check if venue manager can delete posts based on subscription tier
+  const canDelete = canDeleteUserPosts(subscriptionTier);
+  
+  const handlePostDeleted = (postId: string) => {
+    // Update local state to remove the deleted post
+    setLocalPosts(prevPosts => prevPosts.filter(post => post.id !== postId));
+    
+    // Call parent handler if provided
+    if (onPostDeleted) {
+      onPostDeleted(postId);
+    }
+  };
+  
+  if (localPosts.length === 0) {
+    return <EmptyState venueName={venue.name} />;
   }
   
-  return (
-    <div className="space-y-4">
-      {posts.map(post => {
-        // Determine if the post is from the venue itself
-        const isVenuePost = post.isVenuePost || post.location?.id === venue.id;
-        
-        return (
-          <PostCard 
-            key={post.id} 
-            post={post} 
-            comments={getComments(post.id)}
-            canDelete={canDelete && !isVenuePost} // Only allow deletion of user posts, not venue posts
-            venue={venue}
-            onPostDeleted={onPostDeleted}
-          />
-        );
-      })}
-    </div>
+  return viewMode === "grid" ? (
+    <VenuePostsGrid 
+      posts={localPosts} 
+      venue={venue}
+      canDelete={canDelete}
+      onPostDeleted={handlePostDeleted}
+    />
+  ) : (
+    <VenuePostsListView 
+      posts={localPosts} 
+      venue={venue}
+      getComments={getComments}
+      canDelete={canDelete}
+      onPostDeleted={handlePostDeleted}
+    />
   );
 };
 
-export default VenuePostsListView;
+export default VenuePostsList;

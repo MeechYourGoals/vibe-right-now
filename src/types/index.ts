@@ -12,10 +12,13 @@ export interface User {
   following?: number;
 }
 
-export type Media = {
+export type MediaObject = {
   type: "image" | "video";
   url: string;
+  thumbnail?: string;
 };
+
+export type Media = MediaObject | string;
 
 export interface Post {
   id: string;
@@ -26,9 +29,9 @@ export interface Post {
   comments: number;
   media?: Media[];
   user?: User;
-  authorId?: string;
+  authorId: string;
   location?: Location;
-  locationId?: string;
+  locationId: string;
   isPinned?: boolean;
   isVenuePost?: boolean;
   vibeTags?: string[];
@@ -38,10 +41,13 @@ export interface Post {
 export interface Comment {
   id: string;
   text?: string;
+  content?: string;
   timestamp: string;
   user?: User; 
+  author?: User;
   authorId?: string;
   vibedHere?: boolean;
+  postId?: string;
 }
 
 export interface Location {
