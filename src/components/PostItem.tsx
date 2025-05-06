@@ -6,13 +6,16 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Heart, MessageCircle, Share2, Clock, Pin } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import { getMediaType, getMediaUrl, hasMedia } from "@/utils/mediaUtils";
+import { getMediaType, getMediaUrl, hasMedia, ensureMediaFormat } from "@/utils/mediaUtils";
 
 interface PostItemProps {
   post: Post;
 }
 
 const PostItem = ({ post }: PostItemProps) => {
+  // Ensure media is in the correct format
+  const formattedMedia = post.media ? ensureMediaFormat(post.media) : [];
+  
   return (
     <Card className="mb-4 border-border/40">
       <CardContent className="p-4">
@@ -50,17 +53,17 @@ const PostItem = ({ post }: PostItemProps) => {
           <p className="text-sm">{post.content}</p>
         </div>
 
-        {hasMedia(post.media) && (
+        {hasMedia(post.media) && formattedMedia.length > 0 && (
           <div className="mt-3 grid grid-cols-1 gap-2">
-            {getMediaType(post.media[0]) === "image" ? (
+            {getMediaType(formattedMedia[0]) === "image" ? (
               <img
-                src={getMediaUrl(post.media[0])}
+                src={getMediaUrl(formattedMedia[0])}
                 alt="Post content"
                 className="rounded-md w-full object-cover max-h-96"
               />
             ) : (
               <video
-                src={getMediaUrl(post.media[0])}
+                src={getMediaUrl(formattedMedia[0])}
                 controls
                 className="rounded-md w-full"
               />

@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Location, Post, Comment } from "@/types";
 import { canDeleteUserPosts } from '@/utils/venue/postManagementUtils';
-import { VenuePostsGrid, VenuePostsListView, EmptyState } from './venue-posts-list';
+import { VenuePostsGrid, VenuePostsListView, EmptyState } from '.';
 
 interface VenuePostsListProps {
   posts: Post[];

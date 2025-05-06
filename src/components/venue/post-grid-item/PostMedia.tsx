@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Post } from "@/types";
-import { getMediaType, getMediaUrl, hasMedia } from "@/utils/mediaUtils";
+import { getMediaType, getMediaUrl, hasMedia, ensureMediaFormat } from "@/utils/mediaUtils";
 
 interface PostMediaProps {
   post: Post;
@@ -18,7 +18,20 @@ const PostMedia: React.FC<PostMediaProps> = ({ post }) => {
     );
   }
 
-  const media = post.media[0];
+  // Ensure media is in the correct format
+  const formattedMedia = ensureMediaFormat(post.media);
+  
+  if (formattedMedia.length === 0) {
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-muted">
+        <p className="p-2 text-center text-sm">
+          {post.content?.slice(0, 100)}{post.content?.length > 100 ? '...' : ''}
+        </p>
+      </div>
+    );
+  }
+  
+  const media = formattedMedia[0];
   
   if (getMediaType(media) === "image") {
     return (

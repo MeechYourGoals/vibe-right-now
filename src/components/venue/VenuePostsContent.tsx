@@ -6,7 +6,7 @@ import PostItem from '@/components/PostItem';
 import PostCardGrid from '@/components/PostCardGrid';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { mockPosts } from '@/mock/data';
-import { getMediaType, getMediaUrl, hasMedia } from "@/utils/mediaUtils";
+import { getMediaType, getMediaUrl, hasMedia, ensureMediaFormat } from "@/utils/mediaUtils";
 
 interface VenuePostsContentProps {
   venue: Location;
@@ -100,21 +100,26 @@ const VenuePostsContent = ({ venue, posts, reviewsCount = 0 }: VenuePostsContent
             {posts.filter(post => hasMedia(post.media)).map(post => {
               if (!post.media || post.media.length === 0) return null;
               
+              // Ensure media is in the correct format
+              const formattedMedia = ensureMediaFormat(post.media);
+              
+              if (formattedMedia.length === 0) return null;
+              
               return (
                 <div 
                   key={post.id}
                   className="aspect-square rounded-md overflow-hidden cursor-pointer"
                   onClick={() => handlePostClick(post)}
                 >
-                  {getMediaType(post.media[0]) === "image" ? (
+                  {getMediaType(formattedMedia[0]) === "image" ? (
                     <img 
-                      src={getMediaUrl(post.media[0])} 
+                      src={getMediaUrl(formattedMedia[0])} 
                       alt="Venue" 
                       className="w-full h-full object-cover"
                     />
                   ) : (
                     <video 
-                      src={getMediaUrl(post.media[0])} 
+                      src={getMediaUrl(formattedMedia[0])} 
                       className="w-full h-full object-cover"
                     />
                   )}

@@ -19,28 +19,8 @@ interface PostFeedProps {
   celebrityFeatured?: string[];
 }
 
-// Helper function to ensure media is in the correct format
-const ensureMediaFormat = (media: any[]): Media[] => {
-  return media.map(item => {
-    if (typeof item === 'string') {
-      // Determine type based on extension
-      const isVideo = item.endsWith('.mp4') || item.endsWith('.mov') || item.endsWith('.avi');
-      return {
-        type: isVideo ? 'video' : 'image',
-        url: item
-      };
-    } else if (typeof item === 'object' && item !== null) {
-      // Already in correct format
-      return item;
-    }
-    
-    // Default fallback
-    return {
-      type: 'image',
-      url: 'https://via.placeholder.com/500'
-    };
-  });
-};
+// Remove the duplicate ensureMediaFormat function definition here
+// and use the imported one from @/utils/mediaUtils
 
 const PostFeed = ({ celebrityFeatured }: { celebrityFeatured?: string[] }) => {
   const [filter, setFilter] = useState("all");

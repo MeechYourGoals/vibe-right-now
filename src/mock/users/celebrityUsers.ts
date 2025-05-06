@@ -11,6 +11,7 @@ export const celebrityUsers: User[] = [
     verified: true,
     bio: "Reality TV star, entrepreneur, and fashion icon. Creating vibes everywhere. SKIMS & KKW Beauty founder.",
     isPrivate: false,
+    email: "kim@kardashian.com"
   },
   {
     id: "25",
@@ -21,6 +22,7 @@ export const celebrityUsers: User[] = [
     verified: true,
     bio: "Grammy-winning artist. OVO Sound. Discovering the best vibes across the globe.",
     isPrivate: false,
+    email: "drake@ovo.com"
   },
   {
     id: "26",
@@ -31,6 +33,7 @@ export const celebrityUsers: User[] = [
     verified: true,
     bio: "Food critic extraordinaire. Helping you find the best food spots in every city.",
     isPrivate: false,
+    email: "keith@foodcritic.com"
   },
   {
     id: "27",
@@ -41,6 +44,7 @@ export const celebrityUsers: User[] = [
     verified: true,
     bio: "Entertainer and content creator. Finding the most energetic vibes around the world!",
     isPrivate: false,
+    email: "speed@creator.com"
   },
   {
     id: "28",
@@ -51,5 +55,6 @@ export const celebrityUsers: User[] = [
     verified: true,
     bio: "Actress, producer, and adventure seeker. Euphoria & White Lotus star. Sharing my favorite places.",
     isPrivate: false,
+    email: "sydney@sweeney.com"
   },
 ];

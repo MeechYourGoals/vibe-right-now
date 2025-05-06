@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
-import { getMediaType, getMediaUrl, hasMedia } from "@/utils/mediaUtils";
+import { getMediaType, getMediaUrl, hasMedia, ensureMediaFormat } from "@/utils/mediaUtils";
 
 export interface PostCardProps {
   post: Post;
@@ -35,6 +35,9 @@ const PostCard = ({ post, comments, locationPostCount, getComments, canDelete, v
   
   // Get post comments if a getter function is provided
   const postComments = comments || (getComments ? getComments(post.id) : []);
+  
+  // Ensure media is in the correct format
+  const formattedMedia = post.media ? ensureMediaFormat(post.media) : [];
   
   const toggleSaved = () => {
     setIsSaved(!isSaved);
@@ -133,22 +136,20 @@ const PostCard = ({ post, comments, locationPostCount, getComments, canDelete, v
         </div>
         
         {/* Post Media */}
-        {hasMedia(post.media) && (
+        {hasMedia(post.media) && formattedMedia.length > 0 && (
           <div className="mt-2">
-            {post.media && post.media.length > 0 && (
-              getMediaType(post.media[0]) === "image" ? (
-                <img
-                  src={getMediaUrl(post.media[0])}
-                  alt="Post"
-                  className="w-full object-cover max-h-96"
-                />
-              ) : (
-                <video
-                  src={getMediaUrl(post.media[0])}
-                  controls
-                  className="w-full max-h-96"
-                />
-              )
+            {getMediaType(formattedMedia[0]) === "image" ? (
+              <img
+                src={getMediaUrl(formattedMedia[0])}
+                alt="Post"
+                className="w-full object-cover max-h-96"
+              />
+            ) : (
+              <video
+                src={getMediaUrl(formattedMedia[0])}
+                controls
+                className="w-full max-h-96"
+              />
             )}
           </div>
         )}
