@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Maximize, MapPin } from "lucide-react";
 import { Location } from "@/types";
 import GoogleMapComponent from "@/components/map/google/GoogleMapComponent";
-import { format } from "date-fns";
 import { generateBusinessHours, getTodaysHours } from "@/utils/businessHoursUtils";
 
 interface VenueMapProps {

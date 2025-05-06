@@ -1,4 +1,3 @@
-
 export interface User {
   id: string;
   name: string;
@@ -91,7 +90,7 @@ export interface Location {
   description?: string;
   phone?: string;
   website?: string;
-  hours?: BusinessHours;
+  hours?: BusinessHours | Record<string, string[]>;
   rating?: number;
   tags?: string[];
   vibes?: string[];
@@ -142,4 +141,9 @@ export interface VenueInsights {
   peakHours?: Record<string, number>;
   demographicData?: any;
   competitiveInsights?: any;
+}
+
+// Add Venue type that extends Location
+export interface Venue extends Location {
+  ownerId?: string;
 }

@@ -1,10 +1,10 @@
 // Import necessary types and utilities
 import { Location } from '@/types';
 import { formatTimeToAmPm } from '@/utils/businessHoursUtils';
+import { cityCoordinates } from './cityDatabase';
+import { CityCoordinates, defaultUserProfiles, getRandomUserProfile } from './types';
 
-// Instead of adding userProfile directly to each location object, we'll modify the implementation
-// to avoid the type error, while ensuring the functionality remains the same
-
+// Generate mock locations for testing
 export const generateMockLocations = () => {
   // Location 1
   const location1 = {
@@ -253,6 +253,7 @@ export const generateMockLocations = () => {
   return [location1, location2, location3, location4, location5, location6, location7];
 };
 
+// Format location hours for display
 export const formatLocationHours = (hours: Record<string, string[]>): string => {
   if (!hours) return 'Hours not available';
   
@@ -275,6 +276,7 @@ export const formatLocationHours = (hours: Record<string, string[]>): string => 
   }).join('\n');
 };
 
+// Get the open/closed status of a location
 export const getLocationStatus = (hours: Record<string, string[]>): string => {
   if (!hours) return 'Hours not available';
   
@@ -318,6 +320,7 @@ export const getLocationStatus = (hours: Record<string, string[]>): string => {
          : 'Closed';
 };
 
+// Get today's hours for a location
 export const getTodaysHours = (hours: Record<string, string[]>): string => {
   if (!hours) return 'Hours not available';
   
@@ -333,4 +336,197 @@ export const getTodaysHours = (hours: Record<string, string[]>): string => {
   
   const [open, close] = hours[currentDay];
   return `${formatTimeToAmPm(open)} - ${formatTimeToAmPm(close)}`;
+};
+
+// Generate locations for a specific city
+export const generateCityLocations = (cityName: string, count: number = 10): Location[] => {
+  // Find the city in our database
+  const city = cityCoordinates.find(c => 
+    c.name.toLowerCase() === cityName.toLowerCase() || 
+    (c.state && `${c.name}, ${c.state}`.toLowerCase() === cityName.toLowerCase())
+  );
+  
+  if (!city) {
+    console.error(`City not found: ${cityName}`);
+    return [];
+  }
+  
+  // Generate locations around this city's coordinates
+  const locations: Location[] = [];
+  
+  for (let i = 0; i < count; i++) {
+    // Create some random offset to spread locations around the city
+    const latOffset = (Math.random() - 0.5) * 0.05;  // ~2-3 miles
+    const lngOffset = (Math.random() - 0.5) * 0.05;
+    
+    const types = ['restaurant', 'bar', 'cafe', 'nightclub', 'gym', 'hotel', 'park', 'museum'];
+    const randomType = types[Math.floor(Math.random() * types.length)];
+    
+    const location: Location = {
+      id: `${city.name}-${i}`,
+      name: `${getRandomBusinessName(randomType)} ${i+1}`,
+      address: `${100 + i} Main St`,
+      city: city.name,
+      state: city.state || '',
+      country: city.country,
+      lat: city.lat + latOffset,
+      lng: city.lng + lngOffset,
+      type: randomType,
+      verified: Math.random() > 0.3, // 70% chance of being verified
+      rating: Math.floor(Math.random() * 50) / 10 + 2.5, // 2.5 - 7.5 star rating
+      tags: getRandomTags(randomType),
+      vibes: getRandomVibes(),
+      hours: getRandomHours(randomType)
+    };
+    
+    locations.push(location);
+  }
+  
+  return locations;
+};
+
+// Generate locations for all cities in the database
+export const generateAllCityLocations = (locationsPerCity: number = 5): Location[] => {
+  let allLocations: Location[] = [];
+  
+  cityCoordinates.forEach(city => {
+    const cityLocations = generateCityLocations(city.name, locationsPerCity);
+    allLocations = [...allLocations, ...cityLocations];
+  });
+  
+  return allLocations;
+};
+
+// Helper functions for location generation
+const getRandomBusinessName = (type: string): string => {
+  const prefixes = ['Royal', 'Blue', 'Green', 'Golden', 'Silver', 'Diamond', 'Crystal', 'Emerald', 'Ruby', 'Sapphire'];
+  const restaurantNames = ['Bistro', 'Grill', 'Kitchen', 'Table', 'Plate', 'Spoon', 'Fork', 'Dish', 'Taste', 'Flavor'];
+  const barNames = ['Tavern', 'Pub', 'Bar', 'Lounge', 'Saloon', 'Spirits', 'Brewery', 'Distillery', 'Cocktails'];
+  const cafeNames = ['Coffee', 'Café', 'Bakery', 'Patisserie', 'Roastery', 'Teahouse', 'Espresso', 'Bean'];
+  
+  const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+  
+  switch (type) {
+    case 'restaurant':
+      return `${prefix} ${restaurantNames[Math.floor(Math.random() * restaurantNames.length)]}`;
+    case 'bar':
+    case 'nightclub':
+      return `${prefix} ${barNames[Math.floor(Math.random() * barNames.length)]}`;
+    case 'cafe':
+      return `${prefix} ${cafeNames[Math.floor(Math.random() * cafeNames.length)]}`;
+    default:
+      return `${prefix} ${type.charAt(0).toUpperCase() + type.slice(1)}`;
+  }
+};
+
+const getRandomTags = (type: string): string[] => {
+  const commonTags = ['trending', 'popular', 'local favorite'];
+  
+  const typeTags: Record<string, string[]> = {
+    restaurant: ['dining', 'food', 'cuisine', 'lunch', 'dinner', 'reservations'],
+    bar: ['drinks', 'cocktails', 'happy hour', 'nightlife'],
+    cafe: ['coffee', 'breakfast', 'brunch', 'wifi'],
+    nightclub: ['dancing', 'dj', 'music', 'nightlife', 'vip'],
+    gym: ['fitness', 'workout', 'exercise', 'training'],
+    hotel: ['lodging', 'accommodations', 'rooms', 'service'],
+    park: ['outdoors', 'recreation', 'nature', 'family-friendly'],
+    museum: ['art', 'culture', 'exhibits', 'history', 'educational']
+  };
+  
+  const tags = [...commonTags];
+  const specificTags = typeTags[type] || [];
+  
+  // Add 2-4 type-specific tags
+  for (let i = 0; i < Math.floor(Math.random() * 3) + 2; i++) {
+    if (specificTags.length > 0) {
+      const randomIndex = Math.floor(Math.random() * specificTags.length);
+      tags.push(specificTags[randomIndex]);
+      specificTags.splice(randomIndex, 1);
+    }
+  }
+  
+  return tags;
+};
+
+const getRandomVibes = (): string[] => {
+  const allVibes = ['chill', 'energetic', 'sophisticated', 'casual', 'romantic', 'friendly', 'vibrant', 'cozy', 'upscale', 'rustic', 'artistic', 'lively'];
+  const vibes = [];
+  
+  // Add 1-3 random vibes
+  for (let i = 0; i < Math.floor(Math.random() * 3) + 1; i++) {
+    if (allVibes.length > 0) {
+      const randomIndex = Math.floor(Math.random() * allVibes.length);
+      vibes.push(allVibes[randomIndex]);
+      allVibes.splice(randomIndex, 1);
+    }
+  }
+  
+  return vibes;
+};
+
+const getRandomHours = (type: string): Record<string, string[]> => {
+  // Different default hours based on venue type
+  switch (type) {
+    case 'restaurant':
+      return {
+        monday: ['11:00', '22:00'],
+        tuesday: ['11:00', '22:00'],
+        wednesday: ['11:00', '22:00'],
+        thursday: ['11:00', '23:00'],
+        friday: ['11:00', '23:00'],
+        saturday: ['10:00', '23:00'],
+        sunday: ['10:00', '22:00'],
+      };
+    case 'bar':
+    case 'nightclub':
+      return {
+        monday: ['16:00', '00:00'],
+        tuesday: ['16:00', '00:00'],
+        wednesday: ['16:00', '00:00'],
+        thursday: ['16:00', '01:00'],
+        friday: ['16:00', '02:00'],
+        saturday: ['16:00', '02:00'],
+        sunday: ['16:00', '00:00'],
+      };
+    case 'cafe':
+      return {
+        monday: ['07:00', '20:00'],
+        tuesday: ['07:00', '20:00'],
+        wednesday: ['07:00', '20:00'],
+        thursday: ['07:00', '20:00'],
+        friday: ['07:00', '21:00'],
+        saturday: ['08:00', '21:00'],
+        sunday: ['08:00', '18:00'],
+      };
+    case 'gym':
+      return {
+        monday: ['06:00', '22:00'],
+        tuesday: ['06:00', '22:00'],
+        wednesday: ['06:00', '22:00'],
+        thursday: ['06:00', '22:00'],
+        friday: ['06:00', '21:00'],
+        saturday: ['08:00', '20:00'],
+        sunday: ['08:00', '18:00'],
+      };
+    case 'hotel':
+      return {
+        monday: ['00:00', '23:59'],
+        tuesday: ['00:00', '23:59'],
+        wednesday: ['00:00', '23:59'],
+        thursday: ['00:00', '23:59'],
+        friday: ['00:00', '23:59'],
+        saturday: ['00:00', '23:59'],
+        sunday: ['00:00', '23:59'],
+      };
+    default:
+      return {
+        monday: ['09:00', '17:00'],
+        tuesday: ['09:00', '17:00'],
+        wednesday: ['09:00', '17:00'],
+        thursday: ['09:00', '17:00'],
+        friday: ['09:00', '17:00'],
+        saturday: ['10:00', '16:00'],
+        sunday: ['10:00', '16:00'],
+      };
+  }
 };

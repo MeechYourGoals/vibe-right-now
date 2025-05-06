@@ -1,7 +1,9 @@
 
+// @ts-ignore - Deno imports need to be ignored in TypeScript
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 
+// @ts-ignore - Deno.env needs to be ignored in TypeScript
 const GOOGLE_VERTEX_API_KEY = Deno.env.get('GOOGLE_VERTEX_API_KEY');
 
 const corsHeaders = {
@@ -9,7 +11,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-serve(async (req) => {
+// @ts-ignore - Deno serve function needs to be ignored in TypeScript
+serve(async (req: Request) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -19,7 +22,7 @@ serve(async (req) => {
     const { messages, model = "gemini-1.5-flash", temperature = 0.7, maxTokens = 1000 } = await req.json();
 
     // Format messages for Vertex AI
-    const formattedPrompt = messages.map(msg => {
+    const formattedPrompt = messages.map((msg: any) => {
       if (msg.role === 'system') {
         return { role: 'user', parts: [{ text: `System instruction: ${msg.content}` }] };
       }
@@ -60,7 +63,7 @@ serve(async (req) => {
     return new Response(JSON.stringify({ text }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in vertex-ai function:', error);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
