@@ -1,77 +1,79 @@
 
-import React from "react";
+import React from 'react';
 import { Post } from "@/types";
-import { Card, CardContent } from "@/components/ui/card";
-import { useNavigate } from "react-router-dom";
 
 interface PostCardGridProps {
   posts: Post[];
+  onPostClick: (post: Post) => void;
+  className?: string;
+  columns?: 2 | 3 | 4;
 }
 
-const PostCardGrid: React.FC<PostCardGridProps> = ({ posts }) => {
-  const navigate = useNavigate();
-
-  const handlePostClick = (postId: string) => {
-    navigate(`/post/${postId}`);
-  };
-
-  // Function to get media URL from post
-  const getMediaUrl = (post: Post) => {
-    if (!post.media || post.media.length === 0) return null;
-    
-    const firstMedia = post.media[0];
-    
-    if (typeof firstMedia === "string") {
-      return firstMedia;
-    } else if (typeof firstMedia === "object" && firstMedia !== null) {
-      return firstMedia.url;
+const PostCardGrid = ({ posts, onPostClick, className = "", columns = 3 }: PostCardGridProps) => {
+  const getGridColumns = () => {
+    switch (columns) {
+      case 2:
+        return "grid-cols-1 sm:grid-cols-2";
+      case 3:
+        return "grid-cols-1 sm:grid-cols-2 md:grid-cols-3";
+      case 4:
+        return "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4";
+      default:
+        return "grid-cols-1 sm:grid-cols-2 md:grid-cols-3";
     }
-    
-    return null;
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className={`grid ${getGridColumns()} gap-4 ${className}`}>
       {posts.map((post) => (
-        <Card 
-          key={post.id} 
-          className="cursor-pointer hover:shadow-md transition-shadow overflow-hidden"
-          onClick={() => handlePostClick(post.id)}
+        <div
+          key={post.id}
+          className="aspect-square overflow-hidden rounded-md bg-muted relative group cursor-pointer"
+          onClick={() => onPostClick(post)}
         >
-          <div className="aspect-square relative overflow-hidden">
-            {getMediaUrl(post) ? (
-              <img 
-                src={getMediaUrl(post)} 
-                alt={post.content?.substring(0, 20) || "Post image"}
-                className="w-full h-full object-cover"
+          {post.media && post.media.length > 0 ? (
+            post.media[0].type === "image" ? (
+              <img
+                src={post.media[0].url}
+                alt="Post content"
+                className="h-full w-full object-cover transition-transform group-hover:scale-105"
               />
             ) : (
-              <div className="w-full h-full bg-muted flex items-center justify-center p-4">
-                <p className="text-sm text-center line-clamp-6">
-                  {post.content || post.text || "No content"}
-                </p>
+              <video
+                src={post.media[0].url}
+                className="h-full w-full object-cover"
+                poster="https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
+              />
+            )
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-muted">
+              <p className="p-2 text-center text-sm">
+                {post.content.slice(0, 100)}{post.content.length > 100 ? '...' : ''}
+              </p>
+            </div>
+          )}
+          
+          {post.isPinned && (
+            <div className="absolute top-2 right-2 bg-primary/80 text-white text-xs py-1 px-2 rounded-full">
+              Pinned
+            </div>
+          )}
+          
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black to-transparent p-3">
+            <div className="flex items-center">
+              <div className="w-6 h-6 rounded-full overflow-hidden border border-white mr-2">
+                <img 
+                  src={post.user?.avatar} 
+                  alt={post.user?.username} 
+                  className="w-full h-full object-cover" 
+                />
               </div>
-            )}
-            
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
-              <div className="text-white text-sm font-medium line-clamp-2">
-                {post.location?.name}
-              </div>
+              <p className="text-white text-sm font-medium truncate">
+                {post.user?.username}
+              </p>
             </div>
           </div>
-          
-          <CardContent className="p-3">
-            <div className="flex justify-between items-center">
-              <div className="text-sm font-medium">
-                {post.user?.name || post.author?.name || "Unknown user"}
-              </div>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <span>❤️ {post.likes || 0}</span>
-                <span>💬 {Array.isArray(post.comments) ? post.comments.length : post.comments || 0}</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        </div>
       ))}
     </div>
   );

@@ -1,181 +1,112 @@
-export interface Location {
-  id: string;
-  name: string;
-  address: string;
-  city: string;
-  state: string;
-  zip?: string;
-  country: string;
-  lat: number;
-  lng: number;
-  type?: string;
-  phone?: string;
-  website?: string;
-  rating?: number;
-  price?: string;
-  hours?: BusinessHours;
-  description?: string;
-  tags?: string[];
-  images?: string[];
-  verified?: boolean;
-  vibes?: string[];
-  userProfile?: any;
-  amenities?: any[];
-  reviews?: any[];
-  distance?: string;
-}
 
-export interface BusinessHours {
-  [day: string]: string;
-}
-
+// Add your type definitions here
 export interface User {
   id: string;
-  username: string;
   name: string;
+  username: string;
   avatar: string;
-  isPrivate?: boolean;
   bio?: string;
   verified?: boolean;
   isCelebrity?: boolean;
+  followers?: number;
+  following?: number;
 }
 
-export interface Media {
+export type Media = {
   type: "image" | "video";
   url: string;
-  thumbnail?: string;
-}
+};
 
 export interface Post {
   id: string;
-  user: User;
-  location: Location;
   content: string;
-  text?: string;
-  media: Media[];
   timestamp: string;
-  likes: number;
-  comments: number | any[];
-  vibeTags?: string[];
-  isVenuePost?: boolean;
-  isPinned?: boolean;
   expiresAt?: string;
+  likes: number;
+  comments: number;
+  media?: Media[];
+  user?: User;
+  authorId?: string;
+  location?: Location;
+  locationId?: string;
+  isPinned?: boolean;
+  isVenuePost?: boolean;
+  vibeTags?: string[];
   saved?: boolean;
 }
 
 export interface Comment {
   id: string;
-  postId: string;
-  user: User;
-  content: string;
-  timestamp: string;
-  likes: number;
   text?: string;
+  timestamp: string;
+  user?: User; 
+  authorId?: string;
   vibedHere?: boolean;
 }
 
-export interface Event {
+export interface Location {
   id: string;
-  title: string;
-  description: string;
-  location: Location;
-  startDate: string;
-  endDate: string;
-  media?: Media[];
-  ticketUrl?: string;
-  price?: string;
-  tags?: string[];
-  attendees?: number;
-  interested?: number;
+  name: string;
+  address: string;
+  city: string;
+  state?: string;
+  country?: string;
+  zip?: string;
+  lat: number;
+  lng: number;
+  type: string;
+  verified?: boolean;
+  hours?: BusinessHours;
+  rating?: number;
+  reviewCount?: number;
+  geminiSummary?: string;
+  distance?: number;
 }
 
-export interface Trip {
-  id: string;
-  title: string;
-  description: string;
-  startDate: string;
-  endDate: string;
-  creator: User;
-  collaborators: User[];
-  places: TripPlace[];
-  visibility: 'public' | 'private' | 'friends';
-  status: 'planning' | 'in-progress' | 'completed';
-}
-
-export interface TripPlace {
-  id: string;
-  tripId: string;
-  location: Location;
-  notes?: string;
-  date?: string;
-  order: number;
-  status: 'must-see' | 'tentative' | 'visited';
-}
-
-export interface Notification {
-  id: string;
-  type: 'like' | 'comment' | 'follow' | 'mention' | 'trip-invite' | 'trip-update' | 'check-in';
-  read: boolean;
-  timestamp: string;
-  user: User;
-  post?: Post;
-  trip?: Trip;
-  location?: Location;
-  content?: string;
-}
-
-export interface ChatMessage {
-  id: string;
-  role: 'user' | 'assistant' | 'system';
-  content: string;
-  timestamp: string;
-}
-
-export interface ChatState {
-  messages: ChatMessage[];
-  loading: boolean;
-  error: string | null;
-}
-
-export interface ExtractedIntent {
-  intent: string;
-  entities: Record<string, any>;
-  confidence: number;
+export interface BusinessHours {
+  monday: string;
+  tuesday: string;
+  wednesday: string;
+  thursday: string;
+  friday: string;
+  saturday: string;
+  sunday: string;
+  isOpen?: boolean;
 }
 
 export interface VenueInsights {
-  visitors?: number;
-  visitorsCount?: number;
-  visitorsChange?: number;
-  posts?: number;
-  postsChange?: number;
-  engagement?: number;
-  engagementChange?: number;
-  likes?: number;
-  likesChange?: number;
-  comments?: number;
-  commentsChange?: number;
-  topPosts?: Post[];
-  demographics?: {
-    ageGroups: Record<string, number>;
-    gender: Record<string, number>;
-    interests: Record<string, number>;
-  };
-  visitorsByTime?: Record<string, number>;
-  visitorsByDay?: Record<string, number>;
-  visitorCount?: number;
-  checkInCount?: number;
-  receiptUploads?: number;
-  discountRedemptions?: number;
-  totalViews?: number;
-  totalVisits?: number;
-  totalSaves?: number;
-  totalShares?: number;
-  averageRating?: number;
-  ratingCount?: number;
-  totalReviews?: number;
-  dailyViews?: Record<string, number>;
-  peakHours?: Record<string, number>;
-  demographicData?: any;
-  competitiveInsights?: any;
+  visitorsCount: number;
+  checkInsCount: number;
+  reviewsCount: number;
+  photosCount: number;
+  visitorsByTime: {
+    timeSlot: string;
+    count: number;
+  }[];
+  visitorsByDay: {
+    day: string;
+    count: number;
+  }[];
+  demographics: {
+    ageRange: string;
+    percentage: number;
+  }[];
+}
+
+export interface AmenityFeature {
+  icon: string;
+  title: string;
+  description?: string;
+}
+
+export interface SearchResult {
+  id: string;
+  type: "venue" | "event" | "user" | "post";
+  title: string;
+  subtitle?: string;
+  image?: string;
+  distance?: string;
+  date?: string;
+  rating?: number;
+  reviewCount?: number;
 }

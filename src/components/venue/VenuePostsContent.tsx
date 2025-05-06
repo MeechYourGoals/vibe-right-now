@@ -1,231 +1,143 @@
 
-import React, { useState, useMemo } from "react";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Grid3X3, LayoutList, Sparkles } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Location, Post, Comment, Media } from "@/types";
-import PostItem from "@/components/PostItem";
-import PostCardGrid from "@/components/PostCardGrid";
-import VenuePost from "@/components/VenuePost";
-import { getVenueContent } from "@/utils/venue/venueContentHelpers";
-import { Badge } from "@/components/ui/badge";
-import ReviewSummary from "@/components/venue/ReviewSummary";
+import React, { useState } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Location, Post } from "@/types";
+import PostItem from '@/components/PostItem';
+import PostCardGrid from '@/components/PostCardGrid';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { mockPosts } from '@/mock/data';
 
 interface VenuePostsContentProps {
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
-  viewMode: "list" | "grid";
-  setViewMode: (mode: "list" | "grid") => void;
-  allPosts: Post[];
-  filteredPosts: Post[];
-  generatedVenuePosts: Post[];
-  selectedDays: number[];
   venue: Location;
-  getPostComments: (postId: string) => Comment[];
+  posts: Post[];
+  reviewsCount?: number;
 }
 
-const VenuePostsContent: React.FC<VenuePostsContentProps> = ({
-  activeTab,
-  setActiveTab,
-  viewMode,
-  setViewMode,
-  allPosts,
-  filteredPosts,
-  generatedVenuePosts,
-  selectedDays,
-  venue,
-  getPostComments
-}) => {
-  const [reviewSummary, setReviewSummary] = useState<string | null>(null);
-
-  // Generate mock reviews based on venue id to ensure consistency
-  const mockReviews = useMemo(() => {
-    const reviewCount = parseInt(venue.id) % 10 + 5; // 5-14 reviews based on venue id
-    const reviews = [];
-    
-    for (let i = 0; i < reviewCount; i++) {
-      const rating = 3 + (parseInt(venue.id.charAt(i % venue.id.length)) % 3); // Ratings between 3-5
-      
-      reviews.push({
-        author_name: `Reviewer ${i + 1}`,
-        rating,
-        text: `This ${venue.type} has ${rating >= 4 ? 'great' : 'decent'} service and ${
-          rating >= 4 ? 'excellent' : 'good'
-        } atmosphere. ${rating === 5 ? 'Highly recommended!' : 'Worth checking out.'}`,
-        time: Date.now() - (i * 86400000) // Staggered over the past few days
-      });
-    }
-    
-    return reviews;
-  }, [venue.id, venue.type]);
-
-  const handleSummaryGenerated = (summary: string) => {
-    setReviewSummary(summary);
+const VenuePostsContent = ({ venue, posts, reviewsCount = 0 }: VenuePostsContentProps) => {
+  const [activeTab, setActiveTab] = useState("vibes");
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [isPostDialogOpen, setIsPostDialogOpen] = useState(false);
+  
+  // Simulate reviews tab data
+  const reviews = posts.filter((post) => post.content.includes("review") || post.content.length > 100).slice(0, 5);
+  
+  // Sort posts by pinned status and then by timestamp (most recent first)
+  const sortedPosts = [...posts].sort((a, b) => {
+    if (a.isPinned && !b.isPinned) return -1;
+    if (!a.isPinned && b.isPinned) return 1;
+    return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
+  });
+  
+  const pinnedPosts = sortedPosts.filter(post => post.isPinned);
+  const regularPosts = sortedPosts.filter(post => !post.isPinned);
+  
+  const handlePostClick = (post: Post) => {
+    setSelectedPost(post);
+    setIsPostDialogOpen(true);
   };
-
-  // Helper function to convert string arrays to Media objects
-  const convertToMediaArray = (mediaItems: string[] | Media[]): Media[] => {
-    if (!mediaItems || mediaItems.length === 0) return [];
-    
-    return mediaItems.map(item => {
-      if (typeof item === 'string') {
-        // Determine type based on extension
-        const isVideo = item.endsWith('.mp4') || item.endsWith('.mov') || item.endsWith('.avi');
-        return {
-          type: isVideo ? 'video' : 'image',
-          url: item
-        };
-      } else if (typeof item === 'object' && item !== null && 'url' in item) {
-        // Already in correct format
-        return item;
-      }
-      
-      // Default fallback
-      return {
-        type: 'image',
-        url: 'https://via.placeholder.com/500'
-      };
-    });
-  };
+  
+  // Mock AI summary for reviews
+  const reviewSummary = 
+    "Based on 32 recent reviews, visitors love the atmosphere and cocktails at this venue. Many praise the DJ's music selection and friendly staff, though some mention it gets crowded after 10pm on weekends. Overall sentiment is very positive (4.6/5) with recommendations to arrive early to get a good spot.";
 
   return (
     <div className="mt-6">
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-        <div className="flex justify-between items-center mb-2">
-          <TabsList>
-            <TabsTrigger value="all">All Posts</TabsTrigger>
-            <TabsTrigger value="user">User Posts</TabsTrigger>
-            <TabsTrigger value="venue">Venue Posts</TabsTrigger>
-            <TabsTrigger value="reviews">
-              Reviews
-              <Badge variant="outline" className="ml-2 bg-primary/10 text-xs">
-                New
-              </Badge>
-            </TabsTrigger>
-          </TabsList>
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="w-full border-b mb-4">
+          <TabsTrigger value="vibes" className="flex-1">Vibes</TabsTrigger>
+          <TabsTrigger value="reviews" className="flex-1">Reviews {reviewsCount > 0 && `(${reviewsCount})`}</TabsTrigger>
+          <TabsTrigger value="photos" className="flex-1">Photos</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="vibes" className="mt-0">
+          {pinnedPosts.length > 0 && (
+            <div className="mb-4">
+              <h3 className="text-sm font-medium mb-3 text-muted-foreground">Pinned</h3>
+              {pinnedPosts.map(post => (
+                <PostItem key={post.id} post={post} />
+              ))}
+            </div>
+          )}
           
-          <div className="flex gap-2">
-            <Button
-              variant={viewMode === "list" ? "default" : "outline"}
-              size="icon"
-              className="h-8 w-8"
-              onClick={() => setViewMode("list")}
-            >
-              <LayoutList className="h-4 w-4" />
-              <span className="sr-only">List View</span>
-            </Button>
-            <Button
-              variant={viewMode === "grid" ? "default" : "outline"}
-              size="icon"
-              className="h-8 w-8"
-              onClick={() => setViewMode("grid")}
-            >
-              <Grid3X3 className="h-4 w-4" />
-              <span className="sr-only">Grid View</span>
-            </Button>
-          </div>
-        </div>
-        
-        <TabsContent value="all" className="mt-4 space-y-6">
-          {allPosts.length > 0 ? (
-            viewMode === "list" ? (
-              <div className="space-y-6">
-                {allPosts.map((post) => (
-                  <VenuePost
-                    key={post.id}
-                    venue={venue}
-                    content={post.content}
-                    media={convertToMediaArray(post.media || [])}
-                    timestamp={post.timestamp}
-                  />
-                ))}
-              </div>
-            ) : (
-              <PostCardGrid posts={allPosts} />
-            )
+          {regularPosts.length > 0 ? (
+            <>
+              <h3 className="text-sm font-medium mb-3 text-muted-foreground">Latest Vibes</h3>
+              <PostCardGrid 
+                posts={regularPosts} 
+                onPostClick={handlePostClick} 
+                columns={3} 
+              />
+            </>
           ) : (
-            <p className="text-center text-muted-foreground py-10">
-              No posts available for this venue. Be the first to post!
-            </p>
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">No posts yet. Be the first to share the vibe!</p>
+            </div>
           )}
         </TabsContent>
         
-        <TabsContent value="user" className="mt-4 space-y-6">
-          {filteredPosts.length > 0 ? (
-            viewMode === "list" ? (
-              <div className="space-y-6">
-                {filteredPosts.map((post) => (
-                  <PostItem
-                    key={post.id}
-                    post={post}
-                    comments={getPostComments(post.id)}
-                  />
-                ))}
-              </div>
-            ) : (
-              <PostCardGrid posts={filteredPosts} />
-            )
-          ) : (
-            <p className="text-center text-muted-foreground py-10">
-              No user posts available for this venue. Be the first to post!
-            </p>
-          )}
-        </TabsContent>
-        
-        <TabsContent value="venue" className="mt-4 space-y-6">
-          {generatedVenuePosts.length > 0 ? (
-            viewMode === "list" ? (
-              <div className="space-y-6">
-                {generatedVenuePosts.map((post) => (
-                  <VenuePost
-                    key={post.id}
-                    venue={venue}
-                    content={post.content || getVenueContent(venue, new Date(post.timestamp))}
-                    media={convertToMediaArray(post.media || [])}
-                    timestamp={post.timestamp}
-                    isPinned={post.isPinned}
-                    isVenuePost={true}
-                  />
-                ))}
-              </div>
-            ) : (
-              <PostCardGrid posts={generatedVenuePosts} />
-            )
-          ) : (
-            <p className="text-center text-muted-foreground py-10">
-              No venue posts available yet. Check back later!
-            </p>
-          )}
-        </TabsContent>
-        
-        <TabsContent value="reviews" className="mt-4">
-          <div className="mb-6">
-            <ReviewSummary 
-              venue={venue}
-              reviews={mockReviews} 
-              onSummaryGenerated={handleSummaryGenerated}
-            />
+        <TabsContent value="reviews" className="mt-0">
+          <div className="bg-muted/30 p-4 rounded-lg mb-4">
+            <h3 className="font-medium mb-2">AI Review Summary</h3>
+            <p className="text-sm">{reviewSummary}</p>
           </div>
           
-          <div className="space-y-4">
-            {mockReviews.map((review, index) => (
-              <div key={index} className="p-4 border rounded-lg bg-background">
-                <div className="flex justify-between items-start mb-2">
-                  <div className="font-medium">{review.author_name}</div>
-                  <div className="flex items-center">
-                    <span className="text-amber-500 mr-1">{review.rating}</span>
-                    <Sparkles className="h-3 w-3 text-amber-500" />
-                  </div>
-                </div>
-                <p className="text-sm text-muted-foreground">{review.text}</p>
-                <div className="text-xs text-muted-foreground mt-2">
-                  {new Date(review.time).toLocaleDateString()}
-                </div>
+          {reviews.length > 0 ? (
+            <div>
+              {reviews.map(review => (
+                <PostItem key={review.id} post={review} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">No reviews yet. Be the first to share your experience!</p>
+            </div>
+          )}
+        </TabsContent>
+        
+        <TabsContent value="photos" className="mt-0">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+            {posts.filter(post => post.media && post.media.length > 0).map(post => (
+              <div 
+                key={post.id}
+                className="aspect-square rounded-md overflow-hidden cursor-pointer"
+                onClick={() => handlePostClick(post)}
+              >
+                {post.media && post.media.length > 0 && (
+                  post.media[0].type === "image" ? (
+                    <img 
+                      src={post.media[0].url} 
+                      alt="Venue" 
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <video 
+                      src={post.media[0].url} 
+                      className="w-full h-full object-cover"
+                    />
+                  )
+                )}
               </div>
             ))}
           </div>
+          
+          {posts.filter(post => post.media && post.media.length > 0).length === 0 && (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">No photos available yet.</p>
+            </div>
+          )}
         </TabsContent>
       </Tabs>
+      
+      <Dialog open={isPostDialogOpen} onOpenChange={setIsPostDialogOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Post</DialogTitle>
+          </DialogHeader>
+          {selectedPost && (
+            <PostItem post={selectedPost} />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

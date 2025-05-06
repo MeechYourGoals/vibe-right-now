@@ -1,120 +1,98 @@
 
-import React, { useState } from "react";
+import React from 'react';
+import { Post } from "@/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Heart, MessageCircle, Share2 } from "lucide-react";
+import { Heart, MessageCircle, Share2, Clock, Pin } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import { Post, Comment } from "@/types";
-import CommentList from "@/components/CommentList";
 
 interface PostItemProps {
   post: Post;
-  comments: Comment[];
 }
 
-const PostItem: React.FC<PostItemProps> = ({ post, comments }) => {
-  const [liked, setLiked] = useState(false);
-  const [showComments, setShowComments] = useState(false);
-  const [localLikes, setLocalLikes] = useState(post.likes || 0);
-
-  const handleLike = () => {
-    if (liked) {
-      setLocalLikes(prevLikes => prevLikes - 1);
-    } else {
-      setLocalLikes(prevLikes => prevLikes + 1);
-    }
-    setLiked(!liked);
-  };
-
-  const handleShowComments = () => {
-    setShowComments(!showComments);
-  };
-
-  // Choose which user property to use
-  const user = post.user || post.author;
-  
-  if (!user) {
-    return null;
-  }
-
-  const formattedDate = post.timestamp
-    ? formatDistanceToNow(new Date(post.timestamp), { addSuffix: true })
-    : "";
-
+const PostItem = ({ post }: PostItemProps) => {
   return (
-    <Card className="mb-4">
+    <Card className="mb-4 border-border/40">
       <CardContent className="p-4">
-        <div className="flex items-center mb-3">
-          <Avatar className="h-10 w-10 mr-3">
-            <AvatarImage src={user.avatar || user.image || ""} alt={user.name} />
-            <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-          </Avatar>
-          <div>
-            <div className="font-medium flex items-center">
-              {user.name}
-              {user.verified && (
-                <Badge variant="outline" className="ml-2 bg-blue-50 text-blue-600 border-blue-200 text-[10px]">
-                  Verified
-                </Badge>
-              )}
+        <div className="flex items-start justify-between">
+          <div className="flex items-center gap-3">
+            <Avatar>
+              <AvatarImage src={post.user?.avatar} />
+              <AvatarFallback>{post.user?.username?.[0] || 'U'}</AvatarFallback>
+            </Avatar>
+            <div>
+              <div className="flex items-center">
+                <p className="font-medium">{post.user?.name}</p>
+                {post.user?.verified && (
+                  <span className="ml-1 text-blue-500">✓</span>
+                )}
+              </div>
+              <p className="text-sm text-muted-foreground">@{post.user?.username}</p>
             </div>
-            <div className="text-sm text-muted-foreground">
-              {post.location?.name} · {formattedDate}
+          </div>
+          <div className="flex flex-col items-end">
+            <div className="flex items-center text-xs text-muted-foreground">
+              <Clock className="h-3 w-3 mr-1" />
+              <span>{formatDistanceToNow(new Date(post.timestamp))} ago</span>
             </div>
+            {post.isPinned && (
+              <div className="flex items-center mt-1">
+                <Pin className="h-3 w-3 text-primary mr-1" />
+                <span className="text-xs text-primary">Pinned</span>
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="mb-3">
-          <p>{post.content || post.text}</p>
-          
-          {post.vibeTags && post.vibeTags.length > 0 && (
-            <div className="flex flex-wrap gap-1 mt-2">
-              {post.vibeTags.map((tag, index) => (
-                <Badge key={index} variant="outline" className="bg-primary/10 text-xs">
-                  {tag}
-                </Badge>
-              ))}
-            </div>
-          )}
+        <div className="mt-4">
+          <p className="text-sm">{post.content}</p>
         </div>
 
         {post.media && post.media.length > 0 && (
-          <div className="mb-3 rounded-lg overflow-hidden">
-            {Array.isArray(post.media) && post.media.length > 0 ? (
-              typeof post.media[0] === "string" ? (
-                <img src={post.media[0]} alt="Post" className="w-full h-auto" />
-              ) : 'type' in post.media[0] ? (
-                post.media[0].type === "video" ? (
-                  <video src={post.media[0].url} controls className="w-full h-auto" />
-                ) : (
-                  <img src={post.media[0].url} alt="Post" className="w-full h-auto" />
-                )
-              ) : null
-            ) : null}
+          <div className="mt-3 grid grid-cols-1 gap-2">
+            {post.media[0].type === "image" ? (
+              <img
+                src={post.media[0].url}
+                alt="Post content"
+                className="rounded-md w-full object-cover max-h-96"
+              />
+            ) : (
+              <video
+                src={post.media[0].url}
+                controls
+                className="rounded-md w-full"
+              />
+            )}
           </div>
         )}
-
-        <div className="flex items-center justify-between">
-          <div className="flex space-x-2">
-            <Button variant="ghost" size="sm" onClick={handleLike} className={liked ? "text-red-500" : ""}>
-              <Heart className={`h-4 w-4 mr-1 ${liked ? "fill-red-500" : ""}`} />
-              {localLikes}
-            </Button>
-            <Button variant="ghost" size="sm" onClick={handleShowComments}>
-              <MessageCircle className="h-4 w-4 mr-1" />
-              {Array.isArray(post.comments) ? post.comments.length : post.comments || 0}
-            </Button>
-            <Button variant="ghost" size="sm">
-              <Share2 className="h-4 w-4 mr-1" />
-              {post.shares || 0}
-            </Button>
+        
+        {post.vibeTags && post.vibeTags.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-3">
+            {post.vibeTags.map((tag, index) => (
+              <Badge key={index} variant="secondary" className="text-xs">
+                {tag}
+              </Badge>
+            ))}
           </div>
-        </div>
-
-        {showComments && <CommentList postId={post.id} commentsCount={Array.isArray(post.comments) ? post.comments.length : post.comments || 0} />}
+        )}
       </CardContent>
+      
+      <CardFooter className="p-3 pt-0 border-t border-border/40 flex justify-between">
+        <div className="flex items-center gap-4">
+          <button className="flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors">
+            <Heart className="h-4 w-4" />
+            <span className="text-xs">{post.likes}</span>
+          </button>
+          <button className="flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors">
+            <MessageCircle className="h-4 w-4" />
+            <span className="text-xs">{post.comments}</span>
+          </button>
+        </div>
+        <button className="text-muted-foreground hover:text-primary transition-colors">
+          <Share2 className="h-4 w-4" />
+        </button>
+      </CardFooter>
     </Card>
   );
 };
