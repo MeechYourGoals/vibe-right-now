@@ -1,11 +1,9 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Location, Post } from "@/types";
 import PostItem from '@/components/PostItem';
 import PostCardGrid from '@/components/PostCardGrid';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { mockPosts } from '@/mock/data';
 import { getMediaType, getMediaUrl, hasMedia, ensureMediaFormat } from "@/utils/mediaUtils";
 
 interface VenuePostsContentProps {

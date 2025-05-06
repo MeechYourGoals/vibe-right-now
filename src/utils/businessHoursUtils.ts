@@ -1,77 +1,94 @@
 
-import { Location } from "@/types";
+// This file handles business hours formatting and calculations
 
-// Mock function to generate random business hours for a location
-export const generateBusinessHours = (location: Location) => {
-  // Use location type to determine general business hours pattern
-  const isBar = location.type === 'bar' || location.type === 'nightclub';
-  const isRestaurant = location.type === 'restaurant' || location.type === 'cafe';
-  const isAttraction = location.type === 'attraction' || location.type === 'museum';
+// Format 24-hour time to 12-hour format with AM/PM
+export const formatTimeToAmPm = (time: string): string => {
+  if (!time) return '';
   
-  const hours = {
-    monday: isBar ? '16:00-02:00' : isRestaurant ? '11:00-22:00' : '10:00-18:00',
-    tuesday: isBar ? '16:00-02:00' : isRestaurant ? '11:00-22:00' : '10:00-18:00',
-    wednesday: isBar ? '16:00-02:00' : isRestaurant ? '11:00-22:00' : '10:00-18:00',
-    thursday: isBar ? '16:00-02:00' : isRestaurant ? '11:00-22:00' : '10:00-18:00',
-    friday: isBar ? '16:00-03:00' : isRestaurant ? '11:00-23:00' : '10:00-20:00',
-    saturday: isBar ? '16:00-03:00' : isRestaurant ? '10:00-23:00' : '10:00-20:00',
-    sunday: isBar ? '16:00-00:00' : isRestaurant ? '10:00-22:00' : '11:00-17:00',
-    isOpenNow: "true", // Convert boolean to string
-    timezone: 'America/New_York'
-  };
+  const [hours, minutes] = time.split(':').map(Number);
+  const period = hours >= 12 ? 'PM' : 'AM';
+  const displayHours = hours % 12 || 12; // Convert 0 to 12 for 12 AM
+  const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
   
-  return hours;
+  return `${displayHours}:${formattedMinutes} ${period}`;
 };
 
-// Get today's hours for display
-export const getTodaysHours = (location: Location) => {
-  if (!location.hours) {
-    return "Hours not available";
-  }
-  
+// Check if a venue is currently open
+export const isVenueOpen = (hours: Record<string, string[]>): boolean => {
+  // Get current day and time
+  const now = new Date();
   const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-  const today = new Date().getDay(); // 0 is Sunday, 1 is Monday, etc.
+  const currentDay = days[now.getDay()];
   
-  const dayName = days[today];
-  const dayHours = location.hours[dayName as keyof typeof location.hours];
-  
-  if (!dayHours) {
-    return "Closed today";
+  // Check if there are hours for today
+  if (!hours || !hours[currentDay] || !Array.isArray(hours[currentDay]) || hours[currentDay].length < 2) {
+    return false;
   }
   
-  if (dayHours === "Closed") {
-    return "Closed today";
+  const todayHours = hours[currentDay];
+  const currentHour = now.getHours();
+  const currentMinute = now.getMinutes();
+  
+  // Parse opening and closing times
+  const [openingTime, closingTime] = todayHours.map(timeStr => {
+    if (typeof timeStr !== 'string') {
+      return { hours: 0, minutes: 0 };
+    }
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    return { hours, minutes };
+  });
+  
+  // Handle overnight hours (if closing time is earlier than opening time)
+  if (closingTime.hours < openingTime.hours) {
+    // Venue is open overnight
+    return (currentHour > openingTime.hours || 
+            (currentHour === openingTime.hours && currentMinute >= openingTime.minutes)) || 
+           (currentHour < closingTime.hours || 
+            (currentHour === closingTime.hours && currentMinute <= closingTime.minutes));
   }
   
-  // Check if open now
-  const isOpenNow = location.hours.isOpenNow === "true" ? "Open now" : "Closed now"; // Use string comparison
-  
-  return `${isOpenNow} · Today ${formatHoursRange(dayHours)}`;
+  // Normal hours (same day)
+  return (currentHour > openingTime.hours || 
+          (currentHour === openingTime.hours && currentMinute >= openingTime.minutes)) && 
+         (currentHour < closingTime.hours || 
+          (currentHour === closingTime.hours && currentMinute <= closingTime.minutes));
 };
 
-// Format hours range for display
-const formatHoursRange = (hoursRange: string) => {
-  if (!hoursRange.includes('-')) {
-    return hoursRange;
-  }
+// Get the current status of the venue (Open Now, Closed, Opening Soon, etc.)
+export const getVenueStatus = (hours: Record<string, string[]>): string => {
+  if (!hours) return 'Hours not available';
   
-  const [openTime, closeTime] = hoursRange.split('-');
-  return `${formatTime(openTime)} - ${formatTime(closeTime)}`;
+  if (isVenueOpen(hours)) {
+    return 'Open Now';
+  } else {
+    // Here we could add logic to show "Opening Soon" or "Closing Soon"
+    return 'Closed';
+  }
 };
 
-// Format time for display (convert 24h to 12h)
-const formatTime = (time24h: string) => {
-  const [hours, minutes] = time24h.split(':');
-  const h = parseInt(hours, 10);
+// Format and display business hours for the week
+export const formatBusinessHours = (hours: Record<string, string[]>): string => {
+  if (!hours) return 'Hours not available';
   
-  if (h === 0) {
-    return `12:${minutes} AM`;
-  }
-  if (h < 12) {
-    return `${h}:${minutes} AM`;
-  }
-  if (h === 12) {
-    return `12:${minutes} PM`;
-  }
-  return `${h-12}:${minutes} PM`;
+  const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+  const currentDayIndex = new Date().getDay(); // 0 is Sunday
+  const reorderedDays = [...days.slice(currentDayIndex === 0 ? 6 : currentDayIndex - 1), ...days.slice(0, currentDayIndex === 0 ? 6 : currentDayIndex - 1)];
+  
+  const todayIdx = reorderedDays.findIndex(day => day === days[(currentDayIndex === 0 ? 6 : currentDayIndex - 1)]);
+  
+  return reorderedDays.map((day, index) => {
+    const isToday = index === todayIdx;
+    const dayHours = hours[day];
+    
+    if (!dayHours || !Array.isArray(dayHours) || dayHours.length < 2) {
+      return `${day.charAt(0).toUpperCase() + day.slice(1)}: Closed ${isToday ? '(Today)' : ''}`;
+    }
+    
+    const [open, close] = dayHours;
+    if (typeof open === 'string' && typeof close === 'string') {
+      return `${day.charAt(0).toUpperCase() + day.slice(1)}: ${formatTimeToAmPm(open)} - ${formatTimeToAmPm(close)} ${isToday ? '(Today)' : ''}`;
+    } else {
+      return `${day.charAt(0).toUpperCase() + day.slice(1)}: Hours not available ${isToday ? '(Today)' : ''}`;
+    }
+  }).join('\n');
 };

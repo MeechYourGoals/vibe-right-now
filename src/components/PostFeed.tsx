@@ -19,10 +19,7 @@ interface PostFeedProps {
   celebrityFeatured?: string[];
 }
 
-// Remove the duplicate ensureMediaFormat function definition here
-// and use the imported one from @/utils/mediaUtils
-
-const PostFeed = ({ celebrityFeatured }: { celebrityFeatured?: string[] }) => {
+const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
   const [filter, setFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedVibeTags, setSelectedVibeTags] = useState<string[]>([]);
@@ -105,6 +102,7 @@ const PostFeed = ({ celebrityFeatured }: { celebrityFeatured?: string[] }) => {
     return [...featuredUserPosts, ...otherPosts];
   }, [recentPosts, celebrityFeatured]);
 
+  // Filter posts based on the current filter and search query
   const filteredPosts = useMemo(() => {
     return prioritizedPosts.filter((post) => {
       // Filter by location type if specified
@@ -206,7 +204,7 @@ const PostFeed = ({ celebrityFeatured }: { celebrityFeatured?: string[] }) => {
     return (
       <div className="flex flex-wrap gap-1 mt-2">
         {post.vibeTags.map((tag, index) => (
-          <Badge 
+          <Badge
             key={index} 
             variant="outline" 
             className={`${selectedVibeTags.includes(tag) ? 'bg-primary text-white' : 'bg-primary/10 text-primary'} text-xs`}

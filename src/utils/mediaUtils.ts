@@ -1,74 +1,72 @@
 
-import { Media, MediaObject } from "@/types";
+import { Media } from "@/types";
 
-/**
- * Checks if a media item is a string or an object and returns its type
- */
-export const getMediaType = (media: Media): "image" | "video" => {
-  if (typeof media === "string") {
-    // Determine type based on extension for string media
-    const isVideo = media.endsWith('.mp4') || 
-                   media.endsWith('.mov') || 
-                   media.endsWith('.avi') ||
-                   media.endsWith('.webm');
-    return isVideo ? "video" : "image";
-  }
-  
-  // It's a MediaObject
-  return media.type;
+// Check if the post has media content
+export const hasMedia = (media: any): boolean => {
+  return Array.isArray(media) && media.length > 0 && media[0] !== null && media[0] !== undefined;
 };
 
-/**
- * Gets the URL from a media item regardless of format
- */
-export const getMediaUrl = (media: Media): string => {
-  if (typeof media === "string") {
+// Determine media type (image or video)
+export const getMediaType = (media: Media | string): 'image' | 'video' => {
+  if (typeof media === 'string') {
+    const url = media.toLowerCase();
+    return url.endsWith('.mp4') || url.endsWith('.mov') || url.endsWith('.avi') || url.endsWith('.webm') 
+      ? 'video' 
+      : 'image';
+  }
+  
+  if (typeof media === 'object' && media !== null && 'type' in media) {
+    return media.type as 'image' | 'video';
+  }
+  
+  // Default to image if unable to determine
+  return 'image';
+};
+
+// Get the URL of the media
+export const getMediaUrl = (media: Media | string): string => {
+  if (typeof media === 'string') {
     return media;
   }
   
-  return media.url;
-};
-
-/**
- * Gets the thumbnail URL if available, otherwise returns the media URL
- */
-export const getMediaThumbnail = (media: Media): string => {
-  if (typeof media === "string") {
-    return media;
+  if (typeof media === 'object' && media !== null && 'url' in media) {
+    return media.url;
   }
   
-  return media.thumbnail || media.url;
+  return 'https://via.placeholder.com/500';
 };
 
-/**
- * Safely formats media items to ensure they're in the MediaObject format
- */
-export const ensureMediaFormat = (media?: Media[]): MediaObject[] => {
-  if (!media || media.length === 0) {
+// Ensure media is in the correct format
+export const ensureMediaFormat = (media: any): Media[] => {
+  if (!media || !Array.isArray(media)) {
     return [];
   }
   
   return media.map(item => {
+    // If item is already a Media object
+    if (typeof item === 'object' && item !== null && 'url' in item) {
+      return {
+        type: item.type || 'image',
+        url: item.url,
+        thumbnail: item.thumbnail || undefined
+      };
+    }
+    
+    // If item is a string
     if (typeof item === 'string') {
-      // Determine type based on extension
-      const isVideo = item.endsWith('.mp4') || 
-                     item.endsWith('.mov') || 
-                     item.endsWith('.avi') ||
-                     item.endsWith('.webm');
+      const url = item.toLowerCase();
+      const isVideo = url.endsWith('.mp4') || url.endsWith('.mov') || url.endsWith('.avi') || url.endsWith('.webm');
+      
       return {
         type: isVideo ? 'video' : 'image',
         url: item
       };
     }
     
-    // Already in correct format
-    return item;
+    // Default placeholder
+    return {
+      type: 'image',
+      url: 'https://via.placeholder.com/500'
+    };
   });
-};
-
-/**
- * Checks if a post has any media
- */
-export const hasMedia = (media?: Media[]): boolean => {
-  return !!media && media.length > 0;
 };

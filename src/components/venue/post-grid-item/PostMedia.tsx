@@ -18,7 +18,7 @@ const PostMedia: React.FC<PostMediaProps> = ({ post }) => {
     );
   }
 
-  // Ensure media is in the correct format
+  // Ensure media is in the correct format 
   const formattedMedia = ensureMediaFormat(post.media);
   
   if (formattedMedia.length === 0) {
