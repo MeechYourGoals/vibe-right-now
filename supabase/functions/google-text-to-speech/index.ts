@@ -4,7 +4,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 
 // @ts-ignore - Deno.env needs to be ignored in TypeScript
-const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
+const GOOGLE_API_KEY = Deno.env.get('GOOGLE_VERTEX_API_KEY');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -19,49 +19,46 @@ serve(async (req: Request) => {
   }
 
   try {
-    const { messages, model = "gemini-1.5-flash", temperature = 0.7, maxTokens = 800 } = await req.json();
+    const { text, voice = 'en-US-Standard-D' } = await req.json();
+    
+    if (!text) {
+      throw new Error('No text provided');
+    }
 
-    console.log("Processing Gemini AI request", { 
-      model,
-      messageCount: messages.length,
-      temperature,
-      maxTokens
-    });
-
-    // Call Gemini API
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`, {
+    // Call Google Text-to-Speech API
+    const response = await fetch(`https://texttospeech.googleapis.com/v1/text:synthesize?key=${GOOGLE_API_KEY}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        contents: messages,
-        generationConfig: {
-          temperature: temperature,
-          maxOutputTokens: maxTokens,
-          topP: 0.8,
-          topK: 40
+        input: { text },
+        voice: {
+          languageCode: 'en-US',
+          name: voice,
+        },
+        audioConfig: {
+          audioEncoding: 'MP3',
+          speakingRate: 1.0,
+          pitch: 0.0,
         },
       }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Gemini API error:', errorText);
-      throw new Error(`Gemini API error: ${response.status}`);
+      console.error('Google Text-to-Speech API error:', errorText);
+      throw new Error(`Text-to-Speech API error: ${response.status}`);
     }
 
     const data = await response.json();
     
-    // Extract the response text
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-    console.log("Received Gemini response", { textLength: text.length });
-
-    return new Response(JSON.stringify({ text }), {
+    // Return base64-encoded audio
+    return new Response(JSON.stringify({ audio: data.audioContent }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error: any) {
-    console.error('Error in gemini-ai function:', error);
+    console.error('Error in google-text-to-speech function:', error);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

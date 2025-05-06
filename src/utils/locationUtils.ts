@@ -1,4 +1,3 @@
-
 import { Location } from "@/types";
 
 // Helper function to get ride service URL
@@ -45,4 +44,28 @@ export const getActionButtonText = (type: string) => {
   if (type === "restaurant") return "Reservations";
   if (type === "sports" || type === "event") return "Tickets";
   return "Website";
+};
+
+/**
+ * Gets the vibes associated with a location based on recent posts and sentiment
+ */
+export const getLocationVibes = (locationId: string): string[] => {
+  // For now, return some default vibes based on location type
+  // In a real implementation, this would analyze posts and user sentiment
+  const defaultVibes = [
+    "Relaxed",
+    "Energetic",
+    "Creative",
+    "Professional",
+    "Romantic",
+    "Family-friendly",
+    "Trendy",
+    "Exclusive",
+    "Casual"
+  ];
+  
+  // Return 2-4 random vibes
+  const count = Math.floor(Math.random() * 3) + 2;
+  const shuffled = [...defaultVibes].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, count);
 };

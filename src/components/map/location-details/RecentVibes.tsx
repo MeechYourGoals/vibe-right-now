@@ -1,79 +1,95 @@
 
-import { Location, Media, Post } from "@/types";
+import React from 'react';
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import VenuePost from "@/components/VenuePost";
 import { getMediaForLocation } from "@/utils/map/locationMediaUtils";
 import { getLocationVibes } from "@/utils/locationUtils";
 import { 
   isWithinThreeMonths, 
-  getDaySpecificContent, 
-  getDaySpecificImageUrl
-} from "@/mock/time-utils";
-import { formatTimestamp } from "@/lib/utils";
+  isPopularRightNow,
+  calculateCrowdLevel
+} from "@/utils/timeUtils";
 
 interface RecentVibesProps {
-  location: Location;
+  locationId: string;
 }
 
-const RecentVibes = ({ location }: RecentVibesProps) => {
-  const locationVibes = getLocationVibes(location.id)
-    .filter(vibe => isWithinThreeMonths(vibe.timestamp));
+const RecentVibes: React.FC<RecentVibesProps> = ({ locationId }) => {
+  // Get vibes for this location
+  const vibes = getLocationVibes(locationId);
   
-  // Get current day of week to show content for today
-  const today = new Date();
-  const dayOfWeek = today.getDay();
+  // Get crowdedness level (1-3)
+  const crowdLevel = calculateCrowdLevel();
   
-  // Get content specific to today's day of week
-  const todayContent = getDaySpecificContent(location.type || 'default', dayOfWeek);
-  const todayImage: Media = {
-    type: "image" as const,
-    url: getDaySpecificImageUrl(location.type || 'default', dayOfWeek)
-  };
+  // Determine if it's popular right now
+  const isPopularNow = isPopularRightNow();
   
-  // Get content for another day (2 days earlier)
-  const previousDay = (dayOfWeek - 2 + 7) % 7; // Ensure it's a positive number
-  const previousContent = getDaySpecificContent(location.type || 'default', previousDay);
-  const previousImage: Media = {
-    type: "image" as const,
-    url: getDaySpecificImageUrl(location.type || 'default', previousDay)
-  };
+  // Determine if it's trending (has recent activity)
+  const isTrending = isWithinThreeMonths(new Date().toISOString());
   
   return (
-    <>
-      <h4 className="font-medium text-sm mb-2">Recent Vibes <span className="text-xs text-muted-foreground">(up to 3 months)</span></h4>
-      <div className="space-y-4">
-        {locationVibes.length > 0 ? (
-          locationVibes.map(post => (
-            <div key={post.id} className="border-2 border-amber-500/50 rounded-lg overflow-hidden">
-              <VenuePost
-                venue={location}
-                content={post.content || ''}
-                media={getMediaForLocation(location)}
-                timestamp={formatTimestamp(post.timestamp)}
-              />
+    <Card>
+      <CardHeader className="py-3">
+        <h3 className="text-lg font-semibold">Current Vibes</h3>
+      </CardHeader>
+      <CardContent className="py-2">
+        <div className="flex flex-wrap gap-2 mb-4">
+          {vibes.map((vibe, index) => (
+            <Badge key={index} variant="outline" className="bg-secondary/20">
+              {vibe}
+            </Badge>
+          ))}
+        </div>
+        
+        <div className="flex items-center justify-between text-sm mb-3">
+          <div className="flex items-center">
+            <span className="mr-1">Crowd Level:</span>
+            <div className="flex">
+              {[...Array(3)].map((_, i) => (
+                <div 
+                  key={i} 
+                  className={`w-2 h-6 mx-0.5 rounded-sm ${
+                    i < crowdLevel ? 'bg-primary' : 'bg-gray-200 dark:bg-gray-700'
+                  }`}
+                />
+              ))}
             </div>
-          ))
-        ) : (
-          <>
-            <div className="border-2 border-amber-500/50 rounded-lg overflow-hidden">
-              <VenuePost
-                venue={location}
-                content={todayContent}
-                media={todayImage}
-                timestamp={formatTimestamp(new Date().toISOString())}
-              />
+          </div>
+          
+          <div className="flex items-center gap-2">
+            {isPopularNow && (
+              <Badge className="bg-red-500 hover:bg-red-600">Popular Now</Badge>
+            )}
+            {isTrending && (
+              <Badge className="bg-blue-500 hover:bg-blue-600">Trending</Badge>
+            )}
+          </div>
+        </div>
+        
+        {/* Content preview (if any media available) */}
+        <div className="space-y-4 mt-4">
+          {getMediaForLocation(locationId).map(media => (
+            <div key={media.id} className="border rounded-md overflow-hidden">
+              {media.type === 'image' ? (
+                <img 
+                  src={media.url} 
+                  alt="Recent content" 
+                  className="w-full h-48 object-cover"
+                />
+              ) : (
+                <div className="bg-gray-100 dark:bg-gray-800 p-3 text-sm">
+                  {media.caption}
+                </div>
+              )}
+              <div className="p-2 text-xs text-gray-500">
+                {new Date(media.timestamp).toLocaleDateString()} · {media.source}
+              </div>
             </div>
-            <div className="border-2 border-amber-500/50 rounded-lg overflow-hidden">
-              <VenuePost
-                venue={location}
-                content={previousContent}
-                media={previousImage}
-                timestamp={formatTimestamp(new Date(Date.now() - 3600000 * 48).toISOString())}
-              />
-            </div>
-          </>
-        )}
-      </div>
-    </>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 
