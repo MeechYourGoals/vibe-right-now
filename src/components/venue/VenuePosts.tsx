@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Post, Comment } from "@/types";
 import { Button } from "@/components/ui/button";
 import { ImageIcon, List } from "lucide-react";
@@ -25,6 +25,11 @@ const VenuePosts: React.FC<VenuePostsProps> = ({
   getPostComments 
 }) => {
   const [localPosts, setLocalPosts] = useState<Post[]>(posts);
+  const [commentsCache, setCommentsCache] = useState<Record<string, Comment[]>>({});
+  
+  useEffect(() => {
+    setLocalPosts(posts);
+  }, [posts]);
   
   const handleDeletePost = async (postId: string) => {
     try {
@@ -34,6 +39,22 @@ const VenuePosts: React.FC<VenuePostsProps> = ({
     } catch (error) {
       console.error("Error deleting post:", error);
       toast.error("Failed to delete post");
+    }
+  };
+  
+  // Handle getting comments for a post
+  const fetchComments = async (postId: string): Promise<Comment[]> => {
+    if (commentsCache[postId]) {
+      return commentsCache[postId];
+    }
+    
+    try {
+      const comments = await getPostComments(postId);
+      setCommentsCache(prev => ({ ...prev, [postId]: comments }));
+      return comments;
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+      return [];
     }
   };
   
@@ -71,7 +92,7 @@ const VenuePosts: React.FC<VenuePostsProps> = ({
               <PostCard 
                 post={post} 
                 showComments={viewMode === 'list'}
-                getComments={() => getPostComments(post.id)}
+                getComments={() => fetchComments(post.id)}
               />
               
               {canDelete && (

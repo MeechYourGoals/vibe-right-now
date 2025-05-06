@@ -1,16 +1,16 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { CalendarIcon, ImageIcon, ListIcon, MapPin, MessageSquare, Plus, Star } from "lucide-react";
-import { Venue } from "@/types";
+import { Venue, Post } from "@/types";
 import { getVenueById } from "@/services/VenueService";
 import VenueHeader from "@/components/venue/VenueHeader";
 import VenueAbout from "@/components/venue/VenueAbout";
 import VenuePosts from "@/components/venue/VenuePosts";
 import VenueMap from "@/components/venue/VenueMap";
-import { createPost, getVenuePosts } from "@/services/PostService";
-import { Post } from "@/types";
+import { createPost, getVenuePosts, getPostComments } from "@/services/PostService";
 import { useSession } from "@/contexts/SessionContext";
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -26,7 +26,6 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { deleteVenue } from '@/services/VenueService';
-import { generateBusinessHours, getTodaysHours } from '@/utils/businessHoursUtils';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -43,31 +42,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Switch } from "@/components/ui/switch"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Badge } from "@/components/ui/badge"
-import { format } from 'date-fns';
-import { cn } from "@/lib/utils"
-import { Calendar } from "@/components/ui/calendar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from "@/components/ui/command"
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Link } from 'react-router-dom';
 import { SkeletonVenueHeader } from '@/components/SkeletonVenueHeader';
 import { SkeletonVenueAbout } from '@/components/SkeletonVenueAbout';
 import { SkeletonVenuePosts } from '@/components/SkeletonVenuePosts';
@@ -98,7 +73,7 @@ const VenuePostsContent: React.FC<VenuePostsContentProps> = ({ posts, viewMode, 
 };
 
 const VenueProfile: React.FC = () => {
-  const { venueId } = useParams<{ venueId: string }>();
+  const { id: venueId } = useParams<{ id: string }>();
   const [venue, setVenue] = useState<Venue | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"about" | "posts" | "map" | "reviews">("about");
@@ -109,7 +84,7 @@ const VenueProfile: React.FC = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [postContent, setPostContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [postComments, setPostComments] = useState<Record<string, any[]>>({});
+  const [isMapExpanded, setIsMapExpanded] = useState(false);
 
   const fetchVenue = useCallback(async () => {
     if (!venueId) {
@@ -122,7 +97,7 @@ const VenueProfile: React.FC = () => {
       const fetchedVenue = await getVenueById(venueId);
       if (fetchedVenue) {
         setVenue(fetchedVenue);
-        setIsOwner(session?.user.id === fetchedVenue.ownerId);
+        setIsOwner(session?.user?.id === fetchedVenue.ownerId);
       } else {
         toast.error('Venue not found.');
       }
@@ -165,8 +140,8 @@ const VenueProfile: React.FC = () => {
     setIsSubmitting(true);
     try {
       const newPost = await createPost({
-        venueId: venueId,
         content: postContent,
+        locationId: venueId
       });
 
       setVenuePosts(prevPosts => [newPost, ...prevPosts]);
@@ -196,9 +171,13 @@ const VenueProfile: React.FC = () => {
     }
   };
 
-  const getPostComments = async (postId: string) => {
-    // Placeholder for fetching comments
-    return [];
+  const handleTabChange = (value: string) => {
+    setActiveTab(value as "about" | "posts" | "map" | "reviews");
+  };
+
+  const handleExpandMap = () => {
+    setIsMapExpanded(true);
+    setActiveTab("map");
   };
 
   if (isLoading) {
@@ -228,7 +207,7 @@ const VenueProfile: React.FC = () => {
     <div className="container mx-auto mt-8 p-4">
       <VenueHeader venue={venue} />
 
-      <Tabs defaultValue="about" className="w-full mt-4" onValueChange={setActiveTab}>
+      <Tabs value={activeTab} className="w-full mt-4" onValueChange={handleTabChange}>
         <TabsList>
           <TabsTrigger value="about"><ListIcon className="mr-2 h-4 w-4" /> About</TabsTrigger>
           <TabsTrigger value="posts"><MessageSquare className="mr-2 h-4 w-4" /> Posts</TabsTrigger>
@@ -308,7 +287,7 @@ const VenueProfile: React.FC = () => {
           </div>
           <div className="space-y-4">
             <TabsContent value="map" className="space-y-4">
-              <VenueMap venue={venue} />
+              <VenueMap venue={venue} onExpand={handleExpandMap} />
             </TabsContent>
             <TabsContent value="reviews" className="space-y-4">
               <VenueReviews venue={venue} />

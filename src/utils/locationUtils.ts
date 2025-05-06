@@ -1,16 +1,11 @@
 
 import { Location } from "@/types";
-import { isEligibleForPriceComparison } from "@/utils/venue/travelIntegrationUtils";
-import { mockPosts } from "@/mock/data";
-
-// Helper function to get recent vibes (posts) for a specific location
-export const getLocationVibes = (locationId: string) => {
-  // Filter posts for this location
-  return mockPosts.filter(post => post.location.id === locationId);
-};
 
 // Helper function to get ride service URL
 export const getRideServiceUrl = (place: Location) => {
+  // Simulate a partnership with Uber
+  const partnerService = "uber";
+  
   // Create the deep link to the ride service app
   return `https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[formatted_address]=${encodeURIComponent(`${place.address}, ${place.city}, ${place.state}`)}`;
 };
@@ -19,13 +14,12 @@ export const getRideServiceUrl = (place: Location) => {
 export const getOfficialUrl = (place: Location) => {
   // For sports venues, we would typically have specific ticket platform partnerships
   if (place.type === "sports") {
-    // Use the same logic as in VenuePost to get ticket URLs
     const ticketUrls: Record<string, string> = {
       "30": "https://www.axs.com/events/crypto-com-arena", // Lakers
       "31": "https://www.therams.com/tickets/", // Rams
       "32": "https://www.mlb.com/dodgers/tickets", // Dodgers
       "33": "https://www.lagalaxy.com/tickets/", // LA Galaxy
-      "34": "https://www.vbusa.org/tickets", // Venice Beach Volleyball
+      "34": "https://www.vbusa.org/tickets/", // Venice Beach Volleyball
       "35": "https://wmphoenixopen.com/tickets/", // WM Phoenix Open
     };
     

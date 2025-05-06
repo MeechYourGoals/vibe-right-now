@@ -4,19 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Maximize, MapPin } from "lucide-react";
 import { Location } from "@/types";
 import GoogleMapComponent from "@/components/map/google/GoogleMapComponent";
-import { generateBusinessHours, getTodaysHours } from "@/utils/businessHoursUtils";
+import { getTodaysHours } from "@/utils/locations/locationGenerator";
 
 interface VenueMapProps {
   venue: Location;
-  onExpand: () => void;
+  onExpand?: () => void;
 }
 
-const VenueMap: React.FC<VenueMapProps> = ({ venue, onExpand }) => {
-  // Ensure venue has hours, even if mock
-  if (!venue.hours) {
-    venue.hours = generateBusinessHours(venue);
-  }
-  
+const VenueMap: React.FC<VenueMapProps> = ({ venue, onExpand = () => {} }) => {
   const todaysHours = getTodaysHours(venue);
   
   return (

@@ -1,180 +1,123 @@
 
 import { Post, Comment } from "@/types";
-import { supabase } from "@/integrations/supabase/client";
+import { v4 as uuidv4 } from "uuid";
 import { toast } from "sonner";
-import { v4 as uuidv4 } from 'uuid';
+import { generateMockUserData } from "@/mock/mockUserData";
+
+// Mock posts data for demonstration
+const mockPosts: Post[] = [];
 
 // Create a new post
-export const createPost = async (postData: Partial<Post>): Promise<Post> => {
+export const createPost = async (postData: {
+  content: string;
+  locationId: string;
+}): Promise<Post> => {
   try {
-    // Generate an ID if one isn't provided
-    const postId = postData.id || uuidv4();
-    
-    // Create timestamp if not provided
-    const timestamp = postData.timestamp || new Date().toISOString();
+    const { content, locationId } = postData;
+    const user = generateMockUserData();
     
     const newPost: Post = {
-      id: postId,
-      content: postData.content || '',
-      authorId: postData.authorId || 'anonymous',
-      locationId: postData.locationId || postData.venueId || '',
-      timestamp,
-      media: postData.media || [],
-      location: postData.location || { 
-        id: postData.locationId || postData.venueId || '', 
-        name: '',
-        address: '',
-        city: '',
-        state: '',
-        lat: 0,
-        lng: 0
-      }
+      id: uuidv4(),
+      content: content,
+      timestamp: new Date().toISOString(),
+      likes: Math.floor(Math.random() * 50),
+      comments: Math.floor(Math.random() * 10),
+      authorId: user.id,
+      locationId: locationId,
+      user: user
     };
     
-    // For now, just return the mock post since we don't have a backend
-    // In a real implementation, this would be saved to Supabase
-    
-    toast.success('Post created successfully!');
+    mockPosts.unshift(newPost);
+    toast.success("Post created successfully");
     return newPost;
   } catch (error) {
-    console.error('Error creating post:', error);
-    toast.error('Failed to create post');
+    console.error("Error creating post:", error);
+    toast.error("Failed to create post");
     throw error;
   }
 };
 
-// Get posts for a venue
-export const getVenuePosts = async (venueId: string): Promise<Post[]> => {
+// Get all posts
+export const getAllPosts = async (): Promise<Post[]> => {
   try {
-    // In a real implementation, this would fetch from Supabase
-    // For now, return some mock data
-    const mockPosts: Post[] = [
-      {
-        id: '1',
-        content: 'Loving the atmosphere at this place!',
-        authorId: 'user1',
-        locationId: venueId,
-        timestamp: new Date().toISOString(),
-        likes: 12,
-        comments: 3,
-        location: {
-          id: venueId,
-          name: 'Venue Name',
-          address: '123 Main St',
-          city: 'Anytown',
-          state: 'CA',
-          lat: 0,
-          lng: 0
-        },
-        user: {
-          id: 'user1',
-          name: 'John Doe',
-          username: 'johndoe',
-          email: 'john@example.com',
-          avatar: 'https://i.pravatar.cc/150?img=1'
-        }
-      },
-      {
-        id: '2',
-        content: 'Great food and service!',
-        authorId: 'user2',
-        locationId: venueId,
-        timestamp: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
-        likes: 8,
-        comments: 1,
-        location: {
-          id: venueId,
-          name: 'Venue Name',
-          address: '123 Main St',
-          city: 'Anytown',
-          state: 'CA',
-          lat: 0,
-          lng: 0
-        },
-        user: {
-          id: 'user2',
-          name: 'Jane Smith',
-          username: 'janesmith',
-          email: 'jane@example.com',
-          avatar: 'https://i.pravatar.cc/150?img=2'
-        }
-      }
-    ];
-    
     return mockPosts;
   } catch (error) {
-    console.error('Error fetching venue posts:', error);
+    console.error("Error fetching posts:", error);
+    toast.error("Failed to fetch posts");
     return [];
+  }
+};
+
+// Get posts by venue ID
+export const getVenuePosts = async (venueId: string): Promise<Post[]> => {
+  try {
+    const user = generateMockUserData();
+    
+    // Generate mock posts
+    const posts: Post[] = [];
+    
+    for (let i = 0; i < Math.floor(Math.random() * 5) + 1; i++) {
+      posts.push({
+        id: uuidv4(),
+        content: `This is a great place to ${["eat", "hang out", "spend time", "enjoy", "relax"][i % 5]} with friends!`,
+        timestamp: new Date(Date.now() - i * 86400000).toISOString(),
+        likes: Math.floor(Math.random() * 50),
+        comments: Math.floor(Math.random() * 10),
+        authorId: user.id,
+        locationId: venueId,
+        user: user
+      });
+    }
+    
+    return posts;
+  } catch (error) {
+    console.error("Error fetching venue posts:", error);
+    toast.error("Failed to fetch venue posts");
+    return [];
+  }
+};
+
+// Delete a post
+export const deletePost = async (postId: string): Promise<void> => {
+  try {
+    const index = mockPosts.findIndex(post => post.id === postId);
+    if (index !== -1) {
+      mockPosts.splice(index, 1);
+      toast.success("Post deleted successfully");
+    } else {
+      toast.error("Post not found");
+    }
+  } catch (error) {
+    console.error("Error deleting post:", error);
+    toast.error("Failed to delete post");
+    throw error;
   }
 };
 
 // Get comments for a post
 export const getPostComments = async (postId: string): Promise<Comment[]> => {
   try {
-    // In a real implementation, this would fetch from Supabase
-    // For now, return some mock data
-    const mockComments: Comment[] = [
-      {
-        id: '1',
-        postId,
-        authorId: 'user3',
-        content: 'Totally agree!',
-        timestamp: new Date().toISOString(),
-        likes: 2,
-        author: {
-          id: 'user3',
-          name: 'Alice Johnson',
-          username: 'alicej',
-          email: 'alice@example.com',
-          avatar: 'https://i.pravatar.cc/150?img=3'
-        }
-      },
-      {
-        id: '2',
-        postId,
-        authorId: 'user4',
-        content: 'I need to visit this place!',
-        timestamp: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
-        likes: 1,
-        author: {
-          id: 'user4',
-          name: 'Bob Wilson',
-          username: 'bobw',
-          email: 'bob@example.com',
-          avatar: 'https://i.pravatar.cc/150?img=4'
-        }
-      }
-    ];
+    const user = generateMockUserData();
     
-    return mockComments;
+    // Generate mock comments
+    const comments: Comment[] = [];
+    
+    for (let i = 0; i < Math.floor(Math.random() * 3) + 1; i++) {
+      comments.push({
+        id: uuidv4(),
+        postId: postId,
+        content: `This is comment ${i + 1}!`,
+        timestamp: new Date(Date.now() - i * 3600000).toISOString(),
+        authorId: user.id,
+        author: user,
+        likes: Math.floor(Math.random() * 10),
+        vibedHere: Math.random() > 0.5
+      });
+    }
+    
+    return comments;
   } catch (error) {
-    console.error('Error fetching post comments:', error);
+    console.error("Error fetching post comments:", error);
     return [];
-  }
-};
-
-// Like a post
-export const likePost = async (postId: string): Promise<boolean> => {
-  try {
-    // In a real implementation, this would update Supabase
-    toast.success('Post liked!');
-    return true;
-  } catch (error) {
-    console.error('Error liking post:', error);
-    toast.error('Failed to like post');
-    return false;
-  }
-};
-
-// Delete a post
-export const deletePost = async (postId: string): Promise<boolean> => {
-  try {
-    // In a real implementation, this would delete from Supabase
-    toast.success('Post deleted successfully');
-    return true;
-  } catch (error) {
-    console.error('Error deleting post:', error);
-    toast.error('Failed to delete post');
-    return false;
   }
 };
