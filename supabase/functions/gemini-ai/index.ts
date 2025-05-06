@@ -1,8 +1,8 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
 
-const GEMINI_API_KEY = "AIzaSyBeEJvxSAjyvoRS6supoob0F7jGW7lhZUU";
-const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent";
+const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -16,83 +16,80 @@ serve(async (req) => {
   }
 
   try {
-    const { prompt, mode, history } = await req.json();
-    
-    // Build conversation history in Gemini format
-    const messages = [];
-    
-    // Add system prompt based on the mode
+    const { prompt, mode = 'user', history = [] } = await req.json();
+
+    // Create system prompt based on mode
+    let systemPrompt = '';
     if (mode === 'venue') {
-      messages.push({
-        role: "model",
-        parts: [{ text: "I am VeRNon for Venues, a business insights assistant. I help venue owners understand their metrics, customer trends, and marketing performance." }]
-      });
+      systemPrompt = "You are Vernon, a helpful AI assistant for venue owners. Provide insightful business analysis and actionable recommendations based on venue data.";
     } else {
+      systemPrompt = "You are Vernon, a helpful and friendly AI assistant within the 'Vibe Right Now' app. Your primary goal is to help users discover great places to go and things to do based on their requests. Respond in a concise, informative, and enthusiastic tone.";
+    }
+
+    // Format message history for Gemini
+    const messages = [];
+    if (systemPrompt) {
+      messages.push({
+        role: "user",
+        parts: [{ text: `System instruction: ${systemPrompt}` }]
+      });
+      
       messages.push({
         role: "model",
-        parts: [{ text: "I am VeRNon, a venue and event discovery assistant. I help users find venues, events, and local attractions based on their preferences and location." }]
+        parts: [{ text: "I understand and will act according to these instructions." }]
       });
     }
-    
+
     // Add conversation history
     if (history && history.length > 0) {
-      for (const message of history) {
+      history.forEach(msg => {
         messages.push({
-          role: message.sender === 'user' ? "user" : "model",
-          parts: [{ text: message.text }]
+          role: msg.sender === 'user' ? 'user' : 'model',
+          parts: [{ text: msg.text }]
         });
-      }
+      });
     }
-    
+
     // Add the current prompt
     messages.push({
       role: "user",
       parts: [{ text: prompt }]
     });
-    
-    console.log("Sending request to Gemini API with messages:", JSON.stringify(messages));
-    
-    // Call the Gemini API
-    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
-      method: "POST",
+
+    // Call Gemini API
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json"
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         contents: messages,
         generationConfig: {
           temperature: 0.7,
-          topK: 40,
+          maxOutputTokens: 800,
           topP: 0.95,
-          maxOutputTokens: 2048,
-        }
-      })
+          topK: 40
+        },
+      }),
     });
 
     if (!response.ok) {
-      const errorData = await response.text();
-      console.error(`Gemini API error: ${response.status}`, errorData);
-      return new Response(
-        JSON.stringify({ error: `Error calling Gemini API: ${response.status}` }),
-        { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      const errorText = await response.text();
+      console.error('Gemini API error:', errorText);
+      throw new Error(`Gemini API error: ${response.status}`);
     }
 
     const data = await response.json();
-    console.log("Gemini API response:", JSON.stringify(data));
-    
-    // Extract the response text
-    const responseText = data.candidates[0].content.parts[0].text;
-    
-    return new Response(
-      JSON.stringify({ text: responseText }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    const text = data.candidates[0]?.content?.parts?.[0]?.text || "I couldn't generate a response at the moment.";
+
+    return new Response(JSON.stringify({ text }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   } catch (error) {
     console.error('Error in gemini-ai function:', error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
 });

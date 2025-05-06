@@ -29,7 +29,9 @@ const VernonVenueAssistant = () => {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <p className="text-sm font-medium text-gray-800 dark:text-gray-100">Get AI-powered help with managing your venue and analyzing customer data.</p>
+          <p className="text-sm font-medium text-gray-800 dark:text-gray-100">
+            Get AI-powered help with managing your venue using Google's Vertex AI and Gemini technology.
+          </p>
           
           <div className="space-y-2">
             <h4 className="text-xs font-medium uppercase text-gray-700 dark:text-gray-200">Ask Vernon about:</h4>

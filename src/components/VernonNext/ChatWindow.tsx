@@ -146,10 +146,10 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
             <h2 className="text-white font-medium flex items-center">
               Vernon
               <Badge variant="outline" className="ml-2 bg-blue-700 text-white border-blue-500 text-xs px-1.5">
-                GPT-4o
+                Gemini AI
               </Badge>
             </h2>
-            <p className="text-blue-100 text-xs">Powered by OpenAI</p>
+            <p className="text-blue-100 text-xs">Powered by Google</p>
           </div>
         </div>
         <div className="flex items-center space-x-1">

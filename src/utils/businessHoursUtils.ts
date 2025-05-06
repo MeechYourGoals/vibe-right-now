@@ -92,3 +92,24 @@ export const formatBusinessHours = (hours: Record<string, string[]>): string => 
     }
   }).join('\n');
 };
+
+// Added missing exports for compatibility
+export const generateBusinessHours = formatBusinessHours;
+export const getTodaysHours = (hours: Record<string, string[]>): string => {
+  const now = new Date();
+  const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+  const currentDay = days[now.getDay()];
+  
+  const dayHours = hours[currentDay];
+  
+  if (!dayHours || !Array.isArray(dayHours) || dayHours.length < 2) {
+    return 'Closed today';
+  }
+  
+  const [open, close] = dayHours;
+  if (typeof open === 'string' && typeof close === 'string') {
+    return `${formatTimeToAmPm(open)} - ${formatTimeToAmPm(close)}`;
+  } else {
+    return 'Hours not available';
+  }
+};

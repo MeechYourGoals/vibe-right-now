@@ -1,7 +1,7 @@
 
 import { MessageContext, MessageProcessor } from '../types';
 import { Message } from '../../../types';
-import { OpenAIService } from '@/services/OpenAIService';
+import { GeminiService } from '@/services/GeminiService';
 import { VertexAIService } from '@/services/VertexAIService';
 import { createAIMessage } from '../../messageFactory';
 import { localAI } from '@/services/LocalAIService';
@@ -17,20 +17,10 @@ export class AIWithPreferencesProcessor implements MessageProcessor {
     setMessages: React.Dispatch<React.SetStateAction<Message[]>>
   ): Promise<boolean> {
     try {
-      // Convert contextMessages to format expected by OpenAI
+      // Convert contextMessages to format expected by AI services
       const contextMessages = context.messages.slice(-10);
-      const openAIMessages = contextMessages.map(msg => ({
-        role: msg.sender === 'user' ? 'user' : 'assistant',
-        content: msg.text
-      }));
       
-      // Add the new user message
-      openAIMessages.push({
-        role: 'user',
-        content: context.query
-      });
-      
-      // Analyze sentiment of the query
+      // Analyze sentiment of the query using local AI
       let userSentiment;
       try {
         userSentiment = await localAI.analyzeSentiment(context.query);
@@ -56,53 +46,33 @@ export class AIWithPreferencesProcessor implements MessageProcessor {
         console.error('Error loading user preferences:', error);
       }
       
-      // Add sentiment and preferences to system message if available
-      let systemMessage = 'You are a helpful assistant.';
-      
-      if (userSentiment && userSentiment.label) {
-        systemMessage += ` The user's current sentiment appears to be ${userSentiment.label}.`;
-      }
-      
-      if (userPreferences.length > 0) {
-        systemMessage += ` The user has expressed interest in these topics: ${userPreferences.join(', ')}.`;
-        systemMessage += ` When appropriate, tailor your responses to include these interests.`;
-      }
-      
       let responseText = '';
       
       if (context.options.isVenueMode) {
-        // For venue mode, use higher quality model for business insights
+        // For venue mode, use higher quality Vertex AI model for business insights
         try {
-          // Add system message with sentiment and preferences
-          openAIMessages.unshift({
-            role: 'system',
-            content: systemMessage
-          });
+          // Create context with sentiment and preferences
+          const enhancedPrompt = `[CONTEXT: ${userSentiment?.label || 'neutral'} sentiment detected]
+            ${userPreferences.length > 0 ? `[USER INTERESTS: ${userPreferences.join(', ')}]` : ''}
+            ${context.query}`;
           
-          responseText = await OpenAIService.sendChatRequest(openAIMessages, {
-            model: 'gpt-4o',
-            context: 'venue'
-          });
+          responseText = await VertexAIService.generateResponse(enhancedPrompt, 'venue', contextMessages);
         } catch (error) {
-          console.error('Error with OpenAI for venue mode:', error);
-          // Fall back to Vertex AI
-          responseText = await VertexAIService.generateResponse(context.query, 'venue', contextMessages);
+          console.error('Error with Vertex AI for venue mode:', error);
+          // Fall back to Gemini
+          responseText = await GeminiService.generateResponse(context.query, 'venue', contextMessages);
         }
       } else {
-        // For conversational queries, use standard model
+        // For conversational queries, use standard Gemini model
         try {
-          // Add system message with sentiment and preferences
-          openAIMessages.unshift({
-            role: 'system',
-            content: systemMessage
-          });
+          // Create context with sentiment and preferences
+          const enhancedPrompt = `[CONTEXT: ${userSentiment?.label || 'neutral'} sentiment detected]
+            ${userPreferences.length > 0 ? `[USER INTERESTS: ${userPreferences.join(', ')}]` : ''}
+            ${context.query}`;
           
-          responseText = await OpenAIService.sendChatRequest(openAIMessages, {
-            model: 'gpt-4o-mini',
-            context: 'user'
-          });
+          responseText = await GeminiService.generateResponse(enhancedPrompt, 'user', contextMessages);
         } catch (error) {
-          console.error('Error with OpenAI for conversational mode:', error);
+          console.error('Error with Gemini for conversational mode:', error);
           // Fall back to Vertex AI
           responseText = await VertexAIService.generateResponse(context.query, 'default', contextMessages);
         }

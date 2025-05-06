@@ -6,6 +6,7 @@ import { ComplexQueryStrategy } from './complexQueryStrategy';
 import { ComedySearchStrategy } from './comedySearchStrategy';
 import { LocationSearchStrategy } from './locationSearchStrategy';
 import { parseCityStateFromQuery } from '@/utils/geocodingService';
+import { extractCategories } from '@/services/VertexAI/analysis';
 
 /**
  * Central coordinator for all search strategies
@@ -39,6 +40,19 @@ export const SearchCoordinator = {
       }
     }
     
+    // If no categories were passed, try to extract them using Google NLP
+    if (!categories || categories.length === 0) {
+      try {
+        const extractedCategories = await extractCategories(inputValue);
+        if (extractedCategories && extractedCategories.length > 0) {
+          console.log('Extracted categories from Google NLP:', extractedCategories);
+          categories = extractedCategories;
+        }
+      } catch (error) {
+        console.error('Error extracting categories with Google NLP:', error);
+      }
+    }
+    
     // Check if it's a complex query
     if (ComplexQueryStrategy.isComplexQuery(inputValue)) {
       console.log('Detected complex query, using ComplexQueryStrategy with NLP categories');
@@ -51,7 +65,7 @@ export const SearchCoordinator = {
       return await ComedySearchStrategy.handleComedySearch(inputValue);
     }
     
-    // Fall back to general search service
+    // Fall back to general search service with Google NLP categories
     console.log('Using general search service with NLP categories');
     try {
       return await SearchService.search(inputValue, categories);

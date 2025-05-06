@@ -1,12 +1,12 @@
 
 import React from 'react';
-import { Mic, MicOff } from 'lucide-react';
+import { Mic, Volume } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface VoiceIndicatorProps {
   isListening: boolean;
   isSpeaking: boolean;
-  toggleListening: () => void;
+  toggleListening?: () => void;
 }
 
 const VoiceIndicator: React.FC<VoiceIndicatorProps> = ({
@@ -14,28 +14,39 @@ const VoiceIndicator: React.FC<VoiceIndicatorProps> = ({
   isSpeaking,
   toggleListening
 }) => {
+  if (!isListening && !isSpeaking) return null;
+  
   return (
-    <div className="absolute left-3 top-3 z-10">
-      <div className="flex items-center gap-1.5">
-        <Button
-          variant="ghost"
-          size="icon"
-          className={`h-7 w-7 rounded-full ${isListening ? 'bg-red-100 hover:bg-red-200' : isSpeaking ? 'bg-blue-100 hover:bg-blue-200' : 'bg-transparent'}`}
-          onClick={toggleListening}
-          title={isListening ? "Stop Listening" : "Start Voice Input"}
-        >
-          {isListening ? (
-            <MicOff className="h-3.5 w-3.5 text-red-600" />
-          ) : (
-            <Mic className={`h-3.5 w-3.5 ${isSpeaking ? 'text-blue-600' : 'text-muted-foreground'}`} />
-          )}
-        </Button>
-        {(isListening || isSpeaking) && (
-          <span className="text-xs font-medium">
-            {isListening ? 'Listening...' : isSpeaking ? 'Speaking...' : ''}
-          </span>
-        )}
+    <div className={`
+      flex items-center justify-between 
+      px-3 py-1.5 
+      ${isListening ? 'bg-red-600/20' : 'bg-blue-600/20'}
+      border-b border-gray-700
+    `}>
+      <div className="flex items-center">
+        {isListening ? (
+          <>
+            <Mic className="h-4 w-4 text-red-500 mr-2 animate-pulse" />
+            <span className="text-xs font-medium text-red-300">Listening...</span>
+          </>
+        ) : isSpeaking ? (
+          <>
+            <Volume className="h-4 w-4 text-blue-500 mr-2 animate-pulse" />
+            <span className="text-xs font-medium text-blue-300">Speaking...</span>
+          </>
+        ) : null}
       </div>
+      
+      {isListening && toggleListening && (
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="h-6 px-2 py-0 text-xs text-red-300 hover:bg-red-900/30 hover:text-red-200"
+          onClick={toggleListening}
+        >
+          Stop
+        </Button>
+      )}
     </div>
   );
 };

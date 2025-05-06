@@ -21,13 +21,33 @@ export class VertexAIService {
     mode: 'default' | 'search' | 'venue' = 'default', 
     context: any[] = []
   ): Promise<string> {
-    // For now, we'll delegate to OpenAI since that's what we have configured
     try {
-      // Convert context to the format expected by OpenAI
-      const messages = context.map(msg => ({
-        role: msg.sender === 'user' ? 'user' : 'assistant',
-        content: msg.text
-      }));
+      console.log('Generating response with Vertex AI:', mode);
+      
+      // Create system prompt based on mode
+      let systemPrompt = '';
+      if (mode === 'venue') {
+        systemPrompt = "You are Vernon, a helpful AI assistant for venue owners. Provide insightful business analysis and actionable recommendations based on venue data.";
+      } else if (mode === 'search') {
+        systemPrompt = "You are Vernon, a helpful search assistant. Provide accurate, detailed information about places, events, and activities.";
+      } else {
+        systemPrompt = "You are Vernon, a helpful and friendly AI assistant. Your primary goal is to help users discover great places to go and things to do based on their requests.";
+      }
+      
+      // Format messages for the API request
+      const messages = [
+        { role: 'system', content: systemPrompt }
+      ];
+      
+      // Add conversation context if available
+      if (context && context.length > 0) {
+        context.forEach(msg => {
+          messages.push({
+            role: msg.sender === 'user' ? 'user' : 'assistant',
+            content: msg.text
+          });
+        });
+      }
       
       // Add the new prompt
       messages.push({
@@ -35,13 +55,25 @@ export class VertexAIService {
         content: prompt
       });
       
-      // Determine the context based on mode
-      const chatContext = mode === 'venue' ? 'venue' : 'user';
+      // Call the Vertex AI edge function
+      const { data, error } = await supabase.functions.invoke('vertex-ai', {
+        body: {
+          messages,
+          model: mode === 'venue' ? 'gemini-1.5-pro' : 'gemini-1.5-flash',
+          temperature: mode === 'search' ? 0.2 : 0.7,
+          maxTokens: 1000
+        }
+      });
       
-      return await OpenAIService.sendChatRequest(messages, { context: chatContext });
+      if (error) {
+        console.error('Error calling Vertex AI function:', error);
+        throw new Error(`Failed to generate response: ${error.message}`);
+      }
+      
+      return data?.text || "I couldn't generate a response at the moment.";
     } catch (error) {
       console.error('Error generating response with Vertex AI:', error);
-      throw error;
+      return `I'm having trouble generating a response right now. Please try again later.`;
     }
   }
 
@@ -61,7 +93,7 @@ export class VertexAIService {
         console.log('With categories:', categories);
       }
       
-      // Since we're using OpenAI as our backend, delegate the search
+      // Create search prompt with categories if available
       const enhancedPrompt = `
         Please provide real information about "${query}".
         ${categories && categories.length > 0 ? `Focusing on these categories: ${categories.join(', ')}` : ''}
@@ -74,17 +106,8 @@ export class VertexAIService {
         Format your response in a clear, readable way.
       `;
       
-      // Convert to OpenAI format
-      return await OpenAIService.sendChatRequest([
-        {
-          role: 'system',
-          content: 'You are a helpful assistant that provides accurate information about places, events, and things to do.'
-        },
-        {
-          role: 'user',
-          content: enhancedPrompt
-        }
-      ]);
+      // Call Vertex AI with search configuration
+      return await this.generateResponse(enhancedPrompt, 'search');
     } catch (error) {
       console.error('Error in Vertex AI search:', error);
       return `I couldn't find specific information about "${query}". Please try a different search.`;
@@ -101,10 +124,27 @@ export class VertexAIService {
     text: string, 
     options: { voice?: string; speakingRate?: number; pitch?: number } = {}
   ): Promise<string> {
-    // For now, we'll delegate to OpenAI since that's what we have configured
-    return OpenAIService.textToSpeech(text);
+    try {
+      console.log('Converting text to speech with Vertex AI');
+      
+      const { data, error } = await supabase.functions.invoke('google-tts', {
+        body: {
+          text,
+          voice: options.voice || this.DEFAULT_MALE_VOICE,
+          speakingRate: options.speakingRate || 1.0,
+          pitch: options.pitch || 0
+        }
+      });
+      
+      if (error) {
+        console.error('Error calling Google TTS function:', error);
+        throw new Error(`Failed to convert text to speech: ${error.message}`);
+      }
+      
+      return data?.audioContent || '';
+    } catch (error) {
+      console.error('Error in text-to-speech:', error);
+      throw error;
+    }
   }
 }
-
-// Import OpenAIService for fallback
-import { OpenAIService } from './OpenAIService';
