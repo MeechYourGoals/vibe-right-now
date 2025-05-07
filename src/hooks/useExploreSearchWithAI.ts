@@ -4,7 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useDebounce } from '@/hooks/useDebounce';
 import { Location } from '@/types';
 import { localAI } from '@/services/LocalAIService';
-import { preferenceMatcher } from '@/services/PreferenceMatcherService';
+import { preferenceMatcherService } from '@/services/PreferenceMatcherService';
 import { useUserPreferences } from './useUserPreferences';
 import { DateRange } from "react-day-picker";
 import { useNavigate } from "react-router-dom";
@@ -67,7 +67,7 @@ export const useExploreSearchWithAI = () => {
 
     try {
       const userPrefs = preferences.interests.concat(preferences.vibes).concat(preferences.categories);
-      const aiEnhancedLocations = await preferenceMatcher.sortByPreferenceMatch(locations, userPrefs);
+      const aiEnhancedLocations = await preferenceMatcherService.sortByPreferenceMatch(locations, userPrefs);
       return aiEnhancedLocations;
     } catch (error) {
       console.error('Error searching locations with AI:', error);

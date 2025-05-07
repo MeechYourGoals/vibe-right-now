@@ -31,13 +31,11 @@ export const ComedySearchService = {
         Return the information in a well-formatted, easy to read format.
       `;
       
-      // Use VertexAI for both search and context-aware responses
-      const comedyInfo = await VertexAIService.searchWithVertex(
-        enhancedQuery,
-        ['entertainment', 'comedy', 'events']
-      );
+      // Use VertexAI for search with appropriate categories
+      const comedyInfo = await VertexAIService.searchWithVertex(enhancedQuery);
       
-      if (comedyInfo && comedyInfo.length > 0) {
+      if (comedyInfo && comedyInfo.length > 50) {
+        console.log('Got Vertex AI response with web search, length:', comedyInfo.length);
         return comedyInfo;
       }
       

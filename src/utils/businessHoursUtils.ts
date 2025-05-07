@@ -14,14 +14,15 @@ interface BusinessHours {
 export const generateBusinessHours = (locationId: string): BusinessHours => {
   // Seed the random number generator based on the location ID
   const seed = locationId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  
+  // Use a separate mutable counter for generating the sequence of random numbers
+  let counter = 0;
   const random = () => {
-    const x = Math.sin(seed++) * 10000;
+    // Use both the seed and the counter to generate different values
+    const x = Math.sin((seed + counter++) * 9999) * 10000;
     return x - Math.floor(x);
   };
 
-  // Get current day of the week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
-  const currentDay = new Date().getDay();
-  
   // Format day names
   const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
   
@@ -63,8 +64,10 @@ export const getTodaysHours = (venue: Location): string => {
   
   const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
   const today = days[new Date().getDay()];
+  const hoursForToday = venue.hours[today as keyof typeof venue.hours];
   
-  return venue.hours[today as keyof typeof venue.hours] || "Hours not available";
+  // Make sure we're returning a string
+  return typeof hoursForToday === 'string' ? hoursForToday : "Hours not available";
 };
 
 // Check if a venue is currently open
@@ -84,8 +87,16 @@ export const isOpenNow = (venue: Location): boolean => {
     return false;
   }
   
+  // Ensure we have a string to parse
+  const hoursString = typeof currentHours === 'string' ? currentHours : "";
+  if (!hoursString) return false;
+  
   // Parse hours
-  const [openingStr, closingStr] = currentHours.split(' - ');
+  const hourParts = hoursString.split(' - ');
+  if (hourParts.length !== 2) return false;
+  
+  const openingStr = hourParts[0];
+  const closingStr = hourParts[1];
   
   if (!openingStr || !closingStr) {
     return false;

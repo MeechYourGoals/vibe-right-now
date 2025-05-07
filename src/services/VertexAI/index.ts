@@ -30,3 +30,6 @@ export const VertexAIHub = {
   },
   extractCategories: (await import('./analysis')).extractCategories
 };
+
+// Re-export searchWithVertex to ensure compatibility with older code
+export const searchWithVertex = (await import('./text')).searchWithAI;

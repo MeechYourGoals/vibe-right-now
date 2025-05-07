@@ -36,12 +36,13 @@ const shareVenue = (location: Location) => {
 const LocationActions = ({ location, onViewVibes }: LocationActionsProps) => {
   const navigate = useNavigate();
   
-  // Ensure location has hours
-  if (!location.hours) {
-    location.hours = generateBusinessHours(location);
+  // Ensure location has hours - without modifying the original location object
+  const locationWithHours = { ...location };
+  if (!locationWithHours.hours) {
+    locationWithHours.hours = generateBusinessHours(locationWithHours.id);
   }
   
-  const todaysHours = getTodaysHours(location);
+  const todaysHours = getTodaysHours(locationWithHours);
   
   // Helper function to get ride service URL
   const getRideServiceUrl = (place: Location) => {

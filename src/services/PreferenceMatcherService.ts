@@ -1,5 +1,6 @@
 
 import { localAI } from './LocalAIService';
+import { Location } from '@/types';
 
 export interface PreferenceMatcher {
   findBestMatches(input: string, count?: number): Promise<string[]>;
@@ -124,7 +125,7 @@ export class PreferenceMatcherService implements PreferenceMatcher {
       return [];
     }
   }
-  
+
   // Helper method to calculate cosine similarity between vectors
   private cosineSimilarity(vec1: number[], vec2: number[]): number {
     if (vec1.length !== vec2.length) {
@@ -149,6 +150,49 @@ export class PreferenceMatcherService implements PreferenceMatcher {
     }
     
     return dotProduct / (mag1 * mag2);
+  }
+
+  // Add method to sort locations by preference match
+  async sortByPreferenceMatch(locations: Location[], preferences: string[]): Promise<Location[]> {
+    // Create a copy of the locations array to avoid modifying the original
+    const sortedLocations = [...locations];
+    
+    // For each location, calculate a preference match score
+    const locationScores = await Promise.all(
+      sortedLocations.map(async (location) => {
+        // Start with a base score
+        let score = 0;
+        
+        // Create a combined text from location attributes for matching
+        const locationText = [
+          location.name,
+          location.type,
+          ...(location.vibes || []),
+          ...(location.tags || []),
+          location.city
+        ].filter(Boolean).join(' ').toLowerCase();
+        
+        // Calculate match score for each preference
+        for (const pref of preferences) {
+          try {
+            // Use text similarity as a simple matching method
+            const prefSimilarity = localAI.calculateTextSimilarity(locationText, pref.toLowerCase());
+            // Add to total score
+            score += prefSimilarity;
+          } catch (error) {
+            console.error('Error calculating preference match:', error);
+          }
+        }
+        
+        return { location, score };
+      })
+    );
+    
+    // Sort by score descending
+    locationScores.sort((a, b) => b.score - a.score);
+    
+    // Return the sorted locations
+    return locationScores.map(item => item.location);
   }
 }
 

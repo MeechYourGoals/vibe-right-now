@@ -14,7 +14,12 @@ const BusinessHours = ({ venue }: BusinessHoursProps) => {
   
   // Ensure venue has hours data
   if (!venue.hours) {
-    venue.hours = generateBusinessHours(venue.id);
+    // Clone the venue object to avoid modifying props directly
+    const venueWithHours = { 
+      ...venue, 
+      hours: generateBusinessHours(venue.id)
+    };
+    venue = venueWithHours;
   }
   
   const todaysHours = getTodaysHours(venue);
