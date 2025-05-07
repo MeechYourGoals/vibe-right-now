@@ -39,13 +39,12 @@ const shareVenue = (location: Location) => {
 const LocationCard = ({ location, onViewVibes }: LocationCardProps) => {
   const navigate = useNavigate();
 
-  // Ensure location has hours - without modifying the original location object
-  const locationWithHours = { ...location };
-  if (!locationWithHours.hours) {
-    locationWithHours.hours = generateBusinessHours(locationWithHours.id);
+  // Ensure location has hours
+  if (!location.hours) {
+    location.hours = generateBusinessHours(location);
   }
   
-  const todaysHours = getTodaysHours(locationWithHours);
+  const todaysHours = getTodaysHours(location);
 
   const handleViewVibes = () => {
     if (onViewVibes) {

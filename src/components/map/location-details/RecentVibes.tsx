@@ -8,25 +8,6 @@ interface RecentVibesProps {
   location: Location;
 }
 
-// Helper to create valid Post objects from minimal data
-const createPost = (data: Partial<Post>): Post => {
-  return {
-    id: data.id || '',
-    content: data.content || '',
-    timestamp: data.timestamp || new Date().toISOString(),
-    likes: data.likes || 0,
-    comments: data.comments || 0,
-    authorId: data.authorId || '',
-    locationId: data.locationId || '',
-    media: data.media || undefined,
-    location: data.location || null, // Required field for Post
-    vibeTags: data.vibeTags || [],
-    isPinned: data.isPinned || false,
-    isVenuePost: data.isVenuePost || false,
-    saved: data.saved || false
-  };
-};
-
 const RecentVibes = ({ location }: RecentVibesProps) => {
   const [recentPosts, setRecentPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -37,7 +18,7 @@ const RecentVibes = ({ location }: RecentVibesProps) => {
       try {
         // In a real implementation, this would fetch from an API
         // For now, we'll generate mock data
-        const mockPosts: Post[] = Array(3).fill(null).map((_, i) => createPost({
+        const mockPosts: Post[] = Array(3).fill(null).map((_, i) => ({
           id: `mock-${location.id}-${i}`,
           content: `Check out ${location.name}! ${i === 0 ? 'Great vibes tonight!' : i === 1 ? 'Amazing atmosphere!' : 'Love this place!'}`,
           timestamp: new Date(Date.now() - i * 3600000).toISOString(),
@@ -45,12 +26,7 @@ const RecentVibes = ({ location }: RecentVibesProps) => {
           comments: Math.floor(Math.random() * 10),
           authorId: `user-${i + 1}`,
           locationId: location.id,
-          media: i === 0 ? [{ type: 'image', url: 'https://picsum.photos/400/300' }] : undefined,
-          location: location, // Required for Post type
-          isPinned: false,
-          isVenuePost: true,
-          saved: false,
-          vibeTags: ['fun', 'energetic']
+          media: i === 0 ? [{ type: 'image', url: 'https://picsum.photos/400/300' }] : undefined
         }));
         
         setRecentPosts(mockPosts);

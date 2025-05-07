@@ -1,130 +1,90 @@
 
 /**
- * Format and clean up AI responses for better user experience
- */
-
-/**
- * Clean up response text from AI models
- * @param text The raw text returned from AI
- * @returns Cleaned up and formatted text
- */
-export const cleanResponseText = (text: string): string => {
-  if (!text) return "";
-  
-  // Remove any markdown code block syntax
-  text = text.replace(/```[a-z]*\n/g, '').replace(/```/g, '');
-  
-  // Remove any warnings about AI limitations
-  text = text.replace(/I'm an AI assistant and don't have real-time information beyond my training data\./gi, '');
-  text = text.replace(/As an AI assistant, I don't have access to real-time information\./gi, '');
-  text = text.replace(/I don't have access to current or real-time information\./gi, '');
-  text = text.replace(/My knowledge cutoff is .*?\./gi, '');
-  
-  // Trim any excessive whitespace
-  text = text.trim();
-  
-  return text;
-};
-
-/**
- * Format a location-based response
- * @param city The city being referenced
- * @param categoryResults Results grouped by category
- * @param paginationState Pagination state for tracking pages
- * @returns Formatted response about locations in the city
+ * Format location search results for the chat response
  */
 export const formatLocationResponse = (
-  city: string,
+  cityName: string, 
   categoryResults: Record<string, string[]>,
-  paginationState: Record<string, number> = {}
+  paginationParams: Record<string, number> = {}
 ): string => {
-  const categoryEmojis: Record<string, string> = {
-    restaurants: '🍽️',
-    dining: '🍽️',
-    bars: '🍸',
-    nightlife: '🍸',
-    events: '🎭',
-    attractions: '🏛️',
-    sports: '⚽',
-    other: '📍'
-  };
+  const hasResults = Object.values(categoryResults).some(arr => arr.length > 0);
   
-  let response = `Here's what I found in ${city}:\n\n`;
-  
-  // Process each category and add entries
-  Object.entries(categoryResults).forEach(([category, locations]) => {
-    if (locations.length > 0) {
-      // Get emoji for this category or default to 📍
-      const emoji = categoryEmojis[category.toLowerCase()] || '📍';
-      
-      // Use title case for category names
-      const formattedCategory = category.charAt(0).toUpperCase() + category.slice(1);
-      
-      // Add the category heading and results
-      response += `${emoji} **${formattedCategory}**\n`;
-      
-      // Calculate pagination for this category if needed
-      const currentPage = paginationState[category] || 0;
-      const itemsPerPage = 5;
-      const startIndex = currentPage * itemsPerPage;
-      const endIndex = startIndex + itemsPerPage;
-      const paginatedLocations = locations.slice(startIndex, endIndex);
-      
-      // Add each location
-      paginatedLocations.forEach(location => {
-        response += `• ${location}\n`;
-      });
-      
-      // Add pagination info if there are more items
-      if (endIndex < locations.length) {
-        response += `\nShowing ${startIndex + 1}-${endIndex} of ${locations.length} results. Say "More ${category}" to see more.\n`;
-      }
-      
-      response += '\n';
-    }
-  });
-  
-  // Add a call to action if we found anything
-  if (Object.values(categoryResults).some(locations => locations.length > 0)) {
-    response += "You can ask for more details about any specific place, or ask about other cities or categories.";
-  } else {
-    response += `I couldn't find specific venues in ${city}. Try asking for a different city or be more specific about what you're looking for.`;
+  if (!hasResults) {
+    return `I couldn't find specific venues or events in ${cityName} at the moment. Would you like me to recommend some popular activities or search in a different city?`;
   }
+  
+  // Build response starting with an intro
+  let response = `Here's what's happening in ${cityName} right now:\n\n`;
+  
+  // Add section for each category with results
+  if (categoryResults.nightlife && categoryResults.nightlife.length > 0) {
+    response += `**Nightlife & Bars**\n${categoryResults.nightlife.join('\n')}\n\n`;
+  }
+  
+  if (categoryResults.dining && categoryResults.dining.length > 0) {
+    response += `**Restaurants & Dining**\n${categoryResults.dining.join('\n')}\n\n`;
+  }
+  
+  if (categoryResults.concerts && categoryResults.concerts.length > 0) {
+    response += `**Live Music & Concerts**\n${categoryResults.concerts.join('\n')}\n\n`;
+  }
+  
+  if (categoryResults.events && categoryResults.events.length > 0) {
+    response += `**Events & Happenings**\n${categoryResults.events.join('\n')}\n\n`;
+  }
+  
+  if (categoryResults.attractions && categoryResults.attractions.length > 0) {
+    response += `**Attractions & Landmarks**\n${categoryResults.attractions.join('\n')}\n\n`;
+  }
+  
+  if (categoryResults.sports && categoryResults.sports.length > 0) {
+    response += `**Sports & Recreation**\n${categoryResults.sports.join('\n')}\n\n`;
+  }
+  
+  if (categoryResults.other && categoryResults.other.length > 0) {
+    response += `**Other Points of Interest**\n${categoryResults.other.join('\n')}\n\n`;
+  }
+  
+  // Add a call to action
+  response += `Want to see more options? Ask me about specific types of places or activities in ${cityName}!`;
   
   return response;
 };
 
 /**
- * Format a summary of a location's highlights
- * @param location Location object with details
- * @returns Formatted highlights about the location
+ * Format a simple response for the chat
  */
-export const formatLocationHighlights = (location: any): string => {
-  let response = `## ${location.name}\n\n`;
+export const formatSimpleResponse = (message: string): string => {
+  return message;
+};
+
+/**
+ * Clean response text by removing unnecessary formatting
+ */
+export const cleanResponseText = (text: string): string => {
+  if (!text) return '';
   
-  if (location.address) {
-    response += `**Address:** ${location.address}, ${location.city || ''}\n\n`;
+  // Remove excessive newlines
+  let cleaned = text.replace(/\n{3,}/g, '\n\n');
+  
+  // Remove excessive spaces
+  cleaned = cleaned.replace(/[ ]{2,}/g, ' ');
+  
+  return cleaned.trim();
+};
+
+/**
+ * Format API response for display
+ */
+export const formatAPIResponse = (data: any, type: string = 'general'): string => {
+  if (!data) return 'No data available';
+  
+  switch (type) {
+    case 'location':
+      return `Found: ${data.name} in ${data.city}, ${data.state || data.country}`;
+    case 'event':
+      return `Event: ${data.name} on ${data.date} at ${data.venue}`;
+    default:
+      return typeof data === 'object' ? JSON.stringify(data, null, 2) : String(data);
   }
-  
-  if (location.description) {
-    response += `${location.description}\n\n`;
-  }
-  
-  if (location.hours) {
-    response += "**Hours:**\n";
-    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-    days.forEach(day => {
-      if (location.hours[day]) {
-        const formattedDay = day.charAt(0).toUpperCase() + day.slice(1);
-        response += `- ${formattedDay}: ${location.hours[day]}\n`;
-      }
-    });
-    response += "\n";
-  }
-  
-  if (location.vibes && location.vibes.length > 0) {
-    response += `**Vibes:** ${location.vibes.join(', ')}\n\n`;
-  }
-  
-  return response;
 };

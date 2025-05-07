@@ -1,144 +1,83 @@
 
-import { Location } from "@/types";
+import { Location, BusinessHours } from "@/types";
 
-interface BusinessHours {
-  monday: string;
-  tuesday: string;
-  wednesday: string;
-  thursday: string;
-  friday: string;
-  saturday: string;
-  sunday: string;
-}
-
-export const generateBusinessHours = (locationId: string): BusinessHours => {
-  // Seed the random number generator based on the location ID
-  const seed = locationId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  
-  // Use a separate mutable counter for generating the sequence of random numbers
-  let counter = 0;
-  const random = () => {
-    // Use both the seed and the counter to generate different values
-    const x = Math.sin((seed + counter++) * 9999) * 10000;
-    return x - Math.floor(x);
+export const generateBusinessHours = (venue: Location | string): BusinessHours => {
+  // Create default business hours
+  return {
+    monday: "9:00 AM - 5:00 PM",
+    tuesday: "9:00 AM - 5:00 PM",
+    wednesday: "9:00 AM - 5:00 PM",
+    thursday: "9:00 AM - 5:00 PM",
+    friday: "9:00 AM - 8:00 PM",
+    saturday: "10:00 AM - 10:00 PM",
+    sunday: "11:00 AM - 4:00 PM"
   };
-
-  // Format day names
-  const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-  
-  // Generate hours for each day
-  const hours: BusinessHours = {
-    monday: getRandomHours(random),
-    tuesday: getRandomHours(random),
-    wednesday: getRandomHours(random),
-    thursday: getRandomHours(random),
-    friday: getRandomHours(random),
-    saturday: getRandomHours(random),
-    sunday: getRandomHours(random)
-  };
-  
-  return hours;
 };
 
-// Helper function to generate random opening hours
-const getRandomHours = (random: () => number): string => {
-  // 20% chance of being closed
-  if (random() < 0.2) {
-    return "Closed";
-  }
-
-  // Generate opening hour (7am-12pm)
-  const openingHour = Math.floor(random() * 5) + 7;
-  
-  // Generate closing hour (5pm-12am)
-  const closingHour = Math.floor(random() * 7) + 17;
-
-  return `${openingHour === 12 ? '12pm' : (openingHour > 12 ? `${openingHour-12}pm` : `${openingHour}am`)} - ${closingHour === 12 ? '12pm' : (closingHour > 12 ? `${closingHour-12}pm` : `${closingHour}am`)}`;
-};
-
-// Get today's business hours for a venue
 export const getTodaysHours = (venue: Location): string => {
-  if (!venue.hours) {
-    return "Hours not available";
+  if (!venue || !venue.hours) return "Hours not available";
+  
+  const today = new Date().toLocaleString('en-US', { weekday: 'lowercase' });
+  
+  switch (today) {
+    case 'monday': return venue.hours.monday || "Closed";
+    case 'tuesday': return venue.hours.tuesday || "Closed";
+    case 'wednesday': return venue.hours.wednesday || "Closed";
+    case 'thursday': return venue.hours.thursday || "Closed";
+    case 'friday': return venue.hours.friday || "Closed";
+    case 'saturday': return venue.hours.saturday || "Closed";
+    case 'sunday': return venue.hours.sunday || "Closed";
+    default: return "Hours not available";
   }
-  
-  const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-  const today = days[new Date().getDay()];
-  const hoursForToday = venue.hours[today as keyof typeof venue.hours];
-  
-  // Make sure we're returning a string
-  return typeof hoursForToday === 'string' ? hoursForToday : "Hours not available";
 };
 
-// Check if a venue is currently open
-export const isOpenNow = (venue: Location): boolean => {
-  if (!venue.hours) {
-    return false;
-  }
-  
-  // Get current day and time
+export const isOpenNow = (hours: BusinessHours): boolean => {
   const now = new Date();
-  const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-  const today = days[now.getDay()];
-  const currentHours = venue.hours[today as keyof typeof venue.hours];
+  const dayOfWeek = now.toLocaleString('en-US', { weekday: 'lowercase' });
   
-  // If "Closed" or not available, return false
-  if (!currentHours || currentHours === "Closed") {
-    return false;
+  // Get today's hours
+  let todayHours;
+  switch (dayOfWeek) {
+    case 'monday': todayHours = hours.monday; break;
+    case 'tuesday': todayHours = hours.tuesday; break;
+    case 'wednesday': todayHours = hours.wednesday; break;
+    case 'thursday': todayHours = hours.thursday; break;
+    case 'friday': todayHours = hours.friday; break;
+    case 'saturday': todayHours = hours.saturday; break;
+    case 'sunday': todayHours = hours.sunday; break;
+    default: return false;
   }
   
-  // Ensure we have a string to parse
-  const hoursString = typeof currentHours === 'string' ? currentHours : "";
-  if (!hoursString) return false;
+  if (todayHours === "Closed" || !todayHours) return false;
   
-  // Parse hours
-  const hourParts = hoursString.split(' - ');
-  if (hourParts.length !== 2) return false;
+  // Parse hours like "9:00 AM - 5:00 PM"
+  const [openStr, closeStr] = todayHours.split(" - ");
+  if (!openStr || !closeStr) return false;
   
-  const openingStr = hourParts[0];
-  const closingStr = hourParts[1];
-  
-  if (!openingStr || !closingStr) {
-    return false;
-  }
-  
+  // Convert to 24-hour format for comparison
   const currentHour = now.getHours();
   const currentMinute = now.getMinutes();
   
-  // Parse opening hour
-  let openingHour = parseInt(openingStr);
-  const isOpeningAM = openingStr.toLowerCase().includes('am');
-  const isOpeningPM = openingStr.toLowerCase().includes('pm');
+  // Parse opening hours
+  const openMatch = openStr.match(/(\d+):(\d+)\s*(AM|PM)/i);
+  if (!openMatch) return false;
+  let openHour = parseInt(openMatch[1]);
+  const openMinute = parseInt(openMatch[2]);
+  if (openMatch[3].toUpperCase() === "PM" && openHour !== 12) openHour += 12;
+  if (openMatch[3].toUpperCase() === "AM" && openHour === 12) openHour = 0;
   
-  if (isOpeningPM && openingHour < 12) {
-    openingHour += 12;
-  } else if (isOpeningAM && openingHour === 12) {
-    openingHour = 0;
-  }
+  // Parse closing hours
+  const closeMatch = closeStr.match(/(\d+):(\d+)\s*(AM|PM)/i);
+  if (!closeMatch) return false;
+  let closeHour = parseInt(closeMatch[1]);
+  const closeMinute = parseInt(closeMatch[2]);
+  if (closeMatch[3].toUpperCase() === "PM" && closeHour !== 12) closeHour += 12;
+  if (closeMatch[3].toUpperCase() === "AM" && closeHour === 12) closeHour = 0;
   
-  // Parse closing hour
-  let closingHour = parseInt(closingStr);
-  const isClosingAM = closingStr.toLowerCase().includes('am');
-  const isClosingPM = closingStr.toLowerCase().includes('pm');
+  // Check if current time is within operating hours
+  const currentTime = currentHour * 60 + currentMinute;
+  const openTime = openHour * 60 + openMinute;
+  const closeTime = closeHour * 60 + closeMinute;
   
-  if (isClosingPM && closingHour < 12) {
-    closingHour += 12;
-  } else if (isClosingAM && closingHour === 12) {
-    closingHour = 0;
-  }
-  
-  // Check if current time is between opening and closing
-  const currentTimeInMinutes = currentHour * 60 + currentMinute;
-  const openingTimeInMinutes = openingHour * 60;
-  let closingTimeInMinutes = closingHour * 60;
-  
-  // Handle cases where closing time is past midnight
-  if (closingTimeInMinutes < openingTimeInMinutes) {
-    closingTimeInMinutes += 24 * 60;
-    if (currentTimeInMinutes < openingTimeInMinutes) {
-      return currentTimeInMinutes + 24 * 60 <= closingTimeInMinutes;
-    }
-  }
-  
-  return currentTimeInMinutes >= openingTimeInMinutes && currentTimeInMinutes <= closingTimeInMinutes;
+  return currentTime >= openTime && currentTime <= closeTime;
 };

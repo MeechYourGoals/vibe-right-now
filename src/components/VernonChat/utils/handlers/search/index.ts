@@ -1,6 +1,7 @@
 import { LocationSearchStrategy } from './locationSearchStrategy';
-import { GeminiService } from '@/services/GeminiService';
+import { LocationService } from '@/services/LocationService';
 import { cleanResponseText } from '../../responseFormatter';
+import { GeminiService } from '@/services/GeminiService';
 
 export const SearchCoordinator = {
   async processSearchQuery(
@@ -17,33 +18,34 @@ export const SearchCoordinator = {
       return result.response;
     }
 
-    // Otherwise use Gemini's web search capabilities
-    return this.handleGeminiWebSearch(inputValue);
+    // Otherwise use our general search
+    return this.handleGeneralSearch(inputValue, categories);
   },
 
-  async handleGeminiWebSearch(inputValue: string): Promise<string> {
+  async handleGeneralSearch(inputValue: string, categories: string[] = []): Promise<string> {
     try {
-      // Use Gemini's web search function for real information
-      console.log('Using Gemini web search for:', inputValue);
-      const geminiResponse = await GeminiService.searchWeb(inputValue);
+      // Attempt to get real information using Gemini API
+      console.log('Using Gemini for general search:', inputValue);
+      const prompt = `
+        The user is asking: "${inputValue}"
+        
+        Please provide a helpful, informative response based on your knowledge. 
+        If the query relates to locations, events, or activities, include specific details like 
+        names, addresses, and times if you know them.
+        ${categories.length > 0 ? `Consider these relevant categories: ${categories.join(', ')}` : ''}
+      `;
+      
+      const geminiResponse = await GeminiService.generateResponse(prompt, 'user');
       
       if (geminiResponse && geminiResponse.length > 50) {
-        console.log('Got Gemini response with web search, length:', geminiResponse.length);
+        console.log('Got Gemini response of length:', geminiResponse.length);
         return cleanResponseText(geminiResponse);
-      }
-      
-      // If Gemini web search fails, try regular Gemini response
-      console.log('Web search didn\'t yield good results, trying standard Gemini response');
-      const standardResponse = await GeminiService.generateResponse(inputValue, 'user');
-      
-      if (standardResponse && standardResponse.length > 50) {
-        return cleanResponseText(standardResponse);
       }
       
       // Fall back to a generic response
       return "I'm sorry, I couldn't find specific information about that. Could you try rephrasing your question or asking about something else?";
     } catch (error) {
-      console.error('Error in Gemini search:', error);
+      console.error('Error in general search:', error);
       return "I'm having trouble processing your request right now. Please try again in a moment.";
     }
   }

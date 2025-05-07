@@ -41,19 +41,17 @@ export const handleSearchQuery = async (query: string, paginationState: any = {}
     };
     
     // Group locations by category
-    if (Array.isArray(locations)) {
-      locations.forEach(location => {
-        const category = typeToCategory[location.type] || "other";
-        
-        if (!categoryResults[category]) {
-          categoryResults[category] = [];
-        }
-        
-        // Create link for the location
-        const locationLink = `[${location.name}](/venue/${location.id})`;
-        categoryResults[category].push(locationLink);
-      });
-    }
+    locations.forEach(location => {
+      const category = typeToCategory[location.type] || "other";
+      
+      if (!categoryResults[category]) {
+        categoryResults[category] = [];
+      }
+      
+      // Create link for the location
+      const locationLink = `[${location.name}](/venue/${location.id})`;
+      categoryResults[category].push(locationLink);
+    });
     
     // Format the response
     return formatLocationResponse(searchCity, categoryResults, paginationState);

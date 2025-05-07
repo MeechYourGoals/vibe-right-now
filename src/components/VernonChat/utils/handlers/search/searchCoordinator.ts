@@ -32,15 +32,11 @@ export const SearchCoordinator = {
       const { city, state } = parseCityStateFromQuery(inputValue);
       console.log(`Parsed location: ${city}, ${state}`);
       
-      try {
-        const locationResult = await LocationSearchStrategy.handleLocationSearch(inputValue);
-        
-        if (locationResult && locationResult.response && locationResult.response.length > 50) {
-          console.log('Location strategy returned results');
-          return locationResult.response;
-        }
-      } catch (error) {
-        console.error('Error in location search strategy:', error);
+      const locationResult = await LocationSearchStrategy.handleLocationSearch(inputValue);
+      
+      if (locationResult && locationResult.response && locationResult.response.length > 50) {
+        console.log('Location strategy returned results');
+        return locationResult.response;
       }
     }
     

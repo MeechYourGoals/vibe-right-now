@@ -45,24 +45,6 @@ export const localAI = {
     const union = new Set([...set1, ...set2]);
     
     return intersection.size / union.size;
-  },
-
-  // Add embedding method for PreferenceMatcherService
-  getTextEmbedding: async (text: string): Promise<number[]> => {
-    // Simple embedding - convert text to vector using character frequencies
-    const chars = 'abcdefghijklmnopqrstuvwxyz'.split('');
-    const embedding = chars.map(char => {
-      const regex = new RegExp(char, 'gi');
-      const matches = text.match(regex);
-      return matches ? matches.length / text.length : 0;
-    });
-    
-    // Normalize and return a 32-dim vector
-    const norm = Math.sqrt(embedding.reduce((sum, val) => sum + val * val, 0)) || 1;
-    const normalized = embedding.map(val => val / norm);
-    
-    // Pad to 32 dimensions with zeros for compatibility
-    return [...normalized, ...Array(32 - normalized.length).fill(0)];
   }
 };
 

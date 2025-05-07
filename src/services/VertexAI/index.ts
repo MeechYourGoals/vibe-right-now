@@ -20,16 +20,7 @@ export const VertexAIHub = {
   checkContentSafety: (await import('./safety')).checkContentSafety,
   
   // Analysis
-  analyzeText: () => { 
-    console.log('analyzeText not implemented'); 
-    return Promise.resolve(null);
-  },
-  extractEntities: () => { 
-    console.log('extractEntities not implemented'); 
-    return Promise.resolve([]); 
-  },
+  analyzeText: (await import('./analysis')).analyzeText,
+  extractEntities: (await import('./analysis')).extractEntities,
   extractCategories: (await import('./analysis')).extractCategories
 };
-
-// Re-export searchWithVertex to ensure compatibility with older code
-export const searchWithVertex = (await import('./text')).searchWithAI;

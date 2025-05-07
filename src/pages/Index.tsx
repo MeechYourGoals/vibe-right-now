@@ -13,6 +13,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { DateRange } from "react-day-picker";
 import { useNavigate } from "react-router-dom";
 import { mockLocations } from "@/mock/data";
+import SearchVibes from "@/components/SearchVibes";
 
 const Index = () => {
   const isMobile = useIsMobile();
@@ -20,9 +21,16 @@ const Index = () => {
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const navigate = useNavigate();
 
-  const handleSearch = (query: string) => {
-    if (query.trim()) {
-      navigate(`/explore?q=${encodeURIComponent(query)}`);
+  const handleFutureSearch = (range: DateRange | undefined) => {
+    if (range?.from) {
+      const searchParams = new URLSearchParams();
+      searchParams.set('from', range.from.toISOString().split('T')[0]);
+      if (range.to) {
+        searchParams.set('to', range.to.toISOString().split('T')[0]);
+      }
+      navigate(`/explore?${searchParams.toString()}`);
+    } else {
+      navigate('/explore');
     }
   };
 
@@ -38,7 +46,12 @@ const Index = () => {
               </h1>
             </div>
 
-            {/* Map positioned first */}
+            {/* Search bar with integrated future tab */}
+            <div className="w-full mb-4">
+              <SearchVibes onSearch={() => {}} onFutureSearch={handleFutureSearch} />
+            </div>
+
+            {/* Map positioned between search bar and filters */}
             <div className="w-full mb-4">
               <NearbyVibesMap 
                 locations={mockLocations.slice(0, 5)}
