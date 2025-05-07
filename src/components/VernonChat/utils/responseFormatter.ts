@@ -1,90 +1,81 @@
 
 /**
- * Format location search results for the chat response
- */
-export const formatLocationResponse = (
-  cityName: string, 
-  categoryResults: Record<string, string[]>,
-  paginationParams: Record<string, number> = {}
-): string => {
-  const hasResults = Object.values(categoryResults).some(arr => arr.length > 0);
-  
-  if (!hasResults) {
-    return `I couldn't find specific venues or events in ${cityName} at the moment. Would you like me to recommend some popular activities or search in a different city?`;
-  }
-  
-  // Build response starting with an intro
-  let response = `Here's what's happening in ${cityName} right now:\n\n`;
-  
-  // Add section for each category with results
-  if (categoryResults.nightlife && categoryResults.nightlife.length > 0) {
-    response += `**Nightlife & Bars**\n${categoryResults.nightlife.join('\n')}\n\n`;
-  }
-  
-  if (categoryResults.dining && categoryResults.dining.length > 0) {
-    response += `**Restaurants & Dining**\n${categoryResults.dining.join('\n')}\n\n`;
-  }
-  
-  if (categoryResults.concerts && categoryResults.concerts.length > 0) {
-    response += `**Live Music & Concerts**\n${categoryResults.concerts.join('\n')}\n\n`;
-  }
-  
-  if (categoryResults.events && categoryResults.events.length > 0) {
-    response += `**Events & Happenings**\n${categoryResults.events.join('\n')}\n\n`;
-  }
-  
-  if (categoryResults.attractions && categoryResults.attractions.length > 0) {
-    response += `**Attractions & Landmarks**\n${categoryResults.attractions.join('\n')}\n\n`;
-  }
-  
-  if (categoryResults.sports && categoryResults.sports.length > 0) {
-    response += `**Sports & Recreation**\n${categoryResults.sports.join('\n')}\n\n`;
-  }
-  
-  if (categoryResults.other && categoryResults.other.length > 0) {
-    response += `**Other Points of Interest**\n${categoryResults.other.join('\n')}\n\n`;
-  }
-  
-  // Add a call to action
-  response += `Want to see more options? Ask me about specific types of places or activities in ${cityName}!`;
-  
-  return response;
-};
-
-/**
- * Format a simple response for the chat
- */
-export const formatSimpleResponse = (message: string): string => {
-  return message;
-};
-
-/**
- * Clean response text by removing unnecessary formatting
+ * Format the text response for better readability
+ * @param text The raw text response
+ * @returns Formatted text
  */
 export const cleanResponseText = (text: string): string => {
-  if (!text) return '';
+  // Remove any system prompts or formatting tokens
+  let cleaned = text.replace(/\[CONTEXT:.*?\]/g, '')
+    .replace(/\[USER INTERESTS:.*?\]/g, '')
+    .replace(/\<ASSISTANT\>|\<\/ASSISTANT\>/g, '')
+    .replace(/\[ASSISTANT\]|\[\/ASSISTANT\]/g, '');
   
-  // Remove excessive newlines
-  let cleaned = text.replace(/\n{3,}/g, '\n\n');
+  // Trim any excess whitespace
+  cleaned = cleaned.trim();
   
-  // Remove excessive spaces
-  cleaned = cleaned.replace(/[ ]{2,}/g, ' ');
-  
-  return cleaned.trim();
+  return cleaned;
 };
 
 /**
- * Format API response for display
+ * Format a location response for the chat
+ * @param city The city being searched
+ * @param categoryResults The results grouped by category
+ * @param paginationState Pagination state for paginated results
+ * @returns Formatted response text
  */
-export const formatAPIResponse = (data: any, type: string = 'general'): string => {
-  if (!data) return 'No data available';
+export const formatLocationResponse = (city: string, categoryResults: Record<string, string[]>, paginationState: any = {}): string => {
+  const categories = Object.keys(categoryResults);
   
-  switch (type) {
-    case 'location':
-      return `Found: ${data.name} in ${data.city}, ${data.state || data.country}`;
-    case 'event':
-      return `Event: ${data.name} on ${data.date} at ${data.venue}`;
-    default:
-      return typeof data === 'object' ? JSON.stringify(data, null, 2) : String(data);
+  if (categories.length === 0) {
+    return `I couldn't find any locations in ${city} matching your search. Would you like me to expand the search to nearby areas?`;
   }
+
+  // Start building the response
+  let response = `Here are some places to check out in ${city}:\n\n`;
+
+  // Get the current page for each category
+  const currentPages: Record<string, number> = {};
+  for (const category of categories) {
+    currentPages[category] = paginationState[category] || 0;
+  }
+
+  // Get items per page
+  const itemsPerPage = 5;
+
+  // Add each category and its locations
+  for (const category of categories) {
+    const locations = categoryResults[category];
+    if (locations && locations.length > 0) {
+      // Calculate start and end indices for pagination
+      const start = currentPages[category] * itemsPerPage;
+      const end = start + itemsPerPage;
+      
+      // Get locations for current page
+      const pagedLocations = locations.slice(start, end);
+      
+      if (pagedLocations.length > 0) {
+        // Capitalize category
+        const displayCategory = category.charAt(0).toUpperCase() + category.slice(1);
+        
+        response += `**${displayCategory}**\n`;
+        pagedLocations.forEach(location => {
+          response += `- ${location}\n`;
+        });
+        
+        // Add pagination info if there are more pages
+        if (end < locations.length) {
+          const nextPage = currentPages[category] + 1;
+          response += `\n*For more ${category}, ask for "more ${category}"*\n`;
+        }
+        
+        response += '\n';
+      }
+    }
+  }
+
+  // Add more helpful information
+  response += `You can ask me for more details about any of these places, such as opening hours, prices, or reviews. Or you can say "show me nightlife in ${city}" or "find restaurants in downtown ${city}" to refine your search.`;
+  
+  return response;
 };

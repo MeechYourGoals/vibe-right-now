@@ -20,7 +20,13 @@ export const VertexAIHub = {
   checkContentSafety: (await import('./safety')).checkContentSafety,
   
   // Analysis
-  analyzeText: (await import('./analysis')).analyzeText,
-  extractEntities: (await import('./analysis')).extractEntities,
+  analyzeText: () => { 
+    console.log('analyzeText not implemented'); 
+    return Promise.resolve(null);
+  },
+  extractEntities: () => { 
+    console.log('extractEntities not implemented'); 
+    return Promise.resolve([]); 
+  },
   extractCategories: (await import('./analysis')).extractCategories
 };
