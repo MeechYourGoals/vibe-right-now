@@ -60,6 +60,9 @@ const SearchVibes = ({ onSearch, onFutureSearch }: SearchVibesProps) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
+  
+  // Check if we're on the explore page to know whether to show the Future tab
+  const isExplorePage = location.pathname.includes('/explore');
 
   const filters = [
     "Restaurants",
@@ -209,7 +212,7 @@ const SearchVibes = ({ onSearch, onFutureSearch }: SearchVibesProps) => {
   }, [searchQuery]);
 
   const handleSearch = async () => {
-    if (searchCategory === "future" && dateRange?.from) {
+    if (searchCategory === "future" && dateRange?.from && isExplorePage) {
       if (onFutureSearch) {
         onFutureSearch(dateRange);
       } else {
@@ -403,7 +406,7 @@ const SearchVibes = ({ onSearch, onFutureSearch }: SearchVibesProps) => {
         onValueChange={handleCategoryChange} 
         className="w-full mb-3"
       >
-        <TabsList className="grid grid-cols-5 w-full">
+        <TabsList className={`grid ${isExplorePage ? 'grid-cols-5' : 'grid-cols-4'} w-full`}>
           <TabsTrigger value="all" className="flex items-center gap-1">
             <Search className="h-3.5 w-3.5" />
             <span>All</span>
@@ -420,10 +423,12 @@ const SearchVibes = ({ onSearch, onFutureSearch }: SearchVibesProps) => {
             <Sparkles className="h-3.5 w-3.5" />
             <span>Vibes</span>
           </TabsTrigger>
-          <TabsTrigger value="future" className="flex items-center gap-1">
-            <Calendar className="h-3.5 w-3.5" />
-            <span>Future</span>
-          </TabsTrigger>
+          {isExplorePage && (
+            <TabsTrigger value="future" className="flex items-center gap-1">
+              <Calendar className="h-3.5 w-3.5" />
+              <span>Future</span>
+            </TabsTrigger>
+          )}
         </TabsList>
       </Tabs>
 
