@@ -3,6 +3,27 @@ import { Location, BusinessHours } from "@/types";
 import { generateMockVenue } from "@/utils/locations/locationGenerator";
 import { supabase } from "@/integrations/supabase/client";
 
+// Direct exported functions for compatibility
+export const getVenueById = async (id: string): Promise<Location | null> => {
+  return await VenueService.getVenueById(id);
+};
+
+export const deleteVenue = async (id: string): Promise<void> => {
+  try {
+    // First try to delete from Supabase if connected
+    const { error } = await supabase
+      .from('locations')
+      .delete()
+      .eq('id', id);
+    
+    if (error) {
+      console.log("Error deleting from Supabase or using mock operation", error);
+    }
+  } catch (e) {
+    console.log("Error deleting venue", e);
+  }
+};
+
 export const VenueService = {
   /**
    * Gets venue details for a specific venue ID
@@ -11,7 +32,7 @@ export const VenueService = {
     // First try to get from Supabase if connected
     try {
       const { data, error } = await supabase
-        .from('venues')
+        .from('locations')
         .select('*')
         .eq('id', id)
         .single();
@@ -34,7 +55,7 @@ export const VenueService = {
     // Try to get from Supabase if connected
     try {
       const { data, error } = await supabase
-        .from('venues')
+        .from('locations')
         .select('*')
         .eq('city', city)
         .limit(limit);
@@ -65,7 +86,7 @@ export const VenueService = {
     // Try to get from Supabase if connected
     try {
       const { data, error } = await supabase
-        .from('venues')
+        .from('locations')
         .select('*')
         .eq('city', originalVenue.city)
         .eq('type', originalVenue.type)
@@ -97,9 +118,10 @@ export const VenueService = {
     // Try to update in Supabase if connected
     try {
       const { data, error } = await supabase
-        .from('venues')
+        .from('locations')
         .update(updates)
         .eq('id', venueId)
+        .select()
         .single();
       
       if (!error && data) {
@@ -112,5 +134,14 @@ export const VenueService = {
     // Fall back to mock data
     const venue = await this.getVenueById(venueId);
     return { ...venue, ...updates } as Location;
+  },
+
+  /**
+   * Deletes a venue
+   */
+  async deleteVenue(venueId: string): Promise<void> {
+    await deleteVenue(venueId);
   }
 };
+
+export default VenueService;

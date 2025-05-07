@@ -1,5 +1,5 @@
 
-import { formatLocationResponse } from '../../utils/responseFormatter';
+import { formatLocationResponse } from '../responseFormatter';
 import { LocationService } from '@/services/LocationService';
 import { parseCityStateFromQuery } from '@/utils/geocodingService';
 import { getLocationsByCity } from '@/mock/cityLocations';

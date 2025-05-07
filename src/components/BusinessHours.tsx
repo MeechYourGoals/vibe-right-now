@@ -14,7 +14,7 @@ const BusinessHours = ({ venue }: BusinessHoursProps) => {
   
   // Ensure venue has hours data
   if (!venue.hours) {
-    venue.hours = generateBusinessHours(venue);
+    venue.hours = generateBusinessHours(venue.id);
   }
   
   const todaysHours = getTodaysHours(venue);

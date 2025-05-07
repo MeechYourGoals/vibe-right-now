@@ -4,8 +4,8 @@ import { useParams } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { CalendarIcon, ImageIcon, ListIcon, MapPin, MessageSquare, Plus, Star } from "lucide-react";
-import { Venue, Post } from "@/types";
-import { getVenueById } from "@/services/VenueService";
+import { Venue, Post, Location } from "@/types";
+import { getVenueById, deleteVenue } from "@/services/VenueService";
 import VenueHeader from "@/components/venue/VenueHeader";
 import VenueAbout from "@/components/venue/VenueAbout";
 import VenuePosts from "@/components/venue/VenuePosts";
@@ -24,8 +24,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { deleteVenue } from '@/services/VenueService';
+} from "@/components/ui/alert-dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,7 +32,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import { DotsHorizontalIcon } from '@radix-ui/react-icons';
 import {
   Card,
@@ -41,8 +40,8 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Textarea } from "@/components/ui/textarea"
+} from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
 import { SkeletonVenueHeader } from '@/components/SkeletonVenueHeader';
 import { SkeletonVenueAbout } from '@/components/SkeletonVenueAbout';
 import { SkeletonVenuePosts } from '@/components/SkeletonVenuePosts';
@@ -52,29 +51,9 @@ import { SkeletonVenueAssistant } from '@/components/SkeletonVenueAssistant';
 import VenueReviews from '@/components/venue/VenueReviews';
 import VernonVenueAssistant from '@/components/venue/VernonVenueAssistant';
 
-interface VenuePostsContentProps {
-  posts: Post[];
-  viewMode: 'grid' | 'list';
-  setViewMode: (mode: 'grid' | 'list') => void;
-  canDelete: boolean;
-  getPostComments: (postId: string) => Promise<any[]>;
-}
-
-const VenuePostsContent: React.FC<VenuePostsContentProps> = ({ posts, viewMode, setViewMode, canDelete, getPostComments }) => {
-  return (
-    <VenuePosts
-      posts={posts}
-      viewMode={viewMode}
-      setViewMode={setViewMode}
-      canDelete={canDelete}
-      getPostComments={getPostComments}
-    />
-  );
-};
-
 const VenueProfile: React.FC = () => {
   const { id: venueId } = useParams<{ id: string }>();
-  const [venue, setVenue] = useState<Venue | null>(null);
+  const [venue, setVenue] = useState<Location | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"about" | "posts" | "map" | "reviews">("about");
   const [venuePosts, setVenuePosts] = useState<Post[]>([]);
@@ -276,12 +255,11 @@ const VenueProfile: React.FC = () => {
                   </CardContent>
                 </Card>
               )}
-              <VenuePostsContent 
-                posts={venuePosts}
+              <VenuePosts
+                venueId={venueId || ''}
                 viewMode={viewMode}
                 setViewMode={setViewMode}
                 canDelete={isOwner}
-                getPostComments={getPostComments}
               />
             </TabsContent>
           </div>

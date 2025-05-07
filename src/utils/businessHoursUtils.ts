@@ -1,85 +1,83 @@
 
-import { BusinessHours, Location } from '@/types';
+import { Location, BusinessHours } from "@/types";
 
-// Format business hours for display
-export const formatBusinessHours = (hours: BusinessHours | undefined): Record<string, string> => {
-  if (!hours) {
-    return {
-      monday: "Hours not available",
-      tuesday: "Hours not available",
-      wednesday: "Hours not available",
-      thursday: "Hours not available",
-      friday: "Hours not available",
-      saturday: "Hours not available",
-      sunday: "Hours not available"
-    };
-  }
-  
-  return hours;
-};
-
-// Get today's hours string
-export const getTodaysHours = (location: Location): string => {
-  if (!location.hours) return "Hours not available";
-  
-  const today = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
-  const hours = location.hours as BusinessHours;
-  
-  return hours[today as keyof BusinessHours] as string || "Hours not available";
-};
-
-// Generate business hours based on venue type
-export const generateBusinessHours = (type: string): BusinessHours => {
-  if (type === "restaurant") {
-    return {
-      monday: "11:00 AM - 10:00 PM",
-      tuesday: "11:00 AM - 10:00 PM",
-      wednesday: "11:00 AM - 10:00 PM",
-      thursday: "11:00 AM - 10:00 PM",
-      friday: "11:00 AM - 11:00 PM",
-      saturday: "11:00 AM - 11:00 PM",
-      sunday: "12:00 PM - 9:00 PM"
-    };
-  } else if (type === "bar") {
-    return {
-      monday: "4:00 PM - 12:00 AM",
-      tuesday: "4:00 PM - 12:00 AM",
-      wednesday: "4:00 PM - 12:00 AM",
-      thursday: "4:00 PM - 1:00 AM",
-      friday: "4:00 PM - 2:00 AM",
-      saturday: "4:00 PM - 2:00 AM",
-      sunday: "4:00 PM - 12:00 AM"
-    };
-  } else if (type === "attraction") {
-    return {
-      monday: "10:00 AM - 6:00 PM",
-      tuesday: "10:00 AM - 6:00 PM",
-      wednesday: "10:00 AM - 6:00 PM", 
-      thursday: "10:00 AM - 6:00 PM",
-      friday: "10:00 AM - 8:00 PM",
-      saturday: "9:00 AM - 9:00 PM", 
-      sunday: "9:00 AM - 6:00 PM"
-    };
-  } else if (type === "sports" || type === "event") {
-    return {
-      monday: "Event times vary",
-      tuesday: "Event times vary",
-      wednesday: "Event times vary",
-      thursday: "Event times vary", 
-      friday: "Event times vary",
-      saturday: "Event times vary",
-      sunday: "Event times vary"
-    };
-  }
-  
-  // Default hours
+export const generateBusinessHours = (venue: Location | string): BusinessHours => {
+  // Create default business hours
   return {
     monday: "9:00 AM - 5:00 PM",
     tuesday: "9:00 AM - 5:00 PM",
-    wednesday: "9:00 AM - 5:00 PM", 
+    wednesday: "9:00 AM - 5:00 PM",
     thursday: "9:00 AM - 5:00 PM",
-    friday: "9:00 AM - 5:00 PM",
-    saturday: "10:00 AM - 3:00 PM",
-    sunday: "Closed"
+    friday: "9:00 AM - 8:00 PM",
+    saturday: "10:00 AM - 10:00 PM",
+    sunday: "11:00 AM - 4:00 PM"
   };
+};
+
+export const getTodaysHours = (venue: Location): string => {
+  if (!venue || !venue.hours) return "Hours not available";
+  
+  const today = new Date().toLocaleString('en-US', { weekday: 'lowercase' });
+  
+  switch (today) {
+    case 'monday': return venue.hours.monday || "Closed";
+    case 'tuesday': return venue.hours.tuesday || "Closed";
+    case 'wednesday': return venue.hours.wednesday || "Closed";
+    case 'thursday': return venue.hours.thursday || "Closed";
+    case 'friday': return venue.hours.friday || "Closed";
+    case 'saturday': return venue.hours.saturday || "Closed";
+    case 'sunday': return venue.hours.sunday || "Closed";
+    default: return "Hours not available";
+  }
+};
+
+export const isOpenNow = (hours: BusinessHours): boolean => {
+  const now = new Date();
+  const dayOfWeek = now.toLocaleString('en-US', { weekday: 'lowercase' });
+  
+  // Get today's hours
+  let todayHours;
+  switch (dayOfWeek) {
+    case 'monday': todayHours = hours.monday; break;
+    case 'tuesday': todayHours = hours.tuesday; break;
+    case 'wednesday': todayHours = hours.wednesday; break;
+    case 'thursday': todayHours = hours.thursday; break;
+    case 'friday': todayHours = hours.friday; break;
+    case 'saturday': todayHours = hours.saturday; break;
+    case 'sunday': todayHours = hours.sunday; break;
+    default: return false;
+  }
+  
+  if (todayHours === "Closed" || !todayHours) return false;
+  
+  // Parse hours like "9:00 AM - 5:00 PM"
+  const [openStr, closeStr] = todayHours.split(" - ");
+  if (!openStr || !closeStr) return false;
+  
+  // Convert to 24-hour format for comparison
+  const currentHour = now.getHours();
+  const currentMinute = now.getMinutes();
+  
+  // Parse opening hours
+  const openMatch = openStr.match(/(\d+):(\d+)\s*(AM|PM)/i);
+  if (!openMatch) return false;
+  let openHour = parseInt(openMatch[1]);
+  const openMinute = parseInt(openMatch[2]);
+  if (openMatch[3].toUpperCase() === "PM" && openHour !== 12) openHour += 12;
+  if (openMatch[3].toUpperCase() === "AM" && openHour === 12) openHour = 0;
+  
+  // Parse closing hours
+  const closeMatch = closeStr.match(/(\d+):(\d+)\s*(AM|PM)/i);
+  if (!closeMatch) return false;
+  let closeHour = parseInt(closeMatch[1]);
+  const closeMinute = parseInt(closeMatch[2]);
+  if (closeMatch[3].toUpperCase() === "PM" && closeHour !== 12) closeHour += 12;
+  if (closeMatch[3].toUpperCase() === "AM" && closeHour === 12) closeHour = 0;
+  
+  // Check if current time is within operating hours
+  const currentTime = currentHour * 60 + currentMinute;
+  const openTime = openHour * 60 + openMinute;
+  const closeTime = closeHour * 60 + closeMinute;
+  
+  return currentTime >= openTime && currentTime <= closeTime;
 };

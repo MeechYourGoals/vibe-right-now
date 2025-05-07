@@ -57,3 +57,34 @@ export const formatLocationResponse = (
 export const formatSimpleResponse = (message: string): string => {
   return message;
 };
+
+/**
+ * Clean response text by removing unnecessary formatting
+ */
+export const cleanResponseText = (text: string): string => {
+  if (!text) return '';
+  
+  // Remove excessive newlines
+  let cleaned = text.replace(/\n{3,}/g, '\n\n');
+  
+  // Remove excessive spaces
+  cleaned = cleaned.replace(/[ ]{2,}/g, ' ');
+  
+  return cleaned.trim();
+};
+
+/**
+ * Format API response for display
+ */
+export const formatAPIResponse = (data: any, type: string = 'general'): string => {
+  if (!data) return 'No data available';
+  
+  switch (type) {
+    case 'location':
+      return `Found: ${data.name} in ${data.city}, ${data.state || data.country}`;
+    case 'event':
+      return `Event: ${data.name} on ${data.date} at ${data.venue}`;
+    default:
+      return typeof data === 'object' ? JSON.stringify(data, null, 2) : String(data);
+  }
+};

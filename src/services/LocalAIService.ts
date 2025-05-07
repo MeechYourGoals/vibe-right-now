@@ -1,74 +1,51 @@
 
-// Service for local AI processing using TensorFlow.js
-// Used for small tasks that don't need to call external APIs
-
+// Simple AI service for local processing
 export const localAI = {
-  /**
-   * Initializes the local AI models
-   */
-  async init(): Promise<boolean> {
-    try {
-      // Simulated initialization - in a real app, we would load TensorFlow.js models here
-      console.log('LocalAI service initialized');
-      return true;
-    } catch (error) {
-      console.error('Error initializing LocalAI service:', error);
-      return false;
+  init: async (): Promise<boolean> => {
+    console.log('Initializing local AI service');
+    return true;
+  },
+
+  initModels: async (): Promise<boolean> => {
+    console.log('Initializing AI models');
+    return true;
+  },
+
+  analyzeSentiment: async (text: string): Promise<{ label: string; score: number }> => {
+    // Simple sentiment analysis
+    const positive = text.match(/good|great|excellent|happy|love|like|enjoy/gi);
+    const negative = text.match(/bad|terrible|awful|sad|hate|dislike|poor/gi);
+    
+    const positiveScore = positive ? positive.length : 0;
+    const negativeScore = negative ? negative.length : 0;
+    
+    if (positiveScore > negativeScore) {
+      return { label: 'positive', score: 0.5 + (positiveScore - negativeScore) * 0.1 };
+    } else if (negativeScore > positiveScore) {
+      return { label: 'negative', score: 0.5 - (negativeScore - positiveScore) * 0.1 };
+    } else {
+      return { label: 'neutral', score: 0.5 };
     }
   },
   
-  /**
-   * Basic sentiment analysis without external API calls
-   * Using a simple rule-based approach
-   */
-  async analyzeSentiment(text: string): Promise<{label: string, score: number}> {
-    // Simple keyword-based sentiment analysis
-    const positiveWords = ['good', 'great', 'excellent', 'awesome', 'love', 'like', 'happy', 'best', 'recommend', 'amazing', 'fantastic'];
-    const negativeWords = ['bad', 'terrible', 'awful', 'hate', 'dislike', 'disappointed', 'worst', 'poor', 'horrible', 'avoid'];
-    
+  extractKeywords: async (text: string): Promise<string[]> => {
+    // Simple keyword extraction
     const words = text.toLowerCase().split(/\W+/);
-    
-    let positiveCount = 0;
-    let negativeCount = 0;
-    
-    words.forEach(word => {
-      if (positiveWords.includes(word)) positiveCount++;
-      if (negativeWords.includes(word)) negativeCount++;
-    });
-    
-    // Calculate sentiment score
-    let score = 0.5; // Neutral by default
-    if (positiveCount > 0 || negativeCount > 0) {
-      score = positiveCount / (positiveCount + negativeCount);
-    }
-    
-    // Determine sentiment label
-    let label = 'neutral';
-    if (score > 0.6) label = 'positive';
-    if (score < 0.4) label = 'negative';
-    
-    return { label, score };
+    const stopWords = ['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'with', 'by'];
+    const keywords = words.filter(word => word.length > 3 && !stopWords.includes(word));
+    return [...new Set(keywords)].slice(0, 5); // Return up to 5 unique keywords
   },
   
-  /**
-   * Simple keyword extraction
-   */
-  async extractKeywords(text: string): Promise<string[]> {
-    // Simple TF-IDF style keyword extraction
-    const words = text.toLowerCase().split(/\W+/).filter(word => word.length > 3);
+  calculateTextSimilarity: (text1: string, text2: string): number => {
+    // Simple Jaccard similarity
+    const set1 = new Set(text1.toLowerCase().split(/\W+/).filter(w => w.length > 2));
+    const set2 = new Set(text2.toLowerCase().split(/\W+/).filter(w => w.length > 2));
     
-    // Count word frequencies
-    const wordCounts: Record<string, number> = {};
-    words.forEach(word => {
-      wordCounts[word] = (wordCounts[word] || 0) + 1;
-    });
+    const intersection = new Set([...set1].filter(x => set2.has(x)));
+    const union = new Set([...set1, ...set2]);
     
-    // Sort by frequency
-    const keywords = Object.entries(wordCounts)
-      .sort((a, b) => b[1] - a[1])
-      .map(entry => entry[0])
-      .slice(0, 5);
-    
-    return keywords;
+    return intersection.size / union.size;
   }
 };
+
+export default localAI;

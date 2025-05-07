@@ -1,108 +1,90 @@
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
+import { Location, Post } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { formatTimeAgo } from "@/utils/timeUtils";
-import { Sparkles } from "lucide-react";
-import { VenueService } from '@/services/VenueService';
-import type { Location } from '@/types';
 
-export interface RecentVibesProps {
-  locationId: string;
+interface RecentVibesProps {
+  location: Location;
 }
 
-export default function RecentVibes({ locationId }: RecentVibesProps) {
-  const [location, setLocation] = useState<Location | null>(null);
+const RecentVibes = ({ location }: RecentVibesProps) => {
+  const [recentPosts, setRecentPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchLocation = async () => {
+    const fetchRecentPosts = async () => {
+      setIsLoading(true);
       try {
-        setIsLoading(true);
-        const locationData = await VenueService.getVenueById(locationId);
-        setLocation(locationData);
+        // In a real implementation, this would fetch from an API
+        // For now, we'll generate mock data
+        const mockPosts: Post[] = Array(3).fill(null).map((_, i) => ({
+          id: `mock-${location.id}-${i}`,
+          content: `Check out ${location.name}! ${i === 0 ? 'Great vibes tonight!' : i === 1 ? 'Amazing atmosphere!' : 'Love this place!'}`,
+          timestamp: new Date(Date.now() - i * 3600000).toISOString(),
+          likes: Math.floor(Math.random() * 50),
+          comments: Math.floor(Math.random() * 10),
+          authorId: `user-${i + 1}`,
+          locationId: location.id,
+          media: i === 0 ? [{ type: 'image', url: 'https://picsum.photos/400/300' }] : undefined
+        }));
+        
+        setRecentPosts(mockPosts);
       } catch (error) {
-        console.error("Error fetching location:", error);
+        console.error('Error fetching recent posts:', error);
       } finally {
         setIsLoading(false);
       }
     };
     
-    fetchLocation();
-  }, [locationId]);
+    if (location?.id) {
+      fetchRecentPosts();
+    }
+  }, [location]);
 
-  // If location is still loading
   if (isLoading) {
     return (
-      <Card className="mt-4 shadow-sm">
-        <CardContent className="p-4">
-          <div className="flex justify-between items-center mb-2">
-            <h3 className="text-lg font-semibold">Recent Vibes</h3>
-            <Sparkles className="h-5 w-5 text-primary" />
-          </div>
-          <p className="text-sm text-muted-foreground">Loading recent vibes...</p>
-        </CardContent>
-      </Card>
-    );
-  }
-  
-  // If no location data found
-  if (!location) {
-    return (
-      <Card className="mt-4 shadow-sm">
-        <CardContent className="p-4">
-          <div className="flex justify-between items-center mb-2">
-            <h3 className="text-lg font-semibold">Recent Vibes</h3>
-            <Sparkles className="h-5 w-5 text-primary" />
-          </div>
-          <p className="text-sm text-muted-foreground">No recent vibes available.</p>
-        </CardContent>
-      </Card>
+      <div className="mt-4">
+        <h3 className="text-sm font-medium mb-2">Recent Vibes</h3>
+        <div className="space-y-2">
+          {[1, 2].map((i) => (
+            <div key={i} className="h-12 rounded-md bg-muted animate-pulse"></div>
+          ))}
+        </div>
+      </div>
     );
   }
 
-  // Simulate recent vibes for the prototype
-  const vibes = location.vibes || ["Energetic", "Crowded", "Popular"];
-  
+  if (!recentPosts.length) {
+    return (
+      <div className="mt-4">
+        <h3 className="text-sm font-medium mb-2">Recent Vibes</h3>
+        <Card>
+          <CardContent className="p-3">
+            <p className="text-xs text-muted-foreground">No recent vibes at this location.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
-    <Card className="mt-4 shadow-sm">
-      <CardContent className="p-4">
-        <div className="flex justify-between items-center mb-2">
-          <h3 className="text-lg font-semibold">Recent Vibes</h3>
-          <Sparkles className="h-5 w-5 text-primary" />
-        </div>
-        
-        <div className="space-y-4">
-          {/* Current vibes */}
-          <div>
-            <p className="text-sm font-medium">Current Vibes</p>
-            <div className="flex flex-wrap gap-2 mt-1">
-              {vibes.map((vibe, index) => (
-                <Badge key={index} variant="secondary">{vibe}</Badge>
-              ))}
-            </div>
-          </div>
-          
-          {/* Recent updates */}
-          <div>
-            <p className="text-sm font-medium">Recent Updates</p>
-            <div className="space-y-2 mt-2">
-              <div className="flex items-center justify-between">
-                <p className="text-sm">Crowd level increased</p>
-                <span className="text-xs text-muted-foreground">{formatTimeAgo(new Date(Date.now() - 1800000))}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <p className="text-sm">Music level increased</p>
-                <span className="text-xs text-muted-foreground">{formatTimeAgo(new Date(Date.now() - 3600000))}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <p className="text-sm">New photos added</p>
-                <span className="text-xs text-muted-foreground">{formatTimeAgo(new Date(Date.now() - 7200000))}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="mt-4">
+      <h3 className="text-sm font-medium mb-2">Recent Vibes</h3>
+      <div className="space-y-2">
+        {recentPosts.map((post) => (
+          <Card key={post.id}>
+            <CardContent className="p-3">
+              <p className="text-xs truncate">{post.content}</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                {formatTimeAgo(post.timestamp)} • {post.likes} likes
+              </p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
   );
-}
+};
+
+export default RecentVibes;
