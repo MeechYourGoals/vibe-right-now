@@ -1,107 +1,85 @@
 
-import { BusinessHours } from "@/types";
+import { BusinessHours, Location } from '@/types';
 
-/**
- * Gets the day of the week name for a given date or current day
- * @param date Optional date to get day name for
- * @returns Day of the week name
- */
-export const getDayName = (date: Date = new Date()): string => {
-  const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-  return days[date.getDay()];
-};
-
-/**
- * Formats hours as 12h time
- * @param hours Hour in 24h format
- * @param minutes Minutes
- * @returns Formatted time string
- */
-export const formatTime = (hours: number, minutes: number): string => {
-  const period = hours >= 12 ? 'PM' : 'AM';
-  const displayHours = hours % 12 || 12;
-  const displayMinutes = minutes.toString().padStart(2, '0');
-  return `${displayHours}:${displayMinutes} ${period}`;
-};
-
-/**
- * Checks if a venue is currently open
- * @param hours Business hours object
- * @returns Boolean indicating if venue is open
- */
-export const isVenueOpen = (hours: BusinessHours | Record<string, any>): boolean => {
-  const now = new Date();
-  const currentDayName = getDayName(now).toLowerCase();
-  const currentDay = hours[currentDayName];
-  
-  // If closed today
-  if (!currentDay || currentDay === 'Closed') return false;
-  
-  // Parse open and close times
-  const [openHours, openMinutes] = parseTimeString(currentDay.open);
-  const [closeHours, closeMinutes] = parseTimeString(currentDay.close);
-  
-  const currentHours = now.getHours();
-  const currentMinutes = now.getMinutes();
-  
-  // Convert to total minutes for easy comparison
-  const currentTotalMinutes = currentHours * 60 + currentMinutes;
-  const openTotalMinutes = openHours * 60 + openMinutes;
-  const closeTotalMinutes = closeHours * 60 + closeMinutes;
-  
-  // Handle cases where closing time is on the next day (e.g. 2 AM)
-  if (closeTotalMinutes < openTotalMinutes) {
-    return currentTotalMinutes >= openTotalMinutes || currentTotalMinutes < closeTotalMinutes;
+// Format business hours for display
+export const formatBusinessHours = (hours: BusinessHours | undefined): Record<string, string> => {
+  if (!hours) {
+    return {
+      monday: "Hours not available",
+      tuesday: "Hours not available",
+      wednesday: "Hours not available",
+      thursday: "Hours not available",
+      friday: "Hours not available",
+      saturday: "Hours not available",
+      sunday: "Hours not available"
+    };
   }
   
-  return currentTotalMinutes >= openTotalMinutes && currentTotalMinutes < closeTotalMinutes;
+  return hours;
 };
 
-/**
- * Parses a time string like "9:00 AM" into hours and minutes
- * @param timeStr Time string to parse
- * @returns Array of [hours, minutes] in 24h format
- */
-export const parseTimeString = (timeStr: string): [number, number] => {
-  if (!timeStr || typeof timeStr !== 'string') {
-    return [0, 0]; // Default for invalid input
-  }
+// Get today's hours string
+export const getTodaysHours = (location: Location): string => {
+  if (!location.hours) return "Hours not available";
   
-  const match = timeStr.match(/(\d+):(\d+)\s*([AP]M)/i);
-  if (!match) return [0, 0];
+  const today = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+  const hours = location.hours as BusinessHours;
   
-  let hours = parseInt(match[1], 10);
-  const minutes = parseInt(match[2], 10);
-  const period = match[3].toUpperCase();
-  
-  if (period === 'PM' && hours < 12) {
-    hours += 12;
-  } else if (period === 'AM' && hours === 12) {
-    hours = 0;
-  }
-  
-  return [hours, minutes];
+  return hours[today as keyof BusinessHours] as string || "Hours not available";
 };
 
-/**
- * Formats business hours in a readable format
- * @param hours Business hours object
- * @returns Formatted business hours string
- */
-export const formatBusinessHours = (hours: BusinessHours | Record<string, any>): string => {
-  let result = '';
-  const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-  
-  for (const day of days) {
-    const dayHours = hours[day];
-    const dayName = day.charAt(0).toUpperCase() + day.slice(1);
-    
-    if (!dayHours || dayHours === 'Closed') {
-      result += `${dayName}: Closed\n`;
-    } else {
-      result += `${dayName}: ${dayHours.open} - ${dayHours.close}\n`;
-    }
+// Generate business hours based on venue type
+export const generateBusinessHours = (type: string): BusinessHours => {
+  if (type === "restaurant") {
+    return {
+      monday: "11:00 AM - 10:00 PM",
+      tuesday: "11:00 AM - 10:00 PM",
+      wednesday: "11:00 AM - 10:00 PM",
+      thursday: "11:00 AM - 10:00 PM",
+      friday: "11:00 AM - 11:00 PM",
+      saturday: "11:00 AM - 11:00 PM",
+      sunday: "12:00 PM - 9:00 PM"
+    };
+  } else if (type === "bar") {
+    return {
+      monday: "4:00 PM - 12:00 AM",
+      tuesday: "4:00 PM - 12:00 AM",
+      wednesday: "4:00 PM - 12:00 AM",
+      thursday: "4:00 PM - 1:00 AM",
+      friday: "4:00 PM - 2:00 AM",
+      saturday: "4:00 PM - 2:00 AM",
+      sunday: "4:00 PM - 12:00 AM"
+    };
+  } else if (type === "attraction") {
+    return {
+      monday: "10:00 AM - 6:00 PM",
+      tuesday: "10:00 AM - 6:00 PM",
+      wednesday: "10:00 AM - 6:00 PM", 
+      thursday: "10:00 AM - 6:00 PM",
+      friday: "10:00 AM - 8:00 PM",
+      saturday: "9:00 AM - 9:00 PM", 
+      sunday: "9:00 AM - 6:00 PM"
+    };
+  } else if (type === "sports" || type === "event") {
+    return {
+      monday: "Event times vary",
+      tuesday: "Event times vary",
+      wednesday: "Event times vary",
+      thursday: "Event times vary", 
+      friday: "Event times vary",
+      saturday: "Event times vary",
+      sunday: "Event times vary"
+    };
   }
   
-  return result;
+  // Default hours
+  return {
+    monday: "9:00 AM - 5:00 PM",
+    tuesday: "9:00 AM - 5:00 PM",
+    wednesday: "9:00 AM - 5:00 PM", 
+    thursday: "9:00 AM - 5:00 PM",
+    friday: "9:00 AM - 5:00 PM",
+    saturday: "10:00 AM - 3:00 PM",
+    sunday: "Closed"
+  };
 };

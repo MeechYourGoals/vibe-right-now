@@ -1,45 +1,59 @@
 
-import { paginateItems, createPaginationLinks, formatPaginatedCategoryResults } from '@/services/search/paginationUtils';
-
 /**
- * Formats the response from location data into a readable format with categories
+ * Format location search results for the chat response
  */
 export const formatLocationResponse = (
   cityName: string, 
   categoryResults: Record<string, string[]>,
   paginationParams: Record<string, number> = {}
 ): string => {
-  if (Object.keys(categoryResults).length === 0) return "";
+  const hasResults = Object.values(categoryResults).some(arr => arr.length > 0);
   
-  let response = `Here's what's happening in ${cityName}:\n\n`;
+  if (!hasResults) {
+    return `I couldn't find specific venues or events in ${cityName} at the moment. Would you like me to recommend some popular activities or search in a different city?`;
+  }
   
-  // Loop through each category
-  Object.keys(categoryResults).forEach(category => {
-    const items = categoryResults[category];
-    if (items && items.length > 0) {
-      // Get the current page for this category (default to 1)
-      const currentPage = paginationParams[category] || 1;
-      
-      // Add category header with total count
-      let displayCategory = category.charAt(0).toUpperCase() + category.slice(1);
-      response += `**${displayCategory}** (${items.length} options)\n\n`;
-      
-      // Format the paginated results for this category
-      response += formatPaginatedCategoryResults(category, items, currentPage);
-      
-      response += '\n\n';
-    }
-  });
+  // Build response starting with an intro
+  let response = `Here's what's happening in ${cityName} right now:\n\n`;
+  
+  // Add section for each category with results
+  if (categoryResults.nightlife && categoryResults.nightlife.length > 0) {
+    response += `**Nightlife & Bars**\n${categoryResults.nightlife.join('\n')}\n\n`;
+  }
+  
+  if (categoryResults.dining && categoryResults.dining.length > 0) {
+    response += `**Restaurants & Dining**\n${categoryResults.dining.join('\n')}\n\n`;
+  }
+  
+  if (categoryResults.concerts && categoryResults.concerts.length > 0) {
+    response += `**Live Music & Concerts**\n${categoryResults.concerts.join('\n')}\n\n`;
+  }
+  
+  if (categoryResults.events && categoryResults.events.length > 0) {
+    response += `**Events & Happenings**\n${categoryResults.events.join('\n')}\n\n`;
+  }
+  
+  if (categoryResults.attractions && categoryResults.attractions.length > 0) {
+    response += `**Attractions & Landmarks**\n${categoryResults.attractions.join('\n')}\n\n`;
+  }
+  
+  if (categoryResults.sports && categoryResults.sports.length > 0) {
+    response += `**Sports & Recreation**\n${categoryResults.sports.join('\n')}\n\n`;
+  }
+  
+  if (categoryResults.other && categoryResults.other.length > 0) {
+    response += `**Other Points of Interest**\n${categoryResults.other.join('\n')}\n\n`;
+  }
+  
+  // Add a call to action
+  response += `Want to see more options? Ask me about specific types of places or activities in ${cityName}!`;
   
   return response;
 };
 
 /**
- * Clean response text by removing certain markdown formatting
+ * Format a simple response for the chat
  */
-export const cleanResponseText = (text: string): string => {
-  // Clean any double line breaks or excessive spacing
-  return text
-    .replace(/\n{3,}/g, '\n\n')
-    .trim();
+export const formatSimpleResponse = (message: string): string => {
+  return message;
 };

@@ -1,96 +1,108 @@
 
-import React from 'react';
+import { useEffect, useState } from 'react';
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import VenuePost from "@/components/VenuePost";
-import { getMediaForLocation } from "@/utils/map/locationMediaUtils";
-import { getLocationVibes } from "@/utils/locationUtils";
-import { 
-  isWithinThreeMonths, 
-  isPopularRightNow,
-  calculateCrowdLevel
-} from "@/utils/timeUtils";
+import { formatTimeAgo } from "@/utils/timeUtils";
+import { Sparkles } from "lucide-react";
+import { VenueService } from '@/services/VenueService';
+import type { Location } from '@/types';
 
-interface RecentVibesProps {
+export interface RecentVibesProps {
   locationId: string;
 }
 
-const RecentVibes: React.FC<RecentVibesProps> = ({ locationId }) => {
-  // Get vibes for this location
-  const vibes = getLocationVibes(locationId);
+export default function RecentVibes({ locationId }: RecentVibesProps) {
+  const [location, setLocation] = useState<Location | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchLocation = async () => {
+      try {
+        setIsLoading(true);
+        const locationData = await VenueService.getVenueById(locationId);
+        setLocation(locationData);
+      } catch (error) {
+        console.error("Error fetching location:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchLocation();
+  }, [locationId]);
+
+  // If location is still loading
+  if (isLoading) {
+    return (
+      <Card className="mt-4 shadow-sm">
+        <CardContent className="p-4">
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="text-lg font-semibold">Recent Vibes</h3>
+            <Sparkles className="h-5 w-5 text-primary" />
+          </div>
+          <p className="text-sm text-muted-foreground">Loading recent vibes...</p>
+        </CardContent>
+      </Card>
+    );
+  }
   
-  // Get crowdedness level (1-3)
-  const crowdLevel = calculateCrowdLevel();
-  
-  // Determine if it's popular right now
-  const isPopularNow = isPopularRightNow();
-  
-  // Determine if it's trending (has recent activity)
-  const isTrending = isWithinThreeMonths(new Date().toISOString());
+  // If no location data found
+  if (!location) {
+    return (
+      <Card className="mt-4 shadow-sm">
+        <CardContent className="p-4">
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="text-lg font-semibold">Recent Vibes</h3>
+            <Sparkles className="h-5 w-5 text-primary" />
+          </div>
+          <p className="text-sm text-muted-foreground">No recent vibes available.</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Simulate recent vibes for the prototype
+  const vibes = location.vibes || ["Energetic", "Crowded", "Popular"];
   
   return (
-    <Card>
-      <CardHeader className="py-3">
-        <h3 className="text-lg font-semibold">Current Vibes</h3>
-      </CardHeader>
-      <CardContent className="py-2">
-        <div className="flex flex-wrap gap-2 mb-4">
-          {vibes.map((vibe, index) => (
-            <Badge key={index} variant="outline" className="bg-secondary/20">
-              {vibe}
-            </Badge>
-          ))}
+    <Card className="mt-4 shadow-sm">
+      <CardContent className="p-4">
+        <div className="flex justify-between items-center mb-2">
+          <h3 className="text-lg font-semibold">Recent Vibes</h3>
+          <Sparkles className="h-5 w-5 text-primary" />
         </div>
         
-        <div className="flex items-center justify-between text-sm mb-3">
-          <div className="flex items-center">
-            <span className="mr-1">Crowd Level:</span>
-            <div className="flex">
-              {[...Array(3)].map((_, i) => (
-                <div 
-                  key={i} 
-                  className={`w-2 h-6 mx-0.5 rounded-sm ${
-                    i < crowdLevel ? 'bg-primary' : 'bg-gray-200 dark:bg-gray-700'
-                  }`}
-                />
+        <div className="space-y-4">
+          {/* Current vibes */}
+          <div>
+            <p className="text-sm font-medium">Current Vibes</p>
+            <div className="flex flex-wrap gap-2 mt-1">
+              {vibes.map((vibe, index) => (
+                <Badge key={index} variant="secondary">{vibe}</Badge>
               ))}
             </div>
           </div>
           
-          <div className="flex items-center gap-2">
-            {isPopularNow && (
-              <Badge className="bg-red-500 hover:bg-red-600">Popular Now</Badge>
-            )}
-            {isTrending && (
-              <Badge className="bg-blue-500 hover:bg-blue-600">Trending</Badge>
-            )}
-          </div>
-        </div>
-        
-        {/* Content preview (if any media available) */}
-        <div className="space-y-4 mt-4">
-          {getMediaForLocation(locationId).map(media => (
-            <div key={media.id} className="border rounded-md overflow-hidden">
-              {media.type === 'image' ? (
-                <img 
-                  src={media.url} 
-                  alt="Recent content" 
-                  className="w-full h-48 object-cover"
-                />
-              ) : (
-                <div className="bg-gray-100 dark:bg-gray-800 p-3 text-sm">
-                  {media.caption}
-                </div>
-              )}
-              <div className="p-2 text-xs text-gray-500">
-                {new Date(media.timestamp).toLocaleDateString()} · {media.source}
+          {/* Recent updates */}
+          <div>
+            <p className="text-sm font-medium">Recent Updates</p>
+            <div className="space-y-2 mt-2">
+              <div className="flex items-center justify-between">
+                <p className="text-sm">Crowd level increased</p>
+                <span className="text-xs text-muted-foreground">{formatTimeAgo(new Date(Date.now() - 1800000))}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <p className="text-sm">Music level increased</p>
+                <span className="text-xs text-muted-foreground">{formatTimeAgo(new Date(Date.now() - 3600000))}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <p className="text-sm">New photos added</p>
+                <span className="text-xs text-muted-foreground">{formatTimeAgo(new Date(Date.now() - 7200000))}</span>
               </div>
             </div>
-          ))}
+          </div>
         </div>
       </CardContent>
     </Card>
   );
-};
-
-export default RecentVibes;
+}

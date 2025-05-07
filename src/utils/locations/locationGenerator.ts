@@ -45,6 +45,9 @@ export const generateMockLocations = (count: number = 20): Location[] => {
 
 // Generate mock locations for a specific city
 export const generateCityLocations = (cityName: string, count: number = 5): Location[] => {
+  // Ensure cityName is valid
+  if (!cityName) return [];
+  
   const cityKey = Object.keys(cityCoordinates).find(key => 
     cityCoordinates[key].name.toLowerCase() === cityName.toLowerCase()
   );
@@ -86,8 +89,24 @@ export const generateCityLocations = (cityName: string, count: number = 5): Loca
 export const generateAllCityLocations = (locationsPerCity: number = 3): Location[] => {
   const allLocations: Location[] = [];
   
-  for (const cityKey of Object.keys(cityCoordinates)) {
-    const cityLocations = generateCityLocations(cityCoordinates[cityKey].name, locationsPerCity);
+  // Ensure cityCoordinates is valid and has keys
+  if (!cityCoordinates || typeof cityCoordinates !== 'object') {
+    console.error("City coordinates not available");
+    return [];
+  }
+  
+  const cityKeys = Object.keys(cityCoordinates);
+  
+  // Check if cityKeys is an array before attempting to use forEach
+  if (!Array.isArray(cityKeys) || cityKeys.length === 0) {
+    console.error("No city keys available in cityCoordinates");
+    return [];
+  }
+  
+  // Use for...of instead of forEach to avoid potential issues
+  for (const cityKey of cityKeys) {
+    const cityName = cityCoordinates[cityKey].name;
+    const cityLocations = generateCityLocations(cityName, locationsPerCity);
     allLocations.push(...cityLocations);
   }
   
@@ -111,6 +130,11 @@ const generateName = (index: number, type: string): string => {
     attraction: ["Museum", "Gallery", "Garden", "Tower", "Park"],
     event: ["Festival", "Fair", "Convention", "Show", "Concert"]
   };
+  
+  // Handle potential undefined cases
+  if (!prefixes[type as keyof typeof prefixes] || !suffixes[type as keyof typeof suffixes]) {
+    return `Venue ${index}`;
+  }
   
   const prefix = prefixes[type as keyof typeof prefixes][index % 5];
   const suffix = suffixes[type as keyof typeof suffixes][index % 5];

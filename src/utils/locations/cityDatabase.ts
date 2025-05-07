@@ -102,3 +102,18 @@ export const cityCoordinates: Record<string, { name: string; state?: string; cou
     lng: 13.4050
   }
 };
+
+// Add utility function to safely access city coordinates
+export const getCityCoordinatesByName = (cityName: string): { lat: number, lng: number } | null => {
+  if (!cityName) return null;
+  
+  const cityKey = Object.keys(cityCoordinates).find(key => 
+    cityCoordinates[key].name.toLowerCase() === cityName.toLowerCase()
+  );
+  
+  if (!cityKey) return null;
+  return {
+    lat: cityCoordinates[cityKey].lat,
+    lng: cityCoordinates[cityKey].lng
+  };
+};
