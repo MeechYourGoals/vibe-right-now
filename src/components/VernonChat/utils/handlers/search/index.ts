@@ -1,5 +1,5 @@
 
-export * from './SearchCoordinator';
+export * from './searchCoordinator';
 export * from './comedySearchStrategy';
 export * from './complexQueryStrategy';
 export * from './fallbackSearchStrategy';

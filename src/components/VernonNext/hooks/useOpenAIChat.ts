@@ -1,7 +1,9 @@
+
 import { useState, useCallback } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import { v4 as uuidv4 } from 'uuid';
 import { Message } from '../types';
+import { VertexAIService } from '@/services/VertexAIService';
 
 interface UseOpenAIChatProps {
   initialMessages?: Message[];
@@ -42,60 +44,134 @@ export const useOpenAIChat = ({ initialMessages = [], onContentChange }: UseOpen
     setMessages(prevMessages => [...prevMessages, userMessage]);
     setInput('');
     
-    // Simulate API call
+    // Call Vertex AI / Gemini
     setIsLoading(true);
     
     try {
-      // In a real implementation, this would call your OpenAI API
-      // For now, we'll simulate a response after a delay
-      setTimeout(() => {
-        const aiResponse: Message = {
-          id: uuidv4(),
-          role: 'assistant',
-          content: `I received your message: "${text}". This is a simulated response since we're not connecting to the OpenAI API in this demo.`,
-          timestamp: new Date().toISOString(),
-          sender: 'ai'
-        };
-        
-        setMessages(prevMessages => [...prevMessages, aiResponse]);
-        setCompletion(aiResponse.content);
-        if (onContentChange) {
-          onContentChange(aiResponse.content);
-        }
-        setIsLoading(false);
-      }, 1500);
+      // Create context from previous messages
+      const context = messages.slice(-5).map(msg => ({
+        sender: msg.sender || (msg.role === 'user' ? 'user' : 'ai'),
+        text: msg.content
+      }));
+      
+      // Call Vertex AI service
+      const response = await VertexAIService.generateResponse(text, 'default', context);
+      
+      // Create AI message
+      const aiResponse: Message = {
+        id: uuidv4(),
+        role: 'assistant',
+        content: response,
+        timestamp: new Date().toISOString(),
+        sender: 'ai'
+      };
+      
+      setMessages(prevMessages => [...prevMessages, aiResponse]);
+      setCompletion(aiResponse.content);
+      
+      if (onContentChange) {
+        onContentChange(aiResponse.content);
+      }
       
     } catch (error) {
       console.error('Error sending message:', error);
+      
+      // Create error message
+      const errorResponse: Message = {
+        id: uuidv4(),
+        role: 'error',
+        content: "I'm having trouble connecting to my AI services. Please try again later.",
+        timestamp: new Date().toISOString(),
+        sender: 'ai'
+      };
+      
+      setMessages(prevMessages => [...prevMessages, errorResponse]);
+      
       toast({
         title: "Error sending message",
         variant: "destructive",
       });
+    } finally {
       setIsLoading(false);
     }
-  }, [toast, onContentChange]);
+  }, [toast, onContentChange, messages]);
 
-  // Mocked functions for voice interactions
+  // Voice interaction functions
   const startListening = useCallback(async () => {
     setIsListening(true);
     setTranscript('');
     setInterimTranscript('Listening...');
     
-    // Return a mock MediaRecorder
-    return {
-      start: () => console.log('Started recording'),
-      stop: () => console.log('Stopped recording')
-    };
-  }, []);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      const audioChunks: Blob[] = [];
+      
+      mediaRecorder.addEventListener("dataavailable", event => {
+        audioChunks.push(event.data);
+      });
+      
+      mediaRecorder.addEventListener("stop", async () => {
+        setIsListening(false);
+        setInterimTranscript('Processing...');
+        
+        try {
+          // Convert blob to base64
+          const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+          const reader = new FileReader();
+          reader.readAsDataURL(audioBlob);
+          
+          reader.onloadend = async () => {
+            const base64Audio = (reader.result as string).split(',')[1];
+            
+            try {
+              // Use Vertex AI speech-to-text
+              const transcriptionResult = await VertexAIService.searchWithVertex(`Transcribe this audio: ${base64Audio}`);
+              
+              // Extract the transcription text
+              let extractedText = transcriptionResult;
+              if (transcriptionResult.includes('Transcription:')) {
+                extractedText = transcriptionResult.split('Transcription:')[1].trim();
+              }
+              
+              setTranscript(extractedText);
+              sendMessage(extractedText);
+            } catch (error) {
+              console.error('Speech recognition error:', error);
+              setInterimTranscript('');
+              toast({
+                title: "Speech recognition error",
+                description: "Could not process audio. Please try again.",
+                variant: "destructive",
+              });
+            }
+          };
+        } catch (error) {
+          console.error('Error processing audio:', error);
+          setInterimTranscript('');
+        }
+      });
+      
+      mediaRecorder.start();
+      return mediaRecorder;
+    } catch (error) {
+      console.error('Microphone access error:', error);
+      setIsListening(false);
+      setInterimTranscript('');
+      toast({
+        title: "Microphone access denied",
+        description: "Please allow microphone access to use voice features.",
+        variant: "destructive",
+      });
+      return null;
+    }
+  }, [sendMessage, toast]);
 
-  const stopListening = useCallback((recorder: any) => {
-    if (recorder) {
+  const stopListening = useCallback((recorder: MediaRecorder | null) => {
+    if (recorder && recorder.state !== 'inactive') {
       recorder.stop();
     }
-    setIsListening(false);
     setInterimTranscript('');
-    // Simulate getting a transcript
-    setTranscript('This is a simulated transcript');
   }, []);
 
   const speakText = useCallback(async (text: string) => {
@@ -103,15 +179,56 @@ export const useOpenAIChat = ({ initialMessages = [], onContentChange }: UseOpen
     
     setIsSpeaking(true);
     
-    // In a real implementation, this would use the Web Speech API or a TTS service
-    console.log('Speaking:', text);
-    
-    // Simulate speech duration based on text length
-    const duration = Math.min(2000 + text.length * 50, 10000);
-    
-    setTimeout(() => {
+    try {
+      // Use Vertex AI text-to-speech
+      const audioContent = await VertexAIService.textToSpeech(text, {
+        voice: 'en-US-Neural2-J',
+        speakingRate: 1.0,
+        pitch: 0
+      });
+      
+      if (audioContent) {
+        // Create audio element
+        const audioBlob = new Blob([audioContent], { type: 'audio/mpeg' });
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const audio = new Audio(audioUrl);
+        
+        // Set up event listeners
+        audio.onended = () => {
+          setIsSpeaking(false);
+          URL.revokeObjectURL(audioUrl);
+        };
+        
+        audio.onerror = () => {
+          console.error('Audio playback error');
+          setIsSpeaking(false);
+          URL.revokeObjectURL(audioUrl);
+        };
+        
+        // Play the audio
+        await audio.play();
+      } else {
+        // Fall back to browser TTS
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.onend = () => setIsSpeaking(false);
+        utterance.onerror = () => setIsSpeaking(false);
+        speechSynthesis.speak(utterance);
+      }
+    } catch (error) {
+      console.error('Error speaking text:', error);
       setIsSpeaking(false);
-    }, duration);
+      
+      // Fall back to browser TTS
+      try {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.onend = () => setIsSpeaking(false);
+        utterance.onerror = () => setIsSpeaking(false);
+        speechSynthesis.speak(utterance);
+      } catch (fallbackError) {
+        console.error('Speech synthesis fallback error:', fallbackError);
+        setIsSpeaking(false);
+      }
+    }
   }, [isSpeaking]);
 
   const toggleChat = useCallback(() => {

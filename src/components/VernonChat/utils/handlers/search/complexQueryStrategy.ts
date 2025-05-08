@@ -1,73 +1,77 @@
 
 import { SearchService } from '@/services/search/SearchService';
+import { FallbackSearchStrategy } from './fallbackSearchStrategy';
 
 /**
- * Strategy for handling complex search queries with multiple parameters
- * Now enhanced with Cloud Natural Language API support
+ * Strategy for handling complex queries that may require multiple search approaches
  */
-export const ComplexQueryStrategy = {
+export class ComplexQueryStrategy {
   /**
-   * Determine if a query is complex based on various criteria
+   * Determine if the query is complex enough to warrant special handling
    */
-  isComplexQuery(query: string): boolean {
-    const hasMultipleKeywords = 
-      /(\w+\s+(and|or|with|near|before|after)\s+\w+)|(\w+\s+for\s+\w+)/i.test(query);
-    
-    const hasQuestionWords = 
-      /\b(what|where|when|how|which|why|who)\b/i.test(query);
-    
-    const isLongQuery = query.length > 50;
-    
-    return hasMultipleKeywords || hasQuestionWords || isLongQuery;
-  },
-  
+  static isComplexQuery(query: string): boolean {
+    // Complex queries typically have multiple parts or specific filters
+    return (
+      query.length > 15 &&
+      (query.includes("near") ||
+       query.includes("around") ||
+       query.includes("in") ||
+       query.includes("at") ||
+       query.includes("with") ||
+       query.includes("that") ||
+       query.includes("where") ||
+       query.includes("who") ||
+       query.includes("what") ||
+       query.includes("when") ||
+       query.split(" ").length > 4)
+    );
+  }
+
   /**
-   * Handle complex queries with integrated search service
-   * @param query The complex search query
-   * @param paginationState Current pagination state
-   * @param categories Optional categories extracted by NLP
+   * Handle complex search queries by combining vector and keyword searches
    */
-  async handleComplexQuery(
-    query: string, 
+  static async handleComplexQuery(
+    query: string,
     paginationState: Record<string, number> = {},
     categories: string[] = []
   ): Promise<string> {
-    console.log('Handling complex query with AI-powered search:', query);
-    console.log('Using NLP categories:', categories);
-    
     try {
-      // Try vector search first, which now includes the NLP-derived categories
-      const vectorSearchResult = await SearchService.vectorSearch(query);
+      console.log('Handling complex query with categories:', categories);
       
-      if (typeof vectorSearchResult === 'object' && vectorSearchResult !== null) {
-        // If we have a structured result with categories
-        const combinedCategories = [...new Set([
-          ...(vectorSearchResult.categories || []),
-          ...categories
-        ])];
-        
-        console.log('Combined search categories:', combinedCategories);
-        
-        // Store enhanced categories in session
-        try {
-          sessionStorage.setItem('lastSearchCategories', JSON.stringify(combinedCategories));
-          sessionStorage.setItem('lastSearchQuery', query);
-        } catch (e) {
-          console.error('Error storing combined categories in session:', e);
-        }
-        
-        return vectorSearchResult.results;
-      } else if (typeof vectorSearchResult === 'string' && vectorSearchResult.length > 0) {
+      // First try a vector search with semantic understanding
+      let vectorSearchResult = null;
+      try {
+        vectorSearchResult = await SearchService.vectorSearch(query);
+        console.log('Vector search completed');
+      } catch (error) {
+        console.error('Vector search failed:', error);
+      }
+      
+      // If vector search succeeded and returned meaningful results, use them
+      if (vectorSearchResult && vectorSearchResult.length > 100) {
+        console.log('Vector search returned good results');
         return vectorSearchResult;
       }
       
-      // If vector search didn't return useful results, use generalized search
-      return await SearchService.search(query);
+      // Try standard search service as fallback
+      try {
+        const standardResults = await SearchService.search(query);
+        console.log('Standard search completed');
+        
+        // If both vector and standard search returned results, combine them
+        if (vectorSearchResult && standardResults) {
+          return `Based on your query "${query}", I found:\n\n${vectorSearchResult}\n\nAdditionally:\n\n${standardResults}`;
+        }
+        
+        // Use whichever results we have
+        return standardResults || vectorSearchResult || FallbackSearchStrategy.generateFallbackResponse(query);
+      } catch (error) {
+        console.error('Standard search failed:', error);
+        return vectorSearchResult || FallbackSearchStrategy.generateFallbackResponse(query);
+      }
     } catch (error) {
-      console.error('Error in handleComplexQuery:', error);
-      
-      // Fallback response
-      return `I couldn't find specific information about "${query}". Could you try rephrasing your question?`;
+      console.error('Error in complex query handling:', error);
+      return FallbackSearchStrategy.generateFallbackResponse(query);
     }
   }
-};
+}

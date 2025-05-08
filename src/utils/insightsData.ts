@@ -1,151 +1,72 @@
-import { VenueInsights } from '@/types/insights';
 
-/**
- * Sample venue insights data for visualization and testing purposes
- */
-export const insightsData: VenueInsights[] = [
+import { VenueInsights, WeeklyData, TrendData } from '@/types/insights';
+
+// Current insights data
+export const currentInsights: VenueInsights[] = [
   {
-    id: 1,
-    date: '2023-01',
-    visits: 1200,
-    engagement: 68,  // was 'engagementRate' - fixed to match expected type
-    revenue: 24000,
-    checkIns: 820,
-    sentiment: 72,
-    newCustomers: 340,
-    returningCustomers: 680,
-    peakHours: [20, 21, 22],
-  },
-  {
-    id: 2,
-    date: '2023-02',
-    visits: 1350,
-    engagement: 72,  // was 'engagementRate' - fixed to match expected type
-    revenue: 27000,
-    checkIns: 910,
-    sentiment: 75,
-    newCustomers: 380,
-    returningCustomers: 710,
-    peakHours: [20, 21, 22, 23],
-  },
-  {
-    id: 3,
-    date: '2023-03',
-    visits: 1500,
-    engagement: 75,
-    revenue: 30000,
-    checkIns: 1020,
-    sentiment: 78,
-    newCustomers: 420,
-    returningCustomers: 750,
-    peakHours: [19, 20, 21, 22],
-  },
-  {
-    id: 4,
-    date: '2023-04',
-    visits: 1400,
-    engagement: 70,
-    revenue: 28000,
-    checkIns: 950,
-    sentiment: 74,
-    newCustomers: 390,
-    returningCustomers: 720,
-    peakHours: [20, 21, 22],
-  },
-  {
-    id: 5,
-    date: '2023-05',
-    visits: 1600,
+    id: '1',
+    name: 'The Vibe Bar',
+    visitors: 1245,
     engagement: 78,
-    revenue: 32000,
-    checkIns: 1080,
-    sentiment: 80,
-    newCustomers: 450,
-    returningCustomers: 800,
-    peakHours: [19, 20, 21],
+    revenue: 15400,
+    satisfaction: 92,
+    date: '2023-10-15'
   },
   {
-    id: 6,
-    date: '2023-06',
-    visits: 1750,
-    engagement: 82,
-    revenue: 35000,
-    checkIns: 1190,
-    sentiment: 84,
-    newCustomers: 490,
-    returningCustomers: 850,
-    peakHours: [20, 21, 22],
-  },
-  {
-    id: 7,
-    date: '2023-07',
-    visits: 1800,
-    engagement: 85,
-    revenue: 36000,
-    checkIns: 1220,
-    sentiment: 86,
-    newCustomers: 510,
-    returningCustomers: 880,
-    peakHours: [19, 20, 21],
-  },
-  {
-    id: 8,
-    date: '2023-08',
-    visits: 1700,
-    engagement: 80,
-    revenue: 34000,
-    checkIns: 1150,
-    sentiment: 82,
-    newCustomers: 480,
-    returningCustomers: 830,
-    peakHours: [20, 21, 22],
-  },
-  {
-    id: 9,
-    date: '2023-09',
-    visits: 1600,
-    engagement: 77,
-    revenue: 32000,
-    checkIns: 1080,
-    sentiment: 79,
-    newCustomers: 450,
-    returningCustomers: 800,
-    peakHours: [19, 20, 21],
-  },
-  {
-    id: 10,
-    date: '2023-10',
-    visits: 1500,
-    engagement: 74,
-    revenue: 30000,
-    checkIns: 1020,
-    sentiment: 76,
-    newCustomers: 420,
-    returningCustomers: 750,
-    peakHours: [20, 21, 22],
-  },
-  {
-    id: 11,
-    date: '2023-11',
-    visits: 1400,
-    engagement: 70,
-    revenue: 28000,
-    checkIns: 950,
-    sentiment: 72,
-    newCustomers: 390,
-    returningCustomers: 720,
-    peakHours: [19, 20, 21],
-  },
-  {
-    id: 12,
-    date: '2023-12',
-    visits: 1300,
+    id: '2',
+    name: 'Rhythm Lounge',
+    visitors: 980,
     engagement: 65,
-    revenue: 26000,
-    checkIns: 880,
-    sentiment: 70,
-    newCustomers: 360,
-    returningCustomers: 690,
-    peakHours: [20, 21, 22],
+    revenue: 12300,
+    satisfaction: 88,
+    date: '2023-10-15'
   },
+  {
+    id: '3',
+    name: 'Beats Club',
+    visitors: 1540,
+    engagement: 82,
+    revenue: 18200,
+    satisfaction: 94,
+    date: '2023-10-15'
+  }
 ];
+
+// Generate weekly data for charts
+export const generateWeeklyData = (): WeeklyData[] => {
+  const today = new Date();
+  const data: WeeklyData[] = [];
+
+  // Generate data for the past 7 days
+  for (let i = 6; i >= 0; i--) {
+    const date = new Date();
+    date.setDate(today.getDate() - i);
+    
+    data.push({
+      date: date.toISOString().split('T')[0],
+      visitors: Math.floor(Math.random() * 500) + 800,
+      engagement: Math.floor(Math.random() * 30) + 60,
+      revenue: Math.floor(Math.random() * 5000) + 10000
+    });
+  }
+
+  return data;
+};
+
+// Format trend data for charts
+export const formatTrendData = (weeklyData: WeeklyData[]): TrendData[] => {
+  return [
+    {
+      name: 'Visitors',
+      data: weeklyData.map(item => item.visitors)
+    },
+    {
+      name: 'Engagement',
+      data: weeklyData.map(item => item.engagement)
+    },
+    {
+      name: 'Revenue',
+      data: weeklyData.map(item => item.revenue / 100) // Scale down for better visualization
+    }
+  ];
+};

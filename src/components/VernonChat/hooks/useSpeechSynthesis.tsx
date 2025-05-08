@@ -9,6 +9,7 @@ export const useSpeechSynthesis = () => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
+  const [useElevenLabs, setUseElevenLabs] = useState(false);
   
   // Initialize
   useEffect(() => {
@@ -31,20 +32,6 @@ export const useSpeechSynthesis = () => {
     };
   }, [audio]);
   
-  // Initialize TTS service
-  useEffect(() => {
-    const initCoqui = async () => {
-      try {
-        // Initialize Coqui service without configure - we removed the improper call
-        // CoquiTTSService.configure is defined in our updated service
-      } catch (error) {
-        console.error('Error initializing speech synthesis:', error);
-      }
-    };
-    
-    initCoqui();
-  }, []);
-  
   // Function to speak a response
   const speakResponse = useCallback(async (text: string) => {
     if (!text.trim() || isSpeaking) {
@@ -54,7 +41,32 @@ export const useSpeechSynthesis = () => {
     try {
       setIsSpeaking(true);
       
-      // Get a synthesized voice response using browser's built-in TTS
+      // Use Google's TTS API through Vertex AI
+      try {
+        const audioData = await VertexAIService.textToSpeech(text);
+        
+        if (audioData && audio) {
+          // Create a blob from the audio data
+          const blob = new Blob([audioData], { type: 'audio/mpeg' });
+          const url = URL.createObjectURL(blob);
+          
+          // Set the audio source and play
+          audio.src = url;
+          await audio.play();
+          
+          // Clean up blob URL after playback
+          audio.onended = () => {
+            URL.revokeObjectURL(url);
+            setIsSpeaking(false);
+          };
+          
+          return;
+        }
+      } catch (error) {
+        console.error('Error with Google TTS:', error);
+      }
+      
+      // Fall back to browser's built-in TTS
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.rate = 1.0;
       utterance.pitch = 1.0;
@@ -78,7 +90,7 @@ export const useSpeechSynthesis = () => {
       setIsSpeaking(false);
       toast.error('Error generating speech');
     }
-  }, [isSpeaking]);
+  }, [isSpeaking, audio]);
   
   // Stop speaking
   const stopSpeaking = useCallback(() => {
@@ -112,11 +124,21 @@ export const useSpeechSynthesis = () => {
     }
   }, [audio, isPaused]);
   
+  // Function to prompt for ElevenLabs key (now just a stub since we're not using it)
+  const promptForElevenLabsKey = useCallback(() => {
+    toast.info("We now use Google's speech services instead");
+  }, []);
+  
   return {
     isSpeaking,
     isPaused,
     speakResponse,
     stopSpeaking,
-    togglePause
+    togglePause,
+    useElevenLabs,
+    promptForElevenLabsKey
   };
 };
+
+// Import the VertexAIService
+import { VertexAIService } from '@/services/VertexAIService';
