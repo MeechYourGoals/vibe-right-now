@@ -1,21 +1,17 @@
 
 import React from 'react';
-import { Skeleton } from "@/components/ui/skeleton";
 
 export const SkeletonVenueMap: React.FC = () => {
   return (
-    <div className="mt-4 rounded-md overflow-hidden">
-      <div className="flex justify-between items-center mb-2">
-        <div className="flex items-center">
-          <Skeleton className="h-4 w-4 mr-1" />
-          <Skeleton className="h-4 w-40" />
-        </div>
-        <div className="text-right">
-          <Skeleton className="h-4 w-32" />
-        </div>
+    <div className="bg-white rounded-lg p-4 shadow-md">
+      <div className="flex items-center justify-between mb-4">
+        <div className="h-5 w-20 bg-gray-200 rounded animate-pulse"></div>
+        <div className="h-8 w-16 bg-gray-200 rounded animate-pulse"></div>
       </div>
       
-      <Skeleton className="h-48 w-full rounded-md" />
+      <div className="aspect-square w-full bg-gray-200 rounded-md animate-pulse"></div>
+      
+      <div className="h-4 w-48 bg-gray-200 rounded animate-pulse mt-2"></div>
     </div>
   );
 };

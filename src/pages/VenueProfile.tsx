@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { mockLocations } from "@/mock/data";
-import { Location, Post } from "@/types";
+import { Location } from "@/types";
 import { useToast } from "@/components/ui/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -16,13 +17,13 @@ import { getVenueById } from "@/services/VenueService";
 import { getPostsForVenue } from "@/services/PostService";
 import { getCommentsForPost } from "@/services/CommentService";
 import { Layout } from "@/components/Layout";
-import { Badge } from "@/components/ui/badge";
 import { SkeletonVenueHeader } from "@/components/SkeletonVenueHeader";
 import { SkeletonVenueAbout } from "@/components/SkeletonVenueAbout";
 import { SkeletonVenueMap } from "@/components/SkeletonVenueMap";
 import { SkeletonVenuePosts } from "@/components/SkeletonVenuePosts";
 import { SkeletonVenueAssistant } from "@/components/SkeletonVenueAssistant";
 import { SkeletonVenueReviews } from "@/components/SkeletonVenueReviews";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 const VenueProfile = () => {
   const { id } = useParams<{ id: string }>();

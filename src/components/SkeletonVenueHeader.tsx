@@ -1,36 +1,24 @@
 
 import React from 'react';
-import { Skeleton } from "@/components/ui/skeleton";
 
 export const SkeletonVenueHeader: React.FC = () => {
   return (
-    <div className="space-y-2">
-      <div className="flex items-start justify-between">
-        <div className="space-y-2">
-          <Skeleton className="h-8 w-48" />
-          <div className="flex items-center space-x-2">
-            <Skeleton className="h-4 w-16" />
-            <Skeleton className="h-6 w-20" />
+    <div className="relative">
+      <div className="h-48 md:h-64 w-full rounded-lg overflow-hidden bg-gray-200 animate-pulse"></div>
+      
+      <div className="relative z-10 px-4 py-4 md:py-0 md:-mt-16">
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          <div className="flex flex-col md:flex-row justify-between">
+            <div>
+              <div className="h-8 w-64 bg-gray-200 rounded animate-pulse mb-2"></div>
+              <div className="h-4 w-48 bg-gray-200 rounded animate-pulse"></div>
+              
+              <div className="flex flex-wrap gap-2 mt-3">
+                <div className="h-5 w-16 bg-gray-200 rounded-full animate-pulse"></div>
+                <div className="h-5 w-16 bg-gray-200 rounded-full animate-pulse"></div>
+              </div>
+            </div>
           </div>
-        </div>
-        
-        <div className="flex space-x-2">
-          <Skeleton className="h-9 w-24" />
-          <Skeleton className="h-9 w-24" />
-        </div>
-      </div>
-      
-      <div className="flex space-x-2 mt-2">
-        {[1, 2, 3, 4].map(i => (
-          <Skeleton key={i} className="h-5 w-16" />
-        ))}
-      </div>
-      
-      <div className="grid grid-cols-3 gap-2 mt-4 h-64">
-        <Skeleton className="col-span-2 h-full" />
-        <div className="grid grid-rows-2 gap-2 h-full">
-          <Skeleton className="h-full" />
-          <Skeleton className="h-full" />
         </div>
       </div>
     </div>

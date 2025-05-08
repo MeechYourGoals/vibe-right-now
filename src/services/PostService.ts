@@ -1,174 +1,155 @@
 
-import { Post, User, Comment, Location, Media } from '@/types';
-import { mockLocations } from '@/mock/data';
-import { generateMedia } from '@/utils/generateData';
-import { getRecentTime } from '@/mock/time-utils';
-import { generateComments } from './CommentService';
-
-const mockUsers: User[] = [
-  {
-    id: 'user1',
-    username: 'traveler_jen',
-    email: 'jen@example.com',
-    name: 'Jennifer Smith',
-    avatar: 'https://source.unsplash.com/random/200x200/?portrait',
-    verified: true,
-    bio: 'Travel enthusiast and food lover'
-  },
-  {
-    id: 'user2',
-    username: 'foodie_mike',
-    email: 'mike@example.com', 
-    name: 'Mike Johnson',
-    avatar: 'https://source.unsplash.com/random/200x200/?man',
-    verified: false,
-    bio: 'Always looking for the next great meal'
-  },
-  {
-    id: 'user3',
-    username: 'adventure_sam',
-    email: 'sam@example.com',
-    name: 'Samantha Davis',
-    avatar: 'https://source.unsplash.com/random/200x200/?woman',
-    verified: true,
-    bio: 'Adventure seeker and photographer'
-  }
-];
+import { Post, Media, Location } from "@/types";
+import { getCommentsForPost } from "@/services/CommentService";
 
 // Mock posts data
 const mockPosts: Post[] = [
   {
-    id: '1',
-    authorId: 'user1',
-    content: 'Just had an amazing dinner at this place! The atmosphere is incredible and the food is to die for. Highly recommend the chef\'s special.',
-    locationId: '1',
-    timestamp: getRecentTime(2),
-    likes: 24,
-    comments: 5,
-    user: mockUsers[0],
-    location: mockLocations[0],
-    media: [{ type: 'image', url: 'https://source.unsplash.com/random/600x400/?restaurant' }]
+    id: "p1",
+    content: "Having an amazing time at this place! The vibes are perfect for a Friday night.",
+    authorId: "user1",
+    locationId: "1",
+    timestamp: "2023-04-01T14:30:00Z",
+    likes: 25,
+    comments: 2,
+    media: [
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=600&q=60"
+      }
+    ]
   },
   {
-    id: '2',
-    authorId: 'user2',
-    content: 'Great happy hour deals and the live music here on weekends is fantastic! Make sure to come early to get good seats.',
-    locationId: '2',
-    timestamp: getRecentTime(5),
+    id: "p2",
+    content: "This is my favorite spot in town. Great food, amazing drinks, and the best atmosphere!",
+    authorId: "user2",
+    locationId: "2",
+    timestamp: "2023-04-02T10:15:00Z",
     likes: 18,
-    comments: 3,
-    user: mockUsers[1],
-    location: mockLocations[1],
-    media: [{ type: 'image', url: 'https://source.unsplash.com/random/600x400/?bar' }]
+    comments: 1,
+    media: [
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=600&q=60"
+      }
+    ]
   },
   {
-    id: '3',
-    authorId: 'user3',
-    content: 'This museum has an amazing new exhibit that just opened today. The interactive displays are great for kids too!',
-    locationId: '3',
-    timestamp: getRecentTime(8),
+    id: "p3",
+    content: "Just discovered this hidden gem. Can't believe I haven't been here before!",
+    authorId: "user3",
+    locationId: "3",
+    timestamp: "2023-04-03T16:45:00Z",
     likes: 32,
-    comments: 7,
-    user: mockUsers[2],
-    location: mockLocations[2],
-    media: [{ type: 'image', url: 'https://source.unsplash.com/random/600x400/?museum' }]
+    comments: 0,
+    media: [
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1518051870910-a46e30d9db16?auto=format&fit=crop&w=600&q=60"
+      }
+    ]
   }
 ];
 
-/**
- * Get posts for a specific venue
- */
-export const getPostsForVenue = (venueId: string): Post[] => {
-  // Find venue posts
-  const venuePosts = mockPosts.filter(post => post.locationId === venueId);
-  
-  // Generate more posts if we don't have enough
-  if (venuePosts.length < 5) {
-    const venue = mockLocations.find(loc => loc.id === venueId);
-    if (!venue) return venuePosts;
-    
-    const additionalPosts: Post[] = [];
-    const needed = 5 - venuePosts.length;
-    
-    for (let i = 0; i < needed; i++) {
-      const userId = `user${(i % 3) + 1}`;
-      const user = mockUsers.find(u => u.id === userId) || mockUsers[0];
-      
-      additionalPosts.push({
-        id: `${venueId}-generated-post-${i}`,
-        authorId: userId,
-        content: getRandomPostContent(venue),
-        locationId: venueId,
-        timestamp: getRecentTime(Math.floor(Math.random() * 48)),
-        likes: Math.floor(Math.random() * 50),
-        comments: Math.floor(Math.random() * 10),
-        user: user,
-        location: venue,
-        media: Math.random() > 0.3 ? generateMedia(venue.type) : []
-      });
-    }
-    
-    return [...venuePosts, ...additionalPosts];
-  }
-  
-  return venuePosts;
+// Function to get mock user for a post
+const getMockUserForPost = (authorId: string) => {
+  return {
+    id: authorId,
+    username: authorId === "user1" ? "vibeexplorer" : authorId === "user2" ? "cityviber" : "nightowl",
+    email: `${authorId}@example.com`,
+    avatar: `https://i.pravatar.cc/150?img=${authorId === "user1" ? 1 : authorId === "user2" ? 2 : 3}`,
+    verified: authorId === "user1"
+  };
 };
 
-/**
- * Get all posts
- */
+// Function to get mock location for a post
+const getMockLocationForPost = (locationId: string) => {
+  return {
+    id: locationId,
+    name: `Location ${locationId}`,
+    address: `${parseInt(locationId) * 100} Main St`,
+    city: "San Francisco",
+    state: "CA",
+    country: "USA",
+    zip: "94105",
+    lat: 37.7749 + (parseInt(locationId) * 0.01),
+    lng: -122.4194 + (parseInt(locationId) * 0.01),
+    type: parseInt(locationId) % 2 === 0 ? "restaurant" : "bar",
+    verified: true
+  } as Location;
+};
+
+// Get all posts
 export const getAllPosts = (): Post[] => {
-  return mockPosts;
+  return mockPosts.map(post => ({
+    ...post,
+    user: getMockUserForPost(post.authorId),
+    location: getMockLocationForPost(post.locationId)
+  }));
 };
 
-/**
- * Get random post content based on venue type
- */
-const getRandomPostContent = (venue: Location): string => {
-  const contents = {
-    restaurant: [
-      `Amazing food at ${venue.name}! The service was incredible too.`,
-      `Just tried ${venue.name} for the first time. Definitely coming back!`,
-      `Great atmosphere and delicious food at ${venue.name} in ${venue.city}.`,
-      `The chef's special at ${venue.name} is a must-try. So flavorful!`,
-      `Had a wonderful dinner at ${venue.name}. Perfect for date night.`
-    ],
-    bar: [
-      `Great vibes at ${venue.name} tonight! The drinks are amazing.`,
-      `${venue.name} has the best happy hour deals in ${venue.city}!`,
-      `Love the atmosphere at ${venue.name}. Perfect spot to unwind.`,
-      `The craft cocktails at ${venue.name} are next level.`,
-      `DJ is killing it at ${venue.name} right now! Dance floor is packed.`
-    ],
-    attraction: [
-      `Spending the day at ${venue.name}. Such a beautiful place in ${venue.city}.`,
-      `If you're in ${venue.city}, you have to visit ${venue.name}!`,
-      `Amazing views from ${venue.name}. Worth every penny.`,
-      `The new exhibit at ${venue.name} is fascinating.`,
-      `Family day at ${venue.name}. The kids are loving it!`
-    ],
-    event: [
-      `Having a blast at ${venue.name}! The energy is incredible!`,
-      `${venue.name} in ${venue.city} is packed tonight! Great turnout.`,
-      `This year's ${venue.name} is even better than last year.`,
-      `If you're not at ${venue.name} right now, you're missing out!`,
-      `The lineup at ${venue.name} is amazing. Best night ever!`
-    ],
-    sports: [
-      `Great game at ${venue.name} today! The crowd is electric.`,
-      `Nothing beats the atmosphere at ${venue.name} during a big game.`,
-      `Perfect day for sports at ${venue.name} in ${venue.city}.`,
-      `The new facilities at ${venue.name} are impressive!`,
-      `Cheering on the team at ${venue.name}. Let's go!`
-    ]
+// Get posts for a specific venue/location
+export const getPostsForVenue = (venueId: string): Post[] => {
+  return mockPosts
+    .filter(post => post.locationId === venueId)
+    .map(post => ({
+      ...post,
+      user: getMockUserForPost(post.authorId),
+      location: getMockLocationForPost(post.locationId)
+    }));
+};
+
+// Get a single post by ID
+export const getPostById = (postId: string): Post | null => {
+  const post = mockPosts.find(p => p.id === postId);
+  if (!post) return null;
+  
+  return {
+    ...post,
+    user: getMockUserForPost(post.authorId),
+    location: getMockLocationForPost(post.locationId),
+    comments: getCommentsForPost(post.id).length
+  };
+};
+
+// Create a new post
+export const createPost = (content: string, authorId: string, locationId: string, media: Media[] = []): Post => {
+  const newPost: Post = {
+    id: `p${mockPosts.length + 1}`,
+    content,
+    authorId,
+    locationId,
+    timestamp: new Date().toISOString(),
+    likes: 0,
+    comments: 0,
+    media,
+    user: getMockUserForPost(authorId),
+    location: getMockLocationForPost(locationId)
   };
   
-  const venueType = venue.type as keyof typeof contents;
-  const contentArray = contents[venueType] || contents.attraction;
-  return contentArray[Math.floor(Math.random() * contentArray.length)];
+  mockPosts.push(newPost);
+  return newPost;
 };
 
-export default {
-  getPostsForVenue,
-  getAllPosts
+// Like a post
+export const likePost = (postId: string): Post | null => {
+  const postIndex = mockPosts.findIndex(post => post.id === postId);
+  if (postIndex === -1) return null;
+  
+  mockPosts[postIndex].likes += 1;
+  
+  return {
+    ...mockPosts[postIndex],
+    user: getMockUserForPost(mockPosts[postIndex].authorId),
+    location: getMockLocationForPost(mockPosts[postIndex].locationId)
+  };
+};
+
+// Delete a post
+export const deletePost = (postId: string): boolean => {
+  const postIndex = mockPosts.findIndex(post => post.id === postId);
+  if (postIndex === -1) return false;
+  
+  mockPosts.splice(postIndex, 1);
+  return true;
 };

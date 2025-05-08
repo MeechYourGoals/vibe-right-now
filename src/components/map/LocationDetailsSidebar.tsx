@@ -155,11 +155,11 @@ const LocationDetailsSidebar: React.FC<LocationDetailsSidebarProps> = ({
             )}
           </div>
           
-          {location.websiteUrl && (
+          {location.website && (
             <div className="flex items-center text-sm">
               <Globe className="mr-2 h-4 w-4 text-muted-foreground" />
               <a 
-                href={location.websiteUrl} 
+                href={location.website} 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="text-blue-600 hover:underline"

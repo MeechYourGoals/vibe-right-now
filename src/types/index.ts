@@ -23,14 +23,13 @@ export interface Location {
   verified?: boolean;
   vibes?: string[];
   description?: string;
-  websiteUrl?: string;
+  website?: string; // Used by websiteUrl in components
   phoneNumber?: string;
   priceLevel?: number;
   rating?: number;
   businessHours?: BusinessHours;
   photos?: string[];
   ownerIdentifier?: string;
-  website?: string;
 }
 
 export interface Media {

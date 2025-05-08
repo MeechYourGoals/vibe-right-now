@@ -1,86 +1,72 @@
 
-import { addDays, format, isWithinInterval } from "date-fns";
+import { generateRandomBusinessHours } from "@/utils/locations/businessHoursUtils";
 import { DateRange } from "react-day-picker";
-import { EventItem } from "@/components/venue/events/types";
-import { v4 as uuidv4 } from 'uuid';
+import { addDays, format, isSameDay, isWithinInterval } from "date-fns";
+
+export interface EventItem {
+  id: string;
+  title: string;
+  description: string;
+  date: string;
+  time: string;
+  venue: string;
+  address: string;
+  city: string;
+  state: string;
+  image: string;
+  ticketPrice: string;
+  ticketUrl: string;
+  category: string;
+  featured: boolean;
+  lat: number;
+  lng: number;
+}
 
 // Generate mock music events for a city
 export const generateMusicEvents = (city: string, state: string, dateRange?: DateRange): EventItem[] => {
-  if (!city) {
-    city = "San Francisco";
-    state = "CA";
-  }
-
-  const mockArtists = [
-    'The Rolling Stones', 'Taylor Swift', 'Ed Sheeran', 'Lady Gaga', 'Drake',
-    'Beyoncé', 'Coldplay', 'The Weeknd', 'Bad Bunny', 'BTS',
-    'Harry Styles', 'Post Malone', 'Dua Lipa', 'Billie Eilish', 'Bruno Mars'
-  ];
-
-  const mockVenues = [
-    `${city} Arena`, `The ${city} Theatre`, `${city} Jazz Club`,
-    `Underground ${city}`, `${city} Symphony Hall`
-  ];
-
-  // Generate 5-10 events
-  const eventCount = Math.floor(Math.random() * 5) + 5;
   const events: EventItem[] = [];
-
   const today = new Date();
   
-  for (let i = 0; i < eventCount; i++) {
-    const eventDate = addDays(today, Math.floor(Math.random() * 60));
+  // Generate events for the next 14 days
+  for (let i = 0; i < 8; i++) {
+    const eventDate = addDays(today, i);
     
-    // Skip if event date is outside the selected date range
+    // Skip if outside the selected date range
     if (dateRange?.from && dateRange?.to) {
-      if (!isWithinInterval(eventDate, { start: dateRange.from, end: dateRange.to })) {
+      if (!(isWithinInterval(eventDate, { start: dateRange.from, end: dateRange.to }))) {
         continue;
       }
-    } else if (dateRange?.from && !dateRange?.to) {
-      if (eventDate < dateRange.from) {
+    } else if (dateRange?.from && !dateRange.to) {
+      if (!isSameDay(eventDate, dateRange.from)) {
         continue;
       }
     }
     
-    const artist = mockArtists[Math.floor(Math.random() * mockArtists.length)];
-    const venue = mockVenues[Math.floor(Math.random() * mockVenues.length)];
+    const formattedDate = format(eventDate, "yyyy-MM-dd");
+    const formattedDisplayDate = format(eventDate, "EEEE, MMMM d");
+    
+    const genres = ["Rock", "Pop", "Jazz", "Hip Hop", "Electronic", "Classical", "R&B"];
+    const artists = ["The Weekenders", "Electric Sound", "Jazzy Trio", "Beat Masters", "Symphony Orchestra"];
+    const venues = [`${city} Arena`, `${city} Concert Hall`, "Downtown Theater", "Riverside Venue"];
     
     events.push({
-      id: uuidv4(),
-      title: `${artist} Live`,
-      date: format(eventDate, "yyyy-MM-dd"),
-      time: `${7 + Math.floor(Math.random() * 4)}:00 PM`,
-      venue: venue,
-      location: `${city}, ${state}`,
-      description: `Join us for an unforgettable performance by ${artist} at ${venue}!`,
-      price: `$${45 + Math.floor(Math.random() * 150)}`,
-      ticketsAvailable: 20 + Math.floor(Math.random() * 200),
-      type: "music",
-      image: `https://source.unsplash.com/random/400x300/?concert,music,${artist.split(' ').join(',')}`
+      id: `music-event-${city}-${i}`,
+      title: `${artists[i % artists.length]} ${genres[i % genres.length]} Concert`,
+      description: `Join us for a night of amazing ${genres[i % genres.length]} music with ${artists[i % artists.length]}.`,
+      date: formattedDisplayDate,
+      time: `${7 + (i % 3)}:00 PM`,
+      venue: venues[i % venues.length],
+      address: `${100 + i} Music Avenue`,
+      city,
+      state: state || "CA",
+      image: `https://source.unsplash.com/random/400x300/?concert,${genres[i % genres.length]}`,
+      ticketPrice: `$${25 + (i * 5)}`,
+      ticketUrl: "#",
+      category: "music",
+      featured: i < 2,
+      lat: 37.7749 + (Math.random() * 0.05),
+      lng: -122.4194 + (Math.random() * 0.05)
     });
-  }
-
-  // Always return at least 3 events even if date filtering removed some
-  if (events.length < 3) {
-    for (let i = events.length; i < 3; i++) {
-      const eventDate = addDays(today, Math.floor(Math.random() * 60));
-      const artist = mockArtists[Math.floor(Math.random() * mockArtists.length)];
-      const venue = mockVenues[Math.floor(Math.random() * mockVenues.length)];
-      
-      events.push({
-        id: uuidv4(),
-        title: `${artist} Live`,
-        date: format(eventDate, "yyyy-MM-dd"),
-        time: `${7 + Math.floor(Math.random() * 4)}:00 PM`,
-        venue: venue,
-        location: `${city}, ${state}`,
-        description: `Join us for an unforgettable performance by ${artist} at ${venue}!`,
-        price: `$${45 + Math.floor(Math.random() * 150)}`,
-        ticketsAvailable: 20 + Math.floor(Math.random() * 200),
-        type: "music",
-        image: `https://source.unsplash.com/random/400x300/?concert,music,${artist.split(' ').join(',')}`
-      });
-    }
   }
   
   return events;
@@ -88,114 +74,49 @@ export const generateMusicEvents = (city: string, state: string, dateRange?: Dat
 
 // Generate mock comedy events for a city
 export const generateComedyEvents = (city: string, state: string, dateRange?: DateRange): EventItem[] => {
-  if (!city) {
-    city = "San Francisco";
-    state = "CA";
-  }
-
-  const mockComedians = [
-    'Dave Chappelle', 'Kevin Hart', 'John Mulaney', 'Ali Wong', 'Bill Burr',
-    'Trevor Noah', 'Amy Schumer', 'Chris Rock', 'Jerry Seinfeld', 'Jim Gaffigan'
-  ];
-
-  const mockVenues = [
-    `${city} Comedy Club`, `Laugh Factory ${city}`, `${city} Improv`,
-    `Funny Bone ${city}`, `Comedy Cellar ${city}`
-  ];
-
-  // Generate 5-10 events
-  const eventCount = Math.floor(Math.random() * 5) + 5;
   const events: EventItem[] = [];
-
   const today = new Date();
   
-  for (let i = 0; i < eventCount; i++) {
-    const eventDate = addDays(today, Math.floor(Math.random() * 60));
+  // Generate events for the next 7 days
+  for (let i = 0; i < 6; i++) {
+    const eventDate = addDays(today, i);
     
-    // Skip if event date is outside the selected date range
+    // Skip if outside the selected date range
     if (dateRange?.from && dateRange?.to) {
-      if (!isWithinInterval(eventDate, { start: dateRange.from, end: dateRange.to })) {
+      if (!(isWithinInterval(eventDate, { start: dateRange.from, end: dateRange.to }))) {
         continue;
       }
-    } else if (dateRange?.from && !dateRange?.to) {
-      if (eventDate < dateRange.from) {
+    } else if (dateRange?.from && !dateRange.to) {
+      if (!isSameDay(eventDate, dateRange.from)) {
         continue;
       }
     }
     
-    const comedian = mockComedians[Math.floor(Math.random() * mockComedians.length)];
-    const venue = mockVenues[Math.floor(Math.random() * mockVenues.length)];
+    const formattedDate = format(eventDate, "yyyy-MM-dd");
+    const formattedDisplayDate = format(eventDate, "EEEE, MMMM d");
+    
+    const comedians = ["Amy Johnson", "Mike Roberts", "Sarah Williams", "Jack Thompson", "Liz Davis"];
+    const venues = [`${city} Comedy Club`, "Laugh Factory", "The Punchline", "Comedy Cellar"];
     
     events.push({
-      id: uuidv4(),
-      title: `${comedian} Stand-up`,
-      date: format(eventDate, "yyyy-MM-dd"),
-      time: `${7 + Math.floor(Math.random() * 3)}:30 PM`,
-      venue: venue,
-      location: `${city}, ${state}`,
-      description: `Laugh the night away with ${comedian} at ${venue}!`,
-      price: `$${35 + Math.floor(Math.random() * 100)}`,
-      ticketsAvailable: 20 + Math.floor(Math.random() * 100),
-      type: "comedy",
-      image: `https://source.unsplash.com/random/400x300/?comedy,standup,${comedian.split(' ').join(',')}`
+      id: `comedy-event-${city}-${i}`,
+      title: `${comedians[i % comedians.length]} Stand-Up Comedy`,
+      description: `An evening of hilarious comedy with ${comedians[i % comedians.length]}.`,
+      date: formattedDisplayDate,
+      time: `${8 + (i % 2)}:00 PM`,
+      venue: venues[i % venues.length],
+      address: `${200 + i} Laugh Street`,
+      city,
+      state: state || "CA",
+      image: `https://source.unsplash.com/random/400x300/?comedy,standup`,
+      ticketPrice: `$${20 + (i * 3)}`,
+      ticketUrl: "#",
+      category: "comedy",
+      featured: i < 2,
+      lat: 37.7749 + (Math.random() * 0.05),
+      lng: -122.4194 + (Math.random() * 0.05)
     });
-  }
-
-  // Always return at least 3 events even if date filtering removed some
-  if (events.length < 3) {
-    for (let i = events.length; i < 3; i++) {
-      const eventDate = addDays(today, Math.floor(Math.random() * 60));
-      const comedian = mockComedians[Math.floor(Math.random() * mockComedians.length)];
-      const venue = mockVenues[Math.floor(Math.random() * mockVenues.length)];
-      
-      events.push({
-        id: uuidv4(),
-        title: `${comedian} Stand-up`,
-        date: format(eventDate, "yyyy-MM-dd"),
-        time: `${7 + Math.floor(Math.random() * 3)}:30 PM`,
-        venue: venue,
-        location: `${city}, ${state}`,
-        description: `Laugh the night away with ${comedian} at ${venue}!`,
-        price: `$${35 + Math.floor(Math.random() * 100)}`,
-        ticketsAvailable: 20 + Math.floor(Math.random() * 100),
-        type: "comedy",
-        image: `https://source.unsplash.com/random/400x300/?comedy,standup,${comedian.split(' ').join(',')}`
-      });
-    }
   }
   
   return events;
-};
-
-// Helper function to get comedy events for a specific city
-export const getComedyEventsForCity = (city: string, state: string): EventItem[] => {
-  return generateComedyEvents(city, state);
-};
-
-// Add these missing exports that are imported in SimpleSearchService
-export const generateEventsResponse = (city: string): string => {
-  return `Here are some upcoming events in ${city}:\n\n` +
-    generateMusicEvents(city, "").slice(0, 3).map(event => 
-      `- ${event.title} at ${event.venue} on ${event.date} at ${event.time}`
-    ).join('\n');
-};
-
-export const getCitySpecificEvent = (city: string): string => {
-  const events = generateMusicEvents(city, "");
-  const randomEvent = events[Math.floor(Math.random() * events.length)];
-  return randomEvent ? randomEvent.title : `Concert in ${city}`;
-};
-
-export const getEventWebsite = (city: string): string => {
-  return `https://ticketmaster.com/events/${city.toLowerCase().replace(/\s/g, '-')}`;
-};
-
-// Add this function for backward compatibility with imports
-export const fetchMusicEvents = (city: string, state: string): Promise<EventItem[]> => {
-  return Promise.resolve(generateMusicEvents(city, state));
-};
-
-// Add this function for backward compatibility with imports
-export const fetchComedyEvents = (city: string, state: string): Promise<EventItem[]> => {
-  return Promise.resolve(generateComedyEvents(city, state));
 };

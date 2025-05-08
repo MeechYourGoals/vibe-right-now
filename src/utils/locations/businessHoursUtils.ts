@@ -1,12 +1,5 @@
 
-import { BusinessHours } from "@/types";
-
-// Define the DayHours type here since it's missing from the main types
-type DayHours = boolean | {
-  open: boolean;
-  openTime?: string;
-  closeTime?: string;
-};
+import { BusinessHours, DayHours } from "@/types";
 
 const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
@@ -23,19 +16,21 @@ export const generateRandomBusinessHours = (): BusinessHours => {
   // Determine if the venue has the same hours every day
   const hasSameHours = (seed % 2) === 0;
   
-  const hours: Record<string, DayHours> = {} as BusinessHours;
+  const hours = {} as BusinessHours;
   
   // Generate standard business hours
   const standardOpen = `${8 + (seed % 4)}:00`;
   const standardClose = `${18 + (seed % 6)}:00`;
   
   days.forEach(day => {
+    const dayKey = day as keyof BusinessHours;
+    
     if (!isOpenAllWeek && (day === 'sunday' || (seed % 7 === 0 && day === 'monday'))) {
       // Closed on Sunday and sometimes Monday
-      hours[day] = false;
+      hours[dayKey] = false;
     } else if (hasSameHours) {
       // Same hours every day
-      hours[day] = {
+      hours[dayKey] = {
         open: true,
         openTime: standardOpen,
         closeTime: standardClose
@@ -46,7 +41,7 @@ export const generateRandomBusinessHours = (): BusinessHours => {
       const openHour = (8 + (dayNumber + seed) % 4);
       const closeHour = (18 + (dayNumber + seed) % 6);
       
-      hours[day] = {
+      hours[dayKey] = {
         open: true,
         openTime: `${openHour}:00`,
         closeTime: `${closeHour}:00`
@@ -57,7 +52,7 @@ export const generateRandomBusinessHours = (): BusinessHours => {
     seed += 1;
   });
   
-  return hours as BusinessHours;
+  return hours;
 };
 
 /**
@@ -66,8 +61,8 @@ export const generateRandomBusinessHours = (): BusinessHours => {
 export const getTodaysHoursFormatted = (businessHours?: BusinessHours): string => {
   if (!businessHours) return "Hours not available";
   
-  const today = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
-  const todayHours = businessHours[today as keyof BusinessHours];
+  const today = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase() as keyof BusinessHours;
+  const todayHours = businessHours[today];
   
   if (todayHours === undefined) return "Hours not available";
   if (todayHours === true) return "Open 24 hours";
@@ -85,8 +80,8 @@ export const getTodaysHoursFormatted = (businessHours?: BusinessHours): string =
 export const isVenueOpenNow = (businessHours?: BusinessHours): boolean => {
   if (!businessHours) return false;
   
-  const today = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
-  const todayHours = businessHours[today as keyof BusinessHours];
+  const today = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase() as keyof BusinessHours;
+  const todayHours = businessHours[today];
   
   if (todayHours === undefined) return false;
   if (todayHours === true) return true;

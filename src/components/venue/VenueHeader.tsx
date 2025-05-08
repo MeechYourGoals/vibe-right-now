@@ -1,93 +1,60 @@
 
-import React from 'react';
-import { Venue } from "@/types";
-import { Button } from "@/components/ui/button";
-import { ShareIcon, Star } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+import React from "react";
+import { Location } from "@/types";
 
 interface VenueHeaderProps {
-  venue: Venue;
+  venue: Location;
+  isOwner?: boolean;
 }
 
-const VenueHeader: React.FC<VenueHeaderProps> = ({ venue }) => {
-  const { name, rating, category, tags = [], verified } = venue;
-  
+const VenueHeader: React.FC<VenueHeaderProps> = ({ venue, isOwner = false }) => {
+  const coverStyle = {
+    backgroundImage: `url(https://source.unsplash.com/random/1200x400/?${venue.type},venue)`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center'
+  };
+
   return (
-    <div className="space-y-2">
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-bold flex items-center">
-            {name}
-            {verified && (
-              <Badge variant="outline" className="ml-2 bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800">
-                Verified
-              </Badge>
-            )}
-          </h1>
-          
-          <div className="flex items-center mt-1 space-x-4">
-            {rating && (
-              <div className="flex items-center">
-                <Star className="w-4 h-4 text-yellow-500 mr-1 fill-yellow-500" />
-                <span>{rating.toFixed(1)}</span>
-              </div>
-            )}
-            
-            {category && (
-              <Badge variant="secondary">{category}</Badge>
-            )}
-          </div>
-        </div>
-        
-        <div className="flex space-x-2">
-          <Button variant="outline" size="sm">
-            <ShareIcon className="w-4 h-4 mr-1" />
-            Share
-          </Button>
-          <Button size="sm">Check In</Button>
-        </div>
+    <div className="relative">
+      <div 
+        className="h-48 md:h-64 w-full rounded-lg overflow-hidden relative" 
+        style={coverStyle}
+      >
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
       </div>
       
-      {tags && tags.length > 0 && (
-        <div className="flex flex-wrap gap-1">
-          {tags.map((tag, index) => (
-            <Badge key={index} variant="outline" className="text-xs">
-              {tag}
-            </Badge>
-          ))}
-        </div>
-      )}
-      
-      {venue.images && venue.images.length > 0 ? (
-        <div className="grid grid-cols-3 gap-2 mt-4 h-64">
-          <img 
-            src={venue.images[0]} 
-            alt={venue.name}
-            className="col-span-2 h-full w-full object-cover rounded-l-md"
-          />
-          <div className="grid grid-rows-2 gap-2 h-full">
-            {venue.images[1] && (
-              <img 
-                src={venue.images[1]} 
-                alt={venue.name}
-                className="h-full w-full object-cover rounded-tr-md"
-              />
-            )}
-            {venue.images[2] && (
-              <img 
-                src={venue.images[2]} 
-                alt={venue.name}
-                className="h-full w-full object-cover rounded-br-md"
-              />
-            )}
+      <div className="relative z-10 px-4 py-4 md:py-0 md:-mt-16">
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          <div className="flex flex-col md:flex-row justify-between">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold mb-2">{venue.name}</h1>
+              <p className="text-muted-foreground">
+                {venue.address}, {venue.city}, {venue.state}
+              </p>
+              
+              <div className="flex flex-wrap gap-2 mt-3">
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                  {venue.type.charAt(0).toUpperCase() + venue.type.slice(1)}
+                </span>
+                
+                {venue.verified && (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    Verified
+                  </span>
+                )}
+              </div>
+            </div>
+            
+            <div className="mt-4 md:mt-0 flex flex-col md:items-end">
+              {isOwner && (
+                <button className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90">
+                  Manage Venue
+                </button>
+              )}
+            </div>
           </div>
         </div>
-      ) : (
-        <div className="h-48 bg-muted rounded-md flex items-center justify-center">
-          <p className="text-muted-foreground">No images available</p>
-        </div>
-      )}
+      </div>
     </div>
   );
 };

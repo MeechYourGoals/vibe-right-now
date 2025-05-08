@@ -1,40 +1,49 @@
 
-/**
- * Utility functions for vibe-related operations
- */
+import { Location } from "@/types";
 
-// Generate random vibes for location listings
-export const generateRandomVibes = (): string[] => {
-  const allVibes = [
-    "Trendy", 
-    "Cozy", 
-    "Upscale", 
-    "Family Friendly", 
-    "Romantic", 
-    "Casual", 
-    "Nightowl", 
-    "Chill", 
-    "Energetic",
-    "Artsy",
-    "Historic",
-    "Zen",
-    "Industrial",
-    "Modern",
-    "Classic"
-  ];
+// List of predefined vibes for the explore search functionality
+const vibeOptions = [
+  "Chill", "Energetic", "Cozy", "Trendy", "Romantic", "Family-friendly", 
+  "Casual", "Upscale", "Nightowl", "Foodie", "Social", "Quiet", 
+  "Artsy", "Outdoorsy", "Historic", "Modern", "Local"
+];
+
+// Generate random vibes for a location
+export const generateRandomVibes = (count: number = 3): string[] => {
+  // Shuffle vibes and pick a random number of them
+  return vibeOptions
+    .sort(() => 0.5 - Math.random())
+    .slice(0, Math.min(count, vibeOptions.length));
+};
+
+// Check if location matches vibe
+export const locationMatchesVibe = (location: Location, vibe: string): boolean => {
+  if (!location.vibes) return false;
   
-  // Select 1-3 random vibes
-  const numVibes = Math.floor(Math.random() * 3) + 1;
-  const selectedVibes: string[] = [];
-  
-  for (let i = 0; i < numVibes; i++) {
-    const randomIndex = Math.floor(Math.random() * allVibes.length);
-    const vibe = allVibes[randomIndex];
+  return location.vibes.some(v => 
+    v.toLowerCase() === vibe.toLowerCase()
+  );
+};
+
+// Get all available vibes for filtering
+export const getAllVibes = (): string[] => {
+  return [...vibeOptions];
+};
+
+// Get recommended vibes based on user preferences
+export const getRecommendedVibes = (userPreferences?: string[]): string[] => {
+  if (userPreferences && userPreferences.length > 0) {
+    // Return user preferences + some random ones to make it up to 5
+    const additionalVibes = vibeOptions
+      .filter(vibe => !userPreferences.includes(vibe))
+      .sort(() => 0.5 - Math.random())
+      .slice(0, Math.max(0, 5 - userPreferences.length));
     
-    if (!selectedVibes.includes(vibe)) {
-      selectedVibes.push(vibe);
-    }
+    return [...userPreferences, ...additionalVibes];
   }
   
-  return selectedVibes;
-}
+  // Return random vibes if no user preferences
+  return vibeOptions
+    .sort(() => 0.5 - Math.random())
+    .slice(0, 5);
+};

@@ -4,9 +4,6 @@ import Header from '@/components/Header';
 import SearchVibes from '@/components/SearchVibes';
 import { useNavigate } from 'react-router-dom'; 
 import { mockLocations } from '@/mock/data';
-import RecommendedForYou from '@/components/RecommendedForYou';
-import TrendingLocations from '@/components/TrendingLocations';
-import DiscountLocations from '@/components/DiscountLocations';
 import { LocalAIService } from '@/services/LocalAIService';
 import VernonChat from '@/components/VernonChat';
 
@@ -44,9 +41,41 @@ const Index: React.FC = () => {
         </div>
         
         <div className="space-y-12">
-          <RecommendedForYou locations={mockLocations.slice(0, 4)} />
-          <TrendingLocations locations={mockLocations.slice(4, 10)} />
-          <DiscountLocations locations={mockLocations.slice(10, 14)} />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {mockLocations.slice(0, 4).map(location => (
+              <div key={location.id} className="bg-white rounded-lg shadow-md p-4">
+                <h3 className="font-semibold">{location.name}</h3>
+                <p className="text-sm text-muted-foreground">{location.address}</p>
+                <p className="text-xs text-muted-foreground mt-1">{location.city}, {location.state}</p>
+              </div>
+            ))}
+          </div>
+          
+          <div>
+            <h2 className="text-2xl font-semibold mb-4">Trending Locations</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {mockLocations.slice(4, 10).map(location => (
+                <div key={location.id} className="bg-white rounded-lg shadow-md p-4">
+                  <h3 className="font-semibold">{location.name}</h3>
+                  <p className="text-sm text-muted-foreground">{location.address}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{location.city}, {location.state}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          <div>
+            <h2 className="text-2xl font-semibold mb-4">Discount Locations</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {mockLocations.slice(10, 14).map(location => (
+                <div key={location.id} className="bg-white rounded-lg shadow-md p-4">
+                  <h3 className="font-semibold">{location.name}</h3>
+                  <p className="text-sm text-muted-foreground">{location.address}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{location.city}, {location.state}</p>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </main>
       

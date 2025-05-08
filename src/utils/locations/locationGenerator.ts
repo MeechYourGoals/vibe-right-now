@@ -1,7 +1,8 @@
 
 import { Location } from "@/types";
 import { cityCoordinates } from "./cityDatabase";
-import { generateRandomVenues } from "./mockVenueGenerators";
+import { generateRandomBusinessHours } from "./businessHoursUtils";
+import { generateMusicVenues, generateComedyClubs } from "./mockVenueGenerators";
 
 // Generate mock locations for testing
 export const generateMockLocations = (count: number): Location[] => {
@@ -27,7 +28,7 @@ export const generateMockLocations = (count: number): Location[] => {
 };
 
 // Generate mock locations for a specific city
-export const generateCityLocations = (city: string, state: string, count: number = 10): Location[] => {
+export const generateCityLocations = (city: string = "San Francisco", state: string = "CA", count: number = 10): Location[] => {
   const cityCoord = cityCoordinates[city.toLowerCase()];
   if (!cityCoord) {
     return generateMockLocations(count);
@@ -48,8 +49,13 @@ export const generateCityLocations = (city: string, state: string, count: number
       lng: cityCoord.lng + (Math.random() * 0.05 - 0.025),
       type: ["restaurant", "bar", "attraction", "event", "sports"][i % 5] as any,
       verified: Math.random() > 0.3,
+      businessHours: generateRandomBusinessHours(),
     });
   }
+  
+  // Add music and comedy venues
+  mockLocations.push(...generateMusicVenues(city, state));
+  mockLocations.push(...generateComedyClubs(city, state));
   
   return mockLocations;
 };

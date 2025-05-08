@@ -1,155 +1,36 @@
 
-/**
- * Utility service for geocoding operations
- */
-
-// Get city and state from coordinates using reverse geocoding
-export const getCityStateFromCoordinates = async (lat: number, lng: number): Promise<{city: string, state: string}> => {
-  try {
-    // First try using free Nominatim OpenStreetMap service
-    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
-    
-    if (!response.ok) {
-      throw new Error(`Geocoding error: ${response.status}`);
-    }
-    
-    const data = await response.json();
-    
-    // Extract city and state from address components
-    let city = data.address.city || 
-               data.address.town || 
-               data.address.village || 
-               data.address.hamlet || 
-               "";
-               
-    // For US, state is typically state or state_code
-    // For other countries, it might be county, state, region, etc.
-    let state = data.address.state ||
-                data.address.county ||
-                data.address.region ||
-                "";
-    
-    // If in US, try to convert state name to state code
-    if (data.address.country_code === "us" && state && state.length > 2) {
-      const stateCode = getStateCodeFromName(state);
-      if (stateCode) {
-        state = stateCode;
-      }
-    }
-    
-    return { city, state };
-  } catch (error) {
-    console.error("Geocoding error:", error);
-    
-    // Try using backup geocoding service if primary fails
-    try {
-      const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`);
-      
-      if (!response.ok) {
-        throw new Error(`Backup geocoding error: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      
-      return {
-        city: data.city || data.locality || "",
-        state: data.principalSubdivisionCode ? 
-               data.principalSubdivisionCode.split('-')[1] : 
-               data.principalSubdivision || ""
-      };
-    } catch (backupError) {
-      console.error("Backup geocoding error:", backupError);
-      return { city: "", state: "" };
-    }
-  }
-};
-
-// Mapping of US state full names to state codes
-const usStateMap: Record<string, string> = {
-  'alabama': 'AL',
-  'alaska': 'AK',
-  'arizona': 'AZ',
-  'arkansas': 'AR',
-  'california': 'CA',
-  'colorado': 'CO',
-  'connecticut': 'CT',
-  'delaware': 'DE',
-  'florida': 'FL',
-  'georgia': 'GA',
-  'hawaii': 'HI',
-  'idaho': 'ID',
-  'illinois': 'IL',
-  'indiana': 'IN',
-  'iowa': 'IA',
-  'kansas': 'KS',
-  'kentucky': 'KY',
-  'louisiana': 'LA',
-  'maine': 'ME',
-  'maryland': 'MD',
-  'massachusetts': 'MA',
-  'michigan': 'MI',
-  'minnesota': 'MN',
-  'mississippi': 'MS',
-  'missouri': 'MO',
-  'montana': 'MT',
-  'nebraska': 'NE',
-  'nevada': 'NV',
-  'new hampshire': 'NH',
-  'new jersey': 'NJ',
-  'new mexico': 'NM',
-  'new york': 'NY',
-  'north carolina': 'NC',
-  'north dakota': 'ND',
-  'ohio': 'OH',
-  'oklahoma': 'OK',
-  'oregon': 'OR',
-  'pennsylvania': 'PA',
-  'rhode island': 'RI',
-  'south carolina': 'SC',
-  'south dakota': 'SD',
-  'tennessee': 'TN',
-  'texas': 'TX',
-  'utah': 'UT',
-  'vermont': 'VT',
-  'virginia': 'VA',
-  'washington': 'WA',
-  'west virginia': 'WV',
-  'wisconsin': 'WI',
-  'wyoming': 'WY'
-};
-
-// Get state code from state name
-export const getStateCodeFromName = (stateName: string): string => {
-  return usStateMap[stateName.toLowerCase()] || stateName;
-};
-
-// Get state name from state code
-export const getStateNameFromCode = (stateCode: string): string => {
-  const stateCodeLower = stateCode.toLowerCase();
-  for (const [name, code] of Object.entries(usStateMap)) {
-    if (code.toLowerCase() === stateCodeLower) {
-      return name.charAt(0).toUpperCase() + name.slice(1);
-    }
-  }
-  return stateCode;
-};
-
-// Helper function to get city and state from search query
+// Utility for parsing city and state from search queries
 export const parseCityStateFromQuery = (query: string): { city: string, state: string } => {
-  const parts = query.split(',').map(part => part.trim());
-  const city = parts[0];
-  let state = parts.length > 1 ? parts[1] : "";
+  if (!query) return { city: "", state: "" };
+
+  // Common city-state formats: "City, State", "City State", "City in State"
+  const cityStateRegex = /^(.*?)[,\s]+([A-Za-z]{2})$/;
+  const cityStateMatch = query.match(cityStateRegex);
   
-  // Convert state code to standard format if possible
-  if (state.length === 2) {
-    state = state.toUpperCase();
-  } else if (state.length > 2) {
-    // Try to convert state name to code
-    const stateCode = getStateCodeFromName(state);
-    if (stateCode) {
-      state = stateCode;
+  if (cityStateMatch) {
+    const city = cityStateMatch[1].trim();
+    const state = cityStateMatch[2].trim().toUpperCase();
+    return { city, state };
+  }
+  
+  // Check for known cities without state
+  const knownCities = [
+    "New York", "Los Angeles", "Chicago", "Houston", "Phoenix",
+    "Philadelphia", "San Antonio", "San Diego", "Dallas", "San Jose",
+    "Austin", "Jacksonville", "San Francisco", "Seattle", "Denver",
+    "Boston", "Las Vegas", "Portland", "Miami", "Atlanta"
+  ];
+  
+  for (const city of knownCities) {
+    if (query.toLowerCase().includes(city.toLowerCase())) {
+      return { city, state: "" };
     }
   }
   
-  return { city, state };
+  // If no match, assume the whole query is a city
+  return { city: query.trim(), state: "" };
+};
+
+export default {
+  parseCityStateFromQuery
 };

@@ -1,51 +1,32 @@
 
 import React from 'react';
-import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 export const SkeletonVenuePosts: React.FC = () => {
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <Skeleton className="h-6 w-24" />
-        <div className="flex items-center space-x-2">
-          <Skeleton className="h-8 w-8" />
-          <Skeleton className="h-8 w-8" />
+    <div className="space-y-6">
+      {[1, 2].map((item) => (
+        <div key={item} className="bg-white rounded-lg shadow-md p-4">
+          <div className="flex items-center mb-3">
+            <div className="h-10 w-10 rounded-full bg-gray-200 animate-pulse mr-3"></div>
+            <div>
+              <div className="h-4 w-24 bg-gray-200 rounded animate-pulse"></div>
+              <div className="h-3 w-16 bg-gray-200 rounded animate-pulse mt-1"></div>
+            </div>
+          </div>
+          
+          <div className="h-4 w-full bg-gray-200 rounded animate-pulse mb-2"></div>
+          <div className="h-4 w-5/6 bg-gray-200 rounded animate-pulse mb-3"></div>
+          
+          <div className="mb-3 rounded-md overflow-hidden">
+            <div className="w-full h-48 bg-gray-200 animate-pulse"></div>
+          </div>
+          
+          <div className="flex items-center">
+            <div className="h-4 w-12 bg-gray-200 rounded animate-pulse mr-4"></div>
+            <div className="h-4 w-12 bg-gray-200 rounded animate-pulse"></div>
+          </div>
         </div>
-      </div>
-      
-      <div className="space-y-4">
-        {[1, 2].map(i => (
-          <Card key={i} className="overflow-hidden">
-            <CardHeader className="pb-2">
-              <div className="flex justify-between">
-                <div className="flex items-center">
-                  <Skeleton className="h-10 w-10 rounded-full mr-2" />
-                  <div>
-                    <Skeleton className="h-4 w-32 mb-1" />
-                    <Skeleton className="h-3 w-24" />
-                  </div>
-                </div>
-                <Skeleton className="h-8 w-8" />
-              </div>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <Skeleton className="h-4 w-full mb-2" />
-              <Skeleton className="h-4 w-3/4 mb-2" />
-              <Skeleton className="h-4 w-1/2 mb-4" />
-              <Skeleton className="h-48 w-full" />
-              <div className="flex justify-between items-center mt-4">
-                <div className="flex space-x-4">
-                  <Skeleton className="h-8 w-16" />
-                  <Skeleton className="h-8 w-16" />
-                  <Skeleton className="h-8 w-16" />
-                </div>
-                <Skeleton className="h-8 w-8" />
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      ))}
     </div>
   );
 };
