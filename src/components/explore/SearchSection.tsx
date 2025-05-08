@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SearchVibes from "@/components/SearchVibes";
 import DateRangeSelector from "@/components/DateRangeSelector";
 import { Calendar } from "lucide-react";
@@ -10,39 +9,22 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 interface SearchSectionProps {
-  activeSearchTab: string;
   showDateFilter: boolean;
   dateRange: DateRange | undefined;
-  onSearchTabChange: (value: string) => void;
   onSearch: (query: string, filterType: string, category: string) => void;
   onDateRangeChange: (range: DateRange | undefined) => void;
   onClearDates: () => void;
 }
 
 const SearchSection: React.FC<SearchSectionProps> = ({
-  activeSearchTab,
   showDateFilter,
   dateRange,
-  onSearchTabChange,
   onSearch,
   onDateRangeChange,
   onClearDates
 }) => {
   return (
     <div className="max-w-xl mx-auto mb-6">
-      <Tabs defaultValue={activeSearchTab} value={activeSearchTab} onValueChange={onSearchTabChange} className="w-full mb-4">
-        <TabsList className="grid grid-cols-5 w-full">
-          <TabsTrigger value="all">All</TabsTrigger>
-          <TabsTrigger value="places">Places</TabsTrigger>
-          <TabsTrigger value="users">Users</TabsTrigger>
-          <TabsTrigger value="vibes">Vibes</TabsTrigger>
-          <TabsTrigger value="dates">
-            <Calendar className="h-4 w-4 mr-2" />
-            Dates
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
-      
       <SearchVibes onSearch={onSearch} />
       
       {showDateFilter && (

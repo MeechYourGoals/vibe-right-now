@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { DateRange } from "react-day-picker";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -149,9 +148,7 @@ export const useExploreState = () => {
   const processComplexQuery = async (queryText: string) => {
     try {
       setIsLoadingResults(true);
-      toast({
-        description: "Finding venues and events that match all your criteria..."
-      });
+      toast("Finding venues and events that match all your criteria...");
       
       const { data, error } = await supabase.functions.invoke('vector-search', {
         body: { query: queryText }
@@ -238,9 +235,7 @@ export const useExploreState = () => {
         }
       }
       
-      toast({
-        description: "We've found venues and events matching your criteria"
-      });
+      toast("We've found venues and events matching your criteria");
     } catch (e) {
       console.error('Error processing complex query:', e);
     } finally {
@@ -446,9 +441,7 @@ export const useExploreState = () => {
     searchParams.delete('to');
     navigate(`/explore?${searchParams.toString()}`, { replace: true });
     
-    toast({
-      description: "Showing events for all upcoming dates"
-    });
+    toast("Showing events for all upcoming dates");
   };
   
   // Get page title
