@@ -1,6 +1,6 @@
 
 // If this file doesn't exist, we're creating it
-import { MockUserProfile } from "@/utils/locations/types";
+import { MockUserProfile } from "@/mock/users";
 
 export interface Location {
   id: string;
@@ -9,7 +9,7 @@ export interface Location {
   city: string;
   state?: string;
   country: string;
-  zip?: string; // Added for compatibility
+  zip?: string;
   lat: number;
   lng: number;
   type: "restaurant" | "bar" | "event" | "attraction" | "sports" | "other";
@@ -17,6 +17,9 @@ export interface Location {
   hours?: Record<string, string>;
   vibes?: string[];
   userProfile?: MockUserProfile;
+  rating?: number;
+  followers?: number;
+  checkins?: number;
 }
 
 // VernonChat types
@@ -42,6 +45,26 @@ export interface ChatState {
   searchResults?: any[];
   transcript?: string;
   interimTranscript?: string;
+}
+
+export interface VenueInsights {
+  visitors: number;
+  visitorsChange: string;
+  posts: number;
+  postsChange: string;
+  shares: number;
+  sharesChange: string;
+  likes: number;
+  likesChange: string;
+  engagementRate: string;
+  followerGrowth: string;
+  clickThroughRate: string;
+  totalVisits: number;
+  revenueImpact: string;
+  totalReach: number;
+  impressions: number;
+  viewsPer: number;
+  viewsCount?: number; // Adding as optional for backward compatibility
 }
 
 export * from "./index";

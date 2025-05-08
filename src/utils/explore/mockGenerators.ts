@@ -15,7 +15,7 @@ export const getCitySpecificContent = (location: Location) => {
 export const getMediaForLocation = (location: Location) => {
   return {
     url: `/images/venues/${location.type || 'restaurant'}-${Math.floor(Math.random() * 5) + 1}.jpg`,
-    type: 'image'
+    type: "image" as "image" | "video"
   };
 };
 

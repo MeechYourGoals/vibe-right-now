@@ -121,6 +121,11 @@ export const generateCityLocations = (cityKey: string): Location[] => {
   
   const locations: Location[] = [];
   
+  // Generate dummy zip code for the city
+  const generateCityZip = () => {
+    return `${Math.floor(10000 + Math.random() * 90000)}`;
+  };
+  
   // 1. Sports Venue
   const sportCoords = createCoordinate(city.lat, city.lng, 1);
   const sportId = createId(city.name, 1);
@@ -131,6 +136,7 @@ export const generateCityLocations = (cityKey: string): Location[] => {
     city: city.name,
     state: city.state,
     country: city.country,
+    zip: generateCityZip(),
     lat: sportCoords.lat,
     lng: sportCoords.lng,
     type: "sports",
@@ -150,6 +156,7 @@ export const generateCityLocations = (cityKey: string): Location[] => {
     city: city.name,
     state: city.state,
     country: city.country,
+    zip: generateCityZip(),
     lat: loungeCoords.lat,
     lng: loungeCoords.lng,
     type: "bar",
@@ -169,6 +176,7 @@ export const generateCityLocations = (cityKey: string): Location[] => {
     city: city.name,
     state: city.state,
     country: city.country,
+    zip: generateCityZip(),
     lat: restaurantCoords.lat,
     lng: restaurantCoords.lng,
     type: "restaurant",
@@ -188,6 +196,7 @@ export const generateCityLocations = (cityKey: string): Location[] => {
     city: city.name,
     state: city.state,
     country: city.country,
+    zip: generateCityZip(),
     lat: eventCoords.lat,
     lng: eventCoords.lng,
     type: "event",
@@ -207,6 +216,7 @@ export const generateCityLocations = (cityKey: string): Location[] => {
     city: city.name,
     state: city.state,
     country: city.country,
+    zip: generateCityZip(),
     lat: comedyCoords.lat,
     lng: comedyCoords.lng,
     type: "event",
@@ -226,6 +236,7 @@ export const generateCityLocations = (cityKey: string): Location[] => {
     city: city.name,
     state: city.state,
     country: city.country,
+    zip: generateCityZip(),
     lat: fitnessCoords.lat,
     lng: fitnessCoords.lng,
     type: "other",
@@ -245,6 +256,7 @@ export const generateCityLocations = (cityKey: string): Location[] => {
     city: city.name,
     state: city.state,
     country: city.country,
+    zip: generateCityZip(),
     lat: attractionCoords.lat,
     lng: attractionCoords.lng,
     type: "attraction",
