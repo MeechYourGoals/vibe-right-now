@@ -1,7 +1,6 @@
 
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { useIsMobile } from "@/hooks/use-mobile";
 import UserPoints from "@/components/user-points";
 import NotificationsDropdown from "@/components/notifications/NotificationsDropdown";
@@ -13,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { User, Bookmark, MapPin, Award, UserCircle, LogIn, Settings, Mail, GithubIcon, BarChart, Headphones } from "lucide-react";
+import { User, Bookmark, MapPin, Award, UserCircle, LogIn, Settings, BarChart, Headphones } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AuthDialog } from "@/components/AuthDialog";
 import VernonConciergeDialog from "./VernonConcierge/VernonConciergeDialog";
@@ -50,8 +49,7 @@ const Header = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const handleOpenAuth = (mode: 'signin' | 'signup') => {
-    setAuthMode(mode);
+  const handleOpenAuth = () => {
     setShowAuthDialog(true);
   };
 
@@ -94,14 +92,9 @@ const Header = () => {
                     <DropdownMenuLabel>My Account</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     
-                    <DropdownMenuItem onSelect={() => handleOpenAuth('signin')} className="cursor-pointer">
+                    <DropdownMenuItem onSelect={handleOpenAuth} className="cursor-pointer">
                       <LogIn className="mr-2 h-4 w-4" />
-                      <span>Sign In</span>
-                    </DropdownMenuItem>
-                    
-                    <DropdownMenuItem onSelect={() => handleOpenAuth('signup')} className="cursor-pointer">
-                      <User className="mr-2 h-4 w-4" />
-                      <span>Sign Up</span>
+                      <span>Sign In / Sign Up</span>
                     </DropdownMenuItem>
                     
                     <DropdownMenuSeparator />
@@ -149,12 +142,6 @@ const Header = () => {
                         <BarChart className="mr-2 h-4 w-4" />
                         <span>Data Insights</span>
                       </Link>
-                    </DropdownMenuItem>
-                    
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem>
-                      <ThemeToggle />
-                      <span className="ml-2">Theme</span>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
