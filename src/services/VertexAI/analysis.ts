@@ -41,3 +41,40 @@ export const extractCategories = async (text: string): Promise<string[]> => {
     return [];
   }
 };
+
+// Add these missing methods that are referenced in the code
+export const analyzeText = async (text: string): Promise<any> => {
+  try {
+    // Simple implementation for now
+    return { sentiment: 0, entities: [], categories: await extractCategories(text) };
+  } catch (error) {
+    console.error('Error analyzing text:', error);
+    return { sentiment: 0, entities: [], categories: [] };
+  }
+};
+
+export const extractEntities = async (text: string): Promise<string[]> => {
+  try {
+    // Simple implementation for now
+    const entities: string[] = [];
+    
+    // Look for cities
+    const cityRegex = /\b(?:chicago|new york|los angeles|san francisco|miami|austin|seattle|boston|portland|nashville|denver|dallas|atlanta)\b/gi;
+    const cityMatches = text.match(cityRegex);
+    if (cityMatches) {
+      cityMatches.forEach(city => entities.push(city));
+    }
+    
+    // Look for venue types
+    const venueRegex = /\b(?:club|theater|venue|bar|restaurant|cafe|stadium|arena|gallery|museum)\b/gi;
+    const venueMatches = text.match(venueRegex);
+    if (venueMatches) {
+      venueMatches.forEach(venue => entities.push(venue));
+    }
+    
+    return entities;
+  } catch (error) {
+    console.error('Error extracting entities:', error);
+    return [];
+  }
+};

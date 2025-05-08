@@ -1,61 +1,151 @@
+import { VenueInsights } from '@/types/insights';
 
-// Add the missing property to the type or fix how the object is generated
-// This is a partial fix since we don't have direct access to the full file
-import { VenueInsights } from "@/types";
-
-// Fix for the error about properties not existing in type 'VenueInsights'
-// We'll modify how the insights data is created
-export const generateVenueInsights = (): VenueInsights => {
-  const visitors = Math.floor(Math.random() * 10000) + 500;
-  const posts = Math.floor(Math.random() * 100) + 10;
-  const likes = Math.floor(Math.random() * 200) + 50;
-  
-  return {
-    visitors: visitors,
-    visitorsChange: Number((Math.random() * 30 - 10).toFixed(1)),
-    posts: posts,
-    postsChange: Number((Math.random() * 20 - 5).toFixed(1)),
-    likesChange: Number((Math.random() * 25 - 10).toFixed(1)),
-    engagement: Number((Math.random() * 10 + 2).toFixed(1)),
-    // Remove followerGrowth as it doesn't exist in VenueInsights type
-    clickThroughRate: Number((Math.random() * 5 + 1).toFixed(1)),
-    totalVisits: Math.floor(Math.random() * 15000) + 1000,
-    revenueImpact: `$${Math.floor(Math.random() * 10000) + 1000}`,
-    totalReach: Math.floor(Math.random() * 50000) + 5000,
-    impressions: Math.floor(Math.random() * 75000) + 7500,
-    viewsPer: Math.floor(Math.random() * 5) + 2,
-    likes: likes,
-  };
-};
-
-// Add missing functions that were referenced in other files
-export const generateWeeklyData = () => {
-  return Array(7).fill(0).map((_, i) => ({
-    day: i,
-    visits: Math.floor(Math.random() * 100) + 10,
-    engagement: Math.floor(Math.random() * 50) + 5,
-  }));
-};
-
-// Fix currentInsights to match VenueInsights type
-export const currentInsights: VenueInsights = {
-  visitors: Math.floor(Math.random() * 1000) + 100,
-  visitorsChange: Number((Math.random() * 15 - 5).toFixed(1)),
-  posts: Math.floor(Math.random() * 50) + 10,
-  postsChange: Number((Math.random() * 15 - 5).toFixed(1)),
-  likesChange: Number((Math.random() * 15 - 5).toFixed(1)),
-  engagement: Number((Math.random() * 10 + 2).toFixed(1)),
-  // Remove followerGrowth as it doesn't exist in VenueInsights type
-  clickThroughRate: Number((Math.random() * 5 + 1).toFixed(1)),
-  totalVisits: Math.floor(Math.random() * 15000) + 1000,
-  revenueImpact: `$${Math.floor(Math.random() * 10000) + 1000}`,
-  totalReach: Math.floor(Math.random() * 50000) + 5000,
-  impressions: Math.floor(Math.random() * 75000) + 7500,
-  viewsPer: Math.floor(Math.random() * 5) + 2,
-  visitorCount: Math.floor(Math.random() * 1000) + 100,
-  checkInCount: Math.floor(Math.random() * 500) + 50,
-  receiptUploads: Math.floor(Math.random() * 200) + 20,
-  discountRedemptions: Math.floor(Math.random() * 100) + 10,
-  viewCount: Math.floor(Math.random() * 5000) + 500,
-  likes: Math.floor(Math.random() * 200) + 20,
-};
+/**
+ * Sample venue insights data for visualization and testing purposes
+ */
+export const insightsData: VenueInsights[] = [
+  {
+    id: 1,
+    date: '2023-01',
+    visits: 1200,
+    engagement: 68,  // was 'engagementRate' - fixed to match expected type
+    revenue: 24000,
+    checkIns: 820,
+    sentiment: 72,
+    newCustomers: 340,
+    returningCustomers: 680,
+    peakHours: [20, 21, 22],
+  },
+  {
+    id: 2,
+    date: '2023-02',
+    visits: 1350,
+    engagement: 72,  // was 'engagementRate' - fixed to match expected type
+    revenue: 27000,
+    checkIns: 910,
+    sentiment: 75,
+    newCustomers: 380,
+    returningCustomers: 710,
+    peakHours: [20, 21, 22, 23],
+  },
+  {
+    id: 3,
+    date: '2023-03',
+    visits: 1500,
+    engagement: 75,
+    revenue: 30000,
+    checkIns: 1020,
+    sentiment: 78,
+    newCustomers: 420,
+    returningCustomers: 750,
+    peakHours: [19, 20, 21, 22],
+  },
+  {
+    id: 4,
+    date: '2023-04',
+    visits: 1400,
+    engagement: 70,
+    revenue: 28000,
+    checkIns: 950,
+    sentiment: 74,
+    newCustomers: 390,
+    returningCustomers: 720,
+    peakHours: [20, 21, 22],
+  },
+  {
+    id: 5,
+    date: '2023-05',
+    visits: 1600,
+    engagement: 78,
+    revenue: 32000,
+    checkIns: 1080,
+    sentiment: 80,
+    newCustomers: 450,
+    returningCustomers: 800,
+    peakHours: [19, 20, 21],
+  },
+  {
+    id: 6,
+    date: '2023-06',
+    visits: 1750,
+    engagement: 82,
+    revenue: 35000,
+    checkIns: 1190,
+    sentiment: 84,
+    newCustomers: 490,
+    returningCustomers: 850,
+    peakHours: [20, 21, 22],
+  },
+  {
+    id: 7,
+    date: '2023-07',
+    visits: 1800,
+    engagement: 85,
+    revenue: 36000,
+    checkIns: 1220,
+    sentiment: 86,
+    newCustomers: 510,
+    returningCustomers: 880,
+    peakHours: [19, 20, 21],
+  },
+  {
+    id: 8,
+    date: '2023-08',
+    visits: 1700,
+    engagement: 80,
+    revenue: 34000,
+    checkIns: 1150,
+    sentiment: 82,
+    newCustomers: 480,
+    returningCustomers: 830,
+    peakHours: [20, 21, 22],
+  },
+  {
+    id: 9,
+    date: '2023-09',
+    visits: 1600,
+    engagement: 77,
+    revenue: 32000,
+    checkIns: 1080,
+    sentiment: 79,
+    newCustomers: 450,
+    returningCustomers: 800,
+    peakHours: [19, 20, 21],
+  },
+  {
+    id: 10,
+    date: '2023-10',
+    visits: 1500,
+    engagement: 74,
+    revenue: 30000,
+    checkIns: 1020,
+    sentiment: 76,
+    newCustomers: 420,
+    returningCustomers: 750,
+    peakHours: [20, 21, 22],
+  },
+  {
+    id: 11,
+    date: '2023-11',
+    visits: 1400,
+    engagement: 70,
+    revenue: 28000,
+    checkIns: 950,
+    sentiment: 72,
+    newCustomers: 390,
+    returningCustomers: 720,
+    peakHours: [19, 20, 21],
+  },
+  {
+    id: 12,
+    date: '2023-12',
+    visits: 1300,
+    engagement: 65,
+    revenue: 26000,
+    checkIns: 880,
+    sentiment: 70,
+    newCustomers: 360,
+    returningCustomers: 690,
+    peakHours: [20, 21, 22],
+  },
+];

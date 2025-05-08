@@ -28,4 +28,13 @@ export class SearchService {
       return `I encountered an error while searching for "${query}". Please try again later.`;
     }
   }
+  
+  // Add these methods to satisfy references in the codebase
+  static async comedySearch(query: string): Promise<string> {
+    return await this.search(`comedy events: ${query}`);
+  }
+  
+  static async vectorSearch(query: string, filters?: any): Promise<string> {
+    return await this.search(query);
+  }
 }

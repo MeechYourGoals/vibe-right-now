@@ -1,4 +1,3 @@
-
 import React, { RefObject, useState } from 'react';
 import { X, Minimize2, Maximize2, Mic, MicOff, ArrowRight, VolumeX, Volume2 } from 'lucide-react';
 import { ChatState, ChatMessage, Message } from '@/components/VernonNext/types';
@@ -146,10 +145,10 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
             <h2 className="text-white font-medium flex items-center">
               Vernon
               <Badge variant="outline" className="ml-2 bg-blue-700 text-white border-blue-500 text-xs px-1.5">
-                GPT-4o
+                Gemini
               </Badge>
             </h2>
-            <p className="text-blue-100 text-xs">Powered by OpenAI</p>
+            <p className="text-blue-100 text-xs">AI Assistant</p>
           </div>
         </div>
         <div className="flex items-center space-x-1">
