@@ -1,244 +1,174 @@
 
-import { Post, Comment, User, Media } from "@/types";
+import { Post, User, Comment, Location, Media } from '@/types';
 import { mockLocations } from '@/mock/data';
+import { generateMedia } from '@/utils/generateData';
+import { getRecentTime } from '@/mock/time-utils';
+import { generateComments } from './CommentService';
+
+const mockUsers: User[] = [
+  {
+    id: 'user1',
+    username: 'traveler_jen',
+    email: 'jen@example.com',
+    name: 'Jennifer Smith',
+    avatar: 'https://source.unsplash.com/random/200x200/?portrait',
+    verified: true,
+    bio: 'Travel enthusiast and food lover'
+  },
+  {
+    id: 'user2',
+    username: 'foodie_mike',
+    email: 'mike@example.com', 
+    name: 'Mike Johnson',
+    avatar: 'https://source.unsplash.com/random/200x200/?man',
+    verified: false,
+    bio: 'Always looking for the next great meal'
+  },
+  {
+    id: 'user3',
+    username: 'adventure_sam',
+    email: 'sam@example.com',
+    name: 'Samantha Davis',
+    avatar: 'https://source.unsplash.com/random/200x200/?woman',
+    verified: true,
+    bio: 'Adventure seeker and photographer'
+  }
+];
+
+// Mock posts data
+const mockPosts: Post[] = [
+  {
+    id: '1',
+    authorId: 'user1',
+    content: 'Just had an amazing dinner at this place! The atmosphere is incredible and the food is to die for. Highly recommend the chef\'s special.',
+    locationId: '1',
+    timestamp: getRecentTime(2),
+    likes: 24,
+    comments: 5,
+    user: mockUsers[0],
+    location: mockLocations[0],
+    media: [{ type: 'image', url: 'https://source.unsplash.com/random/600x400/?restaurant' }]
+  },
+  {
+    id: '2',
+    authorId: 'user2',
+    content: 'Great happy hour deals and the live music here on weekends is fantastic! Make sure to come early to get good seats.',
+    locationId: '2',
+    timestamp: getRecentTime(5),
+    likes: 18,
+    comments: 3,
+    user: mockUsers[1],
+    location: mockLocations[1],
+    media: [{ type: 'image', url: 'https://source.unsplash.com/random/600x400/?bar' }]
+  },
+  {
+    id: '3',
+    authorId: 'user3',
+    content: 'This museum has an amazing new exhibit that just opened today. The interactive displays are great for kids too!',
+    locationId: '3',
+    timestamp: getRecentTime(8),
+    likes: 32,
+    comments: 7,
+    user: mockUsers[2],
+    location: mockLocations[2],
+    media: [{ type: 'image', url: 'https://source.unsplash.com/random/600x400/?museum' }]
+  }
+];
 
 /**
- * Service for handling posts and comments
+ * Get posts for a specific venue
  */
-class PostService {
-  /**
-   * Get posts for a specific location
-   */
-  async getPostsByLocation(locationId: string): Promise<Post[]> {
-    // In a real app, this would be an API call
-    // For now, we'll generate mock posts
-    const location = mockLocations.find(loc => loc.id === locationId);
+export const getPostsForVenue = (venueId: string): Post[] => {
+  // Find venue posts
+  const venuePosts = mockPosts.filter(post => post.locationId === venueId);
+  
+  // Generate more posts if we don't have enough
+  if (venuePosts.length < 5) {
+    const venue = mockLocations.find(loc => loc.id === venueId);
+    if (!venue) return venuePosts;
     
-    if (!location) {
-      return [];
+    const additionalPosts: Post[] = [];
+    const needed = 5 - venuePosts.length;
+    
+    for (let i = 0; i < needed; i++) {
+      const userId = `user${(i % 3) + 1}`;
+      const user = mockUsers.find(u => u.id === userId) || mockUsers[0];
+      
+      additionalPosts.push({
+        id: `${venueId}-generated-post-${i}`,
+        authorId: userId,
+        content: getRandomPostContent(venue),
+        locationId: venueId,
+        timestamp: getRecentTime(Math.floor(Math.random() * 48)),
+        likes: Math.floor(Math.random() * 50),
+        comments: Math.floor(Math.random() * 10),
+        user: user,
+        location: venue,
+        media: Math.random() > 0.3 ? generateMedia(venue.type) : []
+      });
     }
     
-    // Mock users
-    const users: User[] = [
-      {
-        id: "user1",
-        name: "Alex Johnson",
-        username: "alexj",
-        email: "alex@example.com",
-        avatar: "https://source.unsplash.com/random/100x100/?portrait",
-        verified: true,
-        bio: "Food lover and travel enthusiast"
-      },
-      {
-        id: "user2",
-        name: "Sophia Lee",
-        username: "sophialee",
-        email: "sophia@example.com",
-        avatar: "https://source.unsplash.com/random/100x100/?woman",
-        verified: false,
-        bio: "Coffee addict | Photography buff"
-      },
-      {
-        id: "user3",
-        name: "Marcus Rivera",
-        username: "marcusrivs",
-        email: "marcus@example.com",
-        avatar: "https://source.unsplash.com/random/100x100/?man",
-        verified: true,
-        bio: "Music producer and foodie"
-      }
-    ];
-    
-    // Mock posts with correct type
-    const posts: Post[] = [
-      {
-        id: "post1",
-        content: "Just had an amazing time at this venue! The atmosphere was electric, and the service was top-notch. Will definitely be coming back soon!",
-        timestamp: "2 hours ago",
-        likes: 42,
-        comments: 8,
-        user: users[0],
-        location: location,
-        media: [{ type: "image", url: "https://source.unsplash.com/random/800x600/?restaurant" }]
-      },
-      {
-        id: "post2",
-        content: "Great happy hour deals and the best nachos in town! Met some cool people and had a blast.",
-        timestamp: "Yesterday",
-        likes: 29,
-        comments: 5,
-        user: users[1],
-        location: location,
-        media: [{ type: "image", url: "https://source.unsplash.com/random/800x600/?drinks" }]
-      },
-      {
-        id: "post3",
-        content: "This venue has the most incredible live music! The acoustics are perfect, and the crowd was so into it. Can't wait for the next show!",
-        timestamp: "3 days ago",
-        likes: 67,
-        comments: 12,
-        user: users[2],
-        location: location,
-        media: [{ type: "image", url: "https://source.unsplash.com/random/800x600/?concert" }]
-      }
-    ];
-    
-    return posts;
+    return [...venuePosts, ...additionalPosts];
   }
+  
+  return venuePosts;
+};
 
-  /**
-   * Create a new post
-   */
-  async createPost(data: {
-    content: string;
-    locationId: string;
-    authorId: string;
-    media?: Media[];
-  }): Promise<Post | null> {
-    const location = mockLocations.find(loc => loc.id === data.locationId);
-    
-    if (!location) {
-      return null;
-    }
-    
-    // Mock user
-    const user: User = {
-      id: data.authorId,
-      name: "Current User",
-      username: "currentuser",
-      email: "user@example.com",
-      avatar: "https://source.unsplash.com/random/100x100/?person",
-      verified: false,
-      bio: "App user"
-    };
-    
-    // Create a new post
-    const newPost: Post = {
-      id: `post-${Date.now()}`,
-      content: data.content,
-      timestamp: "Just now",
-      likes: 0,
-      comments: 0,
-      user: user,
-      location: location,
-      media: data.media || []
-    };
-    
-    return newPost;
-  }
+/**
+ * Get all posts
+ */
+export const getAllPosts = (): Post[] => {
+  return mockPosts;
+};
 
-  /**
-   * Get comments for a post
-   */
-  async getCommentsByPost(postId: string): Promise<Comment[]> {
-    // Mock users
-    const users: User[] = [
-      {
-        id: "user1",
-        name: "Alex Johnson",
-        username: "alexj",
-        email: "alex@example.com",
-        avatar: "https://source.unsplash.com/random/100x100/?portrait",
-        verified: true,
-        bio: "Food lover and travel enthusiast"
-      },
-      {
-        id: "user2",
-        name: "Sophia Lee",
-        username: "sophialee",
-        email: "sophia@example.com",
-        avatar: "https://source.unsplash.com/random/100x100/?woman",
-        verified: false,
-        bio: "Coffee addict | Photography buff"
-      },
-      {
-        id: "user3",
-        name: "Marcus Rivera",
-        username: "marcusrivs",
-        email: "marcus@example.com",
-        avatar: "https://source.unsplash.com/random/100x100/?man",
-        verified: true,
-        bio: "Music producer and foodie"
-      }
-    ];
-    
-    // Mock comments with correct type
-    const comments: Comment[] = [
-      {
-        id: "comment1",
-        content: "I totally agree! The atmosphere was amazing.",
-        timestamp: "1 hour ago",
-        user: users[0],
-        postId: postId,
-        likes: 3
-      },
-      {
-        id: "comment2",
-        content: "Did you try their signature cocktail? It was delicious!",
-        timestamp: "3 hours ago",
-        user: users[1],
-        postId: postId,
-        likes: 5
-      },
-      {
-        id: "comment3",
-        content: "I'm going there this weekend. Any recommendations?",
-        timestamp: "5 hours ago",
-        user: users[2],
-        postId: postId,
-        likes: 2
-      }
-    ];
-    
-    return comments;
-  }
+/**
+ * Get random post content based on venue type
+ */
+const getRandomPostContent = (venue: Location): string => {
+  const contents = {
+    restaurant: [
+      `Amazing food at ${venue.name}! The service was incredible too.`,
+      `Just tried ${venue.name} for the first time. Definitely coming back!`,
+      `Great atmosphere and delicious food at ${venue.name} in ${venue.city}.`,
+      `The chef's special at ${venue.name} is a must-try. So flavorful!`,
+      `Had a wonderful dinner at ${venue.name}. Perfect for date night.`
+    ],
+    bar: [
+      `Great vibes at ${venue.name} tonight! The drinks are amazing.`,
+      `${venue.name} has the best happy hour deals in ${venue.city}!`,
+      `Love the atmosphere at ${venue.name}. Perfect spot to unwind.`,
+      `The craft cocktails at ${venue.name} are next level.`,
+      `DJ is killing it at ${venue.name} right now! Dance floor is packed.`
+    ],
+    attraction: [
+      `Spending the day at ${venue.name}. Such a beautiful place in ${venue.city}.`,
+      `If you're in ${venue.city}, you have to visit ${venue.name}!`,
+      `Amazing views from ${venue.name}. Worth every penny.`,
+      `The new exhibit at ${venue.name} is fascinating.`,
+      `Family day at ${venue.name}. The kids are loving it!`
+    ],
+    event: [
+      `Having a blast at ${venue.name}! The energy is incredible!`,
+      `${venue.name} in ${venue.city} is packed tonight! Great turnout.`,
+      `This year's ${venue.name} is even better than last year.`,
+      `If you're not at ${venue.name} right now, you're missing out!`,
+      `The lineup at ${venue.name} is amazing. Best night ever!`
+    ],
+    sports: [
+      `Great game at ${venue.name} today! The crowd is electric.`,
+      `Nothing beats the atmosphere at ${venue.name} during a big game.`,
+      `Perfect day for sports at ${venue.name} in ${venue.city}.`,
+      `The new facilities at ${venue.name} are impressive!`,
+      `Cheering on the team at ${venue.name}. Let's go!`
+    ]
+  };
+  
+  const venueType = venue.type as keyof typeof contents;
+  const contentArray = contents[venueType] || contents.attraction;
+  return contentArray[Math.floor(Math.random() * contentArray.length)];
+};
 
-  /**
-   * Add a comment to a post
-   */
-  async addComment(data: {
-    postId: string;
-    content: string;
-    authorId: string;
-  }): Promise<Comment> {
-    // Create a new comment
-    const newComment: Comment = {
-      id: `comment-${Date.now()}`,
-      content: data.content,
-      timestamp: "Just now",
-      user: {
-        id: data.authorId,
-        name: "Current User",
-        username: "currentuser",
-        email: "user@example.com",
-        avatar: "https://source.unsplash.com/random/100x100/?person",
-        verified: false,
-        bio: "App user"
-      },
-      postId: data.postId,
-      likes: 0
-    };
-    
-    return newComment;
-  }
-
-  /**
-   * Like or unlike a post
-   */
-  async toggleLike(postId: string): Promise<number> {
-    // In a real app, this would toggle a like on the backend
-    // For now, just return a random number of likes
-    return Math.floor(Math.random() * 100);
-  }
-
-  /**
-   * Like or unlike a comment
-   */
-  async toggleCommentLike(commentId: string): Promise<number> {
-    // In a real app, this would toggle a like on the backend
-    // For now, just return a random number of likes
-    return Math.floor(Math.random() * 20);
-  }
-}
-
-export default new PostService();
+export default {
+  getPostsForVenue,
+  getAllPosts
+};

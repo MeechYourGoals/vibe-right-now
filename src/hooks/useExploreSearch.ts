@@ -1,12 +1,10 @@
+
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { DateRange } from "react-day-picker";
 import { parseCityStateFromQuery } from "@/utils/geocodingService";
 import { useExploreData } from "@/hooks/useExploreData";
 import { generateMusicEvents, generateComedyEvents } from "@/services/search/eventService";
-import { searchTripAdvisor } from "@/services/tripAdvisorService";
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from "@/components/ui/use-toast";
 import { generateMockLocationsForCity } from "@/utils/explore/exploreHelpers";
 import { Location } from "@/types";
 import { generateLocalNightlifeVenues } from "@/utils/locations/venueHelpers";
@@ -39,17 +37,12 @@ export const useExploreSearch = () => {
     setVibeFilter,
     isNaturalLanguageSearch,
     setIsNaturalLanguageSearch,
-    searchCategories,
-    setSearchCategories,
     isLoadingResults,
     setIsLoadingResults,
     dateRange,
     setDateRange,
     showDateFilter,
     setShowDateFilter,
-    realDataResults,
-    setRealDataResults,
-    hasRealData
   } = useExploreData();
 
   const location = useLocation();
@@ -94,7 +87,7 @@ export const useExploreSearch = () => {
         setSearchedCity(city || "San Francisco");
         setSearchedState(state || "CA");
         
-        fetchRealData(q, city, state);
+        fetchMockData(q, city, state);
         
         setMusicEvents(generateMusicEvents(city, state, dateRange));
         setComedyEvents(generateComedyEvents(city, state, dateRange));
@@ -105,7 +98,7 @@ export const useExploreSearch = () => {
     } else if (searchedCity) {
       // If no query but we have a detected city (from geolocation), search for it
       const searchText = `${searchedCity}${searchedState ? ', ' + searchedState : ''}`;
-      fetchRealData(searchText, searchedCity, searchedState);
+      fetchMockData(searchText, searchedCity, searchedState);
       
       setMusicEvents(generateMusicEvents(searchedCity, searchedState, dateRange));
       setComedyEvents(generateComedyEvents(searchedCity, searchedState, dateRange));
@@ -162,57 +155,34 @@ export const useExploreSearch = () => {
     }
   }, [dateRange, searchedCity, searchedState]);
 
-  const fetchRealData = async (query: string, city: string, state: string) => {
+  const fetchMockData = async (query: string, city: string, state: string) => {
     setIsLoadingResults(true);
     
     try {
       toast({
-        title: "Searching for real data",
+        title: "Searching for venues",
         description: "Looking for venues in " + (city || query) + "...",
       });
       
-      const searchQuery = query || `${city}, ${state}`;
-      const results = await searchTripAdvisor(searchQuery);
+      const mockResults = generateMockLocationsForCity(city, state);
+      setFilteredLocations(mockResults);
       
-      if (results && results.length > 0) {
-        console.log('Found real data results:', results.length);
-        setRealDataResults(results);
-        
-        const newLocationTags: Record<string, string[]> = {...locationTags};
-        
-        results.forEach(location => {
-          if (!newLocationTags[location.id]) {
-            newLocationTags[location.id] = getAdditionalTags(location);
-          }
-        });
-        
-        setLocationTags(newLocationTags);
-        
-        const combinedResults = [...results];
-        
-        if (combinedResults.length < 10) {
-          const mockResults = generateMockLocationsForCity(city, state);
-          combinedResults.push(...mockResults.slice(0, 10 - combinedResults.length));
+      const newLocationTags: Record<string, string[]> = {...locationTags};
+      
+      mockResults.forEach(location => {
+        if (!newLocationTags[location.id]) {
+          newLocationTags[location.id] = getAdditionalTags(location);
         }
-        
-        setFilteredLocations(combinedResults);
-        
-        toast({
-          title: "Real data found!",
-          description: `Found ${results.length} real venues to explore`,
-        });
-      } else {
-        console.log('No real data found, falling back to mock data');
-        const mockResults = generateMockLocationsForCity(city, state);
-        setFilteredLocations(mockResults);
-        
-        toast({
-          title: "Using mock data",
-          description: "Couldn't find real data, showing similar venues instead",
-        });
-      }
+      });
+      
+      setLocationTags(newLocationTags);
+      
+      toast({
+        title: "Venues found!",
+        description: `Found ${mockResults.length} venues to explore`,
+      });
     } catch (error) {
-      console.error('Error fetching real data:', error);
+      console.error('Error fetching mock data:', error);
       const mockResults = generateMockLocationsForCity(city, state);
       setFilteredLocations(mockResults);
     } finally {
@@ -228,96 +198,98 @@ export const useExploreSearch = () => {
         description: "Finding venues and events that match all your criteria...",
       });
       
-      const { data, error } = await supabase.functions.invoke('vector-search', {
-        body: { query: queryText }
+      // Get category keywords from the query
+      const categoryKeywords = [
+        {keyword: "restaurant", category: "restaurant"},
+        {keyword: "dining", category: "restaurant"},
+        {keyword: "bar", category: "bar"},
+        {keyword: "nightlife", category: "bar"},
+        {keyword: "attraction", category: "attraction"},
+        {keyword: "sport", category: "sports"},
+        {keyword: "sports", category: "sports"},
+        {keyword: "event", category: "event"},
+        {keyword: "comedy", category: "comedy"},
+        {keyword: "music", category: "music"},
+      ];
+      
+      const categories: string[] = [];
+      categoryKeywords.forEach(item => {
+        if (queryText.toLowerCase().includes(item.keyword)) {
+          categories.push(item.category);
+        }
       });
       
-      if (error) {
-        console.error('Error calling vector-search function:', error);
-        setIsLoadingResults(false);
-        return;
-      }
+      // Extract location information from the query
+      const locationMatch = queryText.match(/in\s+([a-zA-Z\s]+)(?:,\s*([a-zA-Z\s]+))?/i);
       
-      if (data && data.categories && data.categories.length > 0) {
-        setSearchCategories(data.categories);
-        sessionStorage.setItem('lastSearchCategories', JSON.stringify(data.categories));
+      if (locationMatch && locationMatch[1]) {
+        const city = locationMatch[1].trim();
+        const state = locationMatch[2] ? locationMatch[2].trim() : "";
         
-        const locationMatch = queryText.match(/in\s+([a-zA-Z\s]+)(?:,\s*([a-zA-Z\s]+))?/i);
+        setSearchedCity(city);
+        setSearchedState(state);
         
-        if (locationMatch && locationMatch[1]) {
-          const city = locationMatch[1].trim();
-          const state = locationMatch[2] ? locationMatch[2].trim() : "";
-          
-          setSearchedCity(city);
-          setSearchedState(state);
-          
-          await fetchRealData(queryText, city, state);
-          
-          const needsComedy = data.categories.includes('comedy');
-          if (needsComedy) {
-            try {
-              const comedyEvents = generateComedyEvents(city, state, dateRange);
-              setComedyEvents(comedyEvents);
-              setActiveTab('comedy');
-            } catch (e) {
-              console.error('Error loading comedy events:', e);
-            }
-          } else {
-            setMusicEvents(generateMusicEvents(city, state, dateRange));
-            setComedyEvents(generateComedyEvents(city, state, dateRange));
+        await fetchMockData(queryText, city, state);
+        
+        // Check for category-specific content
+        const needsComedy = categories.includes('comedy') || queryText.toLowerCase().includes("comedy");
+        if (needsComedy) {
+          try {
+            const comedyEvents = generateComedyEvents(city, state, dateRange);
+            setComedyEvents(comedyEvents);
+            setActiveTab('comedy');
+          } catch (e) {
+            console.error('Error loading comedy events:', e);
           }
-          
-          setNightlifeVenues(generateLocalNightlifeVenues(city, state));
-          
-          let results = generateMockLocationsForCity(city, state);
-          
-          const categoryMap: Record<string, string> = {
-            'restaurant': 'restaurant',
-            'dining': 'restaurant',
-            'bar': 'bar',
-            'nightlife': 'bar',
-            'attraction': 'attraction',
-            'sport': 'sports',
-            'sports': 'sports',
-            'event': 'event',
-            'upscale': 'restaurant',
-            'family friendly': 'restaurant'
-          };
-          
-          const relevantTypes = data.categories
-            .map((cat: string) => categoryMap[cat.toLowerCase()])
-            .filter(Boolean);
-          
-          if (relevantTypes.length > 0) {
-            results = results.filter(location => 
-              relevantTypes.includes(location.type)
-            );
-          }
-          
-          const vibes = data.categories.filter((cat: string) => 
-            ['upscale', 'family friendly', 'casual', 'romantic', 'cozy', 'trendy', 'nightowl'].includes(cat.toLowerCase())
-          );
-          
-          if (vibes.length > 0) {
-            results.forEach(location => {
-              if (!location.vibes) {
-                location.vibes = [];
-              }
-              location.vibes.push(...vibes);
-            });
-            
-            if (vibes[0]) {
-              setVibeFilter(vibes[0]);
-            }
-          }
-          
-          if (realDataResults.length > 0) {
-            results = [...realDataResults, ...results.filter(mock => 
-              !realDataResults.some(real => real.name === mock.name))];
-          }
-          
-          setFilteredLocations(results);
+        } else {
+          setMusicEvents(generateMusicEvents(city, state, dateRange));
+          setComedyEvents(generateComedyEvents(city, state, dateRange));
         }
+        
+        setNightlifeVenues(generateLocalNightlifeVenues(city, state));
+        
+        let results = generateMockLocationsForCity(city, state);
+        
+        const categoryMap: Record<string, string> = {
+          'restaurant': 'restaurant',
+          'dining': 'restaurant',
+          'bar': 'bar',
+          'nightlife': 'bar',
+          'attraction': 'attraction',
+          'sport': 'sports',
+          'sports': 'sports',
+          'event': 'event',
+          'upscale': 'restaurant',
+          'family friendly': 'restaurant'
+        };
+        
+        const relevantTypes = categories
+          .map((cat: string) => categoryMap[cat.toLowerCase()])
+          .filter(Boolean);
+        
+        if (relevantTypes.length > 0) {
+          results = results.filter(location => 
+            relevantTypes.includes(location.type)
+          );
+        }
+        
+        const vibes = ['upscale', 'family friendly', 'casual', 'romantic', 'cozy', 'trendy', 'nightowl']
+          .filter(vibe => queryText.toLowerCase().includes(vibe));
+        
+        if (vibes.length > 0) {
+          results.forEach(location => {
+            if (!location.vibes) {
+              location.vibes = [];
+            }
+            location.vibes.push(...vibes);
+          });
+          
+          if (vibes[0]) {
+            setVibeFilter(vibes[0]);
+          }
+        }
+        
+        setFilteredLocations(results);
       }
       
       toast({
@@ -380,7 +352,7 @@ export const useExploreSearch = () => {
       setSearchedCity(city);
       setSearchedState(state);
       
-      await fetchRealData(query, city, state);
+      await fetchMockData(query, city, state);
       
       setMusicEvents(generateMusicEvents(city, state, dateRange));
       setComedyEvents(generateComedyEvents(city, state, dateRange));
@@ -388,24 +360,14 @@ export const useExploreSearch = () => {
     } else {
       // Don't clear the city if we're just filtering by vibe
       if (!query) {
-        fetchRealData("San Francisco, CA", "San Francisco", "CA");
+        fetchMockData("San Francisco, CA", "San Francisco", "CA");
       }
     }
     
     let results = filteredLocations;
     
     if (category === "places" && city) {
-      if (realDataResults.length > 0) {
-        results = [...realDataResults];
-        
-        if (results.length < 10) {
-          const mockCityResults = generateMockLocationsForCity(city, state);
-          results = [...results, ...mockCityResults.filter(mock => 
-            !results.some(real => real.name === mock.name))];
-        }
-      } else {
-        results = generateMockLocationsForCity(city, state);
-      }
+      results = generateMockLocationsForCity(city, state);
       
       results.forEach(location => {
         if (!location.vibes) {
@@ -413,8 +375,7 @@ export const useExploreSearch = () => {
         }
       });
     } else if (query) {
-      const allLocations = [...realDataResults, ...filteredLocations];
-      results = allLocations.filter(location => {
+      results = filteredLocations.filter(location => {
         const locationMatches = 
           location.name.toLowerCase().includes(query.toLowerCase()) ||
           location.city.toLowerCase().includes(query.toLowerCase()) ||
@@ -479,17 +440,7 @@ export const useExploreSearch = () => {
     }
     
     if (searchCategory === "places" && searchedCity) {
-      if (realDataResults.length > 0) {
-        results = [...realDataResults];
-        
-        if (results.length < 10) {
-          const mockCityResults = generateMockLocationsForCity(searchedCity, searchedState);
-          results = [...results, ...mockCityResults.filter(mock => 
-            !results.some(real => real.name === mock.name))];
-        }
-      } else {
-        results = generateMockLocationsForCity(searchedCity, searchedState);
-      }
+      results = generateMockLocationsForCity(searchedCity, searchedState);
       
       results.forEach(location => {
         if (!location.vibes) {
@@ -523,6 +474,8 @@ export const useExploreSearch = () => {
     handleTabChange,
     handleDateRangeChange,
     processComplexQuery,
-    fetchRealData
+    fetchMockData: fetchMockData
   };
 };
+
+export default useExploreSearch;

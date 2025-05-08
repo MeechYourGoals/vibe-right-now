@@ -1,24 +1,28 @@
-
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Layout } from "@/components/Layout";
 import { mockLocations } from "@/mock/data";
-import { Location } from "@/types";
-import VenueHeader from "@/components/venue/VenueHeader";
-import VenueAbout from "@/components/venue/VenueAbout";
-import VenuePosts from "@/components/venue/VenuePosts";
-import VenueMap from "@/components/venue/VenueMap";
-import VenueReviews from "@/components/venue/VenueReviews";
-import VernonVenueAssistant from "@/components/venue/VernonVenueAssistant";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Location, Post } from "@/types";
 import { useToast } from "@/components/ui/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import SkeletonVenueHeader from "@/components/SkeletonVenueHeader";
-import SkeletonVenueAbout from "@/components/SkeletonVenueAbout";
-import SkeletonVenueMap from "@/components/SkeletonVenueMap";
-import SkeletonVenuePosts from "@/components/SkeletonVenuePosts";
-import SkeletonVenueAssistant from "@/components/SkeletonVenueAssistant";
-import SkeletonVenueReviews from "@/components/SkeletonVenueReviews";
+import { Button } from "@/components/ui/button";
+import VenueHeader from "@/components/venue/VenueHeader";
+import VenueAbout from "@/components/venue/VenueAbout";
+import VenueMap from "@/components/venue/VenueMap";
+import VenueAssistant from "@/components/venue/VenueAssistant";
+import VenueManagedBy from "@/components/venue/VenueManagedBy";
+import VenueDiscussions from "@/components/venue/VenueDiscussions";
+import VenuePostsList from "@/components/venue/venue-posts-list/VenuePostsList";
+import { getVenueById } from "@/services/VenueService";
+import { getPostsForVenue } from "@/services/PostService";
+import { getCommentsForPost } from "@/services/CommentService";
+import { Layout } from "@/components/Layout";
+import { Badge } from "@/components/ui/badge";
+import { SkeletonVenueHeader } from "@/components/SkeletonVenueHeader";
+import { SkeletonVenueAbout } from "@/components/SkeletonVenueAbout";
+import { SkeletonVenueMap } from "@/components/SkeletonVenueMap";
+import { SkeletonVenuePosts } from "@/components/SkeletonVenuePosts";
+import { SkeletonVenueAssistant } from "@/components/SkeletonVenueAssistant";
+import { SkeletonVenueReviews } from "@/components/SkeletonVenueReviews";
 
 const VenueProfile = () => {
   const { id } = useParams<{ id: string }>();
@@ -120,15 +124,15 @@ const VenueProfile = () => {
               </TabsContent>
               
               <TabsContent value="posts" className="mt-6">
-                <VenuePosts venue={venue} />
+                <VenuePostsList venue={venue} />
               </TabsContent>
               
               <TabsContent value="reviews" className="mt-6">
-                <VenueReviews venue={venue} />
+                <VenueDiscussions venue={venue} />
               </TabsContent>
               
               <TabsContent value="assistant" className="mt-6">
-                <VernonVenueAssistant venue={venue} />
+                <VenueAssistant venue={venue} />
               </TabsContent>
             </Tabs>
             

@@ -3,8 +3,7 @@
 export { cityCoordinates } from './cityDatabase';
 export { 
   generateMockLocations, 
-  generateCityLocations, 
-  generateAllCityLocations,
+  generateCityLocations,
   formatLocationHours,
   getLocationStatus,
   getTodaysHours

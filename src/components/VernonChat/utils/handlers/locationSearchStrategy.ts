@@ -3,7 +3,11 @@ import { Location } from "@/types";
 import { generateMockLocationsForCity } from "@/utils/explore/exploreHelpers";
 import { formatSearchResponse } from "@/utils/responseFormatter";
 
-export const searchLocations = async (query: string, category: string = "", maxResults: number = 10): Promise<any> => {
+export const searchLocations = async (
+  query: string, 
+  category: string = "", 
+  maxResults: number = 10
+): Promise<any> => {
   // Generate mock locations for the city in the query
   const mockLocations = generateMockLocationsForCity(query);
   
