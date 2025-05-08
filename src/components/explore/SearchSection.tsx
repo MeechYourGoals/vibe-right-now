@@ -7,6 +7,7 @@ import { DateRange } from "react-day-picker";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface SearchSectionProps {
   showDateFilter: boolean;

@@ -1,3 +1,4 @@
+
 import React from "react";
 import Header from "@/components/Header";
 import { Badge } from "@/components/ui/badge";
@@ -18,8 +19,6 @@ import TrendingLocations from "@/components/TrendingLocations";
 import DiscountLocations from "@/components/DiscountLocations";
 import { format } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar } from "lucide-react";
 
 const Explore = () => {
   const isMobile = useIsMobile();
@@ -59,18 +58,7 @@ const Explore = () => {
             {getPageTitle()}
           </h1>
           
-          <Tabs defaultValue={activeSearchTab} value={activeSearchTab} onValueChange={handleSearchTabChange} className="w-full mb-4 max-w-xl mx-auto">
-            <TabsList className="grid grid-cols-5 w-full">
-              <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="places">Places</TabsTrigger>
-              <TabsTrigger value="users">Users</TabsTrigger>
-              <TabsTrigger value="vibes">Vibes</TabsTrigger>
-              <TabsTrigger value="dates">
-                <Calendar className="h-4 w-4 mr-2" />
-                Dates
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+          {/* Removed the redundant top tabs bar */}
           
           <SearchSection 
             showDateFilter={showDateFilter}
