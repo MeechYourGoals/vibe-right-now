@@ -1,5 +1,5 @@
 
-// Speech recognition service using Google's Speech-to-Text API
+// Speech recognition service using OpenAI's Whisper API
 export class WhisperSpeechService {
   private static isInitialized = false;
   
@@ -7,10 +7,11 @@ export class WhisperSpeechService {
    * Initialize the speech recognition model
    */
   static async initSpeechRecognition() {
-    // In a real implementation, this would load any necessary models
+    // In a real implementation, this would load the Whisper model
+    // For now, we'll just simulate initialization
     await new Promise(resolve => setTimeout(resolve, 500));
     
-    console.log('WhisperSpeechService initialized (using Google Speech-to-Text)');
+    console.log('WhisperSpeechService initialized');
     this.isInitialized = true;
     return true;
   }
@@ -23,19 +24,19 @@ export class WhisperSpeechService {
   }
 
   /**
-   * Convert speech to text using Google Speech-to-Text
+   * Convert speech to text using Whisper API
    * @param audioBlob The audio recording as a Blob
    */
   static async speechToText(audioBlob: Blob): Promise<string> {
     try {
-      console.log('Processing audio with Google Speech-to-Text');
+      console.log('Processing audio with Whisper API');
       // Convert blob to base64
       const base64Audio = await this.blobToBase64(audioBlob);
       
-      // Call our service to handle the API request
-      return await GoogleSpeechService.speechToText(base64Audio);
+      // Call OpenAI service to handle the API request
+      return await OpenAIService.speechToText(base64Audio);
     } catch (error) {
-      console.error('Error in Google speech-to-text:', error);
+      console.error('Error in Whisper speech-to-text:', error);
       throw error;
     }
   }
@@ -58,5 +59,5 @@ export class WhisperSpeechService {
   }
 }
 
-// Import GoogleSpeechService to use for API calls
-import { GoogleSpeechService } from './GoogleSpeechService';
+// Import OpenAIService to use for API calls
+import { OpenAIService } from './OpenAIService';

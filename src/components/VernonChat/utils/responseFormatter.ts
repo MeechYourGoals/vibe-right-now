@@ -1,80 +1,45 @@
 
+import { paginateItems, createPaginationLinks, formatPaginatedCategoryResults } from '@/services/search/paginationUtils';
+
 /**
- * This utility formats AI responses for better display in the chat interface
+ * Formats the response from location data into a readable format with categories
  */
-export const formatResponse = (text: string): string => {
-  // Convert plain text URLs to clickable links
-  const urlRegex = /(https?:\/\/[^\s]+)/g;
-  let formattedText = text.replace(urlRegex, '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-blue-500 underline">$1</a>');
+export const formatLocationResponse = (
+  cityName: string, 
+  categoryResults: Record<string, string[]>,
+  paginationParams: Record<string, number> = {}
+): string => {
+  if (Object.keys(categoryResults).length === 0) return "";
   
-  // Convert asterisk bullet points to proper HTML lists
-  const bulletRegex = /\n\s*\*\s(.*)/g;
-  if (bulletRegex.test(formattedText)) {
-    let listItems = '';
-    formattedText = formattedText.replace(bulletRegex, (match, item) => {
-      listItems += `<li>${item}</li>`;
-      return '';
-    });
-    
-    if (listItems) {
-      formattedText += `<ul class="list-disc pl-5 my-2">${listItems}</ul>`;
+  let response = `Here's what's happening in ${cityName}:\n\n`;
+  
+  // Loop through each category
+  Object.keys(categoryResults).forEach(category => {
+    const items = categoryResults[category];
+    if (items && items.length > 0) {
+      // Get the current page for this category (default to 1)
+      const currentPage = paginationParams[category] || 1;
+      
+      // Add category header with total count
+      let displayCategory = category.charAt(0).toUpperCase() + category.slice(1);
+      response += `**${displayCategory}** (${items.length} options)\n\n`;
+      
+      // Format the paginated results for this category
+      response += formatPaginatedCategoryResults(category, items, currentPage);
+      
+      response += '\n\n';
     }
-  }
+  });
   
-  // Convert numbered lists to proper HTML ordered lists
-  const numberedRegex = /\n\s*(\d+)\.\s(.*)/g;
-  if (numberedRegex.test(formattedText)) {
-    let listItems = '';
-    formattedText = formattedText.replace(numberedRegex, (match, number, item) => {
-      listItems += `<li>${item}</li>`;
-      return '';
-    });
-    
-    if (listItems) {
-      formattedText += `<ol class="list-decimal pl-5 my-2">${listItems}</ol>`;
-    }
-  }
-  
-  // Replace newlines with HTML line breaks
-  formattedText = formattedText.replace(/\n/g, '<br>');
-  
-  return formattedText;
+  return response;
 };
 
 /**
- * Formats long text to add "read more" functionality
+ * Clean response text by removing certain markdown formatting
  */
-export const truncateWithReadMore = (text: string, maxLength: number = 200): string => {
-  if (text.length <= maxLength) return text;
-  
-  const truncated = text.substring(0, maxLength);
-  return `${truncated}... <span class="text-blue-500 cursor-pointer read-more">Read more</span>`;
-};
-
-/**
- * Formats location data for chat response
- */
-export const formatLocationResponse = (location: any): string => {
-  return `
-    <div class="venue-result">
-      <h3>${location.name}</h3>
-      <p>${location.address}, ${location.city}, ${location.state}</p>
-      ${location.rating ? `<p>Rating: ${location.rating}/5</p>` : ''}
-      ${location.type ? `<p>Type: ${location.type}</p>` : ''}
-      <a href="/venue/${location.id}" class="view-link">View Details</a>
-    </div>
-  `;
-};
-
 export const cleanResponseText = (text: string): string => {
+  // Clean any double line breaks or excessive spacing
   return text
-    .replace(/\n{3,}/g, '\n\n') // Replace multiple newlines with double newlines
+    .replace(/\n{3,}/g, '\n\n')
     .trim();
-};
-
-export default {
-  formatResponse,
-  truncateWithReadMore,
-  formatLocationResponse,
-  cleanResponseText
 };

@@ -5,12 +5,10 @@ import { LocalDataStrategy } from './localDataStrategy';
 import { ComplexQueryStrategy } from './complexQueryStrategy';
 import { ComedySearchStrategy } from './comedySearchStrategy';
 import { LocationSearchStrategy } from './locationSearchStrategy';
-import { parseCityStateFromQuery } from '@/utils/geocodingService';
-import { extractCategories } from '@/services/VertexAI/analysis';
 
 /**
  * Central coordinator for all search strategies
- * Now with Google Cloud NLP integration support and improved location detection
+ * Now with Google Cloud NLP integration support
  */
 export const SearchCoordinator = {
   /**
@@ -27,29 +25,11 @@ export const SearchCoordinator = {
     // First check if it's a location query
     if (LocationSearchStrategy.isLocationQuery(inputValue)) {
       console.log('Detected location query, using LocationSearchStrategy');
-      
-      // Parse city and state more accurately
-      const { city, state } = parseCityStateFromQuery(inputValue);
-      console.log(`Parsed location: ${city}, ${state}`);
-      
       const locationResult = await LocationSearchStrategy.handleLocationSearch(inputValue);
       
       if (locationResult && locationResult.response && locationResult.response.length > 50) {
         console.log('Location strategy returned results');
         return locationResult.response;
-      }
-    }
-    
-    // If no categories were passed, try to extract them using Google NLP
-    if (!categories || categories.length === 0) {
-      try {
-        const extractedCategories = await extractCategories(inputValue);
-        if (extractedCategories && extractedCategories.length > 0) {
-          console.log('Extracted categories from Google NLP:', extractedCategories);
-          categories = extractedCategories;
-        }
-      } catch (error) {
-        console.error('Error extracting categories with Google NLP:', error);
       }
     }
     
@@ -65,7 +45,7 @@ export const SearchCoordinator = {
       return await ComedySearchStrategy.handleComedySearch(inputValue);
     }
     
-    // Fall back to general search service with Google NLP categories
+    // Fall back to general search service
     console.log('Using general search service with NLP categories');
     try {
       return await SearchService.search(inputValue, categories);

@@ -1,9 +1,9 @@
 
 import { Location } from "@/types";
-import { generateCityLocations } from "@/utils/locations";
+import { generateAllCityLocations } from "@/utils/locations";
 
 // Generate locations for all cities
-export const cityLocations: Location[] = generateCityLocations();
+export const cityLocations: Location[] = generateAllCityLocations();
 
 // Function to get locations for a specific city
 export const getLocationsByCity = (cityName: string): Location[] => {

@@ -116,7 +116,7 @@ const LocationsNearby = () => {
                     )}
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    {location.city}, {location.state || location.country || "USA"}
+                    {location.city}, {location.state || location.country}
                   </div>
                 </div>
                 <Button 

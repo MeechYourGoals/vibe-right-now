@@ -9,7 +9,7 @@ export interface Location {
   city: string;
   state?: string;
   country: string;
-  zip?: string; // Making zip optional to match the other Location definition
+  zip?: string; // Added for compatibility
   lat: number;
   lng: number;
   type: "restaurant" | "bar" | "event" | "attraction" | "sports" | "other";

@@ -1,102 +1,76 @@
 
 /**
- * Analyzes text content using Google's Natural Language API
- * @param text The text to analyze
- * @returns Analysis results including sentiment, entities, etc.
+ * Text analysis services using Google's NLP API
  */
-export const analyzeText = async (text: string) => {
-  console.log('Analyzing text with Google NLP:', text);
-  
-  // Mock implementation for development/testing
-  return {
-    sentiment: { score: 0.4, magnitude: 0.7 },
-    entities: ['restaurant', 'event', 'location'],
-    categories: ['food', 'entertainment', 'travel']
-  };
-};
+import { supabase } from '@/integrations/supabase/client';
 
 /**
- * Extracts entities from text using Google's Natural Language API
- * @param text The text to analyze
- * @returns Array of extracted entities
+ * Analyze text with Natural Language API
  */
-export const extractEntities = async (text: string): Promise<string[]> => {
-  console.log('Extracting entities from text:', text);
-  
-  // Mock implementation for development/testing
-  const keywords = [
-    'restaurant', 'bar', 'club', 'museum', 'park',
-    'event', 'concert', 'show', 'exhibition', 'performance',
-    'comedy', 'music', 'food', 'drink', 'nightlife',
-    'family', 'outdoor', 'indoor', 'free', 'paid'
-  ];
-  
-  // Randomly select 3-5 keywords that might be relevant to the text
-  const selectedCount = Math.floor(Math.random() * 3) + 3; // 3-5 keywords
-  const entities: string[] = [];
-  
-  for (let i = 0; i < selectedCount; i++) {
-    const randomIndex = Math.floor(Math.random() * keywords.length);
-    if (text.toLowerCase().includes(keywords[randomIndex].toLowerCase())) {
-      entities.push(keywords[randomIndex]);
-    } else {
-      // If the keyword is not in the text, add it with 50% probability
-      if (Math.random() > 0.5) {
-        entities.push(keywords[randomIndex]);
-      }
+export async function analyzeText(text: string): Promise<any> {
+  try {
+    const { data, error } = await supabase.functions.invoke('google-nlp', {
+      body: { text }
+    });
+    
+    if (error) {
+      console.error('Error calling Google NLP function:', error);
+      throw new Error(`Text analysis failed: ${error.message}`);
     }
+    
+    return data;
+  } catch (error) {
+    console.error('Error in analyzeText:', error);
+    return null;
   }
-  
-  // Return unique entities
-  return [...new Set(entities)];
-};
+}
 
 /**
- * Extracts categories from text
- * @param text The text to extract categories from
- * @returns Array of category names
+ * Extract entities from text using Natural Language API
  */
-export const extractCategories = async (text: string): Promise<string[]> => {
-  console.log('Extracting categories from text:', text);
-  
-  // For development/testing, provide mock categories
-  const mockCategories = ['restaurant', 'bar', 'entertainment', 'outdoor', 'family-friendly'];
-  
-  // Simple logic to return relevant categories based on text content
-  const result: string[] = [];
-  
-  if (text.match(/food|eat|dinner|lunch|breakfast|restaurant|cafe|dining/i)) {
-    result.push('restaurant', 'dining');
+export async function extractEntities(text: string): Promise<any[]> {
+  const analysisData = await analyzeText(text);
+  if (!analysisData || !analysisData.entities) {
+    return [];
   }
+  return analysisData.entities;
+}
+
+/**
+ * Extract categories from text based on entity types
+ */
+export async function extractCategories(text: string): Promise<string[]> {
+  const entities = await extractEntities(text);
   
-  if (text.match(/drink|bar|pub|cocktail|beer|wine|nightlife|club/i)) {
-    result.push('bar', 'nightlife');
-  }
+  // Map of entity types to categories
+  const categoryMap: Record<string, string> = {
+    'LOCATION': 'location',
+    'ADDRESS': 'location',
+    'CONSUMER_GOOD': 'product',
+    'WORK_OF_ART': 'entertainment',
+    'EVENT': 'event',
+    'ORGANIZATION': 'organization',
+    'PERSON': 'person',
+    'OTHER': 'other'
+  };
   
-  if (text.match(/show|performance|concert|music|band|artist|stage|theater|venue/i)) {
-    result.push('events', 'entertainment');
-  }
+  const categories = new Set<string>();
   
-  if (text.match(/park|outdoor|nature|walk|hike|trail|garden|outside/i)) {
-    result.push('outdoor', 'attractions');
-  }
+  entities.forEach((entity: any) => {
+    const type = entity.type;
+    if (categoryMap[type]) {
+      categories.add(categoryMap[type]);
+    }
+    
+    // Extract subcategories from entity metadata
+    if (entity.metadata) {
+      Object.entries(entity.metadata).forEach(([key, value]: [string, any]) => {
+        if (typeof value === 'string' && value.length > 0) {
+          categories.add(value.toLowerCase());
+        }
+      });
+    }
+  });
   
-  if (text.match(/museum|gallery|art|exhibit|culture|historic|history/i)) {
-    result.push('attractions', 'cultural');
-  }
-  
-  if (text.match(/family|kid|child|children|friendly|fun|play/i)) {
-    result.push('family-friendly');
-  }
-  
-  if (text.match(/comedy|laugh|funny|standup|comedian/i)) {
-    result.push('comedy');
-  }
-  
-  if (result.length === 0) {
-    // If no categories detected, return random subset of mock categories
-    return mockCategories.filter(() => Math.random() > 0.5);
-  }
-  
-  return [...new Set(result)];
-};
+  return Array.from(categories);
+}

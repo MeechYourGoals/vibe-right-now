@@ -27,16 +27,12 @@ import { cityCoordinates } from "@/utils/cityLocations";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { DateRange } from "react-day-picker";
-import DateRangeSelector from "@/components/DateRangeSelector";
-import { format } from "date-fns";
 
 interface SearchVibesProps {
   onSearch: (query: string, filterType: string, category: string) => void;
-  onFutureSearch?: (dateRange: DateRange | undefined) => void;
 }
 
-const SearchVibes = ({ onSearch, onFutureSearch }: SearchVibesProps) => {
+const SearchVibes = ({ onSearch }: SearchVibesProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("All");
@@ -54,15 +50,10 @@ const SearchVibes = ({ onSearch, onFutureSearch }: SearchVibesProps) => {
   const [isNaturalLanguageSearch, setIsNaturalLanguageSearch] = useState(false);
   const [nlpAnalysis, setNlpAnalysis] = useState<any>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [showDateRangeSelector, setShowDateRangeSelector] = useState(false);
-  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
 
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
-  
-  // Check if we're on the explore page to know whether to show the Future tab
-  const isExplorePage = location.pathname.includes('/explore');
 
   const filters = [
     "Restaurants",
@@ -94,22 +85,6 @@ const SearchVibes = ({ onSearch, onFutureSearch }: SearchVibesProps) => {
     const params = new URLSearchParams(location.search);
     const q = params.get('q');
     const vibe = params.get('vibe');
-    const from = params.get('from');
-    const to = params.get('to');
-    
-    // Handle date range from URL params
-    if (from) {
-      const fromDate = new Date(from);
-      let dateRangeValue: DateRange = { from: fromDate };
-      
-      if (to) {
-        dateRangeValue.to = new Date(to);
-      }
-      
-      setDateRange(dateRangeValue);
-      setSearchCategory("future");
-      setShowDateRangeSelector(true);
-    }
     
     if (q) {
       setSearchQuery(q);
@@ -212,20 +187,6 @@ const SearchVibes = ({ onSearch, onFutureSearch }: SearchVibesProps) => {
   }, [searchQuery]);
 
   const handleSearch = async () => {
-    if (searchCategory === "future" && dateRange?.from && isExplorePage) {
-      if (onFutureSearch) {
-        onFutureSearch(dateRange);
-      } else {
-        const searchParams = new URLSearchParams();
-        searchParams.set('from', dateRange.from.toISOString().split('T')[0]);
-        if (dateRange.to) {
-          searchParams.set('to', dateRange.to.toISOString().split('T')[0]);
-        }
-        navigate(`/explore?${searchParams.toString()}`);
-      }
-      return;
-    }
-    
     if (searchQuery.length > 50 && 
       /(\w+\s+(and|or|with|near|before|after)\s+\w+)|(\w+\s+for\s+\w+)/i.test(searchQuery)) {
       setIsNaturalLanguageSearch(true);
@@ -292,13 +253,7 @@ const SearchVibes = ({ onSearch, onFutureSearch }: SearchVibesProps) => {
 
   const handleCategoryChange = (category: string) => {
     setSearchCategory(category);
-    
-    if (category === "future") {
-      setShowDateRangeSelector(true);
-    } else {
-      setShowDateRangeSelector(false);
-      onSearch(searchQuery, selectedFilter, category);
-    }
+    onSearch(searchQuery, selectedFilter, category);
   };
 
   const handleUserSelect = (username: string) => {
@@ -366,10 +321,6 @@ const SearchVibes = ({ onSearch, onFutureSearch }: SearchVibesProps) => {
     }
   };
 
-  const handleDateRangeChange = (range: DateRange | undefined) => {
-    setDateRange(range);
-  };
-
   return (
     <div className="space-y-3 sticky top-16 z-10 bg-background p-4">
       {isNaturalLanguageSearch && (
@@ -406,7 +357,7 @@ const SearchVibes = ({ onSearch, onFutureSearch }: SearchVibesProps) => {
         onValueChange={handleCategoryChange} 
         className="w-full mb-3"
       >
-        <TabsList className={`grid ${isExplorePage ? 'grid-cols-5' : 'grid-cols-4'} w-full`}>
+        <TabsList className="grid grid-cols-4 w-full">
           <TabsTrigger value="all" className="flex items-center gap-1">
             <Search className="h-3.5 w-3.5" />
             <span>All</span>
@@ -423,81 +374,53 @@ const SearchVibes = ({ onSearch, onFutureSearch }: SearchVibesProps) => {
             <Sparkles className="h-3.5 w-3.5" />
             <span>Vibes</span>
           </TabsTrigger>
-          {isExplorePage && (
-            <TabsTrigger value="future" className="flex items-center gap-1">
-              <Calendar className="h-3.5 w-3.5" />
-              <span>Future</span>
-            </TabsTrigger>
-          )}
         </TabsList>
       </Tabs>
 
-      {showDateRangeSelector && searchCategory === "future" ? (
-        <div className="mb-4">
-          <DateRangeSelector 
-            dateRange={dateRange}
-            onDateRangeChange={handleDateRangeChange}
-            className="w-full"
-          />
-          <div className="flex justify-end mt-2">
-            <Button 
-              className="bg-primary hover:bg-primary/90" 
-              size="sm"
-              onClick={handleSearch}
-              disabled={!dateRange?.from}
-            >
-              Find Future Vibes
-            </Button>
-          </div>
+      <div className="relative flex">
+        <Input
+          type="search"
+          placeholder={
+            searchCategory === "users" 
+              ? "Search users by name or username..." 
+              : searchCategory === "places"
+                ? isNaturalLanguageSearch 
+                  ? "Try natural language: 'Upscale restaurants in Chicago for a family lunch...'" 
+                  : "Search cities, venues, events or use natural language..."
+                : searchCategory === "vibes"
+                  ? "Search for vibes like Cozy, Trendy, NightOwl..."
+                  : "Search venues, events, vibes, users or use natural language..."
+          }
+          value={searchQuery}
+          onChange={handleSearchInputChange}
+          onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+          onClick={handleInputClick}
+          className="pr-20"
+        />
+        <div className="absolute right-0 top-0 flex h-full">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => setShowFilters(!showFilters)}
+            className="h-full rounded-none"
+          >
+            <ChevronDown className="h-4 w-4" />
+          </Button>
+          <Button 
+            variant={isAnalyzing ? "secondary" : "ghost"}
+            size="icon" 
+            onClick={handleSearch}
+            disabled={isAnalyzing}
+            className="h-full rounded-none rounded-r-md"
+          >
+            {isAnalyzing ? (
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-solid border-current border-r-transparent" />
+            ) : (
+              <Search className="h-4 w-4" />
+            )}
+          </Button>
         </div>
-      ) : (
-        <div className="relative flex">
-          <Input
-            type="search"
-            placeholder={
-              searchCategory === "users" 
-                ? "Search users by name or username..." 
-                : searchCategory === "places"
-                  ? isNaturalLanguageSearch 
-                    ? "Try natural language: 'Upscale restaurants in Chicago for a family lunch...'" 
-                    : "Search cities, venues, events or use natural language..."
-                  : searchCategory === "vibes"
-                    ? "Search for vibes like Cozy, Trendy, NightOwl..."
-                    : searchCategory === "future"
-                      ? "Select dates to explore future events..."
-                      : "Search venues, events, vibes, users or use natural language..."
-            }
-            value={searchQuery}
-            onChange={handleSearchInputChange}
-            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-            onClick={handleInputClick}
-            className="pr-20"
-          />
-          <div className="absolute right-0 top-0 flex h-full">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={() => setShowFilters(!showFilters)}
-              className="h-full rounded-none"
-            >
-              <ChevronDown className="h-4 w-4" />
-            </Button>
-            <Button 
-              variant={isAnalyzing ? "secondary" : "ghost"}
-              size="icon" 
-              onClick={handleSearch}
-              disabled={isAnalyzing}
-              className="h-full rounded-none rounded-r-md"
-            >
-              {isAnalyzing ? (
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-solid border-current border-r-transparent" />
-              ) : (
-                <Search className="h-4 w-4" />
-              )}
-            </Button>
-          </div>
-        </div>
-      )}
+      </div>
 
       <Collapsible open={showCitySuggestions && searchCategory === "places"} className="w-full">
         <CollapsibleContent className="overflow-hidden">

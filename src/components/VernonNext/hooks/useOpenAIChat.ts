@@ -1,10 +1,7 @@
-
 import { useState, useCallback } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import { v4 as uuidv4 } from 'uuid';
 import { Message } from '../types';
-import { VertexAIService } from '@/services/VertexAIService';
-import { GeminiService } from '@/services/GeminiService';
 
 interface UseOpenAIChatProps {
   initialMessages?: Message[];
@@ -45,49 +42,40 @@ export const useOpenAIChat = ({ initialMessages = [], onContentChange }: UseOpen
     setMessages(prevMessages => [...prevMessages, userMessage]);
     setInput('');
     
-    // Start API call
+    // Simulate API call
     setIsLoading(true);
     
     try {
-      // Use Gemini or Vertex AI service to get a response
-      let aiResponse: string;
-      
-      try {
-        // Try Gemini first (primary service)
-        aiResponse = await GeminiService.generateResponse(text, 'user', messages.slice(-5));
-      } catch (error) {
-        console.error('Error with Gemini, falling back to Vertex AI:', error);
-        // Fall back to Vertex AI
-        aiResponse = await VertexAIService.generateResponse(text, 'default', messages.slice(-5));
-      }
-      
-      const aiMessage: Message = {
-        id: uuidv4(),
-        role: 'assistant',
-        content: aiResponse,
-        timestamp: new Date().toISOString(),
-        sender: 'ai'
-      };
-      
-      setMessages(prevMessages => [...prevMessages, aiMessage]);
-      setCompletion(aiMessage.content);
-      if (onContentChange) {
-        onContentChange(aiMessage.content);
-      }
+      // In a real implementation, this would call your OpenAI API
+      // For now, we'll simulate a response after a delay
+      setTimeout(() => {
+        const aiResponse: Message = {
+          id: uuidv4(),
+          role: 'assistant',
+          content: `I received your message: "${text}". This is a simulated response since we're not connecting to the OpenAI API in this demo.`,
+          timestamp: new Date().toISOString(),
+          sender: 'ai'
+        };
+        
+        setMessages(prevMessages => [...prevMessages, aiResponse]);
+        setCompletion(aiResponse.content);
+        if (onContentChange) {
+          onContentChange(aiResponse.content);
+        }
+        setIsLoading(false);
+      }, 1500);
       
     } catch (error) {
       console.error('Error sending message:', error);
       toast({
-        title: "Error getting response",
-        description: "There was an error processing your request. Please try again.",
+        title: "Error sending message",
         variant: "destructive",
       });
-    } finally {
       setIsLoading(false);
     }
-  }, [toast, onContentChange, messages]);
+  }, [toast, onContentChange]);
 
-  // Voice interaction functions
+  // Mocked functions for voice interactions
   const startListening = useCallback(async () => {
     setIsListening(true);
     setTranscript('');
@@ -115,20 +103,15 @@ export const useOpenAIChat = ({ initialMessages = [], onContentChange }: UseOpen
     
     setIsSpeaking(true);
     
-    try {
-      // In a real implementation, this would use Google's Text-to-Speech API
-      console.log('Speaking with Google Text-to-Speech:', text);
-      
-      // Simulate speech duration based on text length
-      const duration = Math.min(2000 + text.length * 50, 10000);
-      
-      setTimeout(() => {
-        setIsSpeaking(false);
-      }, duration);
-    } catch (error) {
-      console.error('Text-to-speech error:', error);
+    // In a real implementation, this would use the Web Speech API or a TTS service
+    console.log('Speaking:', text);
+    
+    // Simulate speech duration based on text length
+    const duration = Math.min(2000 + text.length * 50, 10000);
+    
+    setTimeout(() => {
       setIsSpeaking(false);
-    }
+    }, duration);
   }, [isSpeaking]);
 
   const toggleChat = useCallback(() => {

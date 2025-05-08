@@ -1,154 +1,77 @@
-import { BusinessHours } from '@/types';
 
-/**
- * Generates random business hours for a location based on location ID
- * @param locationOrId ID of the location or location object
- * @returns BusinessHours object with opening and closing times
- */
-export const generateBusinessHours = (locationOrId: string | any): BusinessHours => {
-  // Get location ID from either a string ID or a location object
-  const locationId = typeof locationOrId === 'string' ? locationOrId : locationOrId.id;
+import { Location } from "@/types";
+
+// Mock function to generate random business hours for a location
+export const generateBusinessHours = (location: Location) => {
+  // Use location type to determine general business hours pattern
+  const isBar = location.type === 'bar' || location.type === 'nightclub';
+  const isRestaurant = location.type === 'restaurant' || location.type === 'cafe';
+  const isAttraction = location.type === 'attraction' || location.type === 'museum';
   
-  // Seed the random number generator based on the location ID
-  const seedValue = locationId.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0);
-  let seedCounter = seedValue;
-  
-  const random = () => {
-    // Use seedCounter rather than mutating seed
-    seedCounter = (seedCounter * 9301 + 49297) % 233280;
-    return seedCounter / 233280;
+  const hours = {
+    monday: isBar ? '16:00-02:00' : isRestaurant ? '11:00-22:00' : '10:00-18:00',
+    tuesday: isBar ? '16:00-02:00' : isRestaurant ? '11:00-22:00' : '10:00-18:00',
+    wednesday: isBar ? '16:00-02:00' : isRestaurant ? '11:00-22:00' : '10:00-18:00',
+    thursday: isBar ? '16:00-02:00' : isRestaurant ? '11:00-22:00' : '10:00-18:00',
+    friday: isBar ? '16:00-03:00' : isRestaurant ? '11:00-23:00' : '10:00-20:00',
+    saturday: isBar ? '16:00-03:00' : isRestaurant ? '10:00-23:00' : '10:00-20:00',
+    sunday: isBar ? '16:00-00:00' : isRestaurant ? '10:00-22:00' : '11:00-17:00',
+    isOpenNow: "true", // Convert boolean to string
+    timezone: 'America/New_York'
   };
   
-  // Generate opening times between 7AM and 11AM
-  const openingHour = Math.floor(random() * 4) + 7;
-  const openingMinute = Math.floor(random() * 4) * 15;
-  
-  // Generate closing times between 5PM and 11PM
-  const closingHour = Math.floor(random() * 6) + 17;
-  const closingMinute = Math.floor(random() * 4) * 15;
-  
-  // Format the times
-  const formatTime = (hour: number, minute: number) => {
-    const period = hour >= 12 ? 'PM' : 'AM';
-    const hour12 = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
-    return `${hour12}:${minute.toString().padStart(2, '0')} ${period}`;
-  };
-  
-  // Generate day-specific variations
-  const generateDayHours = (baseOpen: number, baseClose: number, modifier: number) => {
-    const open = (baseOpen + Math.floor(random() * modifier)) % 24;
-    const close = (baseClose + Math.floor(random() * modifier)) % 24;
-    return `${formatTime(open, openingMinute)} - ${formatTime(close, closingMinute)}`;
-  };
-  
-  // Determine if the place is open now
-  const now = new Date();
-  const currentDay = now.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
-  const currentHour = now.getHours();
-  const currentMinute = now.getMinutes();
-  
-  const isOpen = (currentHour > openingHour && currentHour < closingHour) || 
-                (currentHour === openingHour && currentMinute >= openingMinute) || 
-                (currentHour === closingHour && currentMinute < closingMinute);
-  
-  return {
-    monday: generateDayHours(openingHour, closingHour, 1),
-    tuesday: generateDayHours(openingHour, closingHour, 1),
-    wednesday: generateDayHours(openingHour, closingHour, 1),
-    thursday: generateDayHours(openingHour, closingHour, 2),
-    friday: generateDayHours(openingHour - 1, closingHour + 1, 2),
-    saturday: generateDayHours(openingHour + 1, closingHour + 2, 3),
-    sunday: generateDayHours(openingHour + 2, closingHour - 1, 2),
-    isOpen
-  };
+  return hours;
 };
 
-/**
- * Get the hours for today for a venue
- * @param location Location object or ID to get hours for
- * @returns String representing today's hours (e.g. "10:00 AM - 9:00 PM")
- */
-export const getTodaysHours = (location: any): string => {
-  // Ensure we have hours data
+// Get today's hours for display
+export const getTodaysHours = (location: Location) => {
   if (!location.hours) {
-    location.hours = generateBusinessHours(location);
+    return "Hours not available";
   }
   
-  const now = new Date();
-  const dayName = now.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+  const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+  const today = new Date().getDay(); // 0 is Sunday, 1 is Monday, etc.
   
-  // Get hours string for today
-  switch (dayName) {
-    case 'monday': return location.hours.monday;
-    case 'tuesday': return location.hours.tuesday;
-    case 'wednesday': return location.hours.wednesday;
-    case 'thursday': return location.hours.thursday;
-    case 'friday': return location.hours.friday;
-    case 'saturday': return location.hours.saturday;
-    case 'sunday': return location.hours.sunday;
-    default: return "Hours not available";
+  const dayName = days[today];
+  const dayHours = location.hours[dayName as keyof typeof location.hours];
+  
+  if (!dayHours) {
+    return "Closed today";
   }
+  
+  if (dayHours === "Closed") {
+    return "Closed today";
+  }
+  
+  // Check if open now
+  const isOpenNow = location.hours.isOpenNow === "true" ? "Open now" : "Closed now"; // Use string comparison
+  
+  return `${isOpenNow} · Today ${formatHoursRange(dayHours)}`;
 };
 
-/**
- * Check if a venue is currently open
- * @param hours BusinessHours object for the venue
- * @returns Boolean indicating if venue is currently open
- */
-export const isVenueOpen = (hours?: BusinessHours): boolean => {
-  if (!hours) return false;
-  
-  // Use the pre-calculated isOpen property if available
-  if (hours.isOpen !== undefined) {
-    return Boolean(hours.isOpen);
+// Format hours range for display
+const formatHoursRange = (hoursRange: string) => {
+  if (!hoursRange.includes('-')) {
+    return hoursRange;
   }
   
-  // Otherwise calculate based on current time
-  const now = new Date();
-  const dayName = now.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
-  const currentTimeStr = now.toLocaleTimeString('en-US', { 
-    hour: 'numeric', 
-    minute: 'numeric', 
-    hour12: true 
-  });
+  const [openTime, closeTime] = hoursRange.split('-');
+  return `${formatTime(openTime)} - ${formatTime(closeTime)}`;
+};
+
+// Format time for display (convert 24h to 12h)
+const formatTime = (time24h: string) => {
+  const [hours, minutes] = time24h.split(':');
+  const h = parseInt(hours, 10);
   
-  // Get hours string for today
-  let todayHours: string;
-  switch (dayName) {
-    case 'monday': todayHours = hours.monday; break;
-    case 'tuesday': todayHours = hours.tuesday; break;
-    case 'wednesday': todayHours = hours.wednesday; break;
-    case 'thursday': todayHours = hours.thursday; break;
-    case 'friday': todayHours = hours.friday; break;
-    case 'saturday': todayHours = hours.saturday; break;
-    case 'sunday': todayHours = hours.sunday; break;
-    default: return false;
+  if (h === 0) {
+    return `12:${minutes} AM`;
   }
-  
-  // Parse hours string (e.g., "10:00 AM - 9:00 PM")
-  const [openTime, closeTime] = todayHours.split(' - ');
-  if (!openTime || !closeTime) return false;
-  
-  // Parse times to comparable format
-  const parseTime = (timeStr: string) => {
-    const [time, period] = timeStr.split(' ');
-    let [hours, minutes] = time.split(':').map(Number);
-    if (period === 'PM' && hours !== 12) hours += 12;
-    if (period === 'AM' && hours === 12) hours = 0;
-    return hours * 60 + minutes;
-  };
-  
-  const openMinutes = parseTime(openTime);
-  let closeMinutes = parseTime(closeTime);
-  
-  // Handle cases where closing is past midnight
-  if (closeMinutes < openMinutes) {
-    closeMinutes += 24 * 60;
+  if (h < 12) {
+    return `${h}:${minutes} AM`;
   }
-  
-  // Get current time in minutes
-  const currentTime = parseTime(currentTimeStr);
-  
-  // Check if current time is within open hours
-  return currentTime >= openMinutes && currentTime < closeMinutes;
+  if (h === 12) {
+    return `12:${minutes} PM`;
+  }
+  return `${h-12}:${minutes} PM`;
 };

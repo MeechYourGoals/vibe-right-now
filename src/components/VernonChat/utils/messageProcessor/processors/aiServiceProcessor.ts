@@ -1,7 +1,7 @@
 
 import { MessageContext, MessageProcessor } from '../types';
 import { Message } from '../../../types';
-import { GeminiService } from '@/services/GeminiService';
+import { OpenAIService } from '@/services/OpenAIService';
 import { VertexAIService } from '@/services/VertexAIService';
 import { createAIMessage } from '../../messageFactory';
 
@@ -16,34 +16,42 @@ export class AIServiceProcessor implements MessageProcessor {
     setMessages: React.Dispatch<React.SetStateAction<Message[]>>
   ): Promise<boolean> {
     try {
-      // Convert contextMessages to format expected by AI services
+      // Convert contextMessages to format expected by OpenAI
       const contextMessages = context.messages.slice(-10);
+      const openAIMessages = contextMessages.map(msg => ({
+        role: msg.sender === 'user' ? 'user' : 'assistant',
+        content: msg.text
+      }));
+      
+      // Add the new user message
+      openAIMessages.push({
+        role: 'user',
+        content: context.query
+      });
       
       let responseText = '';
       
       if (context.options.isVenueMode) {
-        // For venue mode, use Vertex AI for business insights
+        // For venue mode, use higher quality model for business insights
         try {
-          responseText = await VertexAIService.generateResponse(
-            context.query,
-            'venue',
-            contextMessages
-          );
+          responseText = await OpenAIService.sendChatRequest(openAIMessages, {
+            model: 'gpt-4o',
+            context: 'venue'
+          });
         } catch (error) {
-          console.error('Error with Vertex AI for venue mode:', error);
-          // Fall back to Gemini
-          responseText = await GeminiService.generateResponse(context.query, 'venue', contextMessages);
+          console.error('Error with OpenAI for venue mode:', error);
+          // Fall back to Vertex AI
+          responseText = await VertexAIService.generateResponse(context.query, 'venue', contextMessages);
         }
       } else {
-        // For conversational queries, use Gemini as primary
+        // For conversational queries, use standard model
         try {
-          responseText = await GeminiService.generateResponse(
-            context.query,
-            'user',
-            contextMessages
-          );
+          responseText = await OpenAIService.sendChatRequest(openAIMessages, {
+            model: 'gpt-4o-mini',
+            context: 'user'
+          });
         } catch (error) {
-          console.error('Error with Gemini for conversational mode:', error);
+          console.error('Error with OpenAI for conversational mode:', error);
           // Fall back to Vertex AI
           responseText = await VertexAIService.generateResponse(context.query, 'default', contextMessages);
         }

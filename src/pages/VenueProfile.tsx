@@ -1,164 +1,184 @@
-
-import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { mockLocations } from "@/mock/data";
-import { Location } from "@/types";
-import { useToast } from "@/components/ui/use-toast";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState, useMemo, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import { Minimize } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import VenueHeader from "@/components/venue/VenueHeader";
-import VenueAbout from "@/components/venue/VenueAbout";
+import { mockLocations, mockPosts, mockComments } from "@/mock/data";
+import CameraButton from "@/components/CameraButton";
+import Header from "@/components/Header";
+import { Comment, Post, Location as VenueLocation } from "@/types"; // Import as VenueLocation to avoid conflicts
+import GoogleMapComponent from "@/components/map/google/GoogleMap";
+import { generateBusinessHours } from "@/utils/businessHoursUtils";
+import { 
+  isPostFromDayOfWeek, 
+  isWithinThreeMonths,
+  createDaySpecificVenuePosts
+} from "@/mock/time-utils";
+import { getVenueContent } from "@/utils/venue/venueContentHelpers";
+import DayOfWeekFilter from "@/components/venue/DayOfWeekFilter";
+import VenueProfileHeader from "@/components/venue/VenueProfileHeader";
 import VenueMap from "@/components/venue/VenueMap";
-import VenueAssistant from "@/components/venue/VenueAssistant";
-import VenueManagedBy from "@/components/venue/VenueManagedBy";
-import VenueDiscussions from "@/components/venue/VenueDiscussions";
-import VenuePostsList from "@/components/venue/venue-posts-list/VenuePostsList";
-import { getVenueById } from "@/services/VenueService";
-import { getPostsForVenue } from "@/services/PostService";
-import { getCommentsForPost } from "@/services/CommentService";
-import { Layout } from "@/components/Layout";
-import { SkeletonVenueHeader } from "@/components/SkeletonVenueHeader";
-import { SkeletonVenueAbout } from "@/components/SkeletonVenueAbout";
-import { SkeletonVenueMap } from "@/components/SkeletonVenueMap";
-import { SkeletonVenuePosts } from "@/components/SkeletonVenuePosts";
-import { SkeletonVenueAssistant } from "@/components/SkeletonVenueAssistant";
-import { SkeletonVenueReviews } from "@/components/SkeletonVenueReviews";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import VenuePostsContent from "@/components/venue/VenuePostsContent";
+
+// Define an extended Post type that includes venue-specific properties
+interface ExtendedPost extends Post {
+  isVenuePost?: boolean;
+  isPinned?: boolean;
+  isExternalPost?: boolean;
+}
 
 const VenueProfile = () => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState("all");
+  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
+  const [isMapExpanded, setIsMapExpanded] = useState(false);
+  const [selectedDays, setSelectedDays] = useState<number[]>([]);
   
-  const [venue, setVenue] = useState<Location | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("about");
-  const [mapDialogOpen, setMapDialogOpen] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const venue = mockLocations.find(location => location.id === id);
   
-  useEffect(() => {
-    const loadVenue = async () => {
-      try {
-        // In a real app, this would be an API call to fetch the venue by ID
-        // For now, we'll just use mock data
-        const foundVenue = mockLocations.find(loc => loc.id === id);
-        
-        if (foundVenue) {
-          setVenue(foundVenue);
-          setLoading(false);
-        } else {
-          setError("Venue not found");
-          setLoading(false);
-          toast({
-            title: "Error",
-            description: "The requested venue could not be found.",
-            variant: "destructive"
-          });
-          
-          // Navigate back to explore page after a delay
-          setTimeout(() => {
-            navigate("/explore");
-          }, 3000);
-        }
-      } catch (err) {
-        console.error("Error loading venue:", err);
-        setError("Failed to load venue data");
-        setLoading(false);
-      }
-    };
+  if (venue && !venue.hours) {
+    venue.hours = generateBusinessHours(venue);
+  }
+  
+  const venuePosts = useMemo(() => {
+    return mockPosts.filter(post => 
+      post.location.id === id && 
+      isWithinThreeMonths(post.timestamp)
+    );
+  }, [id]);
+
+  // Generate venue-specific posts for each day of the week
+  const generatedVenuePosts = useMemo(() => {
+    if (!venue) return [];
+    // Create posts and cast the result to Post[]
+    return createDaySpecificVenuePosts(venue.id, venue.type) as unknown as Post[];
+  }, [venue]);
+
+  const filteredPosts = useMemo(() => {
+    if (selectedDays.length === 0) {
+      return venuePosts;
+    }
     
-    loadVenue();
-  }, [id, navigate, toast]);
-  
-  // Check if the current user is the owner of the venue
-  const isOwner = () => {
-    if (!venue || !venue.ownerIdentifier) return false;
-    // In a real app, this would check if the current user's ID matches the venue's owner ID
-    return false; // Default to false for now
-  };
-  
-  const handleExpandMap = () => {
-    setMapDialogOpen(true);
+    return venuePosts.filter(post => 
+      selectedDays.includes(new Date(post.timestamp).getDay())
+    );
+  }, [venuePosts, selectedDays]);
+
+  const allPosts = useMemo(() => {
+    if (!venue) return [];
+    
+    // Filter venue-specific posts by selected days
+    const filteredVenuePosts = selectedDays.length === 0 
+      ? generatedVenuePosts 
+      : generatedVenuePosts.filter(post => 
+          selectedDays.includes(new Date(post.timestamp).getDay())
+        );
+    
+    // Combine and sort all posts by timestamp
+    const combined = [...filteredPosts, ...filteredVenuePosts].sort((a, b) => 
+      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+    
+    return combined;
+  }, [filteredPosts, venue, generatedVenuePosts, selectedDays]);
+
+  const getPostComments = (postId: string): Comment[] => {
+    return mockComments.filter(comment => comment.postId === postId);
   };
 
+  const toggleMapExpansion = () => {
+    setIsMapExpanded(!isMapExpanded);
+    
+    setTimeout(() => {
+      if (window.resizeMap) {
+        window.resizeMap();
+      }
+    }, 10);
+  };
+  
+  const handleDayToggle = (dayIndex: number) => {
+    setSelectedDays(prev => {
+      if (prev.includes(dayIndex)) {
+        return prev.filter(day => day !== dayIndex);
+      } else {
+        return [...prev, dayIndex];
+      }
+    });
+  };
+  
+  const clearDayFilters = () => {
+    setSelectedDays([]);
+  };
+
+  if (!venue) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container py-20 text-center">
+          <h1 className="text-2xl font-bold mb-4">Venue not found</h1>
+          <p className="text-muted-foreground">This venue doesn't exist or has been removed.</p>
+          <Button className="mt-6" onClick={() => window.history.back()}>Go Back</Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <Layout>
+    <div className="min-h-screen bg-background">
+      <Header />
+      
+      {isMapExpanded && (
+        <div className="fixed inset-0 z-50 bg-background p-4">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-bold">{venue.name} Location</h2>
+            <Button variant="ghost" size="sm" className="gap-1" onClick={toggleMapExpansion}>
+              <Minimize className="h-4 w-4" />
+              Close Map
+            </Button>
+          </div>
+          <div className="h-[85vh] rounded-lg overflow-hidden">
+            <GoogleMapComponent
+              userLocation={null}
+              locations={[venue]}
+              searchedCity={venue.city}
+              mapStyle="default"
+              selectedLocation={null}
+              onLocationSelect={() => {}}
+              userAddressLocation={null}
+            />
+          </div>
+        </div>
+      )}
+      
       <main className="container py-6">
-        {loading ? (
-          <div className="space-y-8">
-            <SkeletonVenueHeader />
-            <SkeletonVenueAbout />
-            <SkeletonVenueMap />
-            <SkeletonVenuePosts />
-            <SkeletonVenueAssistant />
-            <SkeletonVenueReviews />
+        <div className="max-w-4xl mx-auto">
+          <div className="glass-effect p-6 rounded-xl mb-6">
+            <VenueProfileHeader venue={venue} onMapExpand={toggleMapExpansion} />
+            <VenueMap venue={venue} onExpand={toggleMapExpansion} />
           </div>
-        ) : error ? (
-          <div className="text-center py-12">
-            <h2 className="text-2xl font-bold mb-4">Error</h2>
-            <p className="text-muted-foreground">{error}</p>
-            <p className="mt-4">Redirecting to Explore page...</p>
-          </div>
-        ) : venue ? (
-          <div className="space-y-8">
-            {/* Venue Header */}
-            <VenueHeader venue={venue} isOwner={isOwner()} />
-            
-            {/* Venue Content Tabs */}
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="about">About</TabsTrigger>
-                <TabsTrigger value="posts">Posts</TabsTrigger>
-                <TabsTrigger value="reviews">Reviews</TabsTrigger>
-                <TabsTrigger value="assistant">Vernon AI</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="about" className="space-y-6 mt-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="md:col-span-2">
-                    <VenueAbout venue={venue} />
-                  </div>
-                  <div className="md:col-span-1">
-                    <VenueMap venue={venue} onExpand={handleExpandMap} />
-                  </div>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="posts" className="mt-6">
-                <VenuePostsList venue={venue} />
-              </TabsContent>
-              
-              <TabsContent value="reviews" className="mt-6">
-                <VenueDiscussions venue={venue} />
-              </TabsContent>
-              
-              <TabsContent value="assistant" className="mt-6">
-                <VenueAssistant venue={venue} />
-              </TabsContent>
-            </Tabs>
-            
-            {/* Map Dialog */}
-            <Dialog open={mapDialogOpen} onOpenChange={setMapDialogOpen}>
-              <DialogContent className="sm:max-w-[90vw] h-[80vh] p-0">
-                <div className="h-full">
-                  {/* You would implement a full-screen map here */}
-                  <iframe
-                    title={`Map for ${venue.name}`}
-                    width="100%"
-                    height="100%"
-                    frameBorder="0"
-                    src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyBQwBQcUxHAzfHjUZPd47Q3zOcQLfFAUA4&q=${encodeURIComponent(
-                      `${venue.name}, ${venue.address}, ${venue.city}, ${venue.state || ''}`
-                    )}`}
-                    allowFullScreen
-                  />
-                </div>
-              </DialogContent>
-            </Dialog>
-          </div>
-        ) : null}
+          
+          <DayOfWeekFilter 
+            selectedDays={selectedDays} 
+            onDayToggle={handleDayToggle} 
+            onClearFilters={clearDayFilters} 
+          />
+          
+          <VenuePostsContent
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+            allPosts={allPosts}
+            filteredPosts={filteredPosts}
+            generatedVenuePosts={generatedVenuePosts}
+            selectedDays={selectedDays}
+            venue={venue}
+            getPostComments={getPostComments}
+          />
+        </div>
       </main>
-    </Layout>
+      
+      <CameraButton />
+    </div>
   );
 };
 

@@ -1,117 +1,168 @@
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { toast } from "sonner";
+import { useNearbyLocations } from "@/hooks/useNearbyLocations";
+import { geocodeAddress } from "@/utils/geocodingService";
+import MapControls from "./map/MapControls";
+import MapContainer from "./map/MapContainer";
+import NearbyLocationsList from "./map/NearbyLocationsList";
+import AddressSearchPopover from "./map/AddressSearchPopover";
+import { Location } from "@/types";
 
-import React, { useState } from 'react';
-import { Location } from '@/types';
-import { Button } from '@/components/ui/button';
-import { Maximize2, Minimize2 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
-import GoogleMapComponent from './map/google/GoogleMapComponent';
-import { mockLocations } from '@/mock/data';
-
-interface NearbyVibesMapProps {
-  locations?: Location[];
-  isRealData?: boolean;
-  height?: number;
+declare global {
+  interface Window {
+    resizeMap?: () => void;
+  }
 }
 
-const NearbyVibesMap = ({ 
-  locations = mockLocations.slice(0, 10),
-  isRealData = false,
-  height = 300
-}: NearbyVibesMapProps) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+const NearbyVibesMap = () => {
+  const {
+    userLocation,
+    nearbyLocations,
+    loading,
+    searchedCity,
+    setSearchedCity,
+    userAddressLocation,
+    setUserAddressLocation
+  } = useNearbyLocations();
+  
+  const [isMapExpanded, setIsMapExpanded] = useState(false);
+  const [mapStyle, setMapStyle] = useState<"default" | "terrain" | "satellite">("terrain");
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
+  const [showDistances, setShowDistances] = useState(false);
+  const [isAddressPopoverOpen, setIsAddressPopoverOpen] = useState(false);
+  const [localLoading, setLocalLoading] = useState(false);
+  
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const q = params.get('q') || '';
+    
+    if (q) {
+      const city = q.split(',')[0].trim();
+      setSearchedCity(city);
+    } else {
+      setSearchedCity("");
+    }
+  }, [location, setSearchedCity]);
+
+  const handleViewMap = () => {
+    navigate("/explore");
+  };
+
+  const toggleMapExpansion = () => {
+    setIsMapExpanded(!isMapExpanded);
+    setSelectedLocation(null);
+    
+    setTimeout(() => {
+      if (window.resizeMap) {
+        window.resizeMap();
+      }
+    }, 10);
+  };
+
+  const handleLocationClick = (locationId: string) => {
+    // Navigate directly to the venue page
+    navigate(`/venue/${locationId}`);
+  };
 
   const handleLocationSelect = (location: Location) => {
     setSelectedLocation(location);
   };
-
-  const handleViewVibe = () => {
-    if (selectedLocation) {
-      navigate(`/venue/${selectedLocation.id}`);
+  
+  const handleAddressSearch = async (address: string) => {
+    if (!address.trim()) {
+      toast.error("Please enter an address");
+      return;
+    }
+    
+    try {
+      setLocalLoading(true);
+      
+      const coordinates = await geocodeAddress(address);
+      
+      if (coordinates) {
+        setUserAddressLocation(coordinates);
+        setShowDistances(true);
+        setIsAddressPopoverOpen(false);
+        
+        toast.success("Address found! Showing distances on the map");
+        
+        if (isMapExpanded && window.resizeMap) {
+          window.resizeMap();
+        }
+      }
+    } finally {
+      setLocalLoading(false);
     }
   };
-
+  
+  const handleUseCurrentLocation = () => {
+    if (!userLocation) {
+      toast.error("Unable to access your location. Please allow location access or enter an address manually.");
+      return;
+    }
+    
+    setShowDistances(true);
+    setUserAddressLocation(null);
+    setIsAddressPopoverOpen(false);
+    toast.success("Using your current location for distances");
+  };
+  
+  // Determine the effective loading state (either from hook or local)
+  const effectiveLoading = loading || localLoading;
+  
   return (
-    <>
-      <div 
-        className="relative rounded-lg overflow-hidden border border-border/40 bg-muted/20" 
-        style={{ height: `${height}px` }}
-      >
-        <GoogleMapComponent
-          userLocation={null}
-          locations={locations}
-          searchedCity=""
-          mapStyle="default"
-          selectedLocation={selectedLocation}
-          onLocationSelect={handleLocationSelect}
-          userAddressLocation={null}
-        />
-        
-        <div className="absolute bottom-3 right-3 flex gap-2">
-          <Button 
-            size="sm" 
-            variant="secondary" 
-            className="bg-white/80 hover:bg-white shadow-md"
-            onClick={() => navigate("/explore")}
-          >
-            <Maximize2 className="h-4 w-4 mr-1" />
-            View in Explore
-          </Button>
-        </div>
-        
-        <div className="absolute bottom-3 left-3">
-          <div className="bg-white/80 px-3 py-1.5 rounded-md shadow-md text-sm">
-            Map showing {locations.length} locations
-          </div>
+    <div className={`space-y-4 ${isMapExpanded ? "fixed inset-0 z-50 bg-background p-4" : ""}`}>
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-bold">Nearby Vibes</h2>
+        <div className="flex gap-2">
+          <MapControls 
+            isExpanded={isMapExpanded}
+            mapStyle={mapStyle}
+            onStyleChange={setMapStyle}
+            onToggleExpand={toggleMapExpansion}
+          />
+          
+          {!isMapExpanded && (
+            <AddressSearchPopover
+              isOpen={isAddressPopoverOpen}
+              setIsOpen={setIsAddressPopoverOpen}
+              onSearch={handleAddressSearch}
+              onUseCurrentLocation={handleUseCurrentLocation}
+              loading={effectiveLoading}
+              hasUserLocation={true}
+            />
+          )}
         </div>
       </div>
-
-      <Dialog open={isExpanded} onOpenChange={setIsExpanded}>
-        <DialogContent className="sm:max-w-[90vw] h-[80vh] p-0 overflow-hidden">
-          <div className="relative h-full w-full">
-            <GoogleMapComponent
-              userLocation={null}
-              locations={locations}
-              searchedCity=""
-              mapStyle="default"
-              selectedLocation={selectedLocation}
-              onLocationSelect={handleLocationSelect}
-              userAddressLocation={null}
-              showAllCities={true}
-            />
-            
-            <div className="absolute top-3 right-3">
-              <Button 
-                variant="secondary" 
-                size="sm" 
-                className="bg-white/80 hover:bg-white shadow-md"
-                onClick={() => setIsExpanded(false)}
-              >
-                <Minimize2 className="h-4 w-4 mr-1" />
-                Minimize
-              </Button>
-            </div>
-            
-            {selectedLocation && (
-              <div className="absolute bottom-3 left-3 bg-white/90 p-3 rounded-md shadow-md max-w-xs">
-                <h3 className="font-medium">{selectedLocation.name}</h3>
-                <p className="text-sm text-muted-foreground">{selectedLocation.address}</p>
-                <p className="text-xs mt-1">{selectedLocation.city}, {selectedLocation.state || selectedLocation.country}</p>
-                <Button 
-                  size="sm" 
-                  className="mt-2 w-full" 
-                  onClick={handleViewVibe}
-                >
-                  View Venue
-                </Button>
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
-    </>
+      
+      <MapContainer
+        loading={effectiveLoading}
+        isExpanded={isMapExpanded}
+        userLocation={userLocation}
+        locations={nearbyLocations}
+        searchedCity={searchedCity}
+        mapStyle={mapStyle}
+        selectedLocation={selectedLocation}
+        showDistances={showDistances}
+        userAddressLocation={userAddressLocation}
+        onLocationSelect={handleLocationSelect}
+        onCloseLocation={() => setSelectedLocation(null)}
+        nearbyCount={nearbyLocations.length}
+        onToggleDistances={() => setShowDistances(false)}
+        showAllCities={!searchedCity}
+      />
+      
+      <NearbyLocationsList
+        locations={nearbyLocations}
+        isExpanded={isMapExpanded}
+        onViewMap={handleViewMap}
+        onViewLocation={handleLocationClick}
+      />
+    </div>
   );
 };
 

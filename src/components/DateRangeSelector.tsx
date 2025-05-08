@@ -47,11 +47,11 @@ export function DateRangeSelector({
                 format(dateRange.from, "LLL dd, y")
               )
             ) : (
-              <span>Select dates to explore future vibes</span>
+              <span>Select dates</span>
             )}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0 z-50 bg-popover border border-border shadow-md" align="start">
+        <PopoverContent className="w-auto p-0 bg-gray-900 border-gray-700" align="start">
           <Calendar
             initialFocus
             mode="range"
@@ -59,7 +59,7 @@ export function DateRangeSelector({
             selected={dateRange}
             onSelect={onDateRangeChange}
             numberOfMonths={2}
-            className={cn("p-3 pointer-events-auto")}
+            className={cn("p-3 pointer-events-auto bg-gray-900 dark:bg-gray-900 text-white")}
           />
         </PopoverContent>
       </Popover>

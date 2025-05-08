@@ -42,7 +42,7 @@ const FollowedVenuesSection = ({ venues }: FollowedVenuesSectionProps) => {
                   <h4 className="font-medium">{venue.name}</h4>
                   <div className="flex items-center text-sm text-muted-foreground">
                     <MapPin className="h-3 w-3 mr-1" />
-                    <span>{venue.city}, {venue.state || venue.country || "USA"}</span>
+                    <span>{venue.city}, {venue.state || venue.country}</span>
                   </div>
                   <Badge variant="outline" className="mt-1 text-xs bg-muted">
                     {venue.type}

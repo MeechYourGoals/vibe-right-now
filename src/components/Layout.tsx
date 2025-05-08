@@ -1,16 +1,14 @@
 
-import React from "react";
-import Header from "@/components/Header";
+import Header from "./Header";
+import VernonChat from '@/components/VernonChat';
 
-interface LayoutProps {
-  children: React.ReactNode;
-}
-
-export const Layout: React.FC<LayoutProps> = ({ children }) => {
+export const Layout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen flex flex-col">
       <Header />
-      {children}
+      <main className="flex-1 pt-4">
+        {children}
+      </main>
     </div>
   );
 };

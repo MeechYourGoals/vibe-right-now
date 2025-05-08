@@ -27,7 +27,6 @@ const ProfileTabContent: React.FC<ProfileTabContentProps> = ({
     const groupedPosts: Record<string, Post[]> = {};
     
     userPosts.forEach(post => {
-      if (!post.location) return;
       const locationId = post.location.id;
       if (!groupedPosts[locationId]) {
         groupedPosts[locationId] = [];
@@ -49,7 +48,6 @@ const ProfileTabContent: React.FC<ProfileTabContentProps> = ({
   const locationPostCounts = React.useMemo(() => {
     const counts: Record<string, number> = {};
     userPosts.forEach(post => {
-      if (!post.location) return;
       const locationId = post.location.id;
       counts[locationId] = (counts[locationId] || 0) + 1;
     });
@@ -74,22 +72,26 @@ const ProfileTabContent: React.FC<ProfileTabContentProps> = ({
 
   // Enhanced PostCard component with vibe tags
   const EnhancedPostCard = ({ posts, locationPostCount }: { posts: Post[], locationPostCount: number }) => {
-    if (!posts || posts.length === 0) return null;
+    const postCard = (
+      <PostCard 
+        posts={posts} 
+        locationPostCount={locationPostCount}
+        getComments={getComments}
+      />
+    );
     
-    const mainPost = posts[0]; // Using first post from the location
+    // Check if any post has vibe tags
+    const hasVibeTags = posts.some(post => post.vibeTags && post.vibeTags.length > 0);
     
+    if (!hasVibeTags) return postCard;
+    
+    // Add vibe tags below the post card
     return (
       <div className="space-y-2">
-        <PostCard 
-          post={mainPost} 
-          comments={getComments(mainPost.id)}
-          locationPostCount={locationPostCount}
-        />
-        {mainPost.vibeTags && mainPost.vibeTags.length > 0 && (
-          <div className="pl-4">
-            {renderVibeTags(mainPost)}
-          </div>
-        )}
+        {postCard}
+        <div className="pl-4">
+          {renderVibeTags(posts[0])}
+        </div>
       </div>
     );
   };

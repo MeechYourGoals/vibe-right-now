@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Layout } from "@/components/Layout";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 
 import SettingsHeader from "@/components/settings/SettingsHeader";
 import SettingsTabs from "@/components/settings/SettingsTabs";
@@ -15,18 +15,21 @@ import VenueManagementTab from "./settings/VenueManagementTab";
 import MarketingTab from "./settings/MarketingTab";
 
 const Settings = () => {
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("preferences");
   const [isVenueMode, setIsVenueMode] = useState(false);
   const [subscriptionTier, setSubscriptionTier] = useState<'standard' | 'plus' | 'premium' | 'pro'>('standard');
 
   const handleSaveSettings = () => {
-    toast("Settings saved", {
+    toast({
+      title: "Settings saved",
       description: "Your preferences have been updated successfully.",
     });
   };
 
   const handleConnectPlatform = (platformId: string) => {
-    toast("Connecting to platform", {
+    toast({
+      title: "Connecting to platform",
       description: `Initiating connection to ${platformId === 'other' ? "custom platform" : platformId}...`,
     });
     // In a real app, this would trigger an OAuth flow or similar
@@ -34,7 +37,8 @@ const Settings = () => {
 
   const toggleMode = () => {
     setIsVenueMode(!isVenueMode);
-    toast(`Switched to ${!isVenueMode ? "Venue" : "User"} Mode`, {
+    toast({
+      title: `Switched to ${!isVenueMode ? "Venue" : "User"} Mode`,
       description: `Settings are now configured for ${!isVenueMode ? "venue management" : "regular user"}.`,
     });
   };
@@ -42,7 +46,8 @@ const Settings = () => {
   // Helper function to upgrade subscription tier
   const upgradeTier = (tier: 'standard' | 'plus' | 'premium' | 'pro') => {
     setSubscriptionTier(tier);
-    toast(`Upgraded to ${tier.charAt(0).toUpperCase() + tier.slice(1)}`, {
+    toast({
+      title: `Upgraded to ${tier.charAt(0).toUpperCase() + tier.slice(1)}`,
       description: `Your subscription has been upgraded to ${tier}.`,
     });
   };

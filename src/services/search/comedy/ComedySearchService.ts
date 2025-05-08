@@ -32,7 +32,10 @@ export const ComedySearchService = {
       `;
       
       // Use VertexAI for both search and context-aware responses
-      const comedyInfo = await VertexAIService.searchWithVertex(enhancedQuery);
+      const comedyInfo = await VertexAIService.searchWithVertex(
+        enhancedQuery,
+        ['entertainment', 'comedy', 'events']
+      );
       
       if (comedyInfo && comedyInfo.length > 0) {
         return comedyInfo;

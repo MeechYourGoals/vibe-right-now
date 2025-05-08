@@ -1,86 +1,124 @@
 
-import React, { useState } from 'react';
-import Header from '@/components/Header';
-import SearchVibes from '@/components/SearchVibes';
-import { useNavigate } from 'react-router-dom'; 
-import { mockLocations } from '@/mock/data';
-import { LocalAIService } from '@/services/LocalAIService';
-import VernonChat from '@/components/VernonChat';
+import { useState } from "react";
+import { Layout } from "@/components/Layout";
+import PostFeed from "@/components/PostFeed";
+import LocationsNearby from "@/components/LocationsNearby";
+import TrendingLocations from "@/components/TrendingLocations";
+import DiscountLocations from "@/components/DiscountLocations";
+import CameraButton from "@/components/CameraButton";
+import NearbyVibesMap from "@/components/NearbyVibesMap";
+import RecommendedForYou from "@/components/RecommendedForYou";
+import VernonNext from "@/components/VernonNext";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { DateRange } from "react-day-picker";
+import { Button } from "@/components/ui/button";
+import { Calendar, CalendarRange } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import DateRangeSelector from "@/components/DateRangeSelector";
+import { Card, CardContent } from "@/components/ui/card";
 
-const Index: React.FC = () => {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+const Index = () => {
+  const isMobile = useIsMobile();
+  const featuredUsers = ['sarah_vibes', 'jay_experiences', 'adventure_alex', 'marco_travels', 'local_explorer'];
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const navigate = useNavigate();
 
-  // Initialize AI services
-  React.useEffect(() => {
-    const initAI = async () => {
-      await LocalAIService.init();
-    };
-    initAI();
-  }, []);
+  const handleDateRangeChange = (range: DateRange | undefined) => {
+    setDateRange(range);
+  };
 
-  const handleSearch = (query: string) => {
-    const searchParams = new URLSearchParams();
-    if (query) {
-      searchParams.set('q', query);
+  const handlePlanFutureVibes = () => {
+    if (dateRange?.from) {
+      const searchParams = new URLSearchParams();
+      searchParams.set('from', dateRange.from.toISOString().split('T')[0]);
+      if (dateRange.to) {
+        searchParams.set('to', dateRange.to.toISOString().split('T')[0]);
+      }
+      navigate(`/explore?${searchParams.toString()}`);
+    } else {
+      navigate('/explore');
     }
-    navigate(`/explore?${searchParams.toString()}`);
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      
+    <Layout>
       <main className="container py-6">
-        <h1 className="text-4xl font-bold text-center mb-6 vibe-gradient-text">
-          Find Your Vibe
-        </h1>
-        
-        <div className="max-w-xl mx-auto mb-12">
-          <SearchVibes onSearch={handleSearch} />
-        </div>
-        
-        <div className="space-y-12">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {mockLocations.slice(0, 4).map(location => (
-              <div key={location.id} className="bg-white rounded-lg shadow-md p-4">
-                <h3 className="font-semibold">{location.name}</h3>
-                <p className="text-sm text-muted-foreground">{location.address}</p>
-                <p className="text-xs text-muted-foreground mt-1">{location.city}, {location.state}</p>
+        <div className="flex flex-col gap-6">
+          {/* Main content area */}
+          <div className="flex flex-col gap-6">
+            <div className="flex flex-col md:flex-row items-center justify-between mb-2">
+              <h1 className="text-3xl font-bold vibe-gradient-text mb-3 md:mb-0">
+                Discover the Vibe Right Now
+              </h1>
+              <Button 
+                variant="outline" 
+                className="flex items-center gap-2 bg-gradient-to-r from-indigo-50 to-purple-50 hover:from-indigo-100 hover:to-purple-100"
+                onClick={() => setShowDatePicker(!showDatePicker)}
+              >
+                <CalendarRange className="h-4 w-4" />
+                Plan Future Vibes
+              </Button>
+            </div>
+
+            {showDatePicker && (
+              <Card className="mb-4 bg-indigo-50 border-indigo-100">
+                <CardContent className="p-4">
+                  <h3 className="text-lg font-semibold mb-3 text-indigo-800">Find Future Vibes</h3>
+                  <p className="text-sm text-indigo-700 mb-3">Select dates to explore events, concerts, games and more in the coming months</p>
+                  <DateRangeSelector 
+                    dateRange={dateRange} 
+                    onDateRangeChange={handleDateRangeChange} 
+                  />
+                  <div className="flex justify-end mt-4">
+                    <Button
+                      className="bg-indigo-600 hover:bg-indigo-700"
+                      onClick={handlePlanFutureVibes}
+                      disabled={!dateRange?.from}
+                    >
+                      <Calendar className="h-4 w-4 mr-2" />
+                      Explore Future Vibes
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Map positioned between search bar and filters */}
+            <div className="w-full mb-4">
+              <NearbyVibesMap />
+            </div>
+
+            {/* Posts feed and sidebar layout */}
+            <div className="flex flex-col md:flex-row gap-6">
+              <div className="w-full md:w-3/4">
+                <PostFeed celebrityFeatured={featuredUsers} />
               </div>
-            ))}
-          </div>
-          
-          <div>
-            <h2 className="text-2xl font-semibold mb-4">Trending Locations</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {mockLocations.slice(4, 10).map(location => (
-                <div key={location.id} className="bg-white rounded-lg shadow-md p-4">
-                  <h3 className="font-semibold">{location.name}</h3>
-                  <p className="text-sm text-muted-foreground">{location.address}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{location.city}, {location.state}</p>
+              
+              {!isMobile && (
+                <div className="w-full md:w-1/4 space-y-6">
+                  <RecommendedForYou featuredLocations={["5", "7", "10", "13", "20"]} />
+                  <TrendingLocations />
+                  <DiscountLocations />
                 </div>
-              ))}
+              )}
             </div>
           </div>
           
-          <div>
-            <h2 className="text-2xl font-semibold mb-4">Discount Locations</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {mockLocations.slice(10, 14).map(location => (
-                <div key={location.id} className="bg-white rounded-lg shadow-md p-4">
-                  <h3 className="font-semibold">{location.name}</h3>
-                  <p className="text-sm text-muted-foreground">{location.address}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{location.city}, {location.state}</p>
-                </div>
-              ))}
+          {isMobile && (
+            <div className="mt-8 space-y-6">
+              <h2 className="text-xl font-bold mb-4 vibe-gradient-text">Around You</h2>
+              <RecommendedForYou featuredLocations={["5", "7", "10", "13", "20"]} />
+              <TrendingLocations />
+              <DiscountLocations />
             </div>
-          </div>
+          )}
         </div>
       </main>
       
-      <VernonChat />
-    </div>
+      <CameraButton />
+      <VernonNext />
+    </Layout>
   );
 };
 

@@ -1,10 +1,4 @@
 
-import VenuePostsGrid from "./VenuePostsGrid";
-import VenuePostsListView from "./VenuePostsListView";
-import EmptyState from "./EmptyState";
-
-export {
-  VenuePostsGrid,
-  VenuePostsListView,
-  EmptyState
-};
+export { default as VenuePostsGrid } from './VenuePostsGrid';
+export { default as VenuePostsListView } from './VenuePostsList';
+export { default as EmptyState } from './EmptyState';

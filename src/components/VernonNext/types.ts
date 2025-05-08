@@ -50,7 +50,7 @@ export interface Location {
   city: string;
   state: string;
   country: string;
-  zip?: string; // Making this optional to match other definitions
+  zip: string;
   lat: number;
   lng: number;
   type: string;
@@ -66,3 +66,4 @@ export interface Location {
     sunday: string;
   };
 }
+

@@ -1,8 +1,9 @@
+
 import { useState, useMemo } from "react";
-import { mockPosts, mockComments } from "@/mock/data";
+import { mockPosts, mockComments, mockUsers } from "@/mock/data";
 import { PostCard } from "@/components/post";
 import SearchVibes from "@/components/SearchVibes";
-import { Post, Comment, Media } from "@/types";
+import { Post, User, Media } from "@/types";
 import { isWithinThreeMonths } from "@/mock/time-utils";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, Filter } from "lucide-react";
@@ -13,11 +14,33 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { ensureMediaFormat } from "@/utils/mediaUtils";
 
 interface PostFeedProps {
   celebrityFeatured?: string[];
 }
+
+// Helper function to ensure media is in the correct format
+const ensureMediaFormat = (media: any[]): Media[] => {
+  return media.map(item => {
+    if (typeof item === 'string') {
+      // Determine type based on extension
+      const isVideo = item.endsWith('.mp4') || item.endsWith('.mov') || item.endsWith('.avi');
+      return {
+        type: isVideo ? 'video' : 'image',
+        url: item
+      };
+    } else if (typeof item === 'object' && item !== null) {
+      // Already in correct format
+      return item;
+    }
+    
+    // Default fallback
+    return {
+      type: 'image',
+      url: 'https://via.placeholder.com/500'
+    };
+  });
+};
 
 const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
   const [filter, setFilter] = useState("all");
@@ -57,18 +80,7 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
       }
       
       // Ensure media is in the correct format
-      if (post.media) {
-        post.media = ensureMediaFormat(post.media);
-      }
-      
-      // Ensure required fields for Post type
-      if (!post.authorId) {
-        post.authorId = post.user?.id || '';
-      }
-      
-      if (!post.locationId && post.location) {
-        post.locationId = post.location.id;
-      }
+      post.media = ensureMediaFormat(post.media);
       
       return post;
     });
@@ -102,7 +114,6 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
     return [...featuredUserPosts, ...otherPosts];
   }, [recentPosts, celebrityFeatured]);
 
-  // Filter posts based on the current filter and search query
   const filteredPosts = useMemo(() => {
     return prioritizedPosts.filter((post) => {
       // Filter by location type if specified
@@ -204,7 +215,7 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
     return (
       <div className="flex flex-wrap gap-1 mt-2">
         {post.vibeTags.map((tag, index) => (
-          <Badge
+          <Badge 
             key={index} 
             variant="outline" 
             className={`${selectedVibeTags.includes(tag) ? 'bg-primary text-white' : 'bg-primary/10 text-primary'} text-xs`}
@@ -219,22 +230,26 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
 
   // Enhanced PostCard component with vibe tags
   const EnhancedPostCard = ({ posts, locationPostCount }: { posts: Post[], locationPostCount: number }) => {
-    if (!posts || posts.length === 0) return null;
+    const postCard = (
+      <PostCard 
+        posts={posts} 
+        locationPostCount={locationPostCount}
+        getComments={getPostComments}
+      />
+    );
     
-    const mainPost = posts[0];
+    // Check if any post has vibe tags
+    const hasVibeTags = posts.some(post => post.vibeTags && post.vibeTags.length > 0);
     
+    if (!hasVibeTags) return postCard;
+    
+    // Add vibe tags below the post card
     return (
       <div className="space-y-2">
-        <PostCard 
-          post={mainPost}
-          comments={getPostComments(mainPost.id)}
-          locationPostCount={locationPostCount}
-        />
-        {mainPost.vibeTags && mainPost.vibeTags.length > 0 && (
-          <div className="pl-4">
-            {renderVibeTags(mainPost)}
-          </div>
-        )}
+        {postCard}
+        <div className="pl-4">
+          {renderVibeTags(posts[0])}
+        </div>
       </div>
     );
   };
@@ -301,13 +316,12 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
       </div>
 
       <div className="p-4 space-y-4">
-        {/* Use the filtered and grouped posts */}
-        {Object.entries(postsGroupedByLocation || {}).length > 0 ? (
-          Object.entries(postsGroupedByLocation || {}).map(([locationId, posts]) => (
+        {Object.keys(postsGroupedByLocation).length > 0 ? (
+          Object.entries(postsGroupedByLocation).map(([locationId, posts]) => (
             <EnhancedPostCard 
               key={locationId} 
               posts={posts} 
-              locationPostCount={locationPostCounts[locationId] || 0}
+              locationPostCount={locationPostCounts[locationId]}
             />
           ))
         ) : (

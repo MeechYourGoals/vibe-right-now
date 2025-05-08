@@ -1,36 +1,34 @@
 
-// Utility for parsing city and state from search queries
-export const parseCityStateFromQuery = (query: string): { city: string, state: string } => {
-  if (!query) return { city: "", state: "" };
+import { toast } from "sonner";
 
-  // Common city-state formats: "City, State", "City State", "City in State"
-  const cityStateRegex = /^(.*?)[,\s]+([A-Za-z]{2})$/;
-  const cityStateMatch = query.match(cityStateRegex);
-  
-  if (cityStateMatch) {
-    const city = cityStateMatch[1].trim();
-    const state = cityStateMatch[2].trim().toUpperCase();
-    return { city, state };
+export async function geocodeAddress(address: string) {
+  if (!address.trim()) {
+    toast.error("Please enter an address");
+    return null;
   }
   
-  // Check for known cities without state
-  const knownCities = [
-    "New York", "Los Angeles", "Chicago", "Houston", "Phoenix",
-    "Philadelphia", "San Antonio", "San Diego", "Dallas", "San Jose",
-    "Austin", "Jacksonville", "San Francisco", "Seattle", "Denver",
-    "Boston", "Las Vegas", "Portland", "Miami", "Atlanta"
-  ];
-  
-  for (const city of knownCities) {
-    if (query.toLowerCase().includes(city.toLowerCase())) {
-      return { city, state: "" };
+  try {
+    // Using Nominatim (OpenStreetMap) for geocoding - no API key required
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`
+    );
+    
+    if (!response.ok) {
+      throw new Error('Failed to geocode address');
     }
+    
+    const data = await response.json();
+    
+    if (data && data.length > 0) {
+      // Nominatim returns lat/lon (not lon/lat as we need for MapBox/OSM)
+      return [parseFloat(data[0].lon), parseFloat(data[0].lat)] as [number, number];
+    } else {
+      toast.error("Address not found. Please try again with a more specific address.");
+      return null;
+    }
+  } catch (error) {
+    console.error("Geocoding error:", error);
+    toast.error("Error finding address. Please try again.");
+    return null;
   }
-  
-  // If no match, assume the whole query is a city
-  return { city: query.trim(), state: "" };
-};
-
-export default {
-  parseCityStateFromQuery
-};
+}

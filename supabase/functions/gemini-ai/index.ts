@@ -1,70 +1,98 @@
 
-// @ts-ignore - Deno imports need to be ignored in TypeScript
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
 
-// @ts-ignore - Deno.env needs to be ignored in TypeScript
-const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
+const GEMINI_API_KEY = "AIzaSyBeEJvxSAjyvoRS6supoob0F7jGW7lhZUU";
+const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// @ts-ignore - Deno serve function needs to be ignored in TypeScript
-serve(async (req: Request) => {
+serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { messages, model = "gemini-1.5-flash", temperature = 0.7, maxTokens = 800 } = await req.json();
-
-    console.log("Processing Gemini AI request", { 
-      model,
-      messageCount: messages.length,
-      temperature,
-      maxTokens
+    const { prompt, mode, history } = await req.json();
+    
+    // Build conversation history in Gemini format
+    const messages = [];
+    
+    // Add system prompt based on the mode
+    if (mode === 'venue') {
+      messages.push({
+        role: "model",
+        parts: [{ text: "I am VeRNon for Venues, a business insights assistant. I help venue owners understand their metrics, customer trends, and marketing performance." }]
+      });
+    } else {
+      messages.push({
+        role: "model",
+        parts: [{ text: "I am VeRNon, a venue and event discovery assistant. I help users find venues, events, and local attractions based on their preferences and location." }]
+      });
+    }
+    
+    // Add conversation history
+    if (history && history.length > 0) {
+      for (const message of history) {
+        messages.push({
+          role: message.sender === 'user' ? "user" : "model",
+          parts: [{ text: message.text }]
+        });
+      }
+    }
+    
+    // Add the current prompt
+    messages.push({
+      role: "user",
+      parts: [{ text: prompt }]
     });
-
-    // Call Gemini API
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`, {
-      method: 'POST',
+    
+    console.log("Sending request to Gemini API with messages:", JSON.stringify(messages));
+    
+    // Call the Gemini API
+    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json"
       },
       body: JSON.stringify({
         contents: messages,
         generationConfig: {
-          temperature: temperature,
-          maxOutputTokens: maxTokens,
-          topP: 0.8,
-          topK: 40
-        },
-      }),
+          temperature: 0.7,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 2048,
+        }
+      })
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Gemini API error:', errorText);
-      throw new Error(`Gemini API error: ${response.status}`);
+      const errorData = await response.text();
+      console.error(`Gemini API error: ${response.status}`, errorData);
+      return new Response(
+        JSON.stringify({ error: `Error calling Gemini API: ${response.status}` }),
+        { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const data = await response.json();
+    console.log("Gemini API response:", JSON.stringify(data));
     
     // Extract the response text
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-    console.log("Received Gemini response", { textLength: text.length });
-
-    return new Response(JSON.stringify({ text }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
-  } catch (error: any) {
+    const responseText = data.candidates[0].content.parts[0].text;
+    
+    return new Response(
+      JSON.stringify({ text: responseText }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  } catch (error) {
     console.error('Error in gemini-ai function:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
   }
 });
