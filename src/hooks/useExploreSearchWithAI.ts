@@ -1,127 +1,63 @@
 
-import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { useDebounce } from '@/hooks/useDebounce';
-import { Location } from '@/types';
-import { localAI } from '@/services/LocalAIService';
-import { preferenceMatcher } from '@/services/PreferenceMatcherService';
-import { useUserPreferences } from './useUserPreferences';
-import { DateRange } from "react-day-picker";
-import { useNavigate } from "react-router-dom";
+import { useState, useCallback } from "react";
+import { useExploreSearch } from "./useExploreSearch";
+import { LocalAIService } from "@/services/LocalAIService";
 
-export const useExploreSearchWithAI = () => {
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
-  const initialSearchQuery = searchParams.get('q') || '';
-  const initialCategory = searchParams.get('category') || 'all';
+/**
+ * Enhanced hook for explore search with AI personalization
+ */
+const useExploreSearchWithAI = () => {
+  const [isAIReady, setIsAIReady] = useState<boolean>(true);
+  const [isAIPersonalized, setIsAIPersonalized] = useState<boolean>(false);
 
-  const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
-  const [category, setCategory] = useState(initialCategory);
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(initialSearchQuery);
-  const [isAIReady, setIsAIReady] = useState(false);
-  const [aiLoadError, setAiLoadError] = useState<string | null>(null);
-  const [isAIPersonalized, setIsAIPersonalized] = useState(true);
-  const [filteredLocations, setFilteredLocations] = useState<Location[]>([]);
-
-  const { preferences, isLoading: isPreferencesLoading } = useUserPreferences();
-  const debouncedValue = useDebounce(searchQuery, 500);
-
-  useEffect(() => {
-    setDebouncedSearchQuery(debouncedValue);
-  }, [debouncedValue]);
-
-  useEffect(() => {
-    setSearchQuery(initialSearchQuery);
-    setCategory(initialCategory);
-    setDebouncedSearchQuery(initialSearchQuery);
-  }, [initialSearchQuery, initialCategory]);
-
-  useEffect(() => {
-    const initializeAI = async () => {
-      try {
-        await localAI.initModels();
-        setIsAIReady(true);
-      } catch (error) {
-        console.error('Error initializing local AI:', error);
-        setAiLoadError('Failed to initialize AI personalization');
-      }
-    };
-
-    initializeAI();
-  }, []);
-
-  const initLocalAI = async () => {
-    try {
-      await localAI.initModels();
-      setIsAIReady(true);
-    } catch (error) {
-      console.error('Error initializing local AI:', error);
-      setAiLoadError('Failed to initialize AI personalization');
-    }
-  };
-
-  const searchLocationsWithAI = async (locations: Location[]): Promise<Location[]> => {
-    if (!isAIReady || isPreferencesLoading || !isAIPersonalized) {
-      return locations;
-    }
-
-    try {
-      const userPrefs = preferences.interests.concat(preferences.vibes).concat(preferences.categories);
-      const aiEnhancedLocations = await preferenceMatcher.sortByPreferenceMatch(locations, userPrefs);
-      return aiEnhancedLocations;
-    } catch (error) {
-      console.error('Error searching locations with AI:', error);
-      return locations;
-    }
-  };
-
-  // Add the missing methods
-  const handleSearch = (query: string, filterType: string, category: string) => {
-    setSearchQuery(query);
-    setCategory(category);
-
-    // Update URL with search parameters
-    const searchParams = new URLSearchParams();
-    if (query) searchParams.set('q', query);
-    if (category !== 'all') searchParams.set('category', category);
-    
-    navigate(`/explore?${searchParams.toString()}`);
-  };
-
-  const handleTabChange = (value: string) => {
-    setCategory(value);
-    
-    // Update URL with new tab value
-    const searchParams = new URLSearchParams(window.location.search);
-    searchParams.set('category', value);
-    
-    navigate(`/explore?${searchParams.toString()}`);
-  };
-
-  const handleDateRangeChange = (range: DateRange | undefined) => {
-    // This is a stub method to fix the error - the actual implementation
-    // will be used from useExploreSearch
-    console.log("Date range changed:", range);
-  };
-
-  return {
-    searchQuery,
-    setSearchQuery,
-    category,
-    setCategory,
-    debouncedSearchQuery,
-    isAIReady,
-    aiLoadError,
-    isAIPersonalized,
-    setIsAIPersonalized,
-    searchLocationsWithAI,
-    filteredLocations,
-    setFilteredLocations,
-    isAIEnabled: isAIPersonalized,
-    setIsAIEnabled: setIsAIPersonalized,
+  const {
     handleSearch,
     handleTabChange,
-    handleDateRangeChange
+    handleDateRangeChange,
+    processComplexQuery,
+    fetchRealData
+  } = useExploreSearch();
+
+  // Enhanced search with AI personalization
+  const handleSearchWithAI = useCallback((query: string, filterType: string, category: string) => {
+    if (isAIPersonalized) {
+      // Process query with AI for personalization
+      LocalAIService.analyzeSentiment(query)
+        .then(sentiment => {
+          console.log('Query sentiment analysis:', sentiment);
+          
+          // Extract keywords to enhance search
+          return LocalAIService.extractKeywords(query);
+        })
+        .then(keywords => {
+          console.log('Extracted keywords:', keywords);
+          // Proceed with regular search but with AI-enhanced context
+          handleSearch(query, filterType, category);
+        })
+        .catch(error => {
+          console.error('Error in AI search enhancement:', error);
+          // Fall back to regular search
+          handleSearch(query, filterType, category);
+        });
+    } else {
+      // Regular search without AI
+      handleSearch(query, filterType, category);
+    }
+  }, [handleSearch, isAIPersonalized]);
+
+  // Enhanced tab change with AI personalization
+  const handleTabChangeWithAI = useCallback((value: string) => {
+    console.log('Tab changed to:', value);
+    handleTabChange(value);
+  }, [handleTabChange]);
+
+  return {
+    handleSearch: handleSearchWithAI,
+    handleTabChange: handleTabChangeWithAI,
+    handleDateRangeChange,
+    isAIReady,
+    isAIPersonalized,
+    setIsAIPersonalized
   };
 };
 

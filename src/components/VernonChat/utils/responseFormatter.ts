@@ -1,90 +1,74 @@
 
 /**
- * Format location search results for the chat response
+ * This utility formats AI responses for better display in the chat interface
  */
-export const formatLocationResponse = (
-  cityName: string, 
-  categoryResults: Record<string, string[]>,
-  paginationParams: Record<string, number> = {}
-): string => {
-  const hasResults = Object.values(categoryResults).some(arr => arr.length > 0);
+export const formatResponse = (text: string): string => {
+  // Convert plain text URLs to clickable links
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  let formattedText = text.replace(urlRegex, '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-blue-500 underline">$1</a>');
   
-  if (!hasResults) {
-    return `I couldn't find specific venues or events in ${cityName} at the moment. Would you like me to recommend some popular activities or search in a different city?`;
+  // Convert asterisk bullet points to proper HTML lists
+  const bulletRegex = /\n\s*\*\s(.*)/g;
+  if (bulletRegex.test(formattedText)) {
+    let listItems = '';
+    formattedText = formattedText.replace(bulletRegex, (match, item) => {
+      listItems += `<li>${item}</li>`;
+      return '';
+    });
+    
+    if (listItems) {
+      formattedText += `<ul class="list-disc pl-5 my-2">${listItems}</ul>`;
+    }
   }
   
-  // Build response starting with an intro
-  let response = `Here's what's happening in ${cityName} right now:\n\n`;
-  
-  // Add section for each category with results
-  if (categoryResults.nightlife && categoryResults.nightlife.length > 0) {
-    response += `**Nightlife & Bars**\n${categoryResults.nightlife.join('\n')}\n\n`;
+  // Convert numbered lists to proper HTML ordered lists
+  const numberedRegex = /\n\s*(\d+)\.\s(.*)/g;
+  if (numberedRegex.test(formattedText)) {
+    let listItems = '';
+    formattedText = formattedText.replace(numberedRegex, (match, number, item) => {
+      listItems += `<li>${item}</li>`;
+      return '';
+    });
+    
+    if (listItems) {
+      formattedText += `<ol class="list-decimal pl-5 my-2">${listItems}</ol>`;
+    }
   }
   
-  if (categoryResults.dining && categoryResults.dining.length > 0) {
-    response += `**Restaurants & Dining**\n${categoryResults.dining.join('\n')}\n\n`;
-  }
+  // Replace newlines with HTML line breaks
+  formattedText = formattedText.replace(/\n/g, '<br>');
   
-  if (categoryResults.concerts && categoryResults.concerts.length > 0) {
-    response += `**Live Music & Concerts**\n${categoryResults.concerts.join('\n')}\n\n`;
-  }
-  
-  if (categoryResults.events && categoryResults.events.length > 0) {
-    response += `**Events & Happenings**\n${categoryResults.events.join('\n')}\n\n`;
-  }
-  
-  if (categoryResults.attractions && categoryResults.attractions.length > 0) {
-    response += `**Attractions & Landmarks**\n${categoryResults.attractions.join('\n')}\n\n`;
-  }
-  
-  if (categoryResults.sports && categoryResults.sports.length > 0) {
-    response += `**Sports & Recreation**\n${categoryResults.sports.join('\n')}\n\n`;
-  }
-  
-  if (categoryResults.other && categoryResults.other.length > 0) {
-    response += `**Other Points of Interest**\n${categoryResults.other.join('\n')}\n\n`;
-  }
-  
-  // Add a call to action
-  response += `Want to see more options? Ask me about specific types of places or activities in ${cityName}!`;
-  
-  return response;
+  return formattedText;
 };
 
 /**
- * Format a simple response for the chat
+ * Formats long text to add "read more" functionality
  */
-export const formatSimpleResponse = (message: string): string => {
-  return message;
+export const truncateWithReadMore = (text: string, maxLength: number = 200): string => {
+  if (text.length <= maxLength) return text;
+  
+  const truncated = text.substring(0, maxLength);
+  return `${truncated}... <span class="text-blue-500 cursor-pointer read-more">Read more</span>`;
 };
 
 /**
- * Clean response text by removing unnecessary formatting
+ * Generates HTML for displaying a venue card in the chat
  */
-export const cleanResponseText = (text: string): string => {
-  if (!text) return '';
-  
-  // Remove excessive newlines
-  let cleaned = text.replace(/\n{3,}/g, '\n\n');
-  
-  // Remove excessive spaces
-  cleaned = cleaned.replace(/[ ]{2,}/g, ' ');
-  
-  return cleaned.trim();
+export const createVenueCardHTML = (venue: any): string => {
+  return `
+    <div class="bg-card rounded-md p-3 my-2 shadow-sm">
+      <div class="font-medium">${venue.name}</div>
+      <div class="text-sm text-muted-foreground">${venue.address}, ${venue.city}</div>
+      ${venue.rating ? `<div class="text-amber-500">★ ${venue.rating}</div>` : ''}
+      <div class="mt-2">
+        <a href="/venue/${venue.id}" class="text-primary text-sm underline">View details</a>
+      </div>
+    </div>
+  `;
 };
 
-/**
- * Format API response for display
- */
-export const formatAPIResponse = (data: any, type: string = 'general'): string => {
-  if (!data) return 'No data available';
-  
-  switch (type) {
-    case 'location':
-      return `Found: ${data.name} in ${data.city}, ${data.state || data.country}`;
-    case 'event':
-      return `Event: ${data.name} on ${data.date} at ${data.venue}`;
-    default:
-      return typeof data === 'object' ? JSON.stringify(data, null, 2) : String(data);
-  }
+export default {
+  formatResponse,
+  truncateWithReadMore,
+  createVenueCardHTML
 };

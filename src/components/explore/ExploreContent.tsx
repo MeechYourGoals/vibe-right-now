@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Badge } from "@/components/ui/badge";
 import { Location } from "@/types";
@@ -54,6 +55,11 @@ const ExploreContent: React.FC<ExploreContentProps> = ({
     );
   }
 
+  // Filter locations based on the active tab
+  const displayLocations = activeTab === "all" 
+    ? filteredLocations 
+    : filteredLocations.filter(loc => loc.type === activeTab);
+
   return (
     <div className="space-y-6">
       {activeTab === "music" && (
@@ -108,7 +114,8 @@ const ExploreContent: React.FC<ExploreContentProps> = ({
         </div>
       )}
       
-      {activeTab !== "music" && activeTab !== "comedy" && activeTab !== "nightlife" && (
+      {/* Always display locations for tabs other than music, comedy, nightlife */}
+      {activeTab !== "music" && activeTab !== "comedy" && activeTab !== "nightlife" && displayLocations.length > 0 && (
         <div className="mb-6">
           <h2 className="text-xl font-semibold mb-4">
             {activeTab === "all" ? "Popular Venues" : `Popular ${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}s`}
@@ -119,12 +126,18 @@ const ExploreContent: React.FC<ExploreContentProps> = ({
             )}
           </h2>
           <LocationsGrid 
-            locations={filteredLocations.filter(loc => 
-              activeTab === "all" ? true : loc.type === activeTab
-            )} 
+            locations={displayLocations} 
             locationTags={locationTags}
             isRealData={hasRealData && realDataResults.length > 0}
           />
+        </div>
+      )}
+      
+      {/* Show empty state when no results for a tab */}
+      {activeTab !== "music" && activeTab !== "comedy" && activeTab !== "nightlife" && displayLocations.length === 0 && (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">No {activeTab === "all" ? "venues" : activeTab} found for the current search.</p>
+          <p className="text-sm">Try adjusting your search criteria or exploring different categories.</p>
         </div>
       )}
       

@@ -4,7 +4,7 @@ import { useLocation } from "react-router-dom";
 import Header from "@/components/Header";
 import { useToast } from "@/components/ui/use-toast";
 import { useExploreData } from "@/hooks/useExploreData";
-import useExploreSearchWithAI from "@/hooks/useExploreSearchWithAI"; // Fixed import
+import useExploreSearchWithAI from "@/hooks/useExploreSearchWithAI"; 
 import SearchSection from "@/components/explore/SearchSection";
 import ExploreContent from "@/components/explore/ExploreContent";
 import ExploreSidebar from "@/components/explore/ExploreSidebar";
@@ -20,6 +20,7 @@ const Explore = () => {
     searchedState,
     searchCategory,
     filteredLocations,
+    setFilteredLocations,
     locationTags,
     setLocationTags,
     musicEvents,
@@ -49,6 +50,7 @@ const Explore = () => {
   const location = useLocation();
   const { toast } = useToast();
   
+  // Initialize location tags and ensure we have some default locations to display
   useEffect(() => {
     // Initialize location tags
     const tagsMap: Record<string, string[]> = {};
@@ -56,7 +58,12 @@ const Explore = () => {
       tagsMap[location.id] = getAdditionalTags(location);
     });
     setLocationTags(tagsMap);
-  }, [setLocationTags]);
+    
+    // Ensure we have default locations if none are set
+    if (filteredLocations.length === 0) {
+      setFilteredLocations(mockLocations.slice(0, 12));
+    }
+  }, [setLocationTags, filteredLocations.length, setFilteredLocations]);
 
   // Notify when AI is ready for personalization
   useEffect(() => {

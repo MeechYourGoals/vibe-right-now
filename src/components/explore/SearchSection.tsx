@@ -98,18 +98,23 @@ const SearchSection: React.FC<SearchSectionProps> = ({
         </TooltipProvider>
       </div>
       
-      <Tabs defaultValue="all" value={activeTab} onValueChange={handleTabChange} className="max-w-2xl mx-auto">
+      <Tabs 
+        defaultValue="all" 
+        value={activeTab} 
+        onValueChange={handleTabChange} 
+        className="max-w-2xl mx-auto mt-4"
+      >
         <TabsList className="grid grid-cols-2 md:grid-cols-10">
-          <TabsTrigger value="all">All</TabsTrigger>
-          <TabsTrigger value="restaurant">Restaurants</TabsTrigger>
-          <TabsTrigger value="bar">Bars</TabsTrigger>
-          <TabsTrigger value="event">Events</TabsTrigger>
-          <TabsTrigger value="attraction">Attractions</TabsTrigger>
-          <TabsTrigger value="sports">Sports</TabsTrigger>
-          <TabsTrigger value="music">Music</TabsTrigger>
-          <TabsTrigger value="comedy">Comedy</TabsTrigger>
-          <TabsTrigger value="nightlife">Nightlife</TabsTrigger>
-          <TabsTrigger value="other">Other</TabsTrigger>
+          <TabsTrigger value="all" className="cursor-pointer">All</TabsTrigger>
+          <TabsTrigger value="restaurant" className="cursor-pointer">Restaurants</TabsTrigger>
+          <TabsTrigger value="bar" className="cursor-pointer">Bars</TabsTrigger>
+          <TabsTrigger value="event" className="cursor-pointer">Events</TabsTrigger>
+          <TabsTrigger value="attraction" className="cursor-pointer">Attractions</TabsTrigger>
+          <TabsTrigger value="sports" className="cursor-pointer">Sports</TabsTrigger>
+          <TabsTrigger value="music" className="cursor-pointer">Music</TabsTrigger>
+          <TabsTrigger value="comedy" className="cursor-pointer">Comedy</TabsTrigger>
+          <TabsTrigger value="nightlife" className="cursor-pointer">Nightlife</TabsTrigger>
+          <TabsTrigger value="other" className="cursor-pointer">Other</TabsTrigger>
         </TabsList>
       </Tabs>
     </div>
