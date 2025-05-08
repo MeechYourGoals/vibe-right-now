@@ -4,7 +4,7 @@ import { Message } from '../../../types';
 import { GeminiService } from '@/services/GeminiService';
 import { VertexAIService } from '@/services/VertexAIService';
 import { createAIMessage } from '../../messageFactory';
-import { localAI } from '@/services/LocalAIService';
+import { LocalAIService } from '@/services/LocalAIService';
 
 export class AIWithPreferencesProcessor implements MessageProcessor {
   // This processor can always handle messages
@@ -23,7 +23,7 @@ export class AIWithPreferencesProcessor implements MessageProcessor {
       // Analyze sentiment of the query using local AI
       let userSentiment;
       try {
-        userSentiment = await localAI.analyzeSentiment(context.query);
+        userSentiment = await LocalAIService.analyzeSentiment(context.query);
         console.log('Query sentiment analysis:', userSentiment);
       } catch (err) {
         console.error('Error analyzing sentiment:', err);

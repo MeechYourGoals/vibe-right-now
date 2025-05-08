@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from 'react';
-import { localAI } from '@/services/LocalAIService';
+import { LocalAIService } from '@/services/LocalAIService';
 import { toast } from 'sonner';
 
 export const AIModelInitializer = () => {
@@ -9,7 +9,7 @@ export const AIModelInitializer = () => {
   useEffect(() => {
     const initAI = async () => {
       try {
-        await localAI.initModels();
+        await LocalAIService.initModels();
         console.log('AI models initialized successfully');
         setInitialized(true);
       } catch (error) {

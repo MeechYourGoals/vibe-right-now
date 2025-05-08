@@ -1,6 +1,6 @@
 
 import { VertexAIService } from '@/services/VertexAIService';
-import { cleanResponseText } from '../../responseFormatter';
+import { cleanResponseText } from '../../../utils/responseFormatter';
 import { extractCategories } from '@/services/VertexAI/analysis';
 import { GeminiService } from '@/services/GeminiService';
 

@@ -56,4 +56,7 @@ export const LocalAIService = {
   }
 };
 
+// Export LocalAIService as 'localAI' for backward compatibility
+export const localAI = LocalAIService;
+
 export default LocalAIService;

@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Post, Comment } from "@/types";
+import { Post } from "@/types";
 import { Grid, List } from "lucide-react";
 import VenuePost from "@/components/VenuePost";
 import { getVenuePosts, getPostComments } from "@/services/PostService";
@@ -117,8 +118,8 @@ const VenuePosts = ({
                 post.media[0]) : 
               post.media}
             timestamp={post.timestamp}
-            likes={post.likes}
-            comments={post.comments}
+            commentCount={typeof post.comments === 'number' ? post.comments : post.comments.length}
+            likeCount={post.likes}
           />
         ))}
       </TabsContent>
@@ -134,8 +135,8 @@ const VenuePosts = ({
                 post.media[0]) : 
               post.media}
             timestamp={post.timestamp}
-            likes={post.likes}
-            comments={post.comments}
+            commentCount={typeof post.comments === 'number' ? post.comments : post.comments.length}
+            likeCount={post.likes}
           />
         ))}
       </TabsContent>

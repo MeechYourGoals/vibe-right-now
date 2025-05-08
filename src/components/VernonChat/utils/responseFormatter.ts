@@ -52,32 +52,7 @@ export const truncateWithReadMore = (text: string, maxLength: number = 200): str
 };
 
 /**
- * Generates HTML for displaying a venue card in the chat
- */
-export const createVenueCardHTML = (venue: any): string => {
-  return `
-    <div class="bg-card rounded-md p-3 my-2 shadow-sm">
-      <div class="font-medium">${venue.name}</div>
-      <div class="text-sm text-muted-foreground">${venue.address}, ${venue.city}</div>
-      ${venue.rating ? `<div class="text-amber-500">★ ${venue.rating}</div>` : ''}
-      <div class="mt-2">
-        <a href="/venue/${venue.id}" class="text-primary text-sm underline">View details</a>
-      </div>
-    </div>
-  `;
-};
-
-/**
- * Clean and normalize response text for better display
- */
-export const cleanResponseText = (text: string): string => {
-  return text
-    .replace(/\n{3,}/g, '\n\n') // Replace multiple newlines with double newlines
-    .trim();
-};
-
-/**
- * Format location data for chat response
+ * Formats location data for chat response
  */
 export const formatLocationResponse = (location: any): string => {
   return `
@@ -91,10 +66,15 @@ export const formatLocationResponse = (location: any): string => {
   `;
 };
 
+export const cleanResponseText = (text: string): string => {
+  return text
+    .replace(/\n{3,}/g, '\n\n') // Replace multiple newlines with double newlines
+    .trim();
+};
+
 export default {
   formatResponse,
   truncateWithReadMore,
-  createVenueCardHTML,
-  cleanResponseText,
-  formatLocationResponse
+  formatLocationResponse,
+  cleanResponseText
 };

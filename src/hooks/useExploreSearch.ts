@@ -188,16 +188,14 @@ export const useExploreSearch = () => {
         
         setLocationTags(newLocationTags);
         
-        setFilteredLocations(prevLocations => {
-          const combinedResults = [...results];
-          
-          if (combinedResults.length < 10) {
-            const mockResults = generateMockLocationsForCity(city, state);
-            combinedResults.push(...mockResults.slice(0, 10 - combinedResults.length));
-          }
-          
-          return combinedResults;
-        });
+        const combinedResults = [...results];
+        
+        if (combinedResults.length < 10) {
+          const mockResults = generateMockLocationsForCity(city, state);
+          combinedResults.push(...mockResults.slice(0, 10 - combinedResults.length));
+        }
+        
+        setFilteredLocations(combinedResults);
         
         toast({
           title: "Real data found!",
