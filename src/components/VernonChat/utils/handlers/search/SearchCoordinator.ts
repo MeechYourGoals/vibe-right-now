@@ -1,4 +1,11 @@
+
 import { SearchService } from '@/services/search/SearchService';
+import { FallbackSearchStrategy } from './fallbackSearchStrategy';
+import { LocalDataStrategy } from './localDataStrategy';
+import { ComplexQueryStrategy } from './complexQueryStrategy';
+import { ComedySearchStrategy } from './comedySearchStrategy';
+import { LocationSearchStrategy } from './locationSearchStrategy';
+import { VertexAIService } from '@/services/VertexAIService';
 
 export interface SearchResult {
   title: string;
@@ -6,6 +13,10 @@ export interface SearchResult {
   snippet: string;
 }
 
+/**
+ * Central coordinator for all search strategies
+ * Now with Google Cloud NLP integration support
+ */
 export class SearchCoordinator {
   static async performWebSearch(query: string): Promise<SearchResult[]> {
     // Placeholder for actual web search implementation
@@ -31,28 +42,73 @@ export class SearchCoordinator {
            results.map(result => `- ${result.title}: ${result.snippet}`).join('\n');
   }
 
-  static async processSearchQuery(query: string, paginationState = {}, categories: string[] = []): Promise<string> {
-    try {
-      // Try search with Vertex AI first
+  /**
+   * Process a search query and return results
+   * @param inputValue The search query
+   * @param paginationState Pagination state for paginated results
+   * @param categories Optional categories from Google Cloud NLP API
+   */
+  static async processSearchQuery(
+    inputValue: string, 
+    paginationState: Record<string, number> = {}, 
+    categories: string[] = []
+  ): Promise<string> {
+    // First check if it's a location query
+    if (LocationSearchStrategy.isLocationQuery(inputValue)) {
+      console.log('Detected location query, using LocationSearchStrategy');
       try {
-        return await VertexAIService.searchWithVertex(query, categories);
-      } catch (vertexError) {
-        console.error('Error with Vertex AI search:', vertexError);
+        const locationResult = await LocationSearchStrategy.handleLocationSearch(inputValue);
+        
+        if (locationResult && locationResult.response && locationResult.response.length > 50) {
+          console.log('Location strategy returned results');
+          return locationResult.response;
+        }
+      } catch (error) {
+        console.error('Error in location search:', error);
       }
-
-      // Fall back to regular search process if Vertex AI fails
-      const searchResults = await SearchCoordinator.performWebSearch(query);
-      const summary = await SearchCoordinator.summarizeSearchResults(query, searchResults);
-
-      const results = searchResults.map(result => `${result.title}\n${result.snippet}\n${result.link}`);
-
-      return `Here are some results for "${query}":\n\n${results.join('\n\n')}`;
+    }
+    
+    // Check if it's a complex query
+    if (ComplexQueryStrategy.isComplexQuery(inputValue)) {
+      console.log('Detected complex query, using ComplexQueryStrategy with NLP categories');
+      try {
+        return await ComplexQueryStrategy.handleComplexQuery(inputValue, paginationState, categories);
+      } catch (error) {
+        console.error('Error in complex query handling:', error);
+      }
+    }
+    
+    // Check if it's a comedy-related query
+    if (ComedySearchStrategy.isComedyQuery(inputValue)) {
+      console.log('Detected comedy query, using ComedySearchStrategy');
+      try {
+        return await ComedySearchStrategy.handleComedySearch(inputValue);
+      } catch (error) {
+        console.error('Error in comedy search:', error);
+      }
+    }
+    
+    // Fall back to general search service
+    console.log('Using general search service with NLP categories');
+    try {
+      // Fix the parameter mismatch - searchService.search only takes one parameter
+      return await SearchService.search(inputValue);
     } catch (error) {
-      console.error('Error processing search query:', error);
-      return `I'm sorry, I couldn't find information about "${query}". Please try a different search.`;
+      console.error('Error in general search service:', error);
+      
+      // Try local data strategy as fallback
+      try {
+        if (LocalDataStrategy.canHandleLocalQuery(inputValue)) {
+          return await LocalDataStrategy.handleLocalSearch(inputValue, paginationState);
+        }
+      } catch (localError) {
+        console.error('Error in local data strategy:', localError);
+      }
+      
+      // Ultimate fallback
+      return FallbackSearchStrategy.generateFallbackResponse(inputValue);
     }
   }
 }
 
-// Import VertexAIService
-import { VertexAIService } from '@/services/VertexAIService';
+export default SearchCoordinator;

@@ -1,3 +1,4 @@
+
 import React, { RefObject, useState } from 'react';
 import { X, Minimize2, Maximize2, Mic, MicOff, ArrowRight, VolumeX, Volume2 } from 'lucide-react';
 import { ChatState, ChatMessage, Message } from '@/components/VernonNext/types';

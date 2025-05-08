@@ -20,11 +20,44 @@ serve(async (req) => {
     
     // Handle text-to-speech requests
     if (action === 'text-to-speech' && text) {
-      // For now, we'll return a dummy response since Vertex AI TTS requires more setup
-      console.log('Text-to-speech request for:', text.substring(0, 30) + '...');
-      return new Response(JSON.stringify({ audio: 'dummy-base64-audio-data' }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      try {
+        console.log('Text-to-speech request for:', text.substring(0, 30) + '...');
+        
+        // Call Google's Text-to-Speech API
+        const ttsResponse = await fetch(`https://texttospeech.googleapis.com/v1/text:synthesize?key=${VERTEX_AI_API_KEY}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            input: { text },
+            voice: {
+              languageCode: 'en-US',
+              name: options?.voice || 'en-US-Neural2-F',
+              ssmlGender: 'FEMALE'
+            },
+            audioConfig: {
+              audioEncoding: 'MP3',
+              speakingRate: options?.speakingRate || 1.0,
+              pitch: options?.pitch || 0
+            }
+          })
+        });
+        
+        if (!ttsResponse.ok) {
+          throw new Error(`Google TTS API error: ${ttsResponse.status}`);
+        }
+        
+        const ttsData = await ttsResponse.json();
+        
+        return new Response(JSON.stringify({ audio: ttsData.audioContent }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      } catch (error) {
+        console.error('Error in text-to-speech:', error);
+        return new Response(JSON.stringify({ error: error.message, audio: null }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
     }
 
     // Handle chat completion requests
@@ -95,7 +128,7 @@ Respond in a concise, informative, and enthusiastic tone. Be friendly, approacha
       }
       
       const data = await response.json();
-      const generatedText = data.candidates[0]?.content?.parts[0]?.text || '';
+      const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
       
       console.log('Generated response successfully');
       return new Response(JSON.stringify({ text: generatedText }), {

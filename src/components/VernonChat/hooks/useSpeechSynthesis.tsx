@@ -1,15 +1,15 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
+import { VertexAIService } from '@/services/VertexAIService';
 
 /**
- * Hook for text-to-speech synthesis functionality
+ * Hook for text-to-speech synthesis functionality using Google's services
  */
 export const useSpeechSynthesis = () => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
-  const [useElevenLabs, setUseElevenLabs] = useState(false);
   
   // Initialize
   useEffect(() => {
@@ -124,9 +124,9 @@ export const useSpeechSynthesis = () => {
     }
   }, [audio, isPaused]);
   
-  // Function to prompt for ElevenLabs key (now just a stub since we're not using it)
+  // Function to prompt for API key (stub function for UI consistency)
   const promptForElevenLabsKey = useCallback(() => {
-    toast.info("We now use Google's speech services instead");
+    toast.info("We now use Google's speech services");
   }, []);
   
   return {
@@ -135,10 +135,7 @@ export const useSpeechSynthesis = () => {
     speakResponse,
     stopSpeaking,
     togglePause,
-    useElevenLabs,
+    useElevenLabs: false,
     promptForElevenLabsKey
   };
 };
-
-// Import the VertexAIService
-import { VertexAIService } from '@/services/VertexAIService';

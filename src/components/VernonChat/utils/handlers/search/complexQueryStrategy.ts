@@ -1,6 +1,7 @@
 
 import { SearchService } from '@/services/search/SearchService';
 import { FallbackSearchStrategy } from './fallbackSearchStrategy';
+import { VertexAIService } from '@/services/VertexAIService';
 
 /**
  * Strategy for handling complex queries that may require multiple search approaches
@@ -38,19 +39,17 @@ export class ComplexQueryStrategy {
     try {
       console.log('Handling complex query with categories:', categories);
       
-      // First try a vector search with semantic understanding
-      let vectorSearchResult = null;
+      // First try using Google's Vertex AI
       try {
-        vectorSearchResult = await SearchService.vectorSearch(query);
-        console.log('Vector search completed');
+        const vertexResult = await VertexAIService.searchWithVertex(query, categories);
+        console.log('Vertex AI search completed');
+        
+        if (vertexResult && vertexResult.length > 100) {
+          console.log('Vertex AI search returned good results');
+          return vertexResult;
+        }
       } catch (error) {
-        console.error('Vector search failed:', error);
-      }
-      
-      // If vector search succeeded and returned meaningful results, use them
-      if (vectorSearchResult && vectorSearchResult.length > 100) {
-        console.log('Vector search returned good results');
-        return vectorSearchResult;
+        console.error('Vertex AI search failed:', error);
       }
       
       // Try standard search service as fallback
@@ -58,16 +57,11 @@ export class ComplexQueryStrategy {
         const standardResults = await SearchService.search(query);
         console.log('Standard search completed');
         
-        // If both vector and standard search returned results, combine them
-        if (vectorSearchResult && standardResults) {
-          return `Based on your query "${query}", I found:\n\n${vectorSearchResult}\n\nAdditionally:\n\n${standardResults}`;
-        }
-        
-        // Use whichever results we have
-        return standardResults || vectorSearchResult || FallbackSearchStrategy.generateFallbackResponse(query);
+        // Return whatever results we have
+        return standardResults || FallbackSearchStrategy.generateFallbackResponse(query);
       } catch (error) {
         console.error('Standard search failed:', error);
-        return vectorSearchResult || FallbackSearchStrategy.generateFallbackResponse(query);
+        return FallbackSearchStrategy.generateFallbackResponse(query);
       }
     } catch (error) {
       console.error('Error in complex query handling:', error);
