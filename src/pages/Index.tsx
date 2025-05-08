@@ -6,7 +6,6 @@ import LocationsNearby from "@/components/LocationsNearby";
 import TrendingLocations from "@/components/TrendingLocations";
 import DiscountLocations from "@/components/DiscountLocations";
 import CameraButton from "@/components/CameraButton";
-import NearbyVibesMap from "@/components/NearbyVibesMap";
 import RecommendedForYou from "@/components/RecommendedForYou";
 import VernonNext from "@/components/VernonNext";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -36,14 +35,6 @@ const Index = () => {
               <h1 className="text-3xl font-bold vibe-gradient-text mb-3 md:mb-0">
                 Discover the Vibe Right Now
               </h1>
-            </div>
-
-            {/* Map positioned first */}
-            <div className="w-full mb-4">
-              <NearbyVibesMap 
-                locations={mockLocations.slice(0, 5)}
-                isRealData={false}
-              />
             </div>
 
             {/* Posts feed and sidebar layout */}

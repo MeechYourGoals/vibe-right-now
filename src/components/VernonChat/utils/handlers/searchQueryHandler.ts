@@ -1,62 +1,38 @@
 
-import { formatLocationResponse } from '../responseFormatter';
-import { LocationService } from '@/services/LocationService';
-import { parseCityStateFromQuery } from '@/utils/geocodingService';
-import { getLocationsByCity } from '@/mock/cityLocations';
+import { searchLocations } from './locationSearchStrategy';
+import { formatSearchResponse } from '../../../../utils/responseFormatter';
 
 /**
- * Handle a search query about locations, venues, or events
+ * Handle search queries
  */
-export const handleSearchQuery = async (query: string, paginationState: any = {}): Promise<string> => {
+export async function handleSearchQuery(
+  query: string,
+  options: {
+    category?: string;
+    location?: string;
+    maxResults?: number;
+  } = {}
+) {
   try {
-    // Parse location information from the query
-    const { city, state } = parseCityStateFromQuery(query);
+    const { category = "", location = "", maxResults = 10 } = options;
     
-    // Default to a popular city if we couldn't detect one
-    const searchCity = city || "San Francisco";
+    // Determine search query based on input parameters
+    const searchQuery = location || query;
     
-    console.log(`Handling search query for ${searchCity}, ${state || ''}`);
-    
-    // Get locations for the detected city
-    let locations;
-    try {
-      // First try the LocationService which might connect to a real API
-      locations = await LocationService.getLocationsByCity(searchCity);
-    } catch (e) {
-      console.log("Error using LocationService, falling back to mock data");
-      // Fall back to mock data if the service fails
-      locations = getLocationsByCity(searchCity);
+    // If we don't have a proper search query, return empty results
+    if (!searchQuery.trim()) {
+      return formatSearchResponse([]);
     }
     
-    // Group locations by type for the response formatter
-    const categoryResults: Record<string, string[]> = {};
+    // Use location search strategy by default
+    const results = await searchLocations(searchQuery, category, maxResults);
     
-    // Map location types to category names
-    const typeToCategory: Record<string, string> = {
-      "bar": "nightlife",
-      "restaurant": "dining",
-      "attraction": "attractions",
-      "event": "events",
-      "sports": "sports"
-    };
-    
-    // Group locations by category
-    locations.forEach(location => {
-      const category = typeToCategory[location.type] || "other";
-      
-      if (!categoryResults[category]) {
-        categoryResults[category] = [];
-      }
-      
-      // Create link for the location
-      const locationLink = `[${location.name}](/venue/${location.id})`;
-      categoryResults[category].push(locationLink);
-    });
-    
-    // Format the response
-    return formatLocationResponse(searchCity, categoryResults, paginationState);
+    return results;
   } catch (error) {
-    console.error('Error processing search query:', error);
-    return "I'm having trouble finding that information right now. Could you try asking in a different way?";
+    console.error('Error in handleSearchQuery:', error);
+    return {
+      results: [],
+      message: "Sorry, I couldn't find any results for that search."
+    };
   }
-};
+}

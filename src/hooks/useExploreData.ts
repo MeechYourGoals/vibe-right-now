@@ -1,118 +1,151 @@
 
-import { useState, createContext, useContext } from "react";
-import { DateRange } from "react-day-picker";
-import { Location } from "@/types";
-import { EventItem } from "@/components/venue/events/types";
-import { mockLocations } from "@/mock/data";
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { Location } from '@/types';
+import { DateRange } from 'react-day-picker';
+import { mockLocations } from '@/mock/data';
 
-interface ExploreDataContextType {
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
-  searchedCity: string;
-  setSearchedCity: (city: string) => void;
-  searchedState: string;
-  setSearchedState: (state: string) => void;
-  searchCategory: string;
-  setSearchCategory: (category: string) => void;
-  filteredLocations: Location[];
-  setFilteredLocations: (locations: Location[]) => void;
-  locationTags: Record<string, string[]>;
-  setLocationTags: (tags: Record<string, string[]>) => void;
-  musicEvents: EventItem[];
-  setMusicEvents: (events: EventItem[]) => void;
-  comedyEvents: EventItem[];
-  setComedyEvents: (events: EventItem[]) => void;
-  nightlifeVenues: Location[];
-  setNightlifeVenues: (venues: Location[]) => void;
-  vibeFilter: string;
-  setVibeFilter: (vibe: string) => void;
-  isNaturalLanguageSearch: boolean;
-  setIsNaturalLanguageSearch: (value: boolean) => void;
-  searchCategories: string[];
-  setSearchCategories: (categories: string[]) => void;
-  isLoadingResults: boolean;
-  setIsLoadingResults: (loading: boolean) => void;
-  dateRange: DateRange | undefined;
-  setDateRange: (range: DateRange | undefined) => void;
-  showDateFilter: boolean;
-  setShowDateFilter: (show: boolean) => void;
-  realDataResults: Location[];
-  setRealDataResults: (results: Location[]) => void;
-  hasRealData: boolean;
-  isDetectingLocation: boolean;
-  setIsDetectingLocation: (detecting: boolean) => void;
-}
+// Hook for managing explore page state
+export const useExploreData = () => {
+  // URL search params
+  const [searchParams, setSearchParams] = useSearchParams();
 
-const ExploreDataContext = createContext<ExploreDataContextType | undefined>(undefined);
-
-export const useExploreData = (): ExploreDataContextType => {
-  const context = useContext(ExploreDataContext);
+  // Search state
+  const [searchQuery, setSearchQuery] = useState<string>(searchParams.get('q') || '');
+  const [activeTab, setActiveTab] = useState<string>(searchParams.get('tab') || 'all');
+  const [searchedCity, setSearchedCity] = useState<string>(searchParams.get('city') || '');
+  const [searchedState, setSearchedState] = useState<string>(searchParams.get('state') || '');
+  const [searchCategory, setSearchCategory] = useState<string>(searchParams.get('category') || 'all');
   
-  if (!context) {
-    // Create a standalone context if not provided from provider
-    const [searchQuery, setSearchQuery] = useState<string>("");
-    const [activeTab, setActiveTab] = useState<string>("all");
-    const [searchedCity, setSearchedCity] = useState<string>("");
-    const [searchedState, setSearchedState] = useState<string>("");
-    const [searchCategory, setSearchCategory] = useState<string>("places");
-    const [filteredLocations, setFilteredLocations] = useState<Location[]>(mockLocations.slice(0, 12));
-    const [locationTags, setLocationTags] = useState<Record<string, string[]>>({});
-    const [musicEvents, setMusicEvents] = useState<EventItem[]>([]);
-    const [comedyEvents, setComedyEvents] = useState<EventItem[]>([]);
-    const [nightlifeVenues, setNightlifeVenues] = useState<Location[]>([]);
-    const [vibeFilter, setVibeFilter] = useState<string>("");
-    const [isNaturalLanguageSearch, setIsNaturalLanguageSearch] = useState<boolean>(false);
-    const [searchCategories, setSearchCategories] = useState<string[]>([]);
-    const [isLoadingResults, setIsLoadingResults] = useState<boolean>(false);
-    const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
-    const [showDateFilter, setShowDateFilter] = useState<boolean>(false);
-    const [realDataResults, setRealDataResults] = useState<Location[]>([]);
-    const [isDetectingLocation, setIsDetectingLocation] = useState<boolean>(false);
+  // Location data state
+  const [filteredLocations, setFilteredLocations] = useState<Location[]>([]);
+  const [locationTags, setLocationTags] = useState<Record<string, string[]>>({});
+  
+  // Event data state
+  const [musicEvents, setMusicEvents] = useState<any[]>([]);
+  const [comedyEvents, setComedyEvents] = useState<any[]>([]);
+  const [nightlifeVenues, setNightlifeVenues] = useState<any[]>([]);
+  
+  // Filter state
+  const [vibeFilter, setVibeFilter] = useState<string>(searchParams.get('vibe') || '');
+  const [isNaturalLanguageSearch, setIsNaturalLanguageSearch] = useState<boolean>(false);
+  const [isLoadingResults, setIsLoadingResults] = useState<boolean>(false);
+  
+  // Date filter state
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(
+    searchParams.get('from') && searchParams.get('to') 
+      ? { 
+          from: new Date(searchParams.get('from')!), 
+          to: new Date(searchParams.get('to')!) 
+        } 
+      : undefined
+  );
+  const [showDateFilter, setShowDateFilter] = useState<boolean>(false);
+  
+  // Location detection state
+  const [isDetectingLocation, setIsDetectingLocation] = useState<boolean>(false);
+  const [userLocation, setUserLocation] = useState<GeolocationCoordinates | null>(null);
+  
+  // Map state
+  const [mapStyle, setMapStyle] = useState<"default" | "terrain" | "satellite">("default");
+  const [showDistances, setShowDistances] = useState<boolean>(false);
+  const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
+  
+  // Sync URL parameters with state
+  useEffect(() => {
+    const query = searchParams.get('q');
+    const tab = searchParams.get('tab');
+    const category = searchParams.get('category');
+    const vibe = searchParams.get('vibe');
+    const city = searchParams.get('city');
+    const state = searchParams.get('state');
     
-    return {
-      searchQuery,
-      setSearchQuery,
-      activeTab,
-      setActiveTab,
-      searchedCity,
-      setSearchedCity,
-      searchedState,
-      setSearchedState,
-      searchCategory,
-      setSearchCategory,
-      filteredLocations,
-      setFilteredLocations,
-      locationTags,
-      setLocationTags,
-      musicEvents,
-      setMusicEvents,
-      comedyEvents,
-      setComedyEvents,
-      nightlifeVenues,
-      setNightlifeVenues,
-      vibeFilter,
-      setVibeFilter,
-      isNaturalLanguageSearch,
-      setIsNaturalLanguageSearch,
-      searchCategories,
-      setSearchCategories,
-      isLoadingResults,
-      setIsLoadingResults,
-      dateRange,
-      setDateRange,
-      showDateFilter,
-      setShowDateFilter,
-      realDataResults,
-      setRealDataResults,
-      hasRealData: realDataResults.length > 0,
-      isDetectingLocation,
-      setIsDetectingLocation
-    };
-  }
-  
-  return context;
-};
+    if (query && query !== searchQuery) {
+      setSearchQuery(query);
+    }
+    
+    if (tab && tab !== activeTab) {
+      setActiveTab(tab);
+    }
+    
+    if (category && category !== searchCategory) {
+      setSearchCategory(category);
+    }
+    
+    if (vibe && vibe !== vibeFilter) {
+      setVibeFilter(vibe);
+    }
+    
+    if (city && city !== searchedCity) {
+      setSearchedCity(city);
+    }
+    
+    if (state && state !== searchedState) {
+      setSearchedState(state);
+    }
+  }, [searchParams, activeTab, searchCategory, searchQuery, vibeFilter, searchedCity, searchedState]);
 
-export default useExploreData;
+  // Get user location if available
+  useEffect(() => {
+    if (navigator.geolocation) {
+      setIsDetectingLocation(true);
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation(position.coords);
+          setIsDetectingLocation(false);
+        },
+        (error) => {
+          console.error('Error getting user location:', error);
+          setIsDetectingLocation(false);
+        }
+      );
+    }
+  }, []);
+
+  // Toggle distance display on map
+  const toggleDistances = () => {
+    setShowDistances(prev => !prev);
+  };
+
+  return {
+    searchQuery,
+    setSearchQuery,
+    activeTab,
+    setActiveTab,
+    searchedCity,
+    setSearchedCity,
+    searchedState,
+    setSearchedState,
+    searchCategory,
+    setSearchCategory,
+    filteredLocations,
+    setFilteredLocations,
+    locationTags,
+    setLocationTags,
+    musicEvents,
+    setMusicEvents,
+    comedyEvents,
+    setComedyEvents,
+    nightlifeVenues,
+    setNightlifeVenues,
+    vibeFilter,
+    setVibeFilter,
+    isNaturalLanguageSearch,
+    setIsNaturalLanguageSearch,
+    dateRange,
+    setDateRange,
+    isLoadingResults,
+    setIsLoadingResults,
+    showDateFilter,
+    setShowDateFilter,
+    isDetectingLocation,
+    userLocation,
+    mapStyle,
+    setMapStyle,
+    showDistances,
+    setShowDistances,
+    toggleDistances,
+    selectedLocation,
+    setSelectedLocation
+  };
+};

@@ -1,468 +1,333 @@
-import { Location, BusinessHours } from "@/types";
+
+import { Location } from "@/types";
+import { 
+  generateBusinessHours, 
+  generateDescription, 
+  generatePhoneNumber,
+  generateAmenities,
+  generatePopularTimes,
+  generateImages
+} from "./businessHoursUtils";
 import { cityCoordinates } from "./cityDatabase";
-import { getRandomUserProfile, MockUserProfile } from "./types";
 
-// Generate mock locations for demo/testing
-export const generateMockLocations = (count: number = 20): Location[] => {
-  const locations: Location[] = [];
+/**
+ * Generate a random location for a specific city
+ */
+export const generateLocationForCity = (
+  city: string,
+  state: string = "",
+  type: string = "",
+  id?: string
+): Location => {
+  // Get coordinates for the city, or use defaults if not found
+  let cityCoords = { lat: 37.7749, lng: -122.4194 }; // Default to San Francisco
+  const cityKey = city.toLowerCase();
   
-  // Generate a variety of locations with different types
-  const types = ["restaurant", "bar", "sports", "attraction", "event"];
-  const cities = Object.keys(cityCoordinates).slice(0, 5); // Limit to first 5 cities
-  
-  for (let i = 0; i < count; i++) {
-    const city = cities[i % cities.length];
-    const cityData = cityCoordinates[city];
-    
-    if (!cityData) continue;
-    
-    // Create random offset from city center (for visual distribution)
-    const latOffset = (Math.random() - 0.5) * 0.1;
-    const lngOffset = (Math.random() - 0.5) * 0.1;
-    
-    const location: Location = {
-      id: `${i + 1}`,
-      name: generateName(i, types[i % types.length]),
-      address: `${100 + i} Main St`,
-      city: cityData.name,
-      state: cityData.state || '',
-      country: cityData.country,
-      lat: cityData.lat + latOffset,
-      lng: cityData.lng + lngOffset,
-      type: types[i % types.length],
-      hours: generateHours(types[i % types.length]) as BusinessHours,
-      rating: 3 + Math.random() * 2,
-      verified: i % 3 === 0, // Every third location is verified
-      vibes: generateVibes(types[i % types.length]),
-      distance: Math.random() * 5 + 0.5,
-    };
-    
-    locations.push(location);
-  }
-  
-  return locations;
-};
-
-// Generate mock locations for a specific city
-export const generateCityLocations = (cityName: string, count: number = 5): Location[] => {
-  // Ensure cityName is valid
-  if (!cityName) return [];
-  
-  const cityKey = Object.keys(cityCoordinates).find(key => 
-    cityCoordinates[key].name.toLowerCase() === cityName.toLowerCase()
-  );
-  
-  if (!cityKey) return [];
-  
-  const cityData = cityCoordinates[cityKey];
-  const locations: Location[] = [];
-  const types = ["restaurant", "bar", "sports", "attraction", "event"];
-  
-  for (let i = 0; i < count; i++) {
-    // Create random offset from city center
-    const latOffset = (Math.random() - 0.5) * 0.1;
-    const lngOffset = (Math.random() - 0.5) * 0.1;
-    
-    const location: Location = {
-      id: `${cityName.toLowerCase().replace(/\s+/g, '')}-${i + 1}`,
-      name: generateName(i, types[i % types.length]),
-      address: `${100 + i} ${cityName} Ave`,
-      city: cityData.name,
-      state: cityData.state || '',
-      country: cityData.country,
-      lat: cityData.lat + latOffset,
-      lng: cityData.lng + lngOffset,
-      type: types[i % types.length],
-      hours: generateHours(types[i % types.length]) as BusinessHours,
-      rating: 3 + Math.random() * 2,
-      verified: i % 3 === 0,
-      vibes: generateVibes(types[i % types.length]),
-    };
-    
-    locations.push(location);
-  }
-  
-  return locations;
-};
-
-// Generate locations for all cities in the database
-export const generateAllCityLocations = (locationsPerCity: number = 3): Location[] => {
-  const allLocations: Location[] = [];
-  
-  // Ensure cityCoordinates is valid and has keys
-  if (!cityCoordinates || typeof cityCoordinates !== 'object') {
-    console.error("City coordinates not available");
-    return [];
-  }
-  
-  const cityKeys = Object.keys(cityCoordinates);
-  
-  // Check if cityKeys is an array before attempting to use forEach
-  if (!Array.isArray(cityKeys) || cityKeys.length === 0) {
-    console.error("No city keys available in cityCoordinates");
-    return [];
-  }
-  
-  // Use for...of instead of forEach to avoid potential issues
-  for (const cityKey of cityKeys) {
-    const cityName = cityCoordinates[cityKey].name;
-    const cityLocations = generateCityLocations(cityName, locationsPerCity);
-    allLocations.push(...cityLocations);
-  }
-  
-  return allLocations;
-};
-
-// Helper function to generate venue name based on type
-const generateName = (index: number, type: string): string => {
-  const prefixes = {
-    restaurant: ["Tasty", "Gourmet", "Spice", "Fresh", "Urban"],
-    bar: ["Sunset", "Corner", "Crafty", "Downtown", "Night"],
-    sports: ["Victory", "Champion", "Elite", "Stadium", "Arena"],
-    attraction: ["Wonder", "Amazing", "Historic", "Grand", "Scenic"],
-    event: ["Annual", "Festival", "Celebration", "Showcase", "Expo"]
-  };
-  
-  const suffixes = {
-    restaurant: ["Bistro", "Kitchen", "Grill", "Diner", "Cafe"],
-    bar: ["Lounge", "Tavern", "Pub", "Bar & Grill", "Brewery"],
-    sports: ["Field", "Stadium", "Center", "Arena", "Park"],
-    attraction: ["Museum", "Gallery", "Garden", "Tower", "Park"],
-    event: ["Festival", "Fair", "Convention", "Show", "Concert"]
-  };
-  
-  // Handle potential undefined cases
-  if (!prefixes[type as keyof typeof prefixes] || !suffixes[type as keyof typeof suffixes]) {
-    return `Venue ${index}`;
-  }
-  
-  const prefix = prefixes[type as keyof typeof prefixes][index % 5];
-  const suffix = suffixes[type as keyof typeof suffixes][index % 5];
-  
-  return `${prefix} ${suffix}`;
-};
-
-// Helper function to generate business hours
-const generateHours = (type: string): Record<string, string> => {
-  if (type === "restaurant") {
-    return {
-      monday: "11:00 AM - 10:00 PM",
-      tuesday: "11:00 AM - 10:00 PM",
-      wednesday: "11:00 AM - 10:00 PM",
-      thursday: "11:00 AM - 10:00 PM",
-      friday: "11:00 AM - 11:00 PM",
-      saturday: "11:00 AM - 11:00 PM",
-      sunday: "12:00 PM - 9:00 PM"
-    };
-  } else if (type === "bar") {
-    return {
-      monday: "4:00 PM - 12:00 AM",
-      tuesday: "4:00 PM - 12:00 AM",
-      wednesday: "4:00 PM - 12:00 AM",
-      thursday: "4:00 PM - 1:00 AM",
-      friday: "4:00 PM - 2:00 AM",
-      saturday: "4:00 PM - 2:00 AM",
-      sunday: "4:00 PM - 12:00 AM"
-    };
-  } else if (type === "attraction") {
-    return {
-      monday: "10:00 AM - 6:00 PM",
-      tuesday: "10:00 AM - 6:00 PM",
-      wednesday: "10:00 AM - 6:00 PM", 
-      thursday: "10:00 AM - 6:00 PM",
-      friday: "10:00 AM - 8:00 PM",
-      saturday: "9:00 AM - 9:00 PM", 
-      sunday: "9:00 AM - 6:00 PM"
-    };
-  } else if (type === "sports" || type === "event") {
-    return {
-      monday: "Event times vary",
-      tuesday: "Event times vary",
-      wednesday: "Event times vary",
-      thursday: "Event times vary", 
-      friday: "Event times vary",
-      saturday: "Event times vary",
-      sunday: "Event times vary"
+  if (cityCoordinates[cityKey]) {
+    cityCoords = {
+      lat: cityCoordinates[cityKey].lat,
+      lng: cityCoordinates[cityKey].lng
     };
   }
   
-  // Default hours
+  // Add a small random offset to the coordinates for variety
+  const latOffset = (Math.random() - 0.5) * 0.05;
+  const lngOffset = (Math.random() - 0.5) * 0.05;
+  
+  // Possible venue types
+  const venueTypes = ["restaurant", "bar", "event", "attraction", "sports", "music", "comedy", "nightlife", "other"];
+  
+  // Determine the type if not provided
+  const locationType = type || venueTypes[Math.floor(Math.random() * venueTypes.length)];
+  
+  // Restaurant name prefixes and suffixes
+  const restaurantPrefixes = [
+    "The", "Blue", "Green", "Red", "Silver", "Golden", "Royal", "Urban",
+    "Rustic", "Spice", "Salty", "Sweet", "Fresh", "Wild", "Hungry"
+  ];
+  
+  const restaurantSuffixes = [
+    "Table", "Spoon", "Fork", "Plate", "Bowl", "Kitchen", "Bistro", "Grill",
+    "Cafe", "Diner", "Eatery", "Restaurant", "Brasserie", "Chophouse"
+  ];
+  
+  // Bar name prefixes and suffixes
+  const barPrefixes = [
+    "The", "Dark", "Tipsy", "Thirsty", "Crafty", "Rustic", "Downtown",
+    "Corner", "Hidden", "Local", "Night", "Vintage", "Urban"
+  ];
+  
+  const barSuffixes = [
+    "Tavern", "Pub", "Bar", "Lounge", "Speakeasy", "Brewery", "Distillery",
+    "Saloon", "Taproom", "Spirits", "Social", "House", "Hideaway"
+  ];
+  
+  // Event venue name prefixes and suffixes
+  const eventPrefixes = [
+    "Grand", "Royal", "Metro", "City", "Majestic", "Premier", "Elite",
+    "Historic", "Modern", "Central", "Golden", "Diamond", "Platinum"
+  ];
+  
+  const eventSuffixes = [
+    "Hall", "Theater", "Venue", "Arena", "Center", "Auditorium", "Stage",
+    "Pavilion", "Stadium", "Gardens", "Palace", "House", "Gallery"
+  ];
+  
+  // Attraction name prefixes and suffixes
+  const attractionPrefixes = [
+    "Amazing", "Wonderful", "Incredible", "Fantastic", "Spectacular",
+    "Exciting", "Thrilling", "Enchanted", "Magical", "Historic"
+  ];
+  
+  const attractionSuffixes = [
+    "Adventure", "Experience", "Discovery", "Wonder", "Exploration",
+    "Journey", "Quest", "Showcase", "Exhibition", "Tour"
+  ];
+  
+  // Sports venue name prefixes and suffixes
+  const sportsPrefixes = [
+    "Champion", "Victory", "Olympic", "Athletic", "Competitive",
+    "Professional", "Team", "Sport", "National", "International"
+  ];
+  
+  const sportsSuffixes = [
+    "Stadium", "Arena", "Field", "Court", "Complex",
+    "Center", "Gym", "Coliseum", "Park", "Grounds"
+  ];
+  
+  // Music venue name prefixes and suffixes
+  const musicPrefixes = [
+    "Harmony", "Melody", "Rhythm", "Sound", "Echo",
+    "Acoustic", "Electric", "Jazz", "Blues", "Rock"
+  ];
+  
+  const musicSuffixes = [
+    "Hall", "Stage", "Theater", "Lounge", "Club",
+    "Room", "House", "Joint", "Bar", "Venue"
+  ];
+  
+  // Comedy venue name prefixes and suffixes
+  const comedyPrefixes = [
+    "Laughing", "Funny", "Comic", "Humorous", "Witty",
+    "Chuckle", "Giggles", "Joke", "Punchline", "Comedy"
+  ];
+  
+  const comedySuffixes = [
+    "Club", "Factory", "House", "Spot", "Zone",
+    "Corner", "Stage", "Stand", "Theater", "Cellar"
+  ];
+  
+  // Nightlife venue name prefixes and suffixes
+  const nightlifePrefixes = [
+    "Night", "Midnight", "After", "Dark", "Neon",
+    "Late", "Twilight", "Starry", "Moonlit", "Cosmic"
+  ];
+  
+  const nightlifeSuffixes = [
+    "Club", "Lounge", "Bar", "Disco", "Dance",
+    "Room", "Spot", "Scene", "District", "Quarter"
+  ];
+  
+  // Generate venue name based on type
+  let prefixes, suffixes;
+  switch (locationType) {
+    case "restaurant":
+      prefixes = restaurantPrefixes;
+      suffixes = restaurantSuffixes;
+      break;
+    case "bar":
+      prefixes = barPrefixes;
+      suffixes = barSuffixes;
+      break;
+    case "event":
+      prefixes = eventPrefixes;
+      suffixes = eventSuffixes;
+      break;
+    case "attraction":
+      prefixes = attractionPrefixes;
+      suffixes = attractionSuffixes;
+      break;
+    case "sports":
+      prefixes = sportsPrefixes;
+      suffixes = sportsSuffixes;
+      break;
+    case "music":
+      prefixes = musicPrefixes;
+      suffixes = musicSuffixes;
+      break;
+    case "comedy":
+      prefixes = comedyPrefixes;
+      suffixes = comedySuffixes;
+      break;
+    case "nightlife":
+      prefixes = nightlifePrefixes;
+      suffixes = nightlifeSuffixes;
+      break;
+    default:
+      // Generic prefixes and suffixes
+      prefixes = [...restaurantPrefixes, ...barPrefixes, ...eventPrefixes];
+      suffixes = [...restaurantSuffixes, ...barSuffixes, ...eventSuffixes];
+  }
+  
+  const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+  const suffix = suffixes[Math.floor(Math.random() * suffixes.length)];
+  const name = `${prefix} ${suffix}`;
+  
+  // Generate street names with city theme if city is available
+  let streetNames = ["Main", "Broadway", "First", "Second", "Park", "Oak", "Pine", "Maple", "Cedar", "Washington"];
+  let streetTypes = ["St", "Ave", "Blvd", "Rd", "Ln", "Dr", "Way", "Pl"];
+  
+  if (city && typeof city === 'string') {
+    const cityMatch = city.match(/[A-Z][a-z]+/g);
+    if (cityMatch && cityMatch.length > 0) {
+      streetNames = [...streetNames, cityMatch[0]];
+    }
+  }
+  
+  const streetName = streetNames[Math.floor(Math.random() * streetNames.length)];
+  const streetType = streetTypes[Math.floor(Math.random() * streetTypes.length)];
+  const streetNumber = Math.floor(Math.random() * 1000) + 100;
+  const address = `${streetNumber} ${streetName} ${streetType}`;
+  
+  // Random ratings
+  const ratingBase = 3.5;
+  const ratingVariance = 1.5;
+  const rating = Math.min(5, Math.max(1, ratingBase + (Math.random() * ratingVariance - ratingVariance / 2)));
+  const ratingCount = Math.floor(Math.random() * 900) + 100;
+  
+  // Generate random vibes based on the location type
+  const vibes = generateVibesForType(locationType);
+  
+  // Generate a unique ID if not provided
+  const locationId = id || `loc-${Math.random().toString(36).substring(2, 10)}`;
+  
+  // Generate business hours
+  const seed = parseInt(locationId.replace(/[^0-9]/g, '0').substring(0, 8), 16) % 10000;
+  const businessHours = generateBusinessHours(seed);
+  
+  // Create and return the location object
   return {
-    monday: "9:00 AM - 5:00 PM",
-    tuesday: "9:00 AM - 5:00 PM",
-    wednesday: "9:00 AM - 5:00 PM", 
-    thursday: "9:00 AM - 5:00 PM",
-    friday: "9:00 AM - 5:00 PM",
-    saturday: "10:00 AM - 3:00 PM",
-    sunday: "Closed"
+    id: locationId,
+    name,
+    address,
+    city,
+    state,
+    country: "USA",
+    lat: cityCoords.lat + latOffset,
+    lng: cityCoords.lng + lngOffset,
+    type: locationType,
+    rating,
+    ratingCount,
+    vibes,
+    verified: Math.random() > 0.7,
+    businessHours,
+    description: generateDescription(locationType),
+    phoneNumber: generatePhoneNumber(),
+    amenities: generateAmenities(locationType),
+    popular_times: generatePopularTimes(),
+    images: generateImages(locationType, 5),
+    ownerIdentifier: Math.random() > 0.9 ? `owner-${Math.random().toString(36).substring(7)}` : undefined
   };
 };
 
-// Generate vibes based on venue type
-const generateVibes = (type: string): string[] => {
-  const vibesByType = {
-    restaurant: ["Cozy", "Upscale", "Family-friendly", "Romantic", "Trendy"],
-    bar: ["Lively", "Chill", "Upbeat", "Sophisticated", "Energetic"],
-    sports: ["Exciting", "Competitive", "Team spirit", "High-energy", "Fan-friendly"],
-    attraction: ["Cultural", "Educational", "Inspiring", "Scenic", "Historic"],
-    event: ["Festive", "Entertaining", "Social", "Creative", "Memorable"]
+/**
+ * Generate random vibes for a location based on its type
+ */
+export const generateVibesForType = (type: string): string[] => {
+  const commonVibes = ["friendly", "clean", "welcoming", "local favorite"];
+  
+  // Type-specific vibes
+  const typeVibes: Record<string, string[]> = {
+    restaurant: ["delicious", "tasty", "flavorful", "foodie heaven", "gourmet", "culinary delight", "savory", "satisfying"],
+    bar: ["relaxed", "lively", "buzzing", "social", "crafty", "mixology", "nightcap", "happy hour"],
+    event: ["exciting", "entertaining", "memorable", "energetic", "special occasion", "celebration"],
+    attraction: ["fun", "family-friendly", "interesting", "fascinating", "tourist spot", "must-see", "exploration"],
+    sports: ["competitive", "athletic", "team spirit", "energetic", "crowd-pleasing", "action-packed", "thrilling"],
+    music: ["melodic", "rhythmic", "live music", "acoustic", "intimate", "amplified", "performance"],
+    comedy: ["hilarious", "laugh-out-loud", "entertaining", "witty", "humorous", "stand-up", "improv"],
+    nightlife: ["vibrant", "party", "dancing", "late-night", "trendy", "clubbing", "upscale"]
   };
   
-  const allVibes = ["Busy", "Popular", "Local favorite", "Hidden gem"];
-  const typeVibes = vibesByType[type as keyof typeof vibesByType] || [];
+  // Get vibes specific to the location type
+  const specificVibes = typeVibes[type] || [];
   
-  // Select 2-3 vibes
-  const numberOfVibes = Math.floor(Math.random() * 2) + 2;
-  const combinedVibes = [...typeVibes, ...allVibes];
-  const selectedVibes: string[] = [];
+  // Atmosphere vibes
+  const atmosphereVibes = ["cozy", "casual", "upscale", "intimate", "bustling", "relaxed", "vibrant", "quiet", "trendy"];
   
-  for (let i = 0; i < numberOfVibes; i++) {
-    const randomIndex = Math.floor(Math.random() * combinedVibes.length);
-    const vibe = combinedVibes[randomIndex];
+  // Ambiance vibes
+  const ambianceVibes = ["romantic", "rustic", "modern", "classic", "vintage", "industrial", "elegant", "artsy"];
+  
+  // Combine all potential vibes
+  const allPotentialVibes = [...commonVibes, ...specificVibes, ...atmosphereVibes, ...ambianceVibes];
+  
+  // Select random vibes (between 3 and 6)
+  const numberOfVibes = Math.floor(Math.random() * 4) + 3;
+  const selectedVibes = [];
+  
+  // Ensure we have at least one type-specific vibe
+  if (specificVibes.length > 0) {
+    const typeVibeIndex = Math.floor(Math.random() * specificVibes.length);
+    selectedVibes.push(specificVibes[typeVibeIndex]);
+  } else {
+    // If no type-specific vibes, use a common one
+    const commonVibeIndex = Math.floor(Math.random() * commonVibes.length);
+    selectedVibes.push(commonVibes[commonVibeIndex]);
+  }
+  
+  // Add more random vibes
+  while (selectedVibes.length < numberOfVibes) {
+    const index = Math.floor(Math.random() * allPotentialVibes.length);
+    const vibe = allPotentialVibes[index];
     
+    // Avoid duplicates
     if (!selectedVibes.includes(vibe)) {
       selectedVibes.push(vibe);
     }
-    
-    // Remove selected vibe to avoid duplicates
-    combinedVibes.splice(randomIndex, 1);
-    
-    if (combinedVibes.length === 0) break;
   }
   
   return selectedVibes;
 };
 
-// Format location hours for display
-export const formatLocationHours = (hours: BusinessHours | undefined): string => {
-  if (!hours) return "Hours not available";
-  
-  const today = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
-  return hours[today as keyof BusinessHours] as string || "Hours not available";
-};
-
-// Get location open/closed status
-export const getLocationStatus = (location: Location): "open" | "closed" | "unknown" => {
-  if (!location.hours) return "unknown";
-  
-  const now = new Date();
-  const today = now.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
-  const hours = location.hours[today as keyof typeof location.hours];
-  
-  if (!hours || hours === "Closed") return "closed";
-  if (hours === "Open 24 hours") return "open";
-  
-  // Parse hours like "9:00 AM - 5:00 PM"
-  const hoursMatch = hours.match(/(\d+):(\d+)\s+(AM|PM)\s+-\s+(\d+):(\d+)\s+(AM|PM)/);
-  if (!hoursMatch) return "unknown";
-  
-  const [_, openHour, openMinute, openPeriod, closeHour, closeMinute, closePeriod] = hoursMatch;
-  
-  const openTime = getTimeInMinutes(parseInt(openHour), parseInt(openMinute), openPeriod);
-  const closeTime = getTimeInMinutes(parseInt(closeHour), parseInt(closeMinute), closePeriod);
-  const currentTime = now.getHours() * 60 + now.getMinutes();
-  
-  return (currentTime >= openTime && currentTime <= closeTime) ? "open" : "closed";
-};
-
-// Helper function to convert time to minutes since midnight
-const getTimeInMinutes = (hour: number, minute: number, period: string): number => {
-  if (period === "PM" && hour !== 12) hour += 12;
-  if (period === "AM" && hour === 12) hour = 0;
-  
-  return hour * 60 + minute;
-};
-
-// Get today's hours string
-export const getTodaysHours = (location: Location): string => {
-  if (!location.hours) return "Hours not available";
-  
-  const today = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
-  const hours = location.hours as BusinessHours;
-  
-  return hours[today as keyof BusinessHours] as string || "Hours not available";
-};
-
 /**
- * Generates a mock venue with realistic data for development
+ * Generate multiple locations for a city
  */
-export function generateMockVenue(id: string, options: Partial<Location> = {}): Location {
-  const venueTypes = ['restaurant', 'bar', 'club', 'cafe', 'attraction', 'event', 'sports'];
-  const selectedType = options.type || venueTypes[Math.floor(Math.random() * venueTypes.length)];
+export const generateLocationsForCity = (
+  city: string,
+  state: string = "",
+  count: number = 10
+): Location[] => {
+  const locations: Location[] = [];
   
-  const cityInfo = options.city ? 
-    getCityCoordinates(options.city) : 
-    getCityCoordinates('Miami');
+  // Ensure we have at least one of each major type
+  const majorTypes = ["restaurant", "bar", "event", "attraction"];
   
-  // Generate location near the city center
-  const lat = cityInfo.lat + (Math.random() * 0.05 - 0.025);
-  const lng = cityInfo.lng + (Math.random() * 0.05 - 0.025);
-  
-  // Generate name based on venue type
-  const name = generateVenueName(selectedType);
-  
-  // Generate business hours
-  const hours = generateBusinessHours(selectedType);
-  
-  // Generate ratings
-  const ratingValue = (Math.random() * 2 + 3).toFixed(1);
-  const ratingCount = Math.floor(Math.random() * 500) + 50;
-  
-  return {
-    id: id,
-    name: options.name || name,
-    address: options.address || generateAddress(options.city || 'Miami'),
-    city: options.city || 'Miami',
-    state: options.state || 'FL',
-    lat: options.lat || lat,
-    lng: options.lng || lng,
-    type: selectedType,
-    category: options.category || generateCategory(selectedType),
-    description: options.description || generateDescription(selectedType),
-    phone: options.phone || generatePhoneNumber(),
-    website: options.website || `https://www.${name.toLowerCase().replace(/\s+/g, '')}.com`,
-    hours: options.hours || hours,
-    pricing: options.pricing || Math.floor(Math.random() * 3) + 1,
-    rating: options.rating || parseFloat(ratingValue),
-    ratingCount: options.ratingCount || ratingCount,
-    images: options.images || generateImages(selectedType),
-    amenities: options.amenities || generateAmenities(selectedType),
-    popular_times: options.popular_times || generatePopularTimes()
-  };
-}
-
-/**
- * Generates a venue name based on type
- */
-export function generateVenueName(type: string): string {
-  // Names by type
-  const names: Record<string, string[]> = {
-    restaurant: [
-      'The Hungry Bistro', 'Ocean View Grill', 'The Savory Plate',
-      'Urban Eats', 'Fusion Kitchen', 'The Daily Feast',
-      'Harbor House', 'The Spice Route', 'Sapphire Dining'
-    ],
-    bar: [
-      'The Tipsy Cork', 'Nightcap Lounge', 'The Crafty Pint',
-      'Barrel & Vine', 'The Mixing Room', 'The Velvet Lounge',
-      'Skyline Bar', 'The Copper Tap', 'Midnight Social'
-    ],
-    club: [
-      'Pulse', 'Elevate', 'Mirage', 'Eclipse', 'Euphoria',
-      'Rhythm', 'Vibe', 'Illusion', 'Ecstasy', 'Utopia'
-    ],
-    cafe: [
-      'Morning Brew', 'The Daily Grind', 'Café Soleil',
-      'Bean & Leaf', 'The Cozy Cup', 'Urban Roast',
-      'The Artful Espresso', 'Cream & Sugar', 'The Reading Room'
-    ],
-    attraction: [
-      'Wonder World', 'Discovery Zone', 'Heritage Park',
-      'Natural Wonders', 'The Grand Gallery', 'Ocean Depths',
-      'Sky Tower', 'History Haven', 'Adventure Realm'
-    ],
-    event: [
-      'The Grand Ballroom', 'Festival Plaza', 'The Landmark',
-      'Celebration Hall', 'The Venue', 'Performance Place',
-      'Convention Center', 'The Pavilion', 'Legacy Arena'
-    ],
-    sports: [
-      'Victory Stadium', 'Champions Field', 'The Athletic Club',
-      'Sports Complex', 'The Arena', 'Olympic Center',
-      'Fitness Hub', 'The Court', 'Training Grounds'
-    ]
-  };
-  
-  // Default names if type doesn't match
-  const defaultNames = [
-    'The Local Spot', 'City Center', 'Urban Oasis',
-    'The Gathering', 'Main Street Hub', 'Downtown Place'
-  ];
-  
-  const venueNames = names[type] || defaultNames;
-  return venueNames[Math.floor(Math.random() * venueNames.length)];
-}
-
-/**
- * Generates a realistic address
- */
-export function generateAddress(city: string): string {
-  const streets = [
-    'Main St', 'Park Ave', 'Ocean Dr', 'Maple Ave',
-    'Market St', 'Broadway', 'Highland Ave', 'Washington Blvd',
-    'Central Ave', 'Sunset Blvd', 'River Rd', 'Bay St'
-  ];
-  
-  const numbers = Math.floor(Math.random() * 999) + 1;
-  const street = streets[Math.floor(Math.random() * streets.length)];
-  
-  return `${numbers} ${street}`;
-}
-
-/**
- * Generates a category based on venue type
- */
-export function generateCategory(type: string): string {
-  const categories: Record<string, string[]> = {
-    restaurant: [
-      'Italian', 'Mexican', 'American', 'Chinese', 'Japanese',
-      'Thai', 'Mediterranean', 'Indian', 'French', 'BBQ'
-    ],
-    bar: [
-      'Cocktail Bar', 'Sports Bar', 'Wine Bar', 'Brewery',
-      'Pub', 'Lounge', 'Rooftop Bar', 'Dive Bar', 'Speakeasy'
-    ],
-    club: [
-      'Dance Club', 'Live Music', 'Jazz Club', 'Hip Hop',
-      'EDM', 'Latin', 'R&B', 'Alternative', 'Pop'
-    ],
-    cafe: [
-      'Coffee Shop', 'Bakery', 'Tea House', 'Dessert Shop',
-      'Juice Bar', 'Brunch Spot', 'Bistro', 'Sandwich Shop'
-    ],
-    attraction: [
-      'Museum', 'Art Gallery', 'Historic Site', 'Park',
-      'Zoo', 'Aquarium', 'Theme Park', 'Garden', 'Theater'
-    ],
-    event: [
-      'Concert Hall', 'Conference Center', 'Wedding Venue',
-      'Exhibition Space', 'Theater', 'Festival Grounds'
-    ],
-    sports: [
-      'Stadium', 'Arena', 'Sports Bar', 'Golf Course',
-      'Tennis Club', 'Bowling Alley', 'Fitness Center'
-    ]
-  };
-  
-  const defaultCategories = ['Entertainment', 'Venue', 'Landmark'];
-  const venueCategories = categories[type] || defaultCategories;
-  
-  return venueCategories[Math.floor(Math.random() * venueCategories.length)];
-}
-
-// Gets the coordinates for a city
-export function getCityCoordinates(cityName: string): { lat: number, lng: number } {
-  const cityCoordinates: Record<string, { lat: number, lng: number }> = {
-    'Miami': { lat: 25.7617, lng: -80.1918 },
-    'New York': { lat: 40.7128, lng: -74.0060 },
-    'Los Angeles': { lat: 34.0522, lng: -118.2437 },
-    'Chicago': { lat: 41.8781, lng: -87.6298 },
-    'Austin': { lat: 30.2672, lng: -97.7431 },
-    'San Francisco': { lat: 37.7749, lng: -122.4194 },
-    'Seattle': { lat: 47.6062, lng: -122.3321 },
-    'Denver': { lat: 39.7392, lng: -104.9903 },
-    'Atlanta': { lat: 33.7490, lng: -84.3880 },
-    'Boston': { lat: 42.3601, lng: -71.0589 },
-    'Nashville': { lat: 36.1627, lng: -86.7816 },
-    'New Orleans': { lat: 29.9511, lng: -90.0715 },
-    'Washington DC': { lat: 38.9072, lng: -77.0369 }
-  };
-  
-  // If we have coordinates for this city, return them
-  if (typeof cityName === 'string' && cityName in cityCoordinates) {
-    return cityCoordinates[cityName];
+  for (const type of majorTypes) {
+    locations.push(generateLocationForCity(city, state, type));
   }
   
-  // Default to Miami if city not found
-  return cityCoordinates['Miami'];
-}
+  // Generate the rest randomly
+  for (let i = locations.length; i < count; i++) {
+    locations.push(generateLocationForCity(city, state));
+  }
+  
+  return locations;
+};
+
+/**
+ * Get today's hours of operation
+ */
+export const getTodaysHours = (location: any): string => {
+  if (!location || !location.businessHours) {
+    return "Hours not available";
+  }
+  
+  const dayNames = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+  const today = dayNames[new Date().getDay()];
+  const hours = location.businessHours[today];
+  
+  if (!hours || !hours.open) {
+    return "Closed today";
+  }
+  
+  return `${hours.openTime} - ${hours.closeTime}`;
+};

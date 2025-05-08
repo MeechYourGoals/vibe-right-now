@@ -54,10 +54,10 @@ const NearbyVibesMap = ({
             size="sm" 
             variant="secondary" 
             className="bg-white/80 hover:bg-white shadow-md"
-            onClick={() => setIsExpanded(true)}
+            onClick={() => navigate("/explore")}
           >
             <Maximize2 className="h-4 w-4 mr-1" />
-            Expand
+            View in Explore
           </Button>
         </div>
         

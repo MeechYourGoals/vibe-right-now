@@ -8,6 +8,7 @@ import useExploreSearchWithAI from "@/hooks/useExploreSearchWithAI";
 import SearchSection from "@/components/explore/SearchSection";
 import ExploreContent from "@/components/explore/ExploreContent";
 import ExploreSidebar from "@/components/explore/ExploreSidebar";
+import MapContainer from "@/components/map/MapContainer";
 import { mockLocations } from "@/mock/data";
 import { getAdditionalTags } from "@/utils/explore/exploreHelpers";
 
@@ -33,7 +34,13 @@ const Explore = () => {
     dateRange,
     showDateFilter,
     setShowDateFilter,
-    isDetectingLocation
+    isDetectingLocation,
+    userLocation,
+    mapStyle,
+    showDistances,
+    toggleDistances,
+    selectedLocation,
+    setSelectedLocation
   } = useExploreData();
   
   const { 
@@ -60,6 +67,15 @@ const Explore = () => {
     }
   }, [setLocationTags, filteredLocations.length, setFilteredLocations]);
 
+  // Handle location selection and close
+  const handleLocationSelect = (loc: any) => {
+    setSelectedLocation(loc);
+  };
+
+  const handleCloseLocation = () => {
+    setSelectedLocation(null);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -81,6 +97,25 @@ const Explore = () => {
           searchedState={searchedState}
           isNaturalLanguageSearch={isNaturalLanguageSearch}
         />
+
+        {/* Map component - positioned before the main grid */}
+        <div className="mb-6">
+          <MapContainer
+            loading={isLoadingResults}
+            isExpanded={!!selectedLocation}
+            userLocation={userLocation}
+            locations={filteredLocations}
+            searchedCity={searchedCity}
+            mapStyle={mapStyle}
+            selectedLocation={selectedLocation}
+            showDistances={showDistances}
+            userAddressLocation={null}
+            onLocationSelect={handleLocationSelect}
+            onCloseLocation={handleCloseLocation}
+            nearbyCount={filteredLocations.length}
+            onToggleDistances={toggleDistances}
+          />
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-2">

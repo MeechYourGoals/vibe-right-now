@@ -1,280 +1,159 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { CalendarIcon, ImageIcon, ListIcon, MapPin, MessageSquare, Plus, Star } from "lucide-react";
-import { Venue, Post, Location } from "@/types";
-import { getVenueById, deleteVenue } from "@/services/VenueService";
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { Layout } from "@/components/Layout";
+import { mockLocations } from "@/mock/data";
+import { Location } from "@/types";
 import VenueHeader from "@/components/venue/VenueHeader";
 import VenueAbout from "@/components/venue/VenueAbout";
 import VenuePosts from "@/components/venue/VenuePosts";
 import VenueMap from "@/components/venue/VenueMap";
-import { createPost, getVenuePosts, getPostComments } from "@/services/PostService";
-import { useSession } from "@/contexts/SessionContext";
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { DotsHorizontalIcon } from '@radix-ui/react-icons';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
-import { SkeletonVenueHeader } from '@/components/SkeletonVenueHeader';
-import { SkeletonVenueAbout } from '@/components/SkeletonVenueAbout';
-import { SkeletonVenuePosts } from '@/components/SkeletonVenuePosts';
-import { SkeletonVenueMap } from '@/components/SkeletonVenueMap';
-import { SkeletonVenueReviews } from '@/components/SkeletonVenueReviews';
-import { SkeletonVenueAssistant } from '@/components/SkeletonVenueAssistant';
-import VenueReviews from '@/components/venue/VenueReviews';
-import VernonVenueAssistant from '@/components/venue/VernonVenueAssistant';
+import VenueReviews from "@/components/venue/VenueReviews";
+import VernonVenueAssistant from "@/components/venue/VernonVenueAssistant";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { useToast } from "@/components/ui/use-toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import SkeletonVenueHeader from "@/components/SkeletonVenueHeader";
+import SkeletonVenueAbout from "@/components/SkeletonVenueAbout";
+import SkeletonVenueMap from "@/components/SkeletonVenueMap";
+import SkeletonVenuePosts from "@/components/SkeletonVenuePosts";
+import SkeletonVenueAssistant from "@/components/SkeletonVenueAssistant";
+import SkeletonVenueReviews from "@/components/SkeletonVenueReviews";
 
-const VenueProfile: React.FC = () => {
-  const { id: venueId } = useParams<{ id: string }>();
-  const [venue, setVenue] = useState<Location | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"about" | "posts" | "map" | "reviews">("about");
-  const [venuePosts, setVenuePosts] = useState<Post[]>([]);
-  const [isOwner, setIsOwner] = useState(false);
-  const { session } = useSession();
+const VenueProfile = () => {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [postContent, setPostContent] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isMapExpanded, setIsMapExpanded] = useState(false);
-
-  const fetchVenue = useCallback(async () => {
-    if (!venueId) {
-      toast.error('Venue ID is missing.');
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      const fetchedVenue = await getVenueById(venueId);
-      if (fetchedVenue) {
-        setVenue(fetchedVenue);
-        setIsOwner(session?.user?.id === fetchedVenue.ownerId);
-      } else {
-        toast.error('Venue not found.');
-      }
-    } catch (error) {
-      console.error('Error fetching venue:', error);
-      toast.error('Failed to load venue.');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [venueId, session]);
-
-  const fetchVenuePosts = useCallback(async () => {
-    if (!venueId) return;
-
-    try {
-      const posts = await getVenuePosts(venueId);
-      setVenuePosts(posts);
-    } catch (error) {
-      console.error('Error fetching venue posts:', error);
-      toast.error('Failed to load venue posts.');
-    }
-  }, [venueId]);
-
+  const { toast } = useToast();
+  
+  const [venue, setVenue] = useState<Location | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("about");
+  const [mapDialogOpen, setMapDialogOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
   useEffect(() => {
-    fetchVenue();
-    fetchVenuePosts();
-  }, [fetchVenue, fetchVenuePosts]);
-
-  const handleCreatePost = async () => {
-    if (!postContent.trim()) {
-      toast.error('Post content cannot be empty.');
-      return;
-    }
-
-    if (!venueId) {
-      toast.error('Venue ID is missing.');
-      return;
-    }
-
-    setIsSubmitting(true);
-    try {
-      const newPost = await createPost({
-        content: postContent,
-        locationId: venueId
-      });
-
-      setVenuePosts(prevPosts => [newPost, ...prevPosts]);
-      setPostContent('');
-      toast.success('Post created successfully!');
-    } catch (error) {
-      console.error('Error creating post:', error);
-      toast.error('Failed to create post.');
-    } finally {
-      setIsSubmitting(false);
-    }
+    const loadVenue = async () => {
+      try {
+        // In a real app, this would be an API call to fetch the venue by ID
+        // For now, we'll just use mock data
+        const foundVenue = mockLocations.find(loc => loc.id === id);
+        
+        if (foundVenue) {
+          setVenue(foundVenue);
+          setLoading(false);
+        } else {
+          setError("Venue not found");
+          setLoading(false);
+          toast({
+            title: "Error",
+            description: "The requested venue could not be found.",
+            variant: "destructive"
+          });
+          
+          // Navigate back to explore page after a delay
+          setTimeout(() => {
+            navigate("/explore");
+          }, 3000);
+        }
+      } catch (err) {
+        console.error("Error loading venue:", err);
+        setError("Failed to load venue data");
+        setLoading(false);
+      }
+    };
+    
+    loadVenue();
+  }, [id, navigate, toast]);
+  
+  // Check if the current user is the owner of the venue
+  const isOwner = () => {
+    if (!venue || !venue.ownerIdentifier) return false;
+    // In a real app, this would check if the current user's ID matches the venue's owner ID
+    return false; // Default to false for now
   };
-
-  const handleDeleteVenue = async () => {
-    if (!venueId) {
-      toast.error('Venue ID is missing.');
-      return;
-    }
-
-    try {
-      await deleteVenue(venueId);
-      toast.success('Venue deleted successfully!');
-      navigate('/');
-    } catch (error) {
-      console.error('Error deleting venue:', error);
-      toast.error('Failed to delete venue.');
-    }
-  };
-
-  const handleTabChange = (value: string) => {
-    setActiveTab(value as "about" | "posts" | "map" | "reviews");
-  };
-
+  
   const handleExpandMap = () => {
-    setIsMapExpanded(true);
-    setActiveTab("map");
+    setMapDialogOpen(true);
   };
-
-  if (isLoading) {
-    return (
-      <div className="container mx-auto mt-8 p-4">
-        <SkeletonVenueHeader />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-          <div className="md:col-span-2">
-            <SkeletonVenueAbout />
-            <SkeletonVenuePosts />
-          </div>
-          <div className="space-y-4">
-            <SkeletonVenueMap />
-            <SkeletonVenueReviews />
-            <SkeletonVenueAssistant />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!venue) {
-    return <div className="text-center mt-8">Venue not found.</div>;
-  }
 
   return (
-    <div className="container mx-auto mt-8 p-4">
-      <VenueHeader venue={venue} />
-
-      <Tabs value={activeTab} className="w-full mt-4" onValueChange={handleTabChange}>
-        <TabsList>
-          <TabsTrigger value="about"><ListIcon className="mr-2 h-4 w-4" /> About</TabsTrigger>
-          <TabsTrigger value="posts"><MessageSquare className="mr-2 h-4 w-4" /> Posts</TabsTrigger>
-          <TabsTrigger value="map"><MapPin className="mr-2 h-4 w-4" /> Map</TabsTrigger>
-          <TabsTrigger value="reviews"><Star className="mr-2 h-4 w-4" /> Reviews</TabsTrigger>
-        </TabsList>
-        <div className="flex justify-end mt-2">
-          {isOwner && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 p-0">
-                  <span className="sr-only">Open dropdown menu</span>
-                  <DotsHorizontalIcon className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DropdownMenuItem onClick={() => navigate(`/venue/edit/${venueId}`)}>
-                  Edit Venue
-                </DropdownMenuItem>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <DropdownMenuItem>
-                      Delete Venue
-                    </DropdownMenuItem>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        This action cannot be undone. This will permanently delete your venue
-                        and remove all of its data from our servers.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={handleDeleteVenue}>Continue</AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-          <div className="md:col-span-2">
-            <TabsContent value="about" className="space-y-4">
-              <VenueAbout venue={venue} />
-            </TabsContent>
-            <TabsContent value="posts" className="space-y-4">
-              {isOwner && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Create a Post</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <Textarea
-                      placeholder="Write something to share..."
-                      value={postContent}
-                      onChange={(e) => setPostContent(e.target.value)}
-                      className="mb-2"
-                    />
-                    <Button onClick={handleCreatePost} disabled={isSubmitting}>
-                      {isSubmitting ? "Posting..." : "Post"}
-                    </Button>
-                  </CardContent>
-                </Card>
-              )}
-              <VenuePosts
-                venueId={venueId || ''}
-                viewMode={viewMode}
-                setViewMode={setViewMode}
-                canDelete={isOwner}
-              />
-            </TabsContent>
+    <Layout>
+      <main className="container py-6">
+        {loading ? (
+          <div className="space-y-8">
+            <SkeletonVenueHeader />
+            <SkeletonVenueAbout />
+            <SkeletonVenueMap />
+            <SkeletonVenuePosts />
+            <SkeletonVenueAssistant />
+            <SkeletonVenueReviews />
           </div>
-          <div className="space-y-4">
-            <TabsContent value="map" className="space-y-4">
-              <VenueMap venue={venue} onExpand={handleExpandMap} />
-            </TabsContent>
-            <TabsContent value="reviews" className="space-y-4">
-              <VenueReviews venue={venue} />
-            </TabsContent>
-            <VernonVenueAssistant />
+        ) : error ? (
+          <div className="text-center py-12">
+            <h2 className="text-2xl font-bold mb-4">Error</h2>
+            <p className="text-muted-foreground">{error}</p>
+            <p className="mt-4">Redirecting to Explore page...</p>
           </div>
-        </div>
-      </Tabs>
-    </div>
+        ) : venue ? (
+          <div className="space-y-8">
+            {/* Venue Header */}
+            <VenueHeader venue={venue} isOwner={isOwner()} />
+            
+            {/* Venue Content Tabs */}
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="grid w-full grid-cols-4">
+                <TabsTrigger value="about">About</TabsTrigger>
+                <TabsTrigger value="posts">Posts</TabsTrigger>
+                <TabsTrigger value="reviews">Reviews</TabsTrigger>
+                <TabsTrigger value="assistant">Vernon AI</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="about" className="space-y-6 mt-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="md:col-span-2">
+                    <VenueAbout venue={venue} />
+                  </div>
+                  <div className="md:col-span-1">
+                    <VenueMap venue={venue} onExpand={handleExpandMap} />
+                  </div>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="posts" className="mt-6">
+                <VenuePosts venue={venue} />
+              </TabsContent>
+              
+              <TabsContent value="reviews" className="mt-6">
+                <VenueReviews venue={venue} />
+              </TabsContent>
+              
+              <TabsContent value="assistant" className="mt-6">
+                <VernonVenueAssistant venue={venue} />
+              </TabsContent>
+            </Tabs>
+            
+            {/* Map Dialog */}
+            <Dialog open={mapDialogOpen} onOpenChange={setMapDialogOpen}>
+              <DialogContent className="sm:max-w-[90vw] h-[80vh] p-0">
+                <div className="h-full">
+                  {/* You would implement a full-screen map here */}
+                  <iframe
+                    title={`Map for ${venue.name}`}
+                    width="100%"
+                    height="100%"
+                    frameBorder="0"
+                    src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyBQwBQcUxHAzfHjUZPd47Q3zOcQLfFAUA4&q=${encodeURIComponent(
+                      `${venue.name}, ${venue.address}, ${venue.city}, ${venue.state || ''}`
+                    )}`}
+                    allowFullScreen
+                  />
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+        ) : null}
+      </main>
+    </Layout>
   );
 };
 

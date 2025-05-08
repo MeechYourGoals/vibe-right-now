@@ -1,146 +1,151 @@
 
-import React, { useState, useEffect } from 'react';
-import { Button } from "@/components/ui/button";
+import React, { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Post } from "@/types";
-import { Grid, List } from "lucide-react";
-import VenuePost from "@/components/VenuePost";
-import { getVenuePosts, getPostComments } from "@/services/PostService";
+import { Card } from "@/components/ui/card";
+import { Location, Media } from "@/types";
+import VenuePost from "./VenuePost";
 
 interface VenuePostsProps {
-  venueId: string;
-  viewMode?: 'grid' | 'list';
-  setViewMode?: (mode: 'grid' | 'list') => void;
-  canDelete?: boolean;
+  venue: Location;
 }
 
-const VenuePosts = ({ 
-  venueId,
-  viewMode = 'grid', 
-  setViewMode = () => {},
-  canDelete = false
-}: VenuePostsProps) => {
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("recent");
+const VenuePosts: React.FC<VenuePostsProps> = ({ venue }) => {
+  const [activeTab, setActiveTab] = useState<string>("recent");
+  const [posts, setPosts] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
+  // Mock posts data
   useEffect(() => {
-    const loadPosts = async () => {
-      setIsLoading(true);
-      try {
-        const venuePosts = await getVenuePosts(venueId);
-        setPosts(venuePosts);
-      } catch (error) {
-        console.error("Error loading posts:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    // Simulate loading
+    setTimeout(() => {
+      const mockPosts = [
+        {
+          id: "1",
+          content: "Just had an amazing time at this venue! The atmosphere was electric, and the service was top-notch. Will definitely be coming back soon!",
+          media: { type: "image", url: "https://source.unsplash.com/random/800x600/?restaurant" },
+          timestamp: "2 hours ago",
+          likes: 42,
+          comments: 8,
+          user: {
+            name: "Alex Johnson",
+            username: "alexj",
+            avatar: "https://source.unsplash.com/random/100x100/?portrait"
+          }
+        },
+        {
+          id: "2",
+          content: "Great happy hour deals and the best nachos in town! Met some cool people and had a blast.",
+          media: { type: "image", url: "https://source.unsplash.com/random/800x600/?drinks" },
+          timestamp: "Yesterday",
+          likes: 29,
+          comments: 5,
+          user: {
+            name: "Sophia Lee",
+            username: "sophialee",
+            avatar: "https://source.unsplash.com/random/100x100/?woman"
+          }
+        },
+        {
+          id: "3",
+          content: "This venue has the most incredible live music! The acoustics are perfect, and the crowd was so into it. Can't wait for the next show!",
+          media: { type: "image", url: "https://source.unsplash.com/random/800x600/?concert" },
+          timestamp: "3 days ago",
+          likes: 67,
+          comments: 12,
+          user: {
+            name: "Marcus Rivera",
+            username: "marcusrivs",
+            avatar: "https://source.unsplash.com/random/100x100/?man"
+          }
+        }
+      ];
 
-    loadPosts();
-  }, [venueId]);
+      setPosts(mockPosts);
+      setLoading(false);
+    }, 1000);
+  }, [venue.id]);
 
-  const loadComments = async (postId: string) => {
-    try {
-      return await getPostComments(postId);
-    } catch (error) {
-      console.error("Error loading comments:", error);
-      return [];
+  // Filter posts based on active tab
+  const filteredPosts = () => {
+    switch (activeTab) {
+      case "popular":
+        return [...posts].sort((a, b) => b.likes - a.likes);
+      case "vibe-right-now":
+        return posts.filter(post => post.timestamp.includes("hour"));
+      default:
+        return posts;
     }
   };
 
-  const getSortedPosts = () => {
-    if (activeTab === "recent") {
-      return [...posts].sort((a, b) => 
-        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-      );
-    } else {
-      return [...posts].sort((a, b) => b.likes - a.likes);
-    }
-  };
-
-  if (isLoading) {
+  if (loading) {
     return (
-      <div className="space-y-4">
-        {[1, 2, 3].map(i => (
-          <div key={i} className="border rounded-md p-4 space-y-3 animate-pulse">
-            <div className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-full bg-gray-200"></div>
-              <div className="h-4 bg-gray-200 w-24"></div>
-            </div>
-            <div className="h-3 bg-gray-200 w-full"></div>
-            <div className="h-3 bg-gray-200 w-3/4"></div>
-          </div>
-        ))}
-      </div>
+      <Card className="p-6">
+        <div className="animate-pulse">
+          <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
+          <div className="h-24 bg-gray-200 rounded mb-4"></div>
+          <div className="h-32 bg-gray-200 rounded mb-4"></div>
+          <div className="h-24 bg-gray-200 rounded"></div>
+        </div>
+      </Card>
     );
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <Tabs defaultValue="recent" className="w-full" onValueChange={setActiveTab}>
-          <TabsList>
-            <TabsTrigger value="recent">Recent</TabsTrigger>
-            <TabsTrigger value="popular">Popular</TabsTrigger>
-          </TabsList>
-        </Tabs>
+    <Card className="p-6">
+      <Tabs defaultValue="recent" value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="mb-6">
+          <TabsTrigger value="recent">Recent</TabsTrigger>
+          <TabsTrigger value="popular">Popular</TabsTrigger>
+          <TabsTrigger value="vibe-right-now">Vibe Right Now</TabsTrigger>
+        </TabsList>
         
-        <div className="flex border rounded-md">
-          <Button 
-            variant={viewMode === 'grid' ? "secondary" : "ghost"} 
-            size="icon"
-            onClick={() => setViewMode('grid')}
-            className="h-8 w-8 rounded-none rounded-l-md"
-          >
-            <Grid className="h-4 w-4" />
-          </Button>
-          <Button 
-            variant={viewMode === 'list' ? "secondary" : "ghost"} 
-            size="icon"
-            onClick={() => setViewMode('list')}
-            className="h-8 w-8 rounded-none rounded-r-md"
-          >
-            <List className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-
-      <TabsContent value="recent" className="space-y-4 mt-4">
-        {getSortedPosts().map(post => (
-          <VenuePost 
-            key={post.id} 
-            venue={post.location}
-            content={post.content}
-            media={Array.isArray(post.media) ? 
-              (typeof post.media[0] === 'string' ? 
-                { type: "image", url: post.media[0] } : 
-                post.media[0]) : 
-              post.media}
-            timestamp={post.timestamp}
-            commentCount={typeof post.comments === 'number' ? post.comments : post.comments.length}
-            likeCount={post.likes}
-          />
-        ))}
-      </TabsContent>
-      <TabsContent value="popular" className="space-y-4 mt-4">
-        {getSortedPosts().map(post => (
-          <VenuePost 
-            key={post.id} 
-            venue={post.location}
-            content={post.content}
-            media={Array.isArray(post.media) ? 
-              (typeof post.media[0] === 'string' ? 
-                { type: "image", url: post.media[0] } : 
-                post.media[0]) : 
-              post.media}
-            timestamp={post.timestamp}
-            commentCount={typeof post.comments === 'number' ? post.comments : post.comments.length}
-            likeCount={post.likes}
-          />
-        ))}
-      </TabsContent>
-    </div>
+        <TabsContent value="recent" className="space-y-6">
+          {filteredPosts().map(post => (
+            <VenuePost
+              key={post.id}
+              venue={venue}
+              content={post.content}
+              media={post.media}
+              timestamp={post.timestamp}
+              likes={post.likes}
+              comments={post.comments}
+            />
+          ))}
+        </TabsContent>
+        
+        <TabsContent value="popular" className="space-y-6">
+          {filteredPosts().map(post => (
+            <VenuePost
+              key={post.id}
+              venue={venue}
+              content={post.content}
+              media={post.media}
+              timestamp={post.timestamp}
+              likes={post.likes}
+              comments={post.comments}
+            />
+          ))}
+        </TabsContent>
+        
+        <TabsContent value="vibe-right-now" className="space-y-6">
+          {filteredPosts().length > 0 ? (
+            filteredPosts().map(post => (
+              <VenuePost
+                key={post.id}
+                venue={venue}
+                content={post.content}
+                media={post.media}
+                timestamp={post.timestamp}
+                likes={post.likes}
+                comments={post.comments}
+              />
+            ))
+          ) : (
+            <p className="text-center text-muted-foreground py-8">No real-time vibes yet. Be the first to post!</p>
+          )}
+        </TabsContent>
+      </Tabs>
+    </Card>
   );
 };
 

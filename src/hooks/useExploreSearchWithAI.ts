@@ -85,19 +85,13 @@ const useExploreSearchWithAI = () => {
     
     // If vibeFilter is set, filter by vibe
     if (vibeFilter && vibeFilter.length > 0) {
-      setFilteredLocations(prev => 
-        prev.filter(location => {
-          if (!location.vibes) return false;
-          return location.vibes.some(vibe => 
-            vibe.toLowerCase().includes(vibeFilter.toLowerCase())
-          );
-        })
-      );
-    }
-    
-    // Generate mock data based on tab selection
-    if (activeTab !== "all") {
-      setFilteredLocations(prev => prev.filter(loc => loc.type === activeTab));
+      const vibeFilteredLocations = [...filteredLocations].filter(location => {
+        if (!location.vibes) return false;
+        return location.vibes.some(vibe => 
+          vibe.toLowerCase().includes(vibeFilter.toLowerCase())
+        );
+      });
+      setFilteredLocations(vibeFilteredLocations);
     }
     
     // After slight delay to show loading state
@@ -107,6 +101,7 @@ const useExploreSearchWithAI = () => {
   }, [
     activeTab, 
     dateRange, 
+    filteredLocations,
     setActiveTab, 
     setComedyEvents, 
     setFilteredLocations, 

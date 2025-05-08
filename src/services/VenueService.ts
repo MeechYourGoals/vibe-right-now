@@ -1,147 +1,122 @@
 
-import { Location, BusinessHours } from "@/types";
-import { generateMockVenue } from "@/utils/locations/locationGenerator";
-import { supabase } from "@/integrations/supabase/client";
+import { Location } from '@/types';
+import { mockLocations } from '@/mock/data';
 
-// Direct exported functions for compatibility
-export const getVenueById = async (id: string): Promise<Location | null> => {
-  return await VenueService.getVenueById(id);
+type LocationStats = {
+  totalPosts: number;
+  totalPhotos: number;
+  avgRating: number;
+  totalReviews: number;
+  popularTimes: Record<string, number[]>;
 };
 
-export const deleteVenue = async (id: string): Promise<void> => {
-  try {
-    // First try to delete from Supabase if connected
-    const { error } = await supabase
-      .from('locations')
-      .delete()
-      .eq('id', id);
-    
-    if (error) {
-      console.log("Error deleting from Supabase or using mock operation", error);
-    }
-  } catch (e) {
-    console.log("Error deleting venue", e);
-  }
-};
-
-export const VenueService = {
+class VenueService {
   /**
-   * Gets venue details for a specific venue ID
+   * Get a venue by ID
    */
   async getVenueById(id: string): Promise<Location | null> {
-    // First try to get from Supabase if connected
-    try {
-      const { data, error } = await supabase
-        .from('locations')
-        .select('*')
-        .eq('id', id)
-        .single();
-      
-      if (!error && data) {
-        return data as unknown as Location;
-      }
-    } catch (e) {
-      console.log("Error fetching from Supabase, using mock data", e);
-    }
-    
-    // Fall back to mock data
-    return generateMockVenue(id);
-  },
-  
-  /**
-   * Gets recommended venues in a specific city
-   */
-  async getRecommendedVenues(city: string, limit = 6): Promise<Location[]> {
-    // Try to get from Supabase if connected
-    try {
-      const { data, error } = await supabase
-        .from('locations')
-        .select('*')
-        .eq('city', city)
-        .limit(limit);
-      
-      if (!error && data && data.length > 0) {
-        return data as unknown as Location[];
-      }
-    } catch (e) {
-      console.log("Error fetching from Supabase, using mock data", e);
-    }
-    
-    // Fall back to mock data
-    const venues: Location[] = [];
-    for (let i = 0; i < limit; i++) {
-      venues.push(generateMockVenue(`venue-${i}`, { city }));
-    }
-    return venues;
-  },
-  
-  /**
-   * Gets similar venues to a specific venue
-   */
-  async getSimilarVenues(venueId: string, limit = 3): Promise<Location[]> {
-    // Get the original venue to match properties
-    const originalVenue = await this.getVenueById(venueId);
-    if (!originalVenue) return [];
-    
-    // Try to get from Supabase if connected
-    try {
-      const { data, error } = await supabase
-        .from('locations')
-        .select('*')
-        .eq('city', originalVenue.city)
-        .eq('type', originalVenue.type)
-        .neq('id', venueId)
-        .limit(limit);
-      
-      if (!error && data && data.length > 0) {
-        return data as unknown as Location[];
-      }
-    } catch (e) {
-      console.log("Error fetching from Supabase, using mock data", e);
-    }
-    
-    // Fall back to mock data
-    const venues: Location[] = [];
-    for (let i = 0; i < limit; i++) {
-      venues.push(generateMockVenue(`similar-${venueId}-${i}`, { 
-        city: originalVenue.city,
-        type: originalVenue.type
-      }));
-    }
-    return venues;
-  },
-  
-  /**
-   * Updates a venue's details
-   */
-  async updateVenue(venueId: string, updates: Partial<Location>): Promise<Location> {
-    // Try to update in Supabase if connected
-    try {
-      const { data, error } = await supabase
-        .from('locations')
-        .update(updates)
-        .eq('id', venueId)
-        .select()
-        .single();
-      
-      if (!error && data) {
-        return data as unknown as Location;
-      }
-    } catch (e) {
-      console.log("Error updating in Supabase, using mock data", e);
-    }
-    
-    // Fall back to mock data
-    const venue = await this.getVenueById(venueId);
-    return { ...venue, ...updates } as Location;
-  },
-
-  /**
-   * Deletes a venue
-   */
-  async deleteVenue(venueId: string): Promise<void> {
-    await deleteVenue(venueId);
+    // In a real app, this would be an API call
+    const venue = mockLocations.find(loc => loc.id === id);
+    return venue || null;
   }
-};
 
-export default VenueService;
+  /**
+   * Get statistics for a venue
+   */
+  async getVenueStats(id: string): Promise<LocationStats | null> {
+    // In a real app, this would be an API call
+    const venue = mockLocations.find(loc => loc.id === id);
+    
+    if (!venue) {
+      return null;
+    }
+    
+    // Generate mock statistics
+    return {
+      totalPosts: Math.floor(Math.random() * 100) + 10,
+      totalPhotos: Math.floor(Math.random() * 200) + 20,
+      avgRating: (Math.random() * 2) + 3,  // Between 3 and 5
+      totalReviews: Math.floor(Math.random() * 1000) + 50,
+      popularTimes: this.generateMockPopularTimes()
+    };
+  }
+
+  /**
+   * Generate mock popular times data
+   */
+  private generateMockPopularTimes(): Record<string, number[]> {
+    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    const result: Record<string, number[]> = {};
+    
+    days.forEach(day => {
+      const hours = [];
+      
+      // Generate 24 hours of data (0-23)
+      for (let i = 0; i < 24; i++) {
+        let value = 0;
+        
+        if (i >= 7 && i <= 23) { // Open hours
+          if (day === 'friday' || day === 'saturday') {
+            // Weekend pattern
+            if (i >= 11 && i <= 14) { // Lunch rush
+              value = 60 + Math.floor(Math.random() * 40); // 60-100
+            } else if (i >= 18 && i <= 21) { // Dinner rush
+              value = 70 + Math.floor(Math.random() * 30); // 70-100
+            } else {
+              value = 20 + Math.floor(Math.random() * 40); // 20-60
+            }
+          } else {
+            // Weekday pattern
+            if (i >= 11 && i <= 13) { // Lunch rush
+              value = 50 + Math.floor(Math.random() * 40); // 50-90
+            } else if (i >= 17 && i <= 19) { // Dinner rush
+              value = 60 + Math.floor(Math.random() * 30); // 60-90
+            } else {
+              value = 10 + Math.floor(Math.random() * 30); // 10-40
+            }
+          }
+        } else {
+          // Closed or very low traffic hours
+          value = Math.floor(Math.random() * 10); // 0-9
+        }
+        
+        hours.push(value);
+      }
+      
+      result[day] = hours;
+    });
+    
+    return result;
+  }
+
+  /**
+   * Get nearby venues
+   */
+  async getNearbyVenues(venueId: string, radius: number = 5): Promise<Location[]> {
+    // In a real app, this would be an API call with geospatial queries
+    const venue = mockLocations.find(loc => loc.id === venueId);
+    
+    if (!venue) {
+      return [];
+    }
+    
+    // Filter locations within approximate radius (simplified approach)
+    const nearby = mockLocations.filter(loc => {
+      if (loc.id === venueId) return false; // Exclude the current venue
+      
+      // Simple distance calculation (not accurate for large distances)
+      const latDiff = Math.abs(loc.lat - venue.lat);
+      const lngDiff = Math.abs(loc.lng - venue.lng);
+      
+      // Rough approximation: 0.01 degrees is about 0.7 miles
+      const distanceDegrees = Math.sqrt(latDiff * latDiff + lngDiff * lngDiff);
+      const distanceMiles = distanceDegrees * 70;
+      
+      return distanceMiles <= radius;
+    });
+    
+    return nearby.slice(0, 5); // Return up to 5 nearby venues
+  }
+}
+
+export default new VenueService();
