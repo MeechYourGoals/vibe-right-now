@@ -1,97 +1,88 @@
 
 import React from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MapPin } from "lucide-react";
-import NearbyVibesMap from "@/components/NearbyVibesMap";
+import LocationCard from "@/components/map/LocationCard";
 import { Location } from "@/types";
-import { useToast } from "@/components/ui/use-toast";
-import { useNavigate } from "react-router-dom";
+import { CalendarCheck, Bookmark, Flame } from "lucide-react";
 
 interface ExploreSidebarProps {
   filteredLocations: Location[];
-  hasRealData: boolean;
-  realDataResults: Location[];
-  isAIPersonalized?: boolean;
 }
 
-const ExploreSidebar: React.FC<ExploreSidebarProps> = ({
-  filteredLocations,
-  hasRealData,
-  realDataResults,
-  isAIPersonalized = false,
-}) => {
-  const navigate = useNavigate();
-  const { toast } = useToast();
-
+const ExploreSidebar: React.FC<ExploreSidebarProps> = ({ filteredLocations }) => {
+  // Get a few trending locations for the sidebar
+  const trendingLocations = filteredLocations
+    .filter(loc => loc.verified)
+    .slice(0, 3);
+  
   return (
-    <div>
+    <div className="space-y-6">
       <Card>
-        <CardContent className="p-4">
-          <h3 className="text-lg font-semibold mb-2">Nearby Map</h3>
-          <NearbyVibesMap 
-            height={250} 
-            locations={filteredLocations.slice(0, 10)}
-            isRealData={hasRealData && realDataResults.length > 0}
-          />
-          
-          <div className="mt-4">
-            <h4 className="text-sm font-medium mb-2">Quick Filters</h4>
-            <div className="flex flex-wrap gap-2">
-              {["Trending", "Popular", "Local Favorite", "New Opening"].map((tag) => (
-                <Badge 
-                  key={tag} 
-                  variant="outline" 
-                  className="cursor-pointer hover:bg-primary/10"
-                  onClick={() => {
-                    toast({
-                      title: `${tag} Filter Applied`,
-                      description: "Showing venues with this tag",
-                      duration: 2000,
-                    });
-                  }}
-                >
-                  {tag}
-                </Badge>
-              ))}
-            </div>
-          </div>
-          
-          <div className="mt-6">
-            <h4 className="text-sm font-medium mb-2">Data Sources</h4>
-            <div className="text-xs text-muted-foreground">
-              <p className="mb-1">Using data from:</p>
-              <div className="flex flex-wrap gap-2">
-                <Badge variant="secondary" className="text-xs">TripAdvisor</Badge>
-                {realDataResults.length > 0 ? (
-                  <Badge variant="success" className="text-xs bg-green-100 text-green-800">{realDataResults.length} Real Venues</Badge>
-                ) : (
-                  <Badge variant="outline" className="text-xs">Mock Data</Badge>
-                )}
-              </div>
-            </div>
-          </div>
-          
-          {isAIPersonalized && (
-            <div className="mt-4 text-xs text-muted-foreground border-t pt-2">
-              <p>Results are personalized based on your preferences</p>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg flex items-center">
+            <Flame className="h-5 w-5 text-red-500 mr-2" />
+            Trending Now
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {trendingLocations.length > 0 ? (
+            trendingLocations.map(location => (
+              <LocationCard key={location.id} location={location} />
+            ))
+          ) : (
+            <div className="text-center text-muted-foreground py-4">
+              <p>No trending venues found</p>
             </div>
           )}
         </CardContent>
       </Card>
-      
-      <div className="mt-4">
-        <Button 
-          variant="outline" 
-          className="w-full"
-          onClick={() => {
-            navigate("/map");
-          }}
-        >
-          <MapPin className="h-4 w-4 mr-2" /> View Full Map
-        </Button>
-      </div>
+
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg flex items-center">
+            <CalendarCheck className="h-5 w-5 text-blue-500 mr-2" />
+            Upcoming Events
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            {filteredLocations
+              .filter(loc => loc.type === "event")
+              .slice(0, 2)
+              .map((event) => (
+                <div key={event.id} className="border rounded-md p-3">
+                  <div className="font-medium">{event.name}</div>
+                  <div className="text-sm text-muted-foreground">{event.address}</div>
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    <Badge variant="outline">Today</Badge>
+                    <Badge variant="outline">Popular</Badge>
+                  </div>
+                </div>
+              ))}
+            {filteredLocations.filter(loc => loc.type === "event").length === 0 && (
+              <div className="text-center text-muted-foreground py-4">
+                <p>No upcoming events</p>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg flex items-center">
+            <Bookmark className="h-5 w-5 text-green-500 mr-2" />
+            Saved Places
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center text-muted-foreground py-4">
+            <p>You haven't saved any places yet</p>
+            <p className="text-sm">Places you save will appear here</p>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

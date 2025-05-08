@@ -2,12 +2,15 @@ import { BusinessHours } from '@/types';
 
 /**
  * Generates random business hours for a location based on location ID
- * @param locationId ID of the location to generate hours for
+ * @param locationOrId ID of the location or location object
  * @returns BusinessHours object with opening and closing times
  */
-export const generateBusinessHours = (locationId: string): BusinessHours => {
+export const generateBusinessHours = (locationOrId: string | any): BusinessHours => {
+  // Get location ID from either a string ID or a location object
+  const locationId = typeof locationOrId === 'string' ? locationOrId : locationOrId.id;
+  
   // Seed the random number generator based on the location ID
-  const seedValue = locationId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const seedValue = locationId.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0);
   let seedCounter = seedValue;
   
   const random = () => {
@@ -44,7 +47,7 @@ export const generateBusinessHours = (locationId: string): BusinessHours => {
   const currentHour = now.getHours();
   const currentMinute = now.getMinutes();
   
-  const isOpen = currentHour > openingHour && currentHour < closingHour || 
+  const isOpen = (currentHour > openingHour && currentHour < closingHour) || 
                 (currentHour === openingHour && currentMinute >= openingMinute) || 
                 (currentHour === closingHour && currentMinute < closingMinute);
   
@@ -61,6 +64,33 @@ export const generateBusinessHours = (locationId: string): BusinessHours => {
 };
 
 /**
+ * Get the hours for today for a venue
+ * @param location Location object or ID to get hours for
+ * @returns String representing today's hours (e.g. "10:00 AM - 9:00 PM")
+ */
+export const getTodaysHours = (location: any): string => {
+  // Ensure we have hours data
+  if (!location.hours) {
+    location.hours = generateBusinessHours(location);
+  }
+  
+  const now = new Date();
+  const dayName = now.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+  
+  // Get hours string for today
+  switch (dayName) {
+    case 'monday': return location.hours.monday;
+    case 'tuesday': return location.hours.tuesday;
+    case 'wednesday': return location.hours.wednesday;
+    case 'thursday': return location.hours.thursday;
+    case 'friday': return location.hours.friday;
+    case 'saturday': return location.hours.saturday;
+    case 'sunday': return location.hours.sunday;
+    default: return "Hours not available";
+  }
+};
+
+/**
  * Check if a venue is currently open
  * @param hours BusinessHours object for the venue
  * @returns Boolean indicating if venue is currently open
@@ -70,7 +100,7 @@ export const isVenueOpen = (hours?: BusinessHours): boolean => {
   
   // Use the pre-calculated isOpen property if available
   if (hours.isOpen !== undefined) {
-    return hours.isOpen;
+    return Boolean(hours.isOpen);
   }
   
   // Otherwise calculate based on current time

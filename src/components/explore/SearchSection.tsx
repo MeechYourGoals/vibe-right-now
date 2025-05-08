@@ -4,10 +4,6 @@ import SearchVibes from "@/components/SearchVibes";
 import { ExploreFilters } from "@/components/explore/ExploreFilters";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DateRange } from "react-day-picker";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { InfoIcon } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface SearchSectionProps {
   searchQuery: string;
@@ -24,8 +20,6 @@ interface SearchSectionProps {
   searchedCity: string;
   searchedState: string;
   isNaturalLanguageSearch: boolean;
-  isAIEnabled?: boolean;
-  setIsAIEnabled?: (enabled: boolean) => void;
 }
 
 const SearchSection: React.FC<SearchSectionProps> = ({
@@ -43,8 +37,6 @@ const SearchSection: React.FC<SearchSectionProps> = ({
   searchedCity,
   searchedState,
   isNaturalLanguageSearch,
-  isAIEnabled = true,
-  setIsAIEnabled = () => {},
 }) => {
   const getPageTitle = () => {
     if (isDetectingLocation) {
@@ -75,28 +67,6 @@ const SearchSection: React.FC<SearchSectionProps> = ({
         vibeFilter={vibeFilter}
         setVibeFilter={setVibeFilter}
       />
-      
-      {/* Add AI personalization toggle */}
-      <div className="flex items-center gap-2 mt-2 text-xs">
-        <Switch 
-          id="ai-personalization" 
-          checked={isAIEnabled}
-          onCheckedChange={setIsAIEnabled}
-        />
-        <Label htmlFor="ai-personalization" className="text-xs cursor-pointer">
-          AI Personalization
-        </Label>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <InfoIcon className="h-3 w-3 text-muted-foreground cursor-help" />
-            </TooltipTrigger>
-            <TooltipContent>
-              Personalizes results based on your preferences
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </div>
       
       <Tabs 
         defaultValue="all" 

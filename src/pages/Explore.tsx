@@ -33,8 +33,6 @@ const Explore = () => {
     dateRange,
     showDateFilter,
     setShowDateFilter,
-    realDataResults,
-    hasRealData,
     isDetectingLocation
   } = useExploreData();
   
@@ -42,9 +40,6 @@ const Explore = () => {
     handleSearch,
     handleTabChange,
     handleDateRangeChange,
-    isAIReady,
-    isAIPersonalized,
-    setIsAIPersonalized
   } = useExploreSearchWithAI(); 
 
   const location = useLocation();
@@ -64,17 +59,6 @@ const Explore = () => {
       setFilteredLocations(mockLocations.slice(0, 12));
     }
   }, [setLocationTags, filteredLocations.length, setFilteredLocations]);
-
-  // Notify when AI is ready for personalization
-  useEffect(() => {
-    if (isAIReady && isAIPersonalized) {
-      toast({
-        title: "AI Personalization Ready",
-        description: "Search results will be customized to your preferences",
-        duration: 4000
-      });
-    }
-  }, [isAIReady, toast, isAIPersonalized]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -96,8 +80,6 @@ const Explore = () => {
           searchedCity={searchedCity}
           searchedState={searchedState}
           isNaturalLanguageSearch={isNaturalLanguageSearch}
-          isAIEnabled={isAIPersonalized}
-          setIsAIEnabled={setIsAIPersonalized}
         />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -112,19 +94,13 @@ const Explore = () => {
               searchedCity={searchedCity}
               dateRange={dateRange}
               locationTags={locationTags}
-              hasRealData={hasRealData}
-              realDataResults={realDataResults}
               isLoadingResults={isLoadingResults}
-              isAIPersonalized={isAIReady && isAIPersonalized}
             />
           </div>
           
           <div className="md:col-span-1">
             <ExploreSidebar
               filteredLocations={filteredLocations}
-              hasRealData={hasRealData}
-              realDataResults={realDataResults}
-              isAIPersonalized={isAIReady && isAIPersonalized}
             />
           </div>
         </div>

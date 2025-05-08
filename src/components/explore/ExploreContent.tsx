@@ -11,7 +11,6 @@ import LocationsGrid from "@/components/explore/LocationsGrid";
 import VenuePost from "@/components/VenuePost";
 import { EventItem } from "@/components/venue/events/types";
 import { getCitySpecificContent, getMediaForLocation } from "@/utils/explore/exploreHelpers";
-import { Sparkles } from "lucide-react";
 
 interface ExploreContentProps {
   activeTab: string;
@@ -23,10 +22,7 @@ interface ExploreContentProps {
   searchedCity: string;
   dateRange: DateRange | undefined;
   locationTags: Record<string, string[]>;
-  hasRealData: boolean;
-  realDataResults: Location[];
   isLoadingResults: boolean;
-  isAIPersonalized?: boolean;
 }
 
 const ExploreContent: React.FC<ExploreContentProps> = ({
@@ -39,10 +35,7 @@ const ExploreContent: React.FC<ExploreContentProps> = ({
   searchedCity,
   dateRange,
   locationTags,
-  hasRealData,
-  realDataResults,
-  isLoadingResults,
-  isAIPersonalized = false,
+  isLoadingResults
 }) => {
   if (isLoadingResults) {
     return (
@@ -119,16 +112,10 @@ const ExploreContent: React.FC<ExploreContentProps> = ({
         <div className="mb-6">
           <h2 className="text-xl font-semibold mb-4">
             {activeTab === "all" ? "Popular Venues" : `Popular ${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}s`}
-            {hasRealData && realDataResults.length > 0 && (
-              <Badge variant="success" className="ml-2">
-                {realDataResults.length} Real Results
-              </Badge>
-            )}
           </h2>
           <LocationsGrid 
             locations={displayLocations} 
             locationTags={locationTags}
-            isRealData={hasRealData && realDataResults.length > 0}
           />
         </div>
       )}
@@ -138,13 +125,6 @@ const ExploreContent: React.FC<ExploreContentProps> = ({
         <div className="text-center py-12">
           <p className="text-muted-foreground">No {activeTab === "all" ? "venues" : activeTab} found for the current search.</p>
           <p className="text-sm">Try adjusting your search criteria or exploring different categories.</p>
-        </div>
-      )}
-      
-      {isAIPersonalized && activeTab === "all" && (
-        <div className="rounded-md bg-primary/5 p-2 text-xs flex items-center gap-2 border border-primary/10">
-          <Sparkles className="h-3 w-3 text-primary" />
-          <span>Results personalized based on your preferences</span>
         </div>
       )}
     </div>
