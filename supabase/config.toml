@@ -1,5 +1,5 @@
 
-project_id = "yiitqkjrbskxumriujrh"
+project_id = "vibe-right-now"
 
 [api]
 enabled = true
@@ -13,20 +13,23 @@ port = 54322
 shadow_port = 54320
 major_version = 15
 
+[db.pooler]
+enabled = false
+port = 54329
+pool_mode = "transaction"
+default_pool_size = 20
+max_client_conn = 100
+
+[realtime]
+enabled = true
+
 [studio]
 enabled = true
 port = 54323
 api_url = "http://localhost"
 
-[inbucket]
-enabled = true
-port = 54324
-smtp_port = 54325
-pop3_port = 54326
-
 [storage]
 enabled = true
-file_size_limit = "50MiB"
 
 [auth]
 enabled = true
@@ -42,12 +45,27 @@ enable_signup = true
 double_confirm_changes = true
 enable_confirmations = false
 
+[auth.sms]
+enable_signup = true
+enable_confirmations = true
+
+[auth.external.github]
+enabled = true
+client_id = "env(GITHUB_CLIENT_ID)"
+secret = "env(GITHUB_SECRET)"
+
+[analytics]
+enabled = false
+
+[ai]
+enabled = false
+
+[experimental]
+pubsub = true
+
 [functions]
-enabled = true
-port = 54328
+serve_port = 54324
+function_port = 54325
 
-[functions.agent-protocol]
+[functions.vertex-ai]
 verify_jwt = false
-
-[realtime]
-enabled = true

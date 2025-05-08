@@ -1,85 +1,98 @@
 
 import React from 'react';
-import { Settings, Building2, User } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { 
+import { Settings, Mic, MicOff, Building, User } from 'lucide-react';
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuLabel
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface ChatSettingsProps {
   isListening: boolean;
+  isVenueMode: boolean;
+  isModelLoading: boolean;
   toggleListening: () => void;
-  isVenueMode?: boolean;
-  toggleVenueMode?: () => void;
-  isModelLoading?: boolean;
+  toggleVenueMode: () => void;
 }
 
 const ChatSettings: React.FC<ChatSettingsProps> = ({
   isListening,
+  isVenueMode,
+  isModelLoading,
   toggleListening,
-  isVenueMode = false,
   toggleVenueMode,
-  isModelLoading = false
 }) => {
   return (
-    <div className="absolute right-3 top-3 z-10">
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="h-6 w-6">
-            <Settings className="h-3.5 w-3.5" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuLabel>Voice Settings</DropdownMenuLabel>
-          <DropdownMenuItem 
-            onClick={toggleListening}
-            disabled={isModelLoading}
-          >
-            {isModelLoading 
-              ? "Loading speech recognition model..." 
-              : isListening 
-                ? "Stop Voice Input" 
-                : "Start Voice Input"
-            }
-          </DropdownMenuItem>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="absolute top-3 right-12 h-8 w-8 text-gray-400 hover:text-white hover:bg-gray-700"
+        >
+          <Settings className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="bg-gray-800 text-white border-gray-700">
+        <DropdownMenuLabel>Assistant Settings</DropdownMenuLabel>
+        <DropdownMenuSeparator className="bg-gray-700" />
+        
+        <div className="p-2">
+          <div className="flex items-center mb-4">
+            <div className="flex-1">
+              <div className="flex items-center">
+                {isVenueMode ? <Building className="mr-2 h-4 w-4" /> : <User className="mr-2 h-4 w-4" />}
+                <span className="text-sm">Mode: {isVenueMode ? 'Venue' : 'User'}</span>
+              </div>
+              <p className="text-xs text-gray-400">
+                {isVenueMode
+                  ? 'Optimized for business insights'
+                  : 'Tailored for personal recommendations'}
+              </p>
+            </div>
+            <Switch
+              checked={isVenueMode}
+              onCheckedChange={toggleVenueMode}
+              className="bg-gray-600 data-[state=checked]:bg-amber-500"
+            />
+          </div>
           
-          {toggleVenueMode && (
-            <>
-              <DropdownMenuSeparator />
-              <DropdownMenuLabel>Mode</DropdownMenuLabel>
-              <DropdownMenuItem>
-                <div className="flex items-center justify-between w-full">
-                  <div className="flex items-center gap-2">
-                    {isVenueMode ? (
-                      <>
-                        <Building2 className="h-4 w-4 mr-1 text-primary" />
-                        <span>Venue Mode</span>
-                      </>
-                    ) : (
-                      <>
-                        <User className="h-4 w-4 mr-1 text-primary" />
-                        <span>User Mode</span>
-                      </>
-                    )}
-                  </div>
-                  <Switch 
-                    checked={isVenueMode}
-                    onCheckedChange={toggleVenueMode}
-                  />
-                </div>
-              </DropdownMenuItem>
-            </>
+          <div className="flex items-center">
+            <div className="flex-1">
+              <div className="flex items-center">
+                {isListening ? <MicOff className="mr-2 h-4 w-4" /> : <Mic className="mr-2 h-4 w-4" />}
+                <span className="text-sm">Voice Activation</span>
+              </div>
+              <p className="text-xs text-gray-400">
+                {isListening ? 'Turn off microphone' : 'Turn on microphone'}
+              </p>
+            </div>
+            <Switch
+              checked={isListening}
+              onCheckedChange={toggleListening}
+              className="bg-gray-600 data-[state=checked]:bg-red-500"
+            />
+          </div>
+          
+          {isModelLoading && (
+            <div className="mt-4 p-2 bg-gray-700 rounded text-xs text-center">
+              Loading AI model components...
+            </div>
           )}
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
+        </div>
+        
+        <DropdownMenuSeparator className="bg-gray-700" />
+        <DropdownMenuItem className="text-xs text-center justify-center text-gray-400">
+          Powered by Gemini
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
 

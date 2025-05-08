@@ -1,54 +1,79 @@
 
 /**
- * Service for text-to-speech using Coqui TTS
+ * Service for text-to-speech using Coqui TTS (fallback to Web Speech API)
  */
 export class CoquiTTSService {
-  private static serverUrl: string = 'http://localhost:5002';
-  private static isAvailable: boolean = false;
+  private static available = false;
+  private static initialized = false;
 
   /**
-   * Configure the Coqui TTS service
-   * @param serverUrl The URL of the Coqui TTS server
-   */
-  static configure(serverUrl: string): void {
-    this.serverUrl = serverUrl;
-    console.log('Coqui TTS configured with server:', serverUrl);
-  }
-
-  /**
-   * Initialize and check if the Coqui TTS service is available
-   * @returns True if the service is available, false otherwise
+   * Initialize the Coqui TTS service
+   * @returns Whether the service is available
    */
   static async init(): Promise<boolean> {
+    if (this.initialized) {
+      return this.available;
+    }
+    
     try {
-      // For now, we'll simulate a successful connection
-      // In a real implementation, we would check if the server is reachable
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
-      this.isAvailable = true;
-      return true;
+      // Check if Web Speech API is available for fallback
+      if ('speechSynthesis' in window) {
+        console.log('Web Speech API available for fallback TTS');
+        this.initialized = true;
+        return true;
+      } else {
+        console.warn('Web Speech API not available for fallback TTS');
+        this.initialized = true;
+        this.available = false;
+        return false;
+      }
     } catch (error) {
-      console.error('Error initializing Coqui TTS:', error);
-      this.isAvailable = false;
+      console.error('Error initializing Coqui TTS service:', error);
+      this.initialized = true;
+      this.available = false;
       return false;
     }
   }
 
   /**
-   * Convert text to speech using Coqui TTS
-   * @param text The text to convert to speech
-   * @returns The audio data as a base64 string
+   * Convert text to speech
+   * @param text Text to convert to speech
+   * @param options Options for text-to-speech
+   * @returns Audio data as base64 string
    */
-  static async textToSpeech(text: string): Promise<string> {
-    if (!this.isAvailable) {
-      throw new Error('Coqui TTS service is not available');
+  static async textToSpeech(
+    text: string,
+    options: { voice?: string; rate?: number; pitch?: number } = {}
+  ): Promise<string> {
+    await this.init();
+    
+    try {
+      // Fall back to Web Speech API
+      if ('speechSynthesis' in window) {
+        return new Promise((resolve, reject) => {
+          const utterance = new SpeechSynthesisUtterance(text);
+          
+          // Set options if provided
+          if (options.voice) {
+            const voices = window.speechSynthesis.getVoices();
+            const voice = voices.find(v => v.name === options.voice);
+            if (voice) utterance.voice = voice;
+          }
+          
+          if (options.rate) utterance.rate = options.rate;
+          if (options.pitch) utterance.pitch = options.pitch;
+          
+          utterance.onend = () => resolve('speech-completed');
+          utterance.onerror = (event) => reject(new Error(`Speech synthesis error: ${event.error}`));
+          
+          window.speechSynthesis.speak(utterance);
+        });
+      }
+      
+      throw new Error('No text-to-speech service available');
+    } catch (error) {
+      console.error('Error in Coqui TTS service:', error);
+      throw error;
     }
-
-    // Since we don't have a real Coqui TTS server,
-    // we'll delegate to OpenAI's TTS service
-    return OpenAIService.textToSpeech(text);
   }
 }
-
-// Import OpenAIService for API calls
-import { OpenAIService } from './OpenAIService';

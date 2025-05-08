@@ -2,13 +2,12 @@
 import { supabase } from '@/integrations/supabase/client';
 
 /**
- * Service for interacting with Google Vertex AI API
+ * Service for interacting with Google Vertex AI API via Supabase Edge Functions
  */
 export class VertexAIService {
-  // Text-to-speech voice configuration
-  static DEFAULT_MALE_VOICE = "en-US-Neural2-D";
-  static DEFAULT_FEMALE_VOICE = "en-US-Neural2-F";
-
+  // Default settings
+  private static API_KEY = "AIzaSyBeEJvxSAjyvoRS6supoob0F7jGW7lhZUU";
+  
   /**
    * Generate a response using Vertex AI API
    * @param prompt The prompt to send to the model
@@ -21,27 +20,31 @@ export class VertexAIService {
     mode: 'default' | 'search' | 'venue' = 'default', 
     context: any[] = []
   ): Promise<string> {
-    // For now, we'll delegate to OpenAI since that's what we have configured
     try {
-      // Convert context to the format expected by OpenAI
-      const messages = context.map(msg => ({
-        role: msg.sender === 'user' ? 'user' : 'assistant',
-        content: msg.text
-      }));
+      console.log(`Generating Vertex AI response with mode: ${mode}`);
       
-      // Add the new prompt
-      messages.push({
-        role: 'user',
-        content: prompt
+      const { data, error } = await supabase.functions.invoke('vertex-ai', {
+        body: { 
+          prompt,
+          mode,
+          context,
+          model: 'gemini-pro'
+        }
       });
       
-      // Determine the context based on mode
-      const chatContext = mode === 'venue' ? 'venue' : 'user';
+      if (error) {
+        console.error('Error calling Vertex AI function:', error);
+        throw new Error(`Failed to generate response: ${error.message}`);
+      }
       
-      return await OpenAIService.sendChatRequest(messages, { context: chatContext });
+      if (!data || !data.text) {
+        throw new Error('No response received from Vertex AI');
+      }
+      
+      return data.text;
     } catch (error) {
       console.error('Error generating response with Vertex AI:', error);
-      throw error;
+      return "I'm having trouble connecting to my AI services right now. Please try again later.";
     }
   }
 
@@ -61,8 +64,7 @@ export class VertexAIService {
         console.log('With categories:', categories);
       }
       
-      // Since we're using OpenAI as our backend, delegate the search
-      const enhancedPrompt = `
+      const searchPrompt = `
         Please provide real information about "${query}".
         ${categories && categories.length > 0 ? `Focusing on these categories: ${categories.join(', ')}` : ''}
         Include:
@@ -74,17 +76,7 @@ export class VertexAIService {
         Format your response in a clear, readable way.
       `;
       
-      // Convert to OpenAI format
-      return await OpenAIService.sendChatRequest([
-        {
-          role: 'system',
-          content: 'You are a helpful assistant that provides accurate information about places, events, and things to do.'
-        },
-        {
-          role: 'user',
-          content: enhancedPrompt
-        }
-      ]);
+      return await this.generateResponse(searchPrompt, 'search');
     } catch (error) {
       console.error('Error in Vertex AI search:', error);
       return `I couldn't find specific information about "${query}". Please try a different search.`;
@@ -101,10 +93,28 @@ export class VertexAIService {
     text: string, 
     options: { voice?: string; speakingRate?: number; pitch?: number } = {}
   ): Promise<string> {
-    // For now, we'll delegate to OpenAI since that's what we have configured
-    return OpenAIService.textToSpeech(text);
+    try {
+      const { data, error } = await supabase.functions.invoke('vertex-ai', {
+        body: { 
+          action: 'text-to-speech',
+          text,
+          options
+        }
+      });
+      
+      if (error) {
+        console.error('Error calling Vertex AI TTS function:', error);
+        throw new Error(`Failed to convert text to speech: ${error.message}`);
+      }
+      
+      if (!data || !data.audio) {
+        throw new Error('No audio data received from Vertex AI');
+      }
+      
+      return data.audio;
+    } catch (error) {
+      console.error('Error in Vertex AI text-to-speech:', error);
+      throw error;
+    }
   }
 }
-
-// Import OpenAIService for fallback
-import { OpenAIService } from './OpenAIService';

@@ -1,10 +1,10 @@
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Message } from '../types';
 import { toast } from 'sonner';
 import { useSpeechSynthesis } from './useSpeechSynthesis';
 import { useSpeechRecognition } from './speechRecognition';
-import { OpenAIService } from '@/services/OpenAIService';
+import { VertexAIService } from '@/services/VertexAIService';
 import { SearchService } from '@/services/search/SearchService';
 
 // Create a welcome message based on the mode
@@ -20,7 +20,6 @@ const getWelcomeMessage = (isVenueMode: boolean): Message => ({
 export const useElevenLabsConversation = (isVenueMode: boolean = false) => {
   const [isConnected, setIsConnected] = useState(false);
   const [messages, setMessages] = useState<Message[]>([getWelcomeMessage(isVenueMode)]);
-  const [previousMessages, setPreviousMessages] = useState<Message[]>([]);
   
   // Use our speech synthesis hook
   const { isSpeaking, speakResponse, stopSpeaking } = useSpeechSynthesis();
@@ -97,22 +96,14 @@ export const useElevenLabsConversation = (isVenueMode: boolean = false) => {
         setMessages(prev => [...prev, aiMessage]);
         return aiMessage.text;
       } else {
-        // Format messages for OpenAI API
-        const chatMessages = messages.slice(-6).map(msg => ({
-          role: msg.sender === 'user' ? 'user' : 'assistant',
-          content: msg.text
-        }));
+        // Format messages for Vertex AI
+        const contextMessages = messages.slice(-6);
         
-        // Add user message
-        chatMessages.push({
-          role: 'user',
-          content: voiceText
-        });
-        
-        // Get response from OpenAI
-        const aiResponse = await OpenAIService.sendChatRequest(
-          chatMessages,
-          { context: isVenueMode ? 'venue' : 'user' }
+        // Generate response from Vertex AI
+        const aiResponse = await VertexAIService.generateResponse(
+          voiceText,
+          isVenueMode ? 'venue' : 'default',
+          contextMessages
         );
         
         const aiMessage: Message = {
@@ -170,22 +161,14 @@ export const useElevenLabsConversation = (isVenueMode: boolean = false) => {
         setMessages(prev => [...prev, aiMessage]);
         speakResponse(aiMessage.text);
       } else {
-        // Format messages for OpenAI API
-        const chatMessages = messages.slice(-6).map(msg => ({
-          role: msg.sender === 'user' ? 'user' : 'assistant',
-          content: msg.text
-        }));
+        // Format messages for Vertex AI
+        const contextMessages = messages.slice(-6);
         
-        // Add user message
-        chatMessages.push({
-          role: 'user',
-          content: text
-        });
-        
-        // Get response from OpenAI
-        const aiResponse = await OpenAIService.sendChatRequest(
-          chatMessages,
-          { context: isVenueMode ? 'venue' : 'user' }
+        // Generate response from Vertex AI
+        const aiResponse = await VertexAIService.generateResponse(
+          text,
+          isVenueMode ? 'venue' : 'default',
+          contextMessages
         );
         
         const aiMessage: Message = {

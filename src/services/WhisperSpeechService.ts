@@ -1,4 +1,3 @@
-
 // Speech recognition service using OpenAI's Whisper API
 export class WhisperSpeechService {
   private static isInitialized = false;

@@ -17,7 +17,7 @@ export const generateVenueInsights = (): VenueInsights => {
     postsChange: Number((Math.random() * 20 - 5).toFixed(1)),
     likesChange: Number((Math.random() * 25 - 10).toFixed(1)),
     engagement: Number((Math.random() * 10 + 2).toFixed(1)),
-    followerGrowth: Number((Math.random() * 15 - 5).toFixed(1)),
+    // Remove followerGrowth as it doesn't exist in VenueInsights type
     clickThroughRate: Number((Math.random() * 5 + 1).toFixed(1)),
     totalVisits: Math.floor(Math.random() * 15000) + 1000,
     revenueImpact: `$${Math.floor(Math.random() * 10000) + 1000}`,
@@ -45,7 +45,7 @@ export const currentInsights: VenueInsights = {
   postsChange: Number((Math.random() * 15 - 5).toFixed(1)),
   likesChange: Number((Math.random() * 15 - 5).toFixed(1)),
   engagement: Number((Math.random() * 10 + 2).toFixed(1)),
-  followerGrowth: Number((Math.random() * 15 - 5).toFixed(1)),
+  // Remove followerGrowth as it doesn't exist in VenueInsights type
   clickThroughRate: Number((Math.random() * 5 + 1).toFixed(1)),
   totalVisits: Math.floor(Math.random() * 15000) + 1000,
   revenueImpact: `$${Math.floor(Math.random() * 10000) + 1000}`,

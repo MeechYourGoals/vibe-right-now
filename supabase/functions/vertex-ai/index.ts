@@ -1,50 +1,13 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-
-const GOOGLE_VERTEX_API_KEY = Deno.env.get('GOOGLE_VERTEX_API_KEY');
-const VERTEX_API_URL = "https://us-central1-aiplatform.googleapis.com/v1/projects/PROJECT_ID/locations/us-central1/publishers/google/models/gemini-1.5-pro:generateContent";
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// System prompts that define the chatbot's personality and behavior
-const SYSTEM_PROMPTS = {
-  default: `You are a helpful and friendly AI assistant within the 'Lovable' app. Your primary goal is to help users discover great places to go and things to do based on their requests.
-  
-  Respond in a concise, informative, and enthusiastic tone. Be friendly, approachable, and helpful. Offer creative and interesting suggestions.
-  
-  Maintain a conversational style that is engaging and encourages users to explore. Avoid being overly verbose. Get straight to the point while still being helpful.
-  
-  When providing suggestions, briefly explain why you are recommending them based on potential user interests.
-  
-  If the user asks for something specific that isn't readily available, acknowledge it and offer alternative suggestions or ways to find more information within the app.
-  
-  Do not express personal opinions or beliefs. Focus solely on providing information relevant to places and activities. If a user's request is unclear, ask clarifying questions.`,
-  
-  venue: `You are a knowledgeable business assistant within the 'Lovable' platform. Your primary goal is to help venue owners understand their business metrics, customer trends, and marketing performance.
-  
-  Provide data-driven insights and actionable recommendations based on the information available. Be concise, professional, and helpful.
-  
-  When analyzing business data, focus on identifying trends, opportunities, and potential areas for improvement. Support your insights with specific metrics when available.
-  
-  If the venue owner asks for something specific that isn't readily available, acknowledge it and suggest alternative approaches or metrics they might consider.
-  
-  Maintain a professional but friendly tone that builds confidence. Avoid being overly technical unless the user demonstrates expertise in the subject.`,
-  
-  search: `You are an AI discovery expert for the 'Lovable' social platform. Your job is to provide factual, accurate information about places and venues.
-  
-  Always include real venue names, addresses, and other specific details when possible. Format your responses with markdown, including headers and bulleted lists.
-  
-  Present information for venues in a structured format including address, hours, price range, contact information, and other relevant details.
-  
-  For events, include date and time, location, ticket prices, and how to purchase tickets if applicable.
-  
-  Only provide information you're confident is factual. If you don't know something, clearly state that you don't have that specific information.
-  
-  Be concise but thorough. Users are looking for helpful recommendations they can act on immediately.`
-};
+const VERTEX_AI_API_KEY = Deno.env.get('GOOGLE_VERTEX_API_KEY') || "AIzaSyBeEJvxSAjyvoRS6supoob0F7jGW7lhZUU";
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -53,135 +16,99 @@ serve(async (req) => {
   }
 
   try {
-    console.log("Starting Vertex AI function execution");
+    const { prompt, mode = 'default', context = [], model = 'gemini-pro', action, text, options } = await req.json();
     
-    // Parse request body
-    const requestData = await req.json();
-    const { prompt, mode, history, searchMode, categories } = requestData;
-    
-    console.log("Request parameters:", { 
-      prompt: prompt?.substring(0, 50) + "...", 
-      mode, 
-      historyLength: history?.length || 0,
-      searchMode, 
-      categoriesCount: categories?.length || 0 
-    });
-    
-    // Build conversation history in Vertex AI format
-    const contents = [];
-    
-    // Select the appropriate system prompt based on mode
-    const systemPrompt = mode === 'venue' 
-      ? SYSTEM_PROMPTS.venue 
-      : (searchMode ? SYSTEM_PROMPTS.search : SYSTEM_PROMPTS.default);
-    
-    // Add system prompt
-    contents.push({
-      role: "USER",
-      parts: [{ text: systemPrompt }]
-    });
-    
-    // Add model acknowledgment of the system prompt
-    contents.push({
-      role: "MODEL",
-      parts: [{ text: "I understand my role and will assist accordingly." }]
-    });
-    
-    // Add conversation history for regular chat mode
-    if (history && history.length > 0 && !searchMode) {
-      for (const message of history) {
-        contents.push({
-          role: message.sender === 'user' ? "USER" : "MODEL",
-          parts: [{ text: message.text }]
+    // Handle text-to-speech requests
+    if (action === 'text-to-speech' && text) {
+      // For now, we'll return a dummy response since Vertex AI TTS requires more setup
+      console.log('Text-to-speech request for:', text.substring(0, 30) + '...');
+      return new Response(JSON.stringify({ audio: 'dummy-base64-audio-data' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Handle chat completion requests
+    if (prompt) {
+      console.log(`Processing ${model} request in ${mode} mode`);
+      
+      // Define system context based on mode
+      let systemPrompt = '';
+      if (mode === 'venue') {
+        systemPrompt = "You are Vernon, a venue analytics assistant. Provide insightful business analysis and recommendations for venue owners.";
+      } else if (mode === 'search') {
+        systemPrompt = "You are a search assistant that provides detailed information about places, events, and activities.";
+      } else {
+        systemPrompt = `You are Vernon, a helpful AI assistant within the 'Vibe Right Now' app. Your primary goal is to help users discover great places to go and things to do. 
+        
+You are knowledgeable about venues, events, restaurants, bars, attractions, and activities. You should always prioritize giving detailed information about events, venues, and activities that are relevant to the user's query. If asked about comedy shows in Chicago, list all the comedy clubs, venues, and stand-up comedians performing in theaters.
+
+If you need more information to provide a helpful response, ask clarifying questions like the specific dates they're interested in or what neighborhood they prefer.
+
+Respond in a concise, informative, and enthusiastic tone. Be friendly, approachable, and helpful. Never mention that you're powered by any specific AI model.`;
+      }
+      
+      // Prepare the messages for Gemini
+      let messages = [];
+      if (context && context.length > 0) {
+        // Convert the context messages to the format expected by Gemini
+        messages = context.map(msg => ({
+          role: msg.sender === 'user' ? 'user' : 'model',
+          parts: [{ text: msg.text }]
+        }));
+      }
+      
+      // Add system prompt as a "model" message at the beginning if not already included
+      if (messages.length === 0 || messages[0].role !== 'model' || !messages[0].parts[0].text.includes(systemPrompt)) {
+        messages.unshift({
+          role: 'model',
+          parts: [{ text: systemPrompt }]
         });
       }
-    }
-    
-    // Add the current prompt
-    // For search mode, add extra context
-    if (searchMode) {
-      let enhancedPrompt = prompt;
       
-      // Incorporate categories if available
-      if (categories && categories.length > 0) {
-        const categoryContext = categories.join(', ');
-        enhancedPrompt = `${prompt} (Categories: ${categoryContext})`;
-      }
-      
-      contents.push({
-        role: "USER",
-        parts: [{ text: `Search for real factual information about: "${enhancedPrompt}". Include real venue names, addresses, opening hours, and other specific details.` }]
-      });
-    } else {
-      contents.push({
-        role: "USER",
+      // Add the new user message
+      messages.push({
+        role: 'user',
         parts: [{ text: prompt }]
       });
+      
+      // Call Gemini API
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${VERTEX_AI_API_KEY}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: messages,
+          generationConfig: {
+            temperature: 0.7,
+            topK: 40,
+            topP: 0.95,
+            maxOutputTokens: 1024,
+          }
+        }),
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Vertex AI API error:', errorText);
+        throw new Error(`Vertex AI API error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      const generatedText = data.candidates[0]?.content?.parts[0]?.text || '';
+      
+      console.log('Generated response successfully');
+      return new Response(JSON.stringify({ text: generatedText }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    } else {
+      throw new Error('Invalid request: missing prompt or action');
     }
-    
-    console.log("Preparing to call Vertex AI API with URL:", VERTEX_API_URL);
-    console.log("Contents length:", contents.length);
-    
-    if (!GOOGLE_VERTEX_API_KEY) {
-      throw new Error("GOOGLE_VERTEX_API_KEY environment variable is not set");
-    }
-    
-    // Call the Vertex AI API
-    const response = await fetch(`${VERTEX_API_URL}?key=${GOOGLE_VERTEX_API_KEY}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        contents: contents,
-        generationConfig: {
-          temperature: searchMode ? 0.1 : 0.7, // Lower temperature for factual search queries
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: 2048,
-        }
-      })
-    });
-
-    console.log("Vertex AI API response status:", response.status);
-
-    if (!response.ok) {
-      const errorData = await response.text();
-      console.error(`Vertex AI API error: ${response.status}`, errorData);
-      return new Response(
-        JSON.stringify({ error: `Error calling Vertex AI API: ${response.status}` }),
-        { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    const data = await response.json();
-    console.log("Vertex AI API response received");
-    
-    // Extract the response text
-    const responseText = data.candidates[0].content.parts[0].text;
-    
-    // Add hyperlinks to the Explore page for any locations or events mentioned
-    const enhancedResponse = addExplorePageLinks(responseText, prompt);
-    
-    return new Response(
-      JSON.stringify({ text: enhancedResponse }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
   } catch (error) {
     console.error('Error in vertex-ai function:', error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
 });
-
-/**
- * Add hyperlinks to the Explore page for locations/events mentioned in the text
- */
-function addExplorePageLinks(text: string, originalQuery: string): string {
-  // Add a link to explore all results at the bottom
-  const exploreAllLink = `\n\n---\n\n**[Explore all results on the map](/explore?q=${encodeURIComponent(originalQuery)})**`;
-  
-  return text + exploreAllLink;
-}

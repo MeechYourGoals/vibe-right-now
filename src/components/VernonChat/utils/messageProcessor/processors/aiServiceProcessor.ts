@@ -1,7 +1,6 @@
 
 import { MessageContext, MessageProcessor } from '../types';
 import { Message } from '../../../types';
-import { OpenAIService } from '@/services/OpenAIService';
 import { VertexAIService } from '@/services/VertexAIService';
 import { createAIMessage } from '../../messageFactory';
 
@@ -16,45 +15,22 @@ export class AIServiceProcessor implements MessageProcessor {
     setMessages: React.Dispatch<React.SetStateAction<Message[]>>
   ): Promise<boolean> {
     try {
-      // Convert contextMessages to format expected by OpenAI
+      // Convert contextMessages to format expected by Vertex AI
       const contextMessages = context.messages.slice(-10);
-      const openAIMessages = contextMessages.map(msg => ({
-        role: msg.sender === 'user' ? 'user' : 'assistant',
-        content: msg.text
-      }));
       
-      // Add the new user message
-      openAIMessages.push({
-        role: 'user',
-        content: context.query
-      });
-      
+      // Generate response using VertexAIService
       let responseText = '';
       
-      if (context.options.isVenueMode) {
-        // For venue mode, use higher quality model for business insights
-        try {
-          responseText = await OpenAIService.sendChatRequest(openAIMessages, {
-            model: 'gpt-4o',
-            context: 'venue'
-          });
-        } catch (error) {
-          console.error('Error with OpenAI for venue mode:', error);
-          // Fall back to Vertex AI
-          responseText = await VertexAIService.generateResponse(context.query, 'venue', contextMessages);
-        }
-      } else {
-        // For conversational queries, use standard model
-        try {
-          responseText = await OpenAIService.sendChatRequest(openAIMessages, {
-            model: 'gpt-4o-mini',
-            context: 'user'
-          });
-        } catch (error) {
-          console.error('Error with OpenAI for conversational mode:', error);
-          // Fall back to Vertex AI
-          responseText = await VertexAIService.generateResponse(context.query, 'default', contextMessages);
-        }
+      try {
+        responseText = await VertexAIService.generateResponse(
+          context.query, 
+          context.options.isVenueMode ? 'venue' : 'default',
+          contextMessages
+        );
+        console.log('Got response from Vertex AI:', responseText.substring(0, 50) + '...');
+      } catch (error) {
+        console.error('Error with Vertex AI:', error);
+        responseText = "I'm having trouble connecting to my AI services right now. Please try again later.";
       }
       
       // Create and add the AI message with the response
