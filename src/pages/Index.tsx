@@ -2,15 +2,10 @@
 import { useState } from "react";
 import { Layout } from "@/components/Layout";
 import PostFeed from "@/components/PostFeed";
-import RecommendedForYou from "@/components/RecommendedForYou";
-import TrendingLocations from "@/components/TrendingLocations";
-import DiscountLocations from "@/components/DiscountLocations";
 import CameraButton from "@/components/CameraButton";
 import VernonNext from "@/components/VernonNext";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 const Index = () => {
-  const isMobile = useIsMobile();
   const featuredUsers = ['sarah_vibes', 'jay_experiences', 'adventure_alex', 'marco_travels', 'local_explorer'];
 
   return (
@@ -25,30 +20,11 @@ const Index = () => {
               </h1>
             </div>
 
-            {/* Posts feed and sidebar layout */}
-            <div className="flex flex-col md:flex-row gap-6">
-              <div className="w-full md:w-3/4">
-                <PostFeed celebrityFeatured={featuredUsers} />
-              </div>
-              
-              {!isMobile && (
-                <div className="w-full md:w-1/4 space-y-6">
-                  <RecommendedForYou featuredLocations={["5", "7", "10", "13", "20"]} />
-                  <TrendingLocations />
-                  <DiscountLocations />
-                </div>
-              )}
+            {/* Posts feed layout */}
+            <div className="w-full">
+              <PostFeed celebrityFeatured={featuredUsers} />
             </div>
           </div>
-          
-          {isMobile && (
-            <div className="mt-8 space-y-6">
-              <h2 className="text-xl font-bold mb-4 vibe-gradient-text">Around You</h2>
-              <RecommendedForYou featuredLocations={["5", "7", "10", "13", "20"]} />
-              <TrendingLocations />
-              <DiscountLocations />
-            </div>
-          )}
         </div>
       </main>
       

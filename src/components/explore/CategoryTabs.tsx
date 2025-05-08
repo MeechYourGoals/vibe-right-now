@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Music, Mic, Moon } from "lucide-react";
+import { Music, Mic, Moon, Calendar } from "lucide-react";
 
 interface CategoryTabsProps {
   activeTab: string;
@@ -10,8 +10,8 @@ interface CategoryTabsProps {
 
 const CategoryTabs: React.FC<CategoryTabsProps> = ({ activeTab, onTabChange }) => {
   return (
-    <Tabs defaultValue="all" value={activeTab} onValueChange={onTabChange} className="max-w-2xl mx-auto">
-      <TabsList className="grid grid-cols-2 md:grid-cols-10">
+    <Tabs defaultValue="all" value={activeTab} onValueChange={onTabChange} className="max-w-4xl mx-auto">
+      <TabsList className="grid grid-cols-2 md:grid-cols-5 lg:grid-cols-10">
         <TabsTrigger value="all">All</TabsTrigger>
         <TabsTrigger value="restaurant">Restaurants</TabsTrigger>
         <TabsTrigger value="bar">Bars</TabsTrigger>

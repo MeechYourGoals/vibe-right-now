@@ -15,7 +15,6 @@ interface SearchSectionProps {
   dateRange: DateRange | undefined;
   onSearchTabChange: (value: string) => void;
   onSearch: (query: string, filterType: string, category: string) => void;
-  onToggleDateFilter: () => void;
   onDateRangeChange: (range: DateRange | undefined) => void;
   onClearDates: () => void;
 }
@@ -26,7 +25,6 @@ const SearchSection: React.FC<SearchSectionProps> = ({
   dateRange,
   onSearchTabChange,
   onSearch,
-  onToggleDateFilter,
   onDateRangeChange,
   onClearDates
 }) => {
@@ -38,7 +36,7 @@ const SearchSection: React.FC<SearchSectionProps> = ({
           <TabsTrigger value="places">Places</TabsTrigger>
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="vibes">Vibes</TabsTrigger>
-          <TabsTrigger value="dates" onClick={onToggleDateFilter}>
+          <TabsTrigger value="dates">
             <Calendar className="h-4 w-4 mr-2" />
             Dates
           </TabsTrigger>

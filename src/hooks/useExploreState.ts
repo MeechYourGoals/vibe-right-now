@@ -81,8 +81,8 @@ export const useExploreState = () => {
         setSearchedCity(city);
         setSearchedState(state);
         
-        setMusicEvents(generateMusicEvents(city, state, dateRange));
-        setComedyEvents(generateComedyEvents(city, state, dateRange));
+        setMusicEvents(generateMusicEvents(city, state));
+        setComedyEvents(generateComedyEvents(city, state));
         setNightlifeVenues(generateLocalNightlifeVenues(city, state));
       }
       
@@ -90,9 +90,9 @@ export const useExploreState = () => {
     } else {
       setSearchedCity("San Francisco");
       setSearchedState("CA");
-      setMusicEvents(generateMusicEvents("San Francisco", "CA", dateRange));
-      setComedyEvents(generateComedyEvents("San Francisco", "CA", dateRange));
-      setNightlifeVenues(generateLocalNightlifeVenues("San Francisco", "CA", dateRange));
+      setMusicEvents(generateMusicEvents("San Francisco", "CA"));
+      setComedyEvents(generateComedyEvents("San Francisco", "CA"));
+      setNightlifeVenues(generateLocalNightlifeVenues("San Francisco", "CA"));
     }
     
     if (tab) {
@@ -133,14 +133,14 @@ export const useExploreState = () => {
   // Update events when city or date range changes
   useEffect(() => {
     if (searchedCity) {
-      setMusicEvents(generateMusicEvents(searchedCity, searchedState, dateRange));
-      setComedyEvents(generateComedyEvents(searchedCity, searchedState, dateRange));
+      setMusicEvents(generateMusicEvents(searchedCity, searchedState));
+      setComedyEvents(generateComedyEvents(searchedCity, searchedState));
       setNightlifeVenues(generateLocalNightlifeVenues(searchedCity, searchedState));
     } else if (!musicEvents.length || !comedyEvents.length || !nightlifeVenues.length) {
       const defaultCity = "San Francisco";
       const defaultState = "CA";
-      setMusicEvents(generateMusicEvents(defaultCity, defaultState, dateRange));
-      setComedyEvents(generateComedyEvents(defaultCity, defaultState, dateRange));
+      setMusicEvents(generateMusicEvents(defaultCity, defaultState));
+      setComedyEvents(generateComedyEvents(defaultCity, defaultState));
       setNightlifeVenues(generateLocalNightlifeVenues(defaultCity, defaultState));
     }
   }, [dateRange, searchedCity, searchedState]);
@@ -150,9 +150,7 @@ export const useExploreState = () => {
     try {
       setIsLoadingResults(true);
       toast({
-        title: "Processing Complex Search",
-        description: "Finding venues and events that match all your criteria...",
-        duration: 3000,
+        description: "Finding venues and events that match all your criteria..."
       });
       
       const { data, error } = await supabase.functions.invoke('vector-search', {
@@ -188,8 +186,8 @@ export const useExploreState = () => {
               console.error('Error loading comedy events:', e);
             }
           } else {
-            setMusicEvents(generateMusicEvents(city, state, dateRange));
-            setComedyEvents(generateComedyEvents(city, state, dateRange));
+            setMusicEvents(generateMusicEvents(city, state));
+            setComedyEvents(generateComedyEvents(city, state));
           }
           
           setNightlifeVenues(generateLocalNightlifeVenues(city, state));
@@ -241,9 +239,7 @@ export const useExploreState = () => {
       }
       
       toast({
-        title: "Search Results Ready",
-        description: "We've found venues and events matching your criteria",
-        duration: 3000,
+        description: "We've found venues and events matching your criteria"
       });
     } catch (e) {
       console.error('Error processing complex query:', e);
@@ -300,8 +296,8 @@ export const useExploreState = () => {
       setSearchedCity(city);
       setSearchedState(state);
       
-      setMusicEvents(generateMusicEvents(city, state, dateRange));
-      setComedyEvents(generateComedyEvents(city, state, dateRange));
+      setMusicEvents(generateMusicEvents(city, state));
+      setComedyEvents(generateComedyEvents(city, state));
       setNightlifeVenues(generateLocalNightlifeVenues(city, state));
     } else {
       setSearchedCity("");
@@ -416,6 +412,11 @@ export const useExploreState = () => {
   // Handle search tab change
   const handleSearchTabChange = (value: string) => {
     setActiveSearchTab(value);
+    if (value === 'dates') {
+      setShowDateFilter(true);
+    } else {
+      setShowDateFilter(false);
+    }
   };
   
   // Handle date range change
@@ -446,9 +447,7 @@ export const useExploreState = () => {
     navigate(`/explore?${searchParams.toString()}`, { replace: true });
     
     toast({
-      title: "Date filter cleared",
-      description: "Showing events for all upcoming dates",
-      duration: 3000,
+      description: "Showing events for all upcoming dates"
     });
   };
   
