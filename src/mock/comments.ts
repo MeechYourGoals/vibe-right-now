@@ -1,5 +1,6 @@
+
 import { Comment } from "@/types";
-import { mockUsers } from "./users";
+import { mockUsers } from "@/mock/users";
 import { getRecentTime } from "./time-utils";
 
 export const mockComments: Comment[] = [

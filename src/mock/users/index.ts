@@ -1,6 +1,7 @@
 
 import { regularUsers } from "./regularUsers";
 import { celebrityUsers } from "./celebrityUsers";
+import { hashString, generateUserBio } from "./utils";
 
 // Define the MockUserProfile type directly here if missing from @/types
 export interface MockUserProfile {
@@ -23,4 +24,7 @@ export const getMockUserProfile = (type: 'regular' | 'celebrity' | 'venue'): Moc
   };
 };
 
-export { regularUsers, celebrityUsers };
+// Create a combined mockUsers array
+export const mockUsers = [...regularUsers, ...celebrityUsers];
+
+export { regularUsers, celebrityUsers, hashString, generateUserBio };
