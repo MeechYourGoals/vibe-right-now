@@ -1,17 +1,16 @@
 
-import { User } from "@/types";
+import { MockUserProfile } from "@/types";
 import { regularUsers } from "./regularUsers";
 import { celebrityUsers } from "./celebrityUsers";
-import { generateUserBio, hashString, getFeaturedUsers } from "./utils";
 
-// Combine all users for backward compatibility
-export const mockUsers: User[] = [...regularUsers, ...celebrityUsers];
-
-// Export everything from the users module
-export {
-  regularUsers,
-  celebrityUsers,
-  generateUserBio,
-  hashString,
-  getFeaturedUsers
+// Mock user profile utility
+export const getMockUserProfile = (type: 'regular' | 'celebrity' | 'venue'): MockUserProfile => {
+  const collection = type === 'celebrity' ? celebrityUsers : regularUsers;
+  const randomIndex = Math.floor(Math.random() * collection.length);
+  return {
+    ...collection[randomIndex],
+    type: type
+  };
 };
+
+export { regularUsers, celebrityUsers };
