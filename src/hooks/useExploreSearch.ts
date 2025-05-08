@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { DateRange } from "react-day-picker";
@@ -10,6 +9,7 @@ import { Location } from "@/types";
 import { generateLocalNightlifeVenues } from "@/utils/locations/venueHelpers";
 import { getAdditionalTags } from "@/utils/explore/exploreHelpers";
 import { generateRandomVibes } from "@/utils/explore/vibeUtils";
+import { useToast } from "@/components/ui/use-toast";
 
 export const useExploreSearch = () => {
   const {

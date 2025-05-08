@@ -9,7 +9,7 @@ export const searchLocations = async (
   maxResults: number = 10
 ): Promise<any> => {
   // Generate mock locations for the city in the query
-  const mockLocations = generateMockLocationsForCity(query);
+  const mockLocations = generateMockLocationsForCity(query, "");
   
   // Filter by category if specified
   const filteredLocations = category 

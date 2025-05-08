@@ -56,7 +56,7 @@ const SearchSection: React.FC<SearchSectionProps> = ({
       </h1>
       
       <div className="max-w-xl mx-auto mb-6">
-        <SearchVibes onSearch={handleSearch} />
+        <SearchVibes onSearch={(query) => handleSearch(query, activeTab, "places")} />
       </div>
       
       <ExploreFilters
@@ -69,7 +69,6 @@ const SearchSection: React.FC<SearchSectionProps> = ({
       />
       
       <Tabs 
-        defaultValue="all" 
         value={activeTab} 
         onValueChange={handleTabChange} 
         className="max-w-2xl mx-auto mt-4"

@@ -1,72 +1,57 @@
 
-import { useState } from "react";
-import { Layout } from "@/components/Layout";
-import PostFeed from "@/components/PostFeed";
-import LocationsNearby from "@/components/LocationsNearby";
-import TrendingLocations from "@/components/TrendingLocations";
-import DiscountLocations from "@/components/DiscountLocations";
-import CameraButton from "@/components/CameraButton";
-import RecommendedForYou from "@/components/RecommendedForYou";
-import VernonNext from "@/components/VernonNext";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { DateRange } from "react-day-picker";
-import { useNavigate } from "react-router-dom";
-import { mockLocations } from "@/mock/data";
+import React, { useState } from 'react';
+import Header from '@/components/Header';
+import SearchVibes from '@/components/SearchVibes';
+import { useNavigate } from 'react-router-dom'; 
+import { mockLocations } from '@/mock/data';
+import RecommendedForYou from '@/components/RecommendedForYou';
+import TrendingLocations from '@/components/TrendingLocations';
+import DiscountLocations from '@/components/DiscountLocations';
+import { LocalAIService } from '@/services/LocalAIService';
+import VernonChat from '@/components/VernonChat';
 
-const Index = () => {
-  const isMobile = useIsMobile();
-  const featuredUsers = ['sarah_vibes', 'jay_experiences', 'adventure_alex', 'marco_travels', 'local_explorer'];
-  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
+const Index: React.FC = () => {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const navigate = useNavigate();
 
+  // Initialize AI services
+  React.useEffect(() => {
+    const initAI = async () => {
+      await LocalAIService.init();
+    };
+    initAI();
+  }, []);
+
   const handleSearch = (query: string) => {
-    if (query.trim()) {
-      navigate(`/explore?q=${encodeURIComponent(query)}`);
+    const searchParams = new URLSearchParams();
+    if (query) {
+      searchParams.set('q', query);
     }
+    navigate(`/explore?${searchParams.toString()}`);
   };
 
   return (
-    <Layout>
+    <div className="min-h-screen bg-background">
+      <Header />
+      
       <main className="container py-6">
-        <div className="flex flex-col gap-6">
-          {/* Main content area */}
-          <div className="flex flex-col gap-6">
-            <div className="flex flex-col md:flex-row items-center justify-between mb-2">
-              <h1 className="text-3xl font-bold vibe-gradient-text mb-3 md:mb-0">
-                Discover the Vibe Right Now
-              </h1>
-            </div>
-
-            {/* Posts feed and sidebar layout */}
-            <div className="flex flex-col md:flex-row gap-6">
-              <div className="w-full md:w-3/4">
-                <PostFeed celebrityFeatured={featuredUsers} />
-              </div>
-              
-              {!isMobile && (
-                <div className="w-full md:w-1/4 space-y-6">
-                  <RecommendedForYou featuredLocations={["5", "7", "10", "13", "20"]} />
-                  <TrendingLocations />
-                  <DiscountLocations />
-                </div>
-              )}
-            </div>
-          </div>
-          
-          {isMobile && (
-            <div className="mt-8 space-y-6">
-              <h2 className="text-xl font-bold mb-4 vibe-gradient-text">Around You</h2>
-              <RecommendedForYou featuredLocations={["5", "7", "10", "13", "20"]} />
-              <TrendingLocations />
-              <DiscountLocations />
-            </div>
-          )}
+        <h1 className="text-4xl font-bold text-center mb-6 vibe-gradient-text">
+          Find Your Vibe
+        </h1>
+        
+        <div className="max-w-xl mx-auto mb-12">
+          <SearchVibes onSearch={handleSearch} />
+        </div>
+        
+        <div className="space-y-12">
+          <RecommendedForYou locations={mockLocations.slice(0, 4)} />
+          <TrendingLocations locations={mockLocations.slice(4, 10)} />
+          <DiscountLocations locations={mockLocations.slice(10, 14)} />
         </div>
       </main>
       
-      <CameraButton />
-      <VernonNext />
-    </Layout>
+      <VernonChat />
+    </div>
   );
 };
 

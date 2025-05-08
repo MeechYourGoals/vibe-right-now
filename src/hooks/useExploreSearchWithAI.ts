@@ -1,7 +1,8 @@
 
 import { useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { useExploreData } from "./useExploreData";
-import { LocalAIService } from "@/services/LocalAIService";
+import { DateRange } from "react-day-picker";
 import { generateMockLocationsForCity } from "@/utils/explore/exploreHelpers";
 import { generateMusicEvents, generateComedyEvents } from "@/services/search/eventService";
 import { generateLocalNightlifeVenues } from "@/utils/locations/venueHelpers";
@@ -26,21 +27,15 @@ const useExploreSearchWithAI = () => {
     setSearchCategory,
     filteredLocations,
     setFilteredLocations,
-    musicEvents,
     setMusicEvents,
-    comedyEvents,
     setComedyEvents,
-    nightlifeVenues,
     setNightlifeVenues,
     vibeFilter,
-    setVibeFilter,
-    isNaturalLanguageSearch,
-    setIsNaturalLanguageSearch,
-    dateRange,
     setDateRange,
-    isLoadingResults,
     setIsLoadingResults
   } = useExploreData();
+  
+  const navigate = useNavigate();
 
   // Enhanced search with mock data
   const handleSearch = useCallback((query: string, filterType: string, category: string) => {
@@ -66,8 +61,8 @@ const useExploreSearchWithAI = () => {
       setFilteredLocations(mockCityLocations);
       
       // Generate mock events
-      setMusicEvents(generateMusicEvents(city, state, dateRange));
-      setComedyEvents(generateComedyEvents(city, state, dateRange));
+      setMusicEvents(generateMusicEvents(city, state, undefined));
+      setComedyEvents(generateComedyEvents(city, state, undefined));
       setNightlifeVenues(generateLocalNightlifeVenues(city, state));
     } else if (query) {
       // If no city detected but we have a query, search the mock locations
@@ -85,7 +80,7 @@ const useExploreSearchWithAI = () => {
     
     // If vibeFilter is set, filter by vibe
     if (vibeFilter && vibeFilter.length > 0) {
-      const vibeFilteredLocations = [...filteredLocations].filter(location => {
+      const vibeFilteredLocations = filteredLocations.filter(location => {
         if (!location.vibes) return false;
         return location.vibes.some(vibe => 
           vibe.toLowerCase().includes(vibeFilter.toLowerCase())
@@ -98,22 +93,21 @@ const useExploreSearchWithAI = () => {
     setTimeout(() => {
       setIsLoadingResults(false);
     }, 800);
-  }, [
-    activeTab, 
-    dateRange, 
-    filteredLocations,
-    setActiveTab, 
-    setComedyEvents, 
-    setFilteredLocations, 
-    setIsLoadingResults, 
-    setMusicEvents, 
-    setNightlifeVenues, 
-    setSearchCategory, 
-    setSearchQuery, 
-    setSearchedCity, 
-    setSearchedState,
-    vibeFilter
-  ]);
+    
+    // Update URL with search params
+    const searchParams = new URLSearchParams();
+    if (query) {
+      searchParams.set('q', query);
+    }
+    if (filterType && filterType !== "All") {
+      searchParams.set('filter', filterType);
+    }
+    if (category && category !== "all") {
+      searchParams.set('category', category);
+    }
+    
+    navigate(`/explore?${searchParams.toString()}`);
+  }, [filteredLocations, navigate, setActiveTab, setComedyEvents, setFilteredLocations, setIsLoadingResults, setMusicEvents, setNightlifeVenues, setSearchCategory, setSearchQuery, setSearchedCity, setSearchedState, vibeFilter]);
 
   // Tab change with mock data filtering
   const handleTabChange = useCallback((value: string) => {
@@ -170,31 +164,25 @@ const useExploreSearchWithAI = () => {
     if (value === "music") {
       const city = searchedCity || "San Francisco";
       const state = searchedState || "CA";
-      setMusicEvents(generateMusicEvents(city, state, dateRange));
+      setMusicEvents(generateMusicEvents(city, state, undefined));
     } else if (value === "comedy") {
       const city = searchedCity || "San Francisco";
       const state = searchedState || "CA";
-      setComedyEvents(generateComedyEvents(city, state, dateRange));
+      setComedyEvents(generateComedyEvents(city, state, undefined));
     } else if (value === "nightlife") {
       const city = searchedCity || "San Francisco";
       const state = searchedState || "CA";
       setNightlifeVenues(generateLocalNightlifeVenues(city, state));
     }
-  }, [
-    dateRange, 
-    searchedCity, 
-    searchedState, 
-    setActiveTab, 
-    setComedyEvents, 
-    setFilteredLocations, 
-    setIsLoadingResults, 
-    setMusicEvents, 
-    setNightlifeVenues,
-    vibeFilter
-  ]);
+    
+    // Update URL with new tab
+    const searchParams = new URLSearchParams(window.location.search);
+    searchParams.set('tab', value);
+    navigate(`/explore?${searchParams.toString()}`);
+  }, [navigate, searchedCity, searchedState, setActiveTab, setComedyEvents, setFilteredLocations, setIsLoadingResults, setMusicEvents, setNightlifeVenues, vibeFilter]);
 
   // Handle date range change
-  const handleDateRangeChange = useCallback((range: any) => {
+  const handleDateRangeChange = useCallback((range: DateRange | undefined) => {
     setDateRange(range);
     
     // Update events data with new date range
@@ -205,7 +193,24 @@ const useExploreSearchWithAI = () => {
       setMusicEvents(generateMusicEvents("San Francisco", "CA", range));
       setComedyEvents(generateComedyEvents("San Francisco", "CA", range));
     }
-  }, [searchedCity, searchedState, setComedyEvents, setDateRange, setMusicEvents]);
+    
+    // Update URL with date range
+    const searchParams = new URLSearchParams(window.location.search);
+    
+    if (range?.from) {
+      searchParams.set('from', range.from.toISOString().split('T')[0]);
+      if (range.to) {
+        searchParams.set('to', range.to.toISOString().split('T')[0]);
+      } else {
+        searchParams.delete('to');
+      }
+    } else {
+      searchParams.delete('from');
+      searchParams.delete('to');
+    }
+    
+    navigate(`/explore?${searchParams.toString()}`);
+  }, [navigate, searchedCity, searchedState, setComedyEvents, setDateRange, setMusicEvents]);
 
   return {
     handleSearch,

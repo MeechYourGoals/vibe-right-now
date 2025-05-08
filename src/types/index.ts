@@ -30,6 +30,7 @@ export interface Location {
   businessHours?: BusinessHours;
   photos?: string[];
   ownerIdentifier?: string;
+  website?: string;
 }
 
 export interface Media {

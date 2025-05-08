@@ -8,7 +8,7 @@ import MusicSection from "@/components/explore/MusicSection";
 import ComedySection from "@/components/explore/ComedySection";
 import NightlifeSection from "@/components/explore/NightlifeSection";
 import LocationsGrid from "@/components/explore/LocationsGrid";
-import VenuePost from "@/components/VenuePost";
+import VenuePost from "@/components/venue/VenuePost";
 import { EventItem } from "@/components/venue/events/types";
 import { getCitySpecificContent, getMediaForLocation } from "@/utils/explore/exploreHelpers";
 
@@ -79,7 +79,7 @@ const ExploreContent: React.FC<ExploreContentProps> = ({
         />
       )}
       
-      {searchCategory === "places" && activeTab === "sports" && (
+      {activeTab === "sports" && (
         <div className="mb-6">
           <h2 className="text-xl font-semibold mb-4 flex items-center">
             Trending Sports Events
@@ -91,15 +91,14 @@ const ExploreContent: React.FC<ExploreContentProps> = ({
             )}
           </h2>
           <div className="space-y-4">
-            {filteredLocations
-              .filter(loc => loc.type === "sports")
+            {displayLocations
               .slice(0, 3)
               .map(location => (
                 <VenuePost
                   key={location.id}
                   venue={location}
                   content={getCitySpecificContent(location)}
-                  media={getMediaForLocation(location)}
+                  media={[getMediaForLocation(location)]}
                   timestamp={new Date().toISOString()}
                 />
               ))}

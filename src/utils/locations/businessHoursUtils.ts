@@ -1,5 +1,12 @@
 
-import { BusinessHours, DayHours } from "@/types";
+import { BusinessHours } from "@/types";
+
+// Define the DayHours type here since it's missing from the main types
+type DayHours = boolean | {
+  open: boolean;
+  openTime?: string;
+  closeTime?: string;
+};
 
 const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
@@ -62,7 +69,7 @@ export const getTodaysHoursFormatted = (businessHours?: BusinessHours): string =
   const today = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
   const todayHours = businessHours[today as keyof BusinessHours];
   
-  if (!todayHours) return "Closed today";
+  if (todayHours === undefined) return "Hours not available";
   if (todayHours === true) return "Open 24 hours";
   if (todayHours === false) return "Closed today";
   
@@ -81,8 +88,9 @@ export const isVenueOpenNow = (businessHours?: BusinessHours): boolean => {
   const today = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
   const todayHours = businessHours[today as keyof BusinessHours];
   
-  if (!todayHours || todayHours === false) return false;
+  if (todayHours === undefined) return false;
   if (todayHours === true) return true;
+  if (todayHours === false) return false;
   
   const hours = todayHours as { open: boolean, openTime?: string, closeTime?: string };
   if (!hours.open) return false;
