@@ -2,7 +2,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Compass } from "lucide-react";
-import GoogleMapComponent from "./google/GoogleMap";
+import GoogleMapComponent from "./google/GoogleMapComponent";
 import LocationDetailsSidebar from "./LocationDetailsSidebar";
 import { Location } from "@/types";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -44,7 +44,7 @@ const MapContainer = ({
   
   if (loading) {
     return (
-      <div className={`bg-muted/20 rounded-lg flex items-center justify-center ${isExpanded ? "h-[85vh]" : isMobile ? "h-40" : "h-60"}`}>
+      <div className={`bg-muted/20 rounded-lg flex items-center justify-center ${isExpanded ? "h-[85vh]" : isMobile ? "h-60" : "h-80"}`}>
         <div className="animate-spin">
           <Compass className="h-8 w-8 text-muted-foreground" />
         </div>
@@ -53,7 +53,7 @@ const MapContainer = ({
   }
   
   return (
-    <div className={`relative ${isExpanded ? "h-[85vh]" : isMobile ? "h-40" : "h-60"} rounded-lg overflow-hidden transition-all`} style={{ zIndex: 1 }}>
+    <div className={`relative ${isExpanded ? "h-[85vh]" : isMobile ? "h-60" : "h-80"} rounded-lg overflow-hidden transition-all`} style={{ zIndex: 1 }}>
       <GoogleMapComponent
         userLocation={userLocation}
         locations={locations}

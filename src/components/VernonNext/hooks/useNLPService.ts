@@ -1,127 +1,103 @@
 
-import { useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { ExtractedIntent } from '../types';
+import { useState } from 'react';
+
+interface ExtractedIntent {
+  intent: string;
+  entities: Record<string, any>;
+  confidence: number;
+  type: string;
+}
 
 export const useNLPService = () => {
-  // Function to analyze text using Google Cloud NLP
-  const analyzeIntent = useCallback(async (text: string): Promise<ExtractedIntent> => {
+  const [intent, setIntent] = useState<ExtractedIntent | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const extractIntent = async (text: string) => {
+    setIsLoading(true);
+    setError(null);
+    
     try {
-      const { data, error } = await supabase.functions.invoke('google-nlp', {
-        body: { text }
+      // Mock implementation
+      setTimeout(() => {
+        if (text.toLowerCase().includes('restaurant') || text.toLowerCase().includes('food')) {
+          setIntent({
+            intent: 'findRestaurant',
+            entities: {
+              cuisine: text.toLowerCase().includes('italian') ? 'italian' : 
+                       text.toLowerCase().includes('chinese') ? 'chinese' : 'any'
+            },
+            confidence: 0.85,
+            type: 'search'
+          });
+        } else if (text.toLowerCase().includes('bar') || text.toLowerCase().includes('drink')) {
+          setIntent({
+            intent: 'findBar',
+            entities: {
+              type: text.toLowerCase().includes('sports') ? 'sports bar' : 'bar'
+            },
+            confidence: 0.82,
+            type: 'search'
+          });
+        } else if (text.toLowerCase().includes('event') || text.toLowerCase().includes('show')) {
+          setIntent({
+            intent: 'findEvent',
+            entities: {
+              type: text.toLowerCase().includes('music') ? 'music' : 
+                    text.toLowerCase().includes('comedy') ? 'comedy' : 'any'
+            },
+            confidence: 0.79,
+            type: 'search'
+          });
+        } else {
+          setIntent({
+            intent: 'generalSearch',
+            entities: {},
+            confidence: 0.6,
+            type: 'search'
+          });
+        }
+        setIsLoading(false);
+      }, 300);
+    } catch (err) {
+      setError('Error processing natural language');
+      setIntent({
+        intent: 'unknown',
+        entities: {},
+        confidence: 0,
+        type: 'error'
       });
-      
-      if (error) {
-        console.error('Error calling NLP service:', error);
-        return { type: 'unknown' };
-      }
-      
-      // Default intent if we can't determine
-      let intentType: 'search' | 'info' | 'question' | 'booking' | 'unknown' = 'unknown';
-      
-      // Determine intent type based on text patterns
-      if (text.match(/find|search|looking for|show me|where (can|is)|suggest/i)) {
-        intentType = 'search';
-      } else if (text.match(/book|reserve|appointment|schedule|table for/i)) {
-        intentType = 'booking';
-      } else if (text.match(/\?|how|what|when|where|why|who|is there|can you tell/i)) {
-        intentType = 'question';
-      } else if (text.match(/tell me about|information|details|describe|explain/i)) {
-        intentType = 'info';
-      }
-      
-      // Extract location from entities
-      let location = '';
-      if (data?.entities) {
-        const locationEntities = data.entities.filter(
-          (entity: any) => entity.type === 'LOCATION' || entity.type === 'ADDRESS'
-        );
-        
-        if (locationEntities.length > 0) {
-          location = locationEntities[0].name;
-        }
-      }
-      
-      // Extract date
-      let date = '';
-      if (data?.entities) {
-        const dateEntities = data.entities.filter(
-          (entity: any) => entity.type === 'DATE' || entity.type === 'TIME'
-        );
-        
-        if (dateEntities.length > 0) {
-          date = dateEntities[0].name;
-        }
-      }
-      
-      // Get categories from NLP analysis
-      const categories = data?.categories || [];
-      
-      // Extract mood keywords
-      const moodKeywords = extractMoodKeywords(text);
-      
-      return {
-        type: intentType,
-        location,
-        date,
-        categories,
-        mood: moodKeywords,
-        keywords: extractKeywords(text, data?.entities)
-      };
-    } catch (error) {
-      console.error('Error in analyzeIntent:', error);
-      return { type: 'unknown' };
+      setIsLoading(false);
     }
-  }, []);
-  
-  // Helper to extract mood keywords
-  const extractMoodKeywords = (text: string): string[] => {
-    const moodWords = [
-      'cozy', 'romantic', 'casual', 'fancy', 'quiet', 'lively', 'energetic',
-      'relaxed', 'intimate', 'elegant', 'rustic', 'modern', 'trendy', 'hipster',
-      'family-friendly', 'upscale', 'budget', 'authentic', 'exotic', 'local'
-    ];
-    
-    const foundMoods: string[] = [];
-    moodWords.forEach(mood => {
-      if (text.toLowerCase().includes(mood)) {
-        foundMoods.push(mood);
-      }
-    });
-    
-    return foundMoods;
   };
-  
-  // Helper to extract keywords
-  const extractKeywords = (text: string, entities: any[] = []): string[] => {
-    // Extract nouns and relevant terms from entities
-    const keywords: string[] = [];
+
+  const getSearchCategories = (text: string): string => {
+    const categoryMap: Record<string, string[]> = {
+      'restaurant': ['restaurant', 'food', 'eat', 'dining'],
+      'bar': ['bar', 'drink', 'pub', 'brewery'],
+      'event': ['event', 'show', 'concert', 'game'],
+      'attraction': ['attraction', 'museum', 'park', 'visit'],
+    };
     
-    if (entities) {
-      entities.forEach((entity: any) => {
-        if (entity.type === 'CONSUMER_GOOD' || 
-            entity.type === 'WORK_OF_ART' || 
-            entity.type === 'EVENT' || 
-            entity.type === 'ORGANIZATION') {
-          keywords.push(entity.name);
-        }
-      });
+    let matchedCategory = '';
+    
+    for (const [category, keywords] of Object.entries(categoryMap)) {
+      if (keywords.some(keyword => text.toLowerCase().includes(keyword))) {
+        matchedCategory = category;
+        break;
+      }
     }
     
-    // Add common food terms and activities if present in the text
-    const foodTerms = ['restaurant', 'food', 'cafe', 'dinner', 'lunch', 'breakfast', 'brunch', 'coffee', 'cuisine', 'pizza', 'sushi', 'burger', 'vegan', 'vegetarian'];
-    const activityTerms = ['museum', 'gallery', 'park', 'movie', 'theater', 'concert', 'bar', 'nightclub', 'shop', 'mall', 'hiking', 'beach', 'attractions', 'events'];
-    
-    [...foodTerms, ...activityTerms].forEach(term => {
-      if (text.toLowerCase().includes(term) && !keywords.includes(term)) {
-        keywords.push(term);
-      }
-    });
-    
-    return keywords;
+    return matchedCategory || 'all';
   };
-  
+
   return {
-    analyzeIntent
+    intent,
+    isLoading,
+    error,
+    extractIntent,
+    getSearchCategories
   };
 };
+
+export default useNLPService;

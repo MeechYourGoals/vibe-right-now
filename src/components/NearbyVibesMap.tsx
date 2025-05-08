@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
@@ -133,7 +134,7 @@ const NearbyVibesMap = () => {
               onSearch={handleAddressSearch}
               onUseCurrentLocation={handleUseCurrentLocation}
               loading={effectiveLoading}
-              hasUserLocation={true}
+              hasUserLocation={!!userLocation}
             />
           )}
         </div>
@@ -156,12 +157,14 @@ const NearbyVibesMap = () => {
         showAllCities={!searchedCity}
       />
       
-      <NearbyLocationsList
-        locations={nearbyLocations}
-        isExpanded={isMapExpanded}
-        onViewMap={handleViewMap}
-        onViewLocation={handleLocationClick}
-      />
+      {!isMapExpanded && (
+        <NearbyLocationsList
+          locations={nearbyLocations}
+          isExpanded={isMapExpanded}
+          onViewMap={handleViewMap}
+          onViewLocation={handleLocationClick}
+        />
+      )}
     </div>
   );
 };

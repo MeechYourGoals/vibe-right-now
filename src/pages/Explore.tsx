@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { DateRange } from "react-day-picker";
@@ -661,22 +662,92 @@ const Explore = () => {
           </h1>
           
           <div className="max-w-xl mx-auto mb-6">
+            <Tabs defaultValue="all" className="w-full mb-4">
+              <TabsList className="grid grid-cols-5 w-full">
+                <TabsTrigger value="all">All</TabsTrigger>
+                <TabsTrigger value="places">Places</TabsTrigger>
+                <TabsTrigger value="users">Users</TabsTrigger>
+                <TabsTrigger value="vibes">Vibes</TabsTrigger>
+                <TabsTrigger value="dates" onClick={() => setShowDateFilter(!showDateFilter)}>
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Dates
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+            
             <SearchVibes onSearch={handleSearch} />
           </div>
           
-          <DateFilterSection
-            dateRange={dateRange}
-            setDateRange={setDateRange}
-            showDateFilter={showDateFilter}
-            setShowDateFilter={setShowDateFilter}
-            searchedCity={searchedCity || "San Francisco"}
-            handleDateRangeChange={handleDateRangeChange}
-            vibeFilter={vibeFilter}
-            setVibeFilter={setVibeFilter}
-            searchQuery={searchQuery}
-            searchCategory={searchCategory}
-            handleSearch={handleSearch}
-          />
+          {showDateFilter && (
+            <div className="p-3 bg-card border border-input rounded-lg max-w-xl mx-auto mb-4">
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="text-sm font-medium flex items-center">
+                  <Calendar className="h-4 w-4 mr-2 text-primary" />
+                  Find Future Vibes
+                </h3>
+                {dateRange && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-7 text-xs" 
+                    onClick={() => {
+                      setDateRange(undefined);
+                      setShowDateFilter(false);
+                      
+                      const searchParams = new URLSearchParams(location.search);
+                      searchParams.delete('from');
+                      searchParams.delete('to');
+                      navigate(`/explore?${searchParams.toString()}`, { replace: true });
+                      
+                      toast({
+                        title: "Date filter cleared",
+                        description: "Showing events for all upcoming dates",
+                        duration: 3000,
+                      });
+                    }}
+                  >
+                    Clear Dates
+                  </Button>
+                )}
+              </div>
+              <DateRangeSelector 
+                dateRange={dateRange} 
+                onDateRangeChange={handleDateRangeChange} 
+              />
+              {dateRange?.from && (
+                <p className="text-xs text-foreground mt-2">
+                  {dateRange.to 
+                    ? `Showing events from ${format(dateRange.from, "MMM d, yyyy")} to ${format(dateRange.to, "MMM d, yyyy")}` 
+                    : `Showing events from ${format(dateRange.from, "MMM d, yyyy")}`}
+                </p>
+              )}
+            </div>
+          )}
+          
+          {/* Map centered below search bar */}
+          <div className="w-full mb-6">
+            <NearbyVibesMap />
+          </div>
+          
+          {vibeFilter && (
+            <div className="flex justify-center mb-4">
+              <Badge className="bg-indigo-800 dark:bg-indigo-900 text-white px-3 py-1 text-sm flex items-center">
+                <Sparkles className="h-4 w-4 mr-1 text-amber-300" />
+                Filtering by vibe: {vibeFilter}
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-5 w-5 ml-2 rounded-full text-white hover:bg-indigo-700" 
+                  onClick={() => {
+                    setVibeFilter("");
+                    handleSearch(searchQuery, "All", searchCategory);
+                  }}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </Badge>
+            </div>
+          )}
           
           <Tabs defaultValue="all" value={activeTab} onValueChange={handleTabChange} className="max-w-2xl mx-auto">
             <TabsList className="grid grid-cols-2 md:grid-cols-10">
@@ -712,7 +783,7 @@ const Explore = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="md:col-span-2">
+            <div className="md:col-span-3">
               {activeTab === "music" && (
                 <MusicSection
                   musicEvents={musicEvents.length > 0 ? musicEvents : generateMusicEvents(searchedCity || "San Francisco", searchedState || "CA", dateRange)}
@@ -770,35 +841,6 @@ const Explore = () => {
                   locations={filteredLocations.length > 0 ? filteredLocations : generateMockLocationsForCity(searchedCity || "San Francisco", searchedState || "CA")}
                   locationTags={locationTags}
                 />
-              )}
-            </div>
-            
-            <div className="hidden md:block">
-              <NearbyVibesMap />
-              
-              {searchedCity && dateRange?.from && (
-                <Card className="mt-6 bg-indigo-50 border-indigo-200">
-                  <CardContent className="p-4">
-                    <h3 className="text-lg font-semibold mb-2 text-indigo-800">
-                      Planning Your Trip
-                    </h3>
-                    <p className="text-sm text-indigo-700 mb-4">
-                      Looking at events in {searchedCity} for
-                      {dateRange.to
-                        ? ` ${format(dateRange.from, "MMM d")} - ${format(dateRange.to, "MMM d, yyyy")}`
-                        : ` ${format(dateRange.from, "MMM d, yyyy")}`
-                      }
-                    </p>
-                    <div className="space-y-2">
-                      <Button variant="default" className="w-full bg-indigo-600 hover:bg-indigo-700">
-                        Save This Trip
-                      </Button>
-                      <Button variant="outline" className="w-full border-indigo-300 text-indigo-700 hover:bg-indigo-100">
-                        Share With Friends
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
               )}
             </div>
           </div>
