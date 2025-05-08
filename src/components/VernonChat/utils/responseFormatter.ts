@@ -67,8 +67,34 @@ export const createVenueCardHTML = (venue: any): string => {
   `;
 };
 
+/**
+ * Clean and normalize response text for better display
+ */
+export const cleanResponseText = (text: string): string => {
+  return text
+    .replace(/\n{3,}/g, '\n\n') // Replace multiple newlines with double newlines
+    .trim();
+};
+
+/**
+ * Format location data for chat response
+ */
+export const formatLocationResponse = (location: any): string => {
+  return `
+    <div class="venue-result">
+      <h3>${location.name}</h3>
+      <p>${location.address}, ${location.city}, ${location.state}</p>
+      ${location.rating ? `<p>Rating: ${location.rating}/5</p>` : ''}
+      ${location.type ? `<p>Type: ${location.type}</p>` : ''}
+      <a href="/venue/${location.id}" class="view-link">View Details</a>
+    </div>
+  `;
+};
+
 export default {
   formatResponse,
   truncateWithReadMore,
-  createVenueCardHTML
+  createVenueCardHTML,
+  cleanResponseText,
+  formatLocationResponse
 };

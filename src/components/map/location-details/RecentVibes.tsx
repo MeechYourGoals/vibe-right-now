@@ -1,86 +1,69 @@
-
-import { useEffect, useState } from "react";
-import { Location, Post } from "@/types";
-import { Card, CardContent } from "@/components/ui/card";
-import { formatTimeAgo } from "@/utils/timeUtils";
+import React from 'react';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { mockVenue } from "@/mock/data";
+import { Post } from "@/types";
 
 interface RecentVibesProps {
-  location: Location;
+  locationId: string;
 }
 
-const RecentVibes = ({ location }: RecentVibesProps) => {
-  const [recentPosts, setRecentPosts] = useState<Post[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchRecentPosts = async () => {
-      setIsLoading(true);
-      try {
-        // In a real implementation, this would fetch from an API
-        // For now, we'll generate mock data
-        const mockPosts: Post[] = Array(3).fill(null).map((_, i) => ({
-          id: `mock-${location.id}-${i}`,
-          content: `Check out ${location.name}! ${i === 0 ? 'Great vibes tonight!' : i === 1 ? 'Amazing atmosphere!' : 'Love this place!'}`,
-          timestamp: new Date(Date.now() - i * 3600000).toISOString(),
-          likes: Math.floor(Math.random() * 50),
-          comments: Math.floor(Math.random() * 10),
-          authorId: `user-${i + 1}`,
-          locationId: location.id,
-          media: i === 0 ? [{ type: 'image', url: 'https://picsum.photos/400/300' }] : undefined
-        }));
-        
-        setRecentPosts(mockPosts);
-      } catch (error) {
-        console.error('Error fetching recent posts:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    if (location?.id) {
-      fetchRecentPosts();
+const RecentVibes: React.FC<RecentVibesProps> = ({ locationId }) => {
+  // Mock post data
+  const postData = [
+    {
+      id: '1',
+      author: 'Mia Davis',
+      content: 'Just had the best coffee here! ☕ Highly recommend the latte.',
+      timestamp: '2 hours ago',
+      likes: 15,
+      media: ['https://source.unsplash.com/random/200x200/?coffee'],
+      comments: []
+    },
+    {
+      id: '2',
+      author: 'Alex Johnson',
+      content: 'Great atmosphere and friendly staff. Will definitely come back!',
+      timestamp: '5 hours ago',
+      likes: 8,
+      media: [],
+      comments: []
+    },
+    {
+      id: '3',
+      author: 'Sophie White',
+      content: 'Their pastries are to die for! 🥐 So delicious.',
+      timestamp: '1 day ago',
+      likes: 22,
+      media: ['https://source.unsplash.com/random/200x200/?pastry'],
+      comments: []
     }
-  }, [location]);
+  ];
 
-  if (isLoading) {
-    return (
-      <div className="mt-4">
-        <h3 className="text-sm font-medium mb-2">Recent Vibes</h3>
-        <div className="space-y-2">
-          {[1, 2].map((i) => (
-            <div key={i} className="h-12 rounded-md bg-muted animate-pulse"></div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (!recentPosts.length) {
-    return (
-      <div className="mt-4">
-        <h3 className="text-sm font-medium mb-2">Recent Vibes</h3>
-        <Card>
-          <CardContent className="p-3">
-            <p className="text-xs text-muted-foreground">No recent vibes at this location.</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  // Update the posts mapping to include location
+  const posts: Post[] = postData.map(post => ({
+    ...post,
+    location: mockVenue // Add the missing location property
+  }));
 
   return (
-    <div className="mt-4">
-      <h3 className="text-sm font-medium mb-2">Recent Vibes</h3>
-      <div className="space-y-2">
-        {recentPosts.map((post) => (
-          <Card key={post.id}>
-            <CardContent className="p-3">
-              <p className="text-xs truncate">{post.content}</p>
-              <p className="text-xs text-muted-foreground mt-1">
-                {formatTimeAgo(post.timestamp)} • {post.likes} likes
-              </p>
-            </CardContent>
-          </Card>
+    <div className="bg-card rounded-md p-4 space-y-4">
+      <h3 className="text-lg font-semibold">Recent Vibes</h3>
+      <div className="space-y-3">
+        {posts.map(post => (
+          <div key={post.id} className="flex items-start space-x-3">
+            <Avatar>
+              <AvatarImage src="https://github.com/shadcn.png" alt={post.author} />
+              <AvatarFallback>{post.author.charAt(0)}</AvatarFallback>
+            </Avatar>
+            <div className="space-y-1">
+              <div className="text-sm font-medium leading-none">{post.author}</div>
+              <p className="text-sm text-muted-foreground">{post.content}</p>
+              {post.media && post.media.length > 0 && (
+                <img src={post.media[0]} alt="Post Media" className="mt-2 rounded-md w-full" />
+              )}
+              <div className="text-xs text-muted-foreground">{post.timestamp}</div>
+            </div>
+          </div>
         ))}
       </div>
     </div>

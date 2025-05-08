@@ -1,6 +1,6 @@
 
 // Simple AI service for local processing
-export const localAI = {
+export const LocalAIService = {
   init: async (): Promise<boolean> => {
     console.log('Initializing local AI service');
     return true;
@@ -45,7 +45,15 @@ export const localAI = {
     const union = new Set([...set1, ...set2]);
     
     return intersection.size / union.size;
+  },
+  
+  // Simple mock text embedding function
+  getTextEmbedding: async (text: string): Promise<number[]> => {
+    // Mock implementation that returns a simplified vector
+    const hash = text.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    // Generate a simple mock embedding vector of 10 dimensions
+    return Array(10).fill(0).map((_, i) => Math.sin(hash * (i + 1)) * 0.5 + 0.5);
   }
 };
 
-export default localAI;
+export default LocalAIService;

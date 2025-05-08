@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -112,7 +111,11 @@ const VenuePosts = ({
             key={post.id} 
             venue={post.location}
             content={post.content}
-            media={post.media}
+            media={Array.isArray(post.media) ? 
+              (typeof post.media[0] === 'string' ? 
+                { type: "image", url: post.media[0] } : 
+                post.media[0]) : 
+              post.media}
             timestamp={post.timestamp}
             likes={post.likes}
             comments={post.comments}
@@ -125,7 +128,11 @@ const VenuePosts = ({
             key={post.id} 
             venue={post.location}
             content={post.content}
-            media={post.media}
+            media={Array.isArray(post.media) ? 
+              (typeof post.media[0] === 'string' ? 
+                { type: "image", url: post.media[0] } : 
+                post.media[0]) : 
+              post.media}
             timestamp={post.timestamp}
             likes={post.likes}
             comments={post.comments}
