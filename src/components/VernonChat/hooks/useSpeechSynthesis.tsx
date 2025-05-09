@@ -1,10 +1,9 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
-import { VertexAIService } from '@/services/VertexAIService';
 
 /**
- * Hook for text-to-speech synthesis functionality using Google's services
+ * Hook for text-to-speech synthesis functionality using browser's built-in TTS
  */
 export const useSpeechSynthesis = () => {
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -41,50 +40,40 @@ export const useSpeechSynthesis = () => {
     try {
       setIsSpeaking(true);
       
-      // Use Google's TTS API through Vertex AI
-      try {
-        const audioData = await VertexAIService.textToSpeech(text);
+      // Try browser's built-in TTS
+      if ('speechSynthesis' in window) {
+        // Get available voices
+        const voices = window.speechSynthesis.getVoices();
         
-        if (audioData && audio) {
-          // Create a blob from the audio data
-          const blob = new Blob([audioData], { type: 'audio/mpeg' });
-          const url = URL.createObjectURL(blob);
-          
-          // Set the audio source and play
-          audio.src = url;
-          await audio.play();
-          
-          // Clean up blob URL after playback
-          audio.onended = () => {
-            URL.revokeObjectURL(url);
-            setIsSpeaking(false);
-          };
-          
-          return;
-        }
-      } catch (error) {
-        console.error('Error with Google TTS:', error);
+        // Try to find a good voice
+        const preferredVoice = voices.find(voice => 
+          voice.lang === 'en-US' && voice.name.includes('Google')
+        ) || voices.find(voice => voice.lang === 'en-US') || voices[0];
+        
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.voice = preferredVoice;
+        utterance.rate = 1.0;
+        utterance.pitch = 1.0;
+        utterance.volume = 1.0;
+        
+        // Add event listeners
+        utterance.onend = () => {
+          setIsSpeaking(false);
+        };
+        
+        utterance.onerror = (event) => {
+          console.error('Speech synthesis error:', event);
+          setIsSpeaking(false);
+          toast.error('Speech synthesis error');
+        };
+        
+        // Use the browser's speech synthesis
+        window.speechSynthesis.speak(utterance);
+        return;
       }
       
-      // Fall back to browser's built-in TTS
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 1.0;
-      utterance.pitch = 1.0;
-      utterance.volume = 1.0;
-      
-      // Use the browser's speech synthesis
-      window.speechSynthesis.speak(utterance);
-      
-      // Add event listeners
-      utterance.onend = () => {
-        setIsSpeaking(false);
-      };
-      
-      utterance.onerror = (event) => {
-        console.error('Speech synthesis error:', event);
-        setIsSpeaking(false);
-        toast.error('Speech synthesis error');
-      };
+      toast.error('Speech synthesis not supported in this browser');
+      setIsSpeaking(false);
     } catch (error) {
       console.error('Error speaking response:', error);
       setIsSpeaking(false);
@@ -124,11 +113,6 @@ export const useSpeechSynthesis = () => {
     }
   }, [audio, isPaused]);
   
-  // Function to prompt for API key (stub function for UI consistency)
-  const promptForElevenLabsKey = useCallback(() => {
-    toast.info("We now use Google's speech services");
-  }, []);
-  
   return {
     isSpeaking,
     isPaused,
@@ -136,6 +120,8 @@ export const useSpeechSynthesis = () => {
     stopSpeaking,
     togglePause,
     useElevenLabs: false,
-    promptForElevenLabsKey
+    promptForElevenLabsKey: () => {
+      toast.info("Using browser's built-in speech services");
+    }
   };
 };

@@ -1,7 +1,8 @@
 
 import { SearchService } from '@/services/search/SearchService';
 import { FallbackSearchStrategy } from './fallbackSearchStrategy';
-import { VertexAIService } from '@/services/VertexAIService';
+import { SwirlSearchService } from '@/services/SwirlSearchService';
+import { HuggingFaceService } from '@/services/HuggingFaceService';
 
 /**
  * Strategy for handling complex queries that may require multiple search approaches
@@ -39,17 +40,44 @@ export class ComplexQueryStrategy {
     try {
       console.log('Handling complex query with categories:', categories);
       
-      // First try using Google's Vertex AI
+      // First try using HuggingFace for NLU and understanding
       try {
-        const vertexResult = await VertexAIService.searchWithVertex(query, categories);
-        console.log('Vertex AI search completed');
+        const isAvailable = await HuggingFaceService.isAvailable();
         
-        if (vertexResult && vertexResult.length > 100) {
-          console.log('Vertex AI search returned good results');
-          return vertexResult;
+        if (isAvailable) {
+          console.log('Using HuggingFace transformers for query analysis');
+          const { enhancedQuery, extractedEntities } = await HuggingFaceService.analyzeQuery(query);
+          
+          if (enhancedQuery && enhancedQuery !== query) {
+            console.log('Query enhanced to:', enhancedQuery);
+            query = enhancedQuery;
+          }
+          
+          if (extractedEntities && extractedEntities.length > 0) {
+            console.log('Extracted entities:', extractedEntities);
+            // Add extracted entities to categories if possible
+            categories = [...new Set([...categories, ...extractedEntities])];
+          }
         }
       } catch (error) {
-        console.error('Vertex AI search failed:', error);
+        console.error('HuggingFace analysis failed:', error);
+      }
+      
+      // Try Swirl Search Service for web search
+      try {
+        const swirlAvailable = await SwirlSearchService.isAvailable();
+        
+        if (swirlAvailable) {
+          console.log('Using Swirl search');
+          const swirlResult = await SwirlSearchService.search(query);
+          
+          if (swirlResult && swirlResult.length > 100) {
+            console.log('Swirl search returned good results');
+            return swirlResult;
+          }
+        }
+      } catch (error) {
+        console.error('Swirl search failed:', error);
       }
       
       // Try standard search service as fallback

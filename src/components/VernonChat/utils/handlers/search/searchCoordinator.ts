@@ -1,27 +1,53 @@
+
 import { SearchService } from '@/services/search/SearchService';
 import { FallbackSearchStrategy } from './fallbackSearchStrategy';
 import { LocalDataStrategy } from './localDataStrategy';
 import { ComplexQueryStrategy } from './complexQueryStrategy';
 import { ComedySearchStrategy } from './comedySearchStrategy';
 import { LocationSearchStrategy } from './locationSearchStrategy';
+import { SwirlSearchService } from '@/services/SwirlSearchService';
+import { HuggingFaceService } from '@/services/HuggingFaceService';
 
 /**
  * Central coordinator for all search strategies
- * Now with Google Cloud NLP integration support
+ * Now with NLP integration support via HuggingFace
  */
 export class SearchCoordinator {
   /**
    * Process a search query and return results
    * @param inputValue The search query
    * @param paginationState Pagination state for paginated results
-   * @param categories Optional categories from Google Cloud NLP API
+   * @param categories Optional categories from NLP analysis
    */
   static async processSearchQuery(
     inputValue: string, 
     paginationState: Record<string, number> = {}, 
     categories: string[] = []
   ): Promise<string> {
-    // First check if it's a location query
+    // Try to analyze the query with HuggingFace for better understanding
+    try {
+      const hfAvailable = await HuggingFaceService.isAvailable();
+      
+      if (hfAvailable) {
+        const { enhancedQuery, extractedEntities } = await HuggingFaceService.analyzeQuery(inputValue);
+        
+        if (enhancedQuery && enhancedQuery !== inputValue) {
+          console.log('Query enhanced from:', inputValue);
+          console.log('To:', enhancedQuery);
+          inputValue = enhancedQuery;
+        }
+        
+        if (extractedEntities && extractedEntities.length > 0) {
+          console.log('HuggingFace extracted entities:', extractedEntities);
+          // Add extracted entities to categories
+          categories = [...new Set([...categories, ...extractedEntities])];
+        }
+      }
+    } catch (error) {
+      console.error('Error during HuggingFace query analysis:', error);
+    }
+    
+    // Check if it's a location query
     if (LocationSearchStrategy.isLocationQuery(inputValue)) {
       console.log('Detected location query, using LocationSearchStrategy');
       const locationResult = await LocationSearchStrategy.handleLocationSearch(inputValue);
@@ -30,6 +56,23 @@ export class SearchCoordinator {
         console.log('Location strategy returned results');
         return locationResult.response;
       }
+    }
+    
+    // Try Swirl Search for general web search
+    try {
+      const swirlAvailable = await SwirlSearchService.isAvailable();
+      
+      if (swirlAvailable) {
+        console.log('Using Swirl search service');
+        const swirlResult = await SwirlSearchService.search(inputValue);
+        
+        if (swirlResult && swirlResult.length > 100) {
+          console.log('Swirl search returned good results');
+          return swirlResult;
+        }
+      }
+    } catch (error) {
+      console.error('Swirl search failed:', error);
     }
     
     // Check if it's a complex query
@@ -61,4 +104,4 @@ export class SearchCoordinator {
       return FallbackSearchStrategy.generateFallbackResponse(inputValue);
     }
   }
-};
+}
