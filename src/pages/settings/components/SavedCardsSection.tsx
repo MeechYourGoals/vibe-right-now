@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 
 interface SavedCardsSectionProps {
   cards: CreditCard[];
@@ -124,14 +124,16 @@ const SavedCardsSection = ({ cards, onSetDefault, onRemove, onUpdateCard }: Save
               <Label htmlFor={`vernon-approval-${card.id}`} className="flex items-center gap-1">
                 <WalletCards className="h-4 w-4" />
                 <span>Approve for Vernon AI</span>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span className="ml-1 cursor-help text-muted-foreground text-xs">(?)</span>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    Allow Vernon AI to make purchases with this card within the transaction limit
-                  </TooltipContent>
-                </Tooltip>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="ml-1 cursor-help text-muted-foreground text-xs">(?)</span>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      Allow Vernon AI to make purchases with this card within the transaction limit
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </Label>
               <Switch
                 id={`vernon-approval-${card.id}`}
