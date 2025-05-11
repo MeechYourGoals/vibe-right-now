@@ -105,7 +105,7 @@ const Settings = () => {
           )}
           
           <TabsContent value="payments" className="space-y-6">
-            <PaymentsTab />
+            <PaymentsTab isVenueMode={isVenueMode} />
           </TabsContent>
           
           <TabsContent value="account" className="space-y-6">

@@ -7,9 +7,11 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SavedCardsSection from "./components/SavedCardsSection";
 import AddCardForm from "./components/AddCardForm";
 import { CreditCard } from "@/types";
+import POSServicesConnector from "@/components/data-insights/POSServicesConnector";
 
 // Mock data for saved cards
 const mockCards: CreditCard[] = [
@@ -35,11 +37,16 @@ const mockCards: CreditCard[] = [
   }
 ];
 
-const PaymentsTab = () => {
+interface PaymentsTabProps {
+  isVenueMode?: boolean;
+}
+
+const PaymentsTab = ({ isVenueMode = false }: PaymentsTabProps) => {
   const { toast } = useToast();
   const [cards, setCards] = useState<CreditCard[]>([]);
   const [showAddCard, setShowAddCard] = useState(false);
   const [saveCardsByDefault, setSaveCardsByDefault] = useState(true);
+  const [activeTab, setActiveTab] = useState<string>("payment-methods");
 
   useEffect(() => {
     // In a real app, we would fetch the user's cards from an API
@@ -120,79 +127,141 @@ const PaymentsTab = () => {
     });
   };
 
+  // Render different content based on venue mode
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-medium">Payment Methods</h3>
+        <h3 className="text-lg font-medium">Payment Settings</h3>
         <p className="text-sm text-muted-foreground">
-          Manage your payment methods and preferences.
+          {isVenueMode 
+            ? "Manage your venue's payment integrations and preferences." 
+            : "Manage your payment methods and preferences."}
         </p>
       </div>
       
       <Separator />
       
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h4 className="text-base font-medium">Your Cards</h4>
-            <Badge variant="outline" className="text-xs font-normal">
-              {cards.length} Saved
-            </Badge>
-          </div>
+      {isVenueMode ? (
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="mb-4">
+            <TabsTrigger value="payment-methods">Payment Methods</TabsTrigger>
+            <TabsTrigger value="pos-integrations">POS Integrations</TabsTrigger>
+          </TabsList>
           
-          {cards.length > 0 ? (
-            <SavedCardsSection 
-              cards={cards}
-              onSetDefault={handleSetDefaultCard}
-              onRemove={handleRemoveCard}
-              onUpdateCard={handleUpdateCard}
-            />
-          ) : (
-            <div className="bg-muted rounded-md p-4 text-center text-muted-foreground">
-              <p>No payment methods saved yet.</p>
-            </div>
-          )}
+          <TabsContent value="payment-methods">
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h4 className="text-base font-medium">Your Cards</h4>
+                  <Badge variant="outline" className="text-xs font-normal">
+                    {cards.length} Saved
+                  </Badge>
+                </div>
+                
+                {cards.length > 0 ? (
+                  <SavedCardsSection 
+                    cards={cards}
+                    onSetDefault={handleSetDefaultCard}
+                    onRemove={handleRemoveCard}
+                    onUpdateCard={handleUpdateCard}
+                  />
+                ) : (
+                  <div className="bg-muted rounded-md p-4 text-center text-muted-foreground">
+                    <p>No payment methods saved yet.</p>
+                  </div>
+                )}
+                
+                {!showAddCard ? (
+                  <Button 
+                    onClick={() => setShowAddCard(true)} 
+                    className="w-full mt-4"
+                    variant="outline"
+                  >
+                    Add New Card
+                  </Button>
+                ) : (
+                  <div className="mt-4 border rounded-md p-4">
+                    <AddCardForm 
+                      onSubmit={handleAddCard}
+                      onCancel={() => setShowAddCard(false)}
+                    />
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
           
-          {!showAddCard ? (
-            <Button 
-              onClick={() => setShowAddCard(true)} 
-              className="w-full mt-4"
-              variant="outline"
-            >
-              Add New Card
-            </Button>
-          ) : (
-            <div className="mt-4 border rounded-md p-4">
-              <AddCardForm 
-                onSubmit={handleAddCard}
-                onCancel={() => setShowAddCard(false)}
-              />
-            </div>
-          )}
-        </CardContent>
-      </Card>
-      
-      <Card>
-        <CardContent className="p-6">
-          <h4 className="text-base font-medium mb-4">Payment Preferences</h4>
-          
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="save-cards" className="font-medium">Save payment methods by default</Label>
-                <p className="text-sm text-muted-foreground">
-                  Automatically save new payment methods when making purchases
-                </p>
+          <TabsContent value="pos-integrations">
+            <POSServicesConnector />
+          </TabsContent>
+        </Tabs>
+      ) : (
+        // Regular user view
+        <>
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h4 className="text-base font-medium">Your Cards</h4>
+                <Badge variant="outline" className="text-xs font-normal">
+                  {cards.length} Saved
+                </Badge>
               </div>
-              <Switch 
-                id="save-cards" 
-                checked={saveCardsByDefault}
-                onCheckedChange={setSaveCardsByDefault}
-              />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+              
+              {cards.length > 0 ? (
+                <SavedCardsSection 
+                  cards={cards}
+                  onSetDefault={handleSetDefaultCard}
+                  onRemove={handleRemoveCard}
+                  onUpdateCard={handleUpdateCard}
+                />
+              ) : (
+                <div className="bg-muted rounded-md p-4 text-center text-muted-foreground">
+                  <p>No payment methods saved yet.</p>
+                </div>
+              )}
+              
+              {!showAddCard ? (
+                <Button 
+                  onClick={() => setShowAddCard(true)} 
+                  className="w-full mt-4"
+                  variant="outline"
+                >
+                  Add New Card
+                </Button>
+              ) : (
+                <div className="mt-4 border rounded-md p-4">
+                  <AddCardForm 
+                    onSubmit={handleAddCard}
+                    onCancel={() => setShowAddCard(false)}
+                  />
+                </div>
+              )}
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-6">
+              <h4 className="text-base font-medium mb-4">Payment Preferences</h4>
+              
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="save-cards" className="font-medium">Save payment methods by default</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Automatically save new payment methods when making purchases
+                    </p>
+                  </div>
+                  <Switch 
+                    id="save-cards" 
+                    checked={saveCardsByDefault}
+                    onCheckedChange={setSaveCardsByDefault}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </>
+      )}
     </div>
   );
 };
