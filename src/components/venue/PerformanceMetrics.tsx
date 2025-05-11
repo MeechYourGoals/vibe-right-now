@@ -1,10 +1,11 @@
+
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { ArrowUp, ArrowDown } from 'lucide-react';
 
 // Update the venueInsights prop type to match the actual structure
 interface Props {
-  venueInsights: {
+  venueInsights?: {
     visitors: number;
     visitorsChange: number;
     posts: number;
@@ -22,7 +23,25 @@ interface Props {
   };
 }
 
-const PerformanceMetrics: React.FC<Props> = ({ venueInsights }) => {
+// Default values to use when venueInsights is not provided
+const defaultInsights = {
+  visitors: 1200,
+  visitorsChange: 5,
+  posts: 25,
+  postsChange: 8,
+  likes: 450,
+  likesChange: 12,
+  mentions: 30,
+  mentionsChange: 4,
+  checkins: 85,
+  checkinsChange: 7,
+  reviews: 15,
+  reviewsChange: 3,
+  rating: 4.5,
+  ratingChange: 0.2,
+};
+
+const PerformanceMetrics: React.FC<Props> = ({ venueInsights = defaultInsights }) => {
   const {
     visitors,
     visitorsChange,

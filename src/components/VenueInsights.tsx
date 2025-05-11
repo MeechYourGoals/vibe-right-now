@@ -17,6 +17,24 @@ const VenueInsights = () => {
   const [subscriptionTier, setSubscriptionTier] = useState<'standard' | 'plus' | 'premium' | 'pro'>('standard');
   const mediaData = generateWeeklyData();
   
+  // Add mock venue insights data for PerformanceMetrics
+  const mockVenueInsights = {
+    visitors: 1520,
+    visitorsChange: 8.3,
+    posts: 34,
+    postsChange: 12.5,
+    likes: 876,
+    likesChange: 15.2,
+    mentions: 45,
+    mentionsChange: 6.7,
+    checkins: 128,
+    checkinsChange: 9.4,
+    reviews: 22,
+    reviewsChange: 4.8,
+    rating: 4.7,
+    ratingChange: 0.3
+  };
+  
   // Function to simulate upgrading subscription
   const upgradeSubscription = (tier: string) => {
     setSubscriptionTier(tier as 'standard' | 'plus' | 'premium' | 'pro');
@@ -26,7 +44,7 @@ const VenueInsights = () => {
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2">
-          <PerformanceMetrics />
+          <PerformanceMetrics venueInsights={mockVenueInsights} />
         </div>
         <div>
           <QuickActions onTierChange={upgradeSubscription} currentTier={subscriptionTier} />
