@@ -13,6 +13,7 @@ import TicketingTab from "./settings/TicketingTab";
 import AccountTab from "./settings/AccountTab";
 import VenueManagementTab from "./settings/VenueManagementTab";
 import MarketingTab from "./settings/MarketingTab";
+import PaymentsTab from "./settings/PaymentsTab";
 
 const Settings = () => {
   const { toast } = useToast();
@@ -102,6 +103,10 @@ const Settings = () => {
               </TabsContent>
             </>
           )}
+          
+          <TabsContent value="payments" className="space-y-6">
+            <PaymentsTab />
+          </TabsContent>
           
           <TabsContent value="account" className="space-y-6">
             <AccountTab onSave={handleSaveSettings} isVenueMode={isVenueMode} />

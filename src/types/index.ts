@@ -1,4 +1,3 @@
-
 export interface Location {
   id: string;
   name: string;
@@ -173,4 +172,13 @@ export interface VenueInsights {
   receiptUploads?: number;
   discountRedemptions?: number;
   totalViews?: number; // For compatibility
+}
+
+export interface CreditCard {
+  id: string;
+  last4: string;
+  brand: string;
+  expMonth: number;
+  expYear: number;
+  isDefault: boolean;
 }

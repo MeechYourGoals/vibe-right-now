@@ -1,5 +1,5 @@
 
-import { Tag, Shield, Car, Ticket, User, Building2 } from "lucide-react";
+import { Tag, Shield, Car, Ticket, User, Building2, CreditCard } from "lucide-react";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface SettingsTabsProps {
@@ -9,7 +9,7 @@ interface SettingsTabsProps {
 
 const SettingsTabs = ({ activeTab, isVenueMode }: SettingsTabsProps) => {
   return (
-    <TabsList className="mb-6 grid grid-cols-3 md:grid-cols-5 gap-2">
+    <TabsList className="mb-6 grid grid-cols-3 md:grid-cols-6 gap-2">
       <TabsTrigger value="preferences" className="flex items-center gap-2">
         <Tag className="h-4 w-4" />
         <span className="hidden md:inline">Preferences</span>
@@ -41,6 +41,10 @@ const SettingsTabs = ({ activeTab, isVenueMode }: SettingsTabsProps) => {
           </TabsTrigger>
         </>
       )}
+      <TabsTrigger value="payments" className="flex items-center gap-2">
+        <CreditCard className="h-4 w-4" />
+        <span className="hidden md:inline">Payments</span>
+      </TabsTrigger>
       <TabsTrigger value="account" className="flex items-center gap-2">
         <User className="h-4 w-4" />
         <span className="hidden md:inline">Account</span>
