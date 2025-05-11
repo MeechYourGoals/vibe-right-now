@@ -20,6 +20,15 @@ const CategoryTagSection = ({
   selectedTags,
   onTagSelect
 }: CategoryTagSectionProps) => {
+  // Create a map of category-specific tags to avoid repetition
+  const categorySpecificTags = {
+    lgbtq: ["LGBTQ+ Friendly", "Pride", "Inclusive"],
+    groups: ["Good for Groups", "Family Style", "Sharing Plates"],
+    tourist: ["Tourist Attraction", "Landmark", "Must-See"],
+    business: ["Business Appropriate", "Corporate", "Formal"],
+    "after-hours": ["After Hours", "Late Night", "Nightlife"]
+  };
+  
   return (
     <div className="space-y-4 mt-4">
       <Label>Popular Preferences</Label>
@@ -31,7 +40,8 @@ const CategoryTagSection = ({
               {category.name}
             </h4>
             <div className="flex flex-wrap gap-2">
-              {tags.slice(0, 5).map(tag => (
+              {/* Use category-specific tags instead of the same tags for each category */}
+              {categorySpecificTags[category.id as keyof typeof categorySpecificTags]?.map(tag => (
                 <Badge 
                   key={`${category.id}-${tag}`} 
                   variant="outline" 

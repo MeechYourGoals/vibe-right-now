@@ -9,7 +9,7 @@ interface SettingsTabsProps {
 
 const SettingsTabs = ({ activeTab, isVenueMode }: SettingsTabsProps) => {
   return (
-    <TabsList className="mb-6 grid grid-cols-3 md:grid-cols-6 gap-2">
+    <TabsList className="mb-6 grid grid-cols-3 md:grid-cols-7 gap-2">
       <TabsTrigger value="preferences" className="flex items-center gap-2">
         <Tag className="h-4 w-4" />
         <span className="hidden md:inline">Preferences</span>

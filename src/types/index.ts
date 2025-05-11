@@ -1,3 +1,4 @@
+
 export interface Location {
   id: string;
   name: string;
@@ -181,4 +182,6 @@ export interface CreditCard {
   expMonth: number;
   expYear: number;
   isDefault: boolean;
+  maxSpendLimit?: number; // Maximum amount allowed per transaction
+  vernonApproved?: boolean; // Whether Vernon AI can use this card
 }

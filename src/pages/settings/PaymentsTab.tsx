@@ -20,6 +20,8 @@ const mockCards: CreditCard[] = [
     expMonth: 12,
     expYear: 2025,
     isDefault: true,
+    maxSpendLimit: 200,
+    vernonApproved: true,
   },
   {
     id: "card_2",
@@ -28,6 +30,8 @@ const mockCards: CreditCard[] = [
     expMonth: 8,
     expYear: 2024,
     isDefault: false,
+    maxSpendLimit: 100,
+    vernonApproved: false,
   }
 ];
 
@@ -54,6 +58,8 @@ const PaymentsTab = () => {
       ...card,
       id: `card_${Date.now()}`,
       isDefault: cards.length === 0, // Make default if it's the first card
+      maxSpendLimit: 100, // Default spend limit
+      vernonApproved: false // Default to not approved
     };
     
     const updatedCards = [...cards, newCard];
@@ -100,6 +106,20 @@ const PaymentsTab = () => {
     });
   };
 
+  const handleUpdateCard = (updatedCard: CreditCard) => {
+    const updatedCards = cards.map(card => 
+      card.id === updatedCard.id ? updatedCard : card
+    );
+    
+    setCards(updatedCards);
+    localStorage.setItem('saved_cards', JSON.stringify(updatedCards));
+    
+    toast({
+      title: "Card settings updated",
+      description: "Your payment method settings have been updated",
+    });
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -125,6 +145,7 @@ const PaymentsTab = () => {
               cards={cards}
               onSetDefault={handleSetDefaultCard}
               onRemove={handleRemoveCard}
+              onUpdateCard={handleUpdateCard}
             />
           ) : (
             <div className="bg-muted rounded-md p-4 text-center text-muted-foreground">
