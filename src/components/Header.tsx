@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -59,7 +58,7 @@ const Header = () => {
         <div className="container flex h-16 items-center">
           <div className="mr-4 flex">
             <Link to="/" className="flex items-center space-x-2">
-              <span className="text-xl font-bold">
+              <span className={`text-xl font-bold ${isMobile ? 'text-sm' : ''}`}>
                 <span className={`inline-block vibe-gradient-text transition-opacity duration-500 ease-in-out ${isAnimating ? 'opacity-0' : 'opacity-100'}`}>
                   {currentVWord}
                 </span>
@@ -147,6 +146,8 @@ const Header = () => {
                 </DropdownMenu>
               </nav>
             )}
+            
+            {/* For mobile, we'll just keep a minimal header with logo and user points */}
           </div>
         </div>
       </header>

@@ -4,9 +4,11 @@ import { Layout } from "@/components/Layout";
 import PostFeed from "@/components/PostFeed";
 import CameraButton from "@/components/CameraButton";
 import VernonNext from "@/components/VernonNext";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Index = () => {
   const featuredUsers = ['sarah_vibes', 'jay_experiences', 'adventure_alex', 'marco_travels', 'local_explorer'];
+  const isMobile = useIsMobile();
 
   return (
     <Layout>
@@ -15,7 +17,7 @@ const Index = () => {
           {/* Main content area */}
           <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between mb-2">
-              <h1 className="text-3xl font-bold vibe-gradient-text">
+              <h1 className={`${isMobile ? 'text-xl' : 'text-3xl'} font-bold vibe-gradient-text`}>
                 Discover the Vibe Right Now
               </h1>
             </div>

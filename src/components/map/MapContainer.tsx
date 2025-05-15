@@ -44,7 +44,7 @@ const MapContainer = ({
   
   if (loading) {
     return (
-      <div className={`bg-muted/20 rounded-lg flex items-center justify-center ${isExpanded ? "h-[85vh]" : isMobile ? "h-60" : "h-80"}`}>
+      <div className={`bg-muted/20 rounded-lg flex items-center justify-center ${isExpanded ? "h-[85vh]" : isMobile ? "h-80" : "h-80"}`}>
         <div className="animate-spin">
           <Compass className="h-8 w-8 text-muted-foreground" />
         </div>
@@ -53,7 +53,7 @@ const MapContainer = ({
   }
   
   return (
-    <div className={`relative ${isExpanded ? "h-[85vh]" : isMobile ? "h-60" : "h-80"} rounded-lg overflow-hidden transition-all`} style={{ zIndex: 1 }}>
+    <div className={`relative ${isExpanded ? "h-[85vh]" : isMobile ? "h-80" : "h-80"} rounded-lg overflow-hidden transition-all`} style={{ zIndex: 1 }}>
       <GoogleMapComponent
         userLocation={userLocation}
         locations={locations}
@@ -88,6 +88,18 @@ const MapContainer = ({
           )}
         </p>
       </div>
+      
+      {/* Add resize button on mobile */}
+      {isMobile && !isExpanded && (
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm" 
+          onClick={() => window.resizeMap && window.resizeMap()}
+        >
+          Expand Map
+        </Button>
+      )}
     </div>
   );
 };
