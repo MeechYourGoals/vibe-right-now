@@ -27,12 +27,13 @@ export const useIntroMessages = ({
   useEffect(() => {
     if (messages.length > 0 && !introMessageSpoken && isListening && isFirstInteraction && !introMessageSpeaking.current) {
       const introMessage = messages[0];
+      const messageText = introMessage.content || introMessage.text || '';
       
       // Make sure this is only triggered once
       introMessageSpeaking.current = true;
       
       // Speak the intro message
-      speakIntroOnce(introMessage.text).then(() => {
+      speakIntroOnce(messageText).then(() => {
         markIntroAsSpoken();
         setIntroMessageSpoken(true);
         introMessageSpeaking.current = false;

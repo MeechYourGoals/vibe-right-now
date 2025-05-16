@@ -23,13 +23,15 @@ export const useAiResponseReader = ({
   useEffect(() => {
     if (messages.length > 0 && !isTyping && !isSpeaking && isListening) {
       const lastMessage = messages[messages.length - 1];
+      const isAiMessage = lastMessage.direction === 'incoming' || lastMessage.sender === 'ai';
       
       // Skip the intro message which is handled separately
-      if (lastMessage.sender === 'ai' && lastMessage.id !== messages[0].id) {
+      if (isAiMessage && lastMessage.id !== messages[0].id) {
         // Check if we've already processed this message to avoid repetition
         if (lastProcessedMessageRef.current !== lastMessage.id) {
           lastProcessedMessageRef.current = lastMessage.id;
-          speakResponse(lastMessage.text);
+          const messageText = lastMessage.content || lastMessage.text || '';
+          speakResponse(messageText);
         }
       }
     }

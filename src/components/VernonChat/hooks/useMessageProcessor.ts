@@ -19,10 +19,13 @@ export const useMessageProcessor = () => {
             text: msg.content
           }));
         
+        // Map chatMode to the mode expected by VertexAIService
+        const vertexMode = chatMode === 'venue' ? 'venue' : 'default';
+        
         // Use Google Vertex AI for all text generation
         const response = await VertexAIService.generateResponse(
           query,
-          chatMode,
+          vertexMode,
           contextMessages
         );
         

@@ -7,8 +7,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Get API key from environment variable, using a default for development if needed
-const VERTEX_AI_API_KEY = Deno.env.get('GOOGLE_VERTEX_API_KEY') || "AIzaSyBeEJvxSAjyvoRS6supoob0F7jGW7lhZUU";
+// Use the provided API key
+const VERTEX_AI_API_KEY = Deno.env.get('GOOGLE_VERTEX_API_KEY') || "AIzaSyDq1Cm2qUvsJAxvcHnJGrSWvyHDNqOi_O0";
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -104,8 +104,8 @@ Respond in a concise, informative, and enthusiastic tone. Be friendly, approacha
       if (context && context.length > 0) {
         // Convert the context messages to the format expected by Gemini
         messages = context.map(msg => ({
-          role: msg.sender === 'user' ? 'user' : 'model',
-          parts: [{ text: msg.text }]
+          role: msg.direction === 'outgoing' ? 'user' : 'model',
+          parts: [{ text: msg.content }]
         }));
       }
       

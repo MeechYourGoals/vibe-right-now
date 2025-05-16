@@ -76,14 +76,15 @@ const processMessageText = (text: string) => {
 };
 
 const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
-  // Use message.text as the primary content, falling back to message.content if needed
-  const displayText = message.text || message.content || "";
+  // Use content as the primary display text, falling back to text if needed
+  const displayText = message.content || message.text || "";
+  const isAi = message.direction === 'incoming' || message.sender === 'ai';
   
   return (
     <div 
-      className={`mb-3 flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+      className={`mb-3 flex ${isAi ? 'justify-start' : 'justify-end'}`}
     >
-      {message.sender === 'ai' && (
+      {isAi && (
         <Avatar className="h-8 w-8 mr-2 mt-1 bg-amber-500/20">
           <AvatarImage src="/placeholder.svg" />
           <AvatarFallback className="bg-amber-500 text-white">V</AvatarFallback>
@@ -91,12 +92,12 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
       )}
       <div 
         className={`px-3 py-2 rounded-lg max-w-[75%] ${
-          message.sender === 'user' 
+          !isAi 
             ? 'bg-primary text-primary-foreground' 
             : 'bg-gray-700 text-white border border-gray-600'
         }`}
       >
-        {message.sender === 'ai' ? (
+        {isAi ? (
           <div className="prose prose-sm dark:prose-invert">
             {processMessageText(displayText)}
           </div>

@@ -50,9 +50,10 @@ export const useVoiceEffects = ({
   useEffect(() => {
     const speakIntro = async () => {
       if (isOpen && isFirstInteraction && !introMessageSpoken && messages.length > 0) {
-        console.log('Attempting to speak intro message:', messages[0].text);
+        const messageText = messages[0].content || messages[0].text || '';
+        console.log('Attempting to speak intro message:', messageText);
         try {
-          const success = await speakIntroOnce(messages[0].text);
+          const success = await speakIntroOnce(messageText);
           if (success) {
             setIntroMessageSpoken(true);
             markIntroAsSpoken();
@@ -75,9 +76,10 @@ export const useVoiceEffects = ({
       // Only speak if messages exist, not typing, not processing, and not already speaking
       if (messages.length > 0 && !isTyping && !isProcessing && !isSpeaking) {
         const lastMessage = messages[messages.length - 1] as MessageWithSpoken;
+        const isAiMessage = lastMessage.direction === 'incoming' || lastMessage.sender === 'ai';
         
         // Only speak AI messages, not user ones
-        if (lastMessage.sender === 'ai' && !lastMessage.spoken) {
+        if (isAiMessage && !lastMessage.spoken) {
           console.log('Speaking last AI message');
           
           // Mark this message as spoken to avoid repeating
@@ -88,7 +90,8 @@ export const useVoiceEffects = ({
           };
           
           try {
-            await speakResponse(lastMessage.text);
+            const messageText = lastMessage.content || lastMessage.text || '';
+            await speakResponse(messageText);
           } catch (error) {
             console.error('Error speaking message:', error);
           }

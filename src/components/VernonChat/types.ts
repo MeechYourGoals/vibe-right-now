@@ -6,6 +6,12 @@ export interface Message {
   direction: MessageDirection;
   timestamp: Date;
   aiResponse?: boolean;
+  // Adding these fields for compatibility with existing components
+  text?: string;
+  sender?: 'user' | 'ai' | string;
+  role?: 'user' | 'assistant' | 'system';
+  spoken?: boolean;
+  verified?: boolean;
 }
 
 export type MessageDirection = 'incoming' | 'outgoing';
@@ -42,4 +48,25 @@ export interface ChatButtonProps {
 
 export interface MessageContextMenuProps {
   message: Message;
+}
+
+// For Chat Next
+export interface ChatState {
+  messages: Message[];
+  isLoading: boolean;
+  isListening: boolean;
+  isSpeaking: boolean;
+  transcript: string;
+  interimTranscript: string;
+  isOpen: boolean;
+  isMinimized: boolean;
+}
+
+export interface ChatMessage {
+  id: string;
+  content?: string;
+  text?: string;
+  role?: 'user' | 'assistant' | 'system';
+  sender?: 'user' | 'ai' | string;
+  timestamp: string | Date;
 }

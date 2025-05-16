@@ -8,7 +8,7 @@ export const INITIAL_MESSAGE: Message = {
   text: "Hi there! I'm Vernon, your AI assistant for discovering the best venues and events. How can I help you today?",
   sender: 'ai',
   timestamp: new Date(),
-  role: 'assistant',
+  direction: 'incoming',
   content: "Hi there! I'm Vernon, your AI assistant for discovering the best venues and events. How can I help you today?"
 };
 
@@ -19,7 +19,7 @@ export const createUserMessage = (text: string): Message => {
     text: text,
     sender: 'user',
     timestamp: new Date(),
-    role: 'user',
+    direction: 'outgoing',
     content: text
   };
 };
@@ -31,7 +31,7 @@ export const createAIMessage = (text: string): Message => {
     text: text,
     sender: 'ai',
     timestamp: new Date(),
-    role: 'assistant',
+    direction: 'incoming',
     content: text,
     verified: true
   };

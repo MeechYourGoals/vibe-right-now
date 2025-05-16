@@ -38,16 +38,16 @@ export const handleSearchQuery = async (
       console.error('Error using Vertex AI for search:', vertexError);
     }
     
-    // Fall back to our existing search coordinator
+    // Fall back to our SearchService
     try {
-      return await SearchCoordinator.processSearchQuery(inputValue, paginationState, categories);
+      return await SearchService.search(inputValue);
     } catch (error) {
-      console.error('Error using processSearchQuery with categories, falling back to standard search:', error);
-      return await SearchCoordinator.processSearchQuery(inputValue, paginationState);
+      console.error('Error using SearchService with categories, falling back to standard search:', error);
+      return await SearchService.vectorSearch(inputValue);
     }
   } catch (error) {
     console.error('Error in search query handler with NLP:', error);
     // Fall back to regular search without NLP categories
-    return SearchCoordinator.processSearchQuery(inputValue, paginationState);
+    return SearchService.search(inputValue);
   }
 };

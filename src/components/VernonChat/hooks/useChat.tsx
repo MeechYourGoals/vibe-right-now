@@ -1,37 +1,54 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Message } from '../types';
-import { INITIAL_MESSAGE } from '../utils/messageFactory';
+import { Message, ChatMode } from '../types';
+import { createAIMessage, createUserMessage } from '../utils/messageFactory';
 import { useMessageProcessor } from './useMessageProcessor';
 
+// Create initial message
+const createInitialMessage = (isVenueMode: boolean): Message => {
+  const text = isVenueMode 
+    ? "Hi there! I'm VeRNon for Venues, your business insights assistant. I can help you understand your venue metrics, customer trends, and marketing performance. What would you like to know about your venue's performance?"
+    : "Hi there! I'm Vernon, your AI assistant for discovering the best venues and events. How can I help you today?";
+  
+  return {
+    id: '1',
+    text: text,
+    content: text,
+    sender: 'ai',
+    direction: 'incoming',
+    timestamp: new Date()
+  };
+};
+
 export const useChat = (isProPlan: boolean = false, isVenueMode: boolean = false) => {
-  const initialMessage = isVenueMode 
-    ? {
-        id: '1',
-        text: "Hi there! I'm VeRNon for Venues, your business insights assistant. I can help you understand your venue metrics, customer trends, and marketing performance. What would you like to know about your venue's performance?",
-        sender: 'ai' as const,
-        timestamp: new Date()
-      }
-    : INITIAL_MESSAGE;
+  const initialMessage = createInitialMessage(isVenueMode);
   
   const [messages, setMessages] = useState<Message[]>([initialMessage]);
+  const [paginationState, setPaginationState] = useState<Record<string, number>>({});
+  const [isTyping, setIsTyping] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  
   const navigate = useNavigate();
   
-  const {
-    isTyping,
-    isSearching,
-    processMessage
-  } = useMessageProcessor(isProPlan, isVenueMode);
+  const { processMessage, isProcessing } = useMessageProcessor();
+
+  // Function to update pagination state
+  const updatePaginationState = useCallback((params: Record<string, number>) => {
+    setPaginationState(prev => ({ ...prev, ...params }));
+    return { ...paginationState, ...params };
+  }, [paginationState]);
 
   // Parse messages for explore page links
   useEffect(() => {
     const lastMessage = messages[messages.length - 1];
     
-    if (lastMessage && lastMessage.sender === 'ai') {
+    if (lastMessage && (lastMessage.direction === 'incoming' || lastMessage.sender === 'ai')) {
+      const messageContent = lastMessage.content || lastMessage.text || '';
+      
       // Look for explore page links in the format [view all these results on our Explore page](/explore?q=...)
       const exploreRegex = /\[(.*?explore.*?)\]\(\/explore\?q=(.*?)\)/i;
-      const match = lastMessage.text.match(exploreRegex);
+      const match = messageContent.match(exploreRegex);
       
       if (match && match[2]) {
         const query = decodeURIComponent(match[2]);
@@ -85,36 +102,45 @@ export const useChat = (isProPlan: boolean = false, isVenueMode: boolean = false
       }
       
       // Add user message immediately
-      const userMessage: Message = {
-        id: Date.now().toString(),
-        text: inputValue,
-        sender: 'user',
-        timestamp: new Date()
-      };
-      
+      const userMessage = createUserMessage(inputValue);
       setMessages(prev => [...prev, userMessage]);
       
+      setIsTyping(true);
+      setIsSearching(false);
+      
       // Process the message to get AI response
-      await processMessage(inputValue, setMessages);
+      try {
+        const chatMode = isVenueMode ? 'venue' : 'user';
+        const response = await processMessage(inputValue, messages, chatMode);
+        const aiMessage = createAIMessage(response);
+        setMessages(prev => [...prev, aiMessage]);
+      } catch (error) {
+        console.error('Error processing message:', error);
+        setMessages(prev => [
+          ...prev,
+          createAIMessage("I'm sorry, I encountered an error. Please try again later.")
+        ]);
+      } finally {
+        setIsTyping(false);
+        setIsSearching(false);
+      }
     } catch (error) {
       console.error('Error sending message:', error);
       // Make sure we show an error to the user
       setMessages(prev => [
         ...prev,
-        {
-          id: Date.now().toString(),
-          text: "I'm sorry, I encountered an error. Please try again.",
-          sender: 'ai',
-          timestamp: new Date()
-        }
+        createAIMessage("I'm sorry, I encountered an error. Please try again.")
       ]);
+      setIsTyping(false);
+      setIsSearching(false);
     }
-  }, [processMessage]);
+  }, [messages, isVenueMode, processMessage]);
 
   return {
     messages,
     isTyping,
     isSearching,
-    handleSendMessage
+    handleSendMessage,
+    updatePaginationState
   };
 };
