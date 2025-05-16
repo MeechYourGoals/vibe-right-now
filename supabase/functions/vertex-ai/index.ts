@@ -7,6 +7,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Get API key from environment variable, using a default for development if needed
 const VERTEX_AI_API_KEY = Deno.env.get('GOOGLE_VERTEX_API_KEY') || "AIzaSyBeEJvxSAjyvoRS6supoob0F7jGW7lhZUU";
 
 serve(async (req) => {
@@ -31,8 +32,8 @@ serve(async (req) => {
             input: { text },
             voice: {
               languageCode: 'en-US',
-              name: options?.voice || 'en-US-Neural2-F',
-              ssmlGender: 'FEMALE'
+              name: options?.voice || 'en-US-Neural2-D', // Default to male voice
+              ssmlGender: 'MALE' // Consistently use male voice
             },
             audioConfig: {
               audioEncoding: 'MP3',
@@ -48,12 +49,30 @@ serve(async (req) => {
         
         const ttsData = await ttsResponse.json();
         
-        return new Response(JSON.stringify({ audio: ttsData.audioContent }), {
+        return new Response(JSON.stringify({ audioContent: ttsData.audioContent }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       } catch (error) {
         console.error('Error in text-to-speech:', error);
-        return new Response(JSON.stringify({ error: error.message, audio: null }), {
+        return new Response(JSON.stringify({ error: error.message, audioContent: null }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    }
+
+    // Handle speech-to-text requests
+    if (action === 'speech-to-text' && prompt) {
+      try {
+        console.log('Speech-to-text request received');
+        
+        // Mock implementation for now - would be replaced with actual Google Speech-to-Text API call
+        return new Response(JSON.stringify({ transcript: "Speech transcription with Google Speech-to-Text" }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      } catch (error) {
+        console.error('Error in speech-to-text:', error);
+        return new Response(JSON.stringify({ error: error.message, transcript: null }), {
           status: 500,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
@@ -67,17 +86,17 @@ serve(async (req) => {
       // Define system context based on mode
       let systemPrompt = '';
       if (mode === 'venue') {
-        systemPrompt = "You are Vernon, a venue analytics assistant. Provide insightful business analysis and recommendations for venue owners.";
+        systemPrompt = "You are Vernon, a venue analytics assistant powered by Google Gemini. Provide insightful business analysis and recommendations for venue owners.";
       } else if (mode === 'search') {
-        systemPrompt = "You are a search assistant that provides detailed information about places, events, and activities.";
+        systemPrompt = "You are a search assistant powered by Google Gemini. Provide detailed information about places, events, and activities.";
       } else {
-        systemPrompt = `You are Vernon, a helpful AI assistant within the 'Vibe Right Now' app. Your primary goal is to help users discover great places to go and things to do. 
+        systemPrompt = `You are Vernon, a helpful AI assistant powered by Google Gemini within the 'Vibe Right Now' app. Your primary goal is to help users discover great places to go and things to do. 
         
 You are knowledgeable about venues, events, restaurants, bars, attractions, and activities. You should always prioritize giving detailed information about events, venues, and activities that are relevant to the user's query. If asked about comedy shows in Chicago, list all the comedy clubs, venues, and stand-up comedians performing in theaters.
 
 If you need more information to provide a helpful response, ask clarifying questions like the specific dates they're interested in or what neighborhood they prefer.
 
-Respond in a concise, informative, and enthusiastic tone. Be friendly, approachable, and helpful. Never mention that you're powered by any specific AI model.`;
+Respond in a concise, informative, and enthusiastic tone. Be friendly, approachable, and helpful. Always mention that you're powered by Google Gemini AI.`;
       }
       
       // Prepare the messages for Gemini
@@ -123,8 +142,8 @@ Respond in a concise, informative, and enthusiastic tone. Be friendly, approacha
       
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Vertex AI API error:', errorText);
-        throw new Error(`Vertex AI API error: ${response.status}`);
+        console.error('Google Gemini API error:', errorText);
+        throw new Error(`Google Gemini API error: ${response.status}`);
       }
       
       const data = await response.json();

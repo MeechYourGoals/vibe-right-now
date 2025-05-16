@@ -1,63 +1,44 @@
 
-import { useState } from 'react';
-import { Message } from '../types';
-import { usePaginationState } from '../utils/pagination/usePaginationState';
-import { processMessageInput } from '../utils/messageProcessor';
+import { useState, useCallback } from 'react';
+import { Message, ChatMode } from '../types';
+import { VertexAIService } from '@/services/VertexAIService'; 
 
-export const useMessageProcessor = (isProPlan: boolean = false, isVenueMode: boolean = false) => {
-  const [isTyping, setIsTyping] = useState(false);
-  const [isSearching, setIsSearching] = useState(false);
-  const { currentPaginationState, updatePaginationState } = usePaginationState();
+export const useMessageProcessor = () => {
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  const processMessage = async (
-    inputValue: string,
-    setMessages: React.Dispatch<React.SetStateAction<Message[]>>
-  ) => {
-    // Skip processing if the input is empty
-    if (!inputValue || inputValue.trim() === '') {
-      return;
-    }
-    
-    console.log('Processing message:', inputValue);
-    
-    // Set typing and searching states to show loading indicators
-    setIsTyping(true);
-    setIsSearching(true);
-    
-    try {
-      // Wrap the module import in a try-catch to prevent blank screen errors
-      await processMessageInput(inputValue, setMessages, {
-        isVenueMode,
-        isProPlan,
-        updatePaginationState,
-        setIsTyping,
-        setIsSearching
-      });
-    } catch (error) {
-      console.error('Error processing message:', error);
+  const processMessage = useCallback(
+    async (query: string, previousMessages: Message[], chatMode: ChatMode): Promise<string> => {
+      setIsProcessing(true);
       
-      // Create an error message to display to the user instead of crashing
-      if (setMessages) {
-        setMessages(prev => [
-          ...prev,
-          {
-            id: Date.now().toString(),
-            text: "I'm sorry, I encountered an error processing your request. Please try again or ask something different.",
-            sender: 'ai',
-            timestamp: new Date()
-          }
-        ]);
+      try {
+        // Convert messages to format expected by Vertex AI
+        const contextMessages = previousMessages
+          .slice(-5)
+          .map(msg => ({
+            sender: msg.direction === 'outgoing' ? 'user' : 'ai',
+            text: msg.content
+          }));
+        
+        // Use Google Vertex AI for all text generation
+        const response = await VertexAIService.generateResponse(
+          query,
+          chatMode,
+          contextMessages
+        );
+        
+        return response;
+      } catch (error) {
+        console.error('Error processing message:', error);
+        return "I'm having trouble connecting to my AI services right now. Please try again later.";
+      } finally {
+        setIsProcessing(false);
       }
-      
-      // Always make sure to reset states even if there's an error
-      setIsTyping(false);
-      setIsSearching(false);
-    }
-  };
+    },
+    []
+  );
 
   return {
-    isTyping,
-    isSearching,
-    processMessage
+    processMessage,
+    isProcessing
   };
 };

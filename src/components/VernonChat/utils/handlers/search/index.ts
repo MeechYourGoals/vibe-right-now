@@ -1,7 +1,4 @@
 
-export * from './SearchCoordinator';
-export * from './comedySearchStrategy';
-export * from './complexQueryStrategy';
-export * from './fallbackSearchStrategy';
-export * from './locationSearchStrategy';
-export * from './localDataStrategy';
+// Using lowercase to match file name convention
+export * from './searchCoordinator';
+export * from './searchTypes';

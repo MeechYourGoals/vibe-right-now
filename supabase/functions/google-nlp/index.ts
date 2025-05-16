@@ -1,7 +1,9 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const GOOGLE_CLOUD_API_KEY = Deno.env.get('GOOGLE_CLOUD_API_KEY');
+// Get API key from environment variable
+const GOOGLE_NLP_API_KEY = Deno.env.get('GOOGLE_VERTEX_API_KEY');
+const NLP_API_URL = "https://language.googleapis.com/v1/documents:analyzeEntities";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -9,26 +11,26 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  // Handle CORS preflight
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { text } = await req.json();
+    const { text, features = ['entities'] } = await req.json();
     
     if (!text) {
-      throw new Error('Text is required');
+      return new Response(
+        JSON.stringify({ error: 'Text is required' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
     
-    console.log('NLP request received for:', text.substring(0, 50) + '...');
-
-    // Analyze entities
-    const entitiesResponse = await fetch('https://language.googleapis.com/v1/documents:analyzeEntities', {
+    // Call Google Natural Language API
+    const response = await fetch(`${NLP_API_URL}?key=${GOOGLE_NLP_API_KEY}`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'X-Goog-Api-Key': GOOGLE_CLOUD_API_KEY || ''
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         document: {
@@ -39,50 +41,20 @@ serve(async (req) => {
       })
     });
 
-    if (!entitiesResponse.ok) {
-      const errorData = await entitiesResponse.text();
-      console.error('Google NLP Entities API error:', entitiesResponse.status, errorData);
-      throw new Error(`Google NLP API error: ${entitiesResponse.status}`);
+    if (!response.ok) {
+      const errorData = await response.text();
+      console.error(`Google NLP API error: ${response.status}`, errorData);
+      return new Response(
+        JSON.stringify({ error: `Error calling Google NLP API: ${response.status}` }),
+        { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    const entitiesData = await entitiesResponse.json();
-    
-    // Analyze categories
-    const categoriesResponse = await fetch('https://language.googleapis.com/v1/documents:classifyText', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Goog-Api-Key': GOOGLE_CLOUD_API_KEY || ''
-      },
-      body: JSON.stringify({
-        document: {
-          type: 'PLAIN_TEXT',
-          content: text
-        }
-      })
-    });
-
-    // If categories fails (common for short texts), just proceed without categories
-    let categories = [];
-    if (categoriesResponse.ok) {
-      const categoriesData = await categoriesResponse.json();
-      categories = categoriesData.categories?.map((cat: any) => cat.name) || [];
-    }
-    
-    console.log('NLP analysis complete:', {
-      entitiesCount: entitiesData.entities?.length || 0,
-      categoriesCount: categories.length
-    });
-    
-    // Extract intent and keywords (simple implementation)
-    const extractedData = {
-      entities: entitiesData.entities || [],
-      categories,
-      sentiment: entitiesData.documentSentiment,
-    };
+    const data = await response.json();
+    console.log("Google NLP API response received");
     
     return new Response(
-      JSON.stringify(extractedData),
+      JSON.stringify(data),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {

@@ -1,6 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
+// Get API key from environment variable
 const GOOGLE_VERTEX_API_KEY = Deno.env.get('GOOGLE_VERTEX_API_KEY');
 const STT_API_URL = "https://speech.googleapis.com/v1/speech:recognize";
 

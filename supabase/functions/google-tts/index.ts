@@ -8,6 +8,9 @@ const corsHeaders = {
 
 const DEFAULT_MALE_VOICE = "en-US-Neural2-D";
 
+// Get API key from environment variable
+const GOOGLE_CLOUD_API_KEY = Deno.env.get('GOOGLE_VERTEX_API_KEY') || '';
+
 serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
@@ -33,7 +36,7 @@ serve(async (req) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Goog-Api-Key': Deno.env.get('GOOGLE_CLOUD_API_KEY') || ''
+        'X-Goog-Api-Key': GOOGLE_CLOUD_API_KEY
       },
       body: JSON.stringify({
         input: { text },
