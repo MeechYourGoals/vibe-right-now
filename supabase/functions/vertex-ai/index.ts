@@ -8,7 +8,7 @@ const corsHeaders = {
 };
 
 // Use the provided API key
-const VERTEX_AI_API_KEY = Deno.env.get('GOOGLE_VERTEX_API_KEY') || "AIzaSyDq1Cm2qUvsJAxvcHnJGrSWvyHDNqOi_O0";
+const VERTEX_AI_API_KEY = Deno.env.get('GOOGLE_VERTEX_API_KEY') || "AIzaSyDHBe4hL8fQZdz9wSYi9srL0BGTnZ6XmyM";
 
 serve(async (req) => {
   // Handle CORS preflight requests

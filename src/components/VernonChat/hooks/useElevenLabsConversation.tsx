@@ -10,11 +10,15 @@ import { SearchService } from '@/services/search/SearchService';
 // Create a welcome message based on the mode
 const getWelcomeMessage = (isVenueMode: boolean): Message => ({
   id: '1',
+  content: isVenueMode 
+    ? "Hello! I'm Vernon for Venues, your AI business assistant. How can I help you with your venue today?" 
+    : "Hi there! I'm Vernon, your AI assistant for the Vibe Right Now app. I can help you discover great places to go and things to do. Ask me about restaurants, events, activities, or anything else you're interested in!",
+  direction: 'incoming',
+  timestamp: new Date(),
   text: isVenueMode 
     ? "Hello! I'm Vernon for Venues, your AI business assistant. How can I help you with your venue today?" 
     : "Hi there! I'm Vernon, your AI assistant for the Vibe Right Now app. I can help you discover great places to go and things to do. Ask me about restaurants, events, activities, or anything else you're interested in!",
-  sender: 'ai',
-  timestamp: new Date()
+  sender: 'ai'
 });
 
 export const useElevenLabsConversation = (isVenueMode: boolean = false) => {
@@ -73,9 +77,11 @@ export const useElevenLabsConversation = (isVenueMode: boolean = false) => {
     // Add user message
     const userMessage: Message = {
       id: Date.now().toString(),
+      content: voiceText,
+      direction: 'outgoing',
+      timestamp: new Date(),
       text: voiceText,
-      sender: 'user',
-      timestamp: new Date()
+      sender: 'user'
     };
     
     setMessages(prev => [...prev, userMessage]);
@@ -88,13 +94,15 @@ export const useElevenLabsConversation = (isVenueMode: boolean = false) => {
         
         const aiMessage: Message = {
           id: (Date.now() + 1).toString(),
+          content: searchResponse,
+          direction: 'incoming',
+          timestamp: new Date(),
           text: searchResponse,
-          sender: 'ai',
-          timestamp: new Date()
+          sender: 'ai'
         };
         
         setMessages(prev => [...prev, aiMessage]);
-        return aiMessage.text;
+        return aiMessage.content;
       } else {
         // Format messages for Vertex AI
         const contextMessages = messages.slice(-6);
@@ -108,13 +116,15 @@ export const useElevenLabsConversation = (isVenueMode: boolean = false) => {
         
         const aiMessage: Message = {
           id: (Date.now() + 1).toString(),
+          content: aiResponse,
+          direction: 'incoming',
+          timestamp: new Date(),
           text: aiResponse,
-          sender: 'ai',
-          timestamp: new Date()
+          sender: 'ai'
         };
         
         setMessages(prev => [...prev, aiMessage]);
-        return aiMessage.text;
+        return aiMessage.content;
       }
     } catch (error) {
       console.error('Error processing voice input:', error);
@@ -122,13 +132,15 @@ export const useElevenLabsConversation = (isVenueMode: boolean = false) => {
       
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
+        content: "I'm sorry, I encountered an error processing your request. Please try again.",
+        direction: 'incoming',
+        timestamp: new Date(),
         text: "I'm sorry, I encountered an error processing your request. Please try again.",
-        sender: 'ai',
-        timestamp: new Date()
+        sender: 'ai'
       };
       
       setMessages(prev => [...prev, errorMessage]);
-      return errorMessage.text;
+      return errorMessage.content;
     }
   }, [messages, isVenueMode]);
 
@@ -138,9 +150,11 @@ export const useElevenLabsConversation = (isVenueMode: boolean = false) => {
     
     const userMessage: Message = {
       id: Date.now().toString(),
+      content: text,
+      direction: 'outgoing',
+      timestamp: new Date(),
       text,
-      sender: 'user',
-      timestamp: new Date()
+      sender: 'user'
     };
     
     setMessages(prev => [...prev, userMessage]);
@@ -153,13 +167,15 @@ export const useElevenLabsConversation = (isVenueMode: boolean = false) => {
         
         const aiMessage: Message = {
           id: (Date.now() + 1).toString(),
+          content: searchResponse,
+          direction: 'incoming',
+          timestamp: new Date(),
           text: searchResponse,
-          sender: 'ai',
-          timestamp: new Date()
+          sender: 'ai'
         };
         
         setMessages(prev => [...prev, aiMessage]);
-        speakResponse(aiMessage.text);
+        speakResponse(aiMessage.content);
       } else {
         // Format messages for Vertex AI
         const contextMessages = messages.slice(-6);
@@ -173,13 +189,15 @@ export const useElevenLabsConversation = (isVenueMode: boolean = false) => {
         
         const aiMessage: Message = {
           id: (Date.now() + 1).toString(),
+          content: aiResponse,
+          direction: 'incoming',
+          timestamp: new Date(),
           text: aiResponse,
-          sender: 'ai',
-          timestamp: new Date()
+          sender: 'ai'
         };
         
         setMessages(prev => [...prev, aiMessage]);
-        speakResponse(aiMessage.text);
+        speakResponse(aiMessage.content);
       }
     } catch (error) {
       console.error('Error sending text message:', error);
@@ -187,9 +205,11 @@ export const useElevenLabsConversation = (isVenueMode: boolean = false) => {
       
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
+        content: "I'm sorry, I encountered an error processing your request. Please try again.",
+        direction: 'incoming',
+        timestamp: new Date(),
         text: "I'm sorry, I encountered an error processing your request. Please try again.",
-        sender: 'ai',
-        timestamp: new Date()
+        sender: 'ai'
       };
       
       setMessages(prev => [...prev, errorMessage]);

@@ -25,11 +25,15 @@ export const useElevenLabsConversation = (isVenueMode = false) => {
       // Set initial welcome message based on mode
       const welcomeMessage: Message = {
         id: uuidv4(),
+        content: isVenueMode 
+          ? "Hello! I'm Vernon for Venues, your AI business assistant. I can help you analyze your venue data, understand customer trends, and optimize your business performance. What would you like to know about your venue today?"
+          : "Hi there! I'm Vernon, your AI assistant. I can help you discover amazing places to go and things to do based on your interests. How can I assist you today?",
+        direction: 'incoming',
+        timestamp: new Date(),
         text: isVenueMode 
           ? "Hello! I'm Vernon for Venues, your AI business assistant. I can help you analyze your venue data, understand customer trends, and optimize your business performance. What would you like to know about your venue today?"
           : "Hi there! I'm Vernon, your AI assistant. I can help you discover amazing places to go and things to do based on your interests. How can I assist you today?",
         sender: 'ai',
-        timestamp: new Date(),
         verified: true
       };
       
@@ -62,9 +66,11 @@ export const useElevenLabsConversation = (isVenueMode = false) => {
     // Add user message
     const userMessage: Message = {
       id: uuidv4(),
+      content: text,
+      direction: 'outgoing',
+      timestamp: new Date(),
       text,
-      sender: 'user',
-      timestamp: new Date()
+      sender: 'user'
     };
     
     setMessages(prev => [...prev, userMessage]);
@@ -74,7 +80,7 @@ export const useElevenLabsConversation = (isVenueMode = false) => {
       // Format messages for OpenAI API
       const formattedMessages = messages.map(msg => ({
         role: msg.sender === 'ai' ? 'assistant' : 'user',
-        content: msg.text
+        content: msg.text || msg.content
       }));
       
       // Add the new user message
@@ -92,9 +98,11 @@ export const useElevenLabsConversation = (isVenueMode = false) => {
       // Add assistant response
       const assistantMessage: Message = {
         id: uuidv4(),
+        content: response,
+        direction: 'incoming',
+        timestamp: new Date(),
         text: response,
         sender: 'ai',
-        timestamp: new Date(),
         verified: true
       };
       
@@ -102,19 +110,24 @@ export const useElevenLabsConversation = (isVenueMode = false) => {
       
       // Automatically speak the response
       speakResponse(response);
+      
+      return response;
     } catch (error) {
       console.error('Error processing voice input:', error);
       
       // Add error message
       const errorMessage: Message = {
         id: uuidv4(),
+        content: "I'm sorry, I encountered an error while processing your request. Please try again.",
+        direction: 'incoming',
+        timestamp: new Date(),
         text: "I'm sorry, I encountered an error while processing your request. Please try again.",
         sender: 'ai',
-        timestamp: new Date(),
         verified: false
       };
       
       setMessages(prev => [...prev, errorMessage]);
+      return errorMessage.content;
     } finally {
       setIsProcessing(false);
       setTranscript('');
@@ -129,9 +142,11 @@ export const useElevenLabsConversation = (isVenueMode = false) => {
     // Add user message
     const userMessage: Message = {
       id: uuidv4(),
+      content: text,
+      direction: 'outgoing',
+      timestamp: new Date(),
       text,
-      sender: 'user',
-      timestamp: new Date()
+      sender: 'user'
     };
     
     setMessages(prev => [...prev, userMessage]);
@@ -140,7 +155,7 @@ export const useElevenLabsConversation = (isVenueMode = false) => {
       // Format messages for OpenAI API
       const formattedMessages = messages.map(msg => ({
         role: msg.sender === 'ai' ? 'assistant' : 'user',
-        content: msg.text
+        content: msg.text || msg.content
       }));
       
       // Add the new user message
@@ -158,26 +173,32 @@ export const useElevenLabsConversation = (isVenueMode = false) => {
       // Add assistant response
       const assistantMessage: Message = {
         id: uuidv4(),
+        content: response,
+        direction: 'incoming',
+        timestamp: new Date(),
         text: response,
         sender: 'ai',
-        timestamp: new Date(),
         verified: true
       };
       
       setMessages(prev => [...prev, assistantMessage]);
+      return response;
     } catch (error) {
       console.error('Error sending text message:', error);
       
       // Add error message
       const errorMessage: Message = {
         id: uuidv4(),
+        content: "I'm sorry, I encountered an error while processing your request. Please try again.",
+        direction: 'incoming',
+        timestamp: new Date(),
         text: "I'm sorry, I encountered an error while processing your request. Please try again.",
         sender: 'ai',
-        timestamp: new Date(),
         verified: false
       };
       
       setMessages(prev => [...prev, errorMessage]);
+      return errorMessage.content;
     }
   }, [messages, isVenueMode]);
   
