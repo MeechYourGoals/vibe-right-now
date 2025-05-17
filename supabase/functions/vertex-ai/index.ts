@@ -8,7 +8,7 @@ const corsHeaders = {
 };
 
 // Use the provided API key
-const VERTEX_AI_API_KEY = Deno.env.get('GOOGLE_VERTEX_API_KEY') || "AIzaSyDHBe4hL8fQZdz9wSYi9srL0BGTnZ6XmyM";
+const VERTEX_AI_API_KEY = "AIzaSyDHBe4hL8fQZdz9wSYi9srL0BGTnZ6XmyM";
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -17,6 +17,7 @@ serve(async (req) => {
   }
 
   try {
+    console.log("Received request to vertex-ai function");
     const { prompt, mode = 'default', context = [], model = 'gemini-pro', action, text, options } = await req.json();
     
     // Handle text-to-speech requests
@@ -81,7 +82,7 @@ serve(async (req) => {
 
     // Handle chat completion requests
     if (prompt) {
-      console.log(`Processing ${model} request in ${mode} mode`);
+      console.log(`Processing ${model} request in ${mode} mode with prompt: ${prompt.substring(0, 50)}...`);
       
       // Define system context based on mode
       let systemPrompt = '';
@@ -90,13 +91,7 @@ serve(async (req) => {
       } else if (mode === 'search') {
         systemPrompt = "You are a search assistant powered by Google Gemini. Provide detailed information about places, events, and activities.";
       } else {
-        systemPrompt = `You are Vernon, a helpful AI assistant powered by Google Gemini within the 'Vibe Right Now' app. Your primary goal is to help users discover great places to go and things to do. 
-        
-You are knowledgeable about venues, events, restaurants, bars, attractions, and activities. You should always prioritize giving detailed information about events, venues, and activities that are relevant to the user's query. If asked about comedy shows in Chicago, list all the comedy clubs, venues, and stand-up comedians performing in theaters.
-
-If you need more information to provide a helpful response, ask clarifying questions like the specific dates they're interested in or what neighborhood they prefer.
-
-Respond in a concise, informative, and enthusiastic tone. Be friendly, approachable, and helpful. Always mention that you're powered by Google Gemini AI.`;
+        systemPrompt = `You are Vernon, a helpful AI assistant powered by Google Gemini within the 'Vibe Right Now' app. Your primary goal is to help users discover great places to go and things to do.`;
       }
       
       // Prepare the messages for Gemini
@@ -123,6 +118,8 @@ Respond in a concise, informative, and enthusiastic tone. Be friendly, approacha
         parts: [{ text: prompt }]
       });
       
+      console.log("Sending request to Gemini API with messages:", JSON.stringify(messages));
+      
       // Call Gemini API
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${VERTEX_AI_API_KEY}`, {
         method: 'POST',
@@ -143,13 +140,15 @@ Respond in a concise, informative, and enthusiastic tone. Be friendly, approacha
       if (!response.ok) {
         const errorText = await response.text();
         console.error('Google Gemini API error:', errorText);
-        throw new Error(`Google Gemini API error: ${response.status}`);
+        throw new Error(`Google Gemini API error: ${response.status}: ${errorText}`);
       }
       
       const data = await response.json();
+      console.log("Gemini API response:", JSON.stringify(data));
+      
       const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
       
-      console.log('Generated response successfully');
+      console.log('Generated response successfully:', generatedText.substring(0, 50) + '...');
       return new Response(JSON.stringify({ text: generatedText }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });

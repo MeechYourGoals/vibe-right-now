@@ -1,5 +1,5 @@
 
-import { SearchCoordinator } from './searchCoordinator';
+import { SearchCoordinator } from './SearchCoordinator';
 
 export * from './searchTypes';
 export { SearchCoordinator };

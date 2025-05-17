@@ -16,6 +16,7 @@ serve(async (req) => {
   }
 
   try {
+    console.log("Received request to gemini-ai function");
     const { prompt, mode, history } = await req.json();
     
     // Build conversation history in Gemini format
@@ -72,10 +73,7 @@ serve(async (req) => {
     if (!response.ok) {
       const errorData = await response.text();
       console.error(`Gemini API error: ${response.status}`, errorData);
-      return new Response(
-        JSON.stringify({ error: `Error calling Gemini API: ${response.status}` }),
-        { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      throw new Error(`Gemini API error: ${response.status}`);
     }
 
     const data = await response.json();

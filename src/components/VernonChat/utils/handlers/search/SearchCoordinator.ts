@@ -5,7 +5,7 @@ import { LocalDataStrategy } from './localDataStrategy';
 import { ComplexQueryStrategy } from './complexQueryStrategy';
 import { ComedySearchStrategy } from './comedySearchStrategy';
 import { LocationSearchStrategy } from './locationSearchStrategy';
-import { VertexAIService } from '@/services/VertexAIService';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface SearchResult {
   title: string;
@@ -53,60 +53,60 @@ export class SearchCoordinator {
     paginationState: Record<string, number> = {}, 
     categories: string[] = []
   ): Promise<string> {
-    // First check if it's a location query
-    if (LocationSearchStrategy.isLocationQuery(inputValue)) {
-      console.log('Detected location query, using LocationSearchStrategy');
-      try {
-        const locationResult = await LocationSearchStrategy.handleLocationSearch(inputValue);
-        
-        if (locationResult && locationResult.response && locationResult.response.length > 50) {
-          console.log('Location strategy returned results');
-          return locationResult.response;
-        }
-      } catch (error) {
-        console.error('Error in location search:', error);
-      }
-    }
-    
-    // Check if it's a complex query
-    if (ComplexQueryStrategy.isComplexQuery(inputValue)) {
-      console.log('Detected complex query, using ComplexQueryStrategy with NLP categories');
-      try {
-        return await ComplexQueryStrategy.handleComplexQuery(inputValue, paginationState, categories);
-      } catch (error) {
-        console.error('Error in complex query handling:', error);
-      }
-    }
-    
-    // Check if it's a comedy-related query
-    if (ComedySearchStrategy.isComedyQuery(inputValue)) {
-      console.log('Detected comedy query, using ComedySearchStrategy');
-      try {
-        return await ComedySearchStrategy.handleComedySearch(inputValue);
-      } catch (error) {
-        console.error('Error in comedy search:', error);
-      }
-    }
-    
-    // Fall back to general search service
-    console.log('Using general search service with NLP categories');
     try {
-      // Fix the parameter mismatch - searchService.search only takes one parameter
-      return await SearchService.search(inputValue);
-    } catch (error) {
-      console.error('Error in general search service:', error);
+      console.log('Processing search query:', inputValue);
       
-      // Try local data strategy as fallback
-      try {
-        if (LocalDataStrategy.canHandleLocalQuery(inputValue)) {
-          return await LocalDataStrategy.handleLocalSearch(inputValue, paginationState);
+      // Try using the vertex-ai function directly for search
+      const { data, error } = await supabase.functions.invoke('vertex-ai', {
+        body: { 
+          prompt: inputValue,
+          mode: 'search',
+          model: 'gemini-1.5-pro'
         }
-      } catch (localError) {
-        console.error('Error in local data strategy:', localError);
+      });
+      
+      if (error) {
+        console.error("Error calling vertex-ai function for search:", error);
+        throw error;
       }
       
-      // Ultimate fallback
+      if (data && data.text) {
+        return data.text;
+      }
+      
+      throw new Error("No search results received");
+    } catch (error) {
+      console.error('Search coordinator error:', error);
+      
+      // Fall back to regular search strategies
+      if (LocationSearchStrategy.isLocationQuery(inputValue)) {
+        console.log('Using location search strategy');
+        try {
+          const locationResult = await LocationSearchStrategy.handleLocationSearch(inputValue);
+          if (locationResult && locationResult.response && locationResult.response.length > 50) {
+            return locationResult.response;
+          }
+        } catch (locationError) {
+          console.error('Location search error:', locationError);
+        }
+      }
+      
+      // Final fallback
       return FallbackSearchStrategy.generateFallbackResponse(inputValue);
+    }
+  }
+
+  /**
+   * Search for information using Google services
+   * @param query Search query text
+   * @returns Search results formatted as a string
+   */
+  static async search(query: string): Promise<string> {
+    try {
+      return await this.processSearchQuery(query);
+    } catch (error) {
+      console.error('Error in search coordinator:', error);
+      return `I couldn't find information about "${query}". Please try a different search or ask another question.`;
     }
   }
 }

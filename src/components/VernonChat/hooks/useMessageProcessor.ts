@@ -1,7 +1,7 @@
 
 import { useState, useCallback } from 'react';
 import { Message, ChatMode } from '../types';
-import { VertexAIService } from '@/services/VertexAIService'; 
+import { supabase } from '@/integrations/supabase/client';
 
 export const useMessageProcessor = () => {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -22,14 +22,29 @@ export const useMessageProcessor = () => {
         // Map chatMode to the mode expected by VertexAIService
         const vertexMode = chatMode === 'venue' ? 'venue' : 'default';
         
-        // Use Google Vertex AI for all text generation
-        const response = await VertexAIService.generateResponse(
-          query,
-          vertexMode,
-          contextMessages
-        );
+        console.log("Calling vertex-ai function with:", query.substring(0, 50), vertexMode);
         
-        return response;
+        // Direct call to Supabase Edge Function
+        const { data, error } = await supabase.functions.invoke('vertex-ai', {
+          body: { 
+            prompt: query,
+            mode: vertexMode,
+            context: contextMessages,
+            model: 'gemini-1.5-pro'
+          }
+        });
+        
+        if (error) {
+          console.error("Error calling vertex-ai function:", error);
+          throw new Error(error.message);
+        }
+        
+        if (!data || !data.text) {
+          throw new Error("No response received from Vertex AI");
+        }
+        
+        console.log("Received response from vertex-ai:", data.text.substring(0, 50) + "...");
+        return data.text;
       } catch (error) {
         console.error('Error processing message:', error);
         return "I'm having trouble connecting to my AI services right now. Please try again later.";
