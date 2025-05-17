@@ -1,98 +1,78 @@
 
-import { VertexAIService } from '@/services/VertexAIService';
-
 /**
- * Fallback strategy when all other search methods fail
+ * Fallback search strategy that doesn't rely on external APIs
  */
 export const FallbackSearchStrategy = {
   /**
-   * Standard search using the SimpleSearchService
+   * Generate a reasonable response without external search
+   * @param query The search query
+   * @returns A generic response
    */
-  async useStandardSearch(inputValue: string): Promise<string> {
-    try {
-      // This would use a simple keyword-based search
-      return `Here's what I could find about "${inputValue}". You can try refining your search to get more specific results.`;
-    } catch (error) {
-      console.error('Error in standard search:', error);
-      return '';
-    }
-  },
-  
-  /**
-   * Try Swirl search service
-   */
-  async useSwirlSearch(inputValue: string): Promise<string> {
-    try {
-      // This would normally call the Swirl search service
-      return '';
-    } catch (error) {
-      console.error('Error in Swirl search:', error);
-      return '';
-    }
-  },
-  
-  /**
-   * Try using Hugging Chat search
-   */
-  async useHuggingChatSearch(inputValue: string): Promise<string> {
-    try {
-      // This would normally call Hugging Chat
-      return '';
-    } catch (error) {
-      console.error('Error in Hugging Chat search:', error);
-      return '';
-    }
-  },
-  
-  /**
-   * Last attempt using Vertex AI with enhanced search capabilities
-   */
-  async useVertexAILastAttempt(inputValue: string): Promise<string> {
-    try {
-      // Try to get a response from Vertex AI with enhanced search capabilities
-      const response = await VertexAIService.searchWithVertex(inputValue);
-      
-      // Process the response to add hyperlinks for venues mentioned
-      return this.processResponseWithHyperlinks(response, inputValue);
-    } catch (error) {
-      console.error('Error in Vertex AI search:', error);
-      return '';
-    }
-  },
-  
-  /**
-   * Process Vertex AI response to add hyperlinks to venues
-   */
-  processResponseWithHyperlinks(response: string, inputValue: string): string {
-    // This would typically use a more sophisticated NLP to identify venue names
-    // For now, we'll use a simple implementation that just wraps venue names we can recognize
+  async search(query: string): Promise<string> {
+    console.log('Using fallback search strategy for:', query);
     
-    const venuePatterns = [
-      { name: 'Sunset Lounge', url: '/venue/5' },
-      { name: 'LIV Miami', url: '/venue/7' },
-      { name: 'Skyline Night Club', url: '/venue/10' },
-      { name: 'American Airlines Arena', url: '/venue/13' },
-      { name: 'Heat vs Magic game', url: '/venue/13' },
-      { name: 'Barry\'s Bootcamp', url: '/venue/20' },
-    ];
+    // Extract key topics from the query
+    const topics = extractTopics(query);
     
-    let enhancedResponse = response;
-    
-    venuePatterns.forEach(venue => {
-      const regex = new RegExp(`\\b${venue.name}\\b`, 'gi');
-      enhancedResponse = enhancedResponse.replace(
-        regex, 
-        `<a href="${venue.url}" class="text-primary hover:underline">${venue.name}</a>`
-      );
-    });
-    
-    return enhancedResponse;
-  },
-  
-  /**
-   * Generate a fallback response when all other methods fail
-   */
-  generateFallbackResponse(inputValue: string): string {
-    return `I couldn't find specific information about "${inputValue}". Try asking about specific venues, events, or locations.`;
+    // Generate a helpful response based on detected topics
+    return generateFallbackResponse(query, topics);
   }
 };
+
+/**
+ * Extract potential topics from a query using regex patterns
+ */
+function extractTopics(query: string): string[] {
+  const topics: string[] = [];
+  
+  // Check for cities
+  const cityPattern = /\b(chicago|new york|los angeles|san francisco|miami|austin|seattle|boston|atlanta|nashville|denver|portland|dallas|houston)\b/gi;
+  const cityMatches = query.match(cityPattern);
+  if (cityMatches) {
+    topics.push(...cityMatches);
+  }
+  
+  // Check for types of venues
+  const venuePattern = /\b(restaurants?|bars?|clubs?|museums?|theaters?|parks?|cafes?|coffee shops?|concerts?|festivals?|shows?|events?)\b/gi;
+  const venueMatches = query.match(venuePattern);
+  if (venueMatches) {
+    topics.push(...venueMatches);
+  }
+  
+  // Check for cuisines
+  const cuisinePattern = /\b(italian|mexican|chinese|japanese|thai|indian|french|greek|spanish|mediterranean|vegan|vegetarian|seafood|steak)\b/gi;
+  const cuisineMatches = query.match(cuisinePattern);
+  if (cuisineMatches) {
+    topics.push(...cuisineMatches);
+  }
+  
+  // Check for activities
+  const activityPattern = /\b(hiking|biking|swimming|yoga|fitness|shopping|sightseeing|tour|nightlife|happy hour)\b/gi;
+  const activityMatches = query.match(activityPattern);
+  if (activityMatches) {
+    topics.push(...activityMatches);
+  }
+  
+  return Array.from(new Set(topics.map(t => t.toLowerCase())));
+}
+
+/**
+ * Generate a helpful response without external data
+ */
+function generateFallbackResponse(query: string, topics: string[]): string {
+  // If no specific topics were identified
+  if (topics.length === 0) {
+    return `I don't have specific information about "${query}" at the moment. Could you try rephrasing your question or asking about something more specific?`;
+  }
+  
+  // For location-based queries
+  const locationPatterns = ["in", "near", "around", "close to"];
+  const hasLocation = locationPatterns.some(pattern => query.includes(pattern));
+  
+  if (hasLocation) {
+    return `I'd be happy to help you find information about ${topics.join(", ")}. While I don't have real-time data available right now, I suggest checking popular apps like Yelp, Google Maps, or Eventbrite for the most up-to-date information. You can also try asking me again later.`;
+  }
+  
+  // For general venue or activity queries
+  return `I'd like to help you find information about ${topics.join(", ")}. While I can't access specific details at the moment, you might want to try a more specific question including location details (like city or neighborhood) or time frame. You can also check dedicated apps for the most current information.`;
+}

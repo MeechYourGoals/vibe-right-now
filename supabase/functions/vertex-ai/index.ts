@@ -10,6 +10,12 @@ const corsHeaders = {
 // Use the provided API key
 const VERTEX_AI_API_KEY = "AIzaSyDHBe4hL8fQZdz9wSYi9srL0BGTnZ6XmyM";
 
+// Models to use with fallback logic
+const MODELS = {
+  PRIMARY: 'gemini-1.5-pro',
+  FALLBACK: 'gemini-1.0-pro',
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -18,7 +24,7 @@ serve(async (req) => {
 
   try {
     console.log("Received request to vertex-ai function");
-    const { prompt, mode = 'default', context = [], model = 'gemini-pro', action, text, options } = await req.json();
+    const { prompt, mode = 'default', context = [], model = MODELS.PRIMARY, action, text, options } = await req.json();
     
     // Handle text-to-speech requests
     if (action === 'text-to-speech' && text) {
@@ -82,7 +88,8 @@ serve(async (req) => {
 
     // Handle chat completion requests
     if (prompt) {
-      console.log(`Processing ${model} request in ${mode} mode with prompt: ${prompt.substring(0, 50)}...`);
+      const requestedModel = model || MODELS.PRIMARY;
+      console.log(`Processing ${requestedModel} request in ${mode} mode with prompt: ${prompt.substring(0, 50)}...`);
       
       // Define system context based on mode
       let systemPrompt = '';
@@ -96,11 +103,12 @@ serve(async (req) => {
       
       // Prepare the messages for Gemini
       let messages = [];
+      
+      // Process context properly - ensure it's in the correct format
       if (context && context.length > 0) {
-        // Convert the context messages to the format expected by Gemini
         messages = context.map(msg => ({
           role: msg.sender === 'user' ? 'user' : 'model',
-          parts: [{ text: msg.text || msg.content }]
+          parts: [{ text: msg.text || msg.content || '' }]
         }));
       }
       
@@ -119,47 +127,79 @@ serve(async (req) => {
       });
       
       console.log("Sending request to Gemini API with messages:", JSON.stringify(messages));
-      
-      // Call Gemini API
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${VERTEX_AI_API_KEY}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: messages,
-          generationConfig: {
-            temperature: 0.7,
-            topK: 40,
-            topP: 0.95,
-            maxOutputTokens: 1024,
+
+      // Try with primary model first
+      try {
+        const response = await callGeminiAPI(requestedModel, messages);
+        const generatedText = response.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        console.log('Generated response successfully:', generatedText.substring(0, 50) + '...');
+        
+        return new Response(JSON.stringify({ text: generatedText }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      } catch (error) {
+        // If we get a rate limit error and we're using the primary model, try fallback
+        if (error.message.includes('429') && requestedModel === MODELS.PRIMARY) {
+          console.log(`Rate limit exceeded for ${MODELS.PRIMARY}, trying fallback model ${MODELS.FALLBACK}`);
+          
+          try {
+            const fallbackResponse = await callGeminiAPI(MODELS.FALLBACK, messages);
+            const fallbackText = fallbackResponse.candidates?.[0]?.content?.parts?.[0]?.text || '';
+            console.log('Generated response with fallback model:', fallbackText.substring(0, 50) + '...');
+            
+            return new Response(JSON.stringify({ 
+              text: fallbackText,
+              usedFallbackModel: true 
+            }), {
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            });
+          } catch (fallbackError) {
+            console.error('Error with fallback model:', fallbackError);
+            throw new Error(`Failed with both primary and fallback models: ${fallbackError.message}`);
           }
-        }),
-      });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Google Gemini API error:', errorText);
-        throw new Error(`Google Gemini API error: ${response.status}: ${errorText}`);
+        } else {
+          // Rethrow if it's not a rate limit issue or we've already tried fallback
+          throw error;
+        }
       }
-      
-      const data = await response.json();
-      console.log("Gemini API response:", JSON.stringify(data));
-      
-      const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-      
-      console.log('Generated response successfully:', generatedText.substring(0, 50) + '...');
-      return new Response(JSON.stringify({ text: generatedText }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
     } else {
       throw new Error('Invalid request: missing prompt or action');
     }
   } catch (error) {
     console.error('Error in vertex-ai function:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ 
+      error: error.message,
+      fallbackResponse: "I'm currently experiencing connection issues. Please try again shortly." 
+    }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 });
+
+// Helper function to call Gemini API
+async function callGeminiAPI(model, messages) {
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${VERTEX_AI_API_KEY}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      contents: messages,
+      generationConfig: {
+        temperature: 0.7,
+        topK: 40,
+        topP: 0.95,
+        maxOutputTokens: 1024,
+      }
+    }),
+  });
+  
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error(`Google Gemini API error: ${response.status}:`, errorText);
+    throw new Error(`Google Gemini API error: ${response.status}: ${errorText}`);
+  }
+  
+  return await response.json();
+}

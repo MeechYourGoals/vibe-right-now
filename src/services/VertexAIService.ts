@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 export class VertexAIService {
   // Default model settings
   private static DEFAULT_MODEL = 'gemini-1.5-pro';
+  private static FALLBACK_MODEL = 'gemini-1.0-pro';
   private static DEFAULT_VOICE = 'en-US-Neural2-D'; // Default male voice
   
   /**
@@ -26,11 +27,17 @@ export class VertexAIService {
     try {
       console.log(`Generating Gemini response with mode: ${mode}`);
       
+      // Ensure context is in the correct format
+      const formattedContext = context.map(msg => ({
+        sender: msg.sender || (msg.role === 'user' || msg.direction === 'outgoing' ? 'user' : 'ai'),
+        text: msg.text || msg.content || ''
+      }));
+      
       const { data, error } = await supabase.functions.invoke('vertex-ai', {
         body: { 
           prompt,
           mode,
-          context,
+          context: formattedContext,
           model: this.DEFAULT_MODEL
         }
       });
@@ -41,12 +48,42 @@ export class VertexAIService {
       }
       
       if (!data || !data.text) {
-        throw new Error('No response received from Vertex AI');
+        if (data?.fallbackResponse) {
+          return data.fallbackResponse;
+        }
+        throw new Error('No response text received from Vertex AI');
       }
       
       return data.text;
     } catch (error) {
       console.error('Error generating response with Vertex AI:', error);
+      
+      // Try with fallback model if we get a quota error
+      if (error.message?.includes('429') || error.message?.includes('quota')) {
+        try {
+          console.log('Rate limit exceeded, trying fallback model');
+          
+          const { data, error: fallbackError } = await supabase.functions.invoke('vertex-ai', {
+            body: { 
+              prompt,
+              mode,
+              context,
+              model: this.FALLBACK_MODEL
+            }
+          });
+          
+          if (fallbackError) {
+            throw fallbackError;
+          }
+          
+          if (data?.text) {
+            return data.text;
+          }
+        } catch (fallbackAttemptError) {
+          console.error('Fallback model also failed:', fallbackAttemptError);
+        }
+      }
+      
       return "I'm having trouble connecting to Google AI services right now. Please try again later.";
     }
   }
@@ -79,7 +116,39 @@ export class VertexAIService {
         Format your response in a clear, readable way.
       `;
       
-      return await this.generateResponse(searchPrompt, 'search');
+      // Try with primary model first
+      try {
+        return await this.generateResponse(searchPrompt, 'search');
+      } catch (primaryError) {
+        console.error('Error with primary model for search:', primaryError);
+        
+        // Try with fallback model
+        if (primaryError.message?.includes('429') || primaryError.message?.includes('quota')) {
+          try {
+            console.log('Using fallback model for search');
+            
+            const { data, error } = await supabase.functions.invoke('vertex-ai', {
+              body: { 
+                prompt: searchPrompt,
+                mode: 'search',
+                model: this.FALLBACK_MODEL
+              }
+            });
+            
+            if (error) {
+              throw error;
+            }
+            
+            if (data?.text) {
+              return data.text;
+            }
+          } catch (fallbackError) {
+            console.error('Fallback model also failed for search:', fallbackError);
+          }
+        }
+        
+        throw primaryError;
+      }
     } catch (error) {
       console.error('Error in Vertex AI search:', error);
       return `I couldn't find specific information about "${query}". Please try a different search.`;
@@ -97,22 +166,25 @@ export class VertexAIService {
     options: { voice?: string; speakingRate?: number; pitch?: number } = {}
   ): Promise<string> {
     try {
-      const { data, error } = await supabase.functions.invoke('google-tts', {
+      const { data, error } = await supabase.functions.invoke('vertex-ai', {
         body: { 
+          action: 'text-to-speech',
           text,
-          voice: options.voice || this.DEFAULT_VOICE,
-          speakingRate: options.speakingRate || 1.0,
-          pitch: options.pitch || 0
+          options: {
+            voice: options.voice || this.DEFAULT_VOICE,
+            speakingRate: options.speakingRate || 1.0,
+            pitch: options.pitch || 0
+          }
         }
       });
       
       if (error) {
-        console.error('Error calling Google TTS function:', error);
+        console.error('Error calling Vertex AI TTS function:', error);
         throw new Error(`Failed to convert text to speech: ${error.message}`);
       }
       
       if (!data || !data.audioContent) {
-        throw new Error('No audio content received from Google TTS');
+        throw new Error('No audio content received from Vertex AI TTS');
       }
       
       return data.audioContent;
@@ -129,17 +201,20 @@ export class VertexAIService {
    */
   static async speechToText(audioBase64: string): Promise<string | null> {
     try {
-      const { data, error } = await supabase.functions.invoke('google-stt', {
-        body: { audio: audioBase64 }
+      const { data, error } = await supabase.functions.invoke('vertex-ai', {
+        body: { 
+          action: 'speech-to-text',
+          prompt: audioBase64
+        }
       });
       
       if (error) {
-        console.error('Error calling Google STT function:', error);
+        console.error('Error calling Vertex AI STT function:', error);
         throw new Error(`Speech-to-text conversion failed: ${error.message}`);
       }
       
       if (!data || !data.transcript) {
-        throw new Error('No transcript received from Google STT');
+        throw new Error('No transcript received from Vertex AI STT');
       }
       
       return data.transcript;
