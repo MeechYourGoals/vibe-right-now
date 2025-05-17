@@ -41,7 +41,9 @@ const VernonChat: React.FC = () => {
         content, 
         direction, 
         timestamp,
-        aiResponse
+        aiResponse,
+        text: content, // Add for compatibility
+        sender: direction === 'outgoing' ? 'user' : 'ai' // Add for compatibility
       }
     ]);
   }, [setMessages]);
@@ -95,7 +97,9 @@ const VernonChat: React.FC = () => {
           content: 'Hello! I\'m Vernon, your AI assistant powered by Google Gemini. How can I help you today?',
           direction: 'incoming',
           timestamp,
-          aiResponse: true
+          aiResponse: true,
+          text: 'Hello! I\'m Vernon, your AI assistant powered by Google Gemini. How can I help you today?',
+          sender: 'ai'
         }
       ]);
     }

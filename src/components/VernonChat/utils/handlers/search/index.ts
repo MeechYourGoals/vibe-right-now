@@ -1,4 +1,12 @@
 
-// Using lowercase to match file name convention
-export * from './searchCoordinator';
+import { SearchCoordinator } from './searchCoordinator';
+
 export * from './searchTypes';
+export { SearchCoordinator };
+
+// Re-export search strategies for convenience
+export * from './comedySearchStrategy';
+export * from './complexQueryStrategy';
+export * from './fallbackSearchStrategy';
+export * from './localDataStrategy';
+export * from './locationSearchStrategy';
