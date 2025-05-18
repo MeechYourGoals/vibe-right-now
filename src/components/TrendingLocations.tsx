@@ -1,129 +1,174 @@
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Link } from "react-router-dom";
-import { mockLocations } from "@/mock/data";
+import { ArrowRight, TrendingUp, MapPin } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Location } from "@/types";
-import { getMediaForLocationMock } from "@/utils/explore/mockGenerators";
+import { mockLocations } from "@/mock/locations";
+import { getNearbyLocations } from "@/mock/cityLocations";
+import { toast } from "sonner";
+import { Link } from "react-router-dom";
+import { calculateDistance, getReferencePoint } from '@/components/map/common/DistanceCalculator';
 
-const TrendingLocations: React.FC = () => {
-  const [locations, setLocations] = useState<Location[]>([]);
-  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+// Event bus for updating trending locations from VernonChat
+export const eventBus = {
+  listeners: new Map<string, Function[]>(),
+  
+  on(event: string, callback: Function) {
+    if (!this.listeners.has(event)) {
+      this.listeners.set(event, []);
+    }
+    this.listeners.get(event)?.push(callback);
+  },
+  
+  emit(event: string, data: any) {
+    if (this.listeners.has(event)) {
+      this.listeners.get(event)?.forEach(callback => callback(data));
+    }
+  }
+};
 
+// Export function for VernonChat to update trending locations
+export const updateTrendingLocations = (cityName: string, events: Location[]) => {
+  eventBus.emit('trending-locations-update', { cityName, events });
+};
+
+const TrendingLocations = () => {
+  // Default to some popular locations if no city is specified
+  const [trendingLocations, setTrendingLocations] = useState<Location[]>([]);
+  const [userLocation, setUserLocation] = useState<GeolocationCoordinates | null>(null);
+  const [userAddressLocation, setUserAddressLocation] = useState<[number, number] | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [geolocationAttempted, setGeolocationAttempted] = useState(false);
+  
+  // Use geolocation to determine user's location
   useEffect(() => {
-    // Get user's location for nearby filtering
-    if (navigator.geolocation) {
+    if (!geolocationAttempted && navigator.geolocation) {
+      setGeolocationAttempted(true);
+      
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setUserLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          });
+          setUserLocation(position.coords);
+          setLoading(false);
+          
+          // Get nearby locations within 10 miles
+          const nearbyLocations = getNearbyLocations(
+            position.coords.latitude,
+            position.coords.longitude,
+            10 // 10 mile radius
+          );
+          
+          if (nearbyLocations.length > 0) {
+            // Get a random subset for trending
+            const randomTrending = [...nearbyLocations]
+              .sort(() => 0.5 - Math.random())
+              .slice(0, 3);
+            setTrendingLocations(randomTrending);
+          } else {
+            // Fallback to default locations
+            setTrendingLocations(mockLocations.slice(0, 3));
+          }
         },
-        () => {
-          // Fallback to default location (San Francisco)
-          setUserLocation({ lat: 37.7749, lng: -122.4194 });
-        }
+        (error) => {
+          console.error("Error getting location:", error);
+          setLoading(false);
+          // Fall back to default trending locations
+          setTrendingLocations(mockLocations.slice(0, 3));
+        },
+        { enableHighAccuracy: true }
       );
-    } else {
-      // Fallback for browsers without geolocation
-      setUserLocation({ lat: 37.7749, lng: -122.4194 });
     }
-  }, []);
-
+  }, [geolocationAttempted]);
+  
+  // Initialize with trending locations for fallback
   useEffect(() => {
-    if (userLocation) {
-      // Filter locations within approximately 10 miles radius
-      const nearbyLocations = mockLocations.filter(location => {
-        if (!location.lat || !location.lng) return false;
+    if (!geolocationAttempted) {
+      setTrendingLocations(mockLocations.slice(0, 3));
+      setLoading(false);
+    }
+  }, [geolocationAttempted]);
+  
+  useEffect(() => {
+    // Listen for updates from VernonChat
+    const handleUpdate = (data: { cityName: string, events: Location[] }) => {
+      const { cityName, events } = data;
+      
+      // Replace trending locations with the new events
+      if (events && events.length > 0) {
+        setTrendingLocations(events);
         
-        // Calculate distance (rough approximation)
-        const distance = calculateDistance(
-          userLocation.lat,
-          userLocation.lng,
-          location.lat,
-          location.lng
+        // Show toast notification
+        toast.success(`Updated trending locations for ${cityName}`);
+      } else {
+        // If no events were provided, get trending locations for the city
+        const cityTrending = getNearbyLocations(
+          userLocation?.latitude || 34.0522, // Default LA coords if no location
+          userLocation?.longitude || -118.2437,
+          10
         );
         
-        return distance <= 10; // 10 miles radius
-      });
-      
-      // Sort by trending factor and take top 5
-      const sortedLocations = nearbyLocations
-        .sort(() => 0.5 - Math.random()) // Shuffle
-        .sort((a, b) => {
-          // Prioritize locations with vibes
-          const aVibeCount = a.vibes?.length || 0;
-          const bVibeCount = b.vibes?.length || 0;
-          return bVibeCount - aVibeCount;
-        })
-        .slice(0, 5);
-      
-      setLocations(sortedLocations);
-    }
+        if (cityTrending.length > 0) {
+          setTrendingLocations(cityTrending.slice(0, 3));
+        }
+      }
+    };
+    
+    eventBus.on('trending-locations-update', handleUpdate);
+    
+    // Cleanup listener on unmount
+    return () => {
+      eventBus.listeners.delete('trending-locations-update');
+    };
   }, [userLocation]);
 
-  // Calculate distance between two coordinates in miles
-  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
-    const R = 3958.8; // Radius of the Earth in miles
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = 
-      Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-      Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    const distance = R * c; // Distance in miles
-    return distance;
-  };
-
-  // Get random vibe tag for each location
-  const getVibeTag = (location: Location) => {
-    const defaultVibes = ["Trendy", "Popular", "Busy", "Chill", "Local Favorite"];
-    
-    if (location.vibes && location.vibes.length > 0) {
-      return location.vibes[Math.floor(Math.random() * location.vibes.length)];
-    }
-    
-    return defaultVibes[Math.floor(Math.random() * defaultVibes.length)];
-  };
-
+  // Get the reference point for distance calculations
+  const referencePoint = getReferencePoint(userAddressLocation, userLocation);
+  
   return (
     <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg">Trending Nearby</CardTitle>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-xl flex items-center">
+          <TrendingUp className="h-5 w-5 mr-2" />
+          <span>Trending Nearby</span>
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {locations.length === 0 ? (
+          {loading ? (
             <div className="flex justify-center py-4">
               <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
             </div>
           ) : (
-            locations.map((location) => (
+            trendingLocations.map((location) => (
               <Link 
                 key={location.id} 
-                to={`/venue/${location.id}`}
-                className="flex items-center space-x-3 hover:bg-accent rounded-md p-2 transition-colors"
+                to={`/venue/${location.id}`} 
+                className="p-3 border rounded-lg flex justify-between items-center hover:bg-accent/10 transition-colors"
               >
-                <Avatar>
-                  <AvatarImage 
-                    src={getMediaForLocationMock(location)?.url || location.image} 
-                    alt={location.name}
-                  />
-                  <AvatarFallback>{location.name.slice(0, 2)}</AvatarFallback>
-                </Avatar>
-                <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <p className="font-medium text-sm">{location.name}</p>
+                <div>
+                  <div className="font-medium">{location.name}</div>
+                  <div className="text-sm text-muted-foreground flex items-center gap-2">
+                    <span>{location.city}, {location.state || location.country}</span>
                     <Badge variant="outline" className="text-xs">
-                      {getVibeTag(location)}
+                      {location.type}
                     </Badge>
                   </div>
-                  <p className="text-xs text-muted-foreground">{location.city}, {location.state}</p>
+                  {referencePoint && (
+                    <div className="text-xs text-primary flex items-center mt-1">
+                      <MapPin className="h-3 w-3 mr-1" />
+                      {calculateDistance(
+                        referencePoint.lat, 
+                        referencePoint.lng, 
+                        location.lat, 
+                        location.lng
+                      )}
+                    </div>
+                  )}
                 </div>
+                <Button variant="ghost" size="sm" className="h-8">
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
               </Link>
             ))
           )}
