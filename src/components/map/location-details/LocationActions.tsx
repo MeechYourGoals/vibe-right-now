@@ -1,10 +1,10 @@
+
 import { Button } from "@/components/ui/button";
 import { Location } from "@/types";
 import { useNavigate } from "react-router-dom";
-import { Share2 } from "lucide-react";
+import { Share2, Clock } from "lucide-react";
 import { toast } from "sonner";
-import { generateBusinessHours } from "@/utils/businessHoursUtils";
-import WaitTimeDisplay from "@/components/venue/WaitTimeDisplay";
+import { generateBusinessHours, getTodaysHours } from "@/utils/businessHoursUtils";
 
 interface LocationActionsProps {
   location: Location;
@@ -40,6 +40,8 @@ const LocationActions = ({ location, onViewVibes }: LocationActionsProps) => {
   if (!location.hours) {
     location.hours = generateBusinessHours(location);
   }
+  
+  const todaysHours = getTodaysHours(location);
   
   // Helper function to get ride service URL
   const getRideServiceUrl = (place: Location) => {
@@ -95,8 +97,11 @@ const LocationActions = ({ location, onViewVibes }: LocationActionsProps) => {
 
   return (
     <div className="space-y-2 mb-4">
-      {/* Display wait time if available */}
-      <WaitTimeDisplay venueId={location.id} showLastUpdated={false} className="mb-2" />
+      <div className="flex items-center text-sm mb-2">
+        <Clock className="h-4 w-4 mr-1 text-muted-foreground" />
+        <span className="text-muted-foreground">Today:</span>
+        <span className="ml-1 font-medium">{todaysHours}</span>
+      </div>
       
       <div className="flex gap-2">
         <Button className="flex-1" onClick={handleViewVibes}>
