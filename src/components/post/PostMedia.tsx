@@ -14,7 +14,11 @@ const PostMedia: React.FC<PostMediaProps> = ({ media }) => {
   const [mediaLoaded, setMediaLoaded] = useState(false);
   const hasMultipleMedia = media.length > 1;
   
-  const fallbackImage = "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=600&q=80&auto=format&fit=crop";
+  // Type-specific fallback images for better relevance
+  const getFallbackImage = () => {
+    // Use a reliable Pexels image that will definitely load
+    return "https://images.pexels.com/photos/2901209/pexels-photo-2901209.jpeg?auto=compress&cs=tinysrgb&w=600";
+  };
 
   useEffect(() => {
     // Reset media loaded state when media changes or index changes
@@ -60,8 +64,20 @@ const PostMedia: React.FC<PostMediaProps> = ({ media }) => {
     <div className="relative mb-2">
       {currentMedia.type === "image" ? (
         currentHasError ? (
-          <div className="w-full bg-muted flex items-center justify-center h-[300px]">
-            <p className="text-muted-foreground">Image could not be loaded</p>
+          <div className="w-full relative bg-muted flex items-center justify-center h-[300px]">
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent mb-2"></div>
+            </div>
+            <img
+              src={getFallbackImage()}
+              alt="Post media fallback"
+              className="w-full object-cover max-h-[500px]"
+              onLoad={() => setMediaLoaded(true)}
+              onError={(e) => {
+                // Ultimate fallback using a different reliable image
+                (e.target as HTMLImageElement).src = "https://images.pexels.com/photos/315755/pexels-photo-315755.jpeg?auto=compress&cs=tinysrgb&w=600";
+              }}
+            />
           </div>
         ) : (
           <>
@@ -85,7 +101,7 @@ const PostMedia: React.FC<PostMediaProps> = ({ media }) => {
           src={currentMedia.url}
           controls
           className="w-full max-h-[500px]"
-          poster={currentMedia.thumbnail || fallbackImage}
+          poster={currentMedia.thumbnail || getFallbackImage()}
           onError={() => handleError(currentIndex)}
         />
       )}

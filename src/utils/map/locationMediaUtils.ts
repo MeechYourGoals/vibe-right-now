@@ -5,61 +5,60 @@ import { Location, Media } from "@/types";
 export const getMediaForLocation = (location: Location): Media => {
   // Return appropriate media based on location type and name
   const imageMap: Record<string, string> = {
-    // Sports venues - updated with reliable Unsplash images
-    "30": "https://images.unsplash.com/photo-1504450758481-7338eba7524a?w=600&q=80&auto=format&fit=crop",  // Lakers
-    "31": "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?w=600&q=80&auto=format&fit=crop",  // Rams
-    "32": "https://images.unsplash.com/photo-1566577134624-d9b13555e288?w=600&q=80&auto=format&fit=crop",  // Dodgers
-    "33": "https://images.unsplash.com/photo-1459865264687-595d652de67e?w=600&q=80&auto=format&fit=crop",  // LA Galaxy
-    "34": "https://images.unsplash.com/photo-1530915872-13619796d013?w=600&q=80&auto=format&fit=crop",    // Volleyball
-    "35": "https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?w=600&q=80&auto=format&fit=crop",  // Golf
-    // Adding more reliable images for all venues
-    "1": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&q=80&auto=format&fit=crop", // Sunset Lounge
-    "2": "https://images.unsplash.com/photo-1572116469696-31de0f17cc34?w=600&q=80&auto=format&fit=crop", // Artisan Coffee
-    "3": "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&q=80&auto=format&fit=crop", // Music Festival
-    "4": "https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?w=600&q=80&auto=format&fit=crop", // Modern Art Museum
-    "5": "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=600&q=80&auto=format&fit=crop", // Skyline Rooftop
-    "6": "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600&q=80&auto=format&fit=crop", // Madison Square Garden
-    "7": "https://images.unsplash.com/photo-1514913274516-4aa04f176f8c?w=600&q=80&auto=format&fit=crop", // Encore Beach Club
-    "8": "https://images.unsplash.com/photo-1483729558449-99ef09a8c325?w=600&q=80&auto=format&fit=crop", // Christ the Redeemer
-    "9": "https://images.unsplash.com/photo-1551524559-8af4e6624178?w=600&q=80&auto=format&fit=crop", // Aspen Highlands
-    "10": "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=600&q=80&auto=format&fit=crop", // Allegiant Stadium
-    "11": "https://images.unsplash.com/photo-1545579133-99bb5ab189bd?w=600&q=80&auto=format&fit=crop", // Mama's Fish House
-    "12": "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&q=80&auto=format&fit=crop", // Barry's Bootcamp
-    "13": "https://images.unsplash.com/photo-1560147307-7fef1854cd4a?w=600&q=80&auto=format&fit=crop", // Houston Rodeo
-    "14": "https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=600&q=80&auto=format&fit=crop", // Laugh Factory
-    "15": "https://images.unsplash.com/photo-1548574505-5e239809ee19?w=600&q=80&auto=format&fit=crop", // Disney Wonder Cruise
-    "16": "https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=600&q=80&auto=format&fit=crop", // Sweet Delights Bakery
-    "17": "https://images.unsplash.com/photo-1534353436294-0dbd4bdac845?w=600&q=80&auto=format&fit=crop", // Waldorf Astoria
-    "18": "https://images.unsplash.com/photo-1624138784614-87fd1b6528f8?w=600&q=80&auto=format&fit=crop", // Sydney Opera House
-    "19": "https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?w=600&q=80&auto=format&fit=crop", // Eiffel Tower
-    "20": "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=600&q=80&auto=format&fit=crop", // Coachella
-    "21": "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=600&q=80&auto=format&fit=crop", // Gucci Pop-Up
-    "22": "https://images.unsplash.com/photo-1639815188546-c43c240ff4df?w=600&q=80&auto=format&fit=crop", // Bitcoin Conference
-    "23": "https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=600&q=80&auto=format&fit=crop", // InvestFest
-    "24": "https://images.unsplash.com/photo-1559166631-ef208440c75a?w=600&q=80&auto=format&fit=crop", // Austin Night Runners
-    "25": "https://images.unsplash.com/photo-1527224857830-43a7acc85260?w=600&q=80&auto=format&fit=crop", // Comedy Cellar
-    "26": "https://images.unsplash.com/photo-1566737236500-c8ac43014a67?w=600&q=80&auto=format&fit=crop", // Skyline Nightclub
-    "27": "https://images.unsplash.com/photo-1517433367423-c7e5b0f35086?w=600&q=80&auto=format&fit=crop", // Sunrise Bakery
-    "28": "https://images.unsplash.com/photo-1535086181678-5a5c4d23aa7d?w=600&q=80&auto=format&fit=crop", // Coachella VIP
-    "29": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=600&q=80&auto=format&fit=crop", // CES Las Vegas
-    // Add any other venues that were missing
-    "95": "https://images.unsplash.com/photo-1455621481073-d5bc1c40e3cb?w=600&q=80&auto=format&fit=crop", // Old Port Pub
+    // Sports venues with relevant images
+    "30": "https://images.pexels.com/photos/2570139/pexels-photo-2570139.jpeg?auto=compress&cs=tinysrgb&w=600", // Lakers - basketball court
+    "31": "https://images.pexels.com/photos/163452/football-american-football-quarterback-runner-163452.jpeg?auto=compress&cs=tinysrgb&w=600", // Rams - football field
+    "32": "https://images.pexels.com/photos/2570843/pexels-photo-2570843.jpeg?auto=compress&cs=tinysrgb&w=600", // Dodgers - baseball field
+    "33": "https://images.pexels.com/photos/46798/the-ball-stadion-football-the-pitch-46798.jpeg?auto=compress&cs=tinysrgb&w=600", // LA Galaxy - soccer field
+    "34": "https://images.pexels.com/photos/2444852/pexels-photo-2444852.jpeg?auto=compress&cs=tinysrgb&w=600", // Volleyball - volleyball game
+    "35": "https://images.pexels.com/photos/114972/pexels-photo-114972.jpeg?auto=compress&cs=tinysrgb&w=600", // Golf - golf course
+    // Entertainment venues
+    "1": "https://images.pexels.com/photos/1267350/pexels-photo-1267350.jpeg?auto=compress&cs=tinysrgb&w=600", // Sunset Lounge - bar with sunset view
+    "2": "https://images.pexels.com/photos/302899/pexels-photo-302899.jpeg?auto=compress&cs=tinysrgb&w=600", // Artisan Coffee - coffee shop with latte art
+    "3": "https://images.pexels.com/photos/1190298/pexels-photo-1190298.jpeg?auto=compress&cs=tinysrgb&w=600", // Music Festival - concert crowd
+    "4": "https://images.pexels.com/photos/1674049/pexels-photo-1674049.jpeg?auto=compress&cs=tinysrgb&w=600", // Modern Art Museum - art gallery
+    "5": "https://images.pexels.com/photos/2373201/pexels-photo-2373201.jpeg?auto=compress&cs=tinysrgb&w=600", // Skyline Rooftop - rooftop bar with city view
+    "6": "https://images.pexels.com/photos/2409681/pexels-photo-2409681.jpeg?auto=compress&cs=tinysrgb&w=600", // Madison Square Garden - indoor arena
+    "7": "https://images.pexels.com/photos/2507007/pexels-photo-2507007.jpeg?auto=compress&cs=tinysrgb&w=600", // Encore Beach Club - pool party
+    "8": "https://images.pexels.com/photos/2868242/pexels-photo-2868242.jpeg?auto=compress&cs=tinysrgb&w=600", // Christ the Redeemer - Rio landmark
+    "9": "https://images.pexels.com/photos/848618/pexels-photo-848618.jpeg?auto=compress&cs=tinysrgb&w=600", // Aspen Highlands - ski resort
+    "10": "https://images.pexels.com/photos/139762/pexels-photo-139762.jpeg?auto=compress&cs=tinysrgb&w=600", // Allegiant Stadium - football stadium
+    "11": "https://images.pexels.com/photos/262978/pexels-photo-262978.jpeg?auto=compress&cs=tinysrgb&w=600", // Mama's Fish House - seafood restaurant
+    "12": "https://images.pexels.com/photos/3836861/pexels-photo-3836861.jpeg?auto=compress&cs=tinysrgb&w=600", // Barry's Bootcamp - gym workout
+    "13": "https://images.pexels.com/photos/2959288/pexels-photo-2959288.jpeg?auto=compress&cs=tinysrgb&w=600", // Houston Rodeo - rodeo event
+    "14": "https://images.pexels.com/photos/7991579/pexels-photo-7991579.jpeg?auto=compress&cs=tinysrgb&w=600", // Laugh Factory - comedy club
+    "15": "https://images.pexels.com/photos/813011/pexels-photo-813011.jpeg?auto=compress&cs=tinysrgb&w=600", // Disney Wonder Cruise - cruise ship
+    "16": "https://images.pexels.com/photos/1600711/pexels-photo-1600711.jpeg?auto=compress&cs=tinysrgb&w=600", // Sweet Delights Bakery - pastries
+    "17": "https://images.pexels.com/photos/189296/pexels-photo-189296.jpeg?auto=compress&cs=tinysrgb&w=600", // Waldorf Astoria - luxury hotel
+    "18": "https://images.pexels.com/photos/1878293/pexels-photo-1878293.jpeg?auto=compress&cs=tinysrgb&w=600", // Sydney Opera House
+    "19": "https://images.pexels.com/photos/699466/pexels-photo-699466.jpeg?auto=compress&cs=tinysrgb&w=600", // Eiffel Tower
+    "20": "https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg?auto=compress&cs=tinysrgb&w=600", // Coachella - music festival
+    "21": "https://images.pexels.com/photos/1488463/pexels-photo-1488463.jpeg?auto=compress&cs=tinysrgb&w=600", // Gucci Pop-Up - fashion retail
+    "22": "https://images.pexels.com/photos/6780789/pexels-photo-6780789.jpeg?auto=compress&cs=tinysrgb&w=600", // Bitcoin Conference - tech conference
+    "23": "https://images.pexels.com/photos/2833037/pexels-photo-2833037.jpeg?auto=compress&cs=tinysrgb&w=600", // InvestFest - finance conference
+    "24": "https://images.pexels.com/photos/235922/pexels-photo-235922.jpeg?auto=compress&cs=tinysrgb&w=600", // Austin Night Runners - running group
+    "25": "https://images.pexels.com/photos/7991634/pexels-photo-7991634.jpeg?auto=compress&cs=tinysrgb&w=600", // Comedy Cellar - comedy venue
+    "26": "https://images.pexels.com/photos/1604869/pexels-photo-1604869.jpeg?auto=compress&cs=tinysrgb&w=600", // Skyline Nightclub - club with lights
+    "27": "https://images.pexels.com/photos/205961/pexels-photo-205961.jpeg?auto=compress&cs=tinysrgb&w=600", // Sunrise Bakery - fresh bread
+    "28": "https://images.pexels.com/photos/154147/pexels-photo-154147.jpeg?auto=compress&cs=tinysrgb&w=600", // Coachella VIP - VIP festival experience
+    "29": "https://images.pexels.com/photos/4065864/pexels-photo-4065864.jpeg?auto=compress&cs=tinysrgb&w=600", // CES Las Vegas - tech convention
+    "95": "https://images.pexels.com/photos/1484516/pexels-photo-1484516.jpeg?auto=compress&cs=tinysrgb&w=600", // Old Port Pub - traditional pub
   };
 
   // Default media based on type if no specific image is available
   const typeDefaultMedia: Record<string, string> = {
-    "restaurant": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&q=80&auto=format&fit=crop",
-    "bar": "https://images.unsplash.com/photo-1572116469696-31de0f17cc34?w=600&q=80&auto=format&fit=crop",
-    "event": "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&q=80&auto=format&fit=crop",
-    "attraction": "https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?w=600&q=80&auto=format&fit=crop",
-    "sports": "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=600&q=80&auto=format&fit=crop",
-    "other": "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=600&q=80&auto=format&fit=crop",
+    "restaurant": "https://images.pexels.com/photos/67468/pexels-photo-67468.jpeg?auto=compress&cs=tinysrgb&w=600", // Restaurant interior
+    "bar": "https://images.pexels.com/photos/34631/pexels-photo.jpg?auto=compress&cs=tinysrgb&w=600", // Bar with bottles
+    "event": "https://images.pexels.com/photos/2263436/pexels-photo-2263436.jpeg?auto=compress&cs=tinysrgb&w=600", // Event with crowd
+    "attraction": "https://images.pexels.com/photos/290386/pexels-photo-290386.jpeg?auto=compress&cs=tinysrgb&w=600", // Tourist attraction
+    "sports": "https://images.pexels.com/photos/46798/the-ball-stadion-football-the-pitch-46798.jpeg?auto=compress&cs=tinysrgb&w=600", // Sports stadium
+    "other": "https://images.pexels.com/photos/2493157/pexels-photo-2493157.jpeg?auto=compress&cs=tinysrgb&w=600", // General venue
   };
 
-  // Fallback image in case all else fails
-  const fallbackImage = "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=600&q=80&auto=format&fit=crop";
+  // Reliable fallback image that will definitely load
+  const fallbackImage = "https://images.pexels.com/photos/2901209/pexels-photo-2901209.jpeg?auto=compress&cs=tinysrgb&w=600"; // City skyline
 
-  // Build the URL with explicit quality and size parameters to ensure loading
+  // Build the URL with explicit quality and compression parameters for better loading
   const imageUrl = imageMap[location.id] || 
                   typeDefaultMedia[location.type as string] || 
                   fallbackImage;

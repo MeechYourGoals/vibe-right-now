@@ -6,7 +6,7 @@ import CameraButton from "@/components/CameraButton";
 import NearbyVibesMap from "@/components/NearbyVibesMap";
 import VenuePost from "@/components/VenuePost";
 import useExploreState from "@/hooks/useExploreState";
-import { getCitySpecificContent, getMediaForLocation } from "@/utils/explore/mockGenerators";
+import { getCitySpecificContent, getMediaForLocationMock } from "@/utils/explore/mockGenerators";
 import SearchSection from "@/components/explore/SearchSection";
 import CategoryTabs from "@/components/explore/CategoryTabs";
 import VibeFilter from "@/components/explore/VibeFilter";

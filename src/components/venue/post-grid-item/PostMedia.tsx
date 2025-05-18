@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Post } from "@/types";
+import { getMediaForLocation } from "@/utils/map/locationMediaUtils";
 
 interface PostMediaProps {
   post: Post;
@@ -11,7 +12,16 @@ const PostMedia: React.FC<PostMediaProps> = ({ post }) => {
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
   const [mediaLoaded, setMediaLoaded] = useState(false);
   
-  const fallbackImage = "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=600&q=80&auto=format&fit=crop";
+  // Use type-specific fallback images for better relevance
+  const getFallbackImage = () => {
+    if (!post.location) {
+      return "https://images.pexels.com/photos/2901209/pexels-photo-2901209.jpeg?auto=compress&cs=tinysrgb&w=600";
+    }
+    
+    // Use the venue's image as a fallback
+    const venueMedia = getMediaForLocation(post.location);
+    return venueMedia.url;
+  };
   
   // Try loading the next image in the array if one fails
   const tryNextImage = () => {
@@ -30,18 +40,33 @@ const PostMedia: React.FC<PostMediaProps> = ({ post }) => {
     setMediaLoaded(false);
   }, [post.id]);
   
+  // Generate a preview text for fallback display
+  const getPreviewText = () => {
+    if (post.content) {
+      return post.content.slice(0, 100) + (post.content.length > 100 ? '...' : '');
+    }
+    return post.location?.name || "Post content";
+  };
+  
   // Handle case with no media
   if (!post.media || post.media.length === 0 || imageError) {
     return (
       <div className="flex h-full w-full items-center justify-center bg-muted">
         {imageError ? (
           <div className="p-2 text-center">
-            <p className="text-sm text-muted-foreground">Media could not be loaded</p>
-            <p className="text-xs text-muted-foreground mt-1">{post.content.slice(0, 50)}{post.content.length > 50 ? '...' : ''}</p>
+            <img 
+              src={getFallbackImage()}
+              alt="Venue related content"
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                // Final fallback if even the venue image fails
+                (e.target as HTMLImageElement).src = "https://images.pexels.com/photos/2901209/pexels-photo-2901209.jpeg?auto=compress&cs=tinysrgb&w=600";
+              }}
+            />
           </div>
         ) : (
           <p className="p-2 text-center text-sm">
-            {post.content.slice(0, 100)}{post.content.length > 100 ? '...' : ''}
+            {getPreviewText()}
           </p>
         )}
       </div>
@@ -76,7 +101,7 @@ const PostMedia: React.FC<PostMediaProps> = ({ post }) => {
     <video
       src={currentMedia.url}
       className="h-full w-full object-cover"
-      poster={fallbackImage}
+      poster={getFallbackImage()}
       onError={() => tryNextImage()}
       controls={false}
       muted

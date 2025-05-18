@@ -2,6 +2,7 @@
 import React from 'react';
 import { Post, Location } from "@/types";
 import PostGridItem from "../PostGridItem";
+import { getMediaForLocation } from "@/utils/map/locationMediaUtils";
 
 interface VenuePostsGridProps {
   posts: Post[];
@@ -19,20 +20,29 @@ const VenuePostsGrid: React.FC<VenuePostsGridProps> = ({
   if (posts.length === 0) {
     return null;
   }
+
+  // Helper function to ensure post has valid media
+  const ensurePostMedia = (post: Post): Post => {
+    if (post.media && post.media.length > 0) {
+      return post;
+    }
+    
+    // If post has no media, add a relevant venue image
+    const venueMedia = getMediaForLocation(venue);
+    return {
+      ...post,
+      media: [{
+        type: "image" as const,
+        url: venueMedia.url
+      }]
+    };
+  };
   
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
       {posts.map(post => {
-        // Ensure post has at least one media item
-        const postWithMedia = {
-          ...post,
-          media: post.media && post.media.length > 0 
-            ? post.media 
-            : [{ 
-                type: "image" as const, 
-                url: `https://images.unsplash.com/photo-${Math.floor(Math.random() * 10000)}?w=600&q=80&auto=format&fit=crop` 
-              }]
-        };
+        // Ensure post has valid media
+        const postWithMedia = ensurePostMedia(post);
         
         // Determine if the post is from the venue itself
         const isVenuePost = post.isVenuePost || post.location?.id === venue.id;
