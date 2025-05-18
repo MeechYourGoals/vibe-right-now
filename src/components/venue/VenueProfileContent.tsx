@@ -1,4 +1,3 @@
-
 import { useState, useMemo } from "react";
 import { Minimize } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,6 +8,7 @@ import VenueMap from "@/components/venue/VenueMap";
 import VenuePostsContent from "@/components/venue/VenuePostsContent";
 import WaitTimeDisplay from "@/components/venue/WaitTimeDisplay";
 import WaitTimeUpdater from "@/components/venue/WaitTimeUpdater";
+import ExpandedMap from "@/components/venue/ExpandedMap";
 
 interface VenueProfileContentProps {
   venue: Location;
