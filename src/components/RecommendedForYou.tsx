@@ -25,8 +25,16 @@ const RecommendedForYou: React.FC<RecommendedForYouProps> = ({ featuredLocations
     try {
       const storedPreferences = localStorage.getItem('userPreferences');
       if (storedPreferences) {
+        // Ensure we have a valid array
         const parsedPreferences = JSON.parse(storedPreferences);
-        setUserPreferences(parsedPreferences);
+        if (Array.isArray(parsedPreferences)) {
+          setUserPreferences(parsedPreferences);
+        } else {
+          // If not an array, set default preferences
+          const defaultPreferences = ["Live Music", "Sports", "Outdoors", "Locally Owned"];
+          setUserPreferences(defaultPreferences);
+          localStorage.setItem('userPreferences', JSON.stringify(defaultPreferences));
+        }
       } else {
         // Default preferences for demonstration
         const defaultPreferences = ["Live Music", "Sports", "Outdoors", "Locally Owned"];
@@ -159,8 +167,14 @@ const RecommendedForYou: React.FC<RecommendedForYouProps> = ({ featuredLocations
       <CardHeader className="pb-3">
         <CardTitle className="text-lg">Recommended For You</CardTitle>
         <div className="text-xs text-muted-foreground">
-          Based on your preferences: {userPreferences.slice(0, 3).join(', ')}
-          {userPreferences.length > 3 ? '...' : ''}
+          {Array.isArray(userPreferences) && userPreferences.length > 0 ? (
+            <>
+              Based on your preferences: {userPreferences.slice(0, 3).join(', ')}
+              {userPreferences.length > 3 ? '...' : ''}
+            </>
+          ) : (
+            <>Based on popular preferences</>
+          )}
         </div>
       </CardHeader>
       <CardContent>

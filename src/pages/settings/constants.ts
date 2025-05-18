@@ -46,3 +46,16 @@ export const VENUE_TYPES = [
   "park",
   "shopping"
 ];
+
+// Add ticketing platforms for TicketingTab
+export const TICKETING_PLATFORMS = [
+  "Ticketmaster",
+  "Eventbrite",
+  "StubHub",
+  "AXS",
+  "SeatGeek",
+  "LiveNation",
+  "TicketWeb",
+  "Showclix",
+  "Brown Paper Tickets"
+];

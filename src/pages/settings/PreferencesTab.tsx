@@ -1,8 +1,8 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { PREFERENCE_TAGS, PREFERENCE_CATEGORIES } from "./constants";
 import { useToast } from "@/hooks/use-toast";
+import { Coffee, Music, Users, Heart, Star } from "lucide-react";
 
 // Import components
 import UserPreferences from "./components/UserPreferences";
@@ -39,6 +39,30 @@ const PreferencesTab = ({
     { id: 3, name: "The Luxury Lounge", tags: ["High Energy", "Luxury", "Night Owls"] },
     { id: 4, name: "Family Fun Center", tags: ["Family Friendly", "Budget Friendly", "Physical Adventure"] }
   ]);
+  
+  // Map preference categories to the expected format with icons and IDs
+  const preferenceCategories = PREFERENCE_CATEGORIES.map((cat, index) => ({
+    name: cat.name,
+    icon: getCategoryIcon(cat.name),
+    id: `category-${index}`
+  }));
+
+  // Helper function to get icon based on category name
+  function getCategoryIcon(categoryName: string) {
+    switch (categoryName) {
+      case "Vibe":
+        return Star;
+      case "Interests":
+        return Music;
+      case "Crowd":
+        return Users;
+      case "Values":
+        return Heart;
+      case "Experience":
+      default:
+        return Coffee;
+    }
+  }
   
   // Generate AI suggested tags based on venue type for premium/pro users
   useEffect(() => {
@@ -114,7 +138,7 @@ const PreferencesTab = ({
             onAddCustomTag={handleAddCustomTag}
             onAddFavorite={handleAddFavorite}
             onRemoveFavorite={handleRemoveFavorite}
-            preferenceCategories={PREFERENCE_CATEGORIES}
+            preferenceCategories={preferenceCategories}
             preferenceTags={PREFERENCE_TAGS}
           />
         )}
@@ -128,7 +152,7 @@ const PreferencesTab = ({
             onTagSelect={handleTagSelect}
             onTagRemove={handleTagRemove}
             onAddCustomTag={handleAddCustomTag}
-            preferenceCategories={PREFERENCE_CATEGORIES}
+            preferenceCategories={preferenceCategories}
             preferenceTags={PREFERENCE_TAGS}
             renderCompetitorTags={renderCompetitorTags}
           />
