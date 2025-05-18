@@ -1,10 +1,12 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Tabs } from "@/components/ui/tabs";
 import { Post, Comment, Location } from "@/types";
 import VenuePostsTabsHeader from './tabs/VenuePostsTabsHeader';
 import VenuePostsTabsContent from './tabs/VenuePostsTabsContent';
 import AddVenuePostDialog from './AddVenuePostDialog';
+import { useVenueConnections } from '@/hooks/useVenueConnections';
+import { usePostDeletion } from '@/hooks/usePostDeletion';
 
 interface VenuePostsTabsProps {
   activeTab: string;
@@ -29,23 +31,16 @@ const VenuePostsTabs: React.FC<VenuePostsTabsProps> = ({
   venue,
   getPostComments
 }) => {
-  // State for social media connections
-  const [connectedPlatforms, setConnectedPlatforms] = useState<Record<string, boolean>>({
-    instagram: false,
-    tiktok: false,
-    yelp: false,
-    tripadvisor: false,
-    foursquare: false,
-    google: false,
-    franki: false,
-    other: false
-  });
+  // Use our custom hooks
+  const {
+    connectedPlatforms,
+    setConnectedPlatforms,
+    subscriptionTier,
+    handleUpgradeSubscription,
+    canEmbed
+  } = useVenueConnections(venue.id);
   
-  // State to track subscription tier
-  const [subscriptionTier, setSubscriptionTier] = useState<'standard' | 'plus' | 'premium' | 'pro'>('standard');
-  
-  // State to track deleted posts
-  const [deletedPostIds, setDeletedPostIds] = useState<string[]>([]);
+  const { deletedPostIds, handlePostDeleted } = usePostDeletion();
   
   // State to track add post dialog
   const [isAddPostDialogOpen, setIsAddPostDialogOpen] = useState(false);
@@ -53,49 +48,6 @@ const VenuePostsTabs: React.FC<VenuePostsTabsProps> = ({
   // Filter out deleted posts
   const filteredAllPosts = allPosts.filter(post => !deletedPostIds.includes(post.id));
   const filteredUserPosts = filteredPosts.filter(post => !deletedPostIds.includes(post.id));
-  
-  // Load saved platforms on component mount
-  useEffect(() => {
-    const savedKeys = localStorage.getItem('socialMediaApiKeys');
-    if (savedKeys) {
-      try {
-        const parsedKeys = JSON.parse(savedKeys);
-        
-        // Set platforms as connected if they have API keys
-        const connected: Record<string, boolean> = {};
-        Object.keys(parsedKeys).forEach(key => {
-          connected[key] = !!parsedKeys[key];
-        });
-        setConnectedPlatforms(connected);
-      } catch (error) {
-        console.error('Error parsing saved API keys:', error);
-      }
-    }
-    
-    // Check for subscription tier in localStorage
-    const savedTier = localStorage.getItem('subscriptionTier');
-    if (savedTier) {
-      setSubscriptionTier(savedTier as 'standard' | 'plus' | 'premium' | 'pro');
-    }
-  }, []);
-  
-  // Handle upgrading subscription
-  const handleUpgradeSubscription = () => {
-    // For demo purposes, cycle through subscription tiers
-    const tiers: Array<'standard' | 'plus' | 'premium' | 'pro'> = ['standard', 'plus', 'premium', 'pro'];
-    const currentIndex = tiers.indexOf(subscriptionTier);
-    const nextTier = tiers[(currentIndex + 1) % tiers.length];
-    setSubscriptionTier(nextTier);
-    localStorage.setItem('subscriptionTier', nextTier);
-  };
-  
-  // Handle post deletion
-  const handlePostDeleted = (postId: string) => {
-    setDeletedPostIds(prev => [...prev, postId]);
-  };
-  
-  // Check if embedding is allowed (premium/pro tiers only)
-  const canEmbed = subscriptionTier === 'premium' || subscriptionTier === 'pro';
   
   return (
     <>

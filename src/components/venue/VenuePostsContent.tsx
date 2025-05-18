@@ -1,7 +1,8 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Post, Comment, Location } from "@/types";
 import VenuePostsTabs from './VenuePostsTabs';
+import { useVenuePosts } from '@/hooks/useVenuePosts';
 
 interface VenuePostsContentProps {
   activeTab: string;
@@ -16,24 +17,19 @@ interface VenuePostsContentProps {
   getPostComments: (postId: string) => Comment[];
 }
 
-const VenuePostsContent: React.FC<VenuePostsContentProps> = ({
-  activeTab,
-  setActiveTab,
-  viewMode,
-  setViewMode,
-  allPosts,
-  filteredPosts,
-  generatedVenuePosts,
-  selectedDays,
-  venue,
-  getPostComments
-}) => {
-  // Filter venue posts by selected days
-  const filteredVenuePosts = selectedDays.length === 0 
-    ? generatedVenuePosts 
-    : generatedVenuePosts.filter(post => 
-        selectedDays.includes(new Date(post.timestamp).getDay())
-      );
+const VenuePostsContent: React.FC<VenuePostsContentProps> = (props) => {
+  const {
+    activeTab,
+    setActiveTab,
+    viewMode,
+    setViewMode,
+    allPosts,
+    filteredPosts,
+    venue,
+    getPostComments
+  } = props;
+  
+  const { filteredVenuePosts } = useVenuePosts(props);
   
   return (
     <VenuePostsTabs

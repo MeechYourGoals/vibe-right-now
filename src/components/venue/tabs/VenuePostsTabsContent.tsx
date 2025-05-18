@@ -1,10 +1,7 @@
 
 import React from 'react';
 import { Post, Comment, Location } from "@/types";
-import VenuePostsAllTab from './VenuePostsAllTab';
-import VenuePostsVrnTab from './VenuePostsVrnTab';
-import VenuePostsExternalTab from './VenuePostsExternalTab';
-import { TabsContent } from "@/components/ui/tabs";
+import TabContent from './TabContent';
 
 interface VenuePostsTabsContentProps {
   activeTab: string;
@@ -36,40 +33,20 @@ const VenuePostsTabsContent: React.FC<VenuePostsTabsContentProps> = ({
   onPostDeleted
 }) => {
   return (
-    <>
-      <TabsContent value="all" className="mt-4 space-y-4">
-        <VenuePostsAllTab 
-          posts={allPosts} 
-          venue={venue} 
-          viewMode={viewMode} 
-          getComments={getPostComments}
-          subscriptionTier={subscriptionTier}
-          onPostDeleted={onPostDeleted}
-        />
-      </TabsContent>
-      
-      <TabsContent value="vrn" className="mt-4 space-y-4">
-        <VenuePostsVrnTab
-          filteredVenuePosts={filteredVenuePosts}
-          filteredPosts={filteredPosts}
-          venue={venue}
-          viewMode={viewMode}
-          getComments={getPostComments}
-          subscriptionTier={subscriptionTier}
-          onPostDeleted={onPostDeleted}
-        />
-      </TabsContent>
-      
-      <TabsContent value="external" className="mt-4">
-        <VenuePostsExternalTab
-          venueName={venue.name}
-          connectedPlatforms={connectedPlatforms}
-          subscriptionTier={subscriptionTier}
-          canEmbed={canEmbed}
-          onUpgradeSubscription={onUpgradeSubscription}
-        />
-      </TabsContent>
-    </>
+    <TabContent
+      tab={activeTab}
+      allPosts={allPosts}
+      filteredPosts={filteredPosts}
+      filteredVenuePosts={filteredVenuePosts}
+      venue={venue}
+      viewMode={viewMode}
+      getComments={getPostComments}
+      subscriptionTier={subscriptionTier}
+      canEmbed={canEmbed}
+      connectedPlatforms={connectedPlatforms}
+      onUpgradeSubscription={onUpgradeSubscription}
+      onPostDeleted={onPostDeleted}
+    />
   );
 };
 
