@@ -18,6 +18,9 @@ import DayOfWeekFilter from "@/components/venue/DayOfWeekFilter";
 import VenueProfileHeader from "@/components/venue/VenueProfileHeader";
 import VenueMap from "@/components/venue/VenueMap";
 import VenuePostsContent from "@/components/venue/VenuePostsContent";
+import WaitTimeDisplay from "@/components/venue/WaitTimeDisplay";
+import WaitTimeUpdater from "@/components/venue/WaitTimeUpdater";
+import { useAuth0 } from "@auth0/auth0-react";
 
 // Define an extended Post type that includes venue-specific properties
 interface ExtendedPost extends Post {
@@ -32,8 +35,27 @@ const VenueProfile = () => {
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [isMapExpanded, setIsMapExpanded] = useState(false);
   const [selectedDays, setSelectedDays] = useState<number[]>([]);
+  const [isVenueOwner, setIsVenueOwner] = useState(false);
+  const [subscriptionTier, setSubscriptionTier] = useState<'standard' | 'plus' | 'premium' | 'pro'>('standard');
+  
+  const { user, isAuthenticated } = useAuth0();
   
   const venue = mockLocations.find(location => location.id === id);
+  
+  useEffect(() => {
+    // Check if the user is authenticated and is the owner of the venue
+    // This would normally be a server-side check
+    if (isAuthenticated && user && venue) {
+      // Simulating a check - in production this would compare venue owner email with user email
+      // or check a venues_owners table in the database
+      if (user.email === 'owner@example.com') {
+        setIsVenueOwner(true);
+        
+        // Simulating subscription tier check - in production would fetch from database
+        setSubscriptionTier('pro');
+      }
+    }
+  }, [isAuthenticated, user, venue]);
   
   if (venue && !venue.hours) {
     venue.hours = generateBusinessHours(venue);
@@ -153,7 +175,21 @@ const VenueProfile = () => {
         <div className="max-w-4xl mx-auto">
           <div className="glass-effect p-6 rounded-xl mb-6">
             <VenueProfileHeader venue={venue} onMapExpand={toggleMapExpansion} />
+            
+            {/* Display wait time info if available */}
+            <WaitTimeDisplay venueId={venue.id} className="mb-4" />
+            
             <VenueMap venue={venue} onExpand={toggleMapExpansion} />
+            
+            {/* Show wait time updater for venue owners with pro subscription */}
+            {isVenueOwner && (
+              <div className="mt-4">
+                <WaitTimeUpdater 
+                  venueId={venue.id} 
+                  subscriptionTier={subscriptionTier} 
+                />
+              </div>
+            )}
           </div>
           
           <DayOfWeekFilter 

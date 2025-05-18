@@ -5,6 +5,7 @@ import { MapPin, Share2, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { generateBusinessHours } from '@/utils/businessHoursUtils';
+import WaitTimeDisplay from '@/components/venue/WaitTimeDisplay';
 
 interface InfoWindowContentProps {
   location: Location;
@@ -53,6 +54,12 @@ const InfoWindowContent: React.FC<InfoWindowContentProps> = ({ location, onSelec
       <div className="text-sm mb-2">
         <span className="font-medium">Today:</span> {todaysHours}
       </div>
+      
+      {/* Display wait time if available */}
+      <div className="mb-2">
+        <WaitTimeDisplay venueId={location.id} showLastUpdated={false} />
+      </div>
+      
       <div className="text-sm mb-3">
         <span className="inline-block px-2 py-1 bg-primary/10 rounded-full text-xs">
           {location.type.charAt(0).toUpperCase() + location.type.slice(1)}

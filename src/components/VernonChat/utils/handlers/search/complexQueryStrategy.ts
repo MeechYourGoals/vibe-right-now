@@ -1,99 +1,79 @@
 
+import { SearchCoordinator } from './SearchCoordinator';
 import { SearchService } from '@/services/search/SearchService';
+import { IntegratedSearchProvider } from '@/services/search/providers/IntegratedSearchProvider';
 import { FallbackSearchStrategy } from './fallbackSearchStrategy';
-import { SwirlSearchService } from '@/services/SwirlSearchService';
-import { HuggingFaceService } from '@/services/HuggingFaceService';
 
 /**
- * Strategy for handling complex queries that may require multiple search approaches
+ * Strategy for handling complex search queries that might require
+ * multiple search services or specialized processing
  */
-export class ComplexQueryStrategy {
+export const ComplexQueryStrategy = {
   /**
-   * Determine if the query is complex enough to warrant special handling
+   * Process a complex search query using multiple strategies
+   * @param query The search query text
+   * @returns Search results as text
    */
-  static isComplexQuery(query: string): boolean {
-    // Complex queries typically have multiple parts or specific filters
-    return (
-      query.length > 15 &&
-      (query.includes("near") ||
-       query.includes("around") ||
-       query.includes("in") ||
-       query.includes("at") ||
-       query.includes("with") ||
-       query.includes("that") ||
-       query.includes("where") ||
-       query.includes("who") ||
-       query.includes("what") ||
-       query.includes("when") ||
-       query.split(" ").length > 4)
-    );
-  }
-
-  /**
-   * Handle complex search queries by combining vector and keyword searches
-   */
-  static async handleComplexQuery(
-    query: string,
-    paginationState: Record<string, number> = {},
-    categories: string[] = []
-  ): Promise<string> {
+  async search(query: string): Promise<string> {
+    console.log('Using ComplexQueryStrategy for query:', query);
+    
     try {
-      console.log('Handling complex query with categories:', categories);
-      
-      // First try using HuggingFace for NLU and understanding
+      // First attempt - Use the SearchCoordinator for orchestrated search
       try {
-        const isAvailable = await HuggingFaceService.isAvailable();
+        const searchResult = await SearchCoordinator.search(query, {
+          priorityStrategy: 'google',
+          includeCategories: []
+        });
         
-        if (isAvailable) {
-          console.log('Using HuggingFace transformers for query analysis');
-          const { enhancedQuery, extractedEntities } = await HuggingFaceService.analyzeQuery(query);
-          
-          if (enhancedQuery && enhancedQuery !== query) {
-            console.log('Query enhanced to:', enhancedQuery);
-            query = enhancedQuery;
-          }
-          
-          if (extractedEntities && extractedEntities.length > 0) {
-            console.log('Extracted entities:', extractedEntities);
-            // Add extracted entities to categories if possible
-            categories = [...new Set([...categories, ...extractedEntities])];
-          }
+        if (searchResult && searchResult.length > 100) {
+          console.log('SearchCoordinator returned a valid result');
+          return searchResult;
         }
-      } catch (error) {
-        console.error('HuggingFace analysis failed:', error);
+      } catch (coordErr) {
+        console.error('SearchCoordinator failed:', coordErr);
       }
       
-      // Try Swirl Search Service for web search
+      // Second attempt - Use the search service
       try {
-        const swirlAvailable = await SwirlSearchService.isAvailable();
+        console.log('Trying SearchService');
+        const serviceResult = await SearchService.search(query);
         
-        if (swirlAvailable) {
-          console.log('Using Swirl search');
-          const swirlResult = await SwirlSearchService.search(query);
-          
-          if (swirlResult && swirlResult.length > 100) {
-            console.log('Swirl search returned good results');
-            return swirlResult;
-          }
+        if (serviceResult && serviceResult.length > 100) {
+          return serviceResult;
         }
-      } catch (error) {
-        console.error('Swirl search failed:', error);
+      } catch (serviceErr) {
+        console.error('SearchService failed:', serviceErr);
       }
       
-      // Try standard search service as fallback
+      // Third attempt - Try integrated provider
       try {
-        const standardResults = await SearchService.search(query);
-        console.log('Standard search completed');
+        console.log('Trying IntegratedSearchProvider');
+        const vectorResult = await IntegratedSearchProvider.attemptVectorSearch(query);
         
-        // Return whatever results we have
-        return standardResults || FallbackSearchStrategy.generateFallbackResponse(query);
-      } catch (error) {
-        console.error('Standard search failed:', error);
-        return FallbackSearchStrategy.generateFallbackResponse(query);
+        if (vectorResult) {
+          return vectorResult;
+        }
+        
+        const directResult = await IntegratedSearchProvider.attemptDirectAISearch(query);
+        
+        if (directResult) {
+          return directResult;
+        }
+        
+        const allProvidersResult = await IntegratedSearchProvider.attemptAllProviders(query);
+        
+        if (allProvidersResult) {
+          return allProvidersResult;
+        }
+      } catch (integratedErr) {
+        console.error('IntegratedSearchProvider failed:', integratedErr);
       }
+      
+      // Final fallback
+      return await FallbackSearchStrategy.search(query);
     } catch (error) {
-      console.error('Error in complex query handling:', error);
-      return FallbackSearchStrategy.generateFallbackResponse(query);
+      console.error('All complex query strategies failed:', error);
+      return await FallbackSearchStrategy.search(query);
     }
   }
-}
+};
