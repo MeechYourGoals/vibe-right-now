@@ -22,7 +22,7 @@ const VenuePostContent: React.FC<VenuePostContentProps> = ({
   const timeAgo = formatDistanceToNow(new Date(timestamp), { addSuffix: true });
   
   // Fallback image
-  const fallbackImage = "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=600&q=80&auto=format&fit=crop";
+  const fallbackImage = "https://images.pexels.com/photos/670720/pexels-photo-670720.jpeg?auto=compress&cs=tinysrgb&w=600";
   
   return (
     <div>

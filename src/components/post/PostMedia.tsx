@@ -14,7 +14,7 @@ const PostMedia: React.FC<PostMediaProps> = ({ media }) => {
   const [mediaLoaded, setMediaLoaded] = useState(false);
   const hasMultipleMedia = media.length > 1;
   
-  const fallbackImage = "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=600&q=80&auto=format&fit=crop";
+  const fallbackImage = "https://images.pexels.com/photos/670720/pexels-photo-670720.jpeg?auto=compress&cs=tinysrgb&w=600";
 
   useEffect(() => {
     // Reset media loaded state when media changes or index changes
