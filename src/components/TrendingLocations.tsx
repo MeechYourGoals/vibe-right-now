@@ -2,12 +2,14 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, TrendingUp } from "lucide-react";
+import { ArrowRight, TrendingUp, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Location } from "@/types";
 import { mockLocations } from "@/mock/locations";
-import { getTrendingLocationsForCity } from "@/mock/cityLocations";
+import { getNearbyLocations } from "@/mock/cityLocations";
 import { toast } from "sonner";
+import { Link } from "react-router-dom";
+import { calculateDistance, getReferencePoint } from '@/components/map/common/DistanceCalculator';
 
 // Event bus for updating trending locations from VernonChat
 export const eventBus = {
@@ -34,75 +36,56 @@ export const updateTrendingLocations = (cityName: string, events: Location[]) =>
 
 const TrendingLocations = () => {
   // Default to some popular locations if no city is specified
-  const [trendingLocations, setTrendingLocations] = useState(mockLocations.slice(0, 3));
-  const [currentCity, setCurrentCity] = useState("Los Angeles");
+  const [trendingLocations, setTrendingLocations] = useState<Location[]>([]);
+  const [userLocation, setUserLocation] = useState<GeolocationCoordinates | null>(null);
+  const [userAddressLocation, setUserAddressLocation] = useState<[number, number] | null>(null);
+  const [loading, setLoading] = useState(true);
   const [geolocationAttempted, setGeolocationAttempted] = useState(false);
   
-  // Use Google Maps to determine user's location
+  // Use geolocation to determine user's location
   useEffect(() => {
     if (!geolocationAttempted && navigator.geolocation) {
       setGeolocationAttempted(true);
       
       navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          try {
-            // Use Google's Geocoding API to get the city name from coordinates
-            const response = await fetch(
-              `https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.coords.latitude},${position.coords.longitude}&key=AIzaSyAWm0vayRrQJHpMc6XcShcge52hGTt9BV4`
-            );
-            
-            if (response.ok) {
-              const data = await response.json();
-              
-              if (data.results && data.results.length > 0) {
-                // Try to find the city component
-                const addressComponents = data.results[0].address_components;
-                const cityComponent = addressComponents.find(
-                  (component: any) => 
-                    component.types.includes('locality') || 
-                    component.types.includes('administrative_area_level_1')
-                );
-                
-                if (cityComponent) {
-                  const detectedCity = cityComponent.long_name;
-                  setCurrentCity(detectedCity);
-                  
-                  // Get trending locations for the detected city
-                  const cityTrending = getTrendingLocationsForCity(detectedCity);
-                  if (cityTrending.length > 0) {
-                    setTrendingLocations(cityTrending);
-                  }
-                }
-              }
-            }
-          } catch (error) {
-            console.error("Error getting city from coordinates:", error);
-            // Fall back to default trending locations
-            const defaultTrending = getTrendingLocationsForCity("Los Angeles");
-            if (defaultTrending.length > 0) {
-              setTrendingLocations(defaultTrending);
-            }
+        (position) => {
+          setUserLocation(position.coords);
+          setLoading(false);
+          
+          // Get nearby locations within 10 miles
+          const nearbyLocations = getNearbyLocations(
+            position.coords.latitude,
+            position.coords.longitude,
+            10 // 10 mile radius
+          );
+          
+          if (nearbyLocations.length > 0) {
+            // Get a random subset for trending
+            const randomTrending = [...nearbyLocations]
+              .sort(() => 0.5 - Math.random())
+              .slice(0, 3);
+            setTrendingLocations(randomTrending);
+          } else {
+            // Fallback to default locations
+            setTrendingLocations(mockLocations.slice(0, 3));
           }
         },
         (error) => {
           console.error("Error getting location:", error);
+          setLoading(false);
           // Fall back to default trending locations
-          const defaultTrending = getTrendingLocationsForCity("Los Angeles");
-          if (defaultTrending.length > 0) {
-            setTrendingLocations(defaultTrending);
-          }
-        }
+          setTrendingLocations(mockLocations.slice(0, 3));
+        },
+        { enableHighAccuracy: true }
       );
     }
   }, [geolocationAttempted]);
   
-  // Initialize with trending locations for a default city if geolocation fails
+  // Initialize with trending locations for fallback
   useEffect(() => {
     if (!geolocationAttempted) {
-      const defaultTrending = getTrendingLocationsForCity("Los Angeles");
-      if (defaultTrending.length > 0) {
-        setTrendingLocations(defaultTrending);
-      }
+      setTrendingLocations(mockLocations.slice(0, 3));
+      setLoading(false);
     }
   }, [geolocationAttempted]);
   
@@ -110,8 +93,6 @@ const TrendingLocations = () => {
     // Listen for updates from VernonChat
     const handleUpdate = (data: { cityName: string, events: Location[] }) => {
       const { cityName, events } = data;
-      
-      setCurrentCity(cityName);
       
       // Replace trending locations with the new events
       if (events && events.length > 0) {
@@ -121,9 +102,14 @@ const TrendingLocations = () => {
         toast.success(`Updated trending locations for ${cityName}`);
       } else {
         // If no events were provided, get trending locations for the city
-        const cityTrending = getTrendingLocationsForCity(cityName);
+        const cityTrending = getNearbyLocations(
+          userLocation?.latitude || 34.0522, // Default LA coords if no location
+          userLocation?.longitude || -118.2437,
+          10
+        );
+        
         if (cityTrending.length > 0) {
-          setTrendingLocations(cityTrending);
+          setTrendingLocations(cityTrending.slice(0, 3));
         }
       }
     };
@@ -134,39 +120,58 @@ const TrendingLocations = () => {
     return () => {
       eventBus.listeners.delete('trending-locations-update');
     };
-  }, []);
+  }, [userLocation]);
+
+  // Get the reference point for distance calculations
+  const referencePoint = getReferencePoint(userAddressLocation, userLocation);
   
   return (
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="text-xl flex items-center">
           <TrendingUp className="h-5 w-5 mr-2" />
-          <span>Trending in {currentCity}</span>
+          <span>Trending Nearby</span>
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {trendingLocations.map((location) => (
-            <div 
-              key={location.id} 
-              className="p-3 border rounded-lg flex justify-between items-center hover:bg-accent/10 transition-colors"
-            >
-              <div>
-                <div className="font-medium">{location.name}</div>
-                <div className="text-sm text-muted-foreground flex items-center gap-2">
-                  <span>{location.city}, {location.state || location.country}</span>
-                  <Badge variant="outline" className="text-xs">
-                    {location.type}
-                  </Badge>
-                </div>
-              </div>
-              <Button variant="ghost" size="sm" className="h-8" asChild>
-                <a href={`/venue/${location.id}`}>
-                  <ArrowRight className="h-4 w-4" />
-                </a>
-              </Button>
+          {loading ? (
+            <div className="flex justify-center py-4">
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
             </div>
-          ))}
+          ) : (
+            trendingLocations.map((location) => (
+              <Link 
+                key={location.id} 
+                to={`/venue/${location.id}`} 
+                className="p-3 border rounded-lg flex justify-between items-center hover:bg-accent/10 transition-colors"
+              >
+                <div>
+                  <div className="font-medium">{location.name}</div>
+                  <div className="text-sm text-muted-foreground flex items-center gap-2">
+                    <span>{location.city}, {location.state || location.country}</span>
+                    <Badge variant="outline" className="text-xs">
+                      {location.type}
+                    </Badge>
+                  </div>
+                  {referencePoint && (
+                    <div className="text-xs text-primary flex items-center mt-1">
+                      <MapPin className="h-3 w-3 mr-1" />
+                      {calculateDistance(
+                        referencePoint.lat, 
+                        referencePoint.lng, 
+                        location.lat, 
+                        location.lng
+                      )}
+                    </div>
+                  )}
+                </div>
+                <Button variant="ghost" size="sm" className="h-8">
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+            ))
+          )}
         </div>
       </CardContent>
     </Card>

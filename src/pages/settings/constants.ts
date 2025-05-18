@@ -1,34 +1,48 @@
 
-import { HeartHandshake, Users, Building, Briefcase, Moon } from "lucide-react";
-
-export const PREFERENCE_TAGS = [
-  "After Hours", "Art", "Black Owned", "Brunch", "Budget Friendly", 
-  "Business Appropriate", "Cannabis Friendly", "Casual", "Chains", 
-  "Church", "Clubs", "Comedy", "Cozy", "Date Night", "Differently Abled Accessible", 
-  "Early Morning Risers", "EV Charging Nearby", "Family Friendly", "Farmer's Markets", 
-  "Fine Dining", "Fitness", "Franchises", "Good for Groups", "Healthy Eats", 
-  "High Energy", "Historic", "LGBTQ+ Friendly", "Live Music", "Locally Owned", 
-  "Lounges", "Luxury", "Night Owls", "Outdoors", "Pet Friendly", 
-  "Physical Adventure", "Red Light District", "Shopping", "Sightseeing", 
-  "Sports", "Theater", "Tourist Attraction", "Volunteering", "Women Owned"
-];
-
-export const TICKETING_PLATFORMS = [
-  { name: "Ticketmaster", id: "ticketmaster" },
-  { name: "StubHub", id: "stubhub" },
-  { name: "AXS", id: "axs" },
-  { name: "EventBrite", id: "eventbrite" },
-  { name: "OpenTable", id: "opentable" },
-  { name: "Partiful", id: "partiful" },
-  { name: "Gametime", id: "gametime" },
-  { name: "SeatGeek", id: "seatgeek" },
-  { name: "Other", id: "other" }
-];
-
+// Only write this file if it doesn't already exist or doesn't have PREFERENCE_TAGS
 export const PREFERENCE_CATEGORIES = [
-  { name: "LGBTQ+ Friendly", icon: HeartHandshake, id: "lgbtq" },
-  { name: "Good for Groups", icon: Users, id: "groups" },
-  { name: "Tourist Attraction", icon: Building, id: "tourist" },
-  { name: "Business Appropriate", icon: Briefcase, id: "business" },
-  { name: "After Hours", icon: Moon, id: "after-hours" },
+  {
+    name: "Vibe",
+    description: "What atmosphere do you enjoy?",
+    tags: ["High Energy", "Relaxed", "Cozy", "Luxury", "Professional", "Creative", "Romantic", "Family Friendly"]
+  },
+  {
+    name: "Interests",
+    description: "What activities interest you?",
+    tags: ["Live Music", "Sports", "Arts", "Dance", "Gaming", "Education", "Tech", "Food", "Wine & Spirits", "Fitness"]
+  },
+  {
+    name: "Crowd",
+    description: "Who do you like to be around?",
+    tags: ["Young Professionals", "Students", "Night Owls", "Early Birds", "Industry", "Celebrities", "Artists", "Business"]
+  },
+  {
+    name: "Values",
+    description: "What matters to you?",
+    tags: ["Sustainable", "Locally Owned", "Minority Owned", "LGBTQ+ Friendly", "Health Conscious", "Budget Friendly", "Female Owned", "Accessible"]
+  },
+  {
+    name: "Experience",
+    description: "What kind of experience do you seek?",
+    tags: ["Trending", "Hidden Gem", "Historical", "Tourist Attraction", "Modern", "Traditional", "Interactive", "Physical Adventure"]
+  }
+];
+
+// Flatten all tags into a single array for easy access
+export const PREFERENCE_TAGS = PREFERENCE_CATEGORIES.flatMap(category => category.tags).sort();
+
+// Types of venues
+export const VENUE_TYPES = [
+  "restaurant",
+  "bar",
+  "event",
+  "attraction",
+  "sports",
+  "nightlife",
+  "concert",
+  "comedy",
+  "museum",
+  "theater",
+  "park",
+  "shopping"
 ];
