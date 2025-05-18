@@ -139,7 +139,7 @@ const Explore = () => {
                             key={location.id}
                             venue={location}
                             content={getCitySpecificContent(location)}
-                            media={getMediaForLocation(location)}
+                            media={getMediaForLocationMock(location)}
                             timestamp={new Date().toISOString()}
                           />
                         ))}
