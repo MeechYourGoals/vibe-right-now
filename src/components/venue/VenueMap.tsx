@@ -18,7 +18,6 @@ const VenueMap: React.FC<VenueMapProps> = ({ venue, onExpand }) => {
           <MapPin className="h-4 w-4 mr-1 text-primary" />
           <span className="font-medium">{venue.address}</span>
         </div>
-        {/* Removed redundant WaitTimeDisplay here */}
       </div>
       
       <div className="h-48 rounded-md overflow-hidden relative">

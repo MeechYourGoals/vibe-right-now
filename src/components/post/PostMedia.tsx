@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Media } from "@/types";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,9 +11,15 @@ interface PostMediaProps {
 const PostMedia: React.FC<PostMediaProps> = ({ media }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [hasError, setHasError] = useState<boolean[]>(media.map(() => false));
+  const [mediaLoaded, setMediaLoaded] = useState(false);
   const hasMultipleMedia = media.length > 1;
   
   const fallbackImage = "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=600&q=80&auto=format&fit=crop";
+
+  useEffect(() => {
+    // Reset media loaded state when media changes or index changes
+    setMediaLoaded(false);
+  }, [media, currentIndex]);
 
   const nextMedia = () => {
     setCurrentIndex((prev) => (prev + 1) % media.length);
@@ -27,6 +33,24 @@ const PostMedia: React.FC<PostMediaProps> = ({ media }) => {
     const newErrors = [...hasError];
     newErrors[index] = true;
     setHasError(newErrors);
+
+    // If we have multiple media, try to show the next non-errored media
+    if (hasMultipleMedia) {
+      // Find the next valid media index
+      let nextValidIndex = -1;
+      for (let i = 1; i < media.length; i++) {
+        const checkIndex = (index + i) % media.length;
+        if (!newErrors[checkIndex]) {
+          nextValidIndex = checkIndex;
+          break;
+        }
+      }
+      
+      // If found a valid media, switch to it
+      if (nextValidIndex !== -1) {
+        setCurrentIndex(nextValidIndex);
+      }
+    }
   };
 
   const currentMedia = media[currentIndex];
@@ -40,12 +64,21 @@ const PostMedia: React.FC<PostMediaProps> = ({ media }) => {
             <p className="text-muted-foreground">Image could not be loaded</p>
           </div>
         ) : (
-          <img
-            src={currentMedia.url}
-            alt="Post media"
-            className="w-full object-cover max-h-[500px]"
-            onError={() => handleError(currentIndex)}
-          />
+          <>
+            {!mediaLoaded && (
+              <div className="absolute inset-0 flex items-center justify-center bg-muted">
+                <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+              </div>
+            )}
+            <img
+              src={currentMedia.url}
+              alt="Post media"
+              className={`w-full object-cover max-h-[500px] ${mediaLoaded ? 'opacity-100' : 'opacity-0'}`}
+              onError={() => handleError(currentIndex)}
+              onLoad={() => setMediaLoaded(true)}
+              loading="lazy"
+            />
+          </>
         )
       ) : (
         <video
