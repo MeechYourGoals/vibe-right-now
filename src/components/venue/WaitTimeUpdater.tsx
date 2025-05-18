@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Clock } from "lucide-react";
@@ -19,6 +19,32 @@ interface WaitTimeUpdaterProps {
 const WaitTimeUpdater = ({ venueId, initialWaitTime, subscriptionTier }: WaitTimeUpdaterProps) => {
   const [waitTime, setWaitTime] = useState<number | null>(initialWaitTime || null);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [currentWaitTime, setCurrentWaitTime] = useState<number | null>(null);
+  
+  useEffect(() => {
+    // Fetch the current wait time when component mounts
+    const fetchCurrentWaitTime = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('vibe_signals')
+          .select('value')
+          .eq('location_id', venueId)
+          .eq('signal_type', 'wait_time')
+          .order('timestamp', { ascending: false })
+          .limit(1)
+          .single();
+        
+        if (!error && data) {
+          setCurrentWaitTime(data.value);
+          setWaitTime(data.value);
+        }
+      } catch (error) {
+        console.error('Error fetching current wait time:', error);
+      }
+    };
+    
+    fetchCurrentWaitTime();
+  }, [venueId]);
   
   if (subscriptionTier !== 'pro') {
     return (
@@ -45,20 +71,20 @@ const WaitTimeUpdater = ({ venueId, initialWaitTime, subscriptionTier }: WaitTim
       setIsUpdating(true);
       
       try {
-        // Update the wait time in the database
+        // Insert a new vibe_signal entry with signal_type "wait_time"
         const { error } = await supabase
-          .from('venue_wait_times')
-          .upsert(
-            { 
-              venue_id: venueId, 
-              wait_minutes: waitTime,
-              updated_at: new Date().toISOString() 
-            },
-            { onConflict: 'venue_id' }
-          );
+          .from('vibe_signals')
+          .insert({
+            location_id: venueId,
+            value: waitTime,
+            signal_type: 'wait_time',
+            source: 'venue_owner',
+            metadata: { manually_updated: true }
+          });
         
         if (error) throw error;
         
+        setCurrentWaitTime(waitTime);
         toast.success('Wait time updated successfully');
         console.log('Wait time updated:', waitTime);
       } catch (error) {
@@ -76,15 +102,21 @@ const WaitTimeUpdater = ({ venueId, initialWaitTime, subscriptionTier }: WaitTim
     setIsUpdating(true);
     
     try {
-      // Clear the wait time in the database
+      // Insert a new entry with null value to indicate cleared wait time
       const { error } = await supabase
-        .from('venue_wait_times')
-        .update({ wait_minutes: null, updated_at: new Date().toISOString() })
-        .eq('venue_id', venueId);
+        .from('vibe_signals')
+        .insert({
+          location_id: venueId,
+          value: 0, // Use 0 to indicate no wait time
+          signal_type: 'wait_time',
+          source: 'venue_owner',
+          metadata: { wait_time_cleared: true }
+        });
       
       if (error) throw error;
       
-      setWaitTime(null);
+      setWaitTime(0);
+      setCurrentWaitTime(0);
       toast.success('Wait time cleared');
     } catch (error) {
       console.error('Error clearing wait time:', error);

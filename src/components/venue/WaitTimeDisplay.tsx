@@ -2,7 +2,6 @@
 import { useEffect, useState } from 'react';
 import { Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { formatDistanceToNow } from 'date-fns';
 
 interface WaitTimeDisplayProps {
   venueId: string;
@@ -25,16 +24,29 @@ const WaitTimeDisplay = ({ venueId, showLastUpdated = true, className = "" }: Wa
   useEffect(() => {
     const fetchWaitTime = async () => {
       try {
+        // Using vibe_signals table as a temporary storage for wait times
+        // We'll query for signals of type "wait_time" for the specific venue
         const { data, error } = await supabase
-          .from('venue_wait_times')
-          .select('wait_minutes, updated_at')
-          .eq('venue_id', venueId)
+          .from('vibe_signals')
+          .select('value, timestamp')
+          .eq('location_id', venueId)
+          .eq('signal_type', 'wait_time')
+          .order('timestamp', { ascending: false })
+          .limit(1)
           .single();
         
-        if (error) throw error;
-        setWaitTimeData(data);
+        if (error) {
+          console.error('Error fetching wait time:', error);
+          setWaitTimeData(null);
+        } else if (data) {
+          setWaitTimeData({
+            wait_minutes: data.value,
+            updated_at: data.timestamp
+          });
+        }
       } catch (error) {
-        console.error('Error fetching wait time:', error);
+        console.error('Error in wait time fetch:', error);
+        setWaitTimeData(null);
       } finally {
         setLoading(false);
       }
@@ -44,18 +56,23 @@ const WaitTimeDisplay = ({ venueId, showLastUpdated = true, className = "" }: Wa
     
     // Setup realtime subscription for wait time updates
     const channel = supabase
-      .channel('venue_wait_time_changes')
+      .channel('vibe_signal_wait_time_changes')
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
-          table: 'venue_wait_times',
-          filter: `venue_id=eq.${venueId}`
+          table: 'vibe_signals',
+          filter: `location_id=eq.${venueId} AND signal_type=eq.wait_time`
         },
         (payload) => {
           console.log('Wait time updated:', payload);
-          setWaitTimeData(payload.new as WaitTimeData);
+          if (payload.new) {
+            setWaitTimeData({
+              wait_minutes: (payload.new as any).value,
+              updated_at: (payload.new as any).timestamp
+            });
+          }
         }
       )
       .subscribe();
@@ -101,5 +118,8 @@ const WaitTimeDisplay = ({ venueId, showLastUpdated = true, className = "" }: Wa
     </div>
   );
 };
+
+// Import this at the top of the file
+import { formatDistanceToNow } from 'date-fns';
 
 export default WaitTimeDisplay;
