@@ -10,7 +10,10 @@ interface PostMediaProps {
 
 const PostMedia: React.FC<PostMediaProps> = ({ media }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [hasError, setHasError] = useState<boolean[]>(media.map(() => false));
   const hasMultipleMedia = media.length > 1;
+  
+  const fallbackImage = "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=600&q=80&auto=format&fit=crop";
 
   const nextMedia = () => {
     setCurrentIndex((prev) => (prev + 1) % media.length);
@@ -20,22 +23,37 @@ const PostMedia: React.FC<PostMediaProps> = ({ media }) => {
     setCurrentIndex((prev) => (prev - 1 + media.length) % media.length);
   };
 
+  const handleError = (index: number) => {
+    const newErrors = [...hasError];
+    newErrors[index] = true;
+    setHasError(newErrors);
+  };
+
   const currentMedia = media[currentIndex];
+  const currentHasError = hasError[currentIndex];
 
   return (
     <div className="relative mb-2">
       {currentMedia.type === "image" ? (
-        <img
-          src={currentMedia.url}
-          alt="Post media"
-          className="w-full object-cover max-h-[500px]"
-        />
+        currentHasError ? (
+          <div className="w-full bg-muted flex items-center justify-center h-[300px]">
+            <p className="text-muted-foreground">Image could not be loaded</p>
+          </div>
+        ) : (
+          <img
+            src={currentMedia.url}
+            alt="Post media"
+            className="w-full object-cover max-h-[500px]"
+            onError={() => handleError(currentIndex)}
+          />
+        )
       ) : (
         <video
           src={currentMedia.url}
           controls
           className="w-full max-h-[500px]"
-          poster={currentMedia.thumbnail}
+          poster={currentMedia.thumbnail || fallbackImage}
+          onError={() => handleError(currentIndex)}
         />
       )}
 
