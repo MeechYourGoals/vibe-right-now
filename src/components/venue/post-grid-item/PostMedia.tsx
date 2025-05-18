@@ -11,7 +11,7 @@ const PostMedia: React.FC<PostMediaProps> = ({ post }) => {
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
   const [mediaLoaded, setMediaLoaded] = useState(false);
   
-  const fallbackImage = "https://images.pexels.com/photos/670720/pexels-photo-670720.jpeg?auto=compress&cs=tinysrgb&w=600";
+  const fallbackImage = "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=600&q=80&auto=format&fit=crop";
   
   // Try loading the next image in the array if one fails
   const tryNextImage = () => {

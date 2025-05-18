@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { MapPin, Star, Clock, Car, ExternalLink, BookmarkPlus } from "lucide-react";
 import { Location } from "@/types";
 import { toast } from "sonner";
-import { getMediaForLocation } from "@/utils/map/locationMediaUtils";
 
 type PlaceCardProps = {
   place: Location;
@@ -51,7 +50,6 @@ const getOfficialUrl = (place: Location) => {
 const PlaceCard = ({ place, visitType }: PlaceCardProps) => {
   const rideServiceUrl = getRideServiceUrl(place);
   const officialUrl = getOfficialUrl(place);
-  const placeMedia = getMediaForLocation(place);
   
   const handleSaveToWantToVisit = () => {
     toast.success(`Added ${place.name} to your "Want to Visit" list`);
@@ -62,13 +60,9 @@ const PlaceCard = ({ place, visitType }: PlaceCardProps) => {
       <div className="flex flex-col md:flex-row">
         <div className="w-full md:w-1/4 h-48 md:h-auto relative">
           <img 
-            src={placeMedia.url} 
+            src={`https://source.unsplash.com/300x200/?${place.type.replace(/\s+/g, '')}`} 
             alt={place.name}
             className="h-full w-full object-cover"
-            onError={(e) => {
-              // Fallback to a specific image if loading fails
-              (e.target as HTMLImageElement).src = "https://images.pexels.com/photos/670720/pexels-photo-670720.jpeg?auto=compress&cs=tinysrgb&w=600";
-            }}
           />
         </div>
         <div className="flex-1">
