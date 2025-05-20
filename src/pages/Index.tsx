@@ -1,14 +1,35 @@
 
-import { useState } from "react";
+import { useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Layout } from "@/components/Layout";
 import PostFeed from "@/components/PostFeed";
 import CameraButton from "@/components/CameraButton";
 import VernonNext from "@/components/VernonNext";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { mockUsers } from "@/mock/users";
 
 const Index = () => {
   const featuredUsers = ['sarah_vibes', 'jay_experiences', 'adventure_alex', 'marco_travels', 'local_explorer'];
   const isMobile = useIsMobile();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Check if the URL has a user query parameter
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const userQuery = params.get('user');
+    
+    if (userQuery) {
+      // Check if this is a valid username
+      const cleanUsername = userQuery.replace('@', '');
+      const userExists = mockUsers.some(user => user.username === cleanUsername);
+      
+      if (userExists) {
+        // Navigate to user profile
+        navigate(`/user/${cleanUsername}`);
+      }
+    }
+  }, [location.search, navigate]);
 
   return (
     <Layout>

@@ -1,207 +1,197 @@
 
-import { useLocation, useNavigate } from "react-router-dom";
+import { mockLocations } from "@/mock/locations";
 import { Location } from "@/types";
-import { mockLocations } from "@/mock/data";
-import { generateMusicEvents, generateComedyEvents } from "@/services/search/eventService";
-import { generateMockLocationsForCity, generateLocalNightlifeVenues } from "@/utils/explore/locationGenerators";
+import { vibeTags } from "@/hooks/useUserProfile";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export const useFilterHandling = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  
+
   const handleTabChange = (
-    value: string, 
+    value: string,
     searchQuery: string,
     searchedCity: string,
     searchedState: string,
     searchCategory: string,
     vibeFilter: string,
-    setFilteredLocations: (locations: Location[]) => void
+    setFilteredLocations: React.Dispatch<React.SetStateAction<Location[]>>
   ) => {
-    let results = [...mockLocations];
-    
-    if (searchQuery) {
-      results = results.filter(loc => {
-        const locationMatches = 
-          loc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          loc.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          loc.address.toLowerCase().includes(searchQuery.toLowerCase());
-        
-        return locationMatches;
-      });
+    // Check if user category is selected - should not filter locations
+    if (searchCategory === "users") {
+      return;
     }
     
-    if (searchCategory === "places" && searchedCity) {
-      results = generateMockLocationsForCity(searchedCity, searchedState);
-    }
+    // If the tab value is not 'all', filter the locations by type
+    const filteredByType = mockLocations.filter(loc => {
+      if (value === 'all') return true;
+      return loc.type?.toLowerCase() === value.toLowerCase();
+    });
     
-    if (value !== "all") {
-      results = results.filter(loc => loc.type === value);
-    }
+    // If there's a vibe filter active, apply that as well
+    const filteredByVibe = vibeFilter 
+      ? filteredByType.filter(loc => {
+          if (!loc.vibeTags) return false;
+          return loc.vibeTags.some(tag => 
+            tag.toLowerCase() === vibeFilter.toLowerCase()
+          );
+        })
+      : filteredByType;
     
-    if (vibeFilter && vibeFilter.length > 0) {
-      results = results.filter(loc => {
-        if (!loc.vibes) return false;
-        return loc.vibes.some(vibe => 
-          vibe.toLowerCase().includes(vibeFilter.toLowerCase())
-        );
-      });
-    }
+    // If there's a search query for places, filter by city or state or venue name
+    const filteredBySearch = searchQuery && searchCategory === 'places'
+      ? filteredByVibe.filter(loc => {
+          const searchLower = searchQuery.toLowerCase();
+          const cityMatch = loc.city?.toLowerCase().includes(searchLower);
+          const stateMatch = loc.state?.toLowerCase().includes(searchLower);
+          const nameMatch = loc.name.toLowerCase().includes(searchLower);
+          return cityMatch || stateMatch || nameMatch;
+        })
+      : filteredByVibe;
     
-    setFilteredLocations(results);
+    // If there's a specific city being searched, filter by that city
+    const filteredByCity = searchedCity
+      ? filteredBySearch.filter(loc => {
+          return loc.city?.toLowerCase() === searchedCity.toLowerCase();
+        })
+      : filteredBySearch;
+    
+    setFilteredLocations(filteredByCity);
   };
-  
+
   const handleSearch = (
     query: string,
     filterType: string,
     category: string,
     searchQuery: string,
-    setSearchQuery: (query: string) => void,
-    setSearchCategory: (category: string) => void,
-    setActiveTab: (tab: string) => void,
-    setSearchedCity: (city: string) => void,
-    setSearchedState: (state: string) => void,
-    setMusicEvents: (events: any[]) => void,
-    setComedyEvents: (events: any[]) => void,
-    setNightlifeVenues: (venues: Location[]) => void,
-    setFilteredLocations: (locations: Location[]) => void,
+    setSearchQuery: React.Dispatch<React.SetStateAction<string>>,
+    setSearchCategory: React.Dispatch<React.SetStateAction<string>>,
+    setActiveTab: React.Dispatch<React.SetStateAction<string>>,
+    setSearchedCity: React.Dispatch<React.SetStateAction<string>>,
+    setSearchedState: React.Dispatch<React.SetStateAction<string>>,
+    setMusicEvents: React.Dispatch<React.SetStateAction<Location[]>>,
+    setComedyEvents: React.Dispatch<React.SetStateAction<Location[]>>,
+    setNightlifeVenues: React.Dispatch<React.SetStateAction<Location[]>>,
+    setFilteredLocations: React.Dispatch<React.SetStateAction<Location[]>>,
     vibeFilter: string,
-    setVibeFilter: (vibe: string) => void,
-    dateRange?: { from: Date; to?: Date },
-    processComplexQuery?: (query: string) => void,
-    setIsNaturalLanguageSearch?: (isNL: boolean) => void
+    setVibeFilter: React.Dispatch<React.SetStateAction<string>>,
+    dateRange: any,
+    processComplexQuery: (query: string) => Promise<void>,
+    setIsNaturalLanguageSearch: React.Dispatch<React.SetStateAction<boolean>>
   ) => {
+    // Handle user category differently
+    if (category === "users") {
+      // Navigate to user profile if it's a direct username
+      const usernameMatch = query.match(/^@?([a-zA-Z0-9_]+)$/);
+      if (usernameMatch) {
+        const username = usernameMatch[1];
+        navigate(`/user/${username}`);
+        return;
+      }
+      
+      // Don't update search params for users, as we'll navigate to profile
+      return;
+    }
+    
     setSearchQuery(query);
     setSearchCategory(category);
     
-    const isComplexQuery = query.length > 50 && 
+    // If there's a special category like music or comedy, set the active tab
+    if (category === "music") {
+      setActiveTab("music");
+    } else if (category === "comedy") {
+      setActiveTab("comedy");
+    } else if (category === "nightlife") {
+      setActiveTab("nightlife");
+    }
+    
+    // Complex query detection
+    const isComplexQuery = query.length > 40 && 
       /(\w+\s+(and|or|with|near|before|after)\s+\w+)|(\w+\s+for\s+\w+)/i.test(query);
     
-    if (setIsNaturalLanguageSearch) {
-      setIsNaturalLanguageSearch(isComplexQuery);
-    }
-    
-    const isComedyQuery = /comedy|comedian|stand[ -]?up|improv|funny|laugh|jokes/i.test(query);
-    if (isComedyQuery) {
-      setActiveTab("comedy");
-    }
-    
-    const vibeKeywords = ["cozy", "family friendly", "nightowl", "trendy", "chill", "upscale", "casual", "romantic"];
-    const queryLower = query.toLowerCase();
-    let detectedVibe = "";
-    
-    for (const vibe of vibeKeywords) {
-      if (queryLower.includes(vibe)) {
-        detectedVibe = vibe;
-        break;
-      }
-    }
-    
-    if (detectedVibe) {
-      setVibeFilter(detectedVibe);
-    }
-    
-    if (filterType !== "All") {
-      setActiveTab(filterType.toLowerCase());
-    } else {
-      setActiveTab("all");
-    }
-    
-    let city = "";
-    let state = "";
-    
-    if (isComplexQuery && processComplexQuery) {
+    if (isComplexQuery) {
+      // Use NLP to analyze the query
       processComplexQuery(query);
-    } else if (query && !detectedVibe) {
-      const parts = query.split(',');
-      city = parts[0].trim();
-      state = parts.length > 1 ? parts[1].trim() : "";
-      setSearchedCity(city);
-      setSearchedState(state);
-      
-      setMusicEvents(generateMusicEvents(city, state));
-      setComedyEvents(generateComedyEvents(city, state));
-      setNightlifeVenues(generateLocalNightlifeVenues(city, state));
+      setIsNaturalLanguageSearch(true);
+      return;
+    }
+    
+    // Reset NLP flag for simple queries
+    setIsNaturalLanguageSearch(false);
+    
+    // Check if query is a vibe tag
+    const matchingVibeTag = vibeTags.find(tag => 
+      tag.toLowerCase() === query.toLowerCase()
+    );
+    
+    if (matchingVibeTag && category === "vibes") {
+      setVibeFilter(matchingVibeTag);
+      // Find locations with this vibe tag
+      const vibeLocations = mockLocations.filter(loc => 
+        loc.vibeTags && loc.vibeTags.some(tag => 
+          tag.toLowerCase() === matchingVibeTag.toLowerCase()
+        )
+      );
+      setFilteredLocations(vibeLocations);
+      return;
+    }
+    
+    // Process regular search
+    // For simplicity, we'll just set the searched city and update locations
+    setSearchedCity(query);
+    setSearchedState("");
+    
+    // Update URL search params
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.set('q', query);
+    if (category !== "all") {
+      searchParams.set('category', category);
     } else {
-      setSearchedCity("");
-      setSearchedState("");
-      setMusicEvents([]);
-      setComedyEvents([]);
-      setNightlifeVenues([]);
+      searchParams.delete('category');
     }
     
-    let results = [...mockLocations];
+    // Update URL without reload
+    navigate(`/explore?${searchParams.toString()}`, { replace: true });
     
-    if (category === "places" && city) {
-      results = generateMockLocationsForCity(city, state);
-      
-      results.forEach(loc => {
-        if (!loc.vibes) {
-          loc.vibes = [];
-        }
-      });
-    } else if (query) {
-      results = mockLocations.filter(loc => {
-        const locationMatches = 
-          loc.name.toLowerCase().includes(query.toLowerCase()) ||
-          loc.city.toLowerCase().includes(query.toLowerCase()) ||
-          loc.address.toLowerCase().includes(query.toLowerCase());
-        
-        return locationMatches;
-      });
-    }
+    // Filter locations based on query
+    const filteredBySearch = mockLocations.filter(loc => {
+      const searchLower = query.toLowerCase();
+      const cityMatch = loc.city?.toLowerCase().includes(searchLower);
+      const stateMatch = loc.state?.toLowerCase().includes(searchLower);
+      const nameMatch = loc.name.toLowerCase().includes(searchLower);
+      return cityMatch || stateMatch || nameMatch;
+    });
     
-    if (filterType.toLowerCase() !== "all") {
-      results = results.filter(loc => loc.type === filterType.toLowerCase());
-    }
+    // Update filtered locations
+    setFilteredLocations(filteredBySearch);
     
-    if (vibeFilter && vibeFilter.length > 0) {
-      results = results.filter(loc => {
-        if (!loc.vibes) return false;
-        return loc.vibes.some(vibe => 
-          vibe.toLowerCase().includes(vibeFilter.toLowerCase())
-        );
-      });
-    }
+    // Update music, comedy, and nightlife events
+    const musicFiltered = filteredBySearch.filter(loc => loc.type === "music_venue");
+    const comedyFiltered = filteredBySearch.filter(loc => loc.type === "comedy_club");
+    const nightlifeFiltered = filteredBySearch.filter(loc => 
+      loc.type === "bar" || loc.type === "nightclub" || loc.type === "lounge"
+    );
     
-    setFilteredLocations(results);
-    
-    if (query) {
-      const searchParams = new URLSearchParams();
-      searchParams.set('q', query);
-      if (vibeFilter) searchParams.set('vibe', vibeFilter);
-      if (isComedyQuery || filterType.toLowerCase() !== "all") searchParams.set('tab', isComedyQuery ? 'comedy' : filterType.toLowerCase());
-      
-      if (dateRange?.from) {
-        searchParams.set('from', dateRange.from.toISOString().split('T')[0]);
-        if (dateRange.to) {
-          searchParams.set('to', dateRange.to.toISOString().split('T')[0]);
-        } else {
-          searchParams.delete('to');
-        }
-      }
-      
-      navigate(`/explore?${searchParams.toString()}`, { replace: true });
-    } else if (vibeFilter) {
-      navigate(`/explore?vibe=${vibeFilter}`, { replace: true });
-    } else {
-      navigate('/explore', { replace: true });
-    }
+    setMusicEvents(musicFiltered);
+    setComedyEvents(comedyFiltered);
+    setNightlifeVenues(nightlifeFiltered);
   };
-  
+
   const handleClearVibeFilter = (
     searchQuery: string,
     searchCategory: string,
-    setVibeFilter: (vibe: string) => void,
+    setVibeFilter: React.Dispatch<React.SetStateAction<string>>,
     handleSearch: (query: string, filterType: string, category: string) => void
   ) => {
     setVibeFilter("");
-    handleSearch(searchQuery, "All", searchCategory);
+    handleSearch(searchQuery, "", searchCategory);
   };
-  
+
   return {
     handleTabChange,
     handleSearch,
     handleClearVibeFilter
   };
 };
+
+export default useFilterHandling;

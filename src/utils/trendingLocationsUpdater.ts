@@ -1,16 +1,11 @@
 
-import { updateTrendingLocations as updateTrendingLocationsComponent } from '@/components/TrendingLocations';
-import { Location } from '@/types';
-import { getTrendingLocationsForCity } from '@/mock/cityLocations';
+import { Location } from "@/types";
+import { eventBus, updateTrendingLocations } from "@/components/TrendingLocations";
 
-// Function to update trending locations based on AI query results
-export const updateTrendingLocations = (cityName: string, events: Location[] | null = null) => {
-  // In a real implementation, this would update the global state or database
-  console.log(`Updating trending locations for ${cityName}`);
-  
-  // If events are not provided, get them from the city data
-  const locationsToUpdate = events || getTrendingLocationsForCity(cityName);
-  
-  // Call the function exported from TrendingLocations component
-  updateTrendingLocationsComponent(cityName, locationsToUpdate);
+// Function to update trending locations from external components
+export const updateTrendingLocationsFromVernon = (cityName: string, events: Location[]) => {
+  updateTrendingLocations(cityName, events);
 };
+
+// Export event bus for components that need to listen for updates
+export const locationEventBus = eventBus;

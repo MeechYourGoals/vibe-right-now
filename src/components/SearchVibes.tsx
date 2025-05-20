@@ -122,7 +122,7 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
       setSearchQuery(vibe);
       setSearchCategory("vibes");
     }
-  }, [location.search]);
+  }, [location.search, navigate]);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -257,15 +257,19 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
   };
 
   const handleUserSelect = (username: string) => {
-    setSearchQuery(username);
+    navigate(`/user/${username}`);
     setShowUserSuggestions(false);
-    onSearch(username, selectedFilter, searchCategory);
   };
 
   const handlePlaceSelect = (placeName: string) => {
-    setSearchQuery(placeName);
-    setShowPlaceSuggestions(false);
-    onSearch(placeName, selectedFilter, searchCategory);
+    const location = mockLocations.find(loc => loc.name === placeName);
+    if (location) {
+      navigate(`/venue/${location.id}`);
+    } else {
+      setSearchQuery(placeName);
+      setShowPlaceSuggestions(false);
+      onSearch(placeName, selectedFilter, "places");
+    }
   };
   
   const handleVibeSelect = (vibe: string) => {

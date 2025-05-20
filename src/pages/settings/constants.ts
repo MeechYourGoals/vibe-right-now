@@ -1,61 +1,56 @@
 
-// Only write this file if it doesn't already exist or doesn't have PREFERENCE_TAGS
 export const PREFERENCE_CATEGORIES = [
   {
-    name: "Vibe",
-    description: "What atmosphere do you enjoy?",
-    tags: ["High Energy", "Relaxed", "Cozy", "Luxury", "Professional", "Creative", "Romantic", "Family Friendly"]
+    id: "food",
+    name: "Food & Dining",
+    icon: "Utensils",
+    options: ["Fine Dining", "Casual Dining", "Fast Food", "Cafes", "Bakeries", "Desserts"]
   },
   {
-    name: "Interests",
-    description: "What activities interest you?",
-    tags: ["Live Music", "Sports", "Arts", "Dance", "Gaming", "Education", "Tech", "Food", "Wine & Spirits", "Fitness"]
+    id: "music",
+    name: "Music",
+    icon: "Music",
+    options: ["Rock", "Pop", "Hip Hop", "Jazz", "Classical", "Electronic", "Country"]
   },
   {
-    name: "Crowd",
-    description: "Who do you like to be around?",
-    tags: ["Young Professionals", "Students", "Night Owls", "Early Birds", "Industry", "Celebrities", "Artists", "Business"]
+    id: "nightlife",
+    name: "Nightlife",
+    icon: "Moon",
+    options: ["Bars", "Clubs", "Lounges", "Live Music Venues", "Breweries", "Wine Bars"]
   },
   {
-    name: "Values",
-    description: "What matters to you?",
-    tags: ["Sustainable", "Locally Owned", "Minority Owned", "LGBTQ+ Friendly", "Health Conscious", "Budget Friendly", "Female Owned", "Accessible"]
+    id: "outdoor",
+    name: "Outdoor Activities",
+    icon: "Mountain",
+    options: ["Parks", "Hiking", "Beaches", "Camping", "Biking", "Skiing", "Water Sports"]
   },
   {
-    name: "Experience",
-    description: "What kind of experience do you seek?",
-    tags: ["Trending", "Hidden Gem", "Historical", "Tourist Attraction", "Modern", "Traditional", "Interactive", "Physical Adventure"]
+    id: "arts",
+    name: "Arts & Culture",
+    icon: "Palette",
+    options: ["Museums", "Galleries", "Theaters", "Concert Halls", "Historic Sites", "Festivals"]
+  },
+  {
+    id: "sports",
+    name: "Sports",
+    icon: "Trophy",
+    options: ["Football", "Basketball", "Baseball", "Soccer", "Tennis", "Golf", "Fitness"]
+  },
+  {
+    id: "shopping",
+    name: "Shopping",
+    icon: "ShoppingBag",
+    options: ["Malls", "Boutiques", "Markets", "Vintage Shops", "Outlets", "Department Stores"]
   }
 ];
 
-// Flatten all tags into a single array for easy access
-export const PREFERENCE_TAGS = PREFERENCE_CATEGORIES.flatMap(category => category.tags).sort();
-
-// Types of venues
-export const VENUE_TYPES = [
-  "restaurant",
-  "bar",
-  "event",
-  "attraction",
-  "sports",
-  "nightlife",
-  "concert",
-  "comedy",
-  "museum",
-  "theater",
-  "park",
-  "shopping"
-];
-
-// Add ticketing platforms for TicketingTab
 export const TICKETING_PLATFORMS = [
-  "Ticketmaster",
-  "Eventbrite",
-  "StubHub",
-  "AXS",
-  "SeatGeek",
-  "LiveNation",
-  "TicketWeb",
-  "Showclix",
-  "Brown Paper Tickets"
+  { id: "ticketmaster", name: "Ticketmaster" },
+  { id: "eventbrite", name: "Eventbrite" },
+  { id: "stubhub", name: "StubHub" },
+  { id: "seatgeek", name: "SeatGeek" },
+  { id: "axs", name: "AXS" },
+  { id: "opentable", name: "OpenTable" },
+  { id: "resy", name: "Resy" },
+  { id: "other", name: "Other Platform" }
 ];
