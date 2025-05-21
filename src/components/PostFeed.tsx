@@ -1,4 +1,3 @@
-
 import { useState, useMemo } from "react";
 import { mockPosts, mockComments, mockUsers } from "@/mock/data";
 import { PostCard } from "@/components/post";
@@ -8,7 +7,7 @@ import { isWithinThreeMonths } from "@/mock/time-utils";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { vibeTags } from "@/hooks/useUserProfile";
+import { vibeTags } from "@/constants/vibeTags"; // Import from constants
 import {
   Popover,
   PopoverContent,
@@ -166,7 +165,6 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
   }, [filteredPosts]);
 
   // Calculate the number of posts per location
-  // For demo purposes, add variation to the counts
   const locationPostCounts = (() => {
     const counts: Record<string, number> = {};
     
@@ -224,32 +222,6 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
             {tag}
           </Badge>
         ))}
-      </div>
-    );
-  };
-
-  // Enhanced PostCard component with vibe tags
-  const EnhancedPostCard = ({ posts, locationPostCount }: { posts: Post[], locationPostCount: number }) => {
-    const postCard = (
-      <PostCard 
-        posts={posts} 
-        locationPostCount={locationPostCount}
-        getComments={getPostComments}
-      />
-    );
-    
-    // Check if any post has vibe tags
-    const hasVibeTags = posts.some(post => post.vibeTags && post.vibeTags.length > 0);
-    
-    if (!hasVibeTags) return postCard;
-    
-    // Add vibe tags below the post card
-    return (
-      <div className="space-y-2">
-        {postCard}
-        <div className="pl-4">
-          {renderVibeTags(posts[0])}
-        </div>
       </div>
     );
   };
@@ -318,11 +290,14 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
       <div className="p-4 space-y-4">
         {Object.keys(postsGroupedByLocation).length > 0 ? (
           Object.entries(postsGroupedByLocation).map(([locationId, posts]) => (
-            <EnhancedPostCard 
-              key={locationId} 
-              posts={posts} 
-              locationPostCount={locationPostCounts[locationId]}
-            />
+            <div key={locationId} className="space-y-2">
+              <PostCard post={posts[0]} />
+              {posts[0].vibeTags && posts[0].vibeTags.length > 0 && (
+                <div className="pl-4">
+                  {renderVibeTags(posts[0])}
+                </div>
+              )}
+            </div>
           ))
         ) : (
           <div className="text-center py-10">
