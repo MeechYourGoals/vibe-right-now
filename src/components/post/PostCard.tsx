@@ -1,197 +1,212 @@
-
 import React, { useState } from "react";
-import { Post, Comment, Location, Media } from "@/types";
-import { Card } from "@/components/ui/card";
-import PostHeader from "./PostHeader";
-import PostContent from "./PostContent";
-import PostMedia from "./PostMedia";
-import PostFooter from "./PostFooter";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import {
+  Bookmark,
+  MessageSquare,
+  Heart,
+  MapPin,
+  Share2,
+  MoreHorizontal,
+  HeartFilled,
+  BookmarkFilled,
+} from "lucide-react";
 import { Link } from "react-router-dom";
-import { UserPlus, UserCheck, User } from "lucide-react";
-import { deletePost } from "@/utils/venue/postManagementUtils";
-import UserDropdown from "@/components/venue/post-grid-item/UserDropdown";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { createLike, deleteLike, deletePost, savePost } from "@/lib/actions";
+import { useUser } from "@clerk/clerk-react";
+import { Post, User } from "@/types";
+
+dayjs.extend(relativeTime);
 
 interface PostCardProps {
-  post?: Post;
-  posts?: Post[];
-  comments?: Comment[];
-  locationPostCount?: number;
-  isDetailView?: boolean;
-  canDelete?: boolean;
-  venue?: Location;
-  onPostDeleted?: (postId: string) => void;
-  getComments?: (postId: string) => Comment[];
+  post: Post;
 }
 
-const PostCard: React.FC<PostCardProps> = ({ 
-  post, 
-  posts,
-  comments = [],
-  locationPostCount,
-  isDetailView = false,
-  canDelete = false,
-  venue,
-  onPostDeleted,
-  getComments
-}) => {
-  const [isDeleted, setIsDeleted] = useState(false);
-  const [isFollowing, setIsFollowing] = useState(false);
-  
-  const toggleFollow = (e: React.MouseEvent) => {
-    e.preventDefault();
+const PostCard: React.FC<PostCardProps> = ({ post }) => {
+  const [isLiked, setIsLiked] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+	const { user } = useUser();
+
+  const likeMutation = useMutation({
+    mutationFn: isLiked ? deleteLike : createLike,
+    onSuccess: () => {
+      setIsLiked(!isLiked);
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      queryClient.invalidateQueries({ queryKey: ["user-posts"] });
+    },
+    onError: (error) => {
+      toast.error("Something went wrong!");
+      console.log(error);
+    },
+  });
+
+  const saveMutation = useMutation({
+    mutationFn: savePost,
+    onSuccess: () => {
+      setIsSaved(!isSaved);
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+    },
+    onError: (error) => {
+      toast.error("Something went wrong!");
+      console.log(error);
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: deletePost,
+    onSuccess: () => {
+      toast.success("Post deleted successfully!");
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      queryClient.invalidateQueries({ queryKey: ["user-posts"] });
+    },
+    onError: (error) => {
+      toast.error("Something went wrong!");
+      console.log(error);
+    },
+  });
+
+  const handleLike = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.stopPropagation();
-    setIsFollowing(!isFollowing);
+    likeMutation.mutate({ postId: post.id });
   };
 
-  // Generate random user count (between 5 and 120) based on location
-  const getUserCount = (locationId: string) => {
-    // Use location ID to generate a consistent but seemingly random number
-    const seed = parseInt(locationId) || 5;
-    return Math.floor((seed * 13) % 115) + 5;
+  const handleSave = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    e.stopPropagation();
+    saveMutation.mutate({ postId: post.id });
   };
-  
-  // Handle multiple posts mode (used in feed)
-  if (posts && posts.length > 0 && getComments) {
-    const firstPost = posts[0];
-    
-    return (
-      <Card className="overflow-hidden">
-        <div className="p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <div className="flex flex-col">
-                <Link to={`/venue/${firstPost.location?.id}`}>
-                  <h3 className="text-lg font-semibold hover:underline">{firstPost.location?.name}</h3>
-                </Link>
-                <div className="flex items-center">
-                  {locationPostCount !== undefined && (
-                    <span className="text-sm text-muted-foreground mr-3">
-                      {locationPostCount} posts
-                    </span>
-                  )}
-                  <div className="relative z-10">
-                    <UserDropdown 
-                      userCount={getUserCount(firstPost.location?.id || '0')} 
-                      post={firstPost}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              className={isFollowing ? "bg-primary/10" : ""}
-              onClick={toggleFollow}
-            >
-              {isFollowing ? (
-                <>
-                  <UserCheck className="h-4 w-4 mr-1" />
-                  Following
-                </>
-              ) : (
-                <>
-                  <UserPlus className="h-4 w-4 mr-1" />
-                  Follow
-                </>
-              )}
-            </Button>
-          </div>
-          <p className="text-sm text-muted-foreground mt-1">
-            <Link to={`/venue/${firstPost.location?.id}`} className="hover:underline">
-              {firstPost.location?.city}, {firstPost.location?.state}
-            </Link>
-          </p>
-        </div>
-        
-        {posts.map(post => {
-          // Determine if the post is from the venue itself
-          const isVenuePost = post.isVenuePost || post.location?.id === firstPost.location?.id;
-          
-          return (
-            <div 
-              key={post.id} 
-              className={`border-t ${isVenuePost ? 'ring-2 ring-amber-500' : ''}`}
-            >
-              <PostHeader 
-                user={post.user as User} 
-                timestamp={String(post.timestamp)}
-                location={post.location}
-                isPinned={post.isPinned}
-                isVenuePost={isVenuePost}
-                canDelete={canDelete}
-                onDelete={() => {}}
-              />
-              
-              <div className="px-4">
-                <PostContent content={post.content} />
-                
-                {post.media && post.media.length > 0 && (
-                  <PostMedia media={post.media as (Media | string)[]} />
-                )}
-                
-                <PostFooter 
-                  post={post} 
-                  comments={getComments(post.id)} 
-                  isDetailView={false} 
-                />
-              </div>
-            </div>
-          );
-        })}
-      </Card>
-    );
-  }
-  
-  // Single post mode
-  if (!post) {
-    return null; // Don't render if no post is provided
-  }
-  
-  // Don't render if the post has been deleted
-  if (isDeleted) {
-    return null;
-  }
 
-  const handleDelete = () => {
-    if (venue && deletePost(post.id, venue)) {
-      setIsDeleted(true);
-      if (onPostDeleted) {
-        onPostDeleted(post.id);
-      }
+  const handleDelete = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    e.stopPropagation();
+    deleteMutation.mutate({ postId: post.id });
+  };
+
+  const handleShare = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    e.stopPropagation();
+    if (navigator.share) {
+      navigator
+        .share({
+          title: post.content,
+          text: post.content,
+          url: window.location.href,
+        })
+        .then(() => console.log("Successful share"))
+        .catch((error) => console.log("Error sharing", error));
+    } else {
+      toast.error("Web Share API not supported!");
     }
   };
 
-  const isVenuePost = post.isVenuePost || post.location?.id === venue?.id;
+  const goToLocation = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    e.stopPropagation();
+    navigate(`/location/${post.locationId}`);
+  };
+
+  const goToUser = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    e.stopPropagation();
+    navigate(`/user/${post?.user?.username}`);
+  };
 
   return (
-    <Card className={`overflow-hidden ${isVenuePost ? 'ring-2 ring-amber-500' : ''} ${post.isPinned && !isVenuePost ? 'ring-2 ring-amber-300' : ''}`}>
-      <PostHeader 
-        user={post.user as User} 
-        timestamp={String(post.timestamp)} 
-        location={post.location}
-        isPinned={post.isPinned}
-        isVenuePost={isVenuePost}
-        canDelete={canDelete && !isVenuePost}
-        onDelete={handleDelete}
-      />
-      
-      <div className="px-4 py-2 flex justify-end">
-        <UserDropdown userCount={getUserCount(post.location?.id || '0')} post={post} />
-      </div>
-      
-      <PostContent content={post.content} />
-      
-      {post.media && post.media.length > 0 && (
-        <PostMedia media={post.media as (Media | string)[]} />
-      )}
-      
-      <PostFooter 
-        post={post} 
-        comments={comments} 
-        isDetailView={isDetailView} 
-      />
+    <Card className="w-full overflow-hidden">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <div className="flex items-center space-x-4">
+          <Avatar onClick={goToUser} className="cursor-pointer">
+            <AvatarImage src={post?.user?.avatar} />
+            <AvatarFallback>{post?.user?.username?.slice(0, 2)}</AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col">
+            <CardTitle onClick={goToUser} className="cursor-pointer">
+              {post?.user?.name}
+            </CardTitle>
+            <CardDescription className="text-sm text-muted-foreground">
+              @{post?.user?.username}
+            </CardDescription>
+          </div>
+        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <span className="sr-only">Open menu</span>
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuItem onClick={handleDelete}>Delete</DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>Report</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </CardHeader>
+      <CardContent className="aspect-video overflow-hidden">
+        {post.media && post.media.length > 0 ? (
+          <img
+            src={post.media[0]}
+            alt="Post Media"
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <p>{post.content}</p>
+        )}
+      </CardContent>
+      <CardFooter className="flex flex-col space-y-2">
+        <p className="text-sm text-muted-foreground">
+          {dayjs(post.timestamp).fromNow()}
+        </p>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4 text-muted-foreground">
+            <Button variant="ghost" size="icon" onClick={handleLike}>
+              {isLiked ? <HeartFilled className="h-5 w-5" /> : <Heart className="h-5 w-5" />}
+            </Button>
+            <Button variant="ghost" size="icon">
+              <MessageSquare className="h-5 w-5" />
+            </Button>
+            <Button variant="ghost" size="icon" onClick={handleShare}>
+              <Share2 className="h-5 w-5" />
+            </Button>
+          </div>
+          {post.locationId && (
+            <Button variant="outline" size="sm" onClick={goToLocation}>
+              <MapPin className="mr-2 h-4 w-4" />
+              {post?.location?.name}
+            </Button>
+          )}
+          <Button variant="ghost" size="icon" onClick={handleSave}>
+            {isSaved ? <BookmarkFilled className="h-5 w-5" /> : <Bookmark className="h-5 w-5" />}
+          </Button>
+        </div>
+        {post.vibeTags && post.vibeTags.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {post.vibeTags.map((tag) => (
+              <Badge key={tag}>{tag}</Badge>
+            ))}
+          </div>
+        )}
+      </CardFooter>
     </Card>
   );
 };

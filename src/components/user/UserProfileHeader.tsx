@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -76,7 +75,7 @@ const UserProfileHeader = ({ user, getUserBio }: UserProfileHeaderProps) => {
             <div>
               <h1 className="text-2xl font-bold flex items-center gap-2">
                 {user.name}
-                {user.verified && (
+                {user.isVerified && (
                   <VerifiedIcon className="h-5 w-5 text-primary animate-pulse-slow" />
                 )}
               </h1>

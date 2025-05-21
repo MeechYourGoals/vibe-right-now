@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Message } from '@/components/VernonChat/types';
 
@@ -224,6 +223,122 @@ export const GoogleAIService = {
     } catch (error) {
       console.error('Error in search:', error);
       return null;
+    }
+  },
+  
+  /**
+   * Book tickets for an event using Project Mariner
+   * @param eventId The event ID to book tickets for
+   * @param details Ticket booking details (quantity, section, etc.)
+   * @returns Booking confirmation object
+   */
+  async bookTickets(eventId: string, details: any): Promise<any> {
+    try {
+      console.log(`Booking tickets for event: ${eventId} with details:`, details);
+      
+      const { data, error } = await supabase.functions.invoke('mariner-booking', {
+        body: { 
+          action: 'bookTickets',
+          eventId,
+          ticketDetails: details
+        }
+      });
+      
+      if (error) {
+        console.error('Error calling Mariner booking function:', error);
+        throw new Error(`Failed to book tickets: ${error.message}`);
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Error in bookTickets:', error);
+      return { success: false, error: "Failed to book tickets. Please try again later." };
+    }
+  },
+  
+  /**
+   * Make a reservation at a venue using Project Mariner
+   * @param venueId The venue ID to make a reservation at
+   * @param details Reservation details (date, time, party size, etc.)
+   * @returns Reservation confirmation object
+   */
+  async makeReservation(venueId: string, details: any): Promise<any> {
+    try {
+      console.log(`Making reservation at venue: ${venueId} with details:`, details);
+      
+      const { data, error } = await supabase.functions.invoke('mariner-booking', {
+        body: { 
+          action: 'makeReservation',
+          venueId,
+          reservationDetails: details
+        }
+      });
+      
+      if (error) {
+        console.error('Error calling Mariner reservation function:', error);
+        throw new Error(`Failed to make reservation: ${error.message}`);
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Error in makeReservation:', error);
+      return { success: false, error: "Failed to make reservation. Please try again later." };
+    }
+  },
+  
+  /**
+   * Check the status of a Mariner transaction (booking or reservation)
+   * @param transactionId The transaction ID to check
+   * @returns Transaction status object
+   */
+  async checkTransactionStatus(transactionId: string): Promise<any> {
+    try {
+      console.log(`Checking status of transaction: ${transactionId}`);
+      
+      const { data, error } = await supabase.functions.invoke('mariner-booking', {
+        body: { 
+          action: 'checkStatus',
+          transactionId
+        }
+      });
+      
+      if (error) {
+        console.error('Error calling Mariner status check function:', error);
+        throw new Error(`Failed to check transaction status: ${error.message}`);
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Error in checkTransactionStatus:', error);
+      return { success: false, status: "unknown", error: "Failed to check transaction status." };
+    }
+  },
+  
+  /**
+   * Cancel a Mariner transaction (booking or reservation)
+   * @param transactionId The transaction ID to cancel
+   * @returns Cancellation confirmation object
+   */
+  async cancelTransaction(transactionId: string): Promise<any> {
+    try {
+      console.log(`Cancelling transaction: ${transactionId}`);
+      
+      const { data, error } = await supabase.functions.invoke('mariner-booking', {
+        body: { 
+          action: 'cancelTransaction',
+          transactionId
+        }
+      });
+      
+      if (error) {
+        console.error('Error calling Mariner cancellation function:', error);
+        throw new Error(`Failed to cancel transaction: ${error.message}`);
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Error in cancelTransaction:', error);
+      return { success: false, error: "Failed to cancel transaction. Please try again later." };
     }
   }
 };

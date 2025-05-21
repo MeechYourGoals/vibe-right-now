@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useSearchParams } from "./explore/useSearchParams";
 import { useLocationData } from "./explore/useLocationData";
@@ -54,10 +53,10 @@ export const useExploreState = () => {
     setSearchedCity,
     setSearchedState,
     setFilteredLocations,
-    // Cast as unknown first, then to the desired type to avoid type error
+    // Fix type issue - cast through unknown type
     setComedyEvents as unknown as React.Dispatch<React.SetStateAction<Location[]>>,
     setActiveTab,
-    setNightlifeVenues as React.Dispatch<React.SetStateAction<Location[]>>,
+    setNightlifeVenues as unknown as React.Dispatch<React.SetStateAction<Location[]>>,
     setVibeFilter,
     setIsNaturalLanguageSearch
   );
@@ -143,7 +142,7 @@ export const useExploreState = () => {
       setActiveTab,
       setSearchedCity,
       setSearchedState,
-      // Cast as unknown first to safely pass to the function
+      // Fix type issues - cast through unknown type
       setMusicEvents as unknown as React.Dispatch<React.SetStateAction<Location[]>>,
       setComedyEvents as unknown as React.Dispatch<React.SetStateAction<Location[]>>,
       setNightlifeVenues as unknown as React.Dispatch<React.SetStateAction<Location[]>>,
