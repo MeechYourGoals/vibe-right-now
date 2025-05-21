@@ -16,6 +16,12 @@ export const analyzeText = GoogleAIService.analyzeText;
 export const extractEntities = GoogleAIService.extractEntities;
 export const extractCategories = GoogleAIService.extractCategories;
 
+// Project Mariner functionality
+export const bookTickets = GoogleAIService.bookTickets;
+export const makeReservation = GoogleAIService.makeReservation;
+export const checkTransactionStatus = GoogleAIService.checkTransactionStatus;
+export const cancelTransaction = GoogleAIService.cancelTransaction;
+
 // Create a hub to simplify imports (backward compatibility)
 export const VertexAIHub = {
   // Text generation
@@ -32,5 +38,11 @@ export const VertexAIHub = {
   // Analysis
   analyzeText: GoogleAIService.analyzeText.bind(GoogleAIService),
   extractEntities: GoogleAIService.extractEntities.bind(GoogleAIService),
-  extractCategories: GoogleAIService.extractCategories.bind(GoogleAIService)
+  extractCategories: GoogleAIService.extractCategories.bind(GoogleAIService),
+  
+  // Project Mariner
+  bookTickets: GoogleAIService.bookTickets.bind(GoogleAIService),
+  makeReservation: GoogleAIService.makeReservation.bind(GoogleAIService),
+  checkTransactionStatus: GoogleAIService.checkTransactionStatus.bind(GoogleAIService),
+  cancelTransaction: GoogleAIService.cancelTransaction.bind(GoogleAIService)
 };

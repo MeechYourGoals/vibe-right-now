@@ -13,7 +13,6 @@ export interface User {
   joinedDate?: string;
   location?: string;
   vibeTags?: string[];
-  // Add missing properties found in build errors
   isCelebrity?: boolean;
 }
 
@@ -53,7 +52,6 @@ export interface EventItem extends Omit<Location, 'openNow' | 'hours'> {
   ticketUrl?: string;
   category?: string;
   venueName?: string;
-  // Add missing properties found in build errors
   title?: string;
   time?: string;
   venue?: string;
@@ -67,7 +65,7 @@ export interface Media {
 
 export interface Comment {
   id: string;
-  userId?: string; // Make userId optional
+  userId?: string;
   postId: string;
   content: string;
   timestamp: string;
@@ -83,16 +81,15 @@ export interface Post {
   userId: string;
   locationId?: string;
   content: string;
-  media?: string[] | Media[];
+  media?: Media[] | string[];
   timestamp: string;
   likes: number;
-  comments: number;
+  comments: number | Comment[];
   user?: User;
   location?: Location;
   vibeTags?: string[];
   isVenuePost?: boolean;
   isPinned?: boolean;
-  // Add missing properties found in build errors
   expiresAt?: string;
 }
 
@@ -114,15 +111,15 @@ export interface VenueInsights {
   period: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
   date: string;
   visitorCount: number;
+  visitors?: number;
   checkInsCount: number;
+  checkInCount?: number;
   newFollowersCount: number;
   postEngagement: number;
   averageRating: number;
   peakHours: Record<string, number>;
   customerDemographics?: any;
   venue?: Location;
-  // Add missing properties found in build errors
-  visitors?: number;
   visitorsChange?: string;
   posts?: number;
   postsChange?: string;
@@ -139,7 +136,34 @@ export interface VenueInsights {
   impressions?: number;
   viewsPer?: number;
   viewsCount?: number;
-  checkInCount?: number;
   receiptUploads?: number;
   discountRedemptions?: number;
+}
+
+export interface MarinerTransaction {
+  id: string;
+  type: 'ticket' | 'reservation';
+  userId: string;
+  status: 'pending' | 'completed' | 'failed';
+  createdAt: string;
+  completedAt?: string;
+  venueId: string;
+  eventId?: string;
+  reservationDetails?: {
+    date: string;
+    time: string;
+    partySize: number;
+    specialRequests?: string;
+  };
+  ticketDetails?: {
+    eventName: string;
+    quantity: number;
+    pricePerTicket: number;
+    totalPrice: number;
+    section?: string;
+    row?: string;
+    seats?: string[];
+  };
+  paymentMethod?: string;
+  confirmationCode?: string;
 }
