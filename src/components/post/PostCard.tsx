@@ -32,7 +32,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Post, User } from "@/types";
+import { Post, User, Media } from "@/types";
 
 interface PostCardProps {
   post: Post;
@@ -78,17 +78,21 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => {
 
   const goToLocation = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.stopPropagation();
-    navigate(`/location/${post.locationId}`);
+    if (post.locationId) {
+      navigate(`/location/${post.locationId}`);
+    }
   };
 
-  // Change event type to accommodate div click
-  const goToUser = (e: React.MouseEvent) => {
+  // Change handler to use correct event type
+  const goToUser = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     e.stopPropagation();
-    navigate(`/user/${post?.user?.username}`);
+    if (post.user && post.user.username) {
+      navigate(`/user/${post.user.username}`);
+    }
   };
 
   // Get image URL safely
-  const getImageUrl = (media: string | any) => {
+  const getImageUrl = (media: string | Media): string => {
     if (typeof media === 'string') {
       return media;
     } else if (media && media.url) {
@@ -157,7 +161,7 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => {
           {post.locationId && (
             <Button variant="outline" size="sm" onClick={goToLocation}>
               <MapPin className="mr-2 h-4 w-4" />
-              {post?.location?.name}
+              {post?.location?.name || "View Location"}
             </Button>
           )}
           <Button variant="ghost" size="icon" onClick={handleSave}>

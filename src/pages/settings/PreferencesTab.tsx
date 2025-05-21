@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { PREFERENCE_TAGS, PREFERENCE_CATEGORIES } from "./constants";
@@ -40,12 +41,14 @@ const PreferencesTab = ({
     { id: 4, name: "Family Fun Center", tags: ["Family Friendly", "Budget Friendly", "Physical Adventure"] }
   ]);
   
+  // Ensure we're working with arrays by defining them properly
   // Map preference categories to the expected format with icons and IDs
-  const preferenceCategories = PREFERENCE_CATEGORIES.map((cat, index) => ({
-    name: cat.name,
-    icon: getCategoryIcon(cat.name),
-    id: `category-${index}`
-  }));
+  const preferenceCategories = Array.isArray(PREFERENCE_CATEGORIES) ? 
+    PREFERENCE_CATEGORIES.map((cat, index) => ({
+      name: cat.name,
+      icon: getCategoryIcon(cat.name),
+      id: `category-${index}`
+    })) : [];
 
   // Helper function to get icon based on category name
   function getCategoryIcon(categoryName: string) {
@@ -139,7 +142,7 @@ const PreferencesTab = ({
             onAddFavorite={handleAddFavorite}
             onRemoveFavorite={handleRemoveFavorite}
             preferenceCategories={preferenceCategories}
-            preferenceTags={PREFERENCE_TAGS}
+            preferenceTags={Array.isArray(PREFERENCE_TAGS) ? PREFERENCE_TAGS : []}
           />
         )}
         
@@ -153,7 +156,7 @@ const PreferencesTab = ({
             onTagRemove={handleTagRemove}
             onAddCustomTag={handleAddCustomTag}
             preferenceCategories={preferenceCategories}
-            preferenceTags={PREFERENCE_TAGS}
+            preferenceTags={Array.isArray(PREFERENCE_TAGS) ? PREFERENCE_TAGS : []}
             renderCompetitorTags={renderCompetitorTags}
           />
         )}
