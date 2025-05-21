@@ -2,6 +2,10 @@
 // Re-export functionality from GoogleAIService for backward compatibility
 import { GoogleAIService } from '../GoogleAIService';
 
+// Define default voices for compatibility with existing code
+export const DEFAULT_MALE_VOICE = "en-US-Neural2-D";
+export const DEFAULT_FEMALE_VOICE = "en-US-Neural2-F";
+
 // Re-export all functionality for backward compatibility
 export const generateText = GoogleAIService.generateText;
 export const searchWithAI = GoogleAIService.search;

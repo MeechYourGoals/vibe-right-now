@@ -54,7 +54,8 @@ export const useExploreState = () => {
     setSearchedCity,
     setSearchedState,
     setFilteredLocations,
-    setComedyEvents as React.Dispatch<React.SetStateAction<Location[]>>,
+    // Cast as unknown first, then to the desired type to avoid type error
+    setComedyEvents as unknown as React.Dispatch<React.SetStateAction<Location[]>>,
     setActiveTab,
     setNightlifeVenues as React.Dispatch<React.SetStateAction<Location[]>>,
     setVibeFilter,
@@ -142,9 +143,10 @@ export const useExploreState = () => {
       setActiveTab,
       setSearchedCity,
       setSearchedState,
-      setMusicEvents,
-      setComedyEvents,
-      setNightlifeVenues,
+      // Cast as unknown first to safely pass to the function
+      setMusicEvents as unknown as React.Dispatch<React.SetStateAction<Location[]>>,
+      setComedyEvents as unknown as React.Dispatch<React.SetStateAction<Location[]>>,
+      setNightlifeVenues as unknown as React.Dispatch<React.SetStateAction<Location[]>>,
       setFilteredLocations,
       vibeFilter,
       setVibeFilter,

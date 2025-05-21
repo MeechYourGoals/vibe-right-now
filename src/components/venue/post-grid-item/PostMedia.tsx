@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Post } from "@/types";
+import { Post, Media } from "@/types";
 import { getMediaForLocation } from "@/utils/map/locationMediaUtils";
 
 interface PostMediaProps {
@@ -11,6 +11,25 @@ const PostMedia: React.FC<PostMediaProps> = ({ post }) => {
   const [imageError, setImageError] = useState(false);
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
   const [mediaLoaded, setMediaLoaded] = useState(false);
+  
+  // Helper to get media URL from either string or Media object
+  const getMediaUrl = (item: string | Media): string => {
+    if (typeof item === 'string') {
+      return item;
+    }
+    return item.url;
+  };
+
+  // Helper to get media type
+  const getMediaType = (item: string | Media): 'image' | 'video' => {
+    if (typeof item === 'string') {
+      // Guess based on extension
+      return item.toLowerCase().endsWith('.mp4') || 
+             item.toLowerCase().endsWith('.mov') || 
+             item.toLowerCase().endsWith('.webm') ? 'video' : 'image';
+    }
+    return item.type;
+  };
   
   // Use type-specific fallback images for better relevance
   const getFallbackImage = () => {
@@ -75,8 +94,10 @@ const PostMedia: React.FC<PostMediaProps> = ({ post }) => {
 
   // Get current media item
   const currentMedia = post.media[currentMediaIndex];
+  const currentMediaType = getMediaType(currentMedia);
+  const currentMediaUrl = getMediaUrl(currentMedia);
 
-  if (currentMedia.type === "image") {
+  if (currentMediaType === "image") {
     // Try to load the image with error handling and fallback
     return (
       <>
@@ -86,8 +107,8 @@ const PostMedia: React.FC<PostMediaProps> = ({ post }) => {
           </div>
         )}
         <img 
-          src={currentMedia.url}
-          alt={`Post by ${post.user.username}`}
+          src={currentMediaUrl}
+          alt={`Post by ${post.user?.username || 'user'}`}
           className={`h-full w-full object-cover transition-transform group-hover:scale-105 ${mediaLoaded ? 'opacity-100' : 'opacity-0'}`}
           onError={() => tryNextImage()}
           onLoad={() => setMediaLoaded(true)}
@@ -99,7 +120,7 @@ const PostMedia: React.FC<PostMediaProps> = ({ post }) => {
   
   return (
     <video
-      src={currentMedia.url}
+      src={currentMediaUrl}
       className="h-full w-full object-cover"
       poster={getFallbackImage()}
       onError={() => tryNextImage()}

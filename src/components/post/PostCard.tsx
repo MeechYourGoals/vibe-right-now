@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { Post, Comment, Location } from "@/types";
+import { Post, Comment, Location, Media } from "@/types";
 import { Card } from "@/components/ui/card";
 import PostHeader from "./PostHeader";
 import PostContent from "./PostContent";
@@ -8,7 +8,7 @@ import PostMedia from "./PostMedia";
 import PostFooter from "./PostFooter";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { UserPlus, UserCheck } from "lucide-react";
+import { UserPlus, UserCheck, User } from "lucide-react";
 import { deletePost } from "@/utils/venue/postManagementUtils";
 import UserDropdown from "@/components/venue/post-grid-item/UserDropdown";
 
@@ -61,8 +61,8 @@ const PostCard: React.FC<PostCardProps> = ({
           <div className="flex items-center justify-between">
             <div className="flex-1">
               <div className="flex flex-col">
-                <Link to={`/venue/${firstPost.location.id}`}>
-                  <h3 className="text-lg font-semibold hover:underline">{firstPost.location.name}</h3>
+                <Link to={`/venue/${firstPost.location?.id}`}>
+                  <h3 className="text-lg font-semibold hover:underline">{firstPost.location?.name}</h3>
                 </Link>
                 <div className="flex items-center">
                   {locationPostCount !== undefined && (
@@ -72,7 +72,7 @@ const PostCard: React.FC<PostCardProps> = ({
                   )}
                   <div className="relative z-10">
                     <UserDropdown 
-                      userCount={getUserCount(firstPost.location.id)} 
+                      userCount={getUserCount(firstPost.location?.id || '0')} 
                       post={firstPost}
                     />
                   </div>
@@ -99,15 +99,15 @@ const PostCard: React.FC<PostCardProps> = ({
             </Button>
           </div>
           <p className="text-sm text-muted-foreground mt-1">
-            <Link to={`/venue/${firstPost.location.id}`} className="hover:underline">
-              {firstPost.location.city}, {firstPost.location.state}
+            <Link to={`/venue/${firstPost.location?.id}`} className="hover:underline">
+              {firstPost.location?.city}, {firstPost.location?.state}
             </Link>
           </p>
         </div>
         
         {posts.map(post => {
           // Determine if the post is from the venue itself
-          const isVenuePost = post.isVenuePost || post.location?.id === firstPost.location.id;
+          const isVenuePost = post.isVenuePost || post.location?.id === firstPost.location?.id;
           
           return (
             <div 
@@ -115,7 +115,7 @@ const PostCard: React.FC<PostCardProps> = ({
               className={`border-t ${isVenuePost ? 'ring-2 ring-amber-500' : ''}`}
             >
               <PostHeader 
-                user={post.user} 
+                user={post.user as User} 
                 timestamp={String(post.timestamp)}
                 location={post.location}
                 isPinned={post.isPinned}
@@ -128,7 +128,7 @@ const PostCard: React.FC<PostCardProps> = ({
                 <PostContent content={post.content} />
                 
                 {post.media && post.media.length > 0 && (
-                  <PostMedia media={post.media} />
+                  <PostMedia media={post.media as (Media | string)[]} />
                 )}
                 
                 <PostFooter 
@@ -168,7 +168,7 @@ const PostCard: React.FC<PostCardProps> = ({
   return (
     <Card className={`overflow-hidden ${isVenuePost ? 'ring-2 ring-amber-500' : ''} ${post.isPinned && !isVenuePost ? 'ring-2 ring-amber-300' : ''}`}>
       <PostHeader 
-        user={post.user} 
+        user={post.user as User} 
         timestamp={String(post.timestamp)} 
         location={post.location}
         isPinned={post.isPinned}
@@ -178,13 +178,13 @@ const PostCard: React.FC<PostCardProps> = ({
       />
       
       <div className="px-4 py-2 flex justify-end">
-        <UserDropdown userCount={getUserCount(post.location.id)} post={post} />
+        <UserDropdown userCount={getUserCount(post.location?.id || '0')} post={post} />
       </div>
       
       <PostContent content={post.content} />
       
       {post.media && post.media.length > 0 && (
-        <PostMedia media={post.media} />
+        <PostMedia media={post.media as (Media | string)[]} />
       )}
       
       <PostFooter 

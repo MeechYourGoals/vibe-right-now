@@ -53,6 +53,10 @@ export interface EventItem extends Omit<Location, 'openNow' | 'hours'> {
   ticketUrl?: string;
   category?: string;
   venueName?: string;
+  // Add missing properties found in build errors
+  title?: string;
+  time?: string;
+  venue?: string;
 }
 
 export interface Media {
@@ -63,7 +67,7 @@ export interface Media {
 
 export interface Comment {
   id: string;
-  userId: string;
+  userId?: string; // Make userId optional
   postId: string;
   content: string;
   timestamp: string;
@@ -88,6 +92,8 @@ export interface Post {
   vibeTags?: string[];
   isVenuePost?: boolean;
   isPinned?: boolean;
+  // Add missing properties found in build errors
+  expiresAt?: string;
 }
 
 export interface SavedPlace {
@@ -115,4 +121,25 @@ export interface VenueInsights {
   peakHours: Record<string, number>;
   customerDemographics?: any;
   venue?: Location;
+  // Add missing properties found in build errors
+  visitors?: number;
+  visitorsChange?: string;
+  posts?: number;
+  postsChange?: string;
+  shares?: number;
+  sharesChange?: string;
+  likes?: number;
+  likesChange?: string;
+  engagementRate?: string;
+  followerGrowth?: string;
+  clickThroughRate?: string;
+  totalVisits?: number;
+  revenueImpact?: string;
+  totalReach?: number;
+  impressions?: number;
+  viewsPer?: number;
+  viewsCount?: number;
+  checkInCount?: number;
+  receiptUploads?: number;
+  discountRedemptions?: number;
 }
