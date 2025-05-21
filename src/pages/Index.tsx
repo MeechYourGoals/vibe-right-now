@@ -27,6 +27,9 @@ const Index = () => {
       if (userExists) {
         // Navigate to user profile
         navigate(`/user/${cleanUsername}`);
+      } else {
+        // Navigate to explore page with user search
+        navigate(`/explore?q=${cleanUsername}&category=users`);
       }
     }
   }, [location.search, navigate]);

@@ -1,8 +1,11 @@
 
 import { mockLocations } from "@/mock/locations";
 import { Location } from "@/types";
-import { vibeTags } from "@/hooks/useUserProfile";
 import { useLocation, useNavigate } from "react-router-dom";
+import { mockUsers } from "@/mock/users";
+
+// Import vibeTags from useUserProfile
+import { vibeTags } from "@/hooks/useUserProfile";
 
 export const useFilterHandling = () => {
   const location = useLocation();
@@ -85,11 +88,19 @@ export const useFilterHandling = () => {
       const usernameMatch = query.match(/^@?([a-zA-Z0-9_]+)$/);
       if (usernameMatch) {
         const username = usernameMatch[1];
-        navigate(`/user/${username}`);
-        return;
+        
+        // Verify if the username exists
+        const userExists = mockUsers.some(user => user.username === username);
+        
+        if (userExists) {
+          navigate(`/user/${username}`);
+          return;
+        }
       }
       
-      // Don't update search params for users, as we'll navigate to profile
+      // If we get here, it's not a direct username match
+      setSearchQuery(query);
+      setSearchCategory(category);
       return;
     }
     

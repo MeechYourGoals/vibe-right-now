@@ -4,6 +4,7 @@ import { useSearchParams } from "./explore/useSearchParams";
 import { useLocationData } from "./explore/useLocationData";
 import { useQueryProcessing } from "./explore/useQueryProcessing";
 import { useFilterHandling } from "./explore/useFilterHandling";
+import { EventItem, Location } from "@/types";
 
 export const useExploreState = () => {
   const [activeTab, setActiveTab] = useState("all");
@@ -50,9 +51,9 @@ export const useExploreState = () => {
     setSearchedCity,
     setSearchedState,
     setFilteredLocations,
-    setComedyEvents,
+    setComedyEvents as React.Dispatch<React.SetStateAction<Location[]>>,
     setActiveTab,
-    setNightlifeVenues,
+    setNightlifeVenues as React.Dispatch<React.SetStateAction<Location[]>>,
     setVibeFilter,
     setIsNaturalLanguageSearch
   );
@@ -75,6 +76,8 @@ export const useExploreState = () => {
   const getPageTitle = () => {
     if (isNaturalLanguageSearch) {
       return "Smart Search Results";
+    } else if (searchCategory === "users") {
+      return `User Search: ${searchedCity || ""}`;
     } else if (searchedCity) {
       return `Explore Vibes in ${searchedCity}${searchedState ? `, ${searchedState}` : ''}`;
     }

@@ -54,3 +54,12 @@ export const TICKETING_PLATFORMS = [
   { id: "resy", name: "Resy" },
   { id: "other", name: "Other Platform" }
 ];
+
+// Add the missing PREFERENCE_TAGS export
+export const PREFERENCE_TAGS = {
+  "Vibe": ["Cozy", "Trendy", "Upscale", "Casual", "Intimate", "Lively", "Romantic", "NightOwl", "Hidden Gem"],
+  "Interests": ["Live Music", "Art", "Comedy", "Sports", "Gaming", "Dancing", "Theatre", "Food"],
+  "Crowd": ["Family Friendly", "LGBTQ+ Friendly", "Pet Friendly", "Student", "Business", "Young Crowd", "Mature Crowd", "Diverse"],
+  "Values": ["Locally Owned", "Sustainable", "Minority-Owned", "Accessible", "Budget Friendly", "Luxury", "Historic"],
+  "Experience": ["Good for Groups", "Date Night", "Solo Adventure", "Physical Adventure", "Mentally Stimulating", "Unique Experience"]
+};

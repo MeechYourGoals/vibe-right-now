@@ -265,6 +265,7 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
     const location = mockLocations.find(loc => loc.name === placeName);
     if (location) {
       navigate(`/venue/${location.id}`);
+      setShowPlaceSuggestions(false);
     } else {
       setSearchQuery(placeName);
       setShowPlaceSuggestions(false);
