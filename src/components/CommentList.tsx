@@ -6,8 +6,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MessageSquare, Send } from "lucide-react";
 import CommentItem from "@/components/CommentItem";
-import { mockComments } from "@/mock/comments";
-import { mockUsers } from "@/mock/users";
+import { mockComments } from "@/mock/data";
+import { mockUsers } from "@/mock/data";
 
 interface CommentListProps {
   postId: string;
@@ -31,7 +31,6 @@ const CommentList = ({ postId, commentsCount }: CommentListProps) => {
     exampleComments.push({
       id: `example-${postId}-1`,
       postId: postId,
-      userId: mockUsers[Math.floor(Math.random() * mockUsers.length)].id,
       user: mockUsers[Math.floor(Math.random() * mockUsers.length)],
       content: "This place looks amazing! How's the crowd right now?",
       text: "This place looks amazing! How's the crowd right now?", // Add text matching content
@@ -44,7 +43,6 @@ const CommentList = ({ postId, commentsCount }: CommentListProps) => {
     exampleComments.push({
       id: `example-${postId}-2`,
       postId: postId,
-      userId: mockUsers[Math.floor(Math.random() * mockUsers.length)].id,
       user: mockUsers[Math.floor(Math.random() * mockUsers.length)],
       content: "I was here yesterday and it was incredible! The line moves fast if you go around to the side entrance.",
       text: "I was here yesterday and it was incredible! The line moves fast if you go around to the side entrance.", // Add text matching content
@@ -58,7 +56,6 @@ const CommentList = ({ postId, commentsCount }: CommentListProps) => {
       exampleComments.push({
         id: `example-${postId}-3`,
         postId: postId,
-        userId: mockUsers[Math.floor(Math.random() * mockUsers.length)].id,
         user: mockUsers[Math.floor(Math.random() * mockUsers.length)],
         content: "Heading there now! Anyone want to meet up?",
         text: "Heading there now! Anyone want to meet up?", // Add text matching content

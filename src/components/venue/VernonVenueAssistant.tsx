@@ -2,7 +2,7 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Bot, MessageSquare, Crown, Ticket, CalendarClock } from "lucide-react";
+import { Bot, MessageSquare, Crown } from "lucide-react";
 
 const VernonVenueAssistant = () => {
   const openVernonChat = () => {
@@ -29,17 +29,14 @@ const VernonVenueAssistant = () => {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <p className="text-sm font-medium text-gray-800 dark:text-gray-100">
-            Get AI-powered help with managing your venue, analyzing customer data, and handling reservations through Google's Project Mariner.
-          </p>
+          <p className="text-sm font-medium text-gray-800 dark:text-gray-100">Get AI-powered help with managing your venue and analyzing customer data.</p>
           
           <div className="space-y-2">
             <h4 className="text-xs font-medium uppercase text-gray-700 dark:text-gray-200">Ask Vernon about:</h4>
             <ul className="text-sm space-y-1 text-gray-800 dark:text-gray-100">
               <li className="flex items-center"><Crown className="mr-2 h-3 w-3 text-amber-500" /> Marketing strategies</li>
               <li className="flex items-center"><Crown className="mr-2 h-3 w-3 text-amber-500" /> Customer insights</li>
-              <li className="flex items-center"><Ticket className="mr-2 h-3 w-3 text-amber-500" /> Automated ticket sales</li>
-              <li className="flex items-center"><CalendarClock className="mr-2 h-3 w-3 text-amber-500" /> Reservation management</li>
+              <li className="flex items-center"><Crown className="mr-2 h-3 w-3 text-amber-500" /> Competitive analysis</li>
             </ul>
           </div>
           

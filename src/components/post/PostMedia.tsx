@@ -5,7 +5,7 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface PostMediaProps {
-  media: (Media | string)[];
+  media: Media[];
 }
 
 const PostMedia: React.FC<PostMediaProps> = ({ media }) => {
@@ -18,33 +18,6 @@ const PostMedia: React.FC<PostMediaProps> = ({ media }) => {
   const getFallbackImage = () => {
     // Use a reliable Pexels image that will definitely load
     return "https://images.pexels.com/photos/2901209/pexels-photo-2901209.jpeg?auto=compress&cs=tinysrgb&w=600";
-  };
-
-  // Helper to process string or Media object
-  const getMediaUrl = (item: Media | string): string => {
-    if (typeof item === 'string') {
-      return item;
-    }
-    return item.url;
-  };
-
-  // Helper to determine media type
-  const getMediaType = (item: Media | string): 'image' | 'video' => {
-    if (typeof item === 'string') {
-      // Guess type based on extension
-      return item.toLowerCase().endsWith('.mp4') || 
-             item.toLowerCase().endsWith('.mov') || 
-             item.toLowerCase().endsWith('.webm') ? 'video' : 'image';
-    }
-    return item.type;
-  };
-
-  // Helper to get thumbnail
-  const getMediaThumbnail = (item: Media | string): string | undefined => {
-    if (typeof item === 'string') {
-      return undefined;
-    }
-    return item.thumbnail;
   };
 
   useEffect(() => {
@@ -86,13 +59,10 @@ const PostMedia: React.FC<PostMediaProps> = ({ media }) => {
 
   const currentMedia = media[currentIndex];
   const currentHasError = hasError[currentIndex];
-  const currentMediaType = getMediaType(currentMedia);
-  const currentMediaUrl = getMediaUrl(currentMedia);
-  const currentMediaThumbnail = getMediaThumbnail(currentMedia);
 
   return (
     <div className="relative mb-2">
-      {currentMediaType === "image" ? (
+      {currentMedia.type === "image" ? (
         currentHasError ? (
           <div className="w-full relative bg-muted flex items-center justify-center h-[300px]">
             <div className="absolute inset-0 flex items-center justify-center">
@@ -117,7 +87,7 @@ const PostMedia: React.FC<PostMediaProps> = ({ media }) => {
               </div>
             )}
             <img
-              src={currentMediaUrl}
+              src={currentMedia.url}
               alt="Post media"
               className={`w-full object-cover max-h-[500px] ${mediaLoaded ? 'opacity-100' : 'opacity-0'}`}
               onError={() => handleError(currentIndex)}
@@ -128,10 +98,10 @@ const PostMedia: React.FC<PostMediaProps> = ({ media }) => {
         )
       ) : (
         <video
-          src={currentMediaUrl}
+          src={currentMedia.url}
           controls
           className="w-full max-h-[500px]"
-          poster={currentMediaThumbnail || getFallbackImage()}
+          poster={currentMedia.thumbnail || getFallbackImage()}
           onError={() => handleError(currentIndex)}
         />
       )}

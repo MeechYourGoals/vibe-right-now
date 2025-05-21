@@ -1,46 +1,65 @@
 
-// Preference categories used in settings
 export const PREFERENCE_CATEGORIES = [
-  { name: "Vibe", description: "The overall feeling of a place" },
-  { name: "Interests", description: "Activities and experiences you enjoy" },
-  { name: "Crowd", description: "The type of people you like to be around" },
-  { name: "Values", description: "What matters most to you in a venue" },
-  { name: "Experience", description: "The level of service or amenities" }
+  {
+    id: "food",
+    name: "Food & Dining",
+    icon: "Utensils",
+    options: ["Fine Dining", "Casual Dining", "Fast Food", "Cafes", "Bakeries", "Desserts"]
+  },
+  {
+    id: "music",
+    name: "Music",
+    icon: "Music",
+    options: ["Rock", "Pop", "Hip Hop", "Jazz", "Classical", "Electronic", "Country"]
+  },
+  {
+    id: "nightlife",
+    name: "Nightlife",
+    icon: "Moon",
+    options: ["Bars", "Clubs", "Lounges", "Live Music Venues", "Breweries", "Wine Bars"]
+  },
+  {
+    id: "outdoor",
+    name: "Outdoor Activities",
+    icon: "Mountain",
+    options: ["Parks", "Hiking", "Beaches", "Camping", "Biking", "Skiing", "Water Sports"]
+  },
+  {
+    id: "arts",
+    name: "Arts & Culture",
+    icon: "Palette",
+    options: ["Museums", "Galleries", "Theaters", "Concert Halls", "Historic Sites", "Festivals"]
+  },
+  {
+    id: "sports",
+    name: "Sports",
+    icon: "Trophy",
+    options: ["Football", "Basketball", "Baseball", "Soccer", "Tennis", "Golf", "Fitness"]
+  },
+  {
+    id: "shopping",
+    name: "Shopping",
+    icon: "ShoppingBag",
+    options: ["Malls", "Boutiques", "Markets", "Vintage Shops", "Outlets", "Department Stores"]
+  }
 ];
 
-// All available preference tags organized by category
-export const PREFERENCE_TAGS = {
-  "Vibe": [
-    "Chill", "Energetic", "Romantic", "Social", "Quiet",
-    "Lively", "Cozy", "Upscale", "Casual", "Trendy",
-    "Creative", "Relaxed"
-  ],
-  "Interests": [
-    "Live Music", "Sports", "Dancing", "Art", "Games",
-    "Comedy", "Theater", "Food", "Drinks", "Shopping",
-    "Outdoors", "Wellness"
-  ],
-  "Crowd": [
-    "Family-friendly", "Pet-friendly", "LGBTQ+-friendly", "Student",
-    "Professional", "Diverse", "Local", "Tourist", "All Ages"
-  ],
-  "Values": [
-    "Sustainable", "Locally Owned", "Charity", "Inclusive",
-    "Fair Trade", "Ethical", "Community", "Historic"
-  ],
-  "Experience": [
-    "Budget Friendly", "Luxury", "Quick Service", "Full Service",
-    "Self-Guided", "Guided", "Interactive", "Physical Adventure"
-  ]
-};
-
-// Ticketing platforms supported by the app
 export const TICKETING_PLATFORMS = [
   { id: "ticketmaster", name: "Ticketmaster" },
   { id: "eventbrite", name: "Eventbrite" },
   { id: "stubhub", name: "StubHub" },
   { id: "seatgeek", name: "SeatGeek" },
   { id: "axs", name: "AXS" },
-  { id: "livenation", name: "Live Nation" },
+  { id: "opentable", name: "OpenTable" },
+  { id: "resy", name: "Resy" },
   { id: "other", name: "Other Platform" }
 ];
+
+// Add the missing PREFERENCE_TAGS export
+export const PREFERENCE_TAGS = {
+  "Vibe": ["Cozy", "Trendy", "Upscale", "Casual", "Intimate", "Lively", "Romantic", "NightOwl", "Hidden Gem"],
+  "Interests": ["Live Music", "Art", "Comedy", "Sports", "Gaming", "Dancing", "Theatre", "Food"],
+  "Crowd": ["Family Friendly", "LGBTQ+ Friendly", "Pet Friendly", "Student", "Business", "Young Crowd", "Mature Crowd", "Diverse"],
+  "Values": ["Locally Owned", "Sustainable", "Minority-Owned", "Accessible", "Budget Friendly", "Luxury", "Historic"],
+  "Experience": ["Good for Groups", "Date Night", "Solo Adventure", "Physical Adventure", "Mentally Stimulating", "Unique Experience"]
+};

@@ -21,29 +21,21 @@ const PreferenceTagSelection = ({
     <div className="space-y-2 mt-4">
       <Label>All Available Preferences</Label>
       <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto p-2 border rounded-md bg-background">
-        {/* Make sure availableTags is an array before sorting */}
-        {Array.isArray(availableTags) ? 
-          availableTags
-            .slice() // Create a copy to avoid mutating the original array
-            .sort((a, b) => a.localeCompare(b))
-            .map(tag => (
-              <Badge 
-                key={tag} 
-                variant="outline" 
-                className={`cursor-pointer hover:bg-primary/10 ${
-                  selectedTags.includes(tag) ? "bg-primary/20 border-primary" : ""
-                }`}
-                onClick={() => onTagSelect(tag)}
-              >
-                {selectedTags.includes(tag) && (
-                  <Check className="h-3 w-3 mr-1" />
-                )}
-                {tag}
-              </Badge>
-            ))
-          : 
-          <div className="text-sm text-muted-foreground">No available tags</div>
-        }
+        {availableTags.sort((a, b) => a.localeCompare(b)).map(tag => (
+          <Badge 
+            key={tag} 
+            variant="outline" 
+            className={`cursor-pointer hover:bg-primary/10 ${
+              selectedTags.includes(tag) ? "bg-primary/20 border-primary" : ""
+            }`}
+            onClick={() => onTagSelect(tag)}
+          >
+            {selectedTags.includes(tag) && (
+              <Check className="h-3 w-3 mr-1" />
+            )}
+            {tag}
+          </Badge>
+        ))}
       </div>
     </div>
   );

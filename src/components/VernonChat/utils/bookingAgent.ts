@@ -1,235 +1,196 @@
-// Enhanced BookingAgent with Project Mariner support
+
+import { ElevenLabsService } from '@/services/ElevenLabsService';
+import { toast } from 'sonner';
+
+interface BookingDetails {
+  venueName: string;
+  date?: string;
+  time?: string;
+  partySize?: number;
+  additionalNotes?: string;
+}
+
+interface BookingResult {
+  success: boolean;
+  message: string;
+  bookingReference?: string;
+  venueDetails?: {
+    name: string;
+    address?: string;
+    phone?: string;
+  };
+}
+
+/**
+ * Agent for handling venue bookings and reservations
+ */
 export const BookingAgent = {
+  // Check if a query is a booking request
   isBookingRequest(query: string): boolean {
     const bookingKeywords = [
-      'book', 'reserve', 'ticket', 'reservation', 'table',
-      'buy ticket', 'get ticket', 'make reservation'
+      'book', 'reserve', 'make a reservation', 'get tickets',
+      'table for', 'reservation for', 'book a table'
     ];
     
-    return bookingKeywords.some(keyword => 
-      query.toLowerCase().includes(keyword.toLowerCase())
-    );
-  },
-  
-  extractBookingDetails(query: string): any {
-    // Determine if it's a ticket booking or restaurant reservation
-    if (this.isTicketRequest(query)) {
-      return this.extractTicketDetails(query);
-    } else {
-      return this.extractReservationDetails(query);
-    }
-  },
-  
-  isTicketRequest(query: string): boolean {
-    const ticketKeywords = ['ticket', 'show', 'concert', 'event', 'game'];
-    return ticketKeywords.some(keyword => query.toLowerCase().includes(keyword.toLowerCase()));
-  },
-  
-  // Extract details for ticket bookings
-  extractTicketDetails(query: string): any {
     const lowerQuery = query.toLowerCase();
-    
-    // Mock event extraction (in production, would use NLP)
-    let eventId = '';
-    let quantity = 1;
-    let section = '';
-    let priceLevel = '';
-    
-    // Extract event
-    const events = {
-      'lakers': 'event-lakers-123',
-      'concert': 'event-concert-456',
-      'comedy': 'event-comedy-789',
-      'game': 'event-game-101',
-      'show': 'event-show-112',
-    };
-    
-    Object.entries(events).forEach(([keyword, id]) => {
-      if (lowerQuery.includes(keyword)) {
-        eventId = id;
-      }
-    });
-    
-    // Extract quantity
-    const quantityMatch = lowerQuery.match(/(\d+)\s+(ticket|tickets)/);
-    if (quantityMatch) {
-      quantity = parseInt(quantityMatch[1]);
-    }
-    
-    // Extract section (if specified)
-    const sectionMatch = lowerQuery.match(/section\s+([a-z0-9]+)/i);
-    if (sectionMatch) {
-      section = sectionMatch[1];
-    }
-    
-    // Extract price level
-    if (lowerQuery.includes('vip')) {
-      priceLevel = 'vip';
-    } else if (lowerQuery.includes('premium')) {
-      priceLevel = 'premium';
-    } else if (lowerQuery.includes('standard')) {
-      priceLevel = 'standard';
-    } else if (lowerQuery.includes('budget')) {
-      priceLevel = 'budget';
-    }
-    
-    return {
-      type: 'ticket',
-      eventId,
-      quantity,
-      section,
-      priceLevel
-    };
+    return bookingKeywords.some(keyword => lowerQuery.includes(keyword));
   },
   
-  // Extract details for restaurant reservations
-  extractReservationDetails(query: string): any {
-    const lowerQuery = query.toLowerCase();
-    
-    // Mock venue extraction (in production, would use NLP)
-    let venueId = '';
-    let date = new Date().toISOString().split('T')[0]; // default to today
-    let time = '19:00'; // default to 7 PM
-    let partySize = 2; // default to 2 people
-    let specialRequests = '';
-    
-    // Extract venue
-    const venues = {
-      'steakhouse': 'venue-steakhouse-123',
-      'italian': 'venue-italian-456',
-      'seafood': 'venue-seafood-789',
-      'sushi': 'venue-sushi-101',
-      'restaurant': 'venue-restaurant-112',
-    };
-    
-    Object.entries(venues).forEach(([keyword, id]) => {
-      if (lowerQuery.includes(keyword)) {
-        venueId = id;
-      }
-    });
-    
-    // Extract party size
-    const partySizeMatches = [
-      lowerQuery.match(/(\d+)\s+people/),
-      lowerQuery.match(/for\s+(\d+)/),
-      lowerQuery.match(/party\s+of\s+(\d+)/)
-    ];
-    
-    for (const match of partySizeMatches) {
-      if (match) {
-        partySize = parseInt(match[1]);
-        break;
-      }
-    }
-    
-    // Extract date
-    const dateMatches = [
-      lowerQuery.match(/(?:on|for)\s+(\w+day)/i), // e.g., "on Monday"
-      lowerQuery.match(/(?:on|for)\s+(\w+\s+\d+)/i), // e.g., "on June 15"
-      lowerQuery.match(/(\d{1,2}[-/]\d{1,2}(?:[-/]\d{2,4})?)/i) // e.g., "on 06/15"
-    ];
-    
-    for (const match of dateMatches) {
-      if (match) {
-        // In production, would convert this to ISO date format
-        // For mock, we'll keep using today's date
-        break;
-      }
-    }
-    
-    // Extract time
-    const timeMatches = [
-      lowerQuery.match(/at\s+(\d{1,2}(?::\d{2})?\s*(?:am|pm))/i), // e.g., "at 7pm"
-      lowerQuery.match(/(\d{1,2}(?::\d{2})?\s*(?:am|pm))/i) // e.g., "7pm"
-    ];
-    
-    for (const match of timeMatches) {
-      if (match) {
-        // In production, would convert this to 24h time format
-        // For mock, we'll keep using 7 PM
-        break;
-      }
-    }
-    
-    // Extract special requests
-    if (lowerQuery.includes('window')) {
-      specialRequests += 'Window seat preferred. ';
-    }
-    if (lowerQuery.includes('birthday') || lowerQuery.includes('celebration')) {
-      specialRequests += 'Celebrating a special occasion. ';
-    }
-    if (lowerQuery.includes('allergic') || lowerQuery.includes('allergy')) {
-      specialRequests += 'Food allergies noted - please check with party. ';
-    }
-    
-    return {
-      type: 'reservation',
-      venueId,
-      date,
-      time,
-      partySize,
-      specialRequests: specialRequests.trim()
-    };
-  },
-  
-  async bookVenue(details: any): Promise<any> {
+  // Extract booking details from a user query
+  extractBookingDetails(query: string): BookingDetails | null {
     try {
-      console.log("Booking venue with details:", details);
+      // Basic extraction of venue name
+      const venueMatch = query.match(/(?:at|for|with|in)\s+([A-Za-z0-9\s']+?)(?:\s+on|\s+at|\s+for|\?|\.|\s*$)/i);
+      if (!venueMatch) return null;
       
-      // Delegate to the appropriate Mariner function based on booking type
-      const { AgentService } = await import('./services/agentService');
+      const venueName = venueMatch[1].trim();
       
-      if (details.type === 'ticket') {
-        return await AgentService.bookTickets(details.eventId, {
-          quantity: details.quantity,
-          section: details.section,
-          priceLevel: details.priceLevel
-        });
-      } else {
-        return await AgentService.makeReservation(details.venueId, {
-          date: details.date,
-          time: details.time,
-          partySize: details.partySize,
-          specialRequests: details.specialRequests
-        });
-      }
+      // Extract date if present
+      const dateMatch = query.match(/(?:on|for)\s+([A-Za-z]+day|tomorrow|[A-Za-z]+\s+\d{1,2}(?:st|nd|rd|th)?|next\s+week)/) ||
+                        query.match(/(\d{1,2}(?:\/|-)\d{1,2}(?:\/|-)\d{2,4})/);
+      const date = dateMatch ? dateMatch[1].trim() : undefined;
+      
+      // Extract time if present
+      const timeMatch = query.match(/(?:at|around)\s+(\d{1,2}(?::\d{2})?\s*(?:am|pm))/i);
+      const time = timeMatch ? timeMatch[1].trim() : undefined;
+      
+      // Extract party size if present
+      const partySizeMatch = query.match(/(?:for|with)\s+(\d+)\s+(?:people|persons?|guests?)/i);
+      const partySize = partySizeMatch ? parseInt(partySizeMatch[1], 10) : undefined;
+      
+      return {
+        venueName,
+        date,
+        time,
+        partySize
+      };
     } catch (error) {
-      console.error("Error in bookVenue:", error);
-      return { success: false, error: "Failed to process booking" };
+      console.error('Error extracting booking details:', error);
+      return null;
     }
   },
   
-  generateBookingConfirmation(result: any): string {
-    if (!result || !result.success) {
-      return "I'm sorry, I wasn't able to complete your booking. Please try again later.";
+  // Attempt to book a venue
+  async bookVenue(details: BookingDetails): Promise<BookingResult> {
+    try {
+      console.log('Attempting to book venue with details:', details);
+      
+      // If ElevenLabs API key is available, try to use agent capabilities
+      if (ElevenLabsService.hasApiKey()) {
+        try {
+          // This would use the actual ElevenLabs agent API when available
+          // Fix here: The createAgentTask expects an AgentTaskRequest object, not two separate arguments
+          const agentResponse = await ElevenLabsService.createAgentTask({
+            task: 'book_venue',
+            user_id: 'user_' + Date.now(),
+            conversation_id: 'conv_' + Date.now()
+          });
+          
+          if (agentResponse) {
+            return {
+              success: true,
+              message: `I've initiated a booking request for ${details.venueName}. You'll receive confirmation shortly.`,
+              bookingReference: `VERN-${Date.now().toString().slice(-6)}`
+            };
+          }
+        } catch (error) {
+          console.error('Error using ElevenLabs agent:', error);
+          // Fall back to simulation
+        }
+      }
+      
+      // Simulate a booking API call
+      const simulatedResponse = await simulateBookingAPI(details);
+      return simulatedResponse;
+      
+    } catch (error) {
+      console.error('Error booking venue:', error);
+      return {
+        success: false,
+        message: `I wasn't able to complete your booking for ${details.venueName}. The booking system might be temporarily unavailable. Would you like me to try again or help you with something else?`
+      };
+    }
+  },
+  
+  // Generate a booking confirmation message
+  generateBookingConfirmation(result: BookingResult): string {
+    if (!result.success) {
+      return result.message;
     }
     
-    // Different confirmation messages based on booking type
-    if (result.details?.event) {
-      // Ticket booking confirmation
-      return `Great news! I've secured ${result.details.ticketCount || 1} ticket(s) for you.
-      
-Confirmation code: ${result.details.confirmationCode}
-Event: ${result.details.event}
-Venue: ${result.details.venue}
-${result.details.seats ? `Seats: ${result.details.seats.join(', ')}` : ''}
-Total price: ${result.details.totalPrice}
-
-${result.details.additionalInfo || ''}`;
-    } else {
-      // Restaurant reservation confirmation
-      return `Perfect! Your reservation is confirmed.
-      
-Confirmation code: ${result.details.confirmationCode}
-Restaurant: ${result.details.venue}
-Date: ${result.details.date}
-Time: ${result.details.time}
-Party size: ${result.details.partySize}
-${result.details.specialRequests ? `Special requests: ${result.details.specialRequests}` : ''}
-
-${result.details.additionalInfo || ''}`;
+    let message = `Great news! ${result.message}\n\n`;
+    
+    if (result.bookingReference) {
+      message += `Your booking reference is: ${result.bookingReference}\n\n`;
     }
+    
+    if (result.venueDetails) {
+      message += `Venue: ${result.venueDetails.name}\n`;
+      
+      if (result.venueDetails.address) {
+        message += `Address: ${result.venueDetails.address}\n`;
+      }
+      
+      if (result.venueDetails.phone) {
+        message += `Phone: ${result.venueDetails.phone}\n`;
+      }
+    }
+    
+    message += "\nYou can mention this reference if you need to make any changes to your booking.";
+    
+    return message;
   }
 };
 
-export default BookingAgent;
+// Simulate a booking API response
+async function simulateBookingAPI(details: BookingDetails): Promise<BookingResult> {
+  // This function simulates a booking API response
+  // In a real app, this would call an actual booking API
+  
+  return new Promise(resolve => {
+    // Simulate API delay
+    setTimeout(() => {
+      // 80% success rate for demo purposes
+      const isSuccessful = Math.random() < 0.8;
+      
+      if (isSuccessful) {
+        // Generate a booking reference
+        const bookingReference = `VERN-${Date.now().toString().slice(-6)}`;
+        
+        // Format booking details message
+        let message = `I've successfully booked ${details.venueName} for you`;
+        
+        if (details.date) {
+          message += ` on ${details.date}`;
+        }
+        
+        if (details.time) {
+          message += ` at ${details.time}`;
+        }
+        
+        if (details.partySize) {
+          message += ` for ${details.partySize} people`;
+        }
+        
+        message += '.';
+        
+        resolve({
+          success: true,
+          message,
+          bookingReference,
+          venueDetails: {
+            name: details.venueName,
+            address: '123 Main Street, Anytown',
+            phone: '(555) 123-4567'
+          }
+        });
+      } else {
+        // Failed booking
+        resolve({
+          success: false,
+          message: `I wasn't able to book ${details.venueName} at this time. They might be fully booked or the reservation system may be unavailable. Would you like me to suggest an alternative venue?`
+        });
+      }
+    }, 1500); // Simulate a 1.5 second API call
+  });
+}

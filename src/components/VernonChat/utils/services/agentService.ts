@@ -1,5 +1,5 @@
 
-// Enhanced AgentService with Project Mariner support
+// Mock implementation of AgentService
 export class AgentServiceClass {
   async processIntent(intent: string, entities: any = {}) {
     console.log("Processing intent:", intent, entities);
@@ -42,51 +42,6 @@ export class AgentServiceClass {
       email: "user@example.com",
       preferences: {}
     };
-  }
-  
-  // Project Mariner integration for booking
-  async bookTickets(eventId: string, details: any) {
-    console.log("Booking tickets through Project Mariner for event:", eventId);
-    try {
-      const { bookTickets } = await import('@/services/VertexAI');
-      return await bookTickets(eventId, details);
-    } catch (error) {
-      console.error("Error booking tickets:", error);
-      return { success: false, error: "Failed to book tickets" };
-    }
-  }
-  
-  async makeReservation(venueId: string, details: any) {
-    console.log("Making reservation through Project Mariner for venue:", venueId);
-    try {
-      const { makeReservation } = await import('@/services/VertexAI');
-      return await makeReservation(venueId, details);
-    } catch (error) {
-      console.error("Error making reservation:", error);
-      return { success: false, error: "Failed to make reservation" };
-    }
-  }
-  
-  async getTransactionStatus(transactionId: string) {
-    console.log("Checking transaction status:", transactionId);
-    try {
-      const { checkTransactionStatus } = await import('@/services/VertexAI');
-      return await checkTransactionStatus(transactionId);
-    } catch (error) {
-      console.error("Error checking transaction status:", error);
-      return { success: false, status: "unknown", error: "Failed to check status" };
-    }
-  }
-  
-  async cancelBooking(transactionId: string) {
-    console.log("Cancelling booking:", transactionId);
-    try {
-      const { cancelTransaction } = await import('@/services/VertexAI');
-      return await cancelTransaction(transactionId);
-    } catch (error) {
-      console.error("Error cancelling booking:", error);
-      return { success: false, error: "Failed to cancel booking" };
-    }
   }
 }
 

@@ -86,34 +86,6 @@ serve(async (req) => {
       }
     }
 
-    // Handle Mariner-specific actions
-    if (action === 'mariner' && prompt) {
-      try {
-        console.log('Mariner request received');
-        
-        // In production, this would connect to Project Mariner API
-        // For now, we'll simulate a response
-        const marinerResponse = {
-          success: true,
-          transactionId: `mar-${Date.now()}`,
-          details: {
-            confirmationCode: `MAR-${Math.floor(Math.random() * 1000000)}`,
-            completedAt: new Date().toISOString()
-          }
-        };
-        
-        return new Response(JSON.stringify(marinerResponse), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      } catch (error) {
-        console.error('Error in Mariner request:', error);
-        return new Response(JSON.stringify({ error: error.message, success: false }), {
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-    }
-
     // Handle chat completion requests
     if (prompt) {
       const requestedModel = model || MODELS.PRIMARY;
@@ -126,7 +98,7 @@ serve(async (req) => {
       } else if (mode === 'search') {
         systemPrompt = "You are a search assistant powered by Google Gemini. Provide detailed information about places, events, and activities.";
       } else {
-        systemPrompt = `You are Vernon, a helpful AI assistant powered by Google Gemini within the 'Vibe Right Now' app. Your primary goal is to help users discover great places to go and things to do. You can also make bookings and reservations using Google's Project Mariner.`;
+        systemPrompt = `You are Vernon, a helpful AI assistant powered by Google Gemini within the 'Vibe Right Now' app. Your primary goal is to help users discover great places to go and things to do.`;
       }
       
       // Prepare the messages for Gemini

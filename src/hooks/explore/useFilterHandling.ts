@@ -1,12 +1,14 @@
 
-import { useState, useCallback } from "react";
-import { Location, EventItem } from "@/types";
-import { mockLocations } from "@/mock/data";
-import { DateRange } from "react-day-picker";
-import { vibeTags } from "@/constants/vibeTags"; // Import from constants
-import { useNavigate } from "react-router-dom";
+import { mockLocations } from "@/mock/locations";
+import { Location } from "@/types";
+import { useLocation, useNavigate } from "react-router-dom";
+import { mockUsers } from "@/mock/users";
+
+// Import vibeTags from useUserProfile
+import { vibeTags } from "@/hooks/useUserProfile";
 
 export const useFilterHandling = () => {
+  const location = useLocation();
   const navigate = useNavigate();
 
   const handleTabChange = (
@@ -86,8 +88,14 @@ export const useFilterHandling = () => {
       const usernameMatch = query.match(/^@?([a-zA-Z0-9_]+)$/);
       if (usernameMatch) {
         const username = usernameMatch[1];
-        navigate(`/user/${username}`);
-        return;
+        
+        // Verify if the username exists
+        const userExists = mockUsers.some(user => user.username === username);
+        
+        if (userExists) {
+          navigate(`/user/${username}`);
+          return;
+        }
       }
       
       // If we get here, it's not a direct username match
@@ -145,7 +153,7 @@ export const useFilterHandling = () => {
     setSearchedState("");
     
     // Update URL search params
-    const searchParams = new URLSearchParams(window.location.search);
+    const searchParams = new URLSearchParams(location.search);
     searchParams.set('q', query);
     if (category !== "all") {
       searchParams.set('category', category);

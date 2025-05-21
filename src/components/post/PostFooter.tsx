@@ -48,7 +48,7 @@ const PostFooter: React.FC<PostFooterProps> = ({
     return (
       <div className="px-4 py-2 border-t text-sm">
         <div className="flex items-start gap-2">
-          <span className="font-semibold">{latestComment.user?.username}</span>
+          <span className="font-semibold">{latestComment.user.username}</span>
           <p className="text-xs whitespace-pre-wrap">{latestComment.content || latestComment.text}</p>
         </div>
         
