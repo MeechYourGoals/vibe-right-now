@@ -13,6 +13,8 @@ export interface User {
   joinedDate?: string;
   location?: string;
   vibeTags?: string[];
+  // Add missing properties found in build errors
+  isCelebrity?: boolean;
 }
 
 export interface Location {
@@ -37,6 +39,9 @@ export interface Location {
   tags?: string[];
   vibeTags?: string[];
   verified?: boolean;
+  country?: string;
+  vibes?: string[];
+  url?: string;
 }
 
 export interface EventItem extends Omit<Location, 'openNow' | 'hours'> {
@@ -50,6 +55,12 @@ export interface EventItem extends Omit<Location, 'openNow' | 'hours'> {
   venueName?: string;
 }
 
+export interface Media {
+  type: 'image' | 'video';
+  url: string;
+  thumbnail?: string;
+}
+
 export interface Comment {
   id: string;
   userId: string;
@@ -59,6 +70,8 @@ export interface Comment {
   user?: User;
   likes?: number;
   replies?: Comment[];
+  text?: string;
+  vibedHere?: boolean;
 }
 
 export interface Post {
@@ -66,12 +79,15 @@ export interface Post {
   userId: string;
   locationId?: string;
   content: string;
-  media?: string[];
+  media?: string[] | Media[];
   timestamp: string;
   likes: number;
   comments: number;
   user?: User;
   location?: Location;
+  vibeTags?: string[];
+  isVenuePost?: boolean;
+  isPinned?: boolean;
 }
 
 export interface SavedPlace {
@@ -84,4 +100,19 @@ export interface SavedPlace {
   rating?: number;
   status: 'visited' | 'want_to_visit';
   location?: Location;
+}
+
+export interface VenueInsights {
+  id: string;
+  venueId: string;
+  period: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
+  date: string;
+  visitorCount: number;
+  checkInsCount: number;
+  newFollowersCount: number;
+  postEngagement: number;
+  averageRating: number;
+  peakHours: Record<string, number>;
+  customerDemographics?: any;
+  venue?: Location;
 }

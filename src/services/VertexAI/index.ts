@@ -1,26 +1,32 @@
 
-// Re-export all functionality from the Vertex AI service
-export * from './text';
-export * from './speech';
-export * from './safety';
-export * from './analysis';
-export * from './types';
+// Re-export functionality from GoogleAIService for backward compatibility
+import { GoogleAIService } from '../GoogleAIService';
 
-// Create a hub to simplify imports
+// Re-export all functionality for backward compatibility
+export const generateText = GoogleAIService.generateText;
+export const searchWithAI = GoogleAIService.search;
+export const textToSpeech = GoogleAIService.textToSpeech;
+export const speechToText = GoogleAIService.speechToText;
+export const checkContentSafety = GoogleAIService.checkContentSafety;
+export const analyzeText = GoogleAIService.analyzeText;
+export const extractEntities = GoogleAIService.extractEntities;
+export const extractCategories = GoogleAIService.extractCategories;
+
+// Create a hub to simplify imports (backward compatibility)
 export const VertexAIHub = {
   // Text generation
-  generateText: (await import('./text')).generateText,
-  searchWithAI: (await import('./text')).searchWithAI,
+  generateText: GoogleAIService.generateText.bind(GoogleAIService),
+  searchWithAI: GoogleAIService.search.bind(GoogleAIService),
   
   // Speech services
-  textToSpeech: (await import('./speech')).textToSpeech,
-  speechToText: (await import('./speech')).speechToText,
+  textToSpeech: GoogleAIService.textToSpeech.bind(GoogleAIService),
+  speechToText: GoogleAIService.speechToText.bind(GoogleAIService),
   
   // Content safety
-  checkContentSafety: (await import('./safety')).checkContentSafety,
+  checkContentSafety: GoogleAIService.checkContentSafety.bind(GoogleAIService),
   
   // Analysis
-  analyzeText: (await import('./analysis')).analyzeText,
-  extractEntities: (await import('./analysis')).extractEntities,
-  extractCategories: (await import('./analysis')).extractCategories
+  analyzeText: GoogleAIService.analyzeText.bind(GoogleAIService),
+  extractEntities: GoogleAIService.extractEntities.bind(GoogleAIService),
+  extractCategories: GoogleAIService.extractCategories.bind(GoogleAIService)
 };

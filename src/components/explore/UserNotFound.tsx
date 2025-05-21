@@ -12,6 +12,10 @@ interface UserNotFoundProps {
 const UserNotFound: React.FC<UserNotFoundProps> = ({ searchTerm }) => {
   const navigate = useNavigate();
 
+  const handleUserClick = (username: string) => {
+    navigate(`/user/${username}`);
+  };
+
   return (
     <div className="flex flex-col items-center justify-center py-12 text-center">
       <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
@@ -26,7 +30,7 @@ const UserNotFound: React.FC<UserNotFoundProps> = ({ searchTerm }) => {
           <div 
             key={user.id}
             className="flex flex-col items-center cursor-pointer transition hover:scale-105"
-            onClick={() => navigate(`/user/${user.username}`)}
+            onClick={() => handleUserClick(user.username)}
           >
             <Avatar className="h-16 w-16 mb-2">
               <AvatarImage src={user.avatar} alt={user.name} />
