@@ -1,8 +1,9 @@
 
-import { Crown, CreditCard, Star, ChartBar, BarChart3, FileText, Instagram, Phone } from "lucide-react";
+import { Crown, CreditCard, Star, ChartBar, BarChart3, FileText, Instagram, Phone, Video, Image } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 
 interface PremiumBannerProps {
   onUpgrade: (tier: string) => void;
@@ -86,17 +87,36 @@ const PremiumBanner = ({ onUpgrade }: PremiumBannerProps) => {
           
           <TabsContent value="pro">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="flex flex-col items-center text-center p-4 rounded-lg bg-white dark:bg-amber-950/40 shadow-sm">
-                <h3 className="font-semibold mb-2">AI-Powered Analysis</h3>
-                <p className="text-sm text-muted-foreground">Upload financial records for advanced AI insights and recommendations</p>
+              <div className="flex flex-col items-center text-center p-4 rounded-lg bg-white dark:bg-amber-950/40 shadow-sm relative">
+                <Badge className="absolute -top-2 right-1/2 transform translate-x-1/2 bg-blue-500">New</Badge>
+                <div className="flex flex-col items-center">
+                  <Video className="mb-2 h-5 w-5 text-amber-600" />
+                  <h3 className="font-semibold mb-2">Veo Marketing Videos</h3>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Generate professional 15-second video clips for social media with Google's Veo technology
+                </p>
               </div>
-              <div className="flex flex-col items-center text-center p-4 rounded-lg bg-white dark:bg-amber-950/40 shadow-sm">
-                <h3 className="font-semibold mb-2">Promoted Listings</h3>
-                <p className="text-sm text-muted-foreground">Your venue automatically highlighted in trending and recommended sections</p>
+              
+              <div className="flex flex-col items-center text-center p-4 rounded-lg bg-white dark:bg-amber-950/40 shadow-sm relative">
+                <Badge className="absolute -top-2 right-1/2 transform translate-x-1/2 bg-blue-500">New</Badge>
+                <div className="flex flex-col items-center">
+                  <Image className="mb-2 h-5 w-5 text-amber-600" />
+                  <h3 className="font-semibold mb-2">Imagen AI Graphics</h3>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Create custom posters, banners, and social media graphics with Google's Imagen 4
+                </p>
               </div>
+              
               <div className="flex flex-col items-center text-center p-4 rounded-lg bg-white dark:bg-amber-950/40 shadow-sm">
-                <h3 className="font-semibold mb-2">Curated Content Import</h3>
-                <p className="text-sm text-muted-foreground">AI selects and imports your most flattering content from all social platforms weekly</p>
+                <div className="flex flex-col items-center">
+                  <FileText className="mb-2 h-5 w-5 text-amber-600" />
+                  <h3 className="font-semibold mb-2">AI Business Analysis</h3>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Advanced financial analysis and recommendations powered by Gemini and Notebook LM
+                </p>
               </div>
             </div>
             
@@ -115,7 +135,8 @@ const PremiumBanner = ({ onUpgrade }: PremiumBannerProps) => {
       </CardContent>
       <CardFooter className="flex justify-center">
         <p className="text-xs text-muted-foreground text-center max-w-xl">
-          All plans include basic venue profile features. Upgrade anytime to access more powerful tools to grow your business. Annual billing available with a 15% discount.
+          All plans include basic venue profile features. Upgrade to Pro for exclusive access to Google's cutting-edge Veo and Imagen AI tools for marketing content creation.
+          Annual billing available with a 15% discount.
         </p>
       </CardFooter>
     </Card>

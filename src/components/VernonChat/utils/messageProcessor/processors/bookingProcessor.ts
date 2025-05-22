@@ -16,14 +16,21 @@ export class BookingProcessor implements MessageProcessor {
     const bookingDetails = BookingAgent.extractBookingDetails(context.query);
     
     if (bookingDetails) {
-      const processingMessage = createAIMessage("I'm working on your booking request, please wait a moment...");
+      // Add a processing message with Project Mariner attribution
+      const processingMessage = createAIMessage(
+        "I'm working on your booking request using Google's Project Mariner for hands-off reservation processing. Please wait a moment..."
+      );
       setMessages(prev => [...prev, processingMessage]);
       
       const bookingResult = await BookingAgent.bookVenue(bookingDetails);
       const confirmationText = BookingAgent.generateBookingConfirmation(bookingResult);
       
+      // Update the message with booking confirmation
       setMessages(prev => prev.map(msg => 
-        msg.id === processingMessage.id ? {...msg, text: confirmationText} : msg
+        msg.id === processingMessage.id ? {
+          ...msg, 
+          text: confirmationText + "\n\n(Powered by Google's Project Mariner agent technology)"
+        } : msg
       ));
       
       return true;
