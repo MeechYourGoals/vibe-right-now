@@ -29,3 +29,6 @@ export const vibeTags = [
   "Local",
   "Touristy"
 ];
+
+// Default export for backwards compatibility
+export default vibeTags;
