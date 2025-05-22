@@ -13,7 +13,7 @@ const MetricsOverview = ({ insights, timeframe }: MetricsOverviewProps) => {
   const visitorCount = insights.visitorCount || insights.visitors || 0;
   
   // Safely get check-in count from different possible properties
-  const checkInCount = insights.checkInCount || insights.checkInsCount || 0;
+  const checkInCount = insights.checkInCount || insights.checkInsCount || insights.checkins || 0;
   
   // Get receipt uploads with fallback
   const receiptUploads = insights.receiptUploads || 0;

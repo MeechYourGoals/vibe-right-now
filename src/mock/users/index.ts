@@ -42,4 +42,5 @@ export const createUser = (userData: Partial<User>): User => {
 
 // Export all users
 export { regularUsers, celebrityUsers };
+export const mockUsers = allUsers; // Export as mockUsers for backward compatibility
 export default allUsers;

@@ -39,9 +39,10 @@ const RecommendedForYou = ({ featuredLocations }: RecommendedForYouProps) => {
       // Filter locations to match user preferences
       const matchingLocations = mockLocations.filter(location => {
         // Check if location has at least one matching tag
-        return location.vibeTags && location.vibeTags.some(tag => 
-          userPreferences.includes(tag)
-        );
+        return location.vibeTags || location.vibes ? 
+          (location.vibeTags || location.vibes || []).some(tag => 
+            userPreferences.includes(tag)
+          ) : false;
       });
 
       if (matchingLocations.length > 0) {
@@ -80,9 +81,11 @@ const RecommendedForYou = ({ featuredLocations }: RecommendedForYouProps) => {
             <div 
               className="w-14 h-14 rounded-md bg-cover bg-center" 
               style={{ 
-                backgroundImage: location.images && location.images.length > 0 
-                  ? `url(${location.images[0]})` 
-                  : 'url(/placeholder.svg)' 
+                backgroundImage: location.photos && location.photos.length > 0 
+                  ? `url(${location.photos[0]})` 
+                  : location.images && location.images.length > 0 
+                    ? `url(${location.images[0]})` 
+                    : 'url(/placeholder.svg)' 
               }}
             />
             <div className="flex-1 min-w-0">
@@ -90,9 +93,9 @@ const RecommendedForYou = ({ featuredLocations }: RecommendedForYouProps) => {
                 <h3 className="font-medium text-sm truncate">{location.name}</h3>
                 {location.verified && <Star className="h-3 w-3 text-amber-500 fill-amber-500" />}
               </div>
-              <p className="text-xs text-muted-foreground">{location.city}, {location.state}</p>
+              <p className="text-xs text-muted-foreground">{location.city}, {location.state || ''}</p>
               <div className="flex gap-1 mt-1 flex-wrap">
-                {location.vibeTags?.slice(0, 2).map((tag, idx) => (
+                {(location.vibeTags || location.vibes || [])?.slice(0, 2).map((tag, idx) => (
                   <span key={idx} className="text-xs px-2 py-0.5 bg-primary/10 text-primary rounded-full">{tag}</span>
                 ))}
               </div>

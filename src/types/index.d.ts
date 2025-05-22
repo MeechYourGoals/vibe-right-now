@@ -1,5 +1,5 @@
 
-// If this file doesn't exist, we're creating it
+// Merge and align types with src/types/index.ts
 import { MockUserProfile } from "@/mock/users";
 
 export interface Location {
@@ -16,10 +16,13 @@ export interface Location {
   verified: boolean;
   hours?: Record<string, string>;
   vibes?: string[];
+  vibeTags?: string[];
   userProfile?: MockUserProfile;
   rating?: number;
   followers?: number;
   checkins?: number;
+  images?: string[];
+  photos?: string[];
 }
 
 // VernonChat types
@@ -65,6 +68,20 @@ export interface VenueInsights {
   impressions: number;
   viewsPer: number;
   viewsCount?: number; // Adding as optional for backward compatibility
+  visitorCount?: number;
+  checkInCount?: number;
+  checkInsCount?: number;
+  receiptUploads?: number;
+  discountRedemptions?: number;
+  checkins?: number;
+  checkinsChange?: number;
+  mentions?: number;
+  mentionsChange?: number;
+  reviews?: number;
+  reviewsChange?: number;
+  rating?: number;
+  ratingChange?: number;
 }
 
+// Import types from main types file
 export * from "./index";

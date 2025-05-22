@@ -1,4 +1,5 @@
 
+
 // Export all types
 export * from './custom';
 
@@ -42,12 +43,13 @@ export interface Post {
   user: User;
   userId: string; 
   text?: string;
+  content?: string; // Adding content field
   locationId?: string;
-  location?: Location;
+  location: Location;
   timestamp: string;
   likes: number;
   comments: number;
-  media: (Media | string)[];
+  media: Media[];
   isPinned?: boolean;
   isVenuePost?: boolean;
   vibeTags?: string[];
@@ -57,20 +59,23 @@ export interface Location {
   id: string;
   name: string;
   address: string;
-  city?: string;
+  city: string;
   state?: string;
-  country?: string;
-  latitude?: number;
-  longitude?: number;
-  rating?: number;
-  photos?: string[];
-  price?: string;
+  country: string;
+  zip?: string;
+  lat: number;
+  lng: number;
+  type: "restaurant" | "bar" | "event" | "attraction" | "sports" | "other";
+  verified: boolean;
   hours?: Record<string, string>;
-  phone?: string;
-  website?: string;
-  description?: string;
-  categories?: string[];
   vibes?: string[];
+  vibeTags?: string[];
+  images?: string[];
+  userProfile?: any;
+  rating?: number;
+  followers?: number;
+  checkins?: number;
+  photos?: string[];
 }
 
 export interface EventItem {
@@ -100,4 +105,34 @@ export interface VenueInsights {
   reviewsChange: number;
   rating: number;
   ratingChange: number;
+  // Additional fields needed for MetricsOverview component
+  visitorCount?: number;
+  checkInCount?: number;
+  checkInsCount?: number;
+  receiptUploads?: number;
+  discountRedemptions?: number;
+  // Fields from types.d.ts
+  viewsCount?: number;
+  visitorsChange?: string;
+  postsChange?: string;
+  sharesChange?: string;
+  likesChange?: string;
+  engagementRate?: string;
+  followerGrowth?: string;
+  clickThroughRate?: string;
+  totalVisits?: number;
+  revenueImpact?: string;
+  totalReach?: number;
+  impressions?: number;
+  viewsPer?: number;
+  shares?: number;
 }
+
+// Fix the PostCard props issue
+export interface PostCardProps {
+  post?: Post;
+  posts?: Post[];
+  locationPostCount?: number;
+  getComments?: (postId: string) => Comment[];
+}
+

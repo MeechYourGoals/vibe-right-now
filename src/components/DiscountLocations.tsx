@@ -7,7 +7,7 @@ import { ArrowRight, Ticket, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Link, useNavigate } from "react-router-dom";
-import { Media } from "@/types";
+import { Media, Post } from "@/types";
 
 const DiscountLocations = () => {
   const navigate = useNavigate();
@@ -17,7 +17,7 @@ const DiscountLocations = () => {
   ).slice(0, 3); // Only show first 3 in the sidebar
   
   // Helper function to get media URL
-  const getMediaUrl = (media: string[] | Media[] | undefined): string => {
+  const getMediaUrl = (media: Media[] | string[] | undefined): string => {
     if (!media || media.length === 0) {
       return `https://source.unsplash.com/random/200x200/?venue`;
     }
@@ -52,7 +52,7 @@ const DiscountLocations = () => {
               <div className="flex gap-3">
                 <Avatar className="h-10 w-10">
                   <AvatarImage 
-                    src={getMediaUrl(post.media) || `https://source.unsplash.com/random/200x200/?${post.location.type}`} 
+                    src={getMediaUrl(post.media) || `https://source.unsplash.com/random/200x200/?venue`} 
                     alt={post.location.name} 
                   />
                   <AvatarFallback>{post.location.name.charAt(0)}</AvatarFallback>
@@ -65,9 +65,9 @@ const DiscountLocations = () => {
                   <div className="mt-1">
                     <Badge variant="secondary" className="text-xs">
                       <Ticket className="h-3 w-3 mr-1" />
-                      {post.content.includes("FREE TICKETS") ? "Free Tickets" :
-                        post.content.includes("FREE COVER") ? "Free Entry" :
-                        post.content.includes("FREE pastry") ? "Free Item w/ Purchase" :
+                      {(post.content || post.text || "").includes("FREE TICKETS") ? "Free Tickets" :
+                        (post.content || post.text || "").includes("FREE COVER") ? "Free Entry" :
+                        (post.content || post.text || "").includes("FREE pastry") ? "Free Item w/ Purchase" :
                         "VIP Access"}
                     </Badge>
                   </div>
