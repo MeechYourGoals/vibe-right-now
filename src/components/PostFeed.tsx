@@ -235,6 +235,7 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
     const postCard = (
       <PostCard 
         post={post}
+        posts={posts}
         locationPostCount={locationPostCount}
         getComments={getPostComments}
       />

@@ -1,46 +1,60 @@
+import React, { useState, useMemo } from "react";
+import { PostCard } from "@/components/post";
+import { Post, Location, Comment } from "@/types";
+import { mockComments } from "@/mock/data";
+import EmptyState from "./EmptyState";
 
-import React from 'react';
-import { Post, Comment, Location } from "@/types";
-import PostCard from "@/components/post/PostCard";
-
-interface VenuePostsListViewProps {
-  posts: Post[];
+interface VenuePostsListProps {
   venue: Location;
-  getComments: (postId: string) => Comment[];
-  canDelete: boolean;
+  posts: Post[];
+  canDelete?: boolean;
   onPostDeleted?: (postId: string) => void;
 }
 
-const VenuePostsListView: React.FC<VenuePostsListViewProps> = ({
-  posts,
+const VenuePostsList: React.FC<VenuePostsListProps> = ({
   venue,
-  getComments,
-  canDelete,
-  onPostDeleted
+  posts,
+  canDelete = false,
+  onPostDeleted,
 }) => {
-  if (posts.length === 0) {
-    return null;
-  }
-  
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredPosts = useMemo(() => {
+    if (!searchQuery) {
+      return posts;
+    }
+
+    const query = searchQuery.toLowerCase();
+    return posts.filter((post) => {
+      return (
+        post.content?.toLowerCase().includes(query) ||
+        post.vibeTags?.some((tag) => tag.toLowerCase().includes(query))
+      );
+    });
+  }, [posts, searchQuery]);
+
+  const getPostComments = (postId: string): Comment[] => {
+    return mockComments.filter((comment) => comment.postId === postId);
+  };
+
   return (
-    <div className="space-y-4">
-      {posts.map(post => {
-        // Determine if the post is from the venue itself
-        const isVenuePost = post.isVenuePost || post.location?.id === venue.id;
-        
-        return (
-          <PostCard 
-            key={post.id} 
-            post={post} 
-            comments={getComments(post.id)}
-            canDelete={canDelete && !isVenuePost} // Only allow deletion of user posts, not venue posts
+    <div className="space-y-6">
+      {filteredPosts.length === 0 ? (
+        <EmptyState />
+      ) : (
+        filteredPosts.map((post) => (
+          <PostCard
+            key={post.id}
+            post={post}
+            getComments={() => getPostComments(post.id)}
+            canDelete={canDelete}
             venue={venue}
             onPostDeleted={onPostDeleted}
           />
-        );
-      })}
+        ))
+      )}
     </div>
   );
 };
 
-export default VenuePostsListView;
+export default VenuePostsList;

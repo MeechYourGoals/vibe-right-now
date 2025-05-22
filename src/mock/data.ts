@@ -13,7 +13,7 @@ export {
   mockLocations,
   mockPosts,
   comments,
-  mockComments, // Export both names for backward compatibility
+  mockComments,
   getRecentTime,
   getExpiryTime,
   cityLocations

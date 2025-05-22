@@ -42,7 +42,7 @@ export interface Post {
   user: User;
   userId: string; 
   text?: string;
-  content?: string; // Adding content field
+  content?: string; 
   locationId?: string;
   location: Location;
   timestamp: string;
@@ -52,7 +52,8 @@ export interface Post {
   isPinned?: boolean;
   isVenuePost?: boolean;
   vibeTags?: string[];
-  expiresAt?: string; // Add expiresAt property used in posts
+  expiresAt?: string;
+  saved?: boolean; // Add saved property for posts
 }
 
 export interface Location {
@@ -65,8 +66,9 @@ export interface Location {
   zip?: string;
   lat: number;
   lng: number;
-  type: "restaurant" | "bar" | "event" | "attraction" | "sports" | "other";
-  verified: boolean;
+  type: "restaurant" | "bar" | "event" | "attraction" | "sports" | "other" | "nightclub" | "lounge" | "music_venue" | "comedy_club";
+  verified?: boolean;
+  isVerified?: boolean;
   hours?: Record<string, string>;
   vibes?: string[];
   vibeTags?: string[];
@@ -76,7 +78,7 @@ export interface Location {
   followers?: number;
   checkins?: number;
   photos?: string[];
-  categories?: string[]; // Add categories property
+  categories?: string[];
 }
 
 export interface EventItem {
@@ -93,31 +95,27 @@ export interface EventItem {
 
 export interface VenueInsights {
   visitors: number;
-  visitorsChange: number;
+  visitorsChange: number | string;
   posts: number;
-  postsChange: number;
+  postsChange: number | string;
   likes: number;
-  likesChange: number;
+  likesChange: number | string;
   mentions: number;
-  mentionsChange: number;
+  mentionsChange: number | string;
   checkins: number;
-  checkinsChange: number;
+  checkinsChange: number | string;
   reviews: number;
-  reviewsChange: number;
+  reviewsChange: number | string;
   rating: number;
-  ratingChange: number;
-  // Additional fields needed for MetricsOverview component
+  ratingChange: number | string;
   visitorCount?: number;
   checkInCount?: number;
   checkInsCount?: number;
   receiptUploads?: number;
   discountRedemptions?: number;
-  // Fields from types.d.ts
   viewsCount?: number;
-  visitorsChange?: string;
-  postsChange?: string;
+  shares?: number;
   sharesChange?: string;
-  likesChange?: string;
   engagementRate?: string;
   followerGrowth?: string;
   clickThroughRate?: string;
@@ -126,7 +124,6 @@ export interface VenueInsights {
   totalReach?: number;
   impressions?: number;
   viewsPer?: number;
-  shares?: number;
 }
 
 // Fix the PostCard props issue
