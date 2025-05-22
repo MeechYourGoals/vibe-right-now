@@ -3,12 +3,13 @@ import { useState, useMemo } from "react";
 import { mockPosts, mockComments, mockUsers } from "@/mock/data";
 import { PostCard } from "@/components/post";
 import SearchVibes from "@/components/SearchVibes";
-import { Post, User, Media } from "@/types";
+import { Post, User, Comment } from "@/types";
+import { Media } from "@/types";
 import { isWithinThreeMonths } from "@/mock/time-utils";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { vibeTags } from "@/hooks/useUserProfile";
+import { vibeTags } from "@/constants/vibeTags";
 import {
   Popover,
   PopoverContent,

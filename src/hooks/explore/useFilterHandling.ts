@@ -1,11 +1,9 @@
-
+import { useState, useEffect } from 'react';
 import { mockLocations } from "@/mock/locations";
 import { Location } from "@/types";
 import { useLocation, useNavigate } from "react-router-dom";
 import { mockUsers } from "@/mock/users";
-
-// Import vibeTags from useUserProfile
-import { vibeTags } from "@/hooks/useUserProfile";
+import { vibeTags } from '@/constants/vibeTags';
 
 export const useFilterHandling = () => {
   const location = useLocation();
