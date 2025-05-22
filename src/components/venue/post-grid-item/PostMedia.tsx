@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Post } from "@/types";
 import { getMediaForLocation } from "@/utils/map/locationMediaUtils";
@@ -12,6 +11,22 @@ const PostMedia: React.FC<PostMediaProps> = ({ post }) => {
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
   const [mediaLoaded, setMediaLoaded] = useState(false);
   
+  // Helper functions to safely handle media items
+  const getMediaUrl = (media: string | Media): string => {
+    if (typeof media === 'string') {
+      return media;
+    }
+    return media.url;
+  };
+
+  const getMediaType = (media: string | Media): 'image' | 'video' => {
+    if (typeof media === 'string') {
+      // Infer type from URL
+      return media.endsWith('.mp4') || media.endsWith('.mov') ? 'video' : 'image';
+    }
+    return media.type;
+  };
+
   // Use type-specific fallback images for better relevance
   const getFallbackImage = () => {
     if (!post.location) {
@@ -86,7 +101,7 @@ const PostMedia: React.FC<PostMediaProps> = ({ post }) => {
           </div>
         )}
         <img 
-          src={currentMedia.url}
+          src={getMediaUrl(currentMedia)}
           alt={`Post by ${post.user.username}`}
           className={`h-full w-full object-cover transition-transform group-hover:scale-105 ${mediaLoaded ? 'opacity-100' : 'opacity-0'}`}
           onError={() => tryNextImage()}
@@ -99,7 +114,7 @@ const PostMedia: React.FC<PostMediaProps> = ({ post }) => {
   
   return (
     <video
-      src={currentMedia.url}
+      src={getMediaUrl(currentMedia)}
       className="h-full w-full object-cover"
       poster={getFallbackImage()}
       onError={() => tryNextImage()}

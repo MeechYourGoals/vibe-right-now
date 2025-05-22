@@ -1,30 +1,45 @@
 
-import { regularUsers } from "./regularUsers";
-import { celebrityUsers } from "./celebrityUsers";
-import { hashString, generateUserBio } from "./utils";
+import { regularUsers } from './regularUsers';
+import { celebrityUsers } from './celebrityUsers';
+import { User } from '@/types';
 
-// Define the MockUserProfile type directly here if missing from @/types
-export interface MockUserProfile {
-  id: string;
-  username: string;
-  avatar: string;
-  bio?: string;
-  type?: 'regular' | 'celebrity' | 'venue';
-  verified?: boolean;
-}
+// Combine all user types
+const allUsers = [
+  ...regularUsers,
+  ...celebrityUsers
+];
 
-// Mock user profile utility
-export const getMockUserProfile = (type: 'regular' | 'celebrity' | 'venue'): MockUserProfile => {
-  const collection = type === 'celebrity' ? celebrityUsers : regularUsers;
-  const randomIndex = Math.floor(Math.random() * collection.length);
+// Get a random user
+export const getRandomUser = (): User => {
+  const index = Math.floor(Math.random() * allUsers.length);
+  return allUsers[index];
+};
+
+// Get a user by ID
+export const getUserById = (id: string): User | undefined => {
+  return allUsers.find(user => user.id === id);
+};
+
+// Create a new user (for auth flows)
+export const createUser = (userData: Partial<User>): User => {
   return {
-    ...collection[randomIndex],
-    type: type,
-    verified: type === 'venue' ? true : collection[randomIndex].verified
+    id: `user_${Date.now()}`,
+    name: userData.name || 'New User',
+    username: userData.username || `user_${Date.now()}`,
+    email: userData.email || '',
+    bio: userData.bio || '',
+    avatar: userData.avatar || '',
+    coverPhoto: userData.coverPhoto || '',
+    followers: userData.followers || 0,
+    following: userData.following || 0,
+    posts: userData.posts || 0,
+    isVerified: userData.isVerified || false,
+    isCelebrity: userData.isCelebrity || false,
+    isPrivate: userData.isPrivate || false,
+    vibeTags: userData.vibeTags || []
   };
 };
 
-// Create a combined mockUsers array
-export const mockUsers = [...regularUsers, ...celebrityUsers];
-
-export { regularUsers, celebrityUsers, hashString, generateUserBio };
+// Export all users
+export { regularUsers, celebrityUsers };
+export default allUsers;

@@ -39,6 +39,11 @@ const CategoryTagSection = ({
     return [];
   };
   
+  // Check if we have any categories to display
+  if (!categories || categories.length === 0) {
+    return null;
+  }
+  
   return (
     <div className="mt-6">
       <Tabs value={activeCategory} onValueChange={setActiveCategory}>

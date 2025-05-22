@@ -1,159 +1,178 @@
 
-import { useState, useEffect } from "react";
-import { useSearchParams } from "./explore/useSearchParams";
-import { useLocationData } from "./explore/useLocationData";
-import { useQueryProcessing } from "./explore/useQueryProcessing";
-import { useFilterHandling } from "./explore/useFilterHandling";
-import { EventItem, Location } from "@/types";
+import { useState, useEffect } from 'react';
+import { Location, EventItem } from '@/types';
+import { toast } from 'sonner';
 
-export const useExploreState = () => {
-  const [activeTab, setActiveTab] = useState("all");
-  
-  // Import modularized hooks
-  const {
-    searchQuery,
-    searchedCity,
-    searchedState,
-    searchCategory,
-    vibeFilter,
-    isNaturalLanguageSearch,
-    dateRange,
-    showDateFilter,
-    activeSearchTab,
-    setSearchQuery,
-    setSearchedCity,
-    setSearchedState,
-    setSearchCategory,
-    setVibeFilter,
-    setIsNaturalLanguageSearch,
-    handleSearchTabChange,
-    handleDateRangeChange,
-    handleClearDates,
-    setShowDateFilter
-  } = useSearchParams();
-  
-  const {
-    filteredLocations,
-    locationTags,
-    musicEvents,
-    comedyEvents,
-    nightlifeVenues,
-    setFilteredLocations,
-    setMusicEvents,
-    setComedyEvents,
-    setNightlifeVenues
-  } = useLocationData(searchedCity, searchedState, dateRange);
-  
-  const {
-    isLoadingResults,
-    processComplexQuery
-  } = useQueryProcessing(
-    setSearchedCity,
-    setSearchedState,
-    setFilteredLocations,
-    setComedyEvents as React.Dispatch<React.SetStateAction<Location[]>>,
-    setActiveTab,
-    setNightlifeVenues as React.Dispatch<React.SetStateAction<Location[]>>,
-    setVibeFilter,
-    setIsNaturalLanguageSearch
-  );
-  
-  const {
-    handleTabChange: filterHandleTabChange,
-    handleSearch: filterHandleSearch,
-    handleClearVibeFilter: filterHandleClearVibeFilter
-  } = useFilterHandling();
-  
-  // Initialize with default search
-  useEffect(() => {
-    if (!searchQuery && !searchedCity) {
-      setSearchedCity("San Francisco");
-      setSearchedState("CA");
-    }
-  }, [searchQuery, searchedCity, setSearchedCity, setSearchedState]);
-  
-  // Get page title
-  const getPageTitle = () => {
-    if (isNaturalLanguageSearch) {
-      return "Smart Search Results";
-    } else if (searchCategory === "users") {
-      return `User Search: ${searchedCity || ""}`;
-    } else if (searchedCity) {
-      return `Explore Vibes in ${searchedCity}${searchedState ? `, ${searchedState}` : ''}`;
-    }
-    return "Explore Vibes";
-  };
-  
-  // Wrapper functions to maintain the same API
-  const handleSearch = (query: string, filterType: string, category: string) => {
-    filterHandleSearch(
-      query,
-      filterType,
-      category,
-      searchQuery,
-      setSearchQuery,
-      setSearchCategory,
-      setActiveTab,
-      setSearchedCity,
-      setSearchedState,
-      setMusicEvents,
-      setComedyEvents,
-      setNightlifeVenues,
-      setFilteredLocations,
-      vibeFilter,
-      setVibeFilter,
-      dateRange,
-      processComplexQuery,
-      setIsNaturalLanguageSearch
-    );
-  };
-  
-  const handleTabChange = (value: string) => {
-    setActiveTab(value);
-    filterHandleTabChange(
-      value, 
-      searchQuery,
-      searchedCity,
-      searchedState,
-      searchCategory,
-      vibeFilter,
-      setFilteredLocations
-    );
-  };
-  
-  const handleClearVibeFilter = () => {
-    filterHandleClearVibeFilter(
-      searchQuery,
-      searchCategory,
-      setVibeFilter,
-      handleSearch
-    );
-  };
+interface UseExploreStateProps {
+  initialLocations?: Location[];
+  initialEvents?: EventItem[];
+  isEventMode?: boolean;
+}
 
+const useExploreState = ({ 
+  initialLocations = [], 
+  initialEvents = [], 
+  isEventMode = false 
+}: UseExploreStateProps = {}) => {
+  const [locations, setLocations] = useState<Location[]>(initialLocations);
+  const [events, setEvents] = useState<EventItem[]>(initialEvents);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedVibes, setSelectedVibes] = useState<string[]>([]);
+  const [selectedDateRange, setSelectedDateRange] = useState<{start: Date | null, end: Date | null}>({
+    start: null,
+    end: null
+  });
+  const [selectedCity, setSelectedCity] = useState<string | null>(null);
+  
+  // Generic function to handle errors
+  const handleError = (error: any) => {
+    const errorMessage = error?.message || 'An error occurred while fetching data.';
+    setError(errorMessage);
+    toast.error(errorMessage);
+    console.error('Explore error:', error);
+    setIsLoading(false);
+  };
+  
+  // Function to search locations
+  const searchLocations = async (query: string) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      // Simulate API call with delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // For demo, just filter existing locations
+      const filteredLocations = initialLocations.filter(location => 
+        location.name.toLowerCase().includes(query.toLowerCase()) ||
+        (location.city && location.city.toLowerCase().includes(query.toLowerCase())) ||
+        (location.categories && location.categories.some(category => 
+          category.toLowerCase().includes(query.toLowerCase())
+        ))
+      );
+      
+      setLocations(filteredLocations);
+      setIsLoading(false);
+    } catch (error) {
+      handleError(error);
+    }
+  };
+  
+  // Function to search events - fixed type issues
+  const searchEvents = async (query: string) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      // Simulate API call with delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // For demo, just filter existing events
+      const filteredEvents = initialEvents.filter(event => 
+        event.title.toLowerCase().includes(query.toLowerCase()) ||
+        event.venue.toLowerCase().includes(query.toLowerCase()) ||
+        event.description?.toLowerCase().includes(query.toLowerCase())
+      );
+      
+      setEvents(filteredEvents);
+      setIsLoading(false);
+    } catch (error) {
+      handleError(error);
+    }
+  };
+  
+  // Function to filter by vibe/category
+  const filterByVibes = (vibes: string[]) => {
+    setSelectedVibes(vibes);
+    
+    if (vibes.length === 0) {
+      // Reset to original list if no vibes selected
+      setLocations(initialLocations);
+      return;
+    }
+    
+    const filteredLocations = initialLocations.filter(location => {
+      // Check if location has at least one of the selected vibes/categories
+      return vibes.some(vibe => 
+        location.categories?.includes(vibe) || 
+        location.vibes?.includes(vibe)
+      );
+    });
+    
+    setLocations(filteredLocations);
+  };
+  
+  // Function to filter by date range
+  const filterByDateRange = (start: Date | null, end: Date | null) => {
+    setSelectedDateRange({ start, end });
+    
+    // Implement date filtering logic here
+    // This would typically be more complex with real data
+    // For now, just a placeholder
+  };
+  
+  // Function to filter by city
+  const filterByCity = (city: string | null) => {
+    setSelectedCity(city);
+    
+    if (!city) {
+      // Reset to original list if no city selected
+      setLocations(initialLocations);
+      return;
+    }
+    
+    const filteredLocations = initialLocations.filter(location => 
+      location.city?.toLowerCase() === city.toLowerCase()
+    );
+    
+    setLocations(filteredLocations);
+  };
+  
+  // Handle search based on mode
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    
+    if (query.trim() === '') {
+      setLocations(initialLocations);
+      setEvents(initialEvents);
+      return;
+    }
+    
+    if (isEventMode) {
+      searchEvents(query);
+    } else {
+      searchLocations(query);
+    }
+  };
+  
+  // Reset all filters
+  const resetFilters = () => {
+    setSearchQuery('');
+    setSelectedVibes([]);
+    setSelectedDateRange({ start: null, end: null });
+    setSelectedCity(null);
+    setLocations(initialLocations);
+    setEvents(initialEvents);
+  };
+  
   return {
-    activeTab,
-    searchedCity,
-    searchedState,
-    searchCategory,
-    filteredLocations,
-    locationTags,
-    musicEvents,
-    comedyEvents,
-    nightlifeVenues,
-    vibeFilter,
-    isNaturalLanguageSearch,
-    isLoadingResults,
-    dateRange,
-    showDateFilter,
-    activeSearchTab,
-    getPageTitle,
+    locations,
+    events,
+    isLoading,
+    error,
+    searchQuery,
+    selectedVibes,
+    selectedDateRange,
+    selectedCity,
+    setLocations,
+    setEvents: setEvents as React.Dispatch<React.SetStateAction<EventItem[]>>,
     handleSearch,
-    handleTabChange,
-    handleClearVibeFilter,
-    handleDateRangeChange,
-    handleClearDates,
-    handleSearchTabChange,
-    setShowDateFilter
+    filterByVibes,
+    filterByDateRange,
+    filterByCity,
+    resetFilters
   };
 };
 
