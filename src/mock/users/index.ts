@@ -2,6 +2,7 @@
 import { regularUsers } from './regularUsers';
 import { celebrityUsers } from './celebrityUsers';
 import { User } from '@/types';
+import { hashString, generateUserBio } from './utils';
 
 // Combine all user types
 const allUsers = [
@@ -39,6 +40,9 @@ export const createUser = (userData: Partial<User>): User => {
     vibeTags: userData.vibeTags || []
   };
 };
+
+// Export utility functions from utils.ts
+export { hashString, generateUserBio };
 
 // Export all users
 export { regularUsers, celebrityUsers };

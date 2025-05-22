@@ -3,7 +3,7 @@
 import { mockUsers } from "./users";
 import { mockLocations } from "./locations";
 import { mockPosts } from "./posts";
-import { mockComments } from "./comments";
+import { comments, mockComments } from "./comments";
 import { getRecentTime, getExpiryTime } from "./time-utils";
 import { cityLocations } from "./cityLocations";
 
@@ -12,7 +12,8 @@ export {
   mockUsers,
   mockLocations,
   mockPosts,
-  mockComments,
+  comments,
+  mockComments, // Export both names for backward compatibility
   getRecentTime,
   getExpiryTime,
   cityLocations

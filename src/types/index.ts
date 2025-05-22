@@ -1,5 +1,4 @@
 
-
 // Export all types
 export * from './custom';
 
@@ -53,6 +52,7 @@ export interface Post {
   isPinned?: boolean;
   isVenuePost?: boolean;
   vibeTags?: string[];
+  expiresAt?: string; // Add expiresAt property used in posts
 }
 
 export interface Location {
@@ -76,6 +76,7 @@ export interface Location {
   followers?: number;
   checkins?: number;
   photos?: string[];
+  categories?: string[]; // Add categories property
 }
 
 export interface EventItem {
@@ -134,5 +135,8 @@ export interface PostCardProps {
   posts?: Post[];
   locationPostCount?: number;
   getComments?: (postId: string) => Comment[];
+  comments?: Comment[];
+  canDelete?: boolean;
+  venue?: Location;
+  onPostDeleted?: (postId: string) => void;
 }
-

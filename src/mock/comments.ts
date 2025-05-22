@@ -1,3 +1,4 @@
+
 import { Comment, User } from "@/types";
 import { regularUsers } from "./users";
 
@@ -103,5 +104,8 @@ export const comments: Comment[] = [
     likes: 4
   })
 ];
+
+// Export comments as mockComments for backward compatibility
+export const mockComments = comments;
 
 export default comments;

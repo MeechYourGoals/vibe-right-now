@@ -5,6 +5,31 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { mockUsers } from "@/mock/users";
 import { vibeTags } from '@/constants/vibeTags';
 
+// Helper function to check if a location matches a category
+export const locationMatchesCategory = (location: Location, category: string): boolean => {
+  // Handle location type mapping to categories
+  switch (category.toLowerCase()) {
+    case "nightlife":
+      return location.type === "bar" || 
+             (location.categories?.includes("nightclub") || false) || 
+             (location.categories?.includes("lounge") || false);
+    case "music":
+      return (location.categories?.includes("music_venue") || false);
+    case "comedy":
+      return (location.categories?.includes("comedy_club") || false);
+    case "food":
+      return location.type === "restaurant";
+    case "events":
+      return location.type === "event";
+    case "attractions":
+      return location.type === "attraction";
+    case "sports":
+      return location.type === "sports";
+    default:
+      return true; // No filter if unknown category
+  }
+};
+
 export const useFilterHandling = () => {
   const location = useLocation();
   const navigate = useNavigate();
