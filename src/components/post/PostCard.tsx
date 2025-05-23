@@ -1,13 +1,13 @@
+
 import React, { useState } from 'react';
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { VerifiedBadge } from "@/components/icons";
-import { MoreHorizontal, MapPin, Calendar, Link, Pin, Building } from "lucide-react";
+import VerifiedBadge from "@/components/icons/VerifiedIcon";
+import { MoreHorizontal, MapPin, Pin, Building } from "lucide-react";
 import PostMedia from "@/components/post/PostMedia";
 import PostFooter from "@/components/post/PostFooter";
-import CommentList from "@/components/post/CommentList";
 import { Post, User, Location, Media } from "@/types";
 
 interface PostCardProps {
@@ -114,6 +114,12 @@ const PostCard = ({ post, onLike, onComment, onShare }: PostCardProps) => {
     }
   };
 
+  const handleComment = (comment: string) => {
+    if (onComment) {
+      onComment(post.id, comment);
+    }
+  };
+
   // Convert media to proper Media array
   const mediaArray: Media[] = Array.isArray(post.media) 
     ? post.media.map(item => 
@@ -140,20 +146,34 @@ const PostCard = ({ post, onLike, onComment, onShare }: PostCardProps) => {
       )}
       
       <PostFooter
+        post={post}
         isLiked={isLiked}
         likesCount={likesCount}
-        commentsCount={post.comments?.length || 0}
-        vibedHere={post.vibedHere}
         onLike={handleLike}
         onComment={() => setShowComments(!showComments)}
-        onShare={onShare}
+        onShare={() => onShare?.(post.id)}
       />
       
-      {showComments && (
-        <CommentList 
-          comments={post.comments || []} 
-          onAddComment={onComment}
-        />
+      {showComments && post.comments && (
+        <div className="px-4 pb-4">
+          {post.comments.map((comment) => (
+            <div key={comment.id} className="border-t pt-2 mt-2">
+              <div className="flex items-start space-x-2">
+                <Avatar className="h-6 w-6">
+                  <AvatarImage src={comment.user.avatar} alt={comment.user.name} />
+                  <AvatarFallback className="text-xs">{comment.user.name.charAt(0)}</AvatarFallback>
+                </Avatar>
+                <div className="flex-1">
+                  <div className="flex items-center space-x-1">
+                    <span className="font-semibold text-xs">{comment.user.name}</span>
+                    {comment.user.isVerified && <VerifiedBadge />}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">{comment.content}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       )}
     </Card>
   );
