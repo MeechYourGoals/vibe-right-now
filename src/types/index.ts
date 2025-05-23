@@ -1,7 +1,4 @@
 
-// Export all types
-export * from './custom';
-
 export interface User {
   id: string;
   name: string;
@@ -12,16 +9,55 @@ export interface User {
   coverPhoto?: string;
   followers?: number;
   following?: number;
-  posts?: number;
   isVerified?: boolean;
-  isCelebrity?: boolean;
-  isPrivate?: boolean;
+  joinedDate?: string;
+  location?: string;
   vibeTags?: string[];
+  // Add missing properties found in build errors
+  isCelebrity?: boolean;
+}
+
+export interface Location {
+  id: string;
+  name: string;
+  address: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  lat?: number;
+  lng?: number;
+  type?: string;
+  rating?: number;
+  priceLevel?: number;
+  openNow?: boolean;
+  images?: string[];
+  logo?: string;
+  description?: string;
+  website?: string;
+  phone?: string;
+  hours?: Record<string, string>;
+  tags?: string[];
+  vibeTags?: string[];
+  verified?: boolean;
+  country?: string;
+  vibes?: string[];
+  url?: string;
+}
+
+export interface EventItem extends Omit<Location, 'openNow' | 'hours'> {
+  date?: string;
+  startTime?: string;
+  endTime?: string;
+  performers?: string[];
+  ticketPrice?: string;
+  ticketUrl?: string;
+  category?: string;
+  venueName?: string;
 }
 
 export interface Media {
-  url: string;
   type: 'image' | 'video';
+  url: string;
   thumbnail?: string;
 }
 
@@ -29,111 +65,54 @@ export interface Comment {
   id: string;
   userId: string;
   postId: string;
-  user: User;
   content: string;
   timestamp: string;
-  vibedHere: boolean;
-  likes: number;
-  text?: string; // For backwards compatibility
+  user?: User;
+  likes?: number;
+  replies?: Comment[];
+  text?: string;
+  vibedHere?: boolean;
 }
 
 export interface Post {
   id: string;
-  user: User;
-  userId: string; 
-  text?: string;
-  content?: string; 
+  userId: string;
   locationId?: string;
-  location: Location;
+  content: string;
+  media?: string[] | Media[];
   timestamp: string;
   likes: number;
   comments: number;
-  media: Media[];
-  isPinned?: boolean;
+  user?: User;
+  location?: Location;
+  vibeTags?: string[];
   isVenuePost?: boolean;
-  vibeTags?: string[];
-  expiresAt?: string;
-  saved?: boolean; // Add saved property for posts
+  isPinned?: boolean;
 }
 
-export interface Location {
+export interface SavedPlace {
   id: string;
-  name: string;
-  address: string;
-  city: string;
-  state?: string;
-  country: string;
-  zip?: string;
-  lat: number;
-  lng: number;
-  type: "restaurant" | "bar" | "event" | "attraction" | "sports" | "other" | "nightclub" | "lounge" | "music_venue" | "comedy_club";
-  verified?: boolean;
-  isVerified?: boolean;
-  hours?: Record<string, string>;
-  vibes?: string[];
-  vibeTags?: string[];
-  images?: string[];
-  userProfile?: any;
+  locationId: string;
+  userId: string;
+  savedAt: string;
+  notes?: string;
+  visitedAt?: string;
   rating?: number;
-  followers?: number;
-  checkins?: number;
-  photos?: string[];
-  categories?: string[];
-}
-
-export interface EventItem {
-  id: string;
-  title: string;
-  date: string;
-  time: string;
-  venue: string;
-  address: string;
-  image?: string;
-  description?: string;
-  price?: string;
+  status: 'visited' | 'want_to_visit';
+  location?: Location;
 }
 
 export interface VenueInsights {
-  visitors: number;
-  visitorsChange: number | string;
-  posts: number;
-  postsChange: number | string;
-  likes: number;
-  likesChange: number | string;
-  mentions: number;
-  mentionsChange: number | string;
-  checkins: number;
-  checkinsChange: number | string;
-  reviews: number;
-  reviewsChange: number | string;
-  rating: number;
-  ratingChange: number | string;
-  visitorCount?: number;
-  checkInCount?: number;
-  checkInsCount?: number;
-  receiptUploads?: number;
-  discountRedemptions?: number;
-  viewsCount?: number;
-  shares?: number;
-  sharesChange?: string;
-  engagementRate?: string;
-  followerGrowth?: string;
-  clickThroughRate?: string;
-  totalVisits?: number;
-  revenueImpact?: string;
-  totalReach?: number;
-  impressions?: number;
-  viewsPer?: number;
-}
-
-// Fix the PostCard props issue
-export interface PostCardProps {
-  post?: Post;
-  posts?: Post[];
-  locationPostCount?: number;
-  getComments?: (postId: string) => Comment[];
-  comments?: Comment[];
-  canDelete?: boolean;
+  id: string;
+  venueId: string;
+  period: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
+  date: string;
+  visitorCount: number;
+  checkInsCount: number;
+  newFollowersCount: number;
+  postEngagement: number;
+  averageRating: number;
+  peakHours: Record<string, number>;
+  customerDemographics?: any;
   venue?: Location;
-  onPostDeleted?: (postId: string) => void;
 }

@@ -9,23 +9,11 @@ interface MetricsOverviewProps {
 }
 
 const MetricsOverview = ({ insights, timeframe }: MetricsOverviewProps) => {
-  // Safely get visitor count from different possible properties
-  const visitorCount = insights.visitorCount || insights.visitors || 0;
-  
-  // Safely get check-in count from different possible properties
-  const checkInCount = insights.checkInCount || insights.checkInsCount || insights.checkins || 0;
-  
-  // Get receipt uploads with fallback
-  const receiptUploads = insights.receiptUploads || 0;
-  
-  // Get discount redemptions with fallback
-  const discountRedemptions = insights.discountRedemptions || 0;
-  
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       <InsightMetricCard
         title="Total Visitors"
-        value={visitorCount}
+        value={insights.visitorCount || insights.visitors}
         icon={Users}
         iconColor="text-blue-500"
         changePercentage={12}
@@ -34,7 +22,7 @@ const MetricsOverview = ({ insights, timeframe }: MetricsOverviewProps) => {
       
       <InsightMetricCard
         title="Check-ins"
-        value={checkInCount}
+        value={insights.checkInCount || 0}
         icon={CalendarIcon}
         iconColor="text-green-500"
         changePercentage={8}
@@ -43,7 +31,7 @@ const MetricsOverview = ({ insights, timeframe }: MetricsOverviewProps) => {
       
       <InsightMetricCard
         title="Receipt Uploads"
-        value={receiptUploads}
+        value={insights.receiptUploads || 0}
         icon={Receipt}
         iconColor="text-amber-500"
         changePercentage={23}
@@ -52,7 +40,7 @@ const MetricsOverview = ({ insights, timeframe }: MetricsOverviewProps) => {
       
       <InsightMetricCard
         title="Discounts Redeemed"
-        value={discountRedemptions}
+        value={insights.discountRedemptions || 0}
         icon={Tag}
         iconColor="text-purple-500"
         changePercentage={5}

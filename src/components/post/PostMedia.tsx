@@ -1,69 +1,140 @@
 
-import React, { useState } from 'react';
-import { Play } from 'lucide-react';
-import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { Media } from '@/types';
+import React, { useState, useEffect } from "react";
+import { Media } from "@/types";
+import { ArrowLeft, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface PostMediaProps {
-  media: Media | Media[];
+  media: Media[];
 }
 
 const PostMedia: React.FC<PostMediaProps> = ({ media }) => {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [hasError, setHasError] = useState<boolean[]>(media.map(() => false));
+  const [mediaLoaded, setMediaLoaded] = useState(false);
+  const hasMultipleMedia = media.length > 1;
   
-  // Convert to array if single media item
-  const mediaArray = Array.isArray(media) ? media : [media];
-  const mediaItem = mediaArray[activeIndex];
-  
-  if (!mediaItem) return null;
-
-  const handlePlay = () => {
-    setIsPlaying(true);
+  // Type-specific fallback images for better relevance
+  const getFallbackImage = () => {
+    // Use a reliable Pexels image that will definitely load
+    return "https://images.pexels.com/photos/2901209/pexels-photo-2901209.jpeg?auto=compress&cs=tinysrgb&w=600";
   };
 
-  return (
-    <div className="relative">
-      <AspectRatio ratio={16 / 9} className="bg-muted overflow-hidden">
-        {mediaItem.type === 'image' ? (
-          <img 
-            src={mediaItem.url} 
-            alt="Post media" 
-            className="w-full h-full object-cover"
-            loading="lazy"
-          />
-        ) : (
-          <div className="relative w-full h-full">
-            <video 
-              src={mediaItem.url}
-              poster={mediaItem.thumbnail}
-              controls={isPlaying}
-              className="w-full h-full object-cover"
-              onClick={handlePlay}
-            />
-            {!isPlaying && (
-              <button 
-                className="absolute inset-0 flex items-center justify-center bg-black/30 hover:bg-black/40 transition-colors"
-                onClick={handlePlay}
-              >
-                <Play className="w-12 h-12 text-white" />
-              </button>
-            )}
-          </div>
-        )}
-      </AspectRatio>
+  useEffect(() => {
+    // Reset media loaded state when media changes or index changes
+    setMediaLoaded(false);
+  }, [media, currentIndex]);
+
+  const nextMedia = () => {
+    setCurrentIndex((prev) => (prev + 1) % media.length);
+  };
+
+  const prevMedia = () => {
+    setCurrentIndex((prev) => (prev - 1 + media.length) % media.length);
+  };
+
+  const handleError = (index: number) => {
+    const newErrors = [...hasError];
+    newErrors[index] = true;
+    setHasError(newErrors);
+
+    // If we have multiple media, try to show the next non-errored media
+    if (hasMultipleMedia) {
+      // Find the next valid media index
+      let nextValidIndex = -1;
+      for (let i = 1; i < media.length; i++) {
+        const checkIndex = (index + i) % media.length;
+        if (!newErrors[checkIndex]) {
+          nextValidIndex = checkIndex;
+          break;
+        }
+      }
       
-      {/* Multiple media navigation */}
-      {mediaArray.length > 1 && (
-        <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex gap-1">
-          {mediaArray.map((_, index) => (
-            <button
-              key={index}
-              className={`w-2 h-2 rounded-full ${index === activeIndex ? 'bg-white' : 'bg-white/50'}`}
-              onClick={() => setActiveIndex(index)}
+      // If found a valid media, switch to it
+      if (nextValidIndex !== -1) {
+        setCurrentIndex(nextValidIndex);
+      }
+    }
+  };
+
+  const currentMedia = media[currentIndex];
+  const currentHasError = hasError[currentIndex];
+
+  return (
+    <div className="relative mb-2">
+      {currentMedia.type === "image" ? (
+        currentHasError ? (
+          <div className="w-full relative bg-muted flex items-center justify-center h-[300px]">
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent mb-2"></div>
+            </div>
+            <img
+              src={getFallbackImage()}
+              alt="Post media fallback"
+              className="w-full object-cover max-h-[500px]"
+              onLoad={() => setMediaLoaded(true)}
+              onError={(e) => {
+                // Ultimate fallback using a different reliable image
+                (e.target as HTMLImageElement).src = "https://images.pexels.com/photos/315755/pexels-photo-315755.jpeg?auto=compress&cs=tinysrgb&w=600";
+              }}
             />
-          ))}
-        </div>
+          </div>
+        ) : (
+          <>
+            {!mediaLoaded && (
+              <div className="absolute inset-0 flex items-center justify-center bg-muted">
+                <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+              </div>
+            )}
+            <img
+              src={currentMedia.url}
+              alt="Post media"
+              className={`w-full object-cover max-h-[500px] ${mediaLoaded ? 'opacity-100' : 'opacity-0'}`}
+              onError={() => handleError(currentIndex)}
+              onLoad={() => setMediaLoaded(true)}
+              loading="lazy"
+            />
+          </>
+        )
+      ) : (
+        <video
+          src={currentMedia.url}
+          controls
+          className="w-full max-h-[500px]"
+          poster={currentMedia.thumbnail || getFallbackImage()}
+          onError={() => handleError(currentIndex)}
+        />
+      )}
+
+      {hasMultipleMedia && (
+        <>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/20 text-white hover:bg-black/40 rounded-full h-8 w-8"
+            onClick={prevMedia}
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/20 text-white hover:bg-black/40 rounded-full h-8 w-8"
+            onClick={nextMedia}
+          >
+            <ArrowRight className="h-4 w-4" />
+          </Button>
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+            {media.map((_, index) => (
+              <div
+                key={index}
+                className={`h-1.5 rounded-full ${
+                  index === currentIndex ? "w-4 bg-white" : "w-1.5 bg-white/50"
+                }`}
+              />
+            ))}
+          </div>
+        </>
       )}
     </div>
   );

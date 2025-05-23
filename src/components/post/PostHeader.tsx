@@ -36,7 +36,7 @@ const PostHeader: React.FC<PostHeaderProps> = ({
   timestamp,
   location,
   isPinned = false,
-  isVenuePost = false, 
+  isVenuePost = false, // We'll ignore this prop in rendering
   canDelete = false,
   onDelete
 }) => {
@@ -71,7 +71,7 @@ const PostHeader: React.FC<PostHeaderProps> = ({
             <Link to={`/user/${user.username}`} className="font-semibold hover:underline">
               {user.name}
             </Link>
-            {user.isVerified && (
+            {user.verified && (
               <VerifiedIcon className="h-4 w-4 text-blue-500" />
             )}
             {isPinned && (

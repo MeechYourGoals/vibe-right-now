@@ -1,13 +1,14 @@
-import React, { useState, useMemo } from "react";
+
+import { useState, useMemo } from "react";
 import { mockPosts, mockComments, mockUsers } from "@/mock/data";
 import { PostCard } from "@/components/post";
 import SearchVibes from "@/components/SearchVibes";
-import { Post, User, Comment, Media } from "@/types";
+import { Post, User, Media } from "@/types";
 import { isWithinThreeMonths } from "@/mock/time-utils";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { vibeTags } from "@/constants/vibeTags";
+import { vibeTags } from "@/hooks/useUserProfile";
 import {
   Popover,
   PopoverContent,
@@ -229,13 +230,9 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
 
   // Enhanced PostCard component with vibe tags
   const EnhancedPostCard = ({ posts, locationPostCount }: { posts: Post[], locationPostCount: number }) => {
-    // Create a post prop for PostCard from the array of posts
-    const post = posts[0]; // Use the first post as the main post
-    
     const postCard = (
       <PostCard 
-        post={post}
-        posts={posts}
+        posts={posts} 
         locationPostCount={locationPostCount}
         getComments={getPostComments}
       />

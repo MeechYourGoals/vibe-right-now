@@ -1,6 +1,6 @@
 
-export { PostBadges } from "./PostBadges";
-export { DeleteButton } from "./DeleteButton";
-export { UserDropdown } from "./UserDropdown";
-export { PostMedia } from "./PostMedia";
-export { PostOverlay } from "./PostOverlay";
+export { default as PostBadges } from './PostBadges';
+export { default as DeleteButton } from './DeleteButton';
+export { default as PostMedia } from './PostMedia';
+export { default as PostOverlay } from './PostOverlay';
+export { default as UserDropdown } from './UserDropdown';

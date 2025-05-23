@@ -1,7 +1,7 @@
 
-import { useState } from "react";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Check } from "lucide-react";
+import { Label } from "@/components/ui/label";
 
 interface CategoryTagSectionProps {
   categories: {
@@ -9,7 +9,7 @@ interface CategoryTagSectionProps {
     icon: React.ElementType;
     id: string;
   }[];
-  tags: any;
+  tags: string[];
   selectedTags: string[];
   onTagSelect: (tag: string) => void;
 }
@@ -20,68 +20,46 @@ const CategoryTagSection = ({
   selectedTags,
   onTagSelect
 }: CategoryTagSectionProps) => {
-  const [activeCategory, setActiveCategory] = useState(categories[0]?.id || "");
-  
-  // Helper function to get tags for a specific category
-  const getCategoryTags = (categoryName: string): string[] => {
-    if (!tags) return [];
-    
-    // If tags is an object with category keys
-    if (typeof tags === 'object' && !Array.isArray(tags)) {
-      return Array.isArray(tags[categoryName]) ? tags[categoryName] : [];
-    }
-    
-    // If tags is a flat array
-    if (Array.isArray(tags)) {
-      return tags;
-    }
-    
-    return [];
+  // Create a map of category-specific tags to avoid repetition
+  const categorySpecificTags = {
+    lgbtq: ["LGBTQ+ Friendly", "Pride", "Inclusive"],
+    groups: ["Good for Groups", "Family Style", "Sharing Plates"],
+    tourist: ["Tourist Attraction", "Landmark", "Must-See"],
+    business: ["Business Appropriate", "Corporate", "Formal"],
+    "after-hours": ["After Hours", "Late Night", "Nightlife"]
   };
   
-  // Check if we have any categories to display
-  if (!categories || categories.length === 0) {
-    return null;
-  }
-  
   return (
-    <div className="mt-6">
-      <Tabs value={activeCategory} onValueChange={setActiveCategory}>
-        <TabsList className="w-full overflow-x-auto flex-nowrap">
-          {categories.map((category) => {
-            const Icon = category.icon;
-            return (
-              <TabsTrigger key={category.id} value={category.id} className="flex items-center gap-1">
-                <Icon className="h-4 w-4" />
-                <span>{category.name}</span>
-              </TabsTrigger>
-            );
-          })}
-        </TabsList>
-        
-        {categories.map((category) => (
-          <TabsContent key={category.id} value={category.id} className="mt-4">
+    <div className="space-y-4 mt-4">
+      <Label>Popular Preferences</Label>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {categories.map(category => (
+          <div key={category.id} className="space-y-2">
+            <h4 className="text-sm font-medium flex items-center">
+              <category.icon className="h-4 w-4 mr-2" />
+              {category.name}
+            </h4>
             <div className="flex flex-wrap gap-2">
-              {getCategoryTags(category.name).map((tag: string) => (
-                <Badge
-                  key={tag}
-                  variant="outline"
+              {/* Use category-specific tags instead of the same tags for each category */}
+              {categorySpecificTags[category.id as keyof typeof categorySpecificTags]?.map(tag => (
+                <Badge 
+                  key={`${category.id}-${tag}`} 
+                  variant="outline" 
                   className={`cursor-pointer hover:bg-primary/10 ${
                     selectedTags.includes(tag) ? "bg-primary/20 border-primary" : ""
                   }`}
                   onClick={() => onTagSelect(tag)}
                 >
+                  {selectedTags.includes(tag) && (
+                    <Check className="h-3 w-3 mr-1" />
+                  )}
                   {tag}
                 </Badge>
               ))}
-              
-              {getCategoryTags(category.name).length === 0 && (
-                <div className="text-muted-foreground text-sm">No tags available for this category</div>
-              )}
             </div>
-          </TabsContent>
+          </div>
         ))}
-      </Tabs>
+      </div>
     </div>
   );
 };

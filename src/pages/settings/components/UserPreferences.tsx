@@ -5,7 +5,6 @@ import CustomTagInput from "./CustomTagInput";
 import CategoryTagSection from "./CategoryTagSection";
 import PreferenceTagSelection from "./PreferenceTagSelection";
 import FavoritesSection from "./FavoritesSection";
-import { vibeTags } from "@/constants/vibeTags";
 
 interface UserPreferencesProps {
   selectedTags: string[];
@@ -20,7 +19,7 @@ interface UserPreferencesProps {
     icon: React.ElementType;
     id: string;
   }[];
-  preferenceTags: string[] | Record<string, string[]>;
+  preferenceTags: string[];
 }
 
 const UserPreferences = ({
@@ -34,29 +33,6 @@ const UserPreferences = ({
   preferenceCategories,
   preferenceTags
 }: UserPreferencesProps) => {
-  // Convert preferenceTags to array for PreferenceTagSelection
-  const allTags: string[] = [];
-  
-  // Handle different formats of preferenceTags
-  if (preferenceTags) {
-    if (Array.isArray(preferenceTags)) {
-      // If preferenceTags is already an array, use it directly
-      allTags.push(...preferenceTags);
-    } else if (typeof preferenceTags === 'object') {
-      // If preferenceTags is an object with category keys
-      Object.values(preferenceTags).forEach(categoryTags => {
-        if (Array.isArray(categoryTags)) {
-          allTags.push(...categoryTags);
-        }
-      });
-    }
-  }
-  
-  // If no tags were found, use default vibeTags from constants
-  if (allTags.length === 0) {
-    allTags.push(...vibeTags);
-  }
-
   return (
     <div className="space-y-4">
       <div className="space-y-2">
@@ -89,7 +65,7 @@ const UserPreferences = ({
         
         <PreferenceTagSelection
           selectedTags={selectedTags}
-          availableTags={allTags}
+          availableTags={preferenceTags}
           onTagSelect={onTagSelect}
           onTagRemove={onTagRemove}
         />

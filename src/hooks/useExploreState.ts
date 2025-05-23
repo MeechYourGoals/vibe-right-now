@@ -1,118 +1,205 @@
 
-import { useState, useEffect, useMemo } from 'react';
-import { mockLocations } from '@/mock/data';
-import { Location } from '@/types';
+import { useState, useEffect } from "react";
+import { useSearchParams } from "./explore/useSearchParams";
+import { useLocationData } from "./explore/useLocationData";
+import { useQueryProcessing } from "./explore/useQueryProcessing";
+import { useFilterHandling } from "./explore/useFilterHandling";
+import { EventItem, Location } from "@/types";
+import { useNavigate } from "react-router-dom";
+import { mockUsers } from "@/mock/users";
 
-// Create a new hook for explore state
 export const useExploreState = () => {
-  const [locations, setLocations] = useState<Location[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [sortBy, setSortBy] = useState('popular');
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [activeTab, setActiveTab] = useState("all");
+  const navigate = useNavigate();
   
-  // Add additional state properties needed by Explore.tsx
-  const [activeTab, setActiveTab] = useState('all');
-  const [searchedCity, setSearchedCity] = useState('');
-  const [searchedState, setSearchedState] = useState('');
-  const [searchCategory, setSearchCategory] = useState('all');
-  const [locationTags, setLocationTags] = useState<string[]>([]);
-
+  // Import modularized hooks
+  const {
+    searchQuery,
+    searchedCity,
+    searchedState,
+    searchCategory,
+    vibeFilter,
+    isNaturalLanguageSearch,
+    dateRange,
+    showDateFilter,
+    activeSearchTab,
+    setSearchQuery,
+    setSearchedCity,
+    setSearchedState,
+    setSearchCategory,
+    setVibeFilter,
+    setIsNaturalLanguageSearch,
+    handleSearchTabChange,
+    handleDateRangeChange,
+    handleClearDates,
+    setShowDateFilter
+  } = useSearchParams();
+  
+  const {
+    filteredLocations,
+    locationTags,
+    musicEvents,
+    comedyEvents,
+    nightlifeVenues,
+    setFilteredLocations,
+    setMusicEvents,
+    setComedyEvents,
+    setNightlifeVenues
+  } = useLocationData(searchedCity, searchedState, dateRange);
+  
+  const {
+    isLoadingResults,
+    processComplexQuery
+  } = useQueryProcessing(
+    setSearchedCity,
+    setSearchedState,
+    setFilteredLocations,
+    setComedyEvents as React.Dispatch<React.SetStateAction<Location[]>>,
+    setActiveTab,
+    setNightlifeVenues as React.Dispatch<React.SetStateAction<Location[]>>,
+    setVibeFilter,
+    setIsNaturalLanguageSearch
+  );
+  
+  const {
+    handleTabChange: filterHandleTabChange,
+    handleSearch: filterHandleSearch,
+    handleClearVibeFilter: filterHandleClearVibeFilter
+  } = useFilterHandling();
+  
+  // Initialize with default search
   useEffect(() => {
-    // Simulate loading data from an API
-    const loadLocations = async () => {
-      try {
-        setIsLoading(true);
-        // Use a timeout to simulate network request
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // Add missing lat/lng fields if needed
-        const locationsWithCoords = mockLocations.map(location => {
-          if (!location.lat || !location.lng) {
-            return {
-              ...location,
-              lat: Math.random() * 180 - 90, // Generate random lat
-              lng: Math.random() * 360 - 180, // Generate random lng
-              // Ensure location has type property with a valid value
-              type: location.type || "restaurant"
-            };
-          }
-          return location;
-        });
-        
-        setLocations(locationsWithCoords);
-        setError('');
-      } catch (err) {
-        setError('Failed to load locations');
-        console.error('Error loading locations:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadLocations();
-  }, []);
-
-  // Filtering logic
-  const filteredLocations = useMemo(() => {
-    return locations.filter(location => {
-      // Filter by category
-      if (selectedCategory !== 'all' && location.type !== selectedCategory) {
-        return false;
-      }
+    if (!searchQuery && !searchedCity && searchCategory !== 'users') {
+      setSearchedCity("San Francisco");
+      setSearchedState("CA");
+    }
+  }, [searchQuery, searchedCity, searchCategory, setSearchedCity, setSearchedState]);
+  
+  // Handle user search specifically
+  useEffect(() => {
+    if (searchCategory === 'users' && searchQuery) {
+      const cleanUsername = searchQuery.replace('@', '').toLowerCase().trim();
+      // Check if user exists in mock data
+      const userExists = mockUsers.some(user => 
+        user.username.toLowerCase() === cleanUsername || 
+        user.name.toLowerCase().includes(cleanUsername)
+      );
       
-      // Filter by search term
-      if (searchTerm) {
-        const term = searchTerm.toLowerCase();
-        return (
-          location.name.toLowerCase().includes(term) ||
-          location.city.toLowerCase().includes(term) ||
-          (location.address && location.address.toLowerCase().includes(term))
+      if (userExists) {
+        const foundUser = mockUsers.find(user => 
+          user.username.toLowerCase() === cleanUsername ||
+          user.name.toLowerCase().includes(cleanUsername)
         );
+        if (foundUser) {
+          navigate(`/user/${foundUser.username}`);
+        }
       }
+    }
+  }, [searchCategory, searchQuery, navigate]);
+  
+  // Get page title
+  const getPageTitle = () => {
+    if (isNaturalLanguageSearch) {
+      return "Smart Search Results";
+    } else if (searchCategory === "users") {
+      return `User Search: ${searchQuery || ""}`;
+    } else if (searchedCity) {
+      return `Explore Vibes in ${searchedCity}${searchedState ? `, ${searchedState}` : ''}`;
+    }
+    return "Explore Vibes";
+  };
+  
+  // Wrapper functions to maintain the same API
+  const handleSearch = (query: string, filterType: string, category: string) => {
+    // Handle user search specifically
+    if (category === 'users' && query) {
+      const cleanUsername = query.replace('@', '').toLowerCase().trim();
+      // Check if user exists in mock data
+      const userExists = mockUsers.some(user => 
+        user.username.toLowerCase() === cleanUsername || 
+        user.name.toLowerCase().includes(cleanUsername)
+      );
       
-      return true;
-    });
-  }, [locations, selectedCategory, searchTerm]);
-
-  // Handle search
-  const handleSearch = (term: string) => {
-    setSearchTerm(term);
+      if (userExists) {
+        const foundUser = mockUsers.find(user => 
+          user.username.toLowerCase() === cleanUsername ||
+          user.name.toLowerCase().includes(cleanUsername)
+        );
+        if (foundUser) {
+          navigate(`/user/${foundUser.username}`);
+          return;
+        }
+      }
+    }
+    
+    filterHandleSearch(
+      query,
+      filterType,
+      category,
+      searchQuery,
+      setSearchQuery,
+      setSearchCategory,
+      setActiveTab,
+      setSearchedCity,
+      setSearchedState,
+      setMusicEvents,
+      setComedyEvents,
+      setNightlifeVenues,
+      setFilteredLocations,
+      vibeFilter,
+      setVibeFilter,
+      dateRange,
+      processComplexQuery,
+      setIsNaturalLanguageSearch
+    );
   };
-
-  // Handle category change
-  const handleCategoryChange = (category: string) => {
-    setSelectedCategory(category);
+  
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    filterHandleTabChange(
+      value, 
+      searchQuery,
+      searchedCity,
+      searchedState,
+      searchCategory,
+      vibeFilter,
+      setFilteredLocations
+    );
   };
-
-  // Handle sorting
-  const handleSortByChange = (sortByOption: string) => {
-    setSortBy(sortByOption);
+  
+  const handleClearVibeFilter = () => {
+    filterHandleClearVibeFilter(
+      searchQuery,
+      searchCategory,
+      setVibeFilter,
+      handleSearch
+    );
   };
 
   return {
-    locations,
-    searchTerm,
-    selectedCategory,
-    sortBy,
-    isLoading,
-    error,
-    handleSearch,
-    handleCategoryChange,
-    handleSortByChange,
-    // Add the missing properties needed by Explore.tsx
     activeTab,
     searchedCity,
     searchedState,
     searchCategory,
     filteredLocations,
     locationTags,
-    setActiveTab,
-    setSearchedCity,
-    setSearchedState,
-    setSearchCategory,
-    setLocationTags
+    musicEvents,
+    comedyEvents,
+    nightlifeVenues,
+    vibeFilter,
+    isNaturalLanguageSearch,
+    isLoadingResults,
+    dateRange,
+    showDateFilter,
+    activeSearchTab,
+    getPageTitle,
+    handleSearch,
+    handleTabChange,
+    handleClearVibeFilter,
+    handleDateRangeChange,
+    handleClearDates,
+    handleSearchTabChange,
+    setShowDateFilter
   };
 };
 

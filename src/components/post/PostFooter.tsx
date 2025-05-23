@@ -1,100 +1,104 @@
 
-import React, { useState } from 'react';
-import { Heart, MessageCircle, Share, Bookmark } from 'lucide-react';
-import { Comment } from '@/types';
-import { Button } from '@/components/ui/button';
+import React, { useState } from "react";
+import { Post, Comment } from "@/types";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+import { Heart, MessageCircle, Share2 } from "lucide-react";
 
 interface PostFooterProps {
-  likes: number;
-  commentCount: number;
-  isLiked: boolean;
-  isSaved: boolean;
-  toggleLike: () => void;
-  toggleSave: () => void;
-  comments?: Comment[];
+  post: Post;
+  comments: Comment[];
+  isDetailView?: boolean;
 }
 
-const PostFooter: React.FC<PostFooterProps> = ({
-  likes,
-  commentCount,
-  isLiked,
-  isSaved,
-  toggleLike,
-  toggleSave,
-  comments = []
+const PostFooter: React.FC<PostFooterProps> = ({ 
+  post, 
+  comments, 
+  isDetailView = false 
 }) => {
-  const [showComments, setShowComments] = useState(false);
-
-  const toggleComments = () => {
-    setShowComments(!showComments);
+  const [liked, setLiked] = useState(false);
+  
+  const handleLike = () => {
+    setLiked(!liked);
   };
-
-  return (
-    <div className="p-4 pt-2">
-      <div className="flex justify-between items-center mb-2">
-        <div className="flex gap-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            className={`px-2 ${isLiked ? 'text-red-500' : ''}`}
-            onClick={toggleLike}
-          >
-            <Heart
-              className={`w-5 h-5 mr-1 ${isLiked ? 'fill-red-500 text-red-500' : ''}`}
-            />
-            <span>{likes}</span>
-          </Button>
-
-          <Button
-            variant="ghost"
-            size="sm"
-            className="px-2"
-            onClick={toggleComments}
-          >
-            <MessageCircle className="w-5 h-5 mr-1" />
-            <span>{commentCount}</span>
-          </Button>
-
-          <Button variant="ghost" size="sm" className="px-2">
-            <Share className="w-5 h-5 mr-1" />
-          </Button>
+  
+  // Helper function to get comment count safely
+  const getCommentCount = (post: Post): number => {
+    if (typeof post.comments === 'number') {
+      return post.comments;
+    }
+    if (Array.isArray(post.comments)) {
+      return post.comments.length;
+    }
+    return 0;
+  };
+  
+  const renderComments = () => {
+    if (isDetailView) {
+      return null; // Comments are rendered separately in detail view
+    }
+    
+    if (!comments || comments.length === 0) {
+      return null;
+    }
+    
+    // Show the most recent comment
+    const latestComment = comments[0];
+    
+    return (
+      <div className="px-4 py-2 border-t text-sm">
+        <div className="flex items-start gap-2">
+          <span className="font-semibold">{latestComment.user.username}</span>
+          <p className="text-xs whitespace-pre-wrap">{latestComment.content || latestComment.text}</p>
         </div>
         
-        <Button
-          variant="ghost"
-          size="sm"
-          className={`px-2 ${isSaved ? 'text-primary' : ''}`}
-          onClick={toggleSave}
+        {comments.length > 1 && (
+          <Link to={`/post/${post.id}`} className="text-muted-foreground text-xs mt-1 block">
+            View all {getCommentCount(post)} comments
+          </Link>
+        )}
+      </div>
+    );
+  };
+  
+  return (
+    <div className="px-4 pb-2">
+      <div className="flex items-center justify-between py-2">
+        <div className="flex items-center gap-4">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="flex items-center gap-1 px-2"
+            onClick={handleLike}
+          >
+            <Heart 
+              className={`h-5 w-5 ${liked ? 'fill-red-500 text-red-500' : ''}`} 
+            />
+            <span>{post.likes + (liked ? 1 : 0)}</span>
+          </Button>
+          
+          <Link to={`/post/${post.id}`}>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="flex items-center gap-1 px-2"
+            >
+              <MessageCircle className="h-5 w-5" />
+              <span>{getCommentCount(post)}</span>
+            </Button>
+          </Link>
+        </div>
+        
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="rounded-full h-8 w-8 p-0"
         >
-          <Bookmark
-            className={`w-5 h-5 ${isSaved ? 'fill-primary text-primary' : ''}`}
-          />
+          <Share2 className="h-4 w-4" />
         </Button>
       </div>
-
-      {showComments && comments.length > 0 && (
-        <div className="mt-4 space-y-3">
-          {comments.slice(0, 3).map(comment => (
-            <div key={comment.id} className="flex gap-2">
-              <img
-                src={comment.user.avatar || `https://ui-avatars.com/api/?name=${comment.user.name}`}
-                alt={comment.user.name}
-                className="w-8 h-8 rounded-full"
-              />
-              <div className="flex-1">
-                <p className="text-sm font-medium">{comment.user.name}</p>
-                <p className="text-sm text-gray-600 dark:text-gray-300">{comment.content || comment.text}</p>
-              </div>
-            </div>
-          ))}
-          
-          {comments.length > 3 && (
-            <Button variant="link" size="sm" className="px-0">
-              View all {comments.length} comments
-            </Button>
-          )}
-        </div>
-      )}
+      
+      {renderComments()}
     </div>
   );
 };

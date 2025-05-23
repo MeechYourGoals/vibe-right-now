@@ -4,8 +4,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import UserConciergeTab from "./UserConciergeTab";
 import VenueConciergeTab from "./VenueConciergeTab";
-import { Bot, Server } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 
 interface VernonConciergeDialogProps {
   open: boolean;
@@ -19,16 +17,9 @@ const VernonConciergeDialog = ({ open, onOpenChange }: VernonConciergeDialogProp
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold vibe-gradient-text flex items-center gap-2">
-            <Bot className="h-6 w-6" />
+          <DialogTitle className="text-2xl font-bold vibe-gradient-text">
             Vernon Concierge
-            <Badge className="ml-1 bg-blue-600 text-xs">
-              Powered by Project Mariner
-            </Badge>
           </DialogTitle>
-          <p className="text-sm text-muted-foreground mt-1">
-            Agentic booking and recommendations powered by Google's Project Mariner
-          </p>
         </DialogHeader>
         
         <Tabs 
