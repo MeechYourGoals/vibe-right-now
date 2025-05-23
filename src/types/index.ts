@@ -1,4 +1,3 @@
-
 export interface Location {
   id: string;
   name: string;
@@ -8,45 +7,19 @@ export interface Location {
   zip: string;
   latitude: number;
   longitude: number;
-  lat: number; // alias for latitude
-  lng: number; // alias for longitude
   category: string;
-  type: "restaurant" | "bar" | "event" | "attraction" | "sports" | "other";
   rating: number;
   reviewCount: number;
   price: string;
   imageUrl: string;
   isFeatured: boolean;
-  verified: boolean;
-  country: string;
-  images?: string[];
-  vibeTags?: string[];
-  hours?: {
-    monday: string;
-    tuesday: string;
-    wednesday: string;
-    thursday: string;
-    friday: string;
-    saturday: string;
-    sunday: string;
-    weekdayText?: string[];
-  };
-  openingHours?: {
+  openingHours: {
     weekdayText: string[];
   };
   formattedPhoneNumber: string;
   website: string;
   reservable: boolean;
   customerId?: string;
-  followers?: number;
-  checkins?: number;
-  userProfile?: {
-    id: string;
-    username: string;
-    avatar: string;
-    bio?: string;
-    verified: boolean;
-  };
 }
 
 export interface EventItem {
@@ -86,23 +59,22 @@ export interface VenueInsights {
   viewsCount?: number;
   impressions?: number;
   posts?: number;
-  postsChange?: string;
+  postsChange?: number;
   likes?: number;
-  likesChange?: string;
+  likesChange?: number;
   mentions?: number;
-  mentionsChange?: string;
-  checkinsChange?: string;
+  mentionsChange?: number;
+  checkinsChange?: number;
   reviews?: number;
-  reviewsChange?: string;
+  reviewsChange?: number;
   rating?: number;
-  ratingChange?: string;
+  ratingChange?: number;
 }
 
 export interface Post {
   id: string;
   content: string;
   author: User;
-  user: User; // alias for author
   location: Location;
   timestamp: string;
   media?: Media[];
@@ -113,7 +85,6 @@ export interface Post {
   isPinned?: boolean;
   isVenueOwned?: boolean;
   expiresAt?: string;
-  vibeTags?: string[];
 }
 
 export interface User {
