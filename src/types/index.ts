@@ -4,12 +4,12 @@ export interface Location {
   name: string;
   address: string;
   city: string;
-  state: string;
+  state: string | null;
   zip: string;
   latitude: number;
   longitude: number;
-  lat: number; // alias for latitude
-  lng: number; // alias for longitude
+  lat: number;
+  lng: number;
   category: string;
   type: "restaurant" | "bar" | "event" | "attraction" | "sports" | "other";
   rating: number;
@@ -30,6 +30,7 @@ export interface Location {
     saturday: string;
     sunday: string;
     weekdayText?: string[];
+    isOpen24Hours?: boolean;
   };
   openingHours?: {
     weekdayText: string[];
@@ -102,7 +103,7 @@ export interface Post {
   id: string;
   content: string;
   author: User;
-  user: User; // alias for author
+  user: User;
   location: Location;
   timestamp: string;
   media?: Media[];
@@ -112,6 +113,7 @@ export interface Post {
   isLiked?: boolean;
   isPinned?: boolean;
   isVenueOwned?: boolean;
+  isVenuePost?: boolean;
   expiresAt?: string;
   vibeTags?: string[];
 }

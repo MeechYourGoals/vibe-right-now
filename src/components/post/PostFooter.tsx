@@ -1,8 +1,6 @@
 
-import React, { useState } from "react";
-import { Post, Comment } from "@/types";
+import React from "react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
 import { Heart, MessageCircle, Share2 } from "lucide-react";
 
 interface PostFooterProps {
@@ -12,7 +10,7 @@ interface PostFooterProps {
   vibedHere: boolean;
   onLike: () => void;
   onComment: () => void;
-  onShare?: (postId: string) => void;
+  onShare?: () => void;
 }
 
 const PostFooter: React.FC<PostFooterProps> = ({ 
@@ -55,7 +53,7 @@ const PostFooter: React.FC<PostFooterProps> = ({
           variant="ghost" 
           size="sm" 
           className="rounded-full h-8 w-8 p-0"
-          onClick={() => onShare && onShare('')}
+          onClick={onShare}
         >
           <Share2 className="h-4 w-4" />
         </Button>
