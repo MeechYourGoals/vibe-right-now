@@ -1,5 +1,5 @@
 
-import { Crown, CreditCard, Star, ChartBar, BarChart3, FileText, Instagram, Phone } from "lucide-react";
+import { Crown, CreditCard, Star, ChartBar, BarChart3, FileText, Instagram, Phone, Video, Image } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -88,15 +88,21 @@ const PremiumBanner = ({ onUpgrade }: PremiumBannerProps) => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="flex flex-col items-center text-center p-4 rounded-lg bg-white dark:bg-amber-950/40 shadow-sm">
                 <h3 className="font-semibold mb-2">AI-Powered Analysis</h3>
-                <p className="text-sm text-muted-foreground">Upload financial records for advanced AI insights and recommendations</p>
+                <p className="text-sm text-muted-foreground">Use Notebook LM to analyze financial records and get advanced insights</p>
               </div>
               <div className="flex flex-col items-center text-center p-4 rounded-lg bg-white dark:bg-amber-950/40 shadow-sm">
-                <h3 className="font-semibold mb-2">Promoted Listings</h3>
-                <p className="text-sm text-muted-foreground">Your venue automatically highlighted in trending and recommended sections</p>
+                <div className="flex items-center">
+                  <Video className="h-4 w-4 mr-1 text-amber-600" />
+                  <h3 className="font-semibold mb-2">Veo 3 Video Generation</h3>
+                </div>
+                <p className="text-sm text-muted-foreground">Create auto-generated promo videos for social media in just 15 seconds</p>
               </div>
               <div className="flex flex-col items-center text-center p-4 rounded-lg bg-white dark:bg-amber-950/40 shadow-sm">
-                <h3 className="font-semibold mb-2">Curated Content Import</h3>
-                <p className="text-sm text-muted-foreground">AI selects and imports your most flattering content from all social platforms weekly</p>
+                <div className="flex items-center">
+                  <Image className="h-4 w-4 mr-1 text-amber-600" />
+                  <h3 className="font-semibold mb-2">Imagen 4 Graphics</h3>
+                </div>
+                <p className="text-sm text-muted-foreground">Generate high-quality posters, banners and promotional images for your venue</p>
               </div>
             </div>
             
@@ -115,7 +121,7 @@ const PremiumBanner = ({ onUpgrade }: PremiumBannerProps) => {
       </CardContent>
       <CardFooter className="flex justify-center">
         <p className="text-xs text-muted-foreground text-center max-w-xl">
-          All plans include basic venue profile features. Upgrade anytime to access more powerful tools to grow your business. Annual billing available with a 15% discount.
+          All plans include basic venue profile features. Upgrade to Pro for access to Google's cutting-edge Gemini, Veo, Imagen, and Notebook LM technologies to grow your business. Annual billing available with a 15% discount.
         </p>
       </CardFooter>
     </Card>
