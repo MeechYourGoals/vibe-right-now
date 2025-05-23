@@ -1,11 +1,10 @@
-
 import React, { useState } from 'react';
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import VerifiedBadge from "@/components/icons/VerifiedIcon";
-import { MoreHorizontal, MapPin, Pin, Building } from "lucide-react";
+import { VerifiedBadge } from "@/components/icons";
+import { MoreHorizontal, MapPin, Calendar, Link, Pin, Building } from "lucide-react";
 import PostMedia from "@/components/post/PostMedia";
 import PostFooter from "@/components/post/PostFooter";
 import CommentList from "@/components/post/CommentList";
