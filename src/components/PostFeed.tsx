@@ -45,6 +45,69 @@ const ensureMediaFormat = (media: any[]): Media[] => {
   });
 };
 
+// Helper function to ensure location has all required properties
+const ensureLocationFormat = (location: any) => {
+  if (!location) {
+    return {
+      id: 'default',
+      name: 'Unknown Location',
+      address: '',
+      city: '',
+      state: null,
+      zip: '',
+      latitude: 0,
+      longitude: 0,
+      lat: 0,
+      lng: 0,
+      category: '',
+      type: 'other' as const,
+      rating: 0,
+      reviewCount: 0,
+      price: '',
+      imageUrl: '',
+      isFeatured: false,
+      verified: false,
+      country: '',
+      formattedPhoneNumber: '',
+      website: '',
+      reservable: false
+    };
+  }
+
+  return {
+    id: location.id || 'default',
+    name: location.name || 'Unknown Location',
+    address: location.address || '',
+    city: location.city || '',
+    state: location.state || null,
+    zip: location.zip || '',
+    latitude: location.latitude || 0,
+    longitude: location.longitude || 0,
+    lat: location.lat || location.latitude || 0,
+    lng: location.lng || location.longitude || 0,
+    category: location.category || '',
+    type: location.type || 'other' as const,
+    rating: location.rating || 0,
+    reviewCount: location.reviewCount || 0,
+    price: location.price || '',
+    imageUrl: location.imageUrl || '',
+    isFeatured: location.isFeatured || false,
+    verified: location.verified || false,
+    country: location.country || '',
+    formattedPhoneNumber: location.formattedPhoneNumber || '',
+    website: location.website || '',
+    reservable: location.reservable || false,
+    images: location.images || [],
+    vibeTags: location.vibeTags || [],
+    hours: location.hours,
+    openingHours: location.openingHours,
+    customerId: location.customerId,
+    followers: location.followers,
+    checkins: location.checkins,
+    userProfile: location.userProfile
+  };
+};
+
 const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
   const [filter, setFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -70,12 +133,15 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
   // Generate vibe tags for posts and ensure proper structure
   const postsWithVibeTags = useMemo(() => {
     return mockPosts.map(post => {
+      // Ensure location is properly formatted
+      const safeLocation = ensureLocationFormat(post.location);
+      
       // Ensure post has required properties
       const enhancedPost = {
         ...post,
         author: post.author || post.user,
         user: post.user || post.author,
-        location: post.location || { id: 'default', name: 'Unknown Location' },
+        location: safeLocation,
         comments: post.comments || [],
         vibedHere: post.vibedHere || false
       };

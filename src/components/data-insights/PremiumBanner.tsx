@@ -10,7 +10,7 @@ interface PremiumBannerProps {
 
 const PremiumBanner = ({ onUpgrade }: PremiumBannerProps) => {
   return (
-    <Card className="mb-6 border-2 border-neutral-700 bg-neutral-900/95 backdrop-blur-sm">
+    <Card className="mb-6 border-2 border-neutral-700 bg-neutral-900 backdrop-blur-sm">
       <CardHeader>
         <CardTitle className="flex items-center text-amber-400">
           <Crown className="mr-2 h-5 w-5" />
@@ -22,23 +22,23 @@ const PremiumBanner = ({ onUpgrade }: PremiumBannerProps) => {
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="plus" className="w-full">
-          <TabsList className="grid grid-cols-3 w-full max-w-md mx-auto mb-6 bg-neutral-800">
-            <TabsTrigger value="plus" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">Plus</TabsTrigger>
-            <TabsTrigger value="premium" className="data-[state=active]:bg-green-600 data-[state=active]:text-white">Premium</TabsTrigger>
-            <TabsTrigger value="pro" className="data-[state=active]:bg-amber-600 data-[state=active]:text-white">Pro</TabsTrigger>
+          <TabsList className="grid grid-cols-3 w-full max-w-md mx-auto mb-6 bg-neutral-800 border border-neutral-700">
+            <TabsTrigger value="plus" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white text-neutral-300">Plus</TabsTrigger>
+            <TabsTrigger value="premium" className="data-[state=active]:bg-green-600 data-[state=active]:text-white text-neutral-300">Premium</TabsTrigger>
+            <TabsTrigger value="pro" className="data-[state=active]:bg-amber-600 data-[state=active]:text-white text-neutral-300">Pro</TabsTrigger>
           </TabsList>
           
           <TabsContent value="plus">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="flex flex-col items-center text-center p-4 rounded-lg bg-neutral-800/80 border border-neutral-700 shadow-sm">
+              <div className="flex flex-col items-center text-center p-4 rounded-lg bg-neutral-800 border border-neutral-700">
                 <h3 className="font-semibold mb-2 text-white">Pin User Posts</h3>
                 <p className="text-sm text-neutral-300">Highlight the best user-generated content on your venue page</p>
               </div>
-              <div className="flex flex-col items-center text-center p-4 rounded-lg bg-neutral-800/80 border border-neutral-700 shadow-sm">
+              <div className="flex flex-col items-center text-center p-4 rounded-lg bg-neutral-800 border border-neutral-700">
                 <h3 className="font-semibold mb-2 text-white">Offer Discounts</h3>
                 <p className="text-sm text-neutral-300">Create and manage special offers to attract more customers</p>
               </div>
-              <div className="flex flex-col items-center text-center p-4 rounded-lg bg-neutral-800/80 border border-neutral-700 shadow-sm">
+              <div className="flex flex-col items-center text-center p-4 rounded-lg bg-neutral-800 border border-neutral-700">
                 <h3 className="font-semibold mb-2 text-white">Social Media Links</h3>
                 <p className="text-sm text-neutral-300">Link to your external platforms like Yelp, TikTok, Instagram, and more</p>
               </div>
@@ -47,7 +47,7 @@ const PremiumBanner = ({ onUpgrade }: PremiumBannerProps) => {
             <div className="mt-6 text-center">
               <p className="text-lg font-medium mb-4 text-white">$29.99/month</p>
               <Button 
-                className="bg-gradient-to-r from-purple-600 to-teal-600 hover:from-purple-700 hover:to-teal-700 text-white"
+                className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white border-0"
                 onClick={() => onUpgrade('plus')}
               >
                 <CreditCard className="mr-2 h-4 w-4" />
@@ -58,15 +58,15 @@ const PremiumBanner = ({ onUpgrade }: PremiumBannerProps) => {
           
           <TabsContent value="premium">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="flex flex-col items-center text-center p-4 rounded-lg bg-neutral-800/80 border border-neutral-700 shadow-sm">
+              <div className="flex flex-col items-center text-center p-4 rounded-lg bg-neutral-800 border border-neutral-700">
                 <h3 className="font-semibold mb-2 text-white">Full Analytics</h3>
                 <p className="text-sm text-neutral-300">Access detailed insights about visitor demographics and behavior patterns</p>
               </div>
-              <div className="flex flex-col items-center text-center p-4 rounded-lg bg-neutral-800/80 border border-neutral-700 shadow-sm">
+              <div className="flex flex-col items-center text-center p-4 rounded-lg bg-neutral-800 border border-neutral-700">
                 <h3 className="font-semibold mb-2 text-white">Advertising Tools</h3>
                 <p className="text-sm text-neutral-300">Create targeted promotions and track their performance in real-time</p>
               </div>
-              <div className="flex flex-col items-center text-center p-4 rounded-lg bg-neutral-800/80 border border-neutral-700 shadow-sm">
+              <div className="flex flex-col items-center text-center p-4 rounded-lg bg-neutral-800 border border-neutral-700">
                 <h3 className="font-semibold mb-2 text-white">Weekly Content Import</h3>
                 <p className="text-sm text-neutral-300">Automatically import and display your content from Yelp, Google, TikTok, Instagram, and more</p>
               </div>
@@ -75,7 +75,7 @@ const PremiumBanner = ({ onUpgrade }: PremiumBannerProps) => {
             <div className="mt-6 text-center">
               <p className="text-lg font-medium mb-4 text-white">$49.99/month</p>
               <Button 
-                className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white"
+                className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white border-0"
                 onClick={() => onUpgrade('premium')}
               >
                 <CreditCard className="mr-2 h-4 w-4" />
@@ -86,18 +86,18 @@ const PremiumBanner = ({ onUpgrade }: PremiumBannerProps) => {
           
           <TabsContent value="pro">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="flex flex-col items-center text-center p-4 rounded-lg bg-neutral-800/80 border border-neutral-700 shadow-sm">
+              <div className="flex flex-col items-center text-center p-4 rounded-lg bg-neutral-800 border border-neutral-700">
                 <h3 className="font-semibold mb-2 text-white">AI-Powered Analysis</h3>
                 <p className="text-sm text-neutral-300">Use Gemini and Notebook LM to analyze financial records and get advanced insights</p>
               </div>
-              <div className="flex flex-col items-center text-center p-4 rounded-lg bg-neutral-800/80 border border-neutral-700 shadow-sm">
+              <div className="flex flex-col items-center text-center p-4 rounded-lg bg-neutral-800 border border-neutral-700">
                 <div className="flex items-center justify-center mb-2">
                   <Video className="h-4 w-4 mr-1 text-amber-400" />
                   <h3 className="font-semibold text-white">Veo 3 Video Generation</h3>
                 </div>
                 <p className="text-sm text-neutral-300">Create auto-generated promo videos for social media in just 15 seconds using Google's Veo AI</p>
               </div>
-              <div className="flex flex-col items-center text-center p-4 rounded-lg bg-neutral-800/80 border border-neutral-700 shadow-sm">
+              <div className="flex flex-col items-center text-center p-4 rounded-lg bg-neutral-800 border border-neutral-700">
                 <div className="flex items-center justify-center mb-2">
                   <Image className="h-4 w-4 mr-1 text-amber-400" />
                   <h3 className="font-semibold text-white">Imagen 4 Graphics</h3>
@@ -109,7 +109,7 @@ const PremiumBanner = ({ onUpgrade }: PremiumBannerProps) => {
             <div className="mt-6 text-center">
               <p className="text-lg font-medium mb-4 text-white">$99.99/month</p>
               <Button 
-                className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white"
+                className="bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white border-0"
                 onClick={() => onUpgrade('pro')}
               >
                 <CreditCard className="mr-2 h-4 w-4" />

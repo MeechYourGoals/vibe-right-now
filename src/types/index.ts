@@ -21,6 +21,7 @@ export interface Location {
   country: string;
   images?: string[];
   vibeTags?: string[];
+  vibes?: string[];
   hours?: {
     monday: string;
     tuesday: string;

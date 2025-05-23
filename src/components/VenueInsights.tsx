@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -52,7 +53,7 @@ const VenueInsights = () => {
         </div>
       </div>
       
-      <Card className="border-2 border-neutral-700 bg-neutral-900/95 backdrop-blur-sm">
+      <Card className="border-2 border-neutral-700 bg-neutral-900 backdrop-blur-sm">
         <CardHeader className="pb-2">
           <div className="flex justify-between items-center">
             <CardTitle className="flex items-center text-green-400">
@@ -70,11 +71,11 @@ const VenueInsights = () => {
             Notebook LM helps analyze financial documents, P&L sheets, and generates executive summaries.
           </p>
           <div className="flex flex-wrap gap-3">
-            <Button variant="outline" className="border-green-600 text-green-400 hover:bg-neutral-800">
+            <Button variant="outline" className="border-green-600 text-green-400 hover:bg-neutral-800 bg-neutral-900">
               <FileSpreadsheet className="mr-2 h-4 w-4" />
               Upload Business Documents
             </Button>
-            <Button variant="outline" className="border-green-600 text-green-400 hover:bg-neutral-800">
+            <Button variant="outline" className="border-green-600 text-green-400 hover:bg-neutral-800 bg-neutral-900">
               <Bot className="mr-2 h-4 w-4" />
               Run Gemini Analysis
             </Button>
@@ -83,17 +84,17 @@ const VenueInsights = () => {
       </Card>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
+        <Card className="bg-neutral-900 border-neutral-700">
           <CardHeader>
-            <CardTitle>Media Engagement</CardTitle>
+            <CardTitle className="text-white">Media Engagement</CardTitle>
           </CardHeader>
           <CardContent>
             <MediaEngagementChart data={mediaData} />
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-neutral-900 border-neutral-700">
           <CardHeader>
-            <CardTitle>Audience Insights</CardTitle>
+            <CardTitle className="text-white">Audience Insights</CardTitle>
           </CardHeader>
           <CardContent>
             <AudienceInsights />
