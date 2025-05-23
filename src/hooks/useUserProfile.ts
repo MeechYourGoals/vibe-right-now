@@ -1,5 +1,14 @@
+
 import { useState } from "react";
 import { User } from "@/types";
+
+export const vibeTags = [
+  "Cozy", "Family Friendly", "NightOwl", "Trendy", "Chill", 
+  "Upscale", "Casual", "Romantic", "Lively", "Intimate",
+  "Artsy", "Historic", "Modern", "Vintage", "Bohemian",
+  "Luxury", "Budget-Friendly", "Pet-Friendly", "Outdoor",
+  "Indoor", "Quiet", "Energetic", "Hipster", "Corporate"
+];
 
 const useUserProfile = () => {
   const [profile, setProfile] = useState<User>({
