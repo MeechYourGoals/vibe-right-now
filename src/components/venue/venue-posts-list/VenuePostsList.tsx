@@ -1,46 +1,34 @@
-
-import React from 'react';
-import { Post, Comment, Location } from "@/types";
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Verified } from "@/components/Verified";
+import { Post } from "@/types";
 import PostCard from "@/components/post/PostCard";
 
-interface VenuePostsListViewProps {
+interface VenuePostsListProps {
   posts: Post[];
-  venue: Location;
-  getComments: (postId: string) => Comment[];
-  canDelete: boolean;
-  onPostDeleted?: (postId: string) => void;
 }
 
-const VenuePostsListView: React.FC<VenuePostsListViewProps> = ({
-  posts,
-  venue,
-  getComments,
-  canDelete,
-  onPostDeleted
-}) => {
-  if (posts.length === 0) {
-    return null;
-  }
-  
+const VenuePostsList = ({ posts }: VenuePostsListProps) => {
   return (
-    <div className="space-y-4">
-      {posts.map(post => {
-        // Determine if the post is from the venue itself
-        const isVenuePost = post.isVenuePost || post.location?.id === venue.id;
-        
-        return (
-          <PostCard 
-            key={post.id} 
-            post={post} 
-            comments={getComments(post.id)}
-            canDelete={canDelete && !isVenuePost} // Only allow deletion of user posts, not venue posts
-            venue={venue}
-            onPostDeleted={onPostDeleted}
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle>Recent Posts</CardTitle>
+      </CardHeader>
+      <CardContent className="p-4 space-y-4">
+        {posts.map((post) => (
+          <PostCard
+            key={post.id}
+            post={post}
+            onComment={(postId, comment) => console.log('Comment added:', postId, comment)}
+            onLike={(postId) => console.log('Post liked:', postId)}
+            onShare={(postId) => console.log('Post shared:', postId)}
           />
-        );
-      })}
-    </div>
+        ))}
+      </CardContent>
+    </Card>
   );
 };
 
-export default VenuePostsListView;
+export default VenuePostsList;

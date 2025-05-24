@@ -1,9 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
-import { Post, User, Comment } from "@/types";
+import { Post, Comment } from "@/types";
 import PostCard from "@/components/post/PostCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { CalendarClock, MapPin, MessageSquare } from "lucide-react";
 
 interface ProfileTabContentProps {
   posts: Post[];
@@ -33,6 +33,18 @@ const ProfileTabContent = ({
     }
   };
 
+  const handleComment = (postId: string, comment: string) => {
+    console.log('Comment added:', postId, comment);
+  };
+
+  const handleLike = (postId: string) => {
+    console.log('Post liked:', postId);
+  };
+
+  const handleShare = (postId: string) => {
+    console.log('Post shared:', postId);
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -52,9 +64,9 @@ const ProfileTabContent = ({
           <PostCard 
             key={post.id}
             post={post}
-            onComment={(postId, comment) => console.log('Comment added:', postId, comment)}
-            onLike={(postId) => console.log('Post liked:', postId)}
-            onShare={(postId) => console.log('Post shared:', postId)}
+            onComment={handleComment}
+            onLike={handleLike}
+            onShare={handleShare}
           />
         ))}
       </div>

@@ -1,4 +1,3 @@
-
 export interface Location {
   id: string;
   name: string;
@@ -121,17 +120,15 @@ export interface Post {
 
 export interface User {
   id: string;
-  name: string;
   username: string;
+  name: string;
   avatar: string;
-  isVerified: boolean;
-  isPrivate?: boolean;
-  followerCount?: number;
-  followingCount?: number;
   bio?: string;
-  location?: string;
-  joinedDate?: string;
-  website?: string;
+  isVerified?: boolean;
+  followersCount?: number;
+  followingCount?: number;
+  postsCount?: number;
+  isCelebrity?: boolean;
 }
 
 export interface Media {
@@ -139,8 +136,6 @@ export interface Media {
   type: 'image' | 'video';
   url: string;
   thumbnail?: string;
-  duration?: number;
-  aspectRatio?: number;
 }
 
 // Social Media Types (Google ecosystem only)

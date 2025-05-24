@@ -1,101 +1,87 @@
-
-import { Button } from "@/components/ui/button";
+import React, { useState, useCallback } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MessageSquare, Heart, Award, Grid2X2, ListIcon } from "lucide-react";
-import ProfileTabContent from "@/components/user/ProfileTabContent";
-import { Post, Comment } from "@/types";
+import { User, Post, Comment } from "@/types";
+import ProfileHeader from "./ProfileHeader";
+import ProfileTabContent from "./ProfileTabContent";
 
 interface ProfileTabsProps {
-  activeTab: string;
-  setActiveTab: (value: string) => void;
-  viewMode: "list" | "grid";
-  setViewMode: (mode: "list" | "grid") => void;
-  userPosts: Post[];
-  getComments: (postId: string) => Comment[];
+  user: User;
+  posts: Post[];
 }
 
-const ProfileTabs = ({ 
-  activeTab, 
-  setActiveTab, 
-  viewMode, 
-  setViewMode, 
-  userPosts, 
-  getComments 
-}: ProfileTabsProps) => {
+const ProfileTabs = ({ user, posts: userPosts }: ProfileTabsProps) => {
+  const [activeTab, setActiveTab] = useState("posts");
+
+  const getComments = useCallback((postId: string): Comment[] => {
+    // Mock comments - replace with actual data fetching
+    return [
+      {
+        id: "comment1",
+        postId: postId,
+        userId: "user1",
+        user: {
+          id: "user1",
+          username: "johndoe",
+          name: "John Doe",
+          avatar: "/placeholder.svg",
+        },
+        content: "Great post!",
+        timestamp: "2 hours ago",
+        likes: 3,
+      },
+      {
+        id: "comment2",
+        postId: postId,
+        userId: "user2",
+        user: {
+          id: "user2",
+          username: "sarahsmith",
+          name: "Sarah Smith",
+          avatar: "/placeholder.svg",
+        },
+        content: "I agree!",
+        timestamp: "1 hour ago",
+        likes: 1,
+      },
+    ];
+  }, []);
+
   return (
-    <Tabs 
-      defaultValue="posts" 
-      value={activeTab} 
-      onValueChange={setActiveTab} 
-      className="mb-6"
-    >
-      <div className="flex justify-between items-center mb-2">
-        <TabsList className="grid grid-cols-3 w-full max-w-md">
-          <TabsTrigger value="posts">
-            <div className="flex items-center">
-              <MessageSquare className="h-4 w-4 mr-2" />
-              <span>Posts</span>
-            </div>
-          </TabsTrigger>
-          <TabsTrigger value="liked">
-            <div className="flex items-center">
-              <Heart className="h-4 w-4 mr-2" />
-              <span>Liked</span>
-            </div>
-          </TabsTrigger>
-          <TabsTrigger value="saved">
-            <div className="flex items-center">
-              <Award className="h-4 w-4 mr-2" />
-              <span>Popular</span>
-            </div>
-          </TabsTrigger>
+    <div className="space-y-6">
+      <ProfileHeader user={user} />
+      
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="posts">Posts</TabsTrigger>
+          <TabsTrigger value="saved">Saved</TabsTrigger>
+          <TabsTrigger value="tagged">Tagged</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="posts" className="mt-6">
+          <ProfileTabContent
+            posts={userPosts}
+            locationPostCount={userPosts.filter(post => post.location).length}
+            getComments={getComments}
+          />
+        </TabsContent>
         
-        <div className="flex gap-2">
-          <Button 
-            variant={viewMode === "list" ? "default" : "outline"} 
-            size="sm"
-            onClick={() => setViewMode("list")}
-          >
-            <ListIcon className="h-4 w-4" />
-          </Button>
-          <Button 
-            variant={viewMode === "grid" ? "default" : "outline"} 
-            size="sm"
-            onClick={() => setViewMode("grid")}
-          >
-            <Grid2X2 className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-      
-      <TabsContent value="posts" className="mt-4 space-y-4">
-        <ProfileTabContent 
-          activeTab="posts"
-          viewMode={viewMode}
-          userPosts={userPosts}
-          getComments={getComments}
-        />
-      </TabsContent>
-      
-      <TabsContent value="liked" className="mt-4 space-y-4">
-        <ProfileTabContent 
-          activeTab="liked"
-          viewMode={viewMode}
-          userPosts={[]}
-          getComments={getComments}
-        />
-      </TabsContent>
-      
-      <TabsContent value="saved" className="mt-4 space-y-4">
-        <ProfileTabContent 
-          activeTab="saved"
-          viewMode={viewMode}
-          userPosts={[]}
-          getComments={getComments}
-        />
-      </TabsContent>
-    </Tabs>
+        <TabsContent value="saved" className="mt-6">
+          <ProfileTabContent
+            posts={[]}
+            locationPostCount={0}
+            getComments={getComments}
+          />
+        </TabsContent>
+        
+        <TabsContent value="tagged" className="mt-6">
+          <ProfileTabContent
+            posts={[]}
+            locationPostCount={0}
+            getComments={getComments}
+          />
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };
 

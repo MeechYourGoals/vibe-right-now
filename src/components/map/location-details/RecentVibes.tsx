@@ -1,116 +1,92 @@
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React from "react";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Clock, Heart, MessageCircle, Eye } from "lucide-react";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Media } from "@/types";
+import { Heart, MessageCircle, Share } from "lucide-react";
+
+interface Media {
+  id: string;
+  type: 'image' | 'video';
+  url: string;
+}
 
 interface RecentVibesProps {
   locationId: string;
 }
 
 const RecentVibes = ({ locationId }: RecentVibesProps) => {
-  // Mock recent posts for this location
+  // Mock data for recent vibes at this location
   const recentPosts = [
     {
       id: "1",
-      user: {
-        name: "Alex Johnson",
-        avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
-        username: "alexj"
-      },
-      content: "Amazing rooftop vibes! The sunset view is incredible 🌅",
+      user: { name: "Sarah Johnson", avatar: "/placeholder.svg", username: "sarah_j" },
+      content: "Amazing night at this place! The vibe was perfect 🎉",
       timestamp: "2 hours ago",
-      media: [{ 
-        id: "media-1",
-        type: "image" as const, 
-        url: "https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=400&h=300&fit=crop" 
-      }] as Media[],
       likes: 24,
       comments: 8,
-      views: 156
+      media: [
+        { id: "1", type: "image" as const, url: "/placeholder.svg" }
+      ]
     },
     {
       id: "2", 
-      user: {
-        name: "Sarah Chen",
-        avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face",
-        username: "sarahc"
-      },
-      content: "Best cocktails in the city! The bartender knows his craft 🍸",
-      timestamp: "4 hours ago",
-      media: [{ 
-        id: "media-2",
-        type: "image" as const, 
-        url: "https://images.unsplash.com/photo-1536935338788-846bb9981813?w=400&h=300&fit=crop" 
-      }] as Media[],
-      likes: 18,
-      comments: 5,
-      views: 89
+      user: { name: "Mike Chen", avatar: "/placeholder.svg", username: "mike_c" },
+      content: "Great cocktails and awesome music. Definitely coming back!",
+      timestamp: "1 day ago",
+      likes: 15,
+      comments: 3,
+      media: [
+        { id: "2", type: "image" as const, url: "/placeholder.svg" }
+      ]
     }
   ];
 
   return (
-    <Card className="bg-neutral-900 border-neutral-700">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-white text-lg flex items-center">
-          Recent Vibes
-          <Badge variant="secondary" className="ml-2 bg-green-600 text-white">
-            Live
-          </Badge>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <div className="space-y-4">
+      <h3 className="text-lg font-semibold">Recent Vibes</h3>
+      <div className="space-y-4">
         {recentPosts.map((post) => (
-          <div key={post.id} className="bg-neutral-800 rounded-lg p-3 space-y-3">
-            <div className="flex items-start space-x-3">
-              <Avatar className="w-10 h-10">
-                <AvatarImage src={post.user.avatar} alt={post.user.name} />
-                <AvatarFallback>{post.user.name.charAt(0)}</AvatarFallback>
-              </Avatar>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center space-x-2">
-                  <span className="font-medium text-white text-sm">{post.user.name}</span>
-                  <span className="text-neutral-400 text-xs">@{post.user.username}</span>
-                  <span className="text-neutral-500 text-xs flex items-center">
-                    <Clock className="w-3 h-3 mr-1" />
-                    {post.timestamp}
-                  </span>
-                </div>
-                <p className="text-neutral-200 text-sm mt-1">{post.content}</p>
+          <div key={post.id} className="border rounded-lg p-4 space-y-3">
+            <div className="flex items-center space-x-3">
+              <img 
+                src={post.user.avatar} 
+                alt={post.user.name}
+                className="w-8 h-8 rounded-full"
+              />
+              <div>
+                <p className="font-medium text-sm">{post.user.name}</p>
+                <p className="text-xs text-muted-foreground">@{post.user.username}</p>
               </div>
+              <span className="text-xs text-muted-foreground ml-auto">{post.timestamp}</span>
             </div>
             
-            {post.media && post.media.length > 0 && (
-              <div className="rounded-lg overflow-hidden">
-                <img 
-                  src={post.media[0].url} 
-                  alt="Post content"
-                  className="w-full h-40 object-cover"
-                />
-              </div>
+            <p className="text-sm">{post.content}</p>
+            
+            {post.media.length > 0 && (
+              <img 
+                src={post.media[0].url} 
+                alt="Post media"
+                className="w-full h-32 object-cover rounded-lg"
+              />
             )}
             
-            <div className="flex items-center justify-between text-neutral-400 text-xs">
-              <div className="flex items-center space-x-4">
-                <span className="flex items-center">
-                  <Heart className="w-3 h-3 mr-1" />
-                  {post.likes}
-                </span>
-                <span className="flex items-center">
-                  <MessageCircle className="w-3 h-3 mr-1" />
-                  {post.comments}
-                </span>
-                <span className="flex items-center">
-                  <Eye className="w-3 h-3 mr-1" />
-                  {post.views}
-                </span>
-              </div>
+            <div className="flex items-center space-x-4 pt-2">
+              <Button variant="ghost" size="sm" className="flex items-center space-x-1">
+                <Heart className="h-4 w-4" />
+                <span>{post.likes}</span>
+              </Button>
+              <Button variant="ghost" size="sm" className="flex items-center space-x-1">
+                <MessageCircle className="h-4 w-4" />
+                <span>{post.comments}</span>
+              </Button>
+              <Button variant="ghost" size="sm">
+                <Share className="h-4 w-4" />
+              </Button>
             </div>
           </div>
         ))}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 
