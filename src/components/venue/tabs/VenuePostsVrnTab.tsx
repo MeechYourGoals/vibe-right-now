@@ -51,7 +51,8 @@ const VenuePostsVrnTab: React.FC<VenuePostsVrnTabProps> = ({
           viewMode={viewMode} 
           getComments={getComments}
           subscriptionTier={subscriptionTier}
-          onPostDeleted={onPostDeleted}
+          canDelete={true}
+          onPostDeleted={onPostDeleted || (() => {})}
         />
         
         <div className="border-l-4 border-blue-500 pl-4 py-2 mt-4">
@@ -67,7 +68,8 @@ const VenuePostsVrnTab: React.FC<VenuePostsVrnTabProps> = ({
           viewMode={viewMode} 
           getComments={getComments}
           subscriptionTier={subscriptionTier}
-          onPostDeleted={onPostDeleted}
+          canDelete={true}
+          onPostDeleted={onPostDeleted || (() => {})}
         />
       </div>
     </div>
