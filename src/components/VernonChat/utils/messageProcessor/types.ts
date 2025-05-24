@@ -4,6 +4,15 @@ export interface MessageContext {
   timestamp: Date;
   userId?: string;
   sessionId?: string;
+  messages?: any[];
+  options?: any;
+  paginationState?: any;
+}
+
+export interface ProcessMessageOptions {
+  query: string;
+  messages: any[];
+  setMessages: React.Dispatch<React.SetStateAction<any[]>>;
 }
 
 export interface MessageProcessor {

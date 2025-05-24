@@ -9,8 +9,9 @@ interface VenuePostsListProps {
   venue: Location;
   viewMode: "list" | "grid";
   getComments: (postId: string) => Comment[];
-  canDelete: boolean;
-  onPostDeleted: (postId: string) => void;
+  subscriptionTier?: 'standard' | 'plus' | 'premium' | 'pro';
+  canDelete?: boolean;
+  onPostDeleted?: (postId: string) => void;
 }
 
 const VenuePostsList: React.FC<VenuePostsListProps> = ({
@@ -18,7 +19,8 @@ const VenuePostsList: React.FC<VenuePostsListProps> = ({
   venue,
   viewMode,
   getComments,
-  canDelete,
+  subscriptionTier = 'standard',
+  canDelete = false,
   onPostDeleted
 }) => {
   if (posts.length === 0) {
@@ -34,7 +36,7 @@ const VenuePostsList: React.FC<VenuePostsListProps> = ({
       <VenuePostsGrid
         posts={posts}
         canDelete={canDelete}
-        onPostDeleted={onPostDeleted}
+        onPostDeleted={onPostDeleted || (() => {})}
       />
     );
   }
@@ -44,7 +46,7 @@ const VenuePostsList: React.FC<VenuePostsListProps> = ({
       posts={posts}
       getComments={getComments}
       canDelete={canDelete}
-      onPostDeleted={onPostDeleted}
+      onPostDeleted={onPostDeleted || (() => {})}
     />
   );
 };

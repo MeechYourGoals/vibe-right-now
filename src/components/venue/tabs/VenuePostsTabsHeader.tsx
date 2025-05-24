@@ -8,22 +8,28 @@ import SocialMediaConnectionsSheet from "../SocialMediaConnectionsSheet";
 interface VenuePostsTabsHeaderProps {
   viewMode: "list" | "grid";
   setViewMode: (mode: "list" | "grid") => void;
-  isConnectionsOpen: boolean;
-  setIsConnectionsOpen: (open: boolean) => void;
+  isConnectionsOpen?: boolean;
+  setIsConnectionsOpen?: (open: boolean) => void;
+  onConnectedPlatformsChange?: (platforms: Record<string, boolean>) => void;
+  onAddPost?: () => void;
+  venueId?: string;
 }
 
 const VenuePostsTabsHeader: React.FC<VenuePostsTabsHeaderProps> = ({
   viewMode,
   setViewMode,
-  isConnectionsOpen,
-  setIsConnectionsOpen
+  isConnectionsOpen = false,
+  setIsConnectionsOpen = () => {},
+  onConnectedPlatformsChange = () => {},
+  onAddPost = () => {},
+  venueId = ""
 }) => {
   return (
     <div className="flex justify-between items-center">
       <TabsList className="bg-neutral-800">
-        <TabsTrigger value="posts" className="data-[state=active]:bg-neutral-700 text-neutral-300 data-[state=active]:text-white">Posts</TabsTrigger>
-        <TabsTrigger value="reviews" className="data-[state=active]:bg-neutral-700 text-neutral-300 data-[state=active]:text-white">Reviews</TabsTrigger>
-        <TabsTrigger value="events" className="data-[state=active]:bg-neutral-700 text-neutral-300 data-[state=active]:text-white">Events</TabsTrigger>
+        <TabsTrigger value="all" className="data-[state=active]:bg-neutral-700 text-neutral-300 data-[state=active]:text-white">All Posts</TabsTrigger>
+        <TabsTrigger value="vrn" className="data-[state=active]:bg-neutral-700 text-neutral-300 data-[state=active]:text-white">VRN</TabsTrigger>
+        <TabsTrigger value="external" className="data-[state=active]:bg-neutral-700 text-neutral-300 data-[state=active]:text-white">External</TabsTrigger>
       </TabsList>
       
       <div className="flex space-x-2">

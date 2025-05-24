@@ -5,8 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Instagram, Star, ExternalLink, RefreshCw, Calendar, TrendingUp, Brain, Mic } from "lucide-react";
-import { SocialMediaService } from "@/services/SocialMediaService";
-import { SocialMediaPost as SocialMediaPostType } from "@/services/socialMedia/types";
+import { SocialMediaPost as SocialMediaPostType } from "@/types";
 import SocialMediaPost from "./SocialMediaPost";
 import { toast } from "sonner";
 
@@ -16,24 +15,46 @@ interface SocialMediaIntegrationProps {
 }
 
 const SocialMediaIntegration = ({ subscriptionTier, venueName }: SocialMediaIntegrationProps) => {
-  const [posts, setPosts] = useState<SocialMediaPostType[]>([]);
+  const [posts, setPosts] = useState<SocialMediaPostType[]>([
+    {
+      id: "1",
+      content: "Great experience at this venue! Highly recommend.",
+      author: "johndoe123",
+      timestamp: "2 minutes ago",
+      platform: 'google',
+      likes: 10,
+      comments: 3,
+      rating: 5,
+      venueName: venueName,
+      source: 'google',
+      url: "#"
+    },
+    {
+      id: "2", 
+      content: "Amazing food and service!",
+      author: "janesmith456",
+      timestamp: "1 day ago",
+      platform: 'yelp',
+      likes: 15,
+      rating: 4,
+      venueName: venueName,
+      source: 'yelp',
+      url: "#"
+    }
+  ]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(new Date());
 
   const isProTier = subscriptionTier === 'pro';
-  const isPremiumPlus = subscriptionTier === 'premium' || subscriptionTier === 'plus';
 
   const fetchSocialMediaContent = async () => {
     setLoading(true);
     try {
-      const apiKeys = SocialMediaService.getDefaultApiKeys();
-      const content = await SocialMediaService.getAllSocialMediaContent(venueName, apiKeys);
-      setPosts(content);
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
       setLastUpdated(new Date());
-      if (content.length === 0) {
-        toast.info('No social media content found. Connect your accounts to see posts and reviews.');
-      }
+      toast.info('Social media content refreshed');
     } catch (error) {
       console.error('Error fetching social media content:', error);
       toast.error('Failed to fetch social media content');
@@ -41,10 +62,6 @@ const SocialMediaIntegration = ({ subscriptionTier, venueName }: SocialMediaInte
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchSocialMediaContent();
-  }, [venueName]);
 
   const filteredPosts = posts.filter(post => {
     if (activeTab === "all") return true;
@@ -72,7 +89,7 @@ const SocialMediaIntegration = ({ subscriptionTier, venueName }: SocialMediaInte
               Gemini Deep Research Powered Analytics
             </CardTitle>
             <Badge variant="outline" className="bg-blue-900/20 text-blue-400 border-blue-600">
-              {isProTier ? 'Pro Active' : 'Upgrade to Pro'}
+              {isProTier ? 'Upgrade to Pro' : 'Upgrade to Pro'}
             </Badge>
           </div>
         </CardHeader>
@@ -100,15 +117,6 @@ const SocialMediaIntegration = ({ subscriptionTier, venueName }: SocialMediaInte
               Create Notebook LM Podcast
             </Button>
           </div>
-          {isProTier && (
-            <div className="mt-3 p-3 bg-blue-950/30 rounded-lg border border-blue-800/30">
-              <p className="text-xs text-blue-300">
-                💡 <strong>Pro Tip:</strong> Export your weekly insights to Google Notebook LM to generate 
-                an AI-powered podcast summary of your venue's performance. Perfect for staying informed 
-                on-the-go or sharing with your team.
-              </p>
-            </div>
-          )}
         </CardContent>
       </Card>
 

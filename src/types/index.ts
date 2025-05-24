@@ -32,6 +32,8 @@ export interface Location {
     sunday: string;
     weekdayText?: string[];
     isOpen24Hours?: boolean;
+    isOpenNow?: string;
+    timezone?: string;
   };
   openingHours?: {
     weekdayText: string[];
@@ -83,21 +85,21 @@ export interface Comment {
 export interface VenueInsights {
   totalVisits?: number;
   visitors?: number;
-  visitorsChange?: string;
+  visitorsChange?: number;
   checkins?: number;
   viewsCount?: number;
   impressions?: number;
   posts?: number;
-  postsChange?: string;
+  postsChange?: number;
   likes?: number;
-  likesChange?: string;
+  likesChange?: number;
   mentions?: number;
-  mentionsChange?: string;
-  checkinsChange?: string;
+  mentionsChange?: number;
+  checkinsChange?: number;
   reviews?: number;
-  reviewsChange?: string;
+  reviewsChange?: number;
   rating?: number;
-  ratingChange?: string;
+  ratingChange?: number;
 }
 
 export interface Post {
@@ -148,9 +150,10 @@ export interface SocialMediaPost {
   platform: 'google' | 'yelp' | 'instagram';
   imageUrl?: string;
   likes?: number;
+  comments?: number;
   rating?: number;
   venueName: string;
-  source: string;
+  source: 'google' | 'yelp' | 'instagram' | 'other';
   url?: string;
 }
 

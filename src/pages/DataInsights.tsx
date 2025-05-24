@@ -10,13 +10,13 @@ import PremiumBanner from "@/components/data-insights/PremiumBanner";
 import AnalyticsTab from "@/components/data-insights/AnalyticsTab";
 import AdvertisingTab from "@/components/data-insights/marketing/AdvertisingTab";
 import VernonProBanner from "@/components/data-insights/VernonProBanner";
-import VernonChat from "@/components/VernonChat";
+import VernonNext from "@/components/VernonNext";
 
 // Subscription tier types
 type SubscriptionTier = 'standard' | 'plus' | 'premium' | 'pro';
 
 const DataInsights = () => {
-  const [subscriptionTier, setSubscriptionTier] = useState<SubscriptionTier>('standard');
+  const [subscriptionTier, setSubscriptionTier] = useState<SubscriptionTier>('pro');
   const isPremium = subscriptionTier === 'premium' || subscriptionTier === 'pro';
   const isPro = subscriptionTier === 'pro';
   
@@ -170,7 +170,7 @@ const DataInsights = () => {
       </main>
       
       {/* Vernon Chat - Only show for Pro users */}
-      {isPro && <VernonChat />}
+      {isPro && <VernonNext />}
     </div>
   );
 };
