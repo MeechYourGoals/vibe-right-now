@@ -1,84 +1,84 @@
-import React, { useState, useCallback } from 'react';
+
+import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { User, Post, Comment } from "@/types";
-import ProfileHeader from "./ProfileHeader";
-import ProfileTabContent from "./ProfileTabContent";
+import { Comment } from "@/types";
+import ProfileHeader from './ProfileHeader';
 
-interface ProfileTabsProps {
-  user: User;
-  posts: Post[];
-}
+const mockUser = {
+  id: '1',
+  username: 'johndoe',
+  name: 'John Doe',
+  avatar: '/placeholder.svg',
+  bio: 'Living life to the fullest!',
+  isVerified: true,
+  followersCount: 1250,
+  followingCount: 380,
+  postsCount: 125
+};
 
-const ProfileTabs = ({ user, posts: userPosts }: ProfileTabsProps) => {
-  const [activeTab, setActiveTab] = useState("posts");
+const mockComments: Comment[] = [
+  {
+    id: '1',
+    postId: 'post1',
+    userId: '1',
+    user: { id: '1', username: 'alice', name: 'Alice', avatar: '/placeholder.svg' },
+    content: 'Great post!',
+    timestamp: new Date().toISOString(),
+    vibedHere: true,
+    likes: 5
+  },
+  {
+    id: '2',
+    postId: 'post2',
+    userId: '2',
+    user: { id: '2', username: 'bob', name: 'Bob', avatar: '/placeholder.svg' },
+    content: 'Amazing place!',
+    timestamp: new Date().toISOString(),
+    vibedHere: false,
+    likes: 3
+  }
+];
 
-  const getComments = useCallback((postId: string): Comment[] => {
-    // Mock comments - replace with actual data fetching
-    return [
-      {
-        id: "comment1",
-        postId: postId,
-        userId: "user1",
-        user: {
-          id: "user1",
-          username: "johndoe",
-          name: "John Doe",
-          avatar: "/placeholder.svg",
-        },
-        content: "Great post!",
-        timestamp: "2 hours ago",
-        likes: 3,
-      },
-      {
-        id: "comment2",
-        postId: postId,
-        userId: "user2",
-        user: {
-          id: "user2",
-          username: "sarahsmith",
-          name: "Sarah Smith",
-          avatar: "/placeholder.svg",
-        },
-        content: "I agree!",
-        timestamp: "1 hour ago",
-        likes: 1,
-      },
-    ];
-  }, []);
-
+const ProfileTabs = () => {
   return (
-    <div className="space-y-6">
-      <ProfileHeader user={user} />
+    <div className="max-w-4xl mx-auto">
+      <ProfileHeader user={mockUser} />
       
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <Tabs defaultValue="posts" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="posts">Posts</TabsTrigger>
-          <TabsTrigger value="saved">Saved</TabsTrigger>
-          <TabsTrigger value="tagged">Tagged</TabsTrigger>
+          <TabsTrigger value="vibes">Vibes</TabsTrigger>
+          <TabsTrigger value="about">About</TabsTrigger>
         </TabsList>
-
+        
         <TabsContent value="posts" className="mt-6">
-          <ProfileTabContent
-            posts={userPosts}
-            locationPostCount={userPosts.filter(post => post.location).length}
-            getComments={getComments}
-          />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* Posts content */}
+            <p className="text-muted-foreground">No posts yet.</p>
+          </div>
         </TabsContent>
         
-        <TabsContent value="saved" className="mt-6">
-          <ProfileTabContent
-            posts={[]}
-            locationPostCount={0}
-            getComments={getComments}
-          />
+        <TabsContent value="vibes" className="mt-6">
+          <div className="space-y-4">
+            {mockComments.map((comment) => (
+              <div key={comment.id} className="p-4 border rounded-lg">
+                <p>{comment.content}</p>
+                <div className="flex items-center space-x-2 mt-2 text-sm text-muted-foreground">
+                  <span>@{comment.user.username}</span>
+                  {comment.vibedHere && <span className="text-primary">• Vibed Here</span>}
+                </div>
+              </div>
+            ))}
+          </div>
         </TabsContent>
         
-        <TabsContent value="tagged" className="mt-6">
-          <ProfileTabContent
-            posts={[]}
-            locationPostCount={0}
-            getComments={getComments}
-          />
+        <TabsContent value="about" className="mt-6">
+          <div className="space-y-4">
+            <div>
+              <h3 className="font-semibold mb-2">About</h3>
+              <p className="text-muted-foreground">{mockUser.bio}</p>
+            </div>
+          </div>
         </TabsContent>
       </Tabs>
     </div>

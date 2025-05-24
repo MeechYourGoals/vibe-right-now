@@ -7,7 +7,7 @@ import { Post, Comment } from "@/types";
 import PostHeader from "./PostHeader";
 import PostContent from "./PostContent";
 import PostMedia from "./PostMedia";
-import CommentList from "./CommentList";
+import CommentList from "../CommentList";
 
 export interface PostCardProps {
   post: Post;
@@ -67,7 +67,7 @@ const PostCard = ({ post, onComment, onLike, onShare }: PostCardProps) => {
               className="flex items-center space-x-1"
             >
               <MessageCircle className="h-4 w-4" />
-              <span>{post.comments}</span>
+              <span>{post.comments.length}</span>
             </Button>
             
             <Button 
@@ -84,7 +84,7 @@ const PostCard = ({ post, onComment, onLike, onShare }: PostCardProps) => {
         {showComments && (
           <CommentList 
             postId={post.id}
-            onAddComment={handleComment}
+            commentsCount={post.comments.length}
           />
         )}
       </CardContent>

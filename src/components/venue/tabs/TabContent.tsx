@@ -1,83 +1,52 @@
 
 import React from 'react';
-import { TabsContent } from "@/components/ui/tabs";
-import VenuePostsAllTab from './VenuePostsAllTab';
-import VenuePostsVrnTab from './VenuePostsVrnTab';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Location } from "@/types";
 import VenuePostsExternalTab from './VenuePostsExternalTab';
-import { Post, Comment, Location } from "@/types";
 
 interface TabContentProps {
-  tab: string;
-  allPosts: Post[];
-  filteredPosts: Post[];
-  filteredVenuePosts: Post[];
   venue: Location;
-  viewMode: "list" | "grid";
-  getComments: (postId: string) => Comment[];
   subscriptionTier: 'standard' | 'plus' | 'premium' | 'pro';
-  canEmbed: boolean;
-  connectedPlatforms: Record<string, boolean>;
   onUpgradeSubscription: () => void;
-  onPostDeleted?: (postId: string) => void;
 }
 
-const TabContent: React.FC<TabContentProps> = ({
-  tab,
-  allPosts,
-  filteredPosts,
-  filteredVenuePosts,
-  venue,
-  viewMode,
-  getComments,
-  subscriptionTier,
-  canEmbed,
-  connectedPlatforms,
-  onUpgradeSubscription,
-  onPostDeleted
-}) => {
-  switch (tab) {
-    case 'all':
-      return (
-        <TabsContent value="all" className="mt-4 space-y-4">
-          <VenuePostsAllTab 
-            posts={allPosts} 
-            venue={venue} 
-            viewMode={viewMode} 
-            getComments={getComments}
-            subscriptionTier={subscriptionTier}
-            onPostDeleted={onPostDeleted}
-          />
-        </TabsContent>
-      );
-    case 'vrn':
-      return (
-        <TabsContent value="vrn" className="mt-4 space-y-4">
-          <VenuePostsVrnTab
-            filteredVenuePosts={filteredVenuePosts}
-            filteredPosts={filteredPosts}
-            venue={venue}
-            viewMode={viewMode}
-            getComments={getComments}
-            subscriptionTier={subscriptionTier}
-            onPostDeleted={onPostDeleted}
-          />
-        </TabsContent>
-      );
-    case 'external':
-      return (
-        <TabsContent value="external" className="mt-4">
+const TabContent = ({ venue, subscriptionTier, onUpgradeSubscription }: TabContentProps) => {
+  // Simulate connected platforms based on venue data
+  const hasConnections = venue.customerId ? true : false;
+
+  return (
+    <div className="mt-6">
+      <Tabs defaultValue="posts" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="posts">Posts</TabsTrigger>
+          <TabsTrigger value="reviews">Reviews</TabsTrigger>
+          <TabsTrigger value="events">Events</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="posts" className="mt-6">
           <VenuePostsExternalTab
             venueName={venue.name}
-            connectedPlatforms={connectedPlatforms}
+            instagramKey=""
+            yelpKey=""
+            googleKey=""
             subscriptionTier={subscriptionTier}
-            canEmbed={canEmbed}
-            onUpgradeSubscription={onUpgradeSubscription}
           />
         </TabsContent>
-      );
-    default:
-      return null;
-  }
+        
+        <TabsContent value="reviews" className="mt-6">
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">Reviews will be displayed here</p>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="events" className="mt-6">
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">Events will be displayed here</p>
+          </div>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
 };
 
 export default TabContent;

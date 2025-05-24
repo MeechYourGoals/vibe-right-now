@@ -1,3 +1,4 @@
+
 export interface Location {
   id: string;
   name: string;
@@ -10,7 +11,7 @@ export interface Location {
   lat: number;
   lng: number;
   category: string;
-  type: "restaurant" | "bar" | "event" | "attraction" | "sports" | "other";
+  type: "restaurant" | "bar" | "event" | "attraction" | "sports" | "other" | "music_venue" | "comedy_club" | "nightclub" | "lounge";
   rating: number;
   reviewCount: number;
   price: string;
@@ -144,7 +145,7 @@ export interface SocialMediaPost {
   content: string;
   author: string;
   timestamp: string;
-  platform: 'google' | 'yelp' | 'instagram' | 'tiktok' | 'franki';
+  platform: 'google' | 'yelp' | 'instagram';
   imageUrl?: string;
   likes?: number;
   rating?: number;
@@ -155,8 +156,6 @@ export interface SocialMediaPost {
 
 export interface SocialMediaApiKeys {
   instagram: string;
-  tiktok: string;
-  franki: string;
   yelp: string;
   google: string;
 }

@@ -4,7 +4,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ExternalLink, Heart, MessageSquare, Star } from "lucide-react";
-import { SocialMediaPost as SocialMediaPostType } from '@/services/SocialMediaService';
+import { SocialMediaPost as SocialMediaPostType } from '@/services/socialMedia/types';
 import { formatDistanceToNow } from 'date-fns';
 
 interface SocialMediaPostProps {
@@ -15,8 +15,6 @@ interface SocialMediaPostProps {
 const SocialMediaPost: React.FC<SocialMediaPostProps> = ({ post, showExternalLink = false }) => {
   // Function to format the platform name
   const formatPlatformName = (source: string) => {
-    if (source === 'tripadvisor') return 'TripAdvisor';
-    if (source === 'foursquare') return 'Foursquare';
     return source.charAt(0).toUpperCase() + source.slice(1);
   };
   
@@ -24,12 +22,8 @@ const SocialMediaPost: React.FC<SocialMediaPostProps> = ({ post, showExternalLin
   const getPlatformColor = (source: string): string => {
     const colors: Record<string, string> = {
       instagram: 'bg-pink-500',
-      tiktok: 'bg-black',
       yelp: 'bg-red-500',
-      tripadvisor: 'bg-green-600',
       google: 'bg-blue-500',
-      foursquare: 'bg-blue-700',
-      franki: 'bg-purple-500',
       other: 'bg-gray-500'
     };
     

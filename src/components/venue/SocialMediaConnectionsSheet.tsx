@@ -1,97 +1,104 @@
 
 import React, { useState } from 'react';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-  SheetClose,
-  SheetFooter,
-  SheetTrigger,
-} from '@/components/ui/sheet';
-import { Button } from '@/components/ui/button';
-import SocialMediaSettings from './SocialMediaSettings';
-import SocialMediaIntegration from './SocialMediaIntegration';
-import { SocialMediaApiKeys } from '@/services/SocialMediaService';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { SocialMediaApiKeys } from "@/services/socialMedia/types";
+import { Instagram, Star } from "lucide-react";
 
 interface SocialMediaConnectionsSheetProps {
-  onConnectedPlatformsChange?: (connectedPlatforms: Record<string, boolean>) => void;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
-const SocialMediaConnectionsSheet: React.FC<SocialMediaConnectionsSheetProps> = ({ 
-  onConnectedPlatformsChange 
-}) => {
-  const [activeTab, setActiveTab] = useState<'connect' | 'settings'>('connect');
-  const [apiKeys, setApiKeys] = useState<SocialMediaApiKeys>({
+const SocialMediaConnectionsSheet = ({ isOpen, onClose }: SocialMediaConnectionsSheetProps) => {
+  const [apiKeys, setApiKeys] = useLocalStorage<SocialMediaApiKeys>('social_media_keys', {
     instagram: '',
-    tiktok: '',
     yelp: '',
-    google: '',
-    franki: ''
+    google: ''
   });
-  
-  const handleSaveApiKeys = (keys: SocialMediaApiKeys) => {
-    setApiKeys(keys);
-    // This would typically connect to a backend API
-    console.log('Saving API keys:', keys);
-    
-    // Update connected platforms based on which keys are set
-    if (onConnectedPlatformsChange) {
-      const connectedPlatforms: Record<string, boolean> = {};
-      Object.keys(keys).forEach(key => {
-        connectedPlatforms[key] = !!keys[key as keyof SocialMediaApiKeys];
-      });
-      onConnectedPlatformsChange(connectedPlatforms);
-    }
+
+  const [tempKeys, setTempKeys] = useState(apiKeys);
+
+  const handleSave = () => {
+    setApiKeys(tempKeys);
+    onClose();
   };
-  
+
+  const handleInputChange = (platform: keyof SocialMediaApiKeys, value: string) => {
+    setTempKeys(prev => ({
+      ...prev,
+      [platform]: value
+    }));
+  };
+
   return (
-    <Sheet>
-      <SheetTrigger asChild>
-        <Button variant="secondary" className="mt-4">Manage Social Media Connections</Button>
-      </SheetTrigger>
-      <SheetContent side="right" className="w-full sm:max-w-md overflow-auto bg-neutral-900 border-neutral-700">
+    <Sheet open={isOpen} onOpenChange={onClose}>
+      <SheetContent className="w-[400px] sm:w-[540px]">
         <SheetHeader>
-          <SheetTitle className="text-white">Social Media Connections</SheetTitle>
-          <SheetDescription className="text-neutral-400">
-            Connect your social media accounts to share content and gather insights.
+          <SheetTitle>Connect Social Media Platforms</SheetTitle>
+          <SheetDescription>
+            Add your API keys to connect social media platforms and display reviews/posts.
           </SheetDescription>
         </SheetHeader>
-        
-        <div className="my-6">
-          <div className="flex border-b border-neutral-700 mb-4">
-            <button
-              className={`pb-2 px-4 ${activeTab === 'connect' ? 'border-b-2 border-primary font-semibold text-white' : 'text-neutral-400'}`}
-              onClick={() => setActiveTab('connect')}
-            >
-              Connect Accounts
-            </button>
-            <button
-              className={`pb-2 px-4 ${activeTab === 'settings' ? 'border-b-2 border-primary font-semibold text-white' : 'text-neutral-400'}`}
-              onClick={() => setActiveTab('settings')}
-            >
-              API Settings
-            </button>
+
+        <div className="grid gap-6 py-4">
+          {/* Instagram */}
+          <div className="space-y-2">
+            <div className="flex items-center space-x-2">
+              <Instagram className="h-5 w-5 text-pink-500" />
+              <Label htmlFor="instagram">Instagram API Key</Label>
+            </div>
+            <Input
+              id="instagram"
+              type="password"
+              placeholder="Enter Instagram API key"
+              value={tempKeys.instagram}
+              onChange={(e) => handleInputChange('instagram', e.target.value)}
+            />
           </div>
-          
-          {activeTab === 'connect' ? (
-            <SocialMediaIntegration 
-              subscriptionTier="standard"
-              venueName="The Rooftop"
+
+          {/* Yelp */}
+          <div className="space-y-2">
+            <div className="flex items-center space-x-2">
+              <Star className="h-5 w-5 text-red-500" />
+              <Label htmlFor="yelp">Yelp API Key</Label>
+            </div>
+            <Input
+              id="yelp"
+              type="password"
+              placeholder="Enter Yelp API key"
+              value={tempKeys.yelp}
+              onChange={(e) => handleInputChange('yelp', e.target.value)}
             />
-          ) : (
-            <SocialMediaSettings 
-              onSaveApiKeys={handleSaveApiKeys}
+          </div>
+
+          {/* Google */}
+          <div className="space-y-2">
+            <div className="flex items-center space-x-2">
+              <div className="h-5 w-5 bg-blue-500 rounded-full" />
+              <Label htmlFor="google">Google Places API Key</Label>
+            </div>
+            <Input
+              id="google"
+              type="password"
+              placeholder="Enter Google Places API key"
+              value={tempKeys.google}
+              onChange={(e) => handleInputChange('google', e.target.value)}
             />
-          )}
+          </div>
         </div>
-        
-        <SheetFooter>
-          <SheetClose asChild>
-            <Button variant="outline" className="bg-neutral-800 border-neutral-700 text-white">Close</Button>
-          </SheetClose>
-        </SheetFooter>
+
+        <div className="flex justify-end space-x-2 pt-4">
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button onClick={handleSave}>
+            Save Changes
+          </Button>
+        </div>
       </SheetContent>
     </Sheet>
   );

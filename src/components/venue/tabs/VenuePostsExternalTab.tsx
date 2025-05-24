@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -5,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Instagram, Star, ExternalLink, RefreshCw, Calendar, TrendingUp, Brain, Mic } from "lucide-react";
 import { SocialMediaService } from "@/services/SocialMediaService";
+import { SocialMediaPost as SocialMediaPostType } from "@/services/socialMedia/types";
 import SocialMediaPost from "../SocialMediaPost";
 import { toast } from "sonner";
 
@@ -23,7 +25,7 @@ const VenuePostsExternalTab = ({
   googleKey,
   subscriptionTier
 }: VenuePostsExternalTabProps) => {
-  const [posts, setPosts] = useState<SocialMediaPost[]>([]);
+  const [posts, setPosts] = useState<SocialMediaPostType[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
@@ -59,7 +61,7 @@ const VenuePostsExternalTab = ({
 
   const filteredPosts = posts.filter(post => {
     if (activeTab === "all") return true;
-    return post.platform === activeTab;
+    return post.source === activeTab;
   });
 
   const getAnalyticsInsights = () => {
@@ -190,13 +192,13 @@ const VenuePostsExternalTab = ({
                 All Posts ({posts.length})
               </TabsTrigger>
               <TabsTrigger value="google" className="data-[state=active]:bg-neutral-700 data-[state=active]:text-white">
-                Google ({posts.filter(p => p.platform === 'google').length})
+                Google ({posts.filter(p => p.source === 'google').length})
               </TabsTrigger>
               <TabsTrigger value="yelp" className="data-[state=active]:bg-neutral-700 data-[state=active]:text-white">
-                Yelp ({posts.filter(p => p.platform === 'yelp').length})
+                Yelp ({posts.filter(p => p.source === 'yelp').length})
               </TabsTrigger>
               <TabsTrigger value="instagram" className="data-[state=active]:bg-neutral-700 data-[state=active]:text-white">
-                Instagram ({posts.filter(p => p.platform === 'instagram').length})
+                Instagram ({posts.filter(p => p.source === 'instagram').length})
               </TabsTrigger>
             </TabsList>
 
