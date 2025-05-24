@@ -19,12 +19,8 @@ const SocialMediaSettings: React.FC<SocialMediaSettingsProps> = ({
     instagram: '',
     tiktok: '',
     yelp: '',
-    tripadvisor: '',
-    foursquare: '',
     google: '',
-    franki: '',
-    other: '',
-    otherUrl: ''
+    franki: ''
   });
   
   const [activeTab, setActiveTab] = useState('content');
@@ -83,12 +79,8 @@ const SocialMediaSettings: React.FC<SocialMediaSettingsProps> = ({
       instagram: '',
       tiktok: '',
       yelp: '',
-      tripadvisor: '',
-      foursquare: '',
       google: '',
-      franki: '',
-      other: '',
-      otherUrl: ''
+      franki: ''
     };
     
     setApiKeys(emptyKeys);
@@ -102,7 +94,7 @@ const SocialMediaSettings: React.FC<SocialMediaSettingsProps> = ({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 bg-neutral-900 p-6 rounded-lg">
       <ApiKeyTabSwitcher
         activeTab={activeTab}
         onTabChange={setActiveTab}

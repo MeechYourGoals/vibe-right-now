@@ -142,3 +142,26 @@ export interface Media {
   duration?: number;
   aspectRatio?: number;
 }
+
+// Social Media Types (Google ecosystem only)
+export interface SocialMediaPost {
+  id: string;
+  content: string;
+  author: string;
+  timestamp: string;
+  platform: 'google' | 'yelp' | 'instagram' | 'tiktok' | 'franki';
+  imageUrl?: string;
+  likes?: number;
+  rating?: number;
+  venueName: string;
+  source: string;
+  url?: string;
+}
+
+export interface SocialMediaApiKeys {
+  instagram: string;
+  tiktok: string;
+  franki: string;
+  yelp: string;
+  google: string;
+}

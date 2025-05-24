@@ -101,7 +101,7 @@ const PostContent = ({ content }: PostContentProps) => {
   );
 };
 
-const PostCard = ({ post, onLike, onComment, onShare }: PostCardProps) => {
+const PostCard = ({ post, onComment, onLike, onShare }: PostCardProps) => {
   const [isLiked, setIsLiked] = useState(post.isLiked || false);
   const [likesCount, setLikesCount] = useState(post.likes);
   const [showComments, setShowComments] = useState(false);
@@ -124,37 +124,69 @@ const PostCard = ({ post, onLike, onComment, onShare }: PostCardProps) => {
     : [];
 
   return (
-    <Card className="vibe-card overflow-hidden">
-      <PostHeader 
-        author={post.author} 
-        location={post.location} 
-        timestamp={post.timestamp}
-        isPinned={post.isPinned}
-        isVenueOwned={post.isVenueOwned}
-      />
-      
-      <PostContent content={post.content} />
-      
-      {mediaArray.length > 0 && (
-        <PostMedia media={mediaArray} />
-      )}
-      
-      <PostFooter
-        isLiked={isLiked}
-        likesCount={likesCount}
-        commentsCount={post.comments?.length || 0}
-        vibedHere={post.vibedHere}
-        onLike={handleLike}
-        onComment={() => setShowComments(!showComments)}
-        onShare={onShare}
-      />
-      
-      {showComments && (
-        <CommentList 
-          comments={post.comments || []} 
-          onAddComment={onComment}
+    <Card className="border border-neutral-700 bg-neutral-900 backdrop-blur-sm">
+      <CardContent className="p-4">
+        <PostHeader 
+          author={post.author} 
+          location={post.location} 
+          timestamp={post.timestamp}
+          isPinned={post.isPinned}
+          isVenueOwned={post.isVenueOwned}
         />
-      )}
+        
+        <PostContent content={post.content} />
+        
+        {mediaArray.length > 0 && (
+          <PostMedia media={mediaArray} />
+        )}
+        
+        <div className="flex items-center justify-between pt-3 border-t border-neutral-700">
+          <div className="flex items-center space-x-6">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onLike(post.id)}
+              className={`flex items-center space-x-1 ${
+                post.isLiked ? 'text-red-500' : 'text-neutral-400 hover:text-red-500'
+              }`}
+            >
+              <Heart className={`h-4 w-4 ${post.isLiked ? 'fill-current' : ''}`} />
+              <span className="text-sm">{post.likes}</span>
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowComments(!showComments)}
+              className="flex items-center space-x-1 text-neutral-400 hover:text-blue-500"
+            >
+              <MessageCircle className="h-4 w-4" />
+              <span className="text-sm">{post.comments.length}</span>
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onShare(post.id)}
+              className="flex items-center space-x-1 text-neutral-400 hover:text-green-500"
+            >
+              <Share className="h-4 w-4" />
+            </Button>
+          </div>
+
+          <div className="flex items-center space-x-2 text-xs text-neutral-500">
+            <MapPin className="h-3 w-3" />
+            <span>{post.location?.name || 'Unknown Location'}</span>
+          </div>
+        </div>
+        
+        {showComments && (
+          <CommentList 
+            comments={post.comments || []} 
+            onAddComment={onComment}
+          />
+        )}
+      </CardContent>
     </Card>
   );
 };

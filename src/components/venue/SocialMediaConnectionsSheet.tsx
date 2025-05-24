@@ -27,12 +27,8 @@ const SocialMediaConnectionsSheet: React.FC<SocialMediaConnectionsSheetProps> = 
     instagram: '',
     tiktok: '',
     yelp: '',
-    tripadvisor: '',
-    foursquare: '',
     google: '',
-    franki: '',
-    other: '',
-    otherUrl: ''
+    franki: ''
   });
   
   const handleSaveApiKeys = (keys: SocialMediaApiKeys) => {
@@ -44,10 +40,7 @@ const SocialMediaConnectionsSheet: React.FC<SocialMediaConnectionsSheetProps> = 
     if (onConnectedPlatformsChange) {
       const connectedPlatforms: Record<string, boolean> = {};
       Object.keys(keys).forEach(key => {
-        // Skip otherUrl as it's not a platform
-        if (key !== 'otherUrl') {
-          connectedPlatforms[key] = !!keys[key as keyof SocialMediaApiKeys];
-        }
+        connectedPlatforms[key] = !!keys[key as keyof SocialMediaApiKeys];
       });
       onConnectedPlatformsChange(connectedPlatforms);
     }
@@ -58,24 +51,24 @@ const SocialMediaConnectionsSheet: React.FC<SocialMediaConnectionsSheetProps> = 
       <SheetTrigger asChild>
         <Button variant="secondary" className="mt-4">Manage Social Media Connections</Button>
       </SheetTrigger>
-      <SheetContent side="right" className="w-full sm:max-w-md overflow-auto">
+      <SheetContent side="right" className="w-full sm:max-w-md overflow-auto bg-neutral-900 border-neutral-700">
         <SheetHeader>
-          <SheetTitle>Social Media Connections</SheetTitle>
-          <SheetDescription>
+          <SheetTitle className="text-white">Social Media Connections</SheetTitle>
+          <SheetDescription className="text-neutral-400">
             Connect your social media accounts to share content and gather insights.
           </SheetDescription>
         </SheetHeader>
         
         <div className="my-6">
-          <div className="flex border-b mb-4">
+          <div className="flex border-b border-neutral-700 mb-4">
             <button
-              className={`pb-2 px-4 ${activeTab === 'connect' ? 'border-b-2 border-primary font-semibold' : 'text-muted-foreground'}`}
+              className={`pb-2 px-4 ${activeTab === 'connect' ? 'border-b-2 border-primary font-semibold text-white' : 'text-neutral-400'}`}
               onClick={() => setActiveTab('connect')}
             >
               Connect Accounts
             </button>
             <button
-              className={`pb-2 px-4 ${activeTab === 'settings' ? 'border-b-2 border-primary font-semibold' : 'text-muted-foreground'}`}
+              className={`pb-2 px-4 ${activeTab === 'settings' ? 'border-b-2 border-primary font-semibold text-white' : 'text-neutral-400'}`}
               onClick={() => setActiveTab('settings')}
             >
               API Settings
@@ -96,7 +89,7 @@ const SocialMediaConnectionsSheet: React.FC<SocialMediaConnectionsSheetProps> = 
         
         <SheetFooter>
           <SheetClose asChild>
-            <Button variant="outline">Close</Button>
+            <Button variant="outline" className="bg-neutral-800 border-neutral-700 text-white">Close</Button>
           </SheetClose>
         </SheetFooter>
       </SheetContent>
