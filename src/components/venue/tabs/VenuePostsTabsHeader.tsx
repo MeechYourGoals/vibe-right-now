@@ -1,23 +1,36 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Grid, List, Settings } from "lucide-react";
+import { Grid, List, Settings, Plus } from "lucide-react";
 import SocialMediaConnectionsSheet from "../SocialMediaConnectionsSheet";
 
 interface VenuePostsTabsHeaderProps {
+  activeTab?: string;
   viewMode: "list" | "grid";
   setViewMode: (mode: "list" | "grid") => void;
-  isConnectionsOpen: boolean;
-  setIsConnectionsOpen: (open: boolean) => void;
+  onConnectedPlatformsChange?: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
+  onAddPost?: () => void;
+  venueId?: string;
+  isConnectionsOpen?: boolean;
+  setIsConnectionsOpen?: (open: boolean) => void;
 }
 
 const VenuePostsTabsHeader: React.FC<VenuePostsTabsHeaderProps> = ({
+  activeTab,
   viewMode,
   setViewMode,
+  onConnectedPlatformsChange,
+  onAddPost,
+  venueId,
   isConnectionsOpen,
   setIsConnectionsOpen
 }) => {
+  const [internalConnectionsOpen, setInternalConnectionsOpen] = useState(false);
+  
+  const connectionsOpen = isConnectionsOpen ?? internalConnectionsOpen;
+  const setConnectionsOpen = setIsConnectionsOpen ?? setInternalConnectionsOpen;
+
   return (
     <div className="flex justify-between items-center">
       <TabsList className="bg-neutral-800">
@@ -27,6 +40,18 @@ const VenuePostsTabsHeader: React.FC<VenuePostsTabsHeaderProps> = ({
       </TabsList>
       
       <div className="flex space-x-2">
+        {onAddPost && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onAddPost}
+            className="border-neutral-600 text-neutral-300 hover:bg-neutral-800"
+          >
+            <Plus className="h-4 w-4 mr-1" />
+            Add Post
+          </Button>
+        )}
+        
         <Button
           variant="outline"
           size="sm"
@@ -39,7 +64,7 @@ const VenuePostsTabsHeader: React.FC<VenuePostsTabsHeaderProps> = ({
         <Button
           variant="outline"
           size="sm"
-          onClick={() => setIsConnectionsOpen(true)}
+          onClick={() => setConnectionsOpen(true)}
           className="border-neutral-600 text-neutral-300 hover:bg-neutral-800"
         >
           <Settings className="h-4 w-4" />
@@ -47,8 +72,8 @@ const VenuePostsTabsHeader: React.FC<VenuePostsTabsHeaderProps> = ({
       </div>
 
       <SocialMediaConnectionsSheet
-        isOpen={isConnectionsOpen}
-        onClose={() => setIsConnectionsOpen(false)}
+        isOpen={connectionsOpen}
+        onClose={() => setConnectionsOpen(false)}
       />
     </div>
   );
