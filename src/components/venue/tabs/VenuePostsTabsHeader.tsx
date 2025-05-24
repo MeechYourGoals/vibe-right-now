@@ -6,6 +6,7 @@ import { Grid, List, Settings } from "lucide-react";
 import SocialMediaConnectionsSheet from "../SocialMediaConnectionsSheet";
 
 interface VenuePostsTabsHeaderProps {
+  activeTab?: string;
   viewMode: "list" | "grid";
   setViewMode: (mode: "list" | "grid") => void;
   isConnectionsOpen?: boolean;
@@ -16,6 +17,7 @@ interface VenuePostsTabsHeaderProps {
 }
 
 const VenuePostsTabsHeader: React.FC<VenuePostsTabsHeaderProps> = ({
+  activeTab,
   viewMode,
   setViewMode,
   isConnectionsOpen = false,

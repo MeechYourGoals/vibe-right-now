@@ -5,7 +5,7 @@ export interface MessageContext {
   userId?: string;
   sessionId?: string;
   messages?: any[];
-  options?: any;
+  options?: ProcessMessageOptions;
   paginationState?: any;
 }
 

@@ -1,5 +1,5 @@
 
-import { MessageContext, ProcessMessageOptions } from './types';
+import { MessageContext } from './types';
 
 const searchVenues = (query: string) => {
   return [];
@@ -41,4 +41,8 @@ export const processMessage = async (context: MessageContext, setMessages: React
   }
 };
 
-export default processMessage;
+const messageProcessor = {
+  processMessage
+};
+
+export default messageProcessor;

@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Heart, MessageCircle, Share, MapPin, Star } from "lucide-react";
-import { Verified } from "@/components/Verified";
+import Verified from "@/components/Verified";
 import { Post, Comment } from "@/types";
 
 // Mock data
