@@ -26,7 +26,7 @@ const AnalyticsTabContent = ({ isPremium, isPro }: AnalyticsTabContentProps) => 
           <div className="flex justify-between items-center">
             <CardTitle className="flex items-center text-green-400">
               <Brain className="mr-2 h-5 w-5" />
-              Gemini Powered Analytics & Notebook LM Integration
+              Gemini Deep Research Powered Analytics & Notebook LM Integration
             </CardTitle>
             <Badge variant="outline" className="bg-green-900/20 text-green-400 border-green-600">
               {isPro ? 'Pro Active' : 'Premium+'}
@@ -35,9 +35,10 @@ const AnalyticsTabContent = ({ isPremium, isPro }: AnalyticsTabContentProps) => 
         </CardHeader>
         <CardContent className="space-y-4 pb-4">
           <p className="text-sm text-green-200">
-            Advanced analytics powered by Gemini AI provides deep insights into your venue's performance. 
-            Export your data analysis to Google Notebook LM to generate conversational AI podcasts that 
-            summarize your key metrics and trends in an easy-to-digest format.
+            Advanced analytics powered by Gemini Deep Research provides comprehensive insights into your venue's performance. 
+            We don't just pull necessary data for venues - we give you the ability to converse and interact with your data through 
+            Google Notebook LM. Export your analysis to generate conversational AI podcasts that summarize your key metrics, 
+            trends, and actionable insights in an easy-to-digest audio format.
           </p>
           <div className="flex flex-wrap gap-3">
             <Button 
@@ -46,7 +47,7 @@ const AnalyticsTabContent = ({ isPremium, isPro }: AnalyticsTabContentProps) => 
               disabled={!isPremium}
             >
               <TrendingUp className="mr-2 h-4 w-4" />
-              Run Gemini Analysis
+              Run Gemini Deep Research Analysis
             </Button>
             <Button 
               variant="outline" 
@@ -54,14 +55,15 @@ const AnalyticsTabContent = ({ isPremium, isPro }: AnalyticsTabContentProps) => 
               disabled={!isPremium}
             >
               <Mic className="mr-2 h-4 w-4" />
-              Generate Notebook LM Podcast
+              Generate Notebook LM Podcast Summary
             </Button>
           </div>
           {isPremium && (
             <div className="mt-3 p-3 bg-green-950/30 rounded-lg border border-green-800/30">
               <p className="text-xs text-green-300">
-                💡 <strong>Premium Feature:</strong> Transform your analytics data into engaging audio insights. 
-                Perfect for busy venue managers who want to stay informed while multitasking.
+                💡 <strong>Premium Feature:</strong> Transform your analytics data into engaging conversational audio insights. 
+                Perfect for busy venue managers who want to stay informed while multitasking. Ask questions, explore trends, 
+                and get actionable recommendations through natural conversation with your data.
               </p>
             </div>
           )}
@@ -73,26 +75,26 @@ const AnalyticsTabContent = ({ isPremium, isPro }: AnalyticsTabContentProps) => 
         <CardHeader>
           <CardTitle className="text-white">Advanced Analytics Dashboard</CardTitle>
           <CardDescription className="text-neutral-400">
-            Detailed insights about your venue's performance powered by Google AI
+            Detailed insights about your venue's performance powered by Google AI with conversational interaction capabilities
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid grid-cols-4 mb-8 bg-neutral-800">
-              <TabsTrigger value="overview" className="data-[state=active]:bg-neutral-700 data-[state=active]:text-white">
+              <TabsTrigger value="overview" className="data-[state=active]:bg-neutral-700 data-[state=active]:text-white text-neutral-300">
                 <ChartBar className="mr-2 h-4 w-4" />
                 Overview
               </TabsTrigger>
-              <TabsTrigger value="audience" className="data-[state=active]:bg-neutral-700 data-[state=active]:text-white">
+              <TabsTrigger value="audience" className="data-[state=active]:bg-neutral-700 data-[state=active]:text-white text-neutral-300">
                 <Star className="mr-2 h-4 w-4" />
                 Audience
               </TabsTrigger>
-              <TabsTrigger value="trends" className="data-[state=active]:bg-neutral-700 data-[state=active]:text-white">
+              <TabsTrigger value="trends" className="data-[state=active]:bg-neutral-700 data-[state=active]:text-white text-neutral-300">
                 <TrendingUp className="mr-2 h-4 w-4" />
                 Trends
               </TabsTrigger>
               {isPro && (
-                <TabsTrigger value="upload" className="data-[state=active]:bg-neutral-700 data-[state=active]:text-white">
+                <TabsTrigger value="upload" className="data-[state=active]:bg-neutral-700 data-[state=active]:text-white text-neutral-300">
                   <Upload className="mr-2 h-4 w-4" />
                   File Analysis
                 </TabsTrigger>

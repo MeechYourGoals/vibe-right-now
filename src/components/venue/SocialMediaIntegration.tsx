@@ -1,12 +1,11 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Instagram, Star, ExternalLink, RefreshCw, Calendar, TrendingUp, Brain, Mic } from "lucide-react";
-import { SocialMediaService, SocialMediaPost } from "@/services/SocialMediaService";
-import SocialMediaPost as SocialMediaPostComponent from "./SocialMediaPost";
+import { SocialMediaService } from "@/services/SocialMediaService";
+import SocialMediaPost from "./SocialMediaPost";
 import { toast } from "sonner";
 
 interface SocialMediaIntegrationProps {
@@ -79,6 +78,7 @@ const SocialMediaIntegration = ({ subscriptionTier, venueName }: SocialMediaInte
           <p className="text-sm text-blue-200">
             Our AI continuously analyzes your venue's social media presence using Gemini Deep Research 
             to provide comprehensive insights about customer sentiment, trending topics, and competitive positioning.
+            Export your weekly insights to Google Notebook LM to generate an AI-powered podcast summary.
           </p>
           <div className="flex flex-wrap gap-3">
             <Button 
@@ -110,7 +110,7 @@ const SocialMediaIntegration = ({ subscriptionTier, venueName }: SocialMediaInte
         </CardContent>
       </Card>
 
-      {/* Main Social Media Integration */}
+      {/* Main Social Media Integration - Dark Theme */}
       <Card className="bg-neutral-900 border-neutral-700">
         <CardHeader>
           <div className="flex justify-between items-center">
@@ -131,7 +131,7 @@ const SocialMediaIntegration = ({ subscriptionTier, venueName }: SocialMediaInte
           </div>
         </CardHeader>
         <CardContent>
-          {/* Analytics Summary */}
+          {/* Analytics Summary - Dark Theme */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <Card className="bg-neutral-800 border-neutral-600">
               <CardContent className="p-4">
@@ -170,19 +170,19 @@ const SocialMediaIntegration = ({ subscriptionTier, venueName }: SocialMediaInte
             </Card>
           </div>
 
-          {/* Posts Tabs */}
+          {/* Posts Tabs - Dark Theme */}
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="bg-neutral-800 mb-4">
-              <TabsTrigger value="all" className="data-[state=active]:bg-neutral-700">
+              <TabsTrigger value="all" className="data-[state=active]:bg-neutral-700 data-[state=active]:text-white">
                 All Posts ({posts.length})
               </TabsTrigger>
-              <TabsTrigger value="google" className="data-[state=active]:bg-neutral-700">
+              <TabsTrigger value="google" className="data-[state=active]:bg-neutral-700 data-[state=active]:text-white">
                 Google ({posts.filter(p => p.platform === 'google').length})
               </TabsTrigger>
-              <TabsTrigger value="yelp" className="data-[state=active]:bg-neutral-700">
+              <TabsTrigger value="yelp" className="data-[state=active]:bg-neutral-700 data-[state=active]:text-white">
                 Yelp ({posts.filter(p => p.platform === 'yelp').length})
               </TabsTrigger>
-              <TabsTrigger value="instagram" className="data-[state=active]:bg-neutral-700">
+              <TabsTrigger value="instagram" className="data-[state=active]:bg-neutral-700 data-[state=active]:text-white">
                 Instagram ({posts.filter(p => p.platform === 'instagram').length})
               </TabsTrigger>
             </TabsList>
@@ -196,7 +196,7 @@ const SocialMediaIntegration = ({ subscriptionTier, venueName }: SocialMediaInte
               ) : filteredPosts.length > 0 ? (
                 <div className="space-y-4">
                   {filteredPosts.map((post) => (
-                    <SocialMediaPostComponent key={post.id} post={post} />
+                    <SocialMediaPost key={post.id} post={post} />
                   ))}
                 </div>
               ) : (

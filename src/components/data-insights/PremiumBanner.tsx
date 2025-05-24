@@ -40,7 +40,7 @@ const PremiumBanner = ({ onUpgrade }: PremiumBannerProps) => {
               </div>
               <div className="flex flex-col items-center text-center p-4 rounded-lg bg-neutral-800 border border-neutral-700">
                 <h3 className="font-semibold mb-2 text-white">Social Media Links</h3>
-                <p className="text-sm text-neutral-400">Link to your external platforms like Yelp, TikTok, Instagram, and more</p>
+                <p className="text-sm text-neutral-400">Link to your external platforms like Yelp, Instagram, and more</p>
               </div>
             </div>
             
@@ -59,16 +59,16 @@ const PremiumBanner = ({ onUpgrade }: PremiumBannerProps) => {
           <TabsContent value="premium">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="flex flex-col items-center text-center p-4 rounded-lg bg-neutral-800 border border-neutral-700">
-                <h3 className="font-semibold mb-2 text-white">Full Analytics</h3>
-                <p className="text-sm text-neutral-400">Access detailed insights about visitor demographics and behavior patterns</p>
+                <h3 className="font-semibold mb-2 text-white">Gemini Deep Research Analytics</h3>
+                <p className="text-sm text-neutral-400">Access detailed insights powered by Google's Gemini AI about visitor demographics and behavior patterns</p>
               </div>
               <div className="flex flex-col items-center text-center p-4 rounded-lg bg-neutral-800 border border-neutral-700">
                 <h3 className="font-semibold mb-2 text-white">Advertising Tools</h3>
                 <p className="text-sm text-neutral-400">Create targeted promotions and track their performance in real-time</p>
               </div>
               <div className="flex flex-col items-center text-center p-4 rounded-lg bg-neutral-800 border border-neutral-700">
-                <h3 className="font-semibold mb-2 text-white">Weekly Content Import</h3>
-                <p className="text-sm text-neutral-400">Automatically import and display your content from Yelp, Google, TikTok, Instagram, and more</p>
+                <h3 className="font-semibold mb-2 text-white">Notebook LM Podcast Reports</h3>
+                <p className="text-sm text-neutral-400">Generate AI-powered podcast summaries of your weekly insights using Google Notebook LM</p>
               </div>
             </div>
             
@@ -87,8 +87,8 @@ const PremiumBanner = ({ onUpgrade }: PremiumBannerProps) => {
           <TabsContent value="pro">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="flex flex-col items-center text-center p-4 rounded-lg bg-neutral-800 border border-neutral-700">
-                <h3 className="font-semibold mb-2 text-white">AI-Powered Analysis</h3>
-                <p className="text-sm text-neutral-400">Use Gemini and Notebook LM to analyze financial records and get advanced insights</p>
+                <h3 className="font-semibold mb-2 text-white">AI-Powered Financial Analysis</h3>
+                <p className="text-sm text-neutral-400">Use Gemini and Notebook LM to analyze financial records and get advanced conversational insights</p>
               </div>
               <div className="flex flex-col items-center text-center p-4 rounded-lg bg-neutral-800 border border-neutral-700">
                 <div className="flex items-center justify-center mb-2">

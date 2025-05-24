@@ -47,7 +47,7 @@ const DataInsights = () => {
   };
   
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-neutral-950 text-white">
       <Header />
       
       <main className="container py-6">
@@ -55,7 +55,7 @@ const DataInsights = () => {
           <Tabs defaultValue="overview" className="w-full">
             <div className="flex justify-between items-center mb-4">
               <div className="flex items-center">
-                <h1 className="text-3xl font-bold">Data Insights</h1>
+                <h1 className="text-3xl font-bold text-white">Data Insights</h1>
                 {getTierBadge()}
               </div>
               
@@ -115,19 +115,19 @@ const DataInsights = () => {
               )}
             </div>
             
-            <TabsList className="mb-4 bg-neutral-800">
-              <TabsTrigger value="overview" className="data-[state=active]:bg-neutral-700 data-[state=active]:text-white">Overview</TabsTrigger>
-              <TabsTrigger value="analytics" className="data-[state=active]:bg-neutral-700 data-[state=active]:text-white">
+            <TabsList className="mb-4 bg-neutral-800 border-neutral-700">
+              <TabsTrigger value="overview" className="data-[state=active]:bg-neutral-700 data-[state=active]:text-white text-neutral-300">Overview</TabsTrigger>
+              <TabsTrigger value="analytics" className="data-[state=active]:bg-neutral-700 data-[state=active]:text-white text-neutral-300">
                 <div className="flex items-center">
                   <ChartBar className="mr-2 h-4 w-4" />
                   Analytics
-                  {subscriptionTier === 'standard' && <FileLock className="ml-2 h-3 w-3" />}
+                  {subscriptionTier === 'standard' && <FileLock className="ml-2 h-3 w-3 text-neutral-500" />}
                 </div>
               </TabsTrigger>
               <TabsTrigger 
                 value="advertising" 
                 disabled={subscriptionTier === 'standard' || subscriptionTier === 'plus'}
-                className="data-[state=active]:bg-neutral-700 data-[state=active]:text-white"
+                className="data-[state=active]:bg-neutral-700 data-[state=active]:text-white text-neutral-300 disabled:text-neutral-600"
               >
                 <div className="flex items-center">
                   Advertising
