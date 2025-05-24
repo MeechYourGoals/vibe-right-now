@@ -1,3 +1,4 @@
+
 export interface Location {
   id: string;
   name: string;
@@ -10,7 +11,7 @@ export interface Location {
   lat: number;
   lng: number;
   category: string;
-  type: 'food' | 'drink' | 'event' | 'sports' | 'nightlife' | 'other';
+  type: "restaurant" | "bar" | "event" | "attraction" | "sports" | "other" | "music_venue" | "comedy_club" | "nightclub" | "lounge";
   rating: number;
   reviewCount: number;
   price: string;
@@ -18,144 +19,104 @@ export interface Location {
   isFeatured: boolean;
   verified: boolean;
   country: string;
+  images?: string[];
+  vibeTags?: string[];
+  vibes?: string[];
+  hours?: {
+    monday: string;
+    tuesday: string;
+    wednesday: string;
+    thursday: string;
+    friday: string;
+    saturday: string;
+    sunday: string;
+    weekdayText?: string[];
+    isOpen24Hours?: boolean;
+  };
+  openingHours?: {
+    weekdayText: string[];
+  };
   formattedPhoneNumber: string;
   website: string;
   reservable: boolean;
-  images?: string[];
-  vibeTags?: string[];
-  hours?: string;
-  openingHours?: OpeningHours[];
   customerId?: string;
   followers?: number;
   checkins?: number;
-  userProfile?: UserProfile;
+  userProfile?: {
+    id: string;
+    username: string;
+    avatar: string;
+    bio?: string;
+    verified: boolean;
+  };
 }
 
-export interface OpeningHours {
-  days: string;
-  hours: string;
-}
-
-export interface UserProfile {
+export interface EventItem {
   id: string;
-  bio: string;
-  interests: string[];
-  photos: string[];
-}
-
-export interface Post {
-  id: string;
-  content: string;
-  timestamp: string;
-  location?: Location;
-  media?: Media[];
-  likes: number;
-  comments: Comment[];
-  shares: number;
-  user: User;
-  author: User;
-  vibeTags?: string[];
-  vibedHere?: boolean;
-}
-
-export interface Media {
-  id: string;
-  type: 'image' | 'video';
-  url: string;
-}
-
-export interface Comment {
-  id: string;
-  text: string;
-  timestamp: string;
-  user: User;
-  likes: number;
-  replies: Comment[];
-}
-
-export interface Event {
-  id: string;
-  name: string;
+  title: string;
   description: string;
   location: Location;
   startTime: string;
   endTime: string;
   imageUrl: string;
-  tags: string[];
-}
-
-export interface UserLocation {
-  latitude: number;
-  longitude: number;
-}
-
-export interface SearchFilters {
   category: string;
-  location: UserLocation | null;
-  date: string;
-  time: string;
+  isFeatured: boolean;
+  price: string;
+  organizer: string;
+  contactEmail: string;
+  contactPhone: string;
+  website: string;
+  reservable: boolean;
 }
 
-export interface Vibe {
+export interface Comment {
   id: string;
-  name: string;
-  description: string;
-  imageUrl: string;
-}
-
-export interface Category {
-  id: string;
-  name: string;
-  imageUrl: string;
-}
-
-export interface City {
-  id: string;
-  name: string;
-  imageUrl: string;
-}
-
-export interface Notification {
-  id: string;
-  type: 'like' | 'comment' | 'follow';
+  postId: string;
+  userId: string;
   user: User;
-  post?: Post;
-  comment?: Comment;
+  content: string;
   timestamp: string;
-  read: boolean;
+  vibedHere: boolean;
+  likes: number;
 }
 
-export interface Message {
+export interface VenueInsights {
+  totalVisits?: number;
+  visitors?: number;
+  visitorsChange?: string;
+  checkins?: number;
+  viewsCount?: number;
+  impressions?: number;
+  posts?: number;
+  postsChange?: string;
+  likes?: number;
+  likesChange?: string;
+  mentions?: number;
+  mentionsChange?: string;
+  checkinsChange?: string;
+  reviews?: number;
+  reviewsChange?: string;
+  rating?: number;
+  ratingChange?: string;
+}
+
+export interface Post {
   id: string;
-  sender: 'user' | 'bot';
-  text: string;
+  content: string;
+  author: User;
+  user: User;
+  location: Location;
   timestamp: string;
-}
-
-export interface PricingPlan {
-  name: string;
-  description: string;
-  monthlyPrice: number;
-  yearlyPrice: number;
-  features: string[];
-}
-
-export interface Subscription {
-  id: string;
-  plan: PricingPlan;
-  startDate: string;
-  endDate: string;
-  status: 'active' | 'inactive' | 'past_due';
-  paymentMethod: CreditCard;
-}
-
-export interface CreditCard {
-  id: string;
-  lastFour: string;
-  brand: string;
-  expiryMonth: number;
-  expiryYear: number;
-  isDefault: boolean;
+  media?: Media[];
+  likes: number;
+  comments: Comment[];
+  vibedHere: boolean;
+  isLiked?: boolean;
+  isPinned?: boolean;
+  isVenueOwned?: boolean;
+  isVenuePost?: boolean;
+  expiresAt?: string;
+  vibeTags?: string[];
 }
 
 export interface User {
@@ -164,12 +125,37 @@ export interface User {
   name: string;
   avatar: string;
   bio?: string;
-  followersCount: number;
-  followingCount: number;
-  postsCount: number;
-  isVerified: boolean;
-  isPrivate?: boolean;
-  website?: string;
-  location?: string;
-  joinedDate?: string;
+  isVerified?: boolean;
+  followersCount?: number;
+  followingCount?: number;
+  postsCount?: number;
+  isCelebrity?: boolean;
+}
+
+export interface Media {
+  id: string;
+  type: 'image' | 'video';
+  url: string;
+  thumbnail?: string;
+}
+
+// Social Media Types (Google ecosystem only)
+export interface SocialMediaPost {
+  id: string;
+  content: string;
+  author: string;
+  timestamp: string;
+  platform: 'google' | 'yelp' | 'instagram';
+  imageUrl?: string;
+  likes?: number;
+  rating?: number;
+  venueName: string;
+  source: string;
+  url?: string;
+}
+
+export interface SocialMediaApiKeys {
+  instagram: string;
+  yelp: string;
+  google: string;
 }

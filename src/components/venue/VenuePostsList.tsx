@@ -11,7 +11,6 @@ interface VenuePostsListProps {
   getComments: (postId: string) => Comment[];
   canDelete: boolean;
   onPostDeleted: (postId: string) => void;
-  subscriptionTier?: 'standard' | 'plus' | 'premium' | 'pro';
 }
 
 const VenuePostsList: React.FC<VenuePostsListProps> = ({
@@ -20,8 +19,7 @@ const VenuePostsList: React.FC<VenuePostsListProps> = ({
   viewMode,
   getComments,
   canDelete,
-  onPostDeleted,
-  subscriptionTier = 'standard'
+  onPostDeleted
 }) => {
   if (posts.length === 0) {
     return (

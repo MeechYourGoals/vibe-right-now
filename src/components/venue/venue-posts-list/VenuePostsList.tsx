@@ -1,9 +1,8 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import Verified from "@/components/Verified";
+import { Verified } from "@/components/Verified";
 import { Post } from "@/types";
 import PostCard from "@/components/post/PostCard";
 

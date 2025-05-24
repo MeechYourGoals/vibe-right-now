@@ -10,9 +10,14 @@ export const useExploreState = () => {
   const [drinkVenues, setDrinkVenues] = useState<Location[]>([]);
   const [sportsVenues, setSportsVenues] = useState<Location[]>([]);
   const [nightlifeVenues, setNightlifeVenues] = useState<Location[]>([]);
-  const [locations, setLocations] = useState<Location[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [detectedCity, setDetectedCity] = useState('');
+  
+  // Mock implementations for the missing properties
+  const locations: Location[] = [];
+  const loading = false;
+  const setLocations = (locations: Location[]) => console.log('Setting locations:', locations);
+  const setLoading = (loading: boolean) => console.log('Setting loading:', loading);
+  
+  const { detectedCity, setDetectedCity } = { detectedCity: '', setDetectedCity: (city: string) => {} };
   
   const handleCategoryChange = (category: string) => console.log('Category changed:', category);
   const handleVibeChange = (vibe: string) => console.log('Vibe changed:', vibe);

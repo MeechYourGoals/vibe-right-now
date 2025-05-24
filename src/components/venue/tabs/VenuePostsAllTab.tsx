@@ -27,8 +27,7 @@ const VenuePostsAllTab: React.FC<VenuePostsAllTabProps> = ({
       viewMode={viewMode} 
       getComments={getComments}
       subscriptionTier={subscriptionTier}
-      canDelete={true}
-      onPostDeleted={onPostDeleted || (() => {})}
+      onPostDeleted={onPostDeleted}
     />
   );
 };
