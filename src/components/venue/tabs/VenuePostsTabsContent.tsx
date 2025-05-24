@@ -1,7 +1,8 @@
 
 import React from 'react';
 import { Post, Comment, Location } from "@/types";
-import TabContent from './TabContent';
+import { TabsContent } from "@/components/ui/tabs";
+import VenuePostsList from '../VenuePostsList';
 
 interface VenuePostsTabsContentProps {
   activeTab: string;
@@ -33,20 +34,30 @@ const VenuePostsTabsContent: React.FC<VenuePostsTabsContentProps> = ({
   onPostDeleted
 }) => {
   return (
-    <TabContent
-      tab={activeTab}
-      allPosts={allPosts}
-      filteredPosts={filteredPosts}
-      filteredVenuePosts={filteredVenuePosts}
-      venue={venue}
-      viewMode={viewMode}
-      getComments={getPostComments}
-      subscriptionTier={subscriptionTier}
-      canEmbed={canEmbed}
-      connectedPlatforms={connectedPlatforms}
-      onUpgradeSubscription={onUpgradeSubscription}
-      onPostDeleted={onPostDeleted}
-    />
+    <>
+      <TabsContent value="posts" className="mt-6">
+        <VenuePostsList
+          posts={filteredVenuePosts}
+          venue={venue}
+          viewMode={viewMode}
+          getComments={getPostComments}
+          canDelete={canEmbed}
+          onPostDeleted={onPostDeleted || (() => {})}
+        />
+      </TabsContent>
+      
+      <TabsContent value="reviews" className="mt-6">
+        <div className="text-center py-8">
+          <p className="text-muted-foreground">Reviews will be displayed here</p>
+        </div>
+      </TabsContent>
+      
+      <TabsContent value="events" className="mt-6">
+        <div className="text-center py-8">
+          <p className="text-muted-foreground">Events will be displayed here</p>
+        </div>
+      </TabsContent>
+    </>
   );
 };
 

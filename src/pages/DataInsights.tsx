@@ -9,6 +9,8 @@ import { Crown, FileLock, Upload, ChartBar } from "lucide-react";
 import PremiumBanner from "@/components/data-insights/PremiumBanner";
 import AnalyticsTab from "@/components/data-insights/AnalyticsTab";
 import AdvertisingTab from "@/components/data-insights/marketing/AdvertisingTab";
+import VernonProBanner from "@/components/data-insights/VernonProBanner";
+import VernonChat from "@/components/VernonChat";
 
 // Subscription tier types
 type SubscriptionTier = 'standard' | 'plus' | 'premium' | 'pro';
@@ -16,6 +18,7 @@ type SubscriptionTier = 'standard' | 'plus' | 'premium' | 'pro';
 const DataInsights = () => {
   const [subscriptionTier, setSubscriptionTier] = useState<SubscriptionTier>('standard');
   const isPremium = subscriptionTier === 'premium' || subscriptionTier === 'pro';
+  const isPro = subscriptionTier === 'pro';
   
   const handleUpgrade = (tier: SubscriptionTier) => {
     setSubscriptionTier(tier);
@@ -52,6 +55,13 @@ const DataInsights = () => {
       
       <main className="container py-6">
         <div className="max-w-6xl mx-auto">
+          {/* Vernon Pro Banner - Only show for Pro users */}
+          {isPro && (
+            <div className="mb-6">
+              <VernonProBanner subscriptionTier={subscriptionTier} />
+            </div>
+          )}
+          
           <Tabs defaultValue="overview" className="w-full">
             <div className="flex justify-between items-center mb-4">
               <div className="flex items-center">
@@ -158,6 +168,9 @@ const DataInsights = () => {
           </Tabs>
         </div>
       </main>
+      
+      {/* Vernon Chat - Only show for Pro users */}
+      {isPro && <VernonChat />}
     </div>
   );
 };

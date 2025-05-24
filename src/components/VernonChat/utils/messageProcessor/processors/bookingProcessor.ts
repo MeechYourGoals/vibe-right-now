@@ -5,8 +5,10 @@ import { BookingAgent } from '../../bookingAgent';
 import { createAIMessage } from '../../messageFactory';
 
 export class BookingProcessor implements MessageProcessor {
-  async canProcess(context: MessageContext): Promise<boolean> {
-    return await BookingAgent.isBookingRequest(context.query);
+  canProcess(context: MessageContext): boolean {
+    // Simple synchronous check for booking keywords
+    const keywords = ['book', 'reservation', 'reserve', 'table', 'appointment'];
+    return keywords.some(keyword => context.query.toLowerCase().includes(keyword));
   }
 
   async process(
@@ -14,6 +16,10 @@ export class BookingProcessor implements MessageProcessor {
     setMessages: React.Dispatch<React.SetStateAction<Message[]>>
   ): Promise<boolean> {
     try {
+      // Double-check with async method
+      const isBooking = await BookingAgent.isBookingRequest(context.query);
+      if (!isBooking) return false;
+
       const bookingDetails = await BookingAgent.extractBookingDetails(context.query);
       
       if (bookingDetails) {
