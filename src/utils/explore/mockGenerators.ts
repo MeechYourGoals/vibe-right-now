@@ -1,27 +1,34 @@
 
 import { Location } from "@/types";
+import { getMediaForLocation } from "@/utils/map/locationMediaUtils";
 
-export const getCitySpecificContent = (location: Location): string => {
-  const contents = [
-    `Amazing atmosphere at ${location.name}! The energy here is incredible.`,
-    `Perfect spot for a night out! ${location.name} never disappoints.`,
-    `Great vibes at ${location.name}. Highly recommend checking it out!`,
-    `Had an amazing time at ${location.name}. The crowd was fantastic!`,
-    `${location.name} is the place to be! Such a great experience.`
-  ];
-  
-  return contents[Math.floor(Math.random() * contents.length)];
+// Function to get random items from an array
+export const getRandomItems = <T>(items: T[], count: number): T[] => {
+  const shuffled = [...items].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, count);
 };
 
-export const getAdditionalTags = (location: Location): string[] => {
-  const tags = [
-    "trending",
-    "hot-spot",
-    "must-visit",
-    "popular",
-    "crowded",
-    "vibrant"
-  ];
+// Add any other utility functions from the original file here
+export const getCitySpecificContent = (location: Location) => {
+  return `Experience the unique atmosphere of ${location.name} in ${location.city}`;
+};
+
+export const getMediaForLocationMock = (location: Location) => {
+  // Use our central media utility for consistency
+  return getMediaForLocation(location);
+};
+
+export const getAdditionalTags = (location: Location) => {
+  const commonTags = ['Trendy', 'Popular', 'Local Favorite', 'Hidden Gem'];
   
-  return tags.slice(0, Math.floor(Math.random() * 3) + 1);
+  const typeTags: Record<string, string[]> = {
+    restaurant: ['Romantic', 'Outdoor Seating', 'Great View', 'Family Friendly'],
+    bar: ['Happy Hour', 'Craft Beer', 'Cocktails', 'Live Music', 'Sports Bar'],
+    event: ['Live Music', 'Festival', 'Exhibition', 'Conference', 'Workshop'],
+    attraction: ['Historic', 'Family Friendly', 'Guided Tours', 'Scenic'],
+    sports: ['Stadium', 'Arena', 'Field', 'Court', 'Family Friendly']
+  };
+  
+  const typeSpecificTags = typeTags[location.type] || [];
+  return getRandomItems([...commonTags, ...typeSpecificTags], 3);
 };

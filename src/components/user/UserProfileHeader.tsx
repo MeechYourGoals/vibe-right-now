@@ -1,66 +1,107 @@
-
 import React from "react";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { User } from "@/types";
-import Verified from "@/components/Verified";
-import { MapPin, Calendar, Users, Heart } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { MapPin, Link, Calendar, MessageSquare } from "lucide-react";
+import VerifiedBadge from "@/components/icons/VerifiedIcon";
 
 interface UserProfileHeaderProps {
-  user: User;
+  user: {
+    id: string;
+    name: string;
+    username: string;
+    avatar: string;
+    isVerified: boolean;
+    bio?: string;
+    location?: string;
+    joinedDate?: string;
+    website?: string;
+    followerCount?: number;
+    followingCount?: number;
+  };
+  onFollowToggle?: () => void;
+  onMessageClick?: () => void;
 }
 
-const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({ user }) => {
+const UserProfileHeader = ({ user, onFollowToggle, onMessageClick }: UserProfileHeaderProps) => {
+  const handleFollowToggle = () => {
+    if (onFollowToggle) {
+      onFollowToggle();
+    }
+  };
+
+  const handleMessageClick = () => {
+    if (onMessageClick) {
+      onMessageClick();
+    }
+  };
+
   return (
-    <div className="flex flex-col space-y-4 p-6 bg-card rounded-lg border">
-      <div className="flex items-start space-x-4">
-        <Avatar className="h-24 w-24">
-          <AvatarImage src={user.avatar} alt={user.name} />
-          <AvatarFallback className="text-2xl">
-            {user.name.substring(0, 2).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
-        
-        <div className="flex-1 space-y-2">
-          <div className="flex items-center space-x-2">
-            <h1 className="text-2xl font-bold">{user.name}</h1>
-            {user.isVerified && <Verified />}
-            {user.isCelebrity && (
-              <Badge variant="secondary" className="bg-purple-100 text-purple-800">
-                Celebrity
-              </Badge>
-            )}
+    <Card className="vibe-card">
+      <CardContent className="p-6">
+        <div className="flex flex-col md:flex-row gap-6">
+          <div className="flex flex-col items-center md:items-start">
+            <Avatar className="h-24 w-24 mb-4">
+              <AvatarImage src={user.avatar} alt={user.name} />
+              <AvatarFallback className="text-lg">{user.name.charAt(0)}</AvatarFallback>
+            </Avatar>
+            
+            <div className="text-center md:text-left">
+              <div className="flex items-center gap-2 mb-1">
+                <h1 className="text-2xl font-bold">{user.name}</h1>
+                {user.isVerified && <VerifiedBadge />}
+              </div>
+              <p className="text-muted-foreground mb-2">{user.username}</p>
+              {user.bio && <p className="text-sm mb-3">{user.bio}</p>}
+              
+              <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-4">
+                {user.location && (
+                  <div className="flex items-center gap-1">
+                    <MapPin className="h-4 w-4" />
+                    <span>{user.location}</span>
+                  </div>
+                )}
+                {user.website && (
+                  <div className="flex items-center gap-1">
+                    <Link className="h-4 w-4" />
+                    <a href={`https://${user.website}`} target="_blank" rel="noopener noreferrer" className="hover:text-primary">
+                      {user.website}
+                    </a>
+                  </div>
+                )}
+                {user.joinedDate && (
+                  <div className="flex items-center gap-1">
+                    <Calendar className="h-4 w-4" />
+                    <span>Joined {user.joinedDate}</span>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
           
-          <p className="text-muted-foreground">@{user.username}</p>
-          
-          {user.bio && (
-            <p className="text-sm">{user.bio}</p>
-          )}
-          
-          <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-            <div className="flex items-center space-x-1">
-              <Users className="h-4 w-4" />
-              <span>{user.followersCount || 0} followers</span>
+          <div className="flex flex-col justify-between">
+            <div className="flex items-center justify-center md:justify-start gap-4 mb-4">
+              <div className="text-center">
+                <p className="font-bold text-lg">{user.followerCount}</p>
+                <p className="text-muted-foreground text-sm">Followers</p>
+              </div>
+              <div className="text-center">
+                <p className="font-bold text-lg">{user.followingCount}</p>
+                <p className="text-muted-foreground text-sm">Following</p>
+              </div>
             </div>
-            <div className="flex items-center space-x-1">
-              <Heart className="h-4 w-4" />
-              <span>{user.followingCount || 0} following</span>
-            </div>
-            <div className="flex items-center space-x-1">
-              <Calendar className="h-4 w-4" />
-              <span>{user.postsCount || 0} posts</span>
+            
+            <div className="flex justify-center md:justify-start gap-2">
+              <Button onClick={handleFollowToggle}>Follow</Button>
+              <Button variant="outline" onClick={handleMessageClick}>
+                <MessageSquare className="mr-2 h-4 w-4" />
+                Message
+              </Button>
             </div>
           </div>
         </div>
-        
-        <div className="flex space-x-2">
-          <Button variant="outline">Follow</Button>
-          <Button variant="outline">Message</Button>
-        </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 

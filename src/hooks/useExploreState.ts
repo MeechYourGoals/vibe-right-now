@@ -1,98 +1,51 @@
 
-import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { mockLocations } from '@/mock/locations';
-import { Location, DateRange } from '@/types';
+import { useState } from 'react';
+import { Location } from '@/types';
 
 export const useExploreState = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [activeTab, setActiveTab] = useState('all');
-  const [searchedCity, setSearchedCity] = useState<string | null>(null);
-  const [searchedState, setSearchedState] = useState<string | null>(null);
-  const [searchCategory, setSearchCategory] = useState<string>('places');
-  const [filteredLocations, setFilteredLocations] = useState<Location[]>(mockLocations);
+  const [filteredLocations, setFilteredLocations] = useState<Location[]>([]);
   const [locationTags, setLocationTags] = useState<Record<string, string[]>>({});
-  const [musicEvents, setMusicEvents] = useState<any[]>([]);
-  const [comedyEvents, setComedyEvents] = useState<any[]>([]);
-  const [nightlifeVenues, setNightlifeVenues] = useState<any[]>([]);
-  const [vibeFilter, setVibeFilter] = useState<string | null>(null);
-  const [isNaturalLanguageSearch, setIsNaturalLanguageSearch] = useState(false);
-  const [isLoadingResults, setIsLoadingResults] = useState(false);
-  const [dateRange, setDateRange] = useState<DateRange | undefined>();
-  const [showDateFilter, setShowDateFilter] = useState(false);
-  const [activeSearchTab, setActiveSearchTab] = useState('all');
-
-  const getPageTitle = () => {
-    if (searchedCity) {
-      return `Explore Vibes in ${searchedCity}${searchedState ? `, ${searchedState}` : ''}`;
-    }
-    return 'Explore Vibes';
-  };
-
-  const handleSearch = (query: string, category: string = 'places') => {
-    setSearchedCity(query);
-    setSearchCategory(category);
-    setIsLoadingResults(true);
-    
-    setTimeout(() => {
-      setFilteredLocations(mockLocations.filter(location => 
-        location.city.toLowerCase().includes(query.toLowerCase()) ||
-        location.name.toLowerCase().includes(query.toLowerCase())
-      ));
-      setIsLoadingResults(false);
-    }, 1000);
-  };
-
-  const handleTabChange = (tab: string) => {
-    setActiveTab(tab);
-    if (tab !== 'all') {
-      setFilteredLocations(mockLocations.filter(location => location.type === tab));
-    } else {
-      setFilteredLocations(mockLocations);
-    }
-  };
-
-  const handleClearVibeFilter = () => {
-    setVibeFilter(null);
-  };
-
-  const handleDateRangeChange = (range: DateRange | undefined) => {
-    setDateRange(range);
-  };
-
-  const handleClearDates = () => {
-    setDateRange(undefined);
-  };
-
-  const handleSearchTabChange = (tab: string) => {
-    setActiveSearchTab(tab);
-  };
-
+  const [eventVenues, setEventVenues] = useState<Location[]>([]);
+  const [foodVenues, setFoodVenues] = useState<Location[]>([]);
+  const [drinkVenues, setDrinkVenues] = useState<Location[]>([]);
+  const [sportsVenues, setSportsVenues] = useState<Location[]>([]);
+  const [nightlifeVenues, setNightlifeVenues] = useState<Location[]>([]);
+  
+  // Mock implementations for the missing properties
+  const locations: Location[] = [];
+  const loading = false;
+  const setLocations = (locations: Location[]) => console.log('Setting locations:', locations);
+  const setLoading = (loading: boolean) => console.log('Setting loading:', loading);
+  
+  const { detectedCity, setDetectedCity } = { detectedCity: '', setDetectedCity: (city: string) => {} };
+  
+  const handleCategoryChange = (category: string) => console.log('Category changed:', category);
+  const handleVibeChange = (vibe: string) => console.log('Vibe changed:', vibe);
+  const handleDateChange = (date: string) => console.log('Date changed:', date);
+  
   return {
-    activeTab,
-    searchedCity,
-    searchedState,
-    searchCategory,
     filteredLocations,
+    setFilteredLocations,
     locationTags,
-    musicEvents,
-    comedyEvents,
+    setLocationTags,
+    eventVenues,
+    setEventVenues,
+    foodVenues,
+    setFoodVenues,
+    drinkVenues,
+    setDrinkVenues,
+    sportsVenues,
+    setSportsVenues,
     nightlifeVenues,
-    vibeFilter,
-    isNaturalLanguageSearch,
-    isLoadingResults,
-    dateRange,
-    showDateFilter,
-    activeSearchTab,
-    getPageTitle,
-    handleSearch,
-    handleTabChange,
-    handleClearVibeFilter,
-    handleDateRangeChange,
-    handleClearDates,
-    handleSearchTabChange,
-    setShowDateFilter
+    setNightlifeVenues,
+    locations,
+    loading,
+    setLocations,
+    setLoading,
+    detectedCity,
+    setDetectedCity,
+    handleCategoryChange,
+    handleVibeChange,
+    handleDateChange
   };
 };
-
-export default useExploreState;

@@ -1,4 +1,3 @@
-
 export interface Location {
   id: string;
   name: string;
@@ -132,7 +131,6 @@ export interface User {
   followingCount?: number;
   postsCount?: number;
   isCelebrity?: boolean;
-  isPrivate?: boolean;
 }
 
 export interface Media {
@@ -142,52 +140,23 @@ export interface Media {
   thumbnail?: string;
 }
 
-export interface CreditCard {
-  id: string;
-  last4: string;
-  brand: string;
-  expiryMonth: number;
-  expiryYear: number;
-  expMonth?: number;
-  expYear?: number;
-  isDefault: boolean;
-  maxSpendLimit?: number;
-  vernonApproved?: boolean;
-}
-
-export interface DateRange {
-  from: Date;
-  to?: Date;
-}
-
-// Social Media Types (Unified interface)
+// Social Media Types (Google ecosystem only)
 export interface SocialMediaPost {
   id: string;
   content: string;
   author: string;
-  username?: string;
-  userAvatar?: string;
   timestamp: string;
-  platform?: 'google' | 'yelp' | 'instagram' | 'tiktok' | 'tripadvisor' | 'foursquare' | 'franki' | 'other';
-  source: 'google' | 'yelp' | 'instagram' | 'tiktok' | 'tripadvisor' | 'foursquare' | 'franki' | 'other';
+  platform: 'google' | 'yelp' | 'instagram' | 'other';
   likes?: number;
   comments?: number;
   rating?: number;
   venueName: string;
+  source: 'google' | 'yelp' | 'instagram' | 'other';
   url?: string;
-  originalUrl?: string;
-  mediaUrl?: string;
-  mediaType?: 'image' | 'video';
 }
 
 export interface SocialMediaApiKeys {
   instagram: string;
   yelp: string;
   google: string;
-  tiktok?: string;
-  tripadvisor?: string;
-  foursquare?: string;
-  franki?: string;
-  other?: string;
-  otherUrl?: string;
 }

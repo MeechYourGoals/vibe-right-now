@@ -1,42 +1,30 @@
 
-import { User } from '@/types';
-import { celebrityUsers } from './celebrityUsers';
-import { regularUsers } from './regularUsers';
+import { regularUsers } from "./regularUsers";
+import { celebrityUsers } from "./celebrityUsers";
+import { hashString, generateUserBio } from "./utils";
 
-// Hash function for generating consistent colors
-export const hashString = (str: string): number => {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // Convert to 32bit integer
-  }
-  return Math.abs(hash);
+// Define the MockUserProfile type directly here if missing from @/types
+export interface MockUserProfile {
+  id: string;
+  username: string;
+  avatar: string;
+  bio?: string;
+  type?: 'regular' | 'celebrity' | 'venue';
+  verified?: boolean;
+}
+
+// Mock user profile utility
+export const getMockUserProfile = (type: 'regular' | 'celebrity' | 'venue'): MockUserProfile => {
+  const collection = type === 'celebrity' ? celebrityUsers : regularUsers;
+  const randomIndex = Math.floor(Math.random() * collection.length);
+  return {
+    ...collection[randomIndex],
+    type: type,
+    verified: type === 'venue' ? true : collection[randomIndex].verified
+  };
 };
 
-export const mockUsers: User[] = [
-  ...celebrityUsers,
-  ...regularUsers.map(user => ({
-    ...user,
-    isVerified: user.isVerified || false
-  }))
-];
+// Create a combined mockUsers array
+export const mockUsers = [...regularUsers, ...celebrityUsers];
 
-// Re-export for external use
-export { regularUsers, celebrityUsers };
-
-export const getUserById = (id: string): User | undefined => {
-  return mockUsers.find(user => user.id === id);
-};
-
-export const getUserByUsername = (username: string): User | undefined => {
-  return mockUsers.find(user => user.username.toLowerCase() === username.toLowerCase());
-};
-
-export const searchUsers = (query: string): User[] => {
-  const searchTerm = query.toLowerCase();
-  return mockUsers.filter(user => 
-    user.name.toLowerCase().includes(searchTerm) ||
-    user.username.toLowerCase().includes(searchTerm)
-  );
-};
+export { regularUsers, celebrityUsers, hashString, generateUserBio };

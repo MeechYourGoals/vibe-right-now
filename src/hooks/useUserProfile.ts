@@ -1,81 +1,67 @@
 
-import { useState } from 'react';
-import { User, Post, Location } from '@/types';
-import { getUserByUsername } from '@/mock/users';
+import { useState } from "react";
+import { User } from "@/types";
 
-// Vibe tags for export
 export const vibeTags = [
-  'Cozy', 'Energetic', 'Romantic', 'Family Friendly', 'Late Night',
-  'Live Music', 'Good Vibes', 'Trendy', 'Casual', 'Upscale'
+  "Cozy", "Family Friendly", "NightOwl", "Trendy", "Chill", 
+  "Upscale", "Casual", "Romantic", "Lively", "Intimate",
+  "Artsy", "Historic", "Modern", "Vintage", "Bohemian",
+  "Luxury", "Budget-Friendly", "Pet-Friendly", "Outdoor",
+  "Indoor", "Quiet", "Energetic", "Hipster", "Corporate"
 ];
 
-const useUserProfile = (username?: string) => {
-  const [user, setUser] = useState<User | null>(() => {
-    if (username) {
-      return getUserByUsername(username) || null;
-    }
-    return {
-      id: 'default',
-      name: 'John Doe',
-      username: 'johndoe',
-      avatar: '/placeholder.svg',
-      bio: 'Love exploring new places!',
-      isVerified: false,
-      followersCount: 1250,
-      followingCount: 890,
-      postsCount: 45,
-      isCelebrity: false,
-      isPrivate: false
-    };
+const useUserProfile = () => {
+  const [profile, setProfile] = useState<User>({
+    id: "current-user",
+    name: "Alex Thompson",
+    username: "@alexthompson",
+    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+    isVerified: false,
+    followerCount: 1284,
+    followingCount: 892,
+    bio: "Coffee enthusiast ☕ | Travel addict ✈️ | Always looking for the next great vibe",
+    location: "San Francisco, CA",
+    joinedDate: "March 2022",
+    website: "alexthompson.com"
   });
 
-  const [following, setFollowing] = useState(false);
-  const [userPosts] = useState<Post[]>([]);
-  const [followedVenues] = useState<Location[]>([]);
-  const [visitedPlaces] = useState<Location[]>([]);
-  const [wantToVisitPlaces] = useState<Location[]>([]);
-
   const followUser = () => {
-    setFollowing(true);
-    setUser(prev => prev ? ({
+    setProfile(prev => ({
       ...prev,
-      followersCount: (prev.followersCount || 0) + 1
-    }) : null);
+      followerCount: prev.followerCount ? prev.followerCount + 1 : 1
+    }));
   };
 
   const unfollowUser = () => {
-    setFollowing(false);
-    setUser(prev => prev ? ({
+    setProfile(prev => ({
       ...prev,
-      followersCount: Math.max((prev.followersCount || 0) - 1, 0)
-    }) : null);
+      followerCount: prev.followerCount ? prev.followerCount - 1 : 0
+    }));
   };
 
-  const getUserBio = () => {
-    return user?.bio || 'No bio available';
+  const sendMessage = (message: string) => {
+    console.log("Sending message:", message);
   };
 
-  const getPostComments = (postId: string) => {
-    return [];
+  const toggleVerification = () => {
+    setProfile(prev => ({
+      ...prev,
+      isVerified: !prev.isVerified
+    }));
   };
 
-  const isPrivateProfile = user?.isPrivate || false;
+  const updateProfile = (updates: Partial<User>) => {
+    setProfile(prev => ({ ...prev, ...updates }));
+  };
 
   return {
-    user,
-    following,
+    profile,
     followUser,
     unfollowUser,
-    getUserBio,
-    userPosts,
-    followedVenues,
-    visitedPlaces,
-    wantToVisitPlaces,
-    getPostComments,
-    isPrivateProfile
+    sendMessage,
+    toggleVerification,
+    updateProfile
   };
 };
 
-// Named export for compatibility
-export { useUserProfile };
 export default useUserProfile;
