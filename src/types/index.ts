@@ -1,3 +1,4 @@
+
 export interface Location {
   id: string;
   name: string;
@@ -131,6 +132,7 @@ export interface User {
   followingCount?: number;
   postsCount?: number;
   isCelebrity?: boolean;
+  isPrivate?: boolean;
 }
 
 export interface Media {
@@ -138,6 +140,15 @@ export interface Media {
   type: 'image' | 'video';
   url: string;
   thumbnail?: string;
+}
+
+export interface CreditCard {
+  id: string;
+  last4: string;
+  brand: string;
+  expiryMonth: number;
+  expiryYear: number;
+  isDefault: boolean;
 }
 
 // Social Media Types (Google ecosystem only)
@@ -159,4 +170,7 @@ export interface SocialMediaApiKeys {
   instagram: string;
   yelp: string;
   google: string;
+  tiktok?: string;
+  tripadvisor?: string;
+  foursquare?: string;
 }

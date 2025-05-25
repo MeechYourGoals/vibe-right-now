@@ -9,7 +9,6 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { mockUsers } from "@/mock/users";
 
 const Index = () => {
-  const featuredUsers = ['sarah_vibes', 'jay_experiences', 'adventure_alex', 'marco_travels', 'local_explorer'];
   const isMobile = useIsMobile();
   const location = useLocation();
   const navigate = useNavigate();
@@ -48,7 +47,7 @@ const Index = () => {
 
             {/* Posts feed layout */}
             <div className="w-full">
-              <PostFeed celebrityFeatured={featuredUsers} />
+              <PostFeed />
             </div>
           </div>
         </div>
