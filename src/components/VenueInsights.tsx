@@ -1,7 +1,8 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+// Assuming Tabs, TabsContent, TabsList, TabsTrigger might be used elsewhere or were part of a larger context.
+// For now, they are not directly used in this specific version of VenueInsights content structure.
+// If they are needed, they would have to be part of a specific layout not shown in the conflicting snippet.
 import { Button } from "@/components/ui/button";
 import QuickActions from "@/components/venue/QuickActions";
 import PerformanceMetrics from "@/components/venue/PerformanceMetrics";
@@ -11,15 +12,14 @@ import UpcomingEvents from "@/components/venue/UpcomingEvents";
 import VernonVenueAssistant from "@/components/venue/VernonVenueAssistant";
 import CompetitorAnalysis from "@/components/venue/CompetitorAnalysis";
 import SocialMediaIntegration from "@/components/venue/SocialMediaIntegration";
-import { generateWeeklyData } from "@/utils/insightsData";
+import { generateWeeklyData } from "@/utils/insightsData"; // Assuming this path is correct
 import { Badge } from "@/components/ui/badge";
 import { Brain, FileSpreadsheet, Bot } from "lucide-react";
 
 const VenueInsights = () => {
   const [subscriptionTier, setSubscriptionTier] = useState<'standard' | 'plus' | 'premium' | 'pro'>('pro');
   const mediaData = generateWeeklyData();
-  
-  // Add mock venue insights data for PerformanceMetrics
+
   const mockVenueInsights = {
     visitors: 1520,
     visitorsChange: 8.3,
@@ -36,14 +36,13 @@ const VenueInsights = () => {
     rating: 4.7,
     ratingChange: 0.3
   };
-  
-  // Function to simulate upgrading subscription
+
   const upgradeSubscription = (tier: string) => {
     setSubscriptionTier(tier as 'standard' | 'plus' | 'premium' | 'pro');
   };
-  
+
   return (
-    <div className="space-y-6 min-h-screen bg-neutral-950 text-white p-6">
+    <div className="space-y-6 min-h-screen bg-neutral-950 text-white p-6"> {/* bg-neutral-950 was in user's latest snippet, keeping it for now */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2">
           <PerformanceMetrics venueInsights={mockVenueInsights} />
@@ -52,8 +51,8 @@ const VenueInsights = () => {
           <QuickActions onTierChange={upgradeSubscription} currentTier={subscriptionTier} />
         </div>
       </div>
-      
-      {/* Gemini Agent Mode Section - Reinstated Green Gradient Theme */}
+
+      {/* Gemini Agent Mode Section - Green Gradient Theme */}
       <Card className="border border-emerald-700 bg-gradient-to-br from-green-600 via-emerald-600 to-green-700 backdrop-blur-sm p-4 md:p-6">
         <CardHeader className="pb-2 px-0 pt-0">
           <div className="flex justify-between items-center">
@@ -83,7 +82,7 @@ const VenueInsights = () => {
           </div>
         </CardContent>
       </Card>
-      
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="bg-neutral-900 border-neutral-700">
           <CardHeader>
@@ -102,14 +101,14 @@ const VenueInsights = () => {
           </CardContent>
         </Card>
       </div>
-      
+
       <div className="grid grid-cols-1 gap-6">
         <SocialMediaIntegration 
           subscriptionTier={subscriptionTier} 
           venueName="The Rooftop" 
         />
       </div>
-      
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <UpcomingEvents />
@@ -118,7 +117,7 @@ const VenueInsights = () => {
           <VernonVenueAssistant />
         </div>
       </div>
-      
+
       <CompetitorAnalysis />
     </div>
   );
