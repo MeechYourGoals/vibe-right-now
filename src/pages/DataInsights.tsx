@@ -30,19 +30,19 @@ const DataInsights = () => {
         return null;
       case 'plus':
         return (
-          <Badge variant="outline" className="ml-2 bg-blue-600/20 text-blue-400 border-blue-300">
+          <Badge variant="outline" className="ml-2 bg-purple-600/20 text-purple-400 border-purple-500">
             Plus
           </Badge>
         );
       case 'premium':
         return (
-          <Badge variant="outline" className="ml-2 bg-purple-600/20 text-purple-400 border-purple-300">
+          <Badge variant="outline" className="ml-2 bg-green-600/20 text-green-400 border-green-500">
             Premium
           </Badge>
         );
       case 'pro':
         return (
-          <Badge variant="outline" className="ml-2 bg-amber-600/20 text-amber-400 border-amber-300">
+          <Badge variant="outline" className="ml-2 bg-amber-600/20 text-amber-400 border-amber-500">
             Pro
           </Badge>
         );
@@ -72,21 +72,21 @@ const DataInsights = () => {
               {subscriptionTier === 'standard' && (
                 <div className="flex gap-2">
                   <Button 
-                    className="bg-gradient-to-r from-plus-primary to-plus-secondary hover:from-purple-600 hover:to-teal-600 text-white"
+                    className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white"
                     onClick={() => handleUpgrade('plus')}
                   >
                     <Crown className="mr-2 h-4 w-4" />
                     Upgrade to Plus
                   </Button>
                   <Button 
-                    className="bg-gradient-to-r from-premium-primary to-premium-secondary hover:from-green-600 hover:to-blue-600 text-white"
+                    className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white"
                     onClick={() => handleUpgrade('premium')}
                   >
                     <Crown className="mr-2 h-4 w-4" />
                     Upgrade to Premium
                   </Button>
                   <Button 
-                    className="bg-gradient-to-r from-pro-primary to-pro-secondary hover:from-amber-700 hover:to-orange-700 text-white"
+                    className="bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white"
                     onClick={() => handleUpgrade('pro')}
                   >
                     <Crown className="mr-2 h-4 w-4" />
@@ -98,14 +98,14 @@ const DataInsights = () => {
               {subscriptionTier === 'plus' && (
                 <div className="flex gap-2">
                   <Button 
-                    className="bg-gradient-to-r from-premium-primary to-premium-secondary hover:from-green-600 hover:to-blue-600 text-white"
+                    className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white"
                     onClick={() => handleUpgrade('premium')}
                   >
                     <Crown className="mr-2 h-4 w-4" />
                     Upgrade to Premium
                   </Button>
                   <Button 
-                    className="bg-gradient-to-r from-pro-primary to-pro-secondary hover:from-amber-700 hover:to-orange-700 text-white"
+                    className="bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white"
                     onClick={() => handleUpgrade('pro')}
                   >
                     <Crown className="mr-2 h-4 w-4" />
@@ -116,7 +116,7 @@ const DataInsights = () => {
               
               {subscriptionTier === 'premium' && (
                 <Button 
-                  className="bg-gradient-to-r from-pro-primary to-pro-secondary hover:from-amber-700 hover:to-orange-700 text-white"
+                  className="bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white"
                   onClick={() => handleUpgrade('pro')}
                 >
                   <Crown className="mr-2 h-4 w-4" />

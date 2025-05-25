@@ -53,7 +53,7 @@ const VenueInsights = () => {
         </div>
       </div>
       
-      <Card className="border-2 border-green-600 bg-neutral-900 backdrop-blur-sm">
+      <Card className="border-2 border-green-600/50 bg-gradient-to-r from-green-950/40 to-blue-950/40 backdrop-blur-sm">
         <CardHeader className="pb-2">
           <div className="flex justify-between items-center">
             <CardTitle className="flex items-center text-green-400">

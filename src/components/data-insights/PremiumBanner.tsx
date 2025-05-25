@@ -1,8 +1,7 @@
 
-import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Crown, Star, BarChart, Target, Brain } from "lucide-react";
+import { Crown, Zap, Target, TrendingUp } from "lucide-react";
 
 interface PremiumBannerProps {
   onUpgrade: (tier: string) => void;
@@ -10,57 +9,67 @@ interface PremiumBannerProps {
 
 const PremiumBanner = ({ onUpgrade }: PremiumBannerProps) => {
   return (
-    <Card className="border-2 border-orange-500 bg-neutral-900 backdrop-blur-sm mb-6">
-      <CardHeader className="pb-2">
-        <div className="flex justify-between items-center">
-          <CardTitle className="flex items-center text-orange-400">
-            <Crown className="mr-2 h-5 w-5" />
-            Upgrade Your Venue Subscription
-          </CardTitle>
+    <Card className="bg-gradient-to-r from-amber-950/40 to-orange-950/40 border-amber-700/50 mb-6">
+      <CardHeader className="pb-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <Crown className="h-6 w-6 text-amber-400 mr-3" />
+            <div>
+              <CardTitle className="text-xl text-amber-200">Upgrade Your Venue Subscription</CardTitle>
+              <p className="text-amber-300/80 mt-1">Choose the perfect tier to grow your venue's presence on Vibe Right Now</p>
+            </div>
+          </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4 pb-4">
-        <p className="text-sm text-orange-200">
-          Choose the perfect tier to grow your venue's presence on Vibe Right Now
-        </p>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-neutral-800 border border-neutral-600 rounded-lg p-4">
-            <h3 className="text-lg font-semibold text-purple-400 mb-2">Plus</h3>
-            <p className="text-sm text-neutral-300 mb-3">Highlight the best user-generated content on your venue page</p>
-            <Button 
-              className="w-full bg-gradient-to-r from-purple-600 to-teal-600 hover:from-purple-700 hover:to-teal-700 text-white"
-              onClick={() => onUpgrade('plus')}
-            >
-              Upgrade to Plus
-            </Button>
+      <CardContent className="space-y-6">
+        {/* Subscription Tier Selector */}
+        <div className="bg-neutral-800/60 rounded-lg p-1 flex">
+          <div className="flex-1 text-center py-3 px-6 rounded-md bg-purple-600 text-white font-medium">Plus</div>
+          <div className="flex-1 text-center py-3 px-6 text-neutral-400">Premium</div>
+          <div className="flex-1 text-center py-3 px-6 text-neutral-400">Pro</div>
+        </div>
+
+        {/* Feature Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-neutral-800/40 rounded-lg p-6 text-center border border-neutral-700/50">
+            <div className="w-12 h-12 bg-purple-600/20 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <Target className="h-6 w-6 text-purple-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-white mb-2">Pin User Posts</h3>
+            <p className="text-neutral-400 text-sm">Highlight the best user-generated content on your venue page</p>
           </div>
-          
-          <div className="bg-neutral-800 border border-neutral-600 rounded-lg p-4">
-            <h3 className="text-lg font-semibold text-green-400 mb-2">Premium</h3>
-            <p className="text-sm text-neutral-300 mb-3">Create and manage special offers to attract more customers</p>
-            <Button 
-              className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white"
-              onClick={() => onUpgrade('premium')}
-            >
-              Upgrade to Premium
-            </Button>
+
+          <div className="bg-neutral-800/40 rounded-lg p-6 text-center border border-neutral-700/50">
+            <div className="w-12 h-12 bg-purple-600/20 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <Zap className="h-6 w-6 text-purple-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-white mb-2">Offer Discounts</h3>
+            <p className="text-neutral-400 text-sm">Create and manage special offers to attract more customers</p>
           </div>
-          
-          <div className="bg-neutral-800 border border-neutral-600 rounded-lg p-4">
-            <h3 className="text-lg font-semibold text-amber-400 mb-2">Pro</h3>
-            <p className="text-sm text-neutral-300 mb-3">Link to your external platforms like Yelp, Instagram, and more</p>
-            <Button 
-              className="w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white"
-              onClick={() => onUpgrade('pro')}
-            >
-              Upgrade to Pro
-            </Button>
+
+          <div className="bg-neutral-800/40 rounded-lg p-6 text-center border border-neutral-700/50">
+            <div className="w-12 h-12 bg-purple-600/20 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <TrendingUp className="h-6 w-6 text-purple-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-white mb-2">Social Media Links</h3>
+            <p className="text-neutral-400 text-sm">Link to your external platforms like Yelp, Instagram, and more</p>
           </div>
         </div>
-        
-        <p className="text-xs text-neutral-400 text-center">
-          All plans include basic venue profile features. Upgrade to Pro for access to Google's cutting-edge Gemini, Veo, Imagen,
+
+        {/* Pricing */}
+        <div className="text-center">
+          <div className="text-2xl font-bold text-white mb-2">$29.99/month</div>
+          <Button 
+            onClick={() => onUpgrade('plus')}
+            className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-8 py-3"
+          >
+            <Crown className="mr-2 h-4 w-4" />
+            Upgrade to Plus
+          </Button>
+        </div>
+
+        <p className="text-center text-neutral-400 text-sm">
+          All plans include basic venue profile features. Upgrade to Pro for access to Google's cutting-edge Gemini, Veo, Imagen, 
           and Notebook LM technologies to grow your business. Annual billing available with a 15% discount.
         </p>
       </CardContent>
