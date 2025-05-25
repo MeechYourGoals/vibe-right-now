@@ -50,10 +50,10 @@ const DataInsights = () => {
   };
   
   return (
-    <div className="min-h-screen bg-neutral-950 text-white">
+    <div className="min-h-screen bg-neutral-900 text-white">
       <Header />
       
-      <main className="container py-6 bg-neutral-950">
+      <main className="container py-6 bg-neutral-900">
         <div className="max-w-6xl mx-auto">
           {/* Vernon Pro Banner - Only show for Pro users */}
           {isPro && (
@@ -126,8 +126,8 @@ const DataInsights = () => {
             </div>
             
             <TabsList className="mb-4 bg-neutral-800 border-neutral-700">
-              <TabsTrigger value="overview" className="data-[state=active]:bg-neutral-700 data-[state=active]:text-white text-neutral-300">Overview</TabsTrigger>
-              <TabsTrigger value="analytics" className="data-[state=active]:bg-neutral-700 data-[state=active]:text-white text-neutral-300">
+              <TabsTrigger value="overview" className="data-[state=active]:bg-neutral-700 data-[state=active]:text-white text-neutral-400">Overview</TabsTrigger>
+              <TabsTrigger value="analytics" className="data-[state=active]:bg-neutral-700 data-[state=active]:text-white text-neutral-400">
                 <div className="flex items-center">
                   <ChartBar className="mr-2 h-4 w-4" />
                   Analytics
@@ -137,7 +137,7 @@ const DataInsights = () => {
               <TabsTrigger 
                 value="advertising" 
                 disabled={subscriptionTier === 'standard' || subscriptionTier === 'plus'}
-                className="data-[state=active]:bg-neutral-700 data-[state=active]:text-white text-neutral-300 disabled:text-neutral-600"
+                className="data-[state=active]:bg-neutral-700 data-[state=active]:text-white text-neutral-400 disabled:text-neutral-600"
               >
                 <div className="flex items-center">
                   Advertising
@@ -154,15 +154,15 @@ const DataInsights = () => {
               />
             )}
             
-            <TabsContent value="overview" className="mt-0 bg-neutral-950">
+            <TabsContent value="overview" className="mt-0 bg-neutral-900">
               <VenueInsights />
             </TabsContent>
             
-            <TabsContent value="analytics" className="mt-0 bg-neutral-950">
+            <TabsContent value="analytics" className="mt-0 bg-neutral-900">
               <AnalyticsTab isPremium={isPremium} subscriptionTier={subscriptionTier} />
             </TabsContent>
             
-            <TabsContent value="advertising" className="mt-0 bg-neutral-950">
+            <TabsContent value="advertising" className="mt-0 bg-neutral-900">
               <AdvertisingTab isPremium={isPremium} />
             </TabsContent>
           </Tabs>

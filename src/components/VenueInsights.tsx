@@ -53,29 +53,30 @@ const VenueInsights = () => {
         </div>
       </div>
       
-      <Card className="border-2 border-green-600 bg-neutral-900 backdrop-blur-sm">
-        <CardHeader className="pb-2">
+      {/* Gemini Agent Mode Section - Reinstated Green Gradient Theme */}
+      <Card className="border border-emerald-700 bg-gradient-to-br from-green-600 via-emerald-600 to-green-700 backdrop-blur-sm p-4 md:p-6">
+        <CardHeader className="pb-2 px-0 pt-0">
           <div className="flex justify-between items-center">
-            <CardTitle className="flex items-center text-green-400">
-              <Brain className="mr-2 h-5 w-5" /> 
+            <CardTitle className="flex items-center text-white">
+              <Brain className="mr-2 h-5 w-5 text-emerald-200" /> 
               Gemini Agent Mode & Notebook LM Analytics
             </CardTitle>
-            <Badge variant="outline" className="bg-green-900/20 text-green-400 border-green-600">
+            <Badge variant="outline" className="bg-emerald-700 text-white border-emerald-600">
               Pro Features
             </Badge>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4 pb-4">
-          <p className="text-sm text-green-200">
+        <CardContent className="space-y-4 pb-2 px-0">
+          <p className="text-sm text-emerald-50">
             Gemini Agent Mode automatically processes your business data to provide actionable insights. 
             Notebook LM helps analyze financial documents, P&L sheets, and generates executive summaries.
           </p>
           <div className="flex flex-wrap gap-3">
-            <Button variant="outline" className="border-green-600 text-green-400 hover:bg-green-900/20 bg-green-950/30">
+            <Button className="bg-emerald-700 hover:bg-emerald-800 text-white border-emerald-800">
               <FileSpreadsheet className="mr-2 h-4 w-4" />
               Upload Business Documents
             </Button>
-            <Button variant="outline" className="border-green-600 text-green-400 hover:bg-green-900/20 bg-green-950/30">
+            <Button className="bg-emerald-700 hover:bg-emerald-800 text-white border-emerald-800">
               <Bot className="mr-2 h-4 w-4" />
               Run Gemini Analysis
             </Button>

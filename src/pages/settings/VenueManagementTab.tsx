@@ -48,6 +48,7 @@ import {
   UserPlus
 } from "lucide-react";
 import InfluencerMarketplace from "@/components/venue/marketplace/InfluencerMarketplace";
+import VenueSubmissionForm from '@/components/settings/VenueSubmissionForm'; // Added import
 
 interface VenueManagementTabProps {
   onSave: () => void;
@@ -426,6 +427,19 @@ const VenueManagementTab: React.FC<VenueManagementTabProps> = ({
               </div>
             </TabsContent>
           </Tabs>
+        </CardContent>
+      </Card>
+      
+      {/* Section for Venue Submission Form */}
+      <Card className="bg-neutral-900 border-neutral-700">
+        <CardHeader>
+          <CardTitle className="text-white text-2xl">List Your Venue or Event with Us</CardTitle>
+          <CardDescription className="text-neutral-400">
+            Submit your venue or event details to be vetted and listed on our platform.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <VenueSubmissionForm />
         </CardContent>
       </Card>
       
