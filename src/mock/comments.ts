@@ -1,38 +1,26 @@
 
-import { Comment } from "@/types";
-import { regularUsers, celebrityUsers } from "./users";
-
-const allUsers = [...regularUsers, ...celebrityUsers];
+import { Comment } from '@/types';
+import { mockUsers } from './users';
 
 export const mockComments: Comment[] = [
   {
     id: "1",
     postId: "1",
     userId: "1",
-    user: allUsers[0],
-    content: "Amazing vibes here tonight!",
-    timestamp: "2 hours ago",
+    user: mockUsers[0],
+    content: "Great place! Love the atmosphere.",
+    timestamp: "2024-01-15T19:00:00Z",
     vibedHere: true,
-    likes: 12
+    likes: 5
   },
   {
     id: "2",
     postId: "1",
     userId: "2",
-    user: allUsers[1],
-    content: "Love this place, great atmosphere!",
-    timestamp: "1 hour ago",
+    user: mockUsers[1],
+    content: "The cocktails here are amazing!",
+    timestamp: "2024-01-15T19:15:00Z",
     vibedHere: false,
-    likes: 8
-  },
-  {
-    id: "3",
-    postId: "2",
-    userId: "3",
-    user: allUsers[2],
-    content: "Best coffee in town!",
-    timestamp: "30 minutes ago",
-    vibedHere: true,
-    likes: 5
+    likes: 3
   }
 ];
