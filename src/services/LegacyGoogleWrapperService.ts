@@ -1,7 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 
-export class OpenAIService {
+export class LegacyGoogleWrapperService {
   /**
    * Send a chat request using Google Vertex AI (replaces OpenAI)
    */

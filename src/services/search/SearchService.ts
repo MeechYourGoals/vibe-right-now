@@ -1,10 +1,12 @@
 
+import { GoogleAIService } from '@/services/GoogleAIService';
+
 export class SearchService {
   static async search(query: string): Promise<string> {
     try {
       console.log('Performing search for:', query);
       
-      // Use Google's search capabilities through Vertex AI
+      // Use Google's search capabilities through GoogleAIService (Vertex AI)
       const searchResult = await this.performGoogleSearch(query);
       
       if (searchResult) {
@@ -30,11 +32,12 @@ export class SearchService {
 
   private static async performGoogleSearch(query: string): Promise<string | null> {
     try {
-      // This would call Google's search API or Vertex AI
-      // For now, return a mock response
-      return `Search results for "${query}": Found relevant information about local venues and events.`;
+      // Call GoogleAIService.search() which handles Vertex AI
+      const result = await GoogleAIService.search(query);
+      return result; // GoogleAIService.search already returns string | null
     } catch (error) {
-      console.error('Google search error:', error);
+      console.error('Error in performGoogleSearch calling GoogleAIService.search:', error);
+      // Propagate null to let the calling function (search) handle the fallback message
       return null;
     }
   }

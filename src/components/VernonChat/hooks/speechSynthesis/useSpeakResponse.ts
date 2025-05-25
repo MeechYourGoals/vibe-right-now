@@ -3,7 +3,7 @@ import { useCallback } from 'react';
 import { playAudioBase64 } from '@/components/VernonChat/utils/speech/synthesis';
 import { toast } from "sonner";
 import { VertexAIHub, DEFAULT_MALE_VOICE } from '@/services/VertexAI';
-import { OpenRouterService } from '@/services/OpenRouterService';
+import { GoogleAIService } from '@/services/GoogleAIService'; // Added GoogleAIService
 
 interface UseSpeakResponseProps {
   isSpeaking: boolean;
@@ -42,19 +42,18 @@ export const useSpeakResponse = ({
     // Set the current text being spoken
     currentlyPlayingText.current = text;
     
-    // Try OpenRouter TTS first
+    // Try GoogleAIService TTS first
     let speechSuccess = false;
     
     try {
-      console.log('Attempting to use OpenRouter for TTS...');
+      console.log('Attempting to use GoogleAIService for TTS...');
       
-      const audioBase64 = await OpenRouterService.textToSpeech({
-        text: text,
-        voice: 'male'
-      });
+      // Using a default voice, similar to the old OpenRouter call.
+      // GoogleAIService.textToSpeech options can be expanded later if needed.
+      const audioBase64 = await GoogleAIService.textToSpeech(text, { voice: 'en-US-Neural2-D' }); 
       
       if (audioBase64) {
-        console.log('OpenRouter TTS successful, playing audio');
+        console.log('GoogleAIService TTS successful, playing audio');
         const audioElement = playAudioBase64(audioBase64);
         if (audioElement) {
           speechSuccess = true;
@@ -68,19 +67,19 @@ export const useSpeakResponse = ({
           console.warn('Audio element creation failed, falling back');
         }
       } else {
-        console.warn('OpenRouter TTS returned null, falling back');
+        console.warn('GoogleAIService TTS returned null, falling back');
       }
     } catch (error) {
-      console.error('OpenRouter TTS failed, falling back:', error);
+      console.error('GoogleAIService TTS failed, falling back:', error);
     }
     
-    // If OpenRouter failed, try Vertex AI TTS
+    // If GoogleAIService failed, try Vertex AI TTS (existing fallback)
     if (!speechSuccess) {
       try {
-        console.log('Attempting to use Google Vertex AI TTS...');
+        console.log('Attempting to use Google Vertex AI TTS (fallback)...');
         console.log(`Using voice: ${DEFAULT_MALE_VOICE}`);
         
-        const audioBase64 = await VertexAIHub.textToSpeech(text, {
+        const audioBase64 = await VertexAIHub.textToSpeech(text, { // Assuming VertexAIHub is another Google TTS
           voice: DEFAULT_MALE_VOICE,
           speakingRate: 1.0,
           pitch: 0
