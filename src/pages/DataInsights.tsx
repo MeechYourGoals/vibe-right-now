@@ -30,19 +30,19 @@ const DataInsights = () => {
         return null;
       case 'plus':
         return (
-          <Badge variant="outline" className="ml-2 bg-blue-600/20 text-blue-500 dark:text-blue-400 border-blue-300">
+          <Badge variant="outline" className="ml-2 bg-blue-600/20 text-blue-400 border-blue-300">
             Plus
           </Badge>
         );
       case 'premium':
         return (
-          <Badge variant="outline" className="ml-2 bg-purple-600/20 text-purple-600 dark:text-purple-400 border-purple-300">
+          <Badge variant="outline" className="ml-2 bg-purple-600/20 text-purple-400 border-purple-300">
             Premium
           </Badge>
         );
       case 'pro':
         return (
-          <Badge variant="outline" className="ml-2 bg-amber-600/20 text-amber-600 dark:text-amber-400 border-amber-300">
+          <Badge variant="outline" className="ml-2 bg-amber-600/20 text-amber-400 border-amber-300">
             Pro
           </Badge>
         );
@@ -53,7 +53,7 @@ const DataInsights = () => {
     <div className="min-h-screen bg-neutral-950 text-white">
       <Header />
       
-      <main className="container py-6">
+      <main className="container py-6 bg-neutral-950">
         <div className="max-w-6xl mx-auto">
           {/* Vernon Pro Banner - Only show for Pro users */}
           {isPro && (
@@ -154,15 +154,15 @@ const DataInsights = () => {
               />
             )}
             
-            <TabsContent value="overview" className="mt-0">
+            <TabsContent value="overview" className="mt-0 bg-neutral-950">
               <VenueInsights />
             </TabsContent>
             
-            <TabsContent value="analytics" className="mt-0">
+            <TabsContent value="analytics" className="mt-0 bg-neutral-950">
               <AnalyticsTab isPremium={isPremium} subscriptionTier={subscriptionTier} />
             </TabsContent>
             
-            <TabsContent value="advertising" className="mt-0">
+            <TabsContent value="advertising" className="mt-0 bg-neutral-950">
               <AdvertisingTab isPremium={isPremium} />
             </TabsContent>
           </Tabs>

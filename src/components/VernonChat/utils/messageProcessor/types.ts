@@ -13,6 +13,7 @@ export interface ProcessMessageOptions {
   query: string;
   messages: any[];
   setMessages: React.Dispatch<React.SetStateAction<any[]>>;
+  isVenueMode?: boolean;
 }
 
 export interface MessageProcessor {

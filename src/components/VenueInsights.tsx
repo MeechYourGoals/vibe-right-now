@@ -16,7 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Brain, FileSpreadsheet, Bot } from "lucide-react";
 
 const VenueInsights = () => {
-  const [subscriptionTier, setSubscriptionTier] = useState<'standard' | 'plus' | 'premium' | 'pro'>('standard');
+  const [subscriptionTier, setSubscriptionTier] = useState<'standard' | 'plus' | 'premium' | 'pro'>('pro');
   const mediaData = generateWeeklyData();
   
   // Add mock venue insights data for PerformanceMetrics
@@ -53,29 +53,29 @@ const VenueInsights = () => {
         </div>
       </div>
       
-      <Card className="border-2 border-neutral-700 bg-neutral-900 backdrop-blur-sm">
+      <Card className="border-2 border-green-600 bg-neutral-900 backdrop-blur-sm">
         <CardHeader className="pb-2">
           <div className="flex justify-between items-center">
             <CardTitle className="flex items-center text-green-400">
               <Brain className="mr-2 h-5 w-5" /> 
               Gemini Agent Mode & Notebook LM Analytics
             </CardTitle>
-            <Badge variant="outline" className="bg-neutral-800 text-green-400 border-green-600">
+            <Badge variant="outline" className="bg-green-900/20 text-green-400 border-green-600">
               Pro Features
             </Badge>
           </div>
         </CardHeader>
         <CardContent className="space-y-4 pb-4">
-          <p className="text-sm text-neutral-300">
+          <p className="text-sm text-green-200">
             Gemini Agent Mode automatically processes your business data to provide actionable insights. 
             Notebook LM helps analyze financial documents, P&L sheets, and generates executive summaries.
           </p>
           <div className="flex flex-wrap gap-3">
-            <Button variant="outline" className="border-green-600 text-green-400 hover:bg-neutral-800 bg-neutral-900">
+            <Button variant="outline" className="border-green-600 text-green-400 hover:bg-green-900/20 bg-green-950/30">
               <FileSpreadsheet className="mr-2 h-4 w-4" />
               Upload Business Documents
             </Button>
-            <Button variant="outline" className="border-green-600 text-green-400 hover:bg-neutral-800 bg-neutral-900">
+            <Button variant="outline" className="border-green-600 text-green-400 hover:bg-green-900/20 bg-green-950/30">
               <Bot className="mr-2 h-4 w-4" />
               Run Gemini Analysis
             </Button>

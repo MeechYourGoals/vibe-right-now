@@ -1,4 +1,3 @@
-
 export interface Location {
   id: string;
   name: string;
@@ -147,8 +146,7 @@ export interface SocialMediaPost {
   content: string;
   author: string;
   timestamp: string;
-  platform: 'google' | 'yelp' | 'instagram';
-  imageUrl?: string;
+  platform: 'google' | 'yelp' | 'instagram' | 'other';
   likes?: number;
   comments?: number;
   rating?: number;
