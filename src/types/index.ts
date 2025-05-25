@@ -151,6 +151,11 @@ export interface CreditCard {
   isDefault: boolean;
 }
 
+export interface DateRange {
+  from: Date;
+  to?: Date;
+}
+
 // Social Media Types (Google ecosystem only)
 export interface SocialMediaPost {
   id: string;
@@ -170,7 +175,4 @@ export interface SocialMediaApiKeys {
   instagram: string;
   yelp: string;
   google: string;
-  tiktok?: string;
-  tripadvisor?: string;
-  foursquare?: string;
 }

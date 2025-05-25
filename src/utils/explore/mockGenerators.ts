@@ -12,3 +12,16 @@ export const getCitySpecificContent = (location: Location): string => {
   
   return contents[Math.floor(Math.random() * contents.length)];
 };
+
+export const getAdditionalTags = (location: Location): string[] => {
+  const tags = [
+    "trending",
+    "hot-spot",
+    "must-visit",
+    "popular",
+    "crowded",
+    "vibrant"
+  ];
+  
+  return tags.slice(0, Math.floor(Math.random() * 3) + 1);
+};

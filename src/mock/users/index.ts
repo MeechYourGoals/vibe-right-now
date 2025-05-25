@@ -1,30 +1,28 @@
 
-import { regularUsers } from "./regularUsers";
-import { celebrityUsers } from "./celebrityUsers";
-import { hashString, generateUserBio } from "./utils";
+import { User } from '@/types';
+import { celebrityUsers } from './celebrityUsers';
+import { regularUsers } from './regularUsers';
 
-// Define the MockUserProfile type directly here if missing from @/types
-export interface MockUserProfile {
-  id: string;
-  username: string;
-  avatar: string;
-  bio?: string;
-  type?: 'regular' | 'celebrity' | 'venue';
-  verified?: boolean;
-}
+export const mockUsers: User[] = [
+  ...celebrityUsers,
+  ...regularUsers.map(user => ({
+    ...user,
+    isVerified: user.isVerified || false
+  }))
+];
 
-// Mock user profile utility
-export const getMockUserProfile = (type: 'regular' | 'celebrity' | 'venue'): MockUserProfile => {
-  const collection = type === 'celebrity' ? celebrityUsers : regularUsers;
-  const randomIndex = Math.floor(Math.random() * collection.length);
-  return {
-    ...collection[randomIndex],
-    type: type,
-    verified: type === 'venue' ? true : collection[randomIndex].verified
-  };
+export const getUserById = (id: string): User | undefined => {
+  return mockUsers.find(user => user.id === id);
 };
 
-// Create a combined mockUsers array
-export const mockUsers = [...regularUsers, ...celebrityUsers];
+export const getUserByUsername = (username: string): User | undefined => {
+  return mockUsers.find(user => user.username.toLowerCase() === username.toLowerCase());
+};
 
-export { regularUsers, celebrityUsers, hashString, generateUserBio };
+export const searchUsers = (query: string): User[] => {
+  const searchTerm = query.toLowerCase();
+  return mockUsers.filter(user => 
+    user.name.toLowerCase().includes(searchTerm) ||
+    user.username.toLowerCase().includes(searchTerm)
+  );
+};

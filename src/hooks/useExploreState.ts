@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { mockLocations } from '@/mock/locations';
-import { Location } from '@/types';
+import { Location, DateRange } from '@/types';
 
 export const useExploreState = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -18,7 +18,7 @@ export const useExploreState = () => {
   const [vibeFilter, setVibeFilter] = useState<string | null>(null);
   const [isNaturalLanguageSearch, setIsNaturalLanguageSearch] = useState(false);
   const [isLoadingResults, setIsLoadingResults] = useState(false);
-  const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date } | undefined>();
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [showDateFilter, setShowDateFilter] = useState(false);
   const [activeSearchTab, setActiveSearchTab] = useState('all');
 
@@ -56,7 +56,7 @@ export const useExploreState = () => {
     setVibeFilter(null);
   };
 
-  const handleDateRangeChange = (range: { from?: Date; to?: Date } | undefined) => {
+  const handleDateRangeChange = (range: DateRange | undefined) => {
     setDateRange(range);
   };
 
