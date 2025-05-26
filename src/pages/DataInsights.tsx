@@ -5,10 +5,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import VenueInsights from "@/components/VenueInsights";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Crown, FileLock, Upload, ChartBar } from "lucide-react";
+import { Crown, FileLock, Upload, ChartBar, Target } from "lucide-react";
 import PremiumBanner from "@/components/data-insights/PremiumBanner";
 import AnalyticsTab from "@/components/data-insights/AnalyticsTab";
 import AdvertisingTab from "@/components/data-insights/marketing/AdvertisingTab";
+import AdvertiserTab from "@/components/data-insights/advertiser/AdvertiserTab";
 import VernonProBanner from "@/components/data-insights/VernonProBanner";
 import VernonNext from "@/components/VernonNext";
 
@@ -146,6 +147,15 @@ const DataInsights = () => {
                   )}
                 </div>
               </TabsTrigger>
+              <TabsTrigger 
+                value="advertiser"
+                className="data-[state=active]:bg-neutral-700 data-[state=active]:text-white text-neutral-300"
+              >
+                <div className="flex items-center">
+                  <Target className="mr-2 h-4 w-4" />
+                  Advertiser Suite
+                </div>
+              </TabsTrigger>
             </TabsList>
             
             {subscriptionTier === 'standard' && (
@@ -164,6 +174,10 @@ const DataInsights = () => {
             
             <TabsContent value="advertising" className="mt-0 bg-neutral-950">
               <AdvertisingTab isPremium={isPremium} />
+            </TabsContent>
+            
+            <TabsContent value="advertiser" className="mt-0 bg-neutral-950">
+              <AdvertiserTab subscriptionTier={subscriptionTier} />
             </TabsContent>
           </Tabs>
         </div>
