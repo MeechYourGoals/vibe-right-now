@@ -1,8 +1,10 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { PREFERENCE_TAGS, PREFERENCE_CATEGORIES } from "./constants";
 import { useToast } from "@/hooks/use-toast";
 import { Coffee, Music, Users, Heart, Star } from "lucide-react";
+import { vibeTags } from "@/constants/vibeTags";
 
 // Import components
 import UserPreferences from "./components/UserPreferences";
@@ -122,6 +124,9 @@ const PreferencesTab = ({
       />
     );
   };
+
+  // Combine all available tags for the tag selection component
+  const allAvailableTags = Array.isArray(vibeTags) ? vibeTags : [];
   
   return (
     <div className="bg-card p-6 rounded-lg border shadow-sm">
