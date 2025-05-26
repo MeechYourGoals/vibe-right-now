@@ -16,7 +16,13 @@ const SocialMediaConnectionsSheet: React.FC<SocialMediaConnectionsSheetProps> = 
   const [apiKeys, setApiKeys] = useLocalStorage<SocialMediaApiKeys>('social_media_keys', {
     instagram: '',
     yelp: '',
-    google: ''
+    google: '',
+    tiktok: '',
+    tripadvisor: '',
+    foursquare: '',
+    franki: '',
+    other: '',
+    otherUrl: ''
   });
 
   return (

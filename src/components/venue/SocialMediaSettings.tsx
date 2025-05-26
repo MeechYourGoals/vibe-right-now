@@ -13,7 +13,13 @@ const SocialMediaSettings = () => {
   const [apiKeys, setApiKeys] = useLocalStorage<SocialMediaApiKeys>('social_media_keys', {
     instagram: '',
     yelp: '',
-    google: ''
+    google: '',
+    tiktok: '',
+    tripadvisor: '',
+    foursquare: '',
+    franki: '',
+    other: '',
+    otherUrl: ''
   });
 
   const [tempKeys, setTempKeys] = useState(apiKeys);
