@@ -31,24 +31,24 @@ const CommentList = ({ postId, commentsCount }: CommentListProps) => {
     exampleComments.push({
       id: `example-${postId}-1`,
       postId: postId,
+      userId: mockUsers[0].id,
       user: mockUsers[Math.floor(Math.random() * mockUsers.length)],
       content: "This place looks amazing! How's the crowd right now?",
-      text: "This place looks amazing! How's the crowd right now?", // Add text matching content
-      timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30 minutes ago
+      timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
       vibedHere: false,
-      likes: 0 // Add likes property
+      likes: 0
     });
     
     // "Vibed Here" comment
     exampleComments.push({
       id: `example-${postId}-2`,
       postId: postId,
+      userId: mockUsers[1].id,
       user: mockUsers[Math.floor(Math.random() * mockUsers.length)],
       content: "I was here yesterday and it was incredible! The line moves fast if you go around to the side entrance.",
-      text: "I was here yesterday and it was incredible! The line moves fast if you go around to the side entrance.", // Add text matching content
-      timestamp: new Date(Date.now() - 1000 * 60 * 120).toISOString(), // 2 hours ago
+      timestamp: new Date(Date.now() - 1000 * 60 * 120).toISOString(),
       vibedHere: true,
-      likes: 0 // Add likes property
+      likes: 0
     });
     
     // Add a third comment if needed
@@ -56,13 +56,13 @@ const CommentList = ({ postId, commentsCount }: CommentListProps) => {
       exampleComments.push({
         id: `example-${postId}-3`,
         postId: postId,
+        userId: mockUsers[2].id,
         user: mockUsers[Math.floor(Math.random() * mockUsers.length)],
         content: "Heading there now! Anyone want to meet up?",
-        text: "Heading there now! Anyone want to meet up?", // Add text matching content
-        timestamp: new Date(Date.now() - 1000 * 60 * 10).toISOString(), // 10 minutes ago
-        vibedHere: Math.random() > 0.5, // 50% chance of being "Vibed Here"
-        likes: 0 // Add likes property
-      });
+        timestamp: new Date(Date.now() - 1000 * 60 * 10).toISOString(),
+        vibedHere: Math.random() > 0.5,
+        likes: 0
+    });
     }
     
     postComments = exampleComments;
@@ -98,28 +98,25 @@ const CommentList = ({ postId, commentsCount }: CommentListProps) => {
         </div>
       ) : (
         <div className="text-center py-4 text-muted-foreground text-sm">
-          No comments yet. Be the first to comment!
+          No comments yet. Be the first to share your thoughts!
         </div>
       )}
       
-      <div className="mt-3 flex gap-2">
-        <Avatar className="h-8 w-8">
-          <AvatarImage src="https://randomuser.me/api/portraits/men/1.jpg" alt="Your avatar" />
-          <AvatarFallback>Y</AvatarFallback>
-        </Avatar>
-        <div className="flex-1 flex items-end gap-2">
-          <Textarea
-            placeholder="Add a comment..."
-            className="min-h-[60px] flex-1"
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-          />
+      <div className="mt-4 space-y-2">
+        <Textarea
+          value={newComment}
+          onChange={(e) => setNewComment(e.target.value)}
+          placeholder="Add a comment..."
+          className="min-h-[60px]"
+        />
+        <div className="flex justify-end">
           <Button 
-            size="icon"
-            disabled={!newComment.trim() || isSubmitting}
             onClick={handleSubmitComment}
+            disabled={!newComment.trim() || isSubmitting}
+            size="sm"
           >
-            <Send className="h-4 w-4" />
+            <Send className="h-3 w-3 mr-1" />
+            {isSubmitting ? "Posting..." : "Post"}
           </Button>
         </div>
       </div>

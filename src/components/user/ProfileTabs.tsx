@@ -1,101 +1,87 @@
 
-import { Button } from "@/components/ui/button";
+import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MessageSquare, Heart, Award, Grid2X2, ListIcon } from "lucide-react";
-import ProfileTabContent from "@/components/user/ProfileTabContent";
-import { Post, Comment } from "@/types";
+import { Comment } from "@/types";
+import ProfileHeader from './ProfileHeader';
 
-interface ProfileTabsProps {
-  activeTab: string;
-  setActiveTab: (value: string) => void;
-  viewMode: "list" | "grid";
-  setViewMode: (mode: "list" | "grid") => void;
-  userPosts: Post[];
-  getComments: (postId: string) => Comment[];
-}
+const mockUser = {
+  id: '1',
+  username: 'johndoe',
+  name: 'John Doe',
+  avatar: '/placeholder.svg',
+  bio: 'Living life to the fullest!',
+  isVerified: true,
+  followersCount: 1250,
+  followingCount: 380,
+  postsCount: 125
+};
 
-const ProfileTabs = ({ 
-  activeTab, 
-  setActiveTab, 
-  viewMode, 
-  setViewMode, 
-  userPosts, 
-  getComments 
-}: ProfileTabsProps) => {
+const mockComments: Comment[] = [
+  {
+    id: '1',
+    postId: 'post1',
+    userId: '1',
+    user: { id: '1', username: 'alice', name: 'Alice', avatar: '/placeholder.svg' },
+    content: 'Great post!',
+    timestamp: new Date().toISOString(),
+    vibedHere: true,
+    likes: 5
+  },
+  {
+    id: '2',
+    postId: 'post2',
+    userId: '2',
+    user: { id: '2', username: 'bob', name: 'Bob', avatar: '/placeholder.svg' },
+    content: 'Amazing place!',
+    timestamp: new Date().toISOString(),
+    vibedHere: false,
+    likes: 3
+  }
+];
+
+const ProfileTabs = () => {
   return (
-    <Tabs 
-      defaultValue="posts" 
-      value={activeTab} 
-      onValueChange={setActiveTab} 
-      className="mb-6"
-    >
-      <div className="flex justify-between items-center mb-2">
-        <TabsList className="grid grid-cols-3 w-full max-w-md">
-          <TabsTrigger value="posts">
-            <div className="flex items-center">
-              <MessageSquare className="h-4 w-4 mr-2" />
-              <span>Posts</span>
-            </div>
-          </TabsTrigger>
-          <TabsTrigger value="liked">
-            <div className="flex items-center">
-              <Heart className="h-4 w-4 mr-2" />
-              <span>Liked</span>
-            </div>
-          </TabsTrigger>
-          <TabsTrigger value="saved">
-            <div className="flex items-center">
-              <Award className="h-4 w-4 mr-2" />
-              <span>Popular</span>
-            </div>
-          </TabsTrigger>
+    <div className="max-w-4xl mx-auto">
+      <ProfileHeader user={mockUser} />
+      
+      <Tabs defaultValue="posts" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="posts">Posts</TabsTrigger>
+          <TabsTrigger value="vibes">Vibes</TabsTrigger>
+          <TabsTrigger value="about">About</TabsTrigger>
         </TabsList>
         
-        <div className="flex gap-2">
-          <Button 
-            variant={viewMode === "list" ? "default" : "outline"} 
-            size="sm"
-            onClick={() => setViewMode("list")}
-          >
-            <ListIcon className="h-4 w-4" />
-          </Button>
-          <Button 
-            variant={viewMode === "grid" ? "default" : "outline"} 
-            size="sm"
-            onClick={() => setViewMode("grid")}
-          >
-            <Grid2X2 className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-      
-      <TabsContent value="posts" className="mt-4 space-y-4">
-        <ProfileTabContent 
-          activeTab="posts"
-          viewMode={viewMode}
-          userPosts={userPosts}
-          getComments={getComments}
-        />
-      </TabsContent>
-      
-      <TabsContent value="liked" className="mt-4 space-y-4">
-        <ProfileTabContent 
-          activeTab="liked"
-          viewMode={viewMode}
-          userPosts={[]}
-          getComments={getComments}
-        />
-      </TabsContent>
-      
-      <TabsContent value="saved" className="mt-4 space-y-4">
-        <ProfileTabContent 
-          activeTab="saved"
-          viewMode={viewMode}
-          userPosts={[]}
-          getComments={getComments}
-        />
-      </TabsContent>
-    </Tabs>
+        <TabsContent value="posts" className="mt-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* Posts content */}
+            <p className="text-muted-foreground">No posts yet.</p>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="vibes" className="mt-6">
+          <div className="space-y-4">
+            {mockComments.map((comment) => (
+              <div key={comment.id} className="p-4 border rounded-lg">
+                <p>{comment.content}</p>
+                <div className="flex items-center space-x-2 mt-2 text-sm text-muted-foreground">
+                  <span>@{comment.user.username}</span>
+                  {comment.vibedHere && <span className="text-primary">• Vibed Here</span>}
+                </div>
+              </div>
+            ))}
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="about" className="mt-6">
+          <div className="space-y-4">
+            <div>
+              <h3 className="font-semibold mb-2">About</h3>
+              <p className="text-muted-foreground">{mockUser.bio}</p>
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };
 

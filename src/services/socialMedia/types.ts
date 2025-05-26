@@ -1,5 +1,5 @@
 
-// Types for social media posts and API keys
+// Types for social media posts and API keys (Google ecosystem only)
 export interface SocialMediaPost {
   id: string;
   content: string;
@@ -7,7 +7,7 @@ export interface SocialMediaPost {
   username: string;
   userAvatar: string;
   venueName: string;
-  source: 'instagram' | 'tiktok' | 'yelp' | 'tripadvisor' | 'foursquare' | 'google' | 'franki' | 'other';
+  source: 'instagram' | 'yelp' | 'google' | 'other';
   mediaUrl?: string;
   mediaType?: 'image' | 'video';
   likes?: number;
@@ -18,12 +18,6 @@ export interface SocialMediaPost {
 
 export interface SocialMediaApiKeys {
   instagram: string;
-  tiktok: string;
   yelp: string;
-  tripadvisor?: string;
-  foursquare?: string;
-  google?: string;
-  franki?: string;
-  other?: string;
-  otherUrl?: string; // Custom URL for other platform
+  google: string;
 }
