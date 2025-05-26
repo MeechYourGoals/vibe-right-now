@@ -56,3 +56,41 @@ export const formatBusinessHours = (hours: Location['hours']) => {
   
   return "Hours not available";
 };
+
+// Add the missing functions that other components are trying to import
+export const generateBusinessHours = (venue: Location) => {
+  if (venue.hours) {
+    return venue.hours;
+  }
+  
+  // Generate default hours based on venue type
+  const defaultHours = getDefaultHours(venue.type);
+  
+  return {
+    monday: defaultHours,
+    tuesday: defaultHours,
+    wednesday: defaultHours,
+    thursday: defaultHours,
+    friday: defaultHours,
+    saturday: defaultHours,
+    sunday: defaultHours,
+    isOpenNow: "false",
+    isOpen24Hours: false
+  };
+};
+
+export const getTodaysHours = (venue: Location) => {
+  const hours = venue.hours || generateBusinessHours(venue);
+  const now = new Date();
+  const currentDay = now.toLocaleDateString('en-US', { weekday: 'lowercase' }) as keyof typeof hours;
+  
+  const todayHours = hours[currentDay];
+  
+  if (typeof todayHours === 'string') {
+    return todayHours;
+  } else if (typeof todayHours === 'boolean' && todayHours) {
+    return "Open 24 Hours";
+  }
+  
+  return "Closed";
+};

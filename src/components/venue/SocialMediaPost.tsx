@@ -7,9 +7,10 @@ import { SocialMediaPost as SocialMediaPostType } from "@/types";
 
 interface SocialMediaPostProps {
   post: SocialMediaPostType;
+  showExternalLink?: boolean;
 }
 
-const SocialMediaPost: React.FC<SocialMediaPostProps> = ({ post }) => {
+const SocialMediaPost: React.FC<SocialMediaPostProps> = ({ post, showExternalLink = false }) => {
   const getSourceColor = (source: string) => {
     switch (source) {
       case 'google':
@@ -18,6 +19,14 @@ const SocialMediaPost: React.FC<SocialMediaPostProps> = ({ post }) => {
         return 'bg-red-500 text-white';
       case 'instagram':
         return 'bg-pink-500 text-white';
+      case 'tiktok':
+        return 'bg-black text-white';
+      case 'tripadvisor':
+        return 'bg-green-500 text-white';
+      case 'foursquare':
+        return 'bg-purple-500 text-white';
+      case 'franki':
+        return 'bg-orange-500 text-white';
       default:
         return 'bg-gray-500 text-white';
     }

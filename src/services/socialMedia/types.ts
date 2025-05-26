@@ -7,7 +7,7 @@ export interface SocialMediaPost {
   username: string;
   userAvatar: string;
   venueName: string;
-  source: 'instagram' | 'yelp' | 'google' | 'other';
+  source: 'instagram' | 'yelp' | 'google' | 'tiktok' | 'tripadvisor' | 'foursquare' | 'franki' | 'other';
   mediaUrl?: string;
   mediaType?: 'image' | 'video';
   likes?: number;
@@ -20,4 +20,10 @@ export interface SocialMediaApiKeys {
   instagram: string;
   yelp: string;
   google: string;
+  tiktok: string;
+  tripadvisor: string;
+  foursquare: string;
+  franki: string;
+  other: string;
+  otherUrl: string;
 }
