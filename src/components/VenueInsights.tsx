@@ -53,7 +53,7 @@ const VenueInsights = () => {
         </div>
       </div>
       
-      <Card className="border-2 border-green-600/50 bg-gradient-to-r from-green-950/40 to-blue-950/40 backdrop-blur-sm">
+      <Card className="border-2 border-green-600/50 bg-gradient-to-r from-green-950/60 to-blue-950/60 backdrop-blur-sm">
         <CardHeader className="pb-2">
           <div className="flex justify-between items-center">
             <CardTitle className="flex items-center text-green-400">
@@ -84,7 +84,7 @@ const VenueInsights = () => {
       </Card>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="bg-neutral-900 border-neutral-700">
+        <Card className="bg-neutral-800/80 border-neutral-600">
           <CardHeader>
             <CardTitle className="text-white">Media Engagement</CardTitle>
           </CardHeader>
@@ -92,7 +92,7 @@ const VenueInsights = () => {
             <MediaEngagementChart data={mediaData} />
           </CardContent>
         </Card>
-        <Card className="bg-neutral-900 border-neutral-700">
+        <Card className="bg-neutral-800/80 border-neutral-600">
           <CardHeader>
             <CardTitle className="text-white">Audience Insights</CardTitle>
           </CardHeader>

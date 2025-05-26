@@ -32,7 +32,7 @@ const AnalyticsTab = ({ isPremium, subscriptionTier }: AnalyticsTabProps) => {
   return (
     <div className={`space-y-6 ${themeClass}`}>
       {/* Gemini Deep Research Section */}
-      <Card className="border-2 border-blue-600/50 bg-gradient-to-r from-blue-950/40 to-purple-950/40 backdrop-blur-sm">
+      <Card className="border-2 border-blue-600/50 bg-gradient-to-r from-blue-950/60 to-purple-950/60 backdrop-blur-sm">
         <div className="p-6">
           <div className="flex justify-between items-center mb-4">
             <div className="flex items-center">
@@ -45,7 +45,7 @@ const AnalyticsTab = ({ isPremium, subscriptionTier }: AnalyticsTabProps) => {
               </div>
             </div>
             <Badge variant="outline" className="bg-blue-900/20 text-blue-400 border-blue-600">
-              {isPro ? 'Pro Features' : 'Upgrade to Pro'}
+              {isPro ? 'Upgrade to Pro' : 'Upgrade to Pro'}
             </Badge>
           </div>
           

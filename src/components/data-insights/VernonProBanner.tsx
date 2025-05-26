@@ -10,7 +10,7 @@ interface VernonProBannerProps {
 
 const VernonProBanner = ({ subscriptionTier }: VernonProBannerProps) => {
   return (
-    <Card className="bg-gradient-to-r from-amber-950/60 to-orange-950/60 border-2 border-amber-600/50 backdrop-blur-sm">
+    <Card className="bg-gradient-to-r from-amber-950/80 to-orange-950/80 border-2 border-amber-600/50 backdrop-blur-sm">
       <CardHeader className="pb-4">
         <div className="flex justify-between items-start">
           <div className="flex items-center">
@@ -73,7 +73,7 @@ const VernonProBanner = ({ subscriptionTier }: VernonProBannerProps) => {
         </div>
 
         {/* Pro Feature Highlight */}
-        <div className="bg-amber-900/30 rounded-lg p-4 border border-amber-700/50">
+        <div className="bg-amber-900/40 rounded-lg p-4 border border-amber-700/50">
           <div className="flex items-start space-x-3">
             <div className="w-6 h-6 bg-amber-600/30 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
               <span className="text-amber-300 text-xs font-bold">💡</span>

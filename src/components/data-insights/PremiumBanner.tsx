@@ -9,7 +9,7 @@ interface PremiumBannerProps {
 
 const PremiumBanner = ({ onUpgrade }: PremiumBannerProps) => {
   return (
-    <Card className="bg-gradient-to-r from-amber-950/40 to-orange-950/40 border-amber-700/50 mb-6">
+    <Card className="bg-gradient-to-r from-neutral-800/80 to-neutral-700/80 border-amber-700/50 mb-6 backdrop-blur-sm">
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
@@ -23,36 +23,36 @@ const PremiumBanner = ({ onUpgrade }: PremiumBannerProps) => {
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Subscription Tier Selector */}
-        <div className="bg-neutral-800/60 rounded-lg p-1 flex">
+        <div className="bg-neutral-900/80 rounded-lg p-1 flex border border-neutral-700">
           <div className="flex-1 text-center py-3 px-6 rounded-md bg-purple-600 text-white font-medium">Plus</div>
-          <div className="flex-1 text-center py-3 px-6 text-neutral-400">Premium</div>
-          <div className="flex-1 text-center py-3 px-6 text-neutral-400">Pro</div>
+          <div className="flex-1 text-center py-3 px-6 text-neutral-300">Premium</div>
+          <div className="flex-1 text-center py-3 px-6 text-neutral-300">Pro</div>
         </div>
 
         {/* Feature Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-neutral-800/40 rounded-lg p-6 text-center border border-neutral-700/50">
+          <div className="bg-neutral-800/60 rounded-lg p-6 text-center border border-neutral-600/50">
             <div className="w-12 h-12 bg-purple-600/20 rounded-lg flex items-center justify-center mx-auto mb-4">
               <Target className="h-6 w-6 text-purple-400" />
             </div>
             <h3 className="text-lg font-semibold text-white mb-2">Pin User Posts</h3>
-            <p className="text-neutral-400 text-sm">Highlight the best user-generated content on your venue page</p>
+            <p className="text-neutral-300 text-sm">Highlight the best user-generated content on your venue page</p>
           </div>
 
-          <div className="bg-neutral-800/40 rounded-lg p-6 text-center border border-neutral-700/50">
+          <div className="bg-neutral-800/60 rounded-lg p-6 text-center border border-neutral-600/50">
             <div className="w-12 h-12 bg-purple-600/20 rounded-lg flex items-center justify-center mx-auto mb-4">
               <Zap className="h-6 w-6 text-purple-400" />
             </div>
             <h3 className="text-lg font-semibold text-white mb-2">Offer Discounts</h3>
-            <p className="text-neutral-400 text-sm">Create and manage special offers to attract more customers</p>
+            <p className="text-neutral-300 text-sm">Create and manage special offers to attract more customers</p>
           </div>
 
-          <div className="bg-neutral-800/40 rounded-lg p-6 text-center border border-neutral-700/50">
+          <div className="bg-neutral-800/60 rounded-lg p-6 text-center border border-neutral-600/50">
             <div className="w-12 h-12 bg-purple-600/20 rounded-lg flex items-center justify-center mx-auto mb-4">
               <TrendingUp className="h-6 w-6 text-purple-400" />
             </div>
             <h3 className="text-lg font-semibold text-white mb-2">Social Media Links</h3>
-            <p className="text-neutral-400 text-sm">Link to your external platforms like Yelp, Instagram, and more</p>
+            <p className="text-neutral-300 text-sm">Link to your external platforms like Yelp, Instagram, and more</p>
           </div>
         </div>
 
@@ -68,7 +68,7 @@ const PremiumBanner = ({ onUpgrade }: PremiumBannerProps) => {
           </Button>
         </div>
 
-        <p className="text-center text-neutral-400 text-sm">
+        <p className="text-center text-neutral-300 text-sm">
           All plans include basic venue profile features. Upgrade to Pro for access to Google's cutting-edge Gemini, Veo, Imagen, 
           and Notebook LM technologies to grow your business. Annual billing available with a 15% discount.
         </p>
