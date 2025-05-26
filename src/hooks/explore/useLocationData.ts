@@ -9,7 +9,7 @@ export const useLocationData = (
   dateRange?: { from: Date; to?: Date }
 ) => {
   const [filteredLocations, setFilteredLocations] = useState<Location[]>([]);
-  const [locationTags, setLocationTags] = useState<string[]>([]);
+  const [locationTags, setLocationTags] = useState<Record<string, string[]>>({});
   const [musicEvents, setMusicEvents] = useState<EventItem[]>([]);
   const [comedyEvents, setComedyEvents] = useState<EventItem[]>([]);
   const [nightlifeVenues, setNightlifeVenues] = useState<Location[]>([]);
@@ -32,11 +32,14 @@ export const useLocationData = (
     
     setFilteredLocations(filtered);
     
-    // Extract unique tags
-    const tags = Array.from(new Set(
-      filtered.flatMap(location => location.vibeTags || [])
-    ));
-    setLocationTags(tags);
+    // Extract unique tags and create a mapping
+    const tagsMap: Record<string, string[]> = {};
+    filtered.forEach(location => {
+      if (location.vibeTags) {
+        tagsMap[location.id] = location.vibeTags;
+      }
+    });
+    setLocationTags(tagsMap);
     
     // Load events asynchronously
     loadMusicEvents().then(setMusicEvents);
@@ -52,7 +55,6 @@ export const useLocationData = (
           {
             id: '1',
             name: 'Live Music Night',
-            address: '123 Music St',
             city: searchedCity || 'San Francisco',
             state: searchedState || 'CA',
             type: 'music',
@@ -71,7 +73,6 @@ export const useLocationData = (
           {
             id: '2',
             name: 'Comedy Show',
-            address: '456 Laugh Ave',
             city: searchedCity || 'San Francisco',
             state: searchedState || 'CA',
             type: 'comedy',
@@ -93,9 +94,11 @@ export const useLocationData = (
             address: '789 Party Blvd',
             city: searchedCity || 'San Francisco',
             state: searchedState || 'CA',
+            country: 'US',
             type: 'nightlife',
             lat: 37.7749,
-            lng: -122.4194
+            lng: -122.4194,
+            verified: true
           }
         ]);
       }, 500);

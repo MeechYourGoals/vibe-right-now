@@ -1,34 +1,11 @@
 
-import { Location } from "@/types";
-import { getMediaForLocation } from "@/utils/map/locationMediaUtils";
-
-// Function to get random items from an array
-export const getRandomItems = <T>(items: T[], count: number): T[] => {
-  const shuffled = [...items].sort(() => 0.5 - Math.random());
-  return shuffled.slice(0, count);
-};
-
-// Add any other utility functions from the original file here
-export const getCitySpecificContent = (location: Location) => {
-  return `Experience the unique atmosphere of ${location.name} in ${location.city}`;
-};
-
-export const getMediaForLocationMock = (location: Location) => {
-  // Use our central media utility for consistency
-  return getMediaForLocation(location);
-};
-
-export const getAdditionalTags = (location: Location) => {
-  const commonTags = ['Trendy', 'Popular', 'Local Favorite', 'Hidden Gem'];
+export const getCitySpecificContent = (location: any) => {
+  const contents = [
+    `Amazing vibes at ${location.name}! Perfect spot for ${location.type === 'restaurant' ? 'dinner' : 'drinks'}.`,
+    `Just discovered this gem in ${location.city}. The atmosphere is incredible!`,
+    `Love the energy here at ${location.name}. Definitely coming back!`,
+    `${location.name} never disappoints. Great ${location.type === 'bar' ? 'cocktails' : 'food'} and amazing crowd.`
+  ];
   
-  const typeTags: Record<string, string[]> = {
-    restaurant: ['Romantic', 'Outdoor Seating', 'Great View', 'Family Friendly'],
-    bar: ['Happy Hour', 'Craft Beer', 'Cocktails', 'Live Music', 'Sports Bar'],
-    event: ['Live Music', 'Festival', 'Exhibition', 'Conference', 'Workshop'],
-    attraction: ['Historic', 'Family Friendly', 'Guided Tours', 'Scenic'],
-    sports: ['Stadium', 'Arena', 'Field', 'Court', 'Family Friendly']
-  };
-  
-  const typeSpecificTags = typeTags[location.type] || [];
-  return getRandomItems([...commonTags, ...typeSpecificTags], 3);
+  return contents[Math.floor(Math.random() * contents.length)];
 };

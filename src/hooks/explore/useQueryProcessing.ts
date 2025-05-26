@@ -54,7 +54,6 @@ export const useQueryProcessing = (
       {
         id: '1',
         name: 'Comedy Night',
-        address: '123 Main St',
         city: 'San Francisco',
         state: 'CA',
         type: 'comedy',
@@ -74,9 +73,11 @@ export const useQueryProcessing = (
         address: '456 Party St',
         city: 'San Francisco',
         state: 'CA',
+        country: 'US',
         type: 'nightlife',
         lat: 37.7749,
-        lng: -122.4194
+        lng: -122.4194,
+        verified: true
       }
     ];
   };

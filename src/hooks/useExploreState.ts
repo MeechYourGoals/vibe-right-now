@@ -51,9 +51,9 @@ export const useExploreState = () => {
     setSearchedCity,
     setSearchedState,
     setFilteredLocations,
-    setComedyEvents as React.Dispatch<React.SetStateAction<Location[]>>,
+    setComedyEvents,
     setActiveTab,
-    setNightlifeVenues as React.Dispatch<React.SetStateAction<Location[]>>,
+    setNightlifeVenues,
     setVibeFilter,
     setIsNaturalLanguageSearch
   );
