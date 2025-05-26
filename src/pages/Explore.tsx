@@ -4,7 +4,8 @@ import { Layout } from "@/components/Layout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Search } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Search, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useExploreState } from "@/hooks/useExploreState";
 import { User } from "@/types";
@@ -52,31 +53,28 @@ const mockUsers: User[] = [
     id: "1",
     username: "johndoe",
     name: "John Doe",
-    avatarUrl: "https://i.pravatar.cc/150?img=1",
+    avatar: "https://i.pravatar.cc/150?img=1",
     bio: "Foodie and craft beer enthusiast",
-    location: "New York, NY",
-    followers: 123,
-    following: 456,
+    followersCount: 123,
+    followingCount: 456,
   },
   {
     id: "2",
     username: "janedoe",
     name: "Jane Doe",
-    avatarUrl: "https://i.pravatar.cc/150?img=2",
+    avatar: "https://i.pravatar.cc/150?img=2",
     bio: "Traveler and adventure seeker",
-    location: "Los Angeles, CA",
-    followers: 789,
-    following: 101,
+    followersCount: 789,
+    followingCount: 101,
   },
   {
     id: "3",
     username: "peterparker",
     name: "Peter Parker",
-    avatarUrl: "https://i.pravatar.cc/150?img=3",
+    avatar: "https://i.pravatar.cc/150?img=3",
     bio: "Photographer and web developer",
-    location: "New York, NY",
-    followers: 112,
-    following: 131,
+    followersCount: 112,
+    followingCount: 131,
   },
 ];
 
@@ -216,7 +214,7 @@ const Explore = () => {
                 <Card key={user.id} className="bg-neutral-900">
                   <CardContent className="flex flex-col items-center gap-4">
                     <Avatar className="h-20 w-20">
-                      <AvatarImage src={user.avatarUrl} alt={user.name} />
+                      <AvatarImage src={user.avatar} alt={user.name} />
                       <AvatarFallback>{user.name.slice(0, 2)}</AvatarFallback>
                     </Avatar>
                     <h3 className="text-xl font-semibold">{user.name}</h3>
@@ -224,7 +222,7 @@ const Explore = () => {
                     <div className="flex space-x-2">
                       <Badge variant="outline">
                         <Users className="mr-2 h-4 w-4" />
-                        {user.followers} Followers
+                        {user.followersCount} Followers
                       </Badge>
                     </div>
                     <Button variant="outline">View Profile</Button>

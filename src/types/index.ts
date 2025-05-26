@@ -131,6 +131,10 @@ export interface User {
   followingCount?: number;
   postsCount?: number;
   isCelebrity?: boolean;
+  location?: string;
+  createdAt?: string;
+  likesCount?: number;
+  isPrivate?: boolean;
 }
 
 export interface Media {

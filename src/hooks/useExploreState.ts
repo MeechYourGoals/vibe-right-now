@@ -11,13 +11,18 @@ export const useExploreState = () => {
   const [sportsVenues, setSportsVenues] = useState<Location[]>([]);
   const [nightlifeVenues, setNightlifeVenues] = useState<Location[]>([]);
   
+  // Add the missing state for filters and search
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedFilters, setSelectedFilters] = useState<Record<string, string[]>>({});
+  
   // Mock implementations for the missing properties
   const locations: Location[] = [];
   const loading = false;
   const setLocations = (locations: Location[]) => console.log('Setting locations:', locations);
   const setLoading = (loading: boolean) => console.log('Setting loading:', loading);
   
-  const { detectedCity, setDetectedCity } = { detectedCity: '', setDetectedCity: (city: string) => {} };
+  const detectedCity = '';
+  const setDetectedCity = (city: string) => console.log('Setting detected city:', city);
   
   const handleCategoryChange = (category: string) => console.log('Category changed:', category);
   const handleVibeChange = (vibe: string) => console.log('Vibe changed:', vibe);
@@ -46,6 +51,11 @@ export const useExploreState = () => {
     setDetectedCity,
     handleCategoryChange,
     handleVibeChange,
-    handleDateChange
+    handleDateChange,
+    // Add the missing properties
+    searchTerm,
+    setSearchTerm,
+    selectedFilters,
+    setSelectedFilters
   };
 };
