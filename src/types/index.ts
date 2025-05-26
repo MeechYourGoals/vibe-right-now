@@ -158,6 +158,11 @@ export interface SocialMediaPost {
   venueName: string;
   source: 'google' | 'yelp' | 'instagram' | 'tiktok' | 'tripadvisor' | 'foursquare' | 'franki' | 'other';
   url?: string;
+  username: string;
+  userAvatar: string;
+  mediaUrl?: string;
+  mediaType?: 'image' | 'video';
+  originalUrl?: string;
 }
 
 export interface SocialMediaApiKeys {

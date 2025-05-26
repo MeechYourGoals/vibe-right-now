@@ -26,7 +26,7 @@ export const getBusinessHours = (location: Location) => {
   }
 
   const now = new Date();
-  const currentDay = now.toLocaleDateString('en-US', { weekday: 'lowercase' }) as keyof typeof location.hours;
+  const currentDay = now.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase() as keyof typeof location.hours;
   
   let todayHours = "Closed";
   const currentHours = location.hours[currentDay];
@@ -82,7 +82,7 @@ export const generateBusinessHours = (venue: Location) => {
 export const getTodaysHours = (venue: Location) => {
   const hours = venue.hours || generateBusinessHours(venue);
   const now = new Date();
-  const currentDay = now.toLocaleDateString('en-US', { weekday: 'lowercase' }) as keyof typeof hours;
+  const currentDay = now.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase() as keyof typeof hours;
   
   const todayHours = hours[currentDay];
   

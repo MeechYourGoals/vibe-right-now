@@ -14,6 +14,18 @@ interface OpenStreetMapProps {
 }
 
 const OpenStreetMap = (props: OpenStreetMapProps) => {
+  // Accept all props to avoid TypeScript errors but don't use them
+  const {
+    userLocation,
+    locations,
+    searchedCity,
+    mapStyle,
+    onLocationSelect,
+    selectedLocation,
+    userAddressLocation,
+    showAllCities
+  } = props;
+
   return (
     <div className="w-full h-full flex items-center justify-center bg-neutral-800 text-white">
       <p>Map component deprecated - use Google Maps instead</p>
