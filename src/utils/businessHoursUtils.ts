@@ -15,7 +15,7 @@ export const isOpenNow = (location: Location): boolean => {
   if (!location.hours) return false;
   
   const now = new Date();
-  const currentDay = now.toLocaleDateString('en-US', { weekday: 'lowercase' }) as keyof BusinessHours;
+  const currentDay = now.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase() as keyof BusinessHours;
   const currentTime = now.getHours() * 60 + now.getMinutes();
   
   const hours = location.hours[currentDay];
@@ -49,7 +49,7 @@ export const formatBusinessHours = (hours: BusinessHours): string => {
   if (!hours) return 'Hours not available';
   
   const now = new Date();
-  const currentDay = now.toLocaleDateString('en-US', { weekday: 'lowercase' }) as keyof BusinessHours;
+  const currentDay = now.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase() as keyof BusinessHours;
   const todayHours = hours[currentDay];
   
   if (!todayHours || todayHours === 'Closed') {
@@ -75,7 +75,7 @@ export const getTodaysHours = (hours: BusinessHours): string => {
   if (!hours) return 'Hours not available';
   
   const now = new Date();
-  const currentDay = now.toLocaleDateString('en-US', { weekday: 'lowercase' }) as keyof BusinessHours;
+  const currentDay = now.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase() as keyof BusinessHours;
   const todayHours = hours[currentDay];
   
   if (!todayHours || todayHours === 'Closed') {
