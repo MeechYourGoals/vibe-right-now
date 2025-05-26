@@ -13,7 +13,13 @@ export default defineConfig(({ mode }) => ({
         '.env',
         '.env.*',
       ]
-    }
+    },
+    cors: {
+      origin: 'http://localhost:8080',
+      methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
+      credentials: true
+    },
+    allowedHosts: ['localhost', '127.0.0.1']
   },
   plugins: [
     react(),
