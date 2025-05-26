@@ -1,7 +1,32 @@
-
-import { User } from "@/types";
+import { User } from "@/integrations/supabase/types";
 
 export const celebrityUsers: User[] = [
+  {
+    id: "celebrity-1",
+    name: "Emma Stone",
+    username: "emmastone",
+    email: "emma@example.com",
+    bio: "Actor | Producer | Lover of great vibes and authentic experiences",
+    avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b77c?w=150&h=150&fit=crop&crop=face",
+    isVerified: true,
+    followers: 2500000,
+    following: 342,
+    posts: 89,
+    vibeTags: ["trendy", "artsy", "upscale"],
+  },
+  {
+    id: "celebrity-2", 
+    name: "Michael B. Jordan",
+    username: "michaelbjordan",
+    email: "michael@example.com",
+    bio: "Actor | Producer | Fitness enthusiast | Looking for the best workout spots",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+    isVerified: true,
+    followers: 3200000,
+    following: 198,
+    posts: 156,
+    vibeTags: ["sporty", "trendy", "upscale"],
+  },
   {
     id: "24",
     username: "kimkardashian",

@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import VenueInsights from "@/components/VenueInsights";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Crown, FileLock, Upload, ChartBar } from "lucide-react";
+import { Crown, FileLock, ChartBar, Megaphone } from "lucide-react";
 import PremiumBanner from "@/components/data-insights/PremiumBanner";
 import AnalyticsTab from "@/components/data-insights/AnalyticsTab";
 import AdvertisingTab from "@/components/data-insights/marketing/AdvertisingTab";
@@ -14,7 +14,7 @@ import AdvertisingTab from "@/components/data-insights/marketing/AdvertisingTab"
 type SubscriptionTier = 'standard' | 'plus' | 'premium' | 'pro';
 
 const DataInsights = () => {
-  const [subscriptionTier, setSubscriptionTier] = useState<SubscriptionTier>('standard');
+  const [subscriptionTier, setSubscriptionTier] = useState<SubscriptionTier>('pro');
   const isPremium = subscriptionTier === 'premium' || subscriptionTier === 'pro';
   
   const handleUpgrade = (tier: SubscriptionTier) => {
@@ -59,52 +59,7 @@ const DataInsights = () => {
                 {getTierBadge()}
               </div>
               
-              {subscriptionTier === 'standard' && (
-                <div className="flex gap-2">
-                  <Button 
-                    className="bg-gradient-to-r from-plus-primary to-plus-secondary hover:from-purple-600 hover:to-teal-600 text-white"
-                    onClick={() => handleUpgrade('plus')}
-                  >
-                    <Crown className="mr-2 h-4 w-4" />
-                    Upgrade to Plus
-                  </Button>
-                  <Button 
-                    className="bg-gradient-to-r from-premium-primary to-premium-secondary hover:from-green-600 hover:to-blue-600 text-white"
-                    onClick={() => handleUpgrade('premium')}
-                  >
-                    <Crown className="mr-2 h-4 w-4" />
-                    Upgrade to Premium
-                  </Button>
-                  <Button 
-                    className="bg-gradient-to-r from-pro-primary to-pro-secondary hover:from-amber-700 hover:to-orange-700 text-white"
-                    onClick={() => handleUpgrade('pro')}
-                  >
-                    <Crown className="mr-2 h-4 w-4" />
-                    Upgrade to Pro
-                  </Button>
-                </div>
-              )}
-              
-              {subscriptionTier === 'plus' && (
-                <div className="flex gap-2">
-                  <Button 
-                    className="bg-gradient-to-r from-premium-primary to-premium-secondary hover:from-green-600 hover:to-blue-600 text-white"
-                    onClick={() => handleUpgrade('premium')}
-                  >
-                    <Crown className="mr-2 h-4 w-4" />
-                    Upgrade to Premium
-                  </Button>
-                  <Button 
-                    className="bg-gradient-to-r from-pro-primary to-pro-secondary hover:from-amber-700 hover:to-orange-700 text-white"
-                    onClick={() => handleUpgrade('pro')}
-                  >
-                    <Crown className="mr-2 h-4 w-4" />
-                    Upgrade to Pro
-                  </Button>
-                </div>
-              )}
-              
-              {subscriptionTier === 'premium' && (
+              {subscriptionTier !== 'pro' && (
                 <Button 
                   className="bg-gradient-to-r from-pro-primary to-pro-secondary hover:from-amber-700 hover:to-orange-700 text-white"
                   onClick={() => handleUpgrade('pro')}
@@ -130,6 +85,7 @@ const DataInsights = () => {
                 className="data-[state=active]:bg-neutral-700 data-[state=active]:text-white"
               >
                 <div className="flex items-center">
+                  <Megaphone className="mr-2 h-4 w-4" />
                   Advertising
                   {(subscriptionTier === 'standard' || subscriptionTier === 'plus') && (
                     <FileLock className="ml-2 h-3 w-3" />

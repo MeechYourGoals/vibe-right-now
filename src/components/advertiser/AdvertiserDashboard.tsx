@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +17,12 @@ const AdvertiserDashboard = () => {
     { title: "Videos Generated (Veo)", value: "48", change: "+41%", icon: Video },
     { title: "Improved CTR from AI Content", value: "+32%", change: "+12%", icon: TrendingUp },
     { title: "Time Saved", value: "42hrs", change: "+18%", icon: Clock },
+  ];
+
+  const activeCampaigns = [
+    { name: "Summer Vibes Campaign", status: "Active", budget: "$2,500", performance: "High" },
+    { name: "Local Hotspots", status: "Active", budget: "$1,800", performance: "Medium" },
+    { name: "Weekend Warriors", status: "Paused", budget: "$3,200", performance: "Low" },
   ];
 
   return (
@@ -50,7 +57,7 @@ const AdvertiserDashboard = () => {
           <CardTitle className="flex items-center">
             <Zap className="h-5 w-5 mr-2 text-purple-600" />
             Google AI Performance
-            <Badge variant="outline" className="ml-2 bg-purple-100 text-purple-600 border-purple-300">
+            <Badge variant="outline" className="ml-2 bg-purple-100 text-purple-600 border-purple-300 dark:bg-purple-600/20 dark:text-purple-400">
               Powered by Imagen 3 & Veo
             </Badge>
           </CardTitle>
@@ -82,11 +89,7 @@ const AdvertiserDashboard = () => {
             <CardTitle>Active Campaigns</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {[
-              { name: "Summer Vibes Campaign", status: "Active", budget: "$2,500", performance: "High" },
-              { name: "Local Hotspots", status: "Active", budget: "$1,800", performance: "Medium" },
-              { name: "Weekend Warriors", status: "Paused", budget: "$3,200", performance: "Low" },
-            ].map((campaign, index) => (
+            {activeCampaigns.map((campaign, index) => (
               <div key={index} className="flex justify-between items-center p-3 border rounded-lg">
                 <div>
                   <div className="font-medium">{campaign.name}</div>

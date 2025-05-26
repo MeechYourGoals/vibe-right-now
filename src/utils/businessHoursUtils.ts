@@ -45,12 +45,12 @@ export const isOpenNow = (location: Location): boolean => {
   return currentTime >= openMinutes && currentTime <= closeMinutes;
 };
 
-export const formatBusinessHours = (hours: BusinessHours): string => {
-  if (!hours) return 'Hours not available';
+export const formatBusinessHours = (location: Location): string => {
+  if (!location.hours) return 'Hours not available';
   
   const now = new Date();
   const currentDay = now.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase() as keyof BusinessHours;
-  const todayHours = hours[currentDay];
+  const todayHours = location.hours[currentDay];
   
   if (!todayHours || todayHours === 'Closed') {
     return 'Closed today';
@@ -71,12 +71,12 @@ export const generateBusinessHours = (): BusinessHours => {
   };
 };
 
-export const getTodaysHours = (hours: BusinessHours): string => {
-  if (!hours) return 'Hours not available';
+export const getTodaysHours = (location: Location): string => {
+  if (!location.hours) return 'Hours not available';
   
   const now = new Date();
   const currentDay = now.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase() as keyof BusinessHours;
-  const todayHours = hours[currentDay];
+  const todayHours = location.hours[currentDay];
   
   if (!todayHours || todayHours === 'Closed') {
     return 'Closed today';
