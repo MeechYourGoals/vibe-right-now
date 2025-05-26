@@ -1,73 +1,55 @@
 import { supabase } from '@/integrations/supabase/client';
 
 export interface PlaceSearchResult {
-  // Define expected properties for a place search result item based on Google Places API
-  // e.g., id: string, name: string, address: string, types: string[], etc.
-  id: string;
+  id: string; // Typically place_id from Google
   name: string;
   formatted_address?: string;
   types?: string[];
-  // Add other relevant fields you expect from the Google Places API
+  geometry?: {
+    location: {
+      lat: number;
+      lng: number;
+    };
+  };
+  photos?: any[]; // Define more strictly if possible
+  rating?: number;
+  user_ratings_total?: number;
+  opening_hours?: any; // Define more strictly if possible
+  vicinity?: string;
+  // Add other relevant fields you expect from Google Places API searches
 }
 
 export interface PlaceDetails extends PlaceSearchResult {
-  // Define expected properties for place details, extending PlaceSearchResult
-  // e.g., phone_number?: string, website?: string, opening_hours?: any, etc.
-  phone_number?: string;
+  reviews?: any[]; // Define more strictly if possible
   website?: string;
-  rating?: number;
-  // Add other relevant fields
+  international_phone_number?: string;
+  price_level?: number;
+  // Add other specific details fields
 }
 
 export class PlaceService {
   /**
-   * Searches for places using the Google Places API via a Supabase function.
-   * @param query The search query (e.g., "restaurants in New York")
-   * @param type Optional type of place to search for (e.g., 'restaurant', 'cafe')
-   * @returns A promise that resolves to an array of PlaceSearchResult objects.
+   * Fetches detailed information about a specific place.
    */
-  static async searchPlaces(query: string, type?: string): Promise<PlaceSearchResult[]> {
+  static async getPlaceDetails(
+    placeId: string,
+    fields: string[] = [
+      'place_id', 'name', 'formatted_address', 'geometry', 'types', 'rating',
+      'user_ratings_total', 'photos', 'reviews', 'opening_hours', 'website',
+      'international_phone_number', 'price_level', 'vicinity'
+    ]
+  ): Promise<PlaceDetails | null> {
     try {
       const { data, error } = await supabase.functions.invoke('google-places', {
-        body: {
-          action: 'search', // Assuming your Supabase function handles different actions
-          query,
-          type
-        }
+        body: { action: 'details', placeId, fields }
       });
 
       if (error) {
-        console.error('Error calling google-places function for search:', error);
-        throw new Error(`Failed to search places: ${error.message}`);
-      }
-
-      return data?.results || []; // Adjust based on actual Supabase function response
-    } catch (error) {
-      console.error('Error in PlaceService.searchPlaces:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Fetches details for a specific place using its place ID.
-   * @param placeId The Google Place ID.
-   * @returns A promise that resolves to a PlaceDetails object.
-   */
-  static async getPlaceDetails(placeId: string): Promise<PlaceDetails | null> {
-    try {
-      const { data, error } = await supabase.functions.invoke('google-places', {
-        body: {
-          action: 'details', // Assuming your Supabase function handles different actions
-          placeId
-        }
-      });
-
-      if (error) {
-        console.error('Error calling google-places function for details:', error);
+        console.error('Error calling google-places (getPlaceDetails):', error);
         throw new Error(`Failed to get place details: ${error.message}`);
       }
-
-      return data?.details || null; // Adjust based on actual Supabase function response
+      // Assuming Supabase function returns Google Places API 'result' for details
+      return (data?.result as PlaceDetails) || null;
     } catch (error) {
       console.error('Error in PlaceService.getPlaceDetails:', error);
       throw error;
@@ -75,22 +57,94 @@ export class PlaceService {
   }
 
   /**
-   * Finds events near a location or based on a query.
-   * This might use a specific 'events' action in your google-places Supabase function
-   * or combine place search with keyword filtering if Places API supports event types.
-   * @param query Query for events (e.g., "concerts in London", "music festivals near me")
-   * @param location Optional location context (e.g., { latitude: number, longitude: number })
-   * @returns A promise that resolves to an array of event-like objects.
+   * Searches for places based on a textual query.
    */
-  static async findEvents(query: string, location?: { latitude: number, longitude: number }): Promise<any[]> {
+  static async searchPlacesByText(
+    query: string,
+    type?: string,
+    region?: string
+  ): Promise<PlaceSearchResult[]> {
     try {
+      const requestBody: { action: string; query: string; type?: string; location?: string } = {
+        action: 'text_search',
+        query
+      };
+      if (type) requestBody.type = type;
+      if (region) requestBody.location = region; // Map 'region' to 'location' for Supabase
+
+      const { data, error } = await supabase.functions.invoke('google-places', {
+        body: requestBody
+      });
+
+      if (error) {
+        console.error('Error calling google-places (searchPlacesByText):', error);
+        throw new Error(`Failed to search places by text: ${error.message}`);
+      }
+      // Assuming Supabase function returns Google Places API 'results' for text search
+      return (data?.results as PlaceSearchResult[]) || [];
+    } catch (error) {
+      console.error('Error in PlaceService.searchPlacesByText:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Finds places nearby a given location.
+   */
+  static async findNearbyPlaces(
+    location: { lat: number; lng: number },
+    radius: number = 5000,
+    type?: string,
+    keyword?: string
+  ): Promise<PlaceSearchResult[]> {
+    try {
+      const requestBody: {
+        action: string;
+        location: { lat: number; lng: number };
+        radius: number;
+        type?: string;
+        keyword?: string;
+      } = {
+        action: 'nearby_search',
+        location,
+        radius
+      };
+      if (type) requestBody.type = type;
+      if (keyword) requestBody.keyword = keyword;
+
+      const { data, error } = await supabase.functions.invoke('google-places', {
+        body: requestBody
+      });
+
+      if (error) {
+        console.error('Error calling google-places (findNearbyPlaces):', error);
+        throw new Error(`Failed to find nearby places: ${error.message}`);
+      }
+      // Assuming Supabase function returns Google Places API 'results' for nearby search
+      return (data?.results as PlaceSearchResult[]) || [];
+    } catch (error) {
+      console.error('Error in PlaceService.findNearbyPlaces:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Finds events near a location or based on a query.
+   * Assumes events are place-like and can be returned as PlaceSearchResult.
+   */
+  static async findEvents(
+    query: string,
+    location?: { latitude: number; longitude: number } // Note: Google Places usually uses lat/lng
+  ): Promise<PlaceSearchResult[]> {
+    try {
+      // Adapt location to lat/lng if necessary for Supabase function
+      const googleLocation = location ? { lat: location.latitude, lng: location.longitude } : undefined;
+
       const { data, error } = await supabase.functions.invoke('google-places', {
         body: {
-          action: 'events', // Or 'search' with event-specific types
+          action: 'events', // This action needs to be supported by your Supabase function
           query,
-          location // Pass location if your function supports it
-          // You might need to specify types like 'tourist_attraction', 'event', etc.
-          // if the Places API Text Search is used for events.
+          location: googleLocation
         }
       });
 
@@ -98,9 +152,9 @@ export class PlaceService {
         console.error('Error calling google-places function for events:', error);
         throw new Error(`Failed to find events: ${error.message}`);
       }
-      // The structure of event results will depend heavily on how Google Places API returns them
-      // or if you are filtering results from a broader search.
-      return data?.events || data?.results || []; 
+      // Assuming events are returned in 'results' or 'events' field
+      const eventResults = data?.events || data?.results;
+      return (eventResults as PlaceSearchResult[]) || [];
     } catch (error) {
       console.error('Error in PlaceService.findEvents:', error);
       throw error;
