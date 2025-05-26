@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Layout } from "@/components/Layout";
@@ -10,7 +11,7 @@ import useUserProfile from "@/hooks/useUserProfile";
 
 const UserProfile = () => {
   const { username } = useParams<{ username: string }>();
-  const { user, isLoading, error } = useUserProfile(username!);
+  const { profile: user } = useUserProfile(username!);
   const [isFollowing, setIsFollowing] = useState(false);
 
   useEffect(() => {
@@ -19,14 +20,6 @@ const UserProfile = () => {
       setIsFollowing(username === 'vernon'); // Example: follow vernon by default
     }, 500);
   }, [username]);
-
-  if (isLoading) {
-    return <Layout>Loading profile...</Layout>;
-  }
-
-  if (error) {
-    return <Layout>Error loading profile: {error}</Layout>;
-  }
 
   if (!user) {
     return <Layout>User not found</Layout>;
@@ -40,7 +33,7 @@ const UserProfile = () => {
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-4">
                 <Avatar>
-                  <AvatarImage src={user.avatarUrl} alt={user.name} />
+                  <AvatarImage src={user.avatar} alt={user.name} />
                   <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div>
@@ -66,7 +59,7 @@ const UserProfile = () => {
               </div>
               <div className="flex items-center">
                 <Calendar className="h-4 w-4 mr-2" />
-                Joined {new Date(user.createdAt).toLocaleDateString()}
+                Joined {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'Unknown'}
               </div>
               <div className="flex items-center">
                 <Users className="h-4 w-4 mr-2" />

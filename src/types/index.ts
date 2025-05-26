@@ -168,8 +168,13 @@ export interface SocialMediaApiKeys {
 export interface CreditCard {
   id: string;
   lastFour: string;
+  last4?: string;
   brand: string;
   expiryMonth: number;
   expiryYear: number;
+  expMonth?: number;
+  expYear?: number;
   isDefault: boolean;
+  maxSpendLimit?: number;
+  vernonApproved?: boolean;
 }

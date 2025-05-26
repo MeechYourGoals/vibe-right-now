@@ -1,30 +1,23 @@
 
-import { regularUsers } from "./regularUsers";
-import { celebrityUsers } from "./celebrityUsers";
-import { hashString, generateUserBio } from "./utils";
+import { celebrityUsers } from './celebrityUsers';
+import { regularUsers } from './regularUsers';
 
-// Define the MockUserProfile type directly here if missing from @/types
-export interface MockUserProfile {
-  id: string;
-  username: string;
-  avatar: string;
-  bio?: string;
-  type?: 'regular' | 'celebrity' | 'venue';
-  verified?: boolean;
-}
+export const mockUsers = [...celebrityUsers, ...regularUsers];
 
-// Mock user profile utility
-export const getMockUserProfile = (type: 'regular' | 'celebrity' | 'venue'): MockUserProfile => {
-  const collection = type === 'celebrity' ? celebrityUsers : regularUsers;
-  const randomIndex = Math.floor(Math.random() * collection.length);
-  return {
-    ...collection[randomIndex],
-    type: type,
-    verified: type === 'venue' ? true : collection[randomIndex].verified
-  };
+// Helper function to get user by username
+export const getUserByUsername = (username: string) => {
+  return mockUsers.find(user => user.username === username);
 };
 
-// Create a combined mockUsers array
-export const mockUsers = [...regularUsers, ...celebrityUsers];
+// Helper function to check if user is verified
+export const isUserVerified = (username: string) => {
+  const user = getUserByUsername(username);
+  return user?.isVerified || false;
+};
 
-export { regularUsers, celebrityUsers, hashString, generateUserBio };
+// Helper function to get featured users
+export const getFeaturedUsers = () => {
+  return mockUsers.filter(user => user.isCelebrity || user.isVerified);
+};
+
+export { celebrityUsers, regularUsers };
