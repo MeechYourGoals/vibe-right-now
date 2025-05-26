@@ -23,11 +23,14 @@ const ReceiptDiscountChart = ({ data, timeframe }: ReceiptDiscountChartProps) =>
               data={data}
               margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
             >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey={timeframe === "week" ? "date" : "name"} />
-              <YAxis />
-              <Tooltip />
-              <Legend />
+              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+              <XAxis dataKey={timeframe === "week" ? "date" : "name"} stroke="#9ca3af" />
+              <YAxis stroke="#9ca3af" />
+              <Tooltip 
+                contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151', borderRadius: '8px', color: '#f3f4f6' }} 
+                cursor={{ fill: 'rgba(156, 163, 175, 0.1)' }} 
+              />
+              <Legend wrapperStyle={{ color: '#d1d5db' }} />
               <Bar dataKey="receipts" fill="#f59e0b" name="Receipt Uploads" />
               <Bar dataKey="discounts" fill="#8b5cf6" name="Discount Redemptions" />
             </BarChart>

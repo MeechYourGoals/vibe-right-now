@@ -25,10 +25,10 @@ const TrendsPanel = () => {
 };
 
 const RevenueTrendsCard = () => (
-  <Card>
+  <Card className="bg-neutral-800/80 border border-neutral-600">
     <CardHeader>
-      <CardTitle>Revenue Trends</CardTitle>
-      <CardDescription>Estimated revenue based on check-ins</CardDescription>
+      <CardTitle className="text-white">Revenue Trends</CardTitle>
+      <CardDescription className="text-neutral-300">Estimated revenue based on check-ins</CardDescription>
     </CardHeader>
     <CardContent>
       <div className="h-80">
@@ -37,10 +37,13 @@ const RevenueTrendsCard = () => (
             data={demoData}
             margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
           >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="month" />
-            <YAxis />
-            <Tooltip />
+            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+            <XAxis dataKey="month" stroke="#9ca3af" />
+            <YAxis stroke="#9ca3af" />
+            <Tooltip 
+              contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151', borderRadius: '8px', color: '#f3f4f6' }} 
+              cursor={{ fill: 'rgba(156, 163, 175, 0.1)' }} 
+            />
             <Line type="monotone" dataKey="revenue" stroke="#8884d8" />
           </LineChart>
         </ResponsiveContainer>
@@ -50,10 +53,10 @@ const RevenueTrendsCard = () => (
 );
 
 const SocialMediaImpactCard = () => (
-  <Card>
+  <Card className="bg-neutral-800/80 border border-neutral-600">
     <CardHeader>
-      <CardTitle>Social Media Impact</CardTitle>
-      <CardDescription>Posts and mentions over time</CardDescription>
+      <CardTitle className="text-white">Social Media Impact</CardTitle>
+      <CardDescription className="text-neutral-300">Posts and mentions over time</CardDescription>
     </CardHeader>
     <CardContent>
       <div className="h-80">
@@ -69,10 +72,14 @@ const SocialMediaImpactCard = () => (
             ]}
             margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
           >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="month" />
-            <YAxis />
-            <Tooltip />
+            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+            <XAxis dataKey="month" stroke="#9ca3af" />
+            <YAxis stroke="#9ca3af" />
+            <Tooltip 
+              contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151', borderRadius: '8px', color: '#f3f4f6' }} 
+              cursor={{ fill: 'rgba(156, 163, 175, 0.1)' }} 
+            />
+            <Legend wrapperStyle={{ color: '#d1d5db' }} />
             <Bar dataKey="posts" fill="#8884d8" />
             <Bar dataKey="mentions" fill="#82ca9d" />
           </BarChart>
@@ -83,10 +90,10 @@ const SocialMediaImpactCard = () => (
 );
 
 const CompetitiveAnalysisCard = () => (
-  <Card>
+  <Card className="bg-neutral-800/80 border border-neutral-600">
     <CardHeader>
-      <CardTitle>Competitive Analysis</CardTitle>
-      <CardDescription>How your venue compares to similar venues in your area</CardDescription>
+      <CardTitle className="text-white">Competitive Analysis</CardTitle>
+      <CardDescription className="text-neutral-300">How your venue compares to similar venues in your area</CardDescription>
     </CardHeader>
     <CardContent>
       <div className="h-80">
@@ -101,10 +108,14 @@ const CompetitiveAnalysisCard = () => (
             ]}
             margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
           >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="category" />
-            <YAxis />
-            <Tooltip />
+            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+            <XAxis dataKey="category" stroke="#9ca3af" />
+            <YAxis stroke="#9ca3af" />
+            <Tooltip 
+              contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151', borderRadius: '8px', color: '#f3f4f6' }} 
+              cursor={{ fill: 'rgba(156, 163, 175, 0.1)' }} 
+            />
+            <Legend wrapperStyle={{ color: '#d1d5db' }} />
             <Bar dataKey="you" fill="#8884d8" name="Your Venue" />
             <Bar dataKey="average" fill="#82ca9d" name="Industry Average" />
           </BarChart>
@@ -112,7 +123,7 @@ const CompetitiveAnalysisCard = () => (
       </div>
     </CardContent>
     <CardFooter>
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm text-neutral-400">
         <span className="font-medium">Note:</span> Benchmarks are from similar venues in your area based on category, size, and pricing.
       </p>
     </CardFooter>

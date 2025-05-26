@@ -10,7 +10,7 @@ interface VernonProBannerProps {
 
 const VernonProBanner = ({ subscriptionTier }: VernonProBannerProps) => {
   return (
-    <Card className="bg-gradient-to-r from-amber-950/80 to-orange-950/80 border-2 border-amber-600/50 backdrop-blur-sm">
+    <Card className="bg-gradient-to-r from-amber-950/80 to-orange-950/80 border border-amber-600/50 backdrop-blur-sm">
       <CardHeader className="pb-4">
         <div className="flex justify-between items-start">
           <div className="flex items-center">

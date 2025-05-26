@@ -36,10 +36,10 @@ const OverviewPanel = () => {
 };
 
 const VisitorTrendsCard = () => (
-  <Card>
+  <Card className="bg-neutral-800/80 border border-neutral-600">
     <CardHeader>
-      <CardTitle>Visitor Trends</CardTitle>
-      <CardDescription>Monthly visitor statistics</CardDescription>
+      <CardTitle className="text-white">Visitor Trends</CardTitle>
+      <CardDescription className="text-neutral-300">Monthly visitor statistics</CardDescription>
     </CardHeader>
     <CardContent>
       <div className="h-80">
@@ -48,10 +48,13 @@ const VisitorTrendsCard = () => (
             data={demoData}
             margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
           >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="month" />
-            <YAxis />
-            <Tooltip />
+            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+            <XAxis dataKey="month" stroke="#9ca3af" />
+            <YAxis stroke="#9ca3af" />
+            <Tooltip 
+              contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151', borderRadius: '8px', color: '#f3f4f6' }} 
+              cursor={{ fill: 'rgba(156, 163, 175, 0.1)' }} 
+            />
             <Area type="monotone" dataKey="visitors" stroke="#8884d8" fill="#8884d8" />
           </AreaChart>
         </ResponsiveContainer>
@@ -61,10 +64,10 @@ const VisitorTrendsCard = () => (
 );
 
 const EngagementRateCard = () => (
-  <Card>
+  <Card className="bg-neutral-800/80 border border-neutral-600">
     <CardHeader>
-      <CardTitle>Engagement Rate</CardTitle>
-      <CardDescription>User interaction with your venue</CardDescription>
+      <CardTitle className="text-white">Engagement Rate</CardTitle>
+      <CardDescription className="text-neutral-300">User interaction with your venue</CardDescription>
     </CardHeader>
     <CardContent>
       <div className="h-80">
@@ -73,10 +76,13 @@ const EngagementRateCard = () => (
             data={demoData}
             margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
           >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="month" />
-            <YAxis />
-            <Tooltip />
+            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+            <XAxis dataKey="month" stroke="#9ca3af" />
+            <YAxis stroke="#9ca3af" />
+            <Tooltip 
+              contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151', borderRadius: '8px', color: '#f3f4f6' }} 
+              cursor={{ fill: 'rgba(156, 163, 175, 0.1)' }} 
+            />
             <Line type="monotone" dataKey="engagement" stroke="#82ca9d" />
           </LineChart>
         </ResponsiveContainer>
@@ -86,10 +92,10 @@ const EngagementRateCard = () => (
 );
 
 const TopPerformingHoursCard = () => (
-  <Card>
+  <Card className="bg-neutral-800/80 border border-neutral-600">
     <CardHeader>
-      <CardTitle>Top Performing Hours</CardTitle>
-      <CardDescription>Busiest hours at your venue</CardDescription>
+      <CardTitle className="text-white">Top Performing Hours</CardTitle>
+      <CardDescription className="text-neutral-300">Busiest hours at your venue</CardDescription>
     </CardHeader>
     <CardContent>
       <div className="h-80">
@@ -98,10 +104,13 @@ const TopPerformingHoursCard = () => (
             data={topPerformingHoursData}
             margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
           >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="hour" />
-            <YAxis />
-            <Tooltip />
+            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+            <XAxis dataKey="hour" stroke="#9ca3af" />
+            <YAxis stroke="#9ca3af" />
+            <Tooltip 
+              contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151', borderRadius: '8px', color: '#f3f4f6' }} 
+              cursor={{ fill: 'rgba(156, 163, 175, 0.1)' }} 
+            />
             <Bar dataKey="visitors" fill="#8884d8" />
           </BarChart>
         </ResponsiveContainer>

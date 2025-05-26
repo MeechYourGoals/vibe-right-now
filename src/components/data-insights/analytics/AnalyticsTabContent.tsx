@@ -71,7 +71,7 @@ const AnalyticsTabContent = ({ isPremium, isPro }: AnalyticsTabContentProps) => 
       </Card>
 
       {/* Main Analytics Dashboard */}
-      <Card className="bg-neutral-900 border-neutral-700">
+      <Card className="bg-neutral-900/80 border border-neutral-700">
         <CardHeader>
           <CardTitle className="text-white">Advanced Analytics Dashboard</CardTitle>
           <CardDescription className="text-neutral-400">
