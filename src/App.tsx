@@ -11,7 +11,7 @@ import PinnedVibes from "./pages/PinnedVibes";
 import UserPoints from "./pages/UserPoints";
 import Settings from "./pages/Settings";
 import DataInsights from "./pages/DataInsights";
-import Advertiser from "./pages/Advertiser";
+import AdvertiserPage from "./pages/AdvertiserPage"; // Changed import
 import VenueProfile from "./pages/VenueProfile";
 import UserProfile from "./pages/UserProfile";
 import ProfileBio from "./pages/ProfileBio";
@@ -35,7 +35,7 @@ function App() {
               <Route path="/points" element={<UserPoints />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/data-insights" element={<DataInsights />} />
-              <Route path="/advertiser" element={<Advertiser />} />
+              <Route path="/advertiser" element={<AdvertiserPage />} /> {/* Changed component */}
               <Route path="/venue/:id" element={<VenueProfile />} />
               <Route path="/user/:username" element={<UserProfile />} />
               <Route path="/profile" element={<ProfileBio />} />
