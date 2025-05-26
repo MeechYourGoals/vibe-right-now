@@ -1,12 +1,12 @@
 
-import { User } from "@/types";
+import { MockUserProfile } from "./index";
 
 /**
  * Generates a generic bio for a user based on their username patterns
  * @param user The user object
  * @returns A bio string that matches the user's interests
  */
-export const generateUserBio = (user: User): string => {
+export const generateUserBio = (user: MockUserProfile): string => {
   if (user.bio) {
     return user.bio;
   }

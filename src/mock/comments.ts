@@ -1,5 +1,16 @@
-import { Comment } from "@/integrations/supabase/types";
+
 import { mockUsers } from "./users";
+
+export interface Comment {
+  id: string;
+  postId: string;
+  userId: string;
+  user: any;
+  content: string;
+  timestamp: string;
+  vibedHere: boolean;
+  likes: number;
+}
 
 export const mockComments: Comment[] = [
   {

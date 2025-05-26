@@ -1,11 +1,23 @@
 
-import { User } from "@/integrations/supabase/types";
 import { regularUsers } from "./regularUsers";
 import { celebrityUsers } from "./celebrityUsers";
 
-export interface MockUserProfile extends User {
-  type: "regular" | "celebrity" | "venue";
+export interface MockUserProfile {
+  id: string;
+  name: string;
+  username: string;
+  email?: string;
+  bio?: string;
   avatar: string;
+  type: "regular" | "celebrity" | "venue";
+  isVerified?: boolean;
+  verified?: boolean;
+  isCelebrity?: boolean;
+  isPrivate?: boolean;
+  followers?: number;
+  following?: number;
+  posts?: number;
+  vibeTags?: string[];
 }
 
 // Combine all users and add type information
@@ -25,3 +37,4 @@ export const mockUsers: MockUserProfile[] = [
 ];
 
 export { regularUsers, celebrityUsers };
+export { hashString, generateUserBio, getFeaturedUsers } from "./utils";

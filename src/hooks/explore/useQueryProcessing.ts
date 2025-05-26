@@ -54,6 +54,7 @@ export const useQueryProcessing = (
       {
         id: '1',
         name: 'Comedy Night',
+        address: '123 Comedy Club St',
         city: 'San Francisco',
         state: 'CA',
         type: 'comedy',

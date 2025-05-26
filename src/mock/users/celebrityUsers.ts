@@ -1,6 +1,7 @@
-import { User } from "@/integrations/supabase/types";
 
-export const celebrityUsers: User[] = [
+import { MockUserProfile } from "./index";
+
+export const celebrityUsers: Omit<MockUserProfile, 'type' | 'avatar'>[] = [
   {
     id: "celebrity-1",
     name: "Emma Stone",

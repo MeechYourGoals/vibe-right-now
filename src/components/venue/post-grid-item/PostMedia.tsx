@@ -73,10 +73,12 @@ const PostMedia: React.FC<PostMediaProps> = ({ post }) => {
     );
   }
 
-  // Get current media item
+  // Get current media item - handle both string and Media object formats
   const currentMedia = post.media[currentMediaIndex];
+  const mediaUrl = typeof currentMedia === 'string' ? currentMedia : currentMedia.url;
+  const mediaType = typeof currentMedia === 'string' ? 'image' : currentMedia.type;
 
-  if (currentMedia.type === "image") {
+  if (mediaType === "image") {
     // Try to load the image with error handling and fallback
     return (
       <>
@@ -86,7 +88,7 @@ const PostMedia: React.FC<PostMediaProps> = ({ post }) => {
           </div>
         )}
         <img 
-          src={currentMedia.url}
+          src={mediaUrl}
           alt={`Post by ${post.user.username}`}
           className={`h-full w-full object-cover transition-transform group-hover:scale-105 ${mediaLoaded ? 'opacity-100' : 'opacity-0'}`}
           onError={() => tryNextImage()}
@@ -99,7 +101,7 @@ const PostMedia: React.FC<PostMediaProps> = ({ post }) => {
   
   return (
     <video
-      src={currentMedia.url}
+      src={mediaUrl}
       className="h-full w-full object-cover"
       poster={getFallbackImage()}
       onError={() => tryNextImage()}

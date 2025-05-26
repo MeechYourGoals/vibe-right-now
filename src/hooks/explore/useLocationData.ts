@@ -55,6 +55,7 @@ export const useLocationData = (
           {
             id: '1',
             name: 'Live Music Night',
+            address: '123 Music Ave',
             city: searchedCity || 'San Francisco',
             state: searchedState || 'CA',
             type: 'music',
@@ -73,6 +74,7 @@ export const useLocationData = (
           {
             id: '2',
             name: 'Comedy Show',
+            address: '456 Laugh Lane',
             city: searchedCity || 'San Francisco',
             state: searchedState || 'CA',
             type: 'comedy',
