@@ -1,104 +1,80 @@
 
 import React, { useState } from "react";
-import { Post, Comment } from "@/types";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
-import { Heart, MessageCircle, Share2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Heart, MessageCircle, Share, Bookmark } from "lucide-react";
+import CommentList from "@/components/CommentList";
+import { Post, Comment } from "@/types";
 
 interface PostFooterProps {
   post: Post;
   comments: Comment[];
-  isDetailView?: boolean;
+  onLike: () => void;
+  onComment: () => void;
+  onShare: () => void;
+  onSave: () => void;
+  showComments: boolean;
+  setShowComments: (show: boolean) => void;
 }
 
-const PostFooter: React.FC<PostFooterProps> = ({ 
-  post, 
-  comments, 
-  isDetailView = false 
+const PostFooter: React.FC<PostFooterProps> = ({
+  post,
+  comments = [],
+  onLike,
+  onComment,
+  onShare,
+  onSave,
+  showComments,
+  setShowComments
 }) => {
-  const [liked, setLiked] = useState(false);
-  
-  const handleLike = () => {
-    setLiked(!liked);
+  const [newComment, setNewComment] = useState("");
+
+  const handleSubmitComment = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newComment.trim()) {
+      // Handle comment submission
+      console.log("Submitting comment:", newComment);
+      setNewComment("");
+    }
   };
-  
-  // Helper function to get comment count safely
-  const getCommentCount = (post: Post): number => {
-    if (typeof post.comments === 'number') {
-      return post.comments;
-    }
-    if (Array.isArray(post.comments)) {
-      return post.comments.length;
-    }
-    return 0;
-  };
-  
-  const renderComments = () => {
-    if (isDetailView) {
-      return null; // Comments are rendered separately in detail view
-    }
-    
-    if (!comments || comments.length === 0) {
-      return null;
-    }
-    
-    // Show the most recent comment
-    const latestComment = comments[0];
-    
-    return (
-      <div className="px-4 py-2 border-t text-sm">
-        <div className="flex items-start gap-2">
-          <span className="font-semibold">{latestComment.user.username}</span>
-          <p className="text-xs whitespace-pre-wrap">{latestComment.content || latestComment.text}</p>
-        </div>
-        
-        {comments.length > 1 && (
-          <Link to={`/post/${post.id}`} className="text-muted-foreground text-xs mt-1 block">
-            View all {getCommentCount(post)} comments
-          </Link>
-        )}
-      </div>
-    );
-  };
-  
+
   return (
-    <div className="px-4 pb-2">
-      <div className="flex items-center justify-between py-2">
+    <div className="p-4 border-t border-border">
+      <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-4">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="flex items-center gap-1 px-2"
-            onClick={handleLike}
-          >
-            <Heart 
-              className={`h-5 w-5 ${liked ? 'fill-red-500 text-red-500' : ''}`} 
-            />
-            <span>{post.likes + (liked ? 1 : 0)}</span>
+          <Button variant="ghost" size="sm" onClick={onLike}>
+            <Heart className="h-4 w-4 mr-1" />
+            {post.likes}
           </Button>
-          
-          <Link to={`/post/${post.id}`}>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="flex items-center gap-1 px-2"
-            >
-              <MessageCircle className="h-5 w-5" />
-              <span>{getCommentCount(post)}</span>
-            </Button>
-          </Link>
+          <Button variant="ghost" size="sm" onClick={onComment}>
+            <MessageCircle className="h-4 w-4 mr-1" />
+            {comments.length}
+          </Button>
+          <Button variant="ghost" size="sm" onClick={onShare}>
+            <Share className="h-4 w-4" />
+          </Button>
         </div>
-        
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="rounded-full h-8 w-8 p-0"
-        >
-          <Share2 className="h-4 w-4" />
+        <Button variant="ghost" size="sm" onClick={onSave}>
+          <Bookmark className="h-4 w-4" />
         </Button>
       </div>
-      
-      {renderComments()}
+
+      {showComments && (
+        <div className="space-y-3">
+          <CommentList comments={comments} />
+          <form onSubmit={handleSubmitComment} className="flex gap-2">
+            <Input
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              placeholder="Add a comment..."
+              className="flex-1"
+            />
+            <Button type="submit" size="sm">
+              Post
+            </Button>
+          </form>
+        </div>
+      )}
     </div>
   );
 };

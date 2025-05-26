@@ -34,4 +34,12 @@ export const hashString = (str: string): number => {
   return Math.abs(hash); // Return absolute value to ensure positive number
 };
 
+// Get a mock user profile by index or random
+export const getMockUserProfile = (index?: number): MockUserProfile => {
+  if (index !== undefined && index < mockUsers.length) {
+    return mockUsers[index];
+  }
+  return mockUsers[Math.floor(Math.random() * mockUsers.length)];
+};
+
 export { regularUsers, celebrityUsers };

@@ -1,24 +1,34 @@
 
-import { BusinessHours } from "@/types";
+import { BusinessHours, Location } from "@/types";
 
-export const getTodaysHours = (hours?: BusinessHours): string => {
+export const getTodaysHours = (hours?: BusinessHours | Location): string => {
   if (!hours) return "Hours not available";
   
+  // If it's a Location object, extract the hours property
+  const businessHours = 'hours' in hours ? hours.hours : hours;
+  
+  if (!businessHours) return "Hours not available";
+  
   const today = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
-  const todaysHours = hours[today];
+  const todaysHours = businessHours[today];
   
   if (!todaysHours) return "Closed today";
   
   return todaysHours;
 };
 
-export const formatBusinessHours = (hours?: BusinessHours): string => {
+export const formatBusinessHours = (hours?: BusinessHours | Location): string => {
   if (!hours) return "Hours not available";
+  
+  // If it's a Location object, extract the hours property
+  const businessHours = 'hours' in hours ? hours.hours : hours;
+  
+  if (!businessHours) return "Hours not available";
   
   const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
   const formattedHours = daysOfWeek
     .map(day => {
-      const dayHours = hours[day];
+      const dayHours = businessHours[day];
       if (dayHours) {
         const capitalizedDay = day.charAt(0).toUpperCase() + day.slice(1);
         return `${capitalizedDay}: ${dayHours}`;
