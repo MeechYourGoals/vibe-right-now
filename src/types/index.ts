@@ -33,6 +33,7 @@ export interface Comment {
 export interface Media {
   type: 'image' | 'video';
   url: string;
+  thumbnail?: string;
 }
 
 export interface Post {
@@ -51,6 +52,10 @@ export interface Post {
     logo: string;
     cta: string;
   };
+  isPinned?: boolean;
+  saved?: boolean;
+  expiresAt?: string;
+  isVenuePost?: boolean;
 }
 
 export interface Location {
@@ -63,18 +68,31 @@ export interface Location {
   zip?: string;
   lat: number;
   lng: number;
-  type: "restaurant" | "bar" | "event" | "attraction" | "sports" | "other";
+  type: "restaurant" | "bar" | "event" | "attraction" | "sports" | "other" | "nightlife";
   verified: boolean;
   hours?: Record<string, string>;
   vibes?: string[];
+  vibeTags?: string[];
   userProfile?: User;
   rating?: number;
   followers?: number;
   checkins?: number;
+  images?: string[];
 }
 
 export interface BusinessHours {
   [key: string]: string;
+}
+
+export interface EventItem {
+  id: string;
+  name: string;
+  location: Location;
+  date: string;
+  time: string;
+  category: string;
+  price?: string;
+  image?: string;
 }
 
 // VernonChat types
@@ -120,4 +138,9 @@ export interface VenueInsights {
   impressions: number;
   viewsPer: number;
   viewsCount?: number;
+  visitorCount?: number;
+  checkInCount?: number;
+  checkInsCount?: number;
+  receiptUploads?: number;
+  discountRedemptions?: number;
 }

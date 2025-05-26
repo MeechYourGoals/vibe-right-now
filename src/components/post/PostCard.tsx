@@ -1,8 +1,9 @@
+
 import React, { useState } from "react";
-import { PostHeader } from "@/components/post/PostHeader";
-import { PostContent } from "@/components/post/PostContent";
+import PostHeader from "@/components/post/PostHeader";
+import PostContent from "@/components/post/PostContent";
 import PostFooter from "@/components/post/PostFooter";
-import { Media, Post } from "@/types";
+import { Media, Post, Comment } from "@/types";
 import PostMedia from "../venue/post-grid-item/PostMedia";
 
 interface PostCardProps {
@@ -69,9 +70,7 @@ const PostCard = ({ posts, locationPostCount = 1, getComments }: PostCardProps) 
         user={primaryPost.user} 
         location={primaryPost.location} 
         timestamp={primaryPost.timestamp}
-        locationPostCount={locationPostCount}
-        isSponsored={primaryPost.isSponsored}
-        sponsorInfo={primaryPost.sponsorInfo}
+        isPinned={primaryPost.isPinned}
       />
       
       <PostContent content={primaryPost.content} />

@@ -5,10 +5,18 @@ import { getRecentTime, getExpiryTime } from "./time-utils";
 
 const allUsers = [...regularUsers, ...celebrityUsers];
 
+// Ensure all users have required properties
+const sanitizedUsers = allUsers.map(user => ({
+  ...user,
+  username: user.username || `user-${user.id}`,
+  name: user.name || "Anonymous User",
+  avatar: user.avatar || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face"
+}));
+
 export const mockPosts: Post[] = [
   {
     id: "1",
-    user: allUsers[0],
+    user: sanitizedUsers[0],
     location: mockLocations[0],
     content: "The sunset view here is incredible tonight! DJ is playing the best vibes 🎵",
     media: [
@@ -22,7 +30,7 @@ export const mockPosts: Post[] = [
       },
     ],
     timestamp: getRecentTime(1),
-    expiresAt: getExpiryTime(getRecentTime(1), true), // Pinned post (90 days)
+    expiresAt: getExpiryTime(getRecentTime(1), true),
     likes: 42,
     comments: 7,
     isPinned: true,
@@ -576,4 +584,4 @@ export const mockPosts: Post[] = [
     comments: 39,
     saved: false
   },
-];
+].filter(post => post.user && post.user.username); // Filter out any posts without valid user data

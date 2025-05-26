@@ -30,3 +30,20 @@ export const formatBusinessHours = (hours?: BusinessHours): string => {
   
   return formattedHours || "Hours not available";
 };
+
+export const generateBusinessHours = (location?: any): BusinessHours => {
+  if (location && location.hours) {
+    return location.hours;
+  }
+  
+  // Default business hours
+  return {
+    monday: "9:00 AM - 5:00 PM",
+    tuesday: "9:00 AM - 5:00 PM", 
+    wednesday: "9:00 AM - 5:00 PM",
+    thursday: "9:00 AM - 5:00 PM",
+    friday: "9:00 AM - 5:00 PM",
+    saturday: "10:00 AM - 4:00 PM",
+    sunday: "Closed"
+  };
+};
