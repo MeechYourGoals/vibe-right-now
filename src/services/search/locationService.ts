@@ -1,71 +1,123 @@
+import { PlaceService } from '../PlaceService'; // Added import
 
-export function getCitySpecificLocation(city: string, type: string = "downtown"): string {
-  const cityLower = city.toLowerCase();
-  
-  if (type === "downtown") {
-    if (cityLower.includes("new york") || cityLower === "nyc") {
-      return "Union Square";
-    } else if (cityLower.includes("chicago")) {
-      return "Millennium Park";
-    } else if (cityLower.includes("los angeles") || cityLower === "la") {
-      return "Grand Central Market";
-    } else if (cityLower.includes("san francisco") || cityLower === "sf") {
-      return "Ferry Building";
-    } else {
+// Modified to be async and use PlaceService
+export async function getCitySpecificLocation(city: string, type: string = "downtown"): Promise<string> {
+  try {
+    const query = `${type} in ${city}`;
+    const results = await PlaceService.searchPlaces(query);
+    if (results && results.length > 0 && results[0].name) {
+      return results[0].name;
+    }
+    // Fallback to original logic
+    const cityLower = city.toLowerCase();
+    if (type === "downtown") {
+      if (cityLower.includes("new york") || cityLower === "nyc") return "Union Square";
+      if (cityLower.includes("chicago")) return "Millennium Park";
+      if (cityLower.includes("los angeles") || cityLower === "la") return "Grand Central Market";
+      if (cityLower.includes("san francisco") || cityLower === "sf") return "Ferry Building";
       return `Downtown ${city} Plaza`;
     }
-  }
-  
-  if (type === "waterfront") {
-    if (cityLower.includes("chicago")) {
-      return "Navy Pier";
-    } else if (cityLower.includes("san francisco") || cityLower === "sf") {
-      return "Fisherman's Wharf";
-    } else if (cityLower.includes("seattle")) {
-      return "Pike Place Market";
-    } else if (cityLower.includes("new york") || cityLower === "nyc") {
-      return "Battery Park";
-    } else if (cityLower.includes("boston")) {
-      return "Boston Harbor";
-    } else if (cityLower.includes("miami")) {
-      return "Bayside Marketplace";
-    } else {
+    if (type === "waterfront") {
+      if (cityLower.includes("chicago")) return "Navy Pier";
+      if (cityLower.includes("san francisco") || cityLower === "sf") return "Fisherman's Wharf";
+      if (cityLower.includes("seattle")) return "Pike Place Market";
+      if (cityLower.includes("new york") || cityLower === "nyc") return "Battery Park";
+      if (cityLower.includes("boston")) return "Boston Harbor";
+      if (cityLower.includes("miami")) return "Bayside Marketplace";
       return `${city} Waterfront District`;
     }
-  }
-  
-  if (type === "gardens") {
-    if (cityLower.includes("new york") || cityLower === "nyc") {
-      return "New York Botanical Garden";
-    } else if (cityLower.includes("chicago")) {
-      return "Chicago Botanic Garden";
-    } else if (cityLower.includes("los angeles") || cityLower === "la") {
-      return "Huntington Gardens";
-    } else if (cityLower.includes("san francisco") || cityLower === "sf") {
-      return "Golden Gate Park Conservatory of Flowers";
-    } else {
+    if (type === "gardens") {
+      if (cityLower.includes("new york") || cityLower === "nyc") return "New York Botanical Garden";
+      if (cityLower.includes("chicago")) return "Chicago Botanic Garden";
+      if (cityLower.includes("los angeles") || cityLower === "la") return "Huntington Gardens";
+      if (cityLower.includes("san francisco") || cityLower === "sf") return "Golden Gate Park Conservatory of Flowers";
       return `${city} Botanical Gardens`;
     }
+    return `Downtown ${city}`;
+  } catch (error) {
+    console.error(`Error fetching location for ${city} (type: ${type}):`, error);
+    // Fallback to original logic in case of error
+    const cityLower = city.toLowerCase();
+    if (type === "downtown") {
+      if (cityLower.includes("new york") || cityLower === "nyc") return "Union Square";
+      if (cityLower.includes("chicago")) return "Millennium Park";
+      if (cityLower.includes("los angeles") || cityLower === "la") return "Grand Central Market";
+      if (cityLower.includes("san francisco") || cityLower === "sf") return "Ferry Building";
+      return `Downtown ${city} Plaza`;
+    }
+    if (type === "waterfront") {
+      if (cityLower.includes("chicago")) return "Navy Pier";
+      if (cityLower.includes("san francisco") || cityLower === "sf") return "Fisherman's Wharf";
+      if (cityLower.includes("seattle")) return "Pike Place Market";
+      if (cityLower.includes("new york") || cityLower === "nyc") return "Battery Park";
+      if (cityLower.includes("boston")) return "Boston Harbor";
+      if (cityLower.includes("miami")) return "Bayside Marketplace";
+      return `${city} Waterfront District`;
+    }
+    if (type === "gardens") {
+      if (cityLower.includes("new york") || cityLower === "nyc") return "New York Botanical Garden";
+      if (cityLower.includes("chicago")) return "Chicago Botanic Garden";
+      if (cityLower.includes("los angeles") || cityLower === "la") return "Huntington Gardens";
+      if (cityLower.includes("san francisco") || cityLower === "sf") return "Golden Gate Park Conservatory of Flowers";
+      return `${city} Botanical Gardens`;
+    }
+    return `Downtown ${city}`;
   }
-  
-  return `Downtown ${city}`;
 }
 
-export function getCitySpecificNeighborhood(city: string): string {
-  return `Old ${city}`;
+// Modified to be async and use PlaceService
+export async function getCitySpecificNeighborhood(city: string): Promise<string> {
+  try {
+    const query = `neighborhood in ${city}`; // Or a more specific query if needed
+    const results = await PlaceService.searchPlaces(query);
+    if (results && results.length > 0 && results[0].name) {
+      return results[0].name;
+    }
+    return `Old ${city}`; // Fallback
+  } catch (error) {
+    console.error(`Error fetching neighborhood for ${city}:`, error);
+    return `Old ${city}`; // Fallback
+  }
 }
 
-export function getCitySpecificWebsite(city: string, type: string = "general"): string {
-  return `www.${city.toLowerCase().replace(/\s+/g, "")}.${type === "general" ? "com" : "org"}`;
+// Modified to be async and use PlaceService
+export async function getCitySpecificWebsite(city: string, type: string = "general"): Promise<string> {
+  try {
+    // Search for a prominent place in the city to get a potential website
+    const results = await PlaceService.searchPlaces(city); 
+    if (results && results.length > 0 && results[0].id) {
+      const details = await PlaceService.getPlaceDetails(results[0].id);
+      if (details && details.website) {
+        return details.website;
+      }
+    }
+    // Fallback to original logic
+    return `www.${city.toLowerCase().replace(/\s+/g, "")}.${type === "general" ? "com" : "org"}`;
+  } catch (error) {
+    console.error(`Error fetching website for ${city}:`, error);
+    // Fallback to original logic
+    return `www.${city.toLowerCase().replace(/\s+/g, "")}.${type === "general" ? "com" : "org"}`;
+  }
 }
 
-export function getCitySpecificPark(city: string): string {
-  return `${city} Central Park`;
+// Modified to be async and use PlaceService
+export async function getCitySpecificPark(city: string): Promise<string> {
+  try {
+    const query = `park in ${city}`;
+    const results = await PlaceService.searchPlaces(query);
+    if (results && results.length > 0 && results[0].name) {
+      return results[0].name;
+    }
+    return `${city} Central Park`; // Fallback
+  } catch (error) {
+    console.error(`Error fetching park for ${city}:`, error);
+    return `${city} Central Park`; // Fallback
+  }
 }
 
-export function getCitySpecificWeather(city: string): string {
+// Modified to be async, implementation left as is for now
+export async function getCitySpecificWeather(city: string): Promise<string> {
   const cityLower = city.toLowerCase();
-  
   if (cityLower.includes("seattle")) {
     return "Currently experiencing mild temperatures with a chance of rain, typical for the Pacific Northwest.";
   } else if (cityLower.includes("miami")) {
@@ -81,9 +133,9 @@ export function getCitySpecificWeather(city: string): string {
   }
 }
 
-export function getCitySpecificSeason(city: string): string {
+// Modified to be async, implementation left as is for now
+export async function getCitySpecificSeason(city: string): Promise<string> {
   const cityLower = city.toLowerCase();
-  
   if (cityLower.includes("new york") || cityLower.includes("boston") || cityLower.includes("chicago")) {
     return "summer months and during holiday seasons";
   } else if (cityLower.includes("miami") || cityLower.includes("orlando")) {
