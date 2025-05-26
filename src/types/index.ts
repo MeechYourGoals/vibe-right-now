@@ -6,124 +6,118 @@ export interface User {
   email?: string;
   bio?: string;
   avatar?: string;
-  coverPhoto?: string;
+  isVerified?: boolean;
   followers?: number;
   following?: number;
-  isVerified?: boolean; // Previously referenced as 'verified'
-  isCelebrity?: boolean; // Add for UserProfileHeader
+  posts?: number;
+  vibeTags?: string[];
+  coverPhoto?: string;
   joinedDate?: string;
   location?: string;
+  isPrivate?: boolean;
+  isCelebrity?: boolean;
+  verified?: boolean;
+}
+
+export interface Comment {
+  id: string;
+  postId: string;
+  userId: string;
+  user: User;
+  content: string;
+  timestamp: string;
+  vibedHere: boolean;
+  likes: number;
+}
+
+export interface Media {
+  type: 'image' | 'video';
+  url: string;
+}
+
+export interface Post {
+  id: string;
+  user: User;
+  content: string;
+  media: Media[];
+  location: Location;
+  timestamp: string;
+  likes: number;
+  comments: number;
   vibeTags?: string[];
+  isSponsored?: boolean;
+  sponsorInfo?: {
+    name: string;
+    logo: string;
+    cta: string;
+  };
 }
 
 export interface Location {
   id: string;
   name: string;
   address: string;
-  city?: string;
+  city: string;
   state?: string;
-  country?: string; // Add for several components
-  zipCode?: string;
-  zip?: string; // Some components use zip instead of zipCode
-  lat?: number;
-  lng?: number;
-  type?: string;
-  rating?: number;
-  priceLevel?: number;
-  openNow?: boolean;
-  images?: string[];
-  logo?: string;
-  description?: string;
-  website?: string;
-  phone?: string;
+  country: string;
+  zip?: string;
+  lat: number;
+  lng: number;
+  type: "restaurant" | "bar" | "event" | "attraction" | "sports" | "other";
+  verified: boolean;
   hours?: Record<string, string>;
-  tags?: string[];
-  vibeTags?: string[];
-  vibes?: string[]; // Add for InfoWindowContent
-  verified?: boolean;
-}
-
-export interface Media {
-  type: "image" | "video";
-  url: string;
-  thumbnail?: string;
-}
-
-export interface EventItem extends Omit<Location, 'openNow' | 'hours'> {
-  date?: string;
-  startTime?: string;
-  endTime?: string;
-  performers?: string[];
-  ticketPrice?: string;
-  ticketUrl?: string;
-  category?: string;
-  venueName?: string;
-}
-
-export interface Comment {
-  id: string;
-  userId: string;
-  postId: string;
-  content: string;
-  timestamp: string;
-  user?: User;
-  likes?: number;
-  replies?: Comment[];
-  text?: string; // For backward compatibility
-  vibedHere?: boolean; // Add for CommentItem
-}
-
-export interface Post {
-  id: string;
-  userId?: string; // Make optional since many mock posts don't include it
-  locationId?: string;
-  content: string;
-  media?: Media[] | string[];
-  timestamp: string;
-  likes: number;
-  comments: number | Comment[];
-  user?: User;
-  location?: Location;
-  vibeTags?: string[]; // Add for PostFeed, ProfileTabContent, etc.
-  isPinned?: boolean; // Add for PostCard, PostHeader
-  isVenuePost?: boolean; // Add for PostCard
-  saved?: boolean;
-  expiresAt?: string;
-}
-
-export interface SavedPlace {
-  id: string;
-  locationId: string;
-  userId: string;
-  savedAt: string;
-  notes?: string;
-  visitedAt?: string;
+  vibes?: string[];
+  userProfile?: User;
   rating?: number;
-  status: 'visited' | 'want_to_visit';
-  location?: Location;
+  followers?: number;
+  checkins?: number;
+}
+
+export interface BusinessHours {
+  [key: string]: string;
+}
+
+// VernonChat types
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant' | 'system' | 'error';
+  content: string;
+  timestamp: string;
+  // For compatibility with older format
+  text?: string;
+  sender?: 'user' | 'ai';
+}
+
+export interface ChatState {
+  messages: ChatMessage[];
+  loading: boolean;
+  error: string | null;
+  isOpen?: boolean;
+  isMinimized?: boolean;
+  isLoading?: boolean;
+  isListening?: boolean;
+  isSpeaking?: boolean;
+  searchResults?: any[];
+  transcript?: string;
+  interimTranscript?: string;
 }
 
 export interface VenueInsights {
-  visitors?: number;
-  visitorsChange?: string;
-  visitorCount?: number;
-  posts?: number;
-  postsChange?: string;
-  shares?: number;
-  sharesChange?: string;
-  likes?: number;
-  likesChange?: string;
-  engagementRate?: string;
-  followerGrowth?: string;
-  clickThroughRate?: string;
-  totalVisits?: number;
-  revenueImpact?: string;
-  totalReach?: number;
-  impressions?: number;
-  viewsPer?: number;
+  visitors: number;
+  visitorsChange: string;
+  posts: number;
+  postsChange: string;
+  shares: number;
+  sharesChange: string;
+  likes: number;
+  likesChange: string;
+  engagementRate: string;
+  followerGrowth: string;
+  clickThroughRate: string;
+  totalVisits: number;
+  revenueImpact: string;
+  totalReach: number;
+  impressions: number;
+  viewsPer: number;
   viewsCount?: number;
-  checkInCount?: number;
-  checkInsCount?: number;
-  receiptUploads?: number;
-  discountRedemptions?: number;
 }

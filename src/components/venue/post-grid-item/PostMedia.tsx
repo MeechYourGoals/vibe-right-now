@@ -1,111 +1,62 @@
 
-import React, { useState, useEffect } from 'react';
-import { Post } from "@/types";
-import { getMediaForLocation } from "@/utils/map/locationMediaUtils";
+import React from "react";
+import { Media } from "@/types";
 
 interface PostMediaProps {
-  post: Post;
+  media: Media[];
+  className?: string;
 }
 
-const PostMedia: React.FC<PostMediaProps> = ({ post }) => {
-  const [imageError, setImageError] = useState(false);
-  const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
-  const [mediaLoaded, setMediaLoaded] = useState(false);
-  
-  // Use type-specific fallback images for better relevance
-  const getFallbackImage = () => {
-    if (!post.location) {
-      return "https://images.pexels.com/photos/2901209/pexels-photo-2901209.jpeg?auto=compress&cs=tinysrgb&w=600";
+const PostMedia: React.FC<PostMediaProps> = ({ media, className = "" }) => {
+  if (!media || media.length === 0) {
+    return null;
+  }
+
+  // Helper function to ensure media is in the correct format
+  const ensureMediaFormat = (mediaItem: any): Media => {
+    if (typeof mediaItem === 'string') {
+      // Determine type based on extension
+      const isVideo = mediaItem.endsWith('.mp4') || mediaItem.endsWith('.mov') || mediaItem.endsWith('.avi');
+      return {
+        type: isVideo ? 'video' : 'image',
+        url: mediaItem
+      };
+    } else if (typeof mediaItem === 'object' && mediaItem !== null && 'type' in mediaItem && 'url' in mediaItem) {
+      // Already in correct format
+      return mediaItem as Media;
     }
     
-    // Use the venue's image as a fallback
-    const venueMedia = getMediaForLocation(post.location);
-    return venueMedia.url;
-  };
-  
-  // Try loading the next image in the array if one fails
-  const tryNextImage = () => {
-    if (post.media && post.media.length > currentMediaIndex + 1) {
-      setCurrentMediaIndex(prevIndex => prevIndex + 1);
-      setImageError(false);
-    } else {
-      setImageError(true);
-    }
+    // Default fallback
+    return {
+      type: 'image',
+      url: 'https://via.placeholder.com/500'
+    };
   };
 
-  // Reset on post change
-  useEffect(() => {
-    setImageError(false);
-    setCurrentMediaIndex(0);
-    setMediaLoaded(false);
-  }, [post.id]);
-  
-  // Generate a preview text for fallback display
-  const getPreviewText = () => {
-    if (post.content) {
-      return post.content.slice(0, 100) + (post.content.length > 100 ? '...' : '');
-    }
-    return post.location?.name || "Post content";
-  };
-  
-  // Handle case with no media
-  if (!post.media || post.media.length === 0 || imageError) {
-    return (
-      <div className="flex h-full w-full items-center justify-center bg-muted">
-        {imageError ? (
-          <div className="p-2 text-center">
-            <img 
-              src={getFallbackImage()}
-              alt="Venue related content"
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                // Final fallback if even the venue image fails
-                (e.target as HTMLImageElement).src = "https://images.pexels.com/photos/2901209/pexels-photo-2901209.jpeg?auto=compress&cs=tinysrgb&w=600";
-              }}
-            />
-          </div>
-        ) : (
-          <p className="p-2 text-center text-sm">
-            {getPreviewText()}
-          </p>
-        )}
-      </div>
-    );
-  }
+  const firstMedia = ensureMediaFormat(media[0]);
 
-  // Get current media item
-  const currentMedia = post.media[currentMediaIndex];
-
-  if (currentMedia.type === "image") {
-    // Try to load the image with error handling and fallback
-    return (
-      <>
-        {!mediaLoaded && (
-          <div className="absolute inset-0 flex items-center justify-center bg-muted">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-          </div>
-        )}
-        <img 
-          src={currentMedia.url}
-          alt={`Post by ${post.user.username}`}
-          className={`h-full w-full object-cover transition-transform group-hover:scale-105 ${mediaLoaded ? 'opacity-100' : 'opacity-0'}`}
-          onError={() => tryNextImage()}
-          onLoad={() => setMediaLoaded(true)}
-          loading="lazy"
-        />
-      </>
-    );
-  }
-  
   return (
-    <video
-      src={currentMedia.url}
-      className="h-full w-full object-cover"
-      poster={getFallbackImage()}
-      onError={() => tryNextImage()}
-      controls={false}
-      muted
-    />
+    <div className={`relative ${className}`}>
+      {firstMedia.type === "image" ? (
+        <img 
+          src={firstMedia.url}
+          alt="Post media"
+          className="w-full h-full object-cover"
+        />
+      ) : (
+        <video
+          src={firstMedia.url}
+          className="w-full h-full object-cover"
+          poster="https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
+        />
+      )}
+      
+      {media.length > 1 && (
+        <div className="absolute top-2 right-2 bg-black/60 rounded-full px-2 py-1 text-white text-xs">
+          +{media.length - 1}
+        </div>
+      )}
+    </div>
   );
 };
 

@@ -1,4 +1,5 @@
-import { Comment } from "@/integrations/supabase/types";
+
+import { Comment } from "@/types";
 import { mockUsers } from "./users";
 
 export const mockComments: Comment[] = [

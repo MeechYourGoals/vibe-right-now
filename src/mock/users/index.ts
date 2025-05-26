@@ -1,11 +1,10 @@
 
-import { User } from "@/integrations/supabase/types";
+import { User } from "@/types";
 import { regularUsers } from "./regularUsers";
 import { celebrityUsers } from "./celebrityUsers";
 
 export interface MockUserProfile extends User {
   type: "regular" | "celebrity" | "venue";
-  avatar: string;
 }
 
 // Combine all users and add type information
