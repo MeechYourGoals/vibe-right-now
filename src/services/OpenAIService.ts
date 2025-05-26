@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 export class OpenAIService {
   /**
-   * Send a chat request to the OpenAI API (now with OpenRouter support)
+   * Send a chat request using Google Vertex AI (replaces OpenAI)
    */
   static async sendChatRequest(
     messages: { role: string; content: string }[],
@@ -12,84 +12,71 @@ export class OpenAIService {
       context?: string;
       stream?: boolean;
       maxTokens?: number;
-      useOpenRouter?: boolean;
     } = {}
   ) {
     try {
-      const {
-        model = 'anthropic/claude-3-haiku',
-        context = 'user',
-        stream = false,
-        maxTokens = 1000,
-        useOpenRouter = true
-      } = options;
-
-      const { data, error } = await supabase.functions.invoke('openai-chat', {
+      const { data, error } = await supabase.functions.invoke('vertex-ai', {
         body: {
           messages,
-          model,
-          context,
-          stream,
-          useOpenRouter
+          context: options.context || 'user'
         }
       });
 
       if (error) {
-        console.error('Error calling chat function:', error);
-        throw new Error(`Failed to call chat function: ${error.message}`);
+        console.error('Error calling Vertex AI:', error);
+        throw new Error(`Failed to call Vertex AI: ${error.message}`);
       }
 
-      return stream ? data : data?.response?.choices?.[0]?.message?.content || '';
+      return data?.response || '';
     } catch (error) {
-      console.error('Error in chat service:', error);
+      console.error('Error in Vertex AI service:', error);
       throw error;
     }
   }
 
   /**
-   * Convert speech to text using OpenAI's Whisper API
+   * Convert speech to text using Google Cloud STT
    */
   static async speechToText(audioBase64: string) {
     try {
-      const { data, error } = await supabase.functions.invoke('openai-speech', {
-        body: {
-          action: 'speech-to-text',
-          audio: audioBase64
-        }
+      const { data, error } = await supabase.functions.invoke('google-stt', {
+        body: { audio: audioBase64 }
       });
 
       if (error) {
-        console.error('Error calling speech-to-text function:', error);
+        console.error('Error calling Google STT:', error);
         throw new Error(`Failed to convert speech to text: ${error.message}`);
       }
 
-      return data?.text || '';
+      return data?.transcript || '';
     } catch (error) {
-      console.error('Error in speech-to-text service:', error);
+      console.error('Error in Google STT service:', error);
       throw error;
     }
   }
 
   /**
-   * Convert text to speech using OpenAI's TTS API
+   * Convert text to speech using Google Cloud TTS
    */
   static async textToSpeech(text: string) {
     try {
-      const { data, error } = await supabase.functions.invoke('openai-speech', {
+      const { data, error } = await supabase.functions.invoke('google-tts', {
         body: {
-          action: 'text-to-speech',
-          text
+          text: text,
+          voice: 'en-US-Neural2-D',
+          speakingRate: 1.0,
+          pitch: 0
         }
       });
 
       if (error) {
-        console.error('Error calling text-to-speech function:', error);
+        console.error('Error calling Google TTS:', error);
         throw new Error(`Failed to convert text to speech: ${error.message}`);
       }
 
-      return data?.audio || '';
+      return data?.audioContent || '';
     } catch (error) {
-      console.error('Error in text-to-speech service:', error);
+      console.error('Error in Google TTS service:', error);
       throw error;
     }
   }

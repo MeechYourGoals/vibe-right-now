@@ -4,24 +4,37 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import RegularUserPayments from "./RegularUserPayments";
 import VenuePayments from "./VenuePayments";
 
-const PaymentsTabContent = () => {
-  const [activeTab, setActiveTab] = useState("personal");
+interface PaymentsTabContentProps {
+  isVenueMode: boolean;
+}
+
+const PaymentsTabContent = ({ isVenueMode }: PaymentsTabContentProps) => {
+  const [activeTab, setActiveTab] = useState<string>("payment-methods");
 
   return (
-    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <TabsList className="grid w-full grid-cols-2">
-        <TabsTrigger value="personal">Personal</TabsTrigger>
-        <TabsTrigger value="venue">Venue</TabsTrigger>
-      </TabsList>
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-lg font-medium">Payment Settings</h3>
+        <p className="text-sm text-muted-foreground">
+          {isVenueMode 
+            ? "Manage your venue's payment integrations and preferences." 
+            : "Manage your payment methods and preferences."}
+        </p>
+      </div>
       
-      <TabsContent value="personal" className="mt-6">
+      {isVenueMode ? (
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="mb-4">
+            <TabsTrigger value="payment-methods">Payment Methods</TabsTrigger>
+            <TabsTrigger value="pos-integrations">POS Integrations</TabsTrigger>
+          </TabsList>
+          
+          <VenuePayments activeTab={activeTab} />
+        </Tabs>
+      ) : (
         <RegularUserPayments />
-      </TabsContent>
-      
-      <TabsContent value="venue" className="mt-6">
-        <VenuePayments />
-      </TabsContent>
-    </Tabs>
+      )}
+    </div>
   );
 };
 

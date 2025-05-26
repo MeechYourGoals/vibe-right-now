@@ -1,17 +1,23 @@
 
 import { useCallback } from 'react';
-import { ElevenLabsService } from '@/services/ElevenLabsService';
-import { toast } from 'sonner';
+import { GoogleTTSService } from '@/services/GoogleTTSService';
 
-export const useElevenLabsKeyManager = (setUseElevenLabs: (value: boolean) => void) => {
-  const promptForElevenLabsKey = useCallback((): void => {
-    const apiKey = prompt('Enter your Eleven Labs API key for improved voice quality:');
-    if (apiKey) {
-      ElevenLabsService.setApiKey(apiKey);
-      setUseElevenLabs(true);
-      toast.success('Eleven Labs API key saved. Voice quality will be improved.');
-    }
-  }, [setUseElevenLabs]);
+// Migrated from ElevenLabs to Google TTS for key management
+export const useGoogleTTSKeyManager = () => {
+  const validateApiKey = useCallback((): boolean => {
+    // Google TTS uses service account authentication via Supabase
+    // No API key validation needed on frontend
+    return true;
+  }, []);
 
-  return { promptForElevenLabsKey };
+  const clearApiKey = useCallback((): void => {
+    // No action needed for Google TTS
+    console.log('Google TTS uses service account authentication');
+  }, []);
+
+  return {
+    validateApiKey,
+    clearApiKey,
+    isValidated: true
+  };
 };

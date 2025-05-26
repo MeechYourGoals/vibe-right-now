@@ -1,15 +1,14 @@
 
 import { useState, useMemo } from "react";
 import { mockPosts, mockComments, mockUsers } from "@/mock/data";
-import { PostCard } from "@/components/post";
+import PostCard from "@/components/post/PostCard";
 import SearchVibes from "@/components/SearchVibes";
-import { Post, User, Comment } from "@/types";
-import { Media } from "@/types";
+import { Post, User, Media } from "@/types";
 import { isWithinThreeMonths } from "@/mock/time-utils";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { vibeTags } from "@/constants/vibeTags";
+import { vibeTags } from "@/hooks/useUserProfile";
 import {
   Popover,
   PopoverContent,
@@ -22,25 +21,91 @@ interface PostFeedProps {
 
 // Helper function to ensure media is in the correct format
 const ensureMediaFormat = (media: any[]): Media[] => {
-  return media.map(item => {
+  return media.map((item, index) => {
     if (typeof item === 'string') {
-      // Determine type based on extension
       const isVideo = item.endsWith('.mp4') || item.endsWith('.mov') || item.endsWith('.avi');
       return {
+        id: `media-${index}`,
         type: isVideo ? 'video' : 'image',
         url: item
       };
     } else if (typeof item === 'object' && item !== null) {
-      // Already in correct format
-      return item;
+      return {
+        id: item.id || `media-${index}`,
+        type: item.type || 'image',
+        url: item.url
+      };
     }
     
-    // Default fallback
     return {
+      id: `media-${index}`,
       type: 'image',
       url: 'https://via.placeholder.com/500'
     };
   });
+};
+
+// Helper function to ensure location has all required properties
+const ensureLocationFormat = (location: any) => {
+  if (!location) {
+    return {
+      id: 'default',
+      name: 'Unknown Location',
+      address: '',
+      city: '',
+      state: null,
+      zip: '',
+      latitude: 0,
+      longitude: 0,
+      lat: 0,
+      lng: 0,
+      category: '',
+      type: 'other' as const,
+      rating: 0,
+      reviewCount: 0,
+      price: '',
+      imageUrl: '',
+      isFeatured: false,
+      verified: false,
+      country: '',
+      formattedPhoneNumber: '',
+      website: '',
+      reservable: false
+    };
+  }
+
+  return {
+    id: location.id || 'default',
+    name: location.name || 'Unknown Location',
+    address: location.address || '',
+    city: location.city || '',
+    state: location.state || null,
+    zip: location.zip || '',
+    latitude: location.latitude || 0,
+    longitude: location.longitude || 0,
+    lat: location.lat || location.latitude || 0,
+    lng: location.lng || location.longitude || 0,
+    category: location.category || '',
+    type: location.type || 'other' as const,
+    rating: location.rating || 0,
+    reviewCount: location.reviewCount || 0,
+    price: location.price || '',
+    imageUrl: location.imageUrl || '',
+    isFeatured: location.isFeatured || false,
+    verified: location.verified || false,
+    country: location.country || '',
+    formattedPhoneNumber: location.formattedPhoneNumber || '',
+    website: location.website || '',
+    reservable: location.reservable || false,
+    images: location.images || [],
+    vibeTags: location.vibeTags || [],
+    hours: location.hours,
+    openingHours: location.openingHours,
+    customerId: location.customerId,
+    followers: location.followers,
+    checkins: location.checkins,
+    userProfile: location.userProfile
+  };
 };
 
 const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
@@ -57,7 +122,6 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
     }
   };
 
-  // Toggle vibe tag selection
   const toggleVibeTag = (tag: string) => {
     if (selectedVibeTags.includes(tag)) {
       setSelectedVibeTags(selectedVibeTags.filter(t => t !== tag));
@@ -66,30 +130,51 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
     }
   };
 
-  // Generate vibe tags for posts
+  // Generate vibe tags for posts and ensure proper structure
   const postsWithVibeTags = useMemo(() => {
     return mockPosts.map(post => {
+      // Ensure location is properly formatted
+      const safeLocation = ensureLocationFormat(post.location);
+      
+      // Ensure post has required properties
+      const enhancedPost = {
+        ...post,
+        author: post.author || post.user,
+        user: post.user || post.author,
+        location: safeLocation,
+        comments: post.comments || [],
+        vibedHere: post.vibedHere || false
+      };
+
       // Ensure post has vibe tags
-      if (!post.vibeTags || post.vibeTags.length === 0) {
-        // Generate 1-4 vibe tags per post
-        const seed = parseInt(post.id) || post.id.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
+      if (!enhancedPost.vibeTags || enhancedPost.vibeTags.length === 0) {
+        const seed = parseInt(enhancedPost.id) || enhancedPost.id.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
         const tagCount = 1 + (seed % 4);
         const shuffledTags = [...vibeTags].sort(() => 0.5 - (seed * 0.0001));
         const postVibeTags = shuffledTags.slice(0, tagCount);
         
-        post.vibeTags = postVibeTags;
+        enhancedPost.vibeTags = postVibeTags;
       }
       
       // Ensure media is in the correct format
-      post.media = ensureMediaFormat(post.media);
+      if (enhancedPost.media) {
+        enhancedPost.media = ensureMediaFormat(enhancedPost.media);
+      }
       
-      return post;
+      return enhancedPost;
     });
   }, []);
 
-  // First, filter posts to only show those from the past 3 months
+  // Filter posts to only show those from the past 3 months
   const recentPosts = useMemo(() => {
-    return postsWithVibeTags.filter(post => isWithinThreeMonths(post.timestamp));
+    return postsWithVibeTags.filter(post => {
+      // Add safety check for location
+      if (!post.location || !post.location.id) {
+        console.warn('Post missing location data:', post.id);
+        return false;
+      }
+      return isWithinThreeMonths(post.timestamp);
+    });
   }, [postsWithVibeTags]);
 
   // Prioritize posts from featured users if provided
@@ -98,43 +183,33 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
       return recentPosts;
     }
 
-    // Create a map of usernames (lowercase) for case-insensitive comparison
     const featuredUsernames = celebrityFeatured.map(username => username.toLowerCase());
-
-    // Find posts from featured users
     const featuredUserPosts = recentPosts.filter(post => 
       featuredUsernames.includes(post.user.username.toLowerCase())
     );
-    
-    // Get the remaining posts
     const otherPosts = recentPosts.filter(post => 
       !featuredUsernames.includes(post.user.username.toLowerCase())
     );
     
-    // Combine them with featured posts first
     return [...featuredUserPosts, ...otherPosts];
   }, [recentPosts, celebrityFeatured]);
 
   const filteredPosts = useMemo(() => {
     return prioritizedPosts.filter((post) => {
-      // Filter by location type if specified
-      if (filter !== "all" && post.location.type !== filter) {
+      if (filter !== "all" && post.location?.type !== filter) {
         return false;
       }
       
-      // Filter by vibe tags if any are selected
       if (selectedVibeTags.length > 0) {
-        // Check if post has any of the selected vibe tags (inclusive filtering)
         const hasMatchingTag = post.vibeTags?.some(tag => selectedVibeTags.includes(tag));
         if (!hasMatchingTag) return false;
       }
       
-      // Filter by search query if specified
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
         return (
-          post.location.name.toLowerCase().includes(query) ||
-          post.location.city.toLowerCase().includes(query) ||
+          post.location?.name?.toLowerCase().includes(query) ||
+          post.location?.city?.toLowerCase().includes(query) ||
           post.content.toLowerCase().includes(query) ||
           post.vibeTags?.some(tag => tag.toLowerCase().includes(query))
         );
@@ -144,72 +219,10 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
     });
   }, [prioritizedPosts, filter, searchQuery, selectedVibeTags]);
 
-  // Group posts by location
-  const postsGroupedByLocation = useMemo(() => {
-    const groupedPosts: Record<string, Post[]> = {};
-    
-    filteredPosts.forEach(post => {
-      const locationId = post.location.id;
-      if (!groupedPosts[locationId]) {
-        groupedPosts[locationId] = [];
-      }
-      groupedPosts[locationId].push(post);
-    });
-    
-    // Sort each location's posts by timestamp (most recent first)
-    Object.keys(groupedPosts).forEach(locationId => {
-      groupedPosts[locationId].sort((a, b) => 
-        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-      );
-    });
-    
-    return groupedPosts;
-  }, [filteredPosts]);
-
-  // Calculate the number of posts per location
-  // For demo purposes, add variation to the counts
-  const locationPostCounts = (() => {
-    const counts: Record<string, number> = {};
-    
-    // Define specific counts for certain locations to ensure variety
-    const specificCounts: Record<string, number> = {
-      "1": 15, // Sunset Lounge
-      "2": 23, // Artisan Coffee House
-      "3": 8,  // Summer Music Festival
-      "4": 3,  // Modern Art Museum
-      "5": 42, // Skyline Rooftop Bar
-      "6": 67, // Madison Square Garden
-      "7": 89, // Encore Beach Club
-      "8": 35, // Christ the Redeemer
-      "9": 12, // Aspen Highlands
-      "10": 121, // Allegiant Stadium (Super Bowl)
-      "13": 78, // Houston Rodeo
-      "14": 19, // Laugh Factory
-      "18": 53, // Sydney Opera House
-      "19": 145, // Eiffel Tower
-      "20": 104, // Coachella Valley Music Festival
-      "21": 31, // Gucci Pop-Up
-    };
-    
-    // Apply the specific counts where defined, and calculate naturally for others
-    filteredPosts.forEach(post => {
-      const locationId = post.location.id;
-      if (locationId in specificCounts) {
-        counts[locationId] = specificCounts[locationId];
-      } else {
-        counts[locationId] = (counts[locationId] || 0) + Math.floor(Math.random() * 50) + 1;
-      }
-    });
-    
-    return counts;
-  })();
-
-  // Get post comments
   const getPostComments = (postId: string) => {
     return mockComments.filter(comment => comment.postId === postId);
   };
 
-  // Render vibe tags for a post
   const renderVibeTags = (post: Post) => {
     if (!post.vibeTags || post.vibeTags.length === 0) return null;
     
@@ -225,32 +238,6 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
             {tag}
           </Badge>
         ))}
-      </div>
-    );
-  };
-
-  // Enhanced PostCard component with vibe tags
-  const EnhancedPostCard = ({ posts, locationPostCount }: { posts: Post[], locationPostCount: number }) => {
-    const postCard = (
-      <PostCard 
-        posts={posts} 
-        locationPostCount={locationPostCount}
-        getComments={getPostComments}
-      />
-    );
-    
-    // Check if any post has vibe tags
-    const hasVibeTags = posts.some(post => post.vibeTags && post.vibeTags.length > 0);
-    
-    if (!hasVibeTags) return postCard;
-    
-    // Add vibe tags below the post card
-    return (
-      <div className="space-y-2">
-        {postCard}
-        <div className="pl-4">
-          {renderVibeTags(posts[0])}
-        </div>
       </div>
     );
   };
@@ -317,13 +304,19 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
       </div>
 
       <div className="p-4 space-y-4">
-        {Object.keys(postsGroupedByLocation).length > 0 ? (
-          Object.entries(postsGroupedByLocation).map(([locationId, posts]) => (
-            <EnhancedPostCard 
-              key={locationId} 
-              posts={posts} 
-              locationPostCount={locationPostCounts[locationId]}
-            />
+        {filteredPosts.length > 0 ? (
+          filteredPosts.map((post) => (
+            <div key={post.id} className="space-y-2">
+              <PostCard 
+                post={post}
+                onComment={(postId, comment) => console.log('Comment added:', postId, comment)}
+                onLike={(postId) => console.log('Post liked:', postId)}
+                onShare={(postId) => console.log('Post shared:', postId)}
+              />
+              <div className="pl-4">
+                {renderVibeTags(post)}
+              </div>
+            </div>
           ))
         ) : (
           <div className="text-center py-10">

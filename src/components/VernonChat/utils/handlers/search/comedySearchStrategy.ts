@@ -1,106 +1,67 @@
-
+import { SearchStrategy } from '../types';
 import { SearchService } from '@/services/search/SearchService';
-import { cleanResponseText } from '../../responseFormatter';
-import { fetchComedyEvents } from '@/services/search/eventService';
-import { OpenRouterService } from '@/services/OpenRouterService';
 
 /**
- * Handles comedy-related searches
+ * Strategy for handling comedy show search queries
  */
-export const ComedySearchStrategy = {
+export class ComedySearchStrategy implements SearchStrategy {
   /**
-   * Detects if a query is related to comedy content
+   * Determines if the given query is related to comedy shows
+   * @param query The search query
+   * @returns True if the query is related to comedy shows, false otherwise
    */
-  isComedyQuery(inputValue: string): boolean {
-    return /comedy|comedian|stand[ -]?up|improv|funny|laugh|jokes/i.test(inputValue);
-  },
-  
+  canHandle(query: string): boolean {
+    const comedyKeywords = ['comedy', 'comedian', 'stand-up', 'funny', 'joke', 'improv'];
+    const lowerQuery = query.toLowerCase();
+    return comedyKeywords.some(keyword => lowerQuery.includes(keyword));
+  }
+
   /**
-   * Processes a comedy-related query
+   * Determines if this strategy should be used based on certain conditions
+   * @param query The search query
+   * @returns True if this strategy should be used, false otherwise
    */
-  async handleComedySearch(inputValue: string): Promise<string> {
-    console.log('Comedy-related query detected, using comedy-specific search');
+  shouldUse(query: string): boolean {
+    // For now, always use this strategy if canHandle returns true
+    return this.canHandle(query);
+  }
+
+  async search(query: string): Promise<string> {
     try {
-      // Extract city name if present
-      const cityMatch = inputValue.match(/in\s+([a-zA-Z\s]+)(?:,\s*([a-zA-Z\s]+))?/i);
-      let city = "your area";
-      let state = "";
+      console.log('ComedySearchStrategy: Searching for comedy shows with query:', query);
       
-      if (cityMatch && cityMatch[1]) {
-        city = cityMatch[1].trim();
-        if (cityMatch[2]) {
-          state = cityMatch[2].trim();
-        }
+      // Extract location and other details from the query
+      const locationMatch = query.match(/(?:in|at|near)\s+([^,\s]+(?:\s+[^,\s]+)*)/i);
+      const location = locationMatch ? locationMatch[1].trim() : '';
+      
+      console.log('Extracted location:', location);
+      
+      // Use SearchService for comedy-specific search
+      const searchResult = await SearchService.search(`comedy shows events ${query}`);
+      
+      if (searchResult && searchResult.length > 0) {
+        return searchResult;
       }
       
-      // First attempt: Try to get real comedy events using our event service
-      console.log(`Fetching comedy events for ${city}, ${state}`);
-      let comedyEvents = await fetchComedyEvents(city, state);
-      let comedyResponse = "";
-      
-      if (comedyEvents && comedyEvents.length > 0) {
-        comedyResponse = `Here are some upcoming comedy shows in ${city}${state ? `, ${state}` : ''}:\n\n`;
-        
-        comedyEvents.forEach((event, index) => {
-          const eventDate = new Date(event.date);
-          const formattedDate = eventDate.toLocaleDateString('en-US', { 
-            weekday: 'long', 
-            month: 'long', 
-            day: 'numeric' 
-          });
-          
-          comedyResponse += `${index + 1}. **${event.title}**\n`;
-          comedyResponse += `   - ${formattedDate} at ${event.time}\n`;
-          comedyResponse += `   - Venue: ${event.venue || event.location}\n`;
-          comedyResponse += `   - Tickets: ${event.price}\n\n`;
-        });
-      } else {
-        // Second attempt: Try direct web browsing using OpenRouter
-        console.log('No comedy events found, trying direct web browsing');
-        const searchQuery = `comedy shows in ${city}${state ? `, ${state}` : ''}`;
-        const browserEvents = await OpenRouterService.browseWebAndExtractEvents(searchQuery, 'comedy');
-        
-        if (browserEvents && browserEvents.length > 0) {
-          comedyResponse = `Here are some upcoming comedy shows in ${city}${state ? `, ${state}` : ''}:\n\n`;
-          
-          browserEvents.forEach((event, index) => {
-            const eventDate = event.date ? new Date(event.date) : null;
-            const formattedDate = eventDate ? eventDate.toLocaleDateString('en-US', { 
-              weekday: 'long', 
-              month: 'long', 
-              day: 'numeric' 
-            }) : 'Upcoming';
-            
-            comedyResponse += `${index + 1}. **${event.title || `Comedy Show featuring ${event.comedian}`}**\n`;
-            comedyResponse += `   - ${formattedDate}${event.time ? ` at ${event.time}` : ''}\n`;
-            comedyResponse += `   - Venue: ${event.venue || event.location}\n`;
-            comedyResponse += `   - ${event.price ? `Tickets: ${event.price}` : 'Check website for ticket info'}\n\n`;
-          });
-        } else {
-          // Third attempt: Fallback to the search service
-          console.log('No comedy events found via browsing, using search service');
-          comedyResponse = await SearchService.comedySearch(inputValue);
-        }
-      }
-      
-      if (comedyResponse && comedyResponse.length > 100) {
-        const comedyExploreLinkText = "\n\nYou can also [view all comedy shows on our Explore page](/explore?q=" + 
-          encodeURIComponent(inputValue) + "&tab=comedy) for a better visual experience.";
-        
-        // Set comedy category in sessionStorage
-        try {
-          sessionStorage.setItem('lastSearchCategories', JSON.stringify(['comedy']));
-          sessionStorage.setItem('lastSearchQuery', inputValue);
-        } catch (e) {
-          console.error('Error setting categories in sessionStorage:', e);
-        }
-        
-        return cleanResponseText(comedyResponse + comedyExploreLinkText);
-      }
-      return '';
-    } catch (comedyError) {
-      console.error('Comedy search failed:', comedyError);
-      return '';
+      // Fallback response for comedy queries
+      return this.generateComedyFallbackResponse(query, location);
+    } catch (error) {
+      console.error('Error in ComedySearchStrategy:', error);
+      return `I encountered an error searching for comedy shows. Please try rephrasing your question or search again.`;
     }
   }
-};
+
+  /**
+   * Generates a fallback response for comedy-related queries
+   * @param query The original search query
+   * @param location The extracted location from the query
+   * @returns A fallback response string
+   */
+  private generateComedyFallbackResponse(query: string, location: string): string {
+    if (location) {
+      return `I couldn't find specific comedy shows for "${query}" near ${location}. You might want to check local event listings or comedy club websites for more information.`;
+    } else {
+      return `I couldn't find specific comedy shows for "${query}". Please provide a location or try rephrasing your question.`;
+    }
+  }
+}

@@ -1,6 +1,6 @@
 
 import React, { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Header from "@/components/Header";
 import { Badge } from "@/components/ui/badge";
 import CameraButton from "@/components/CameraButton";
@@ -21,7 +21,6 @@ import DiscountLocations from "@/components/DiscountLocations";
 import { format } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { mockUsers } from "@/mock/users";
-import { User, Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const Explore = () => {
   const isMobile = useIsMobile();
