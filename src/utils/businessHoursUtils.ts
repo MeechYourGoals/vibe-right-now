@@ -58,3 +58,29 @@ export const formatBusinessHours = (hours: BusinessHours): string => {
   
   return `Today: ${todayHours}`;
 };
+
+export const generateBusinessHours = (): BusinessHours => {
+  return {
+    monday: "9:00 AM - 10:00 PM",
+    tuesday: "9:00 AM - 10:00 PM", 
+    wednesday: "9:00 AM - 10:00 PM",
+    thursday: "9:00 AM - 11:00 PM",
+    friday: "9:00 AM - 12:00 AM",
+    saturday: "10:00 AM - 12:00 AM",
+    sunday: "10:00 AM - 9:00 PM"
+  };
+};
+
+export const getTodaysHours = (hours: BusinessHours): string => {
+  if (!hours) return 'Hours not available';
+  
+  const now = new Date();
+  const currentDay = now.toLocaleDateString('en-US', { weekday: 'lowercase' }) as keyof BusinessHours;
+  const todayHours = hours[currentDay];
+  
+  if (!todayHours || todayHours === 'Closed') {
+    return 'Closed today';
+  }
+  
+  return todayHours;
+};
