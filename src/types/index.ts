@@ -150,12 +150,12 @@ export interface SocialMediaPost {
   content: string;
   author: string;
   timestamp: string;
-  platform: 'google' | 'yelp' | 'instagram' | 'other';
+  platform: 'google' | 'yelp' | 'instagram' | 'tiktok' | 'tripadvisor' | 'foursquare' | 'franki' | 'other';
   likes?: number;
   comments?: number;
   rating?: number;
   venueName: string;
-  source: 'google' | 'yelp' | 'instagram' | 'other';
+  source: 'google' | 'yelp' | 'instagram' | 'tiktok' | 'tripadvisor' | 'foursquare' | 'franki' | 'other';
   url?: string;
 }
 
@@ -163,6 +163,12 @@ export interface SocialMediaApiKeys {
   instagram: string;
   yelp: string;
   google: string;
+  tiktok: string;
+  tripadvisor: string;
+  foursquare: string;
+  franki: string;
+  other: string;
+  otherUrl: string;
 }
 
 export interface CreditCard {
