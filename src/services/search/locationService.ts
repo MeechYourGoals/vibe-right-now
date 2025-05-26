@@ -1,152 +1,108 @@
-import { PlaceService } from '../PlaceService'; // Added import
+import { PlaceService } from '@/services/PlaceService';
 
-// Modified to be async and use PlaceService
+/**
+ * Gets a specific type of location (e.g., downtown, waterfront) in a given city.
+ * @param city The city name.
+ * @param type The type of location (e.g., "downtown", "waterfront", "gardens").
+ * @returns The name of the location or a fallback message.
+ */
 export async function getCitySpecificLocation(city: string, type: string = "downtown"): Promise<string> {
   try {
     const query = `${type} in ${city}`;
-    const results = await PlaceService.searchPlaces(query);
-    if (results && results.length > 0 && results[0].name) {
-      return results[0].name;
+    // Ensure PlaceService.searchPlacesByText is the correct method name after PlaceService refactor
+    const places = await PlaceService.searchPlacesByText(query); 
+    if (places && places.length > 0 && places[0].name) {
+      return places[0].name;
     }
-    // Fallback to original logic
-    const cityLower = city.toLowerCase();
-    if (type === "downtown") {
-      if (cityLower.includes("new york") || cityLower === "nyc") return "Union Square";
-      if (cityLower.includes("chicago")) return "Millennium Park";
-      if (cityLower.includes("los angeles") || cityLower === "la") return "Grand Central Market";
-      if (cityLower.includes("san francisco") || cityLower === "sf") return "Ferry Building";
-      return `Downtown ${city} Plaza`;
-    }
-    if (type === "waterfront") {
-      if (cityLower.includes("chicago")) return "Navy Pier";
-      if (cityLower.includes("san francisco") || cityLower === "sf") return "Fisherman's Wharf";
-      if (cityLower.includes("seattle")) return "Pike Place Market";
-      if (cityLower.includes("new york") || cityLower === "nyc") return "Battery Park";
-      if (cityLower.includes("boston")) return "Boston Harbor";
-      if (cityLower.includes("miami")) return "Bayside Marketplace";
-      return `${city} Waterfront District`;
-    }
-    if (type === "gardens") {
-      if (cityLower.includes("new york") || cityLower === "nyc") return "New York Botanical Garden";
-      if (cityLower.includes("chicago")) return "Chicago Botanic Garden";
-      if (cityLower.includes("los angeles") || cityLower === "la") return "Huntington Gardens";
-      if (cityLower.includes("san francisco") || cityLower === "sf") return "Golden Gate Park Conservatory of Flowers";
-      return `${city} Botanical Gardens`;
-    }
-    return `Downtown ${city}`;
+    return `No specific ${type} found for ${city}. You can try a general web search.`;
   } catch (error) {
-    console.error(`Error fetching location for ${city} (type: ${type}):`, error);
-    // Fallback to original logic in case of error
-    const cityLower = city.toLowerCase();
-    if (type === "downtown") {
-      if (cityLower.includes("new york") || cityLower === "nyc") return "Union Square";
-      if (cityLower.includes("chicago")) return "Millennium Park";
-      if (cityLower.includes("los angeles") || cityLower === "la") return "Grand Central Market";
-      if (cityLower.includes("san francisco") || cityLower === "sf") return "Ferry Building";
-      return `Downtown ${city} Plaza`;
-    }
-    if (type === "waterfront") {
-      if (cityLower.includes("chicago")) return "Navy Pier";
-      if (cityLower.includes("san francisco") || cityLower === "sf") return "Fisherman's Wharf";
-      if (cityLower.includes("seattle")) return "Pike Place Market";
-      if (cityLower.includes("new york") || cityLower === "nyc") return "Battery Park";
-      if (cityLower.includes("boston")) return "Boston Harbor";
-      if (cityLower.includes("miami")) return "Bayside Marketplace";
-      return `${city} Waterfront District`;
-    }
-    if (type === "gardens") {
-      if (cityLower.includes("new york") || cityLower === "nyc") return "New York Botanical Garden";
-      if (cityLower.includes("chicago")) return "Chicago Botanic Garden";
-      if (cityLower.includes("los angeles") || cityLower === "la") return "Huntington Gardens";
-      if (cityLower.includes("san francisco") || cityLower === "sf") return "Golden Gate Park Conservatory of Flowers";
-      return `${city} Botanical Gardens`;
-    }
-    return `Downtown ${city}`;
+    console.error(`Error fetching ${type} for ${city}:`, error);
+    return `Could not fetch ${type} information for ${city}. Please try a web search.`;
   }
 }
 
-// Modified to be async and use PlaceService
+/**
+ * Gets a famous neighborhood in a given city.
+ * @param city The city name.
+ * @returns The name of a neighborhood or a fallback message.
+ */
 export async function getCitySpecificNeighborhood(city: string): Promise<string> {
   try {
-    const query = `neighborhood in ${city}`; // Or a more specific query if needed
-    const results = await PlaceService.searchPlaces(query);
-    if (results && results.length > 0 && results[0].name) {
-      return results[0].name;
+    const query = `famous neighborhood in ${city}`;
+    const places = await PlaceService.searchPlacesByText(query);
+    if (places && places.length > 0 && places[0].name) {
+      return places[0].name;
     }
-    return `Old ${city}`; // Fallback
+    return `No specific neighborhood found for ${city}. You can try a general web search.`;
   } catch (error) {
     console.error(`Error fetching neighborhood for ${city}:`, error);
-    return `Old ${city}`; // Fallback
+    return `Could not fetch neighborhood information for ${city}. Please try a web search.`;
   }
 }
 
-// Modified to be async and use PlaceService
+/**
+ * Gets a website relevant to the city, possibly for a prominent place.
+ * @param city The city name.
+ * @param type The type of information (e.g., "general", "tourist information").
+ * @returns A website URL or a Google search URL as a fallback.
+ */
 export async function getCitySpecificWebsite(city: string, type: string = "general"): Promise<string> {
   try {
-    // Search for a prominent place in the city to get a potential website
-    const results = await PlaceService.searchPlaces(city); 
-    if (results && results.length > 0 && results[0].id) {
-      const details = await PlaceService.getPlaceDetails(results[0].id);
-      if (details && details.website) {
-        return details.website;
-      }
+    const query = type === "general" ? `official city website ${city}` : `${type} in ${city}`;
+    const places = await PlaceService.searchPlacesByText(query);
+    // Ensure 'website' and 'place_id' are valid fields in PlaceSearchResult after PlaceService refactor
+    if (places && places.length > 0 && (places[0] as any).website) { 
+      return (places[0] as any).website;
     }
-    // Fallback to original logic
-    return `www.${city.toLowerCase().replace(/\s+/g, "")}.${type === "general" ? "com" : "org"}`;
+    // Fallback: try to get details of a prominent place like city hall or tourist info
+    const prominentPlaceQuery = `city hall in ${city}`;
+    const prominentPlaces = await PlaceService.searchPlacesByText(prominentPlaceQuery);
+    if (prominentPlaces && prominentPlaces.length > 0 && prominentPlaces[0].id) { // Assuming 'id' is place_id
+        const details = await PlaceService.getPlaceDetails(prominentPlaces[0].id, ['website']);
+        if (details && details.website) {
+            return details.website;
+        }
+    }
+    return `https://www.google.com/search?q=${encodeURIComponent(city + " " + type + " information")}`;
   } catch (error) {
-    console.error(`Error fetching website for ${city}:`, error);
-    // Fallback to original logic
-    return `www.${city.toLowerCase().replace(/\s+/g, "")}.${type === "general" ? "com" : "org"}`;
+    console.error(`Error fetching website for ${city} (${type}):`, error);
+    return `https://www.google.com/search?q=${encodeURIComponent(city + " " + type + " information")}`;
   }
 }
 
-// Modified to be async and use PlaceService
+/**
+ * Gets a prominent park in a given city.
+ * @param city The city name.
+ * @returns The name of a park or a fallback message.
+ */
 export async function getCitySpecificPark(city: string): Promise<string> {
   try {
     const query = `park in ${city}`;
-    const results = await PlaceService.searchPlaces(query);
-    if (results && results.length > 0 && results[0].name) {
-      return results[0].name;
+    const places = await PlaceService.searchPlacesByText(query, "park"); // Assuming type "park" is valid
+    if (places && places.length > 0 && places[0].name) {
+      return places[0].name;
     }
-    return `${city} Central Park`; // Fallback
+    return `No specific park found for ${city}. You can try a general web search.`;
   } catch (error) {
     console.error(`Error fetching park for ${city}:`, error);
-    return `${city} Central Park`; // Fallback
+    return `Could not fetch park information for ${city}. Please try a web search.`;
   }
 }
 
-// Modified to be async, implementation left as is for now
-export async function getCitySpecificWeather(city: string): Promise<string> {
-  const cityLower = city.toLowerCase();
-  if (cityLower.includes("seattle")) {
-    return "Currently experiencing mild temperatures with a chance of rain, typical for the Pacific Northwest.";
-  } else if (cityLower.includes("miami")) {
-    return "Warm and sunny with occasional afternoon showers, typical for the subtropical climate.";
-  } else if (cityLower.includes("chicago")) {
-    return "Weather can be variable, with windy conditions common. Check the forecast before heading out.";
-  } else if (cityLower.includes("phoenix") || cityLower.includes("las vegas")) {
-    return "Hot and dry conditions are common, especially in summer months. Stay hydrated when outdoors.";
-  } else if (cityLower.includes("denver")) {
-    return "Weather can change quickly due to the elevation. Sunny days are common but prepare for temperature drops.";
-  } else {
-    return "Check a local weather app for the most up-to-date forecast during your visit.";
-  }
+/**
+ * Provides guidance on finding weather information for a city.
+ * @param city The city name.
+ * @returns An informational string.
+ */
+export function getCitySpecificWeather(city: string): string {
+  return `Please use a web search (e.g., Google, weather websites) to find the current weather in ${city}.`;
 }
 
-// Modified to be async, implementation left as is for now
-export async function getCitySpecificSeason(city: string): Promise<string> {
-  const cityLower = city.toLowerCase();
-  if (cityLower.includes("new york") || cityLower.includes("boston") || cityLower.includes("chicago")) {
-    return "summer months and during holiday seasons";
-  } else if (cityLower.includes("miami") || cityLower.includes("orlando")) {
-    return "winter months and spring break";
-  } else if (cityLower.includes("san diego") || cityLower.includes("los angeles")) {
-    return "summer vacation season";
-  } else if (cityLower.includes("new orleans")) {
-    return "Mardi Gras and Jazz Fest";
-  } else if (cityLower.includes("nashville")) {
-    return "CMA Fest and summer months";
-  } else {
-    return "summer vacation months";
-  }
+/**
+ * Provides guidance on finding the best season to visit a city.
+ * @param city The city name.
+ * @returns An informational string.
+ */
+export function getCitySpecificSeason(city: string): string {
+  return `For the best season to visit ${city}, please consult travel guides or perform a web search.`;
 }
