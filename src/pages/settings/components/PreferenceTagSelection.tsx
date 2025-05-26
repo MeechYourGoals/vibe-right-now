@@ -17,16 +17,11 @@ const PreferenceTagSelection = ({
   onTagSelect,
   onTagRemove
 }: PreferenceTagSelectionProps) => {
-  // Ensure availableTags is an array before sorting
-  const sortedTags = Array.isArray(availableTags) 
-    ? [...availableTags].sort((a, b) => a.localeCompare(b)) 
-    : [];
-    
   return (
     <div className="space-y-2 mt-4">
       <Label>All Available Preferences</Label>
       <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto p-2 border rounded-md bg-background">
-        {sortedTags.map(tag => (
+        {availableTags.sort((a, b) => a.localeCompare(b)).map(tag => (
           <Badge 
             key={tag} 
             variant="outline" 

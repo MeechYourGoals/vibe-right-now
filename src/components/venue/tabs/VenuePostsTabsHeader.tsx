@@ -1,17 +1,16 @@
 
-import React from "react";
+import React from 'react';
 import { Button } from "@/components/ui/button";
+import { Grid2X2, ListIcon, Settings, Plus } from "lucide-react";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Grid, List, Settings } from "lucide-react";
-import SocialMediaConnectionsSheet from "../SocialMediaConnectionsSheet";
+import { Sheet, SheetTrigger } from "@/components/ui/sheet";
+import SocialMediaConnectionsSheet from '../SocialMediaConnectionsSheet';
 
 interface VenuePostsTabsHeaderProps {
-  activeTab?: string;
+  activeTab: string;
   viewMode: "list" | "grid";
   setViewMode: (mode: "list" | "grid") => void;
-  isConnectionsOpen?: boolean;
-  setIsConnectionsOpen?: (open: boolean) => void;
-  onConnectedPlatformsChange?: (platforms: Record<string, boolean>) => void;
+  onConnectedPlatformsChange: (platforms: Record<string, boolean>) => void;
   onAddPost?: () => void;
   venueId?: string;
 }
@@ -20,44 +19,60 @@ const VenuePostsTabsHeader: React.FC<VenuePostsTabsHeaderProps> = ({
   activeTab,
   viewMode,
   setViewMode,
-  isConnectionsOpen = false,
-  setIsConnectionsOpen = () => {},
-  onConnectedPlatformsChange = () => {},
-  onAddPost = () => {},
-  venueId = ""
+  onConnectedPlatformsChange,
+  onAddPost,
+  venueId
 }) => {
   return (
-    <div className="flex justify-between items-center">
-      <TabsList className="bg-neutral-800">
-        <TabsTrigger value="all" className="data-[state=active]:bg-neutral-700 text-neutral-300 data-[state=active]:text-white">All Posts</TabsTrigger>
-        <TabsTrigger value="vrn" className="data-[state=active]:bg-neutral-700 text-neutral-300 data-[state=active]:text-white">VRN</TabsTrigger>
-        <TabsTrigger value="external" className="data-[state=active]:bg-neutral-700 text-neutral-300 data-[state=active]:text-white">External</TabsTrigger>
+    <div className="flex justify-between items-center mb-2">
+      <TabsList className="grid grid-cols-3 w-[300px]">
+        <TabsTrigger value="all">All Posts</TabsTrigger>
+        <TabsTrigger value="vrn">VRN Content</TabsTrigger>
+        <TabsTrigger value="external">External</TabsTrigger>
       </TabsList>
       
-      <div className="flex space-x-2">
-        <Button
-          variant="outline"
+      <div className="flex gap-2">
+        {onAddPost && (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={onAddPost}
+            className="text-emerald-500 border-emerald-500/30 hover:bg-emerald-500/10"
+          >
+            <Plus className="h-4 w-4 mr-1" />
+            Add Your VRN Post
+          </Button>
+        )}
+        
+        <Button 
+          variant={viewMode === "list" ? "default" : "outline"} 
           size="sm"
-          onClick={() => setViewMode(viewMode === "list" ? "grid" : "list")}
-          className="border-neutral-600 text-neutral-300 hover:bg-neutral-800"
+          onClick={() => setViewMode("list")}
         >
-          {viewMode === "list" ? <Grid className="h-4 w-4" /> : <List className="h-4 w-4" />}
+          <ListIcon className="h-4 w-4" />
+        </Button>
+        <Button 
+          variant={viewMode === "grid" ? "default" : "outline"} 
+          size="sm"
+          onClick={() => setViewMode("grid")}
+        >
+          <Grid2X2 className="h-4 w-4" />
         </Button>
         
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setIsConnectionsOpen(true)}
-          className="border-neutral-600 text-neutral-300 hover:bg-neutral-800"
-        >
-          <Settings className="h-4 w-4" />
-        </Button>
+        {activeTab === 'external' && (
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="outline" size="sm" data-trigger="connections">
+                <Settings className="h-4 w-4 mr-1" />
+                Connections
+              </Button>
+            </SheetTrigger>
+            <SocialMediaConnectionsSheet 
+              onConnectedPlatformsChange={onConnectedPlatformsChange} 
+            />
+          </Sheet>
+        )}
       </div>
-
-      <SocialMediaConnectionsSheet
-        isOpen={isConnectionsOpen}
-        onClose={() => setIsConnectionsOpen(false)}
-      />
     </div>
   );
 };

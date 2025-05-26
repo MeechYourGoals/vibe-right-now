@@ -1,93 +1,94 @@
 
-import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import { Layout } from "@/components/Layout";
+import { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { MapPin, Calendar, Users, Heart, MessageSquare, Share2, MoreHorizontal } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent } from "@/components/ui/card";
-import useUserProfile from "@/hooks/useUserProfile";
+import Header from "@/components/Header";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import UserProfileHeader from "@/components/user/UserProfileHeader";
+import ProfileTabs from "@/components/user/ProfileTabs";
+import { useUserProfile } from "@/hooks/useUserProfile";
+import PrivateProfileContent from "@/components/user/PrivateProfileContent";
+import UserPlacesContent from "@/components/user/UserPlacesContent";
+import FollowedVenuesSection from "@/components/user/FollowedVenuesSection";
 
 const UserProfile = () => {
   const { username } = useParams<{ username: string }>();
-  const { profile: user } = useUserProfile(username!);
-  const [isFollowing, setIsFollowing] = useState(false);
-
-  useEffect(() => {
-    // Mock follow status - replace with actual API call
-    setTimeout(() => {
-      setIsFollowing(username === 'vernon'); // Example: follow vernon by default
-    }, 500);
-  }, [username]);
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState("posts");
+  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
+  const [placesTabValue, setPlacesTabValue] = useState("visited");
+  
+  const { 
+    user, 
+    userPosts,
+    followedVenues,
+    visitedPlaces,
+    wantToVisitPlaces,
+    getPostComments,
+    getUserBio,
+    isPrivateProfile
+  } = useUserProfile(username);
 
   if (!user) {
-    return <Layout>User not found</Layout>;
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container py-20 text-center">
+          <h1 className="text-2xl font-bold mb-4">User not found</h1>
+          <p className="text-muted-foreground">This user doesn't exist or has been removed.</p>
+          <Button className="mt-6" onClick={() => window.history.back()}>Go Back</Button>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <Layout>
-      <div className="container py-8">
-        <Card className="w-full max-w-4xl mx-auto">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center space-x-4">
-                <Avatar>
-                  <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-                </Avatar>
-                <div>
-                  <h2 className="text-2xl font-semibold">{user.name}</h2>
-                  <p className="text-gray-500">@{user.username}</p>
-                </div>
-              </div>
-              <div>
-                <Button variant={isFollowing ? "outline" : "default"} onClick={() => setIsFollowing(!isFollowing)}>
-                  {isFollowing ? "Unfollow" : "Follow"}
-                </Button>
-              </div>
+    <div className="min-h-screen bg-background">
+      <Header />
+      <main className="container py-6">
+        <div className="max-w-4xl mx-auto">
+          <UserProfileHeader user={user} getUserBio={getUserBio} />
+          
+          {isPrivateProfile ? (
+            <PrivateProfileContent user={user} />
+          ) : (
+            <div>
+              <Tabs defaultValue="content" className="mt-6">
+                <TabsList className="w-full max-w-md mx-auto">
+                  <TabsTrigger value="content">Content</TabsTrigger>
+                  <TabsTrigger value="places">Places</TabsTrigger>
+                  <TabsTrigger value="following">Following</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="content" className="mt-4">
+                  <ProfileTabs 
+                    activeTab={activeTab}
+                    setActiveTab={setActiveTab}
+                    viewMode={viewMode}
+                    setViewMode={setViewMode}
+                    userPosts={userPosts}
+                    getComments={getPostComments}
+                  />
+                </TabsContent>
+                
+                <TabsContent value="places" className="mt-4">
+                  <UserPlacesContent 
+                    visitedPlaces={visitedPlaces} 
+                    wantToVisitPlaces={wantToVisitPlaces}
+                    activeTab={placesTabValue}
+                    setActiveTab={setPlacesTabValue}
+                  />
+                </TabsContent>
+                
+                <TabsContent value="following" className="mt-4">
+                  <FollowedVenuesSection venues={followedVenues} />
+                </TabsContent>
+              </Tabs>
             </div>
-
-            <div className="mb-4">
-              <p>{user.bio || "No bio provided."}</p>
-            </div>
-
-            <div className="flex items-center space-x-4 text-gray-600 mb-4">
-              <div className="flex items-center">
-                <MapPin className="h-4 w-4 mr-2" />
-                {user.location || "Unknown location"}
-              </div>
-              <div className="flex items-center">
-                <Calendar className="h-4 w-4 mr-2" />
-                Joined {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'Unknown'}
-              </div>
-              <div className="flex items-center">
-                <Users className="h-4 w-4 mr-2" />
-                {user.followersCount} Followers
-              </div>
-              <div className="flex items-center">
-                <Heart className="h-4 w-4 mr-2" />
-                {user.likesCount} Likes
-              </div>
-            </div>
-
-            <div className="flex space-x-2">
-              <Badge variant="secondary">Vibing</Badge>
-              <Badge variant="secondary">Explorer</Badge>
-              {user.isVerified && <Badge variant="default">Verified</Badge>}
-            </div>
-
-            <div className="mt-6 flex justify-between items-center">
-              <div className="text-gray-500">
-                <MessageSquare className="inline-block h-5 w-5 mr-1" />
-                <Share2 className="inline-block h-5 w-5 mr-1" />
-              </div>
-              <MoreHorizontal className="h-5 w-5 text-gray-500 cursor-pointer" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </Layout>
+          )}
+        </div>
+      </main>
+    </div>
   );
 };
 

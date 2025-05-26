@@ -2,7 +2,7 @@
 import { VertexAIService } from '@/services/VertexAIService';
 import { cleanResponseText } from '../../responseFormatter';
 import { extractCategories } from '@/services/VertexAI/analysis';
-import { LegacyGoogleWrapperService } from '@/services/LegacyGoogleWrapperService';
+import { OpenAIService } from '@/services/OpenAIService';
 
 /**
  * Handles location-based searches using OpenAI search capabilities
@@ -48,7 +48,7 @@ export const LocationSearchStrategy = {
       };
       
       // Use OpenAI chat completion for better results
-      const openAIResponse = await LegacyGoogleWrapperService.sendChatRequest([
+      const openAIResponse = await OpenAIService.sendChatRequest([
         systemMessage,
         { role: 'user', content: enhancedPrompt }
       ], {

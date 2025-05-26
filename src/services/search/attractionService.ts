@@ -1,21 +1,21 @@
 
-export async function generateAttractionsResponse(city: string): Promise<string> { // Modified signature
+export function generateAttractionsResponse(city: string): string {
   return `When visiting ${city}, consider adding these attractions to your itinerary:
 
-1. **${await getCitySpecificMuseum(city)}** - Housing an extensive collection of artwork and historical exhibits. [Buy Tickets](${await getAttractionWebsite(city, "museum")})
+1. **${getCitySpecificMuseum(city)}** - Housing an extensive collection of artwork and historical exhibits. [Buy Tickets](${getAttractionWebsite(city, "museum")})
 
-2. **${await getCitySpecificPark(city)}** - Perfect for outdoor activities, picnics, or just relaxing amid nature. Free admission.
+2. **${getCitySpecificPark(city)}** - Perfect for outdoor activities, picnics, or just relaxing amid nature. Free admission.
 
-3. **Historic ${city} District** - Walk through well-preserved architecture and learn about the city's history. Self-guided tours available at ${await getCitySpecificWebsite(city, "history")}.
+3. **Historic ${city} District** - Walk through well-preserved architecture and learn about the city's history. Self-guided tours available at ${getCitySpecificWebsite(city, "history")}.
 
-4. **${await getCitySpecificAttraction(city)}** - A unique landmark that offers insight into the region's culture. [Visitor Information](${await getAttractionWebsite(city)})
+4. **${getCitySpecificAttraction(city)}** - A unique landmark that offers insight into the region's culture. [Visitor Information](${getAttractionWebsite(city)})
 
-5. **${city} Botanical Gardens** - Featuring diverse plant collections and seasonal displays. Located at ${await getCitySpecificLocation(city, "gardens")}.
+5. **${city} Botanical Gardens** - Featuring diverse plant collections and seasonal displays. Located at ${getCitySpecificLocation(city, "gardens")}.
 
 Many of these attractions offer guided tours, and some may require tickets purchased in advance.`;
 }
 
-export async function getCitySpecificAttraction(city: string): Promise<string> { // Modified signature
+export function getCitySpecificAttraction(city: string): string {
   const cityLower = city.toLowerCase();
   
   if (cityLower.includes("new york") || cityLower === "nyc") {
@@ -31,15 +31,15 @@ export async function getCitySpecificAttraction(city: string): Promise<string> {
   }
 }
 
-export async function getAttractionWebsite(city: string, type: string = "general"): Promise<string> { // Modified signature
+export function getAttractionWebsite(city: string, type: string = "general"): string {
   return `https://www.visit${city.toLowerCase().replace(/\s+/g, "")}.com`;
 }
 
-export async function getCitySpecificMuseum(city: string): Promise<string> { // Modified signature
+export function getCitySpecificMuseum(city: string): string {
   return `${city} Museum of Fine Arts`;
 }
 
-export async function getCitySpecificPark(city: string): Promise<string> { // Modified signature
+export function getCitySpecificPark(city: string): string {
   return `${city} Central Park`;
 }
 

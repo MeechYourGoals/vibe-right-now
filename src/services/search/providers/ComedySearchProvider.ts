@@ -1,6 +1,6 @@
-import { PlaceService, PlaceSearchResult } from '../../PlaceService';
-import { EventItem } from '../../../components/venue/events/types';
-import { mapPlaceToEventItem } from '../../search/eventService'; // Assuming this is now exported
+
+import { ComedySearchService } from '../comedy/ComedySearchService';
+import { OpenRouterService } from '@/services/OpenRouterService';
 
 /**
  * Provider for comedy-specific search
@@ -18,65 +18,55 @@ export const ComedySearchProvider = {
       // Extract location from query if present
       const locationMatch = query.match(/in\s+([a-zA-Z\s]+)(?:,\s*([a-zA-Z\s]+))?/i);
       let city = "your area";
-      let state = ""; // State might not be used by mapPlaceToEventItem if address is formatted
+      let state = "";
       
       if (locationMatch && locationMatch[1]) {
         city = locationMatch[1].trim();
         if (locationMatch[2]) {
-          state = locationMatch[2].trim(); // Capture state if provided
+          state = locationMatch[2].trim();
         }
       }
       
-      const searchQuery = `comedy shows in ${city}${state ? `, ${state}` : ''}`;
+      // First try using the Comedy Search Service
       try {
-        const placeResults: PlaceSearchResult[] = await PlaceService.findEvents(searchQuery);
-
-        if (placeResults && placeResults.length > 0) {
-          const comedyEvents: EventItem[] = placeResults.map(p => mapPlaceToEventItem(p, 'comedy', city, state));
-
-          if (comedyEvents.length > 0) {
-            let response = `Here are some upcoming comedy shows in ${city}${state ? `, ${state}` : ''}:\n\n`;
-            comedyEvents.forEach((event, index) => {
-              // Ensure date is valid before trying to format
-              let formattedDate = 'Date not specified';
-              if (event.date) {
-                try {
-                  const eventDate = new Date(event.date); // mapPlaceToEventItem should format it as yyyy-MM-dd
-                  // Check if date is valid
-                  if (!isNaN(eventDate.getTime())) {
-                     // Adjusting to ensure it's treated as local date, not UTC
-                    const [year, month, day] = event.date.split('-').map(Number);
-                    const localDate = new Date(year, month -1, day);
-
-                    formattedDate = localDate.toLocaleDateString('en-US', { 
-                      weekday: 'long', 
-                      month: 'long', 
-                      day: 'numeric',
-                      timeZone: 'UTC' // Specify UTC to avoid local timezone shifts if dates are meant to be absolute
-                    });
-                  } else {
-                    console.warn(`Invalid date format for event ${event.title}: ${event.date}`);
-                  }
-                } catch (e) {
-                  console.warn(`Error parsing date for event ${event.title}: ${event.date}`, e);
-                }
-              }
-              
-              response += `${index + 1}. **${event.title || 'Comedy Show'}**\n`; // Fallback title
-              response += `   - ${formattedDate}${event.time && event.time !== "N/A" ? ` at ${event.time}` : ''}\n`;
-              response += `   - Venue: ${event.venue || event.location || city}\n`; // Fallback venue
-              response += `   - ${event.price && event.price !== "N/A" ? `Tickets: ${event.price}` : 'Check website for ticket info'}\n\n`;
-            });
-            response += `\nYou can find more comedy shows and purchase tickets at comedy clubs in ${city}.`;
-            return response;
-          }
+        const comedyResults = await ComedySearchService.comedySearch(query);
+        if (comedyResults && comedyResults.length > 100) {
+          return comedyResults;
         }
       } catch (error) {
-        console.error('Error fetching or mapping comedy events with PlaceService:', error);
-        // Fall through to generic response if PlaceService fails
+        console.error('Error with ComedySearchService, trying alternative:', error);
       }
       
-      // Fallback to generic response
+      // Try using OpenRouter to browse comedy websites
+      try {
+        const searchQuery = `comedy shows in ${city}${state ? `, ${state}` : ''}`;
+        const browserEvents = await OpenRouterService.browseWebAndExtractEvents(searchQuery, 'comedy');
+        
+        if (browserEvents && browserEvents.length > 0) {
+          let response = `Here are some upcoming comedy shows in ${city}${state ? `, ${state}` : ''}:\n\n`;
+          
+          browserEvents.forEach((event, index) => {
+            const eventDate = event.date ? new Date(event.date) : null;
+            const formattedDate = eventDate ? eventDate.toLocaleDateString('en-US', { 
+              weekday: 'long', 
+              month: 'long', 
+              day: 'numeric' 
+            }) : 'Upcoming';
+            
+            response += `${index + 1}. **${event.title || `Comedy Show featuring ${event.comedian}`}**\n`;
+            response += `   - ${formattedDate}${event.time ? ` at ${event.time}` : ''}\n`;
+            response += `   - Venue: ${event.venue || event.location}\n`;
+            response += `   - ${event.price ? `Tickets: ${event.price}` : 'Check website for ticket info'}\n\n`;
+          });
+          
+          response += `\nYou can find more comedy shows and purchase tickets at comedy clubs in ${city}.`;
+          return response;
+        }
+      } catch (error) {
+        console.error('Error browsing for comedy events:', error);
+      }
+      
+      // If all else fails, generate a generic response
       return `I found several comedy shows and stand-up performances in ${city}. 
       
       Check out local venues like The Comedy Club, Laugh Factory, and Improv theaters for upcoming shows. 

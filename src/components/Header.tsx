@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -12,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { User, Bookmark, MapPin, Award, UserCircle, LogIn, Settings, BarChart, Headphones, Target } from "lucide-react";
+import { User, Bookmark, MapPin, Award, UserCircle, LogIn, Settings, BarChart, Headphones } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AuthDialog } from "@/components/AuthDialog";
 import VernonConciergeDialog from "./VernonConcierge/VernonConciergeDialog";
@@ -141,12 +140,6 @@ const Header = () => {
                       <Link to="/data-insights">
                         <BarChart className="mr-2 h-4 w-4" />
                         <span>Data Insights</span>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/advertiser">
-                        <Target className="mr-2 h-4 w-4" />
-                        <span>Advertiser Suite</span>
                       </Link>
                     </DropdownMenuItem>
                   </DropdownMenuContent>

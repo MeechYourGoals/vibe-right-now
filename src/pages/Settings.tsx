@@ -3,7 +3,6 @@ import { useState } from "react";
 import { Layout } from "@/components/Layout";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import VernonChat from "@/components/VernonChat";
 
 import SettingsHeader from "@/components/settings/SettingsHeader";
 import SettingsTabs from "@/components/settings/SettingsTabs";
@@ -21,8 +20,6 @@ const Settings = () => {
   const [activeTab, setActiveTab] = useState("preferences");
   const [isVenueMode, setIsVenueMode] = useState(false);
   const [subscriptionTier, setSubscriptionTier] = useState<'standard' | 'plus' | 'premium' | 'pro'>('standard');
-
-  const isPro = subscriptionTier === 'pro';
 
   const handleSaveSettings = () => {
     toast({
@@ -116,9 +113,6 @@ const Settings = () => {
           </TabsContent>
         </Tabs>
       </div>
-      
-      {/* Vernon Chat - Only show for Pro users in venue mode */}
-      {isPro && isVenueMode && <VernonChat />}
     </Layout>
   );
 };

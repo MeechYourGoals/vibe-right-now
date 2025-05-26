@@ -48,7 +48,7 @@ const Index = () => {
 
             {/* Posts feed layout */}
             <div className="w-full">
-              <PostFeed />
+              <PostFeed celebrityFeatured={featuredUsers} />
             </div>
           </div>
         </div>

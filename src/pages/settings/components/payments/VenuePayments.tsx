@@ -1,80 +1,176 @@
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { TabsContent } from "@/components/ui/tabs";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
 import { CreditCard } from "@/types";
-import AddCardForm from '../AddCardForm';
+import SavedCardsSection from "./SavedCardsSection";
+import AddCardForm from "../AddCardForm";
+import POSServicesConnector from "@/components/data-insights/POSServicesConnector";
 
-const VenuePayments = () => {
-  const [cards, setCards] = useState<CreditCard[]>([
-    {
-      id: '1',
-      lastFour: '1234',
-      brand: 'Visa',
-      expiryMonth: 12,
-      expiryYear: 2025,
-      isDefault: true,
-      maxSpendLimit: 5000,
-      vernonApproved: true
-    },
-    {
-      id: '2',
-      lastFour: '5678',
-      brand: 'Mastercard',
-      expiryMonth: 8,
-      expiryYear: 2026,
-      isDefault: false,
-      maxSpendLimit: 2500,
-      vernonApproved: false
+// Mock data for saved cards
+const mockCards: CreditCard[] = [
+  {
+    id: "card_1",
+    last4: "4242",
+    brand: "visa",
+    expMonth: 12,
+    expYear: 2025,
+    isDefault: true,
+    maxSpendLimit: 200,
+    vernonApproved: true,
+  },
+  {
+    id: "card_2",
+    last4: "1234",
+    brand: "mastercard",
+    expMonth: 8,
+    expYear: 2024,
+    isDefault: false,
+    maxSpendLimit: 100,
+    vernonApproved: false,
+  }
+];
+
+interface VenuePaymentsProps {
+  activeTab: string;
+}
+
+const VenuePayments = ({ activeTab }: VenuePaymentsProps) => {
+  const { toast } = useToast();
+  const [cards, setCards] = useState<CreditCard[]>([]);
+  const [showAddCard, setShowAddCard] = useState(false);
+
+  useEffect(() => {
+    // In a real app, we would fetch the venue's cards from an API
+    // For now, we'll use mock data
+    const savedCards = localStorage.getItem('venue_saved_cards');
+    if (savedCards) {
+      setCards(JSON.parse(savedCards));
+    } else {
+      setCards(mockCards);
+      localStorage.setItem('venue_saved_cards', JSON.stringify(mockCards));
     }
-  ]);
+  }, []);
 
-  const handleAddCard = (newCard: Omit<CreditCard, "id" | "isDefault">) => {
-    const card: CreditCard = {
-      ...newCard,
-      id: Math.random().toString(36).substr(2, 9),
-      isDefault: cards.length === 0
+  const handleAddCard = (card: Omit<CreditCard, 'id' | 'isDefault'>) => {
+    const newCard: CreditCard = {
+      ...card,
+      id: `card_${Date.now()}`,
+      isDefault: cards.length === 0, // Make default if it's the first card
+      maxSpendLimit: 100, // Default spend limit
+      vernonApproved: false // Default to not approved
     };
-    setCards(prev => [...prev, card]);
+    
+    const updatedCards = [...cards, newCard];
+    setCards(updatedCards);
+    localStorage.setItem('venue_saved_cards', JSON.stringify(updatedCards));
+    
+    toast({
+      title: "Card added successfully",
+      description: `${card.brand.toUpperCase()} ending in ${card.last4} has been added to your wallet`,
+    });
+    
+    setShowAddCard(false);
+  };
+
+  const handleRemoveCard = (cardId: string) => {
+    const updatedCards = cards.filter(card => card.id !== cardId);
+    
+    // If we removed the default card and there are other cards, make the first one default
+    if (cards.find(card => card.id === cardId)?.isDefault && updatedCards.length > 0) {
+      updatedCards[0].isDefault = true;
+    }
+    
+    setCards(updatedCards);
+    localStorage.setItem('venue_saved_cards', JSON.stringify(updatedCards));
+    
+    toast({
+      title: "Card removed",
+      description: "The payment method has been removed from your wallet",
+    });
+  };
+
+  const handleSetDefaultCard = (cardId: string) => {
+    const updatedCards = cards.map(card => ({
+      ...card,
+      isDefault: card.id === cardId
+    }));
+    
+    setCards(updatedCards);
+    localStorage.setItem('venue_saved_cards', JSON.stringify(updatedCards));
+    
+    toast({
+      title: "Default card updated",
+      description: "Your default payment method has been updated",
+    });
+  };
+
+  const handleUpdateCard = (updatedCard: CreditCard) => {
+    const updatedCards = cards.map(card => 
+      card.id === updatedCard.id ? updatedCard : card
+    );
+    
+    setCards(updatedCards);
+    localStorage.setItem('venue_saved_cards', JSON.stringify(updatedCards));
+    
+    toast({
+      title: "Card settings updated",
+      description: "Your payment method settings have been updated",
+    });
   };
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Business Payment Methods</CardTitle>
-          <CardDescription>Manage payment methods for your venue operations</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {cards.map((card) => (
-              <div key={card.id} className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="flex items-center space-x-4">
-                  <div className="text-sm">
-                    <p className="font-medium">{card.brand} •••• {card.lastFour}</p>
-                    <p className="text-muted-foreground">
-                      Expires {card.expiryMonth}/{card.expiryYear}
-                    </p>
-                  </div>
-                  {card.isDefault && (
-                    <Badge variant="secondary">Default</Badge>
-                  )}
-                  {card.vernonApproved && (
-                    <Badge variant="default">Vernon Approved</Badge>
-                  )}
-                </div>
-                <Button variant="outline" size="sm">
-                  Remove
-                </Button>
+    <>
+      <TabsContent value="payment-methods">
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h4 className="text-base font-medium">Your Cards</h4>
+              <Badge variant="outline" className="text-xs font-normal">
+                {cards.length} Saved
+              </Badge>
+            </div>
+            
+            {cards.length > 0 ? (
+              <SavedCardsSection 
+                cards={cards}
+                onSetDefault={handleSetDefaultCard}
+                onRemove={handleRemoveCard}
+                onUpdateCard={handleUpdateCard}
+              />
+            ) : (
+              <div className="bg-muted rounded-md p-4 text-center text-muted-foreground">
+                <p>No payment methods saved yet.</p>
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      <AddCardForm onAddCard={handleAddCard} />
-    </div>
+            )}
+            
+            {!showAddCard ? (
+              <Button 
+                onClick={() => setShowAddCard(true)} 
+                className="w-full mt-4"
+                variant="outline"
+              >
+                Add New Card
+              </Button>
+            ) : (
+              <div className="mt-4 border rounded-md p-4">
+                <AddCardForm 
+                  onSubmit={handleAddCard}
+                  onCancel={() => setShowAddCard(false)}
+                />
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </TabsContent>
+      
+      <TabsContent value="pos-integrations">
+        <POSServicesConnector />
+      </TabsContent>
+    </>
   );
 };
 

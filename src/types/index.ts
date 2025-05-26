@@ -1,188 +1,87 @@
+
+export interface User {
+  id: string;
+  name: string;
+  username: string;
+  email?: string;
+  bio?: string;
+  avatar?: string;
+  coverPhoto?: string;
+  followers?: number;
+  following?: number;
+  isVerified?: boolean;
+  joinedDate?: string;
+  location?: string;
+  vibeTags?: string[];
+}
+
 export interface Location {
   id: string;
   name: string;
   address: string;
-  city: string;
-  state: string | null;
-  zip: string;
-  latitude: number;
-  longitude: number;
-  lat: number;
-  lng: number;
-  category: string;
-  type: "restaurant" | "bar" | "event" | "attraction" | "sports" | "other" | "music_venue" | "comedy_club" | "nightclub" | "lounge";
-  rating: number;
-  reviewCount: number;
-  price: string;
-  imageUrl: string;
-  isFeatured: boolean;
-  verified: boolean;
-  country: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  lat?: number;
+  lng?: number;
+  type?: string;
+  rating?: number;
+  priceLevel?: number;
+  openNow?: boolean;
   images?: string[];
+  logo?: string;
+  description?: string;
+  website?: string;
+  phone?: string;
+  hours?: Record<string, string>;
+  tags?: string[];
   vibeTags?: string[];
-  vibes?: string[];
-  hours?: {
-    monday: string;
-    tuesday: string;
-    wednesday: string;
-    thursday: string;
-    friday: string;
-    saturday: string;
-    sunday: string;
-    weekdayText?: string[];
-    isOpen24Hours?: boolean;
-    isOpenNow?: string;
-    timezone?: string;
-  };
-  openingHours?: {
-    weekdayText: string[];
-  };
-  formattedPhoneNumber: string;
-  website: string;
-  reservable: boolean;
-  customerId?: string;
-  followers?: number;
-  checkins?: number;
-  userProfile?: {
-    id: string;
-    username: string;
-    avatar: string;
-    bio?: string;
-    verified: boolean;
-  };
+  verified?: boolean;
 }
 
-export interface EventItem {
-  id: string;
-  title: string;
-  description: string;
-  location: Location;
-  startTime: string;
-  endTime: string;
-  imageUrl: string;
-  category: string;
-  isFeatured: boolean;
-  price: string;
-  organizer: string;
-  contactEmail: string;
-  contactPhone: string;
-  website: string;
-  reservable: boolean;
+export interface EventItem extends Omit<Location, 'openNow' | 'hours'> {
+  date?: string;
+  startTime?: string;
+  endTime?: string;
+  performers?: string[];
+  ticketPrice?: string;
+  ticketUrl?: string;
+  category?: string;
+  venueName?: string;
 }
 
 export interface Comment {
   id: string;
-  postId: string;
   userId: string;
-  user: User;
+  postId: string;
   content: string;
   timestamp: string;
-  vibedHere: boolean;
-  likes: number;
-}
-
-export interface VenueInsights {
-  totalVisits?: number;
-  visitors?: number;
-  visitorsChange?: number;
-  checkins?: number;
-  viewsCount?: number;
-  impressions?: number;
-  posts?: number;
-  postsChange?: number;
+  user?: User;
   likes?: number;
-  likesChange?: number;
-  mentions?: number;
-  mentionsChange?: number;
-  checkinsChange?: number;
-  reviews?: number;
-  reviewsChange?: number;
-  rating?: number;
-  ratingChange?: number;
+  replies?: Comment[];
 }
 
 export interface Post {
   id: string;
+  userId: string;
+  locationId?: string;
   content: string;
-  author: User;
-  user: User;
-  location: Location;
+  media?: string[];
   timestamp: string;
-  media?: Media[];
   likes: number;
-  comments: Comment[];
-  vibedHere: boolean;
-  isLiked?: boolean;
-  isPinned?: boolean;
-  isVenueOwned?: boolean;
-  isVenuePost?: boolean;
-  expiresAt?: string;
-  vibeTags?: string[];
+  comments: number;
+  user?: User;
+  location?: Location;
 }
 
-export interface User {
+export interface SavedPlace {
   id: string;
-  username: string;
-  name: string;
-  avatar: string;
-  bio?: string;
-  isVerified?: boolean;
-  followersCount?: number;
-  followingCount?: number;
-  postsCount?: number;
-  isCelebrity?: boolean;
-  location?: string;
-  createdAt?: string;
-  likesCount?: number;
-  isPrivate?: boolean;
-}
-
-export interface Media {
-  id: string;
-  type: 'image' | 'video';
-  url: string;
-  thumbnail?: string;
-}
-
-// Social Media Types (Google ecosystem only)
-export interface SocialMediaPost {
-  id: string;
-  content: string;
-  author: string;
-  timestamp: string;
-  platform: 'google' | 'yelp' | 'instagram' | 'tiktok' | 'tripadvisor' | 'foursquare' | 'franki' | 'other';
-  likes?: number;
-  comments?: number;
+  locationId: string;
+  userId: string;
+  savedAt: string;
+  notes?: string;
+  visitedAt?: string;
   rating?: number;
-  venueName: string;
-  source: 'google' | 'yelp' | 'instagram' | 'tiktok' | 'tripadvisor' | 'foursquare' | 'franki' | 'other';
-  url?: string;
-  username: string;
-  userAvatar: string;
-  mediaUrl?: string;
-  mediaType?: 'image' | 'video';
-  originalUrl?: string;
-}
-
-export interface SocialMediaApiKeys {
-  instagram: string;
-  yelp: string;
-  google: string;
-  tiktok: string;
-  tripadvisor: string;
-  foursquare: string;
-  franki: string;
-  other: string;
-  otherUrl: string;
-}
-
-export interface CreditCard {
-  id: string;
-  lastFour: string;
-  brand: string;
-  expiryMonth: number;
-  expiryYear: number;
-  isDefault: boolean;
-  maxSpendLimit?: number;
-  vernonApproved?: boolean;
+  status: 'visited' | 'want_to_visit';
+  location?: Location;
 }
