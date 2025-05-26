@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Zap, Layout, MapPin, Smartphone, Upload, Eye, Play, Palette, Image } from "lucide-react";
+import { Zap, Layout, MapPin, Smartphone, Upload, Eye, Play, Palette, Image, Video, Sparkles } from "lucide-react";
 
 interface AdCreationStudioProps {
   subscriptionTier: 'standard' | 'plus' | 'premium' | 'pro';
@@ -21,6 +21,40 @@ const AdCreationStudio: React.FC<AdCreationStudioProps> = ({ subscriptionTier })
 
   return (
     <div className="space-y-6">
+      {/* Google AI Tools Banner */}
+      <Card className="border-2 border-gradient-to-r from-blue-500 to-purple-500 bg-gradient-to-r from-blue-950/80 to-purple-950/80 backdrop-blur-sm">
+        <CardHeader>
+          <CardTitle className="text-blue-300 flex items-center">
+            <Sparkles className="mr-3 h-6 w-6" />
+            Powered by Google AI Creative Suite
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-blue-950/40 p-4 rounded-lg border border-blue-600/30">
+              <div className="flex items-center mb-2">
+                <Image className="h-5 w-5 text-blue-400 mr-2" />
+                <h4 className="font-bold text-blue-300">Google Imagen 3</h4>
+              </div>
+              <p className="text-sm text-blue-200/80 mb-3">Generate high-quality, photorealistic images from text prompts with advanced control and safety features.</p>
+              <Badge variant="outline" className="bg-blue-900/20 text-blue-400 border-blue-600 text-xs">
+                Latest Model
+              </Badge>
+            </div>
+            <div className="bg-purple-950/40 p-4 rounded-lg border border-purple-600/30">
+              <div className="flex items-center mb-2">
+                <Video className="h-5 w-5 text-purple-400 mr-2" />
+                <h4 className="font-bold text-purple-300">Google Veo</h4>
+              </div>
+              <p className="text-sm text-purple-200/80 mb-3">Create cinematic 1080p videos up to 60 seconds long with advanced motion control and scene understanding.</p>
+              <Badge variant="outline" className="bg-purple-900/20 text-purple-400 border-purple-600 text-xs">
+                Video Generation
+              </Badge>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Ad Format Selection */}
       <Card className="bg-neutral-800/80 border-neutral-600">
         <CardHeader>
@@ -166,17 +200,89 @@ const AdCreationStudio: React.FC<AdCreationStudioProps> = ({ subscriptionTier })
               </div>
             </div>
 
-            <Tabs defaultValue="upload" className="w-full">
+            <Tabs defaultValue="google-ai" className="w-full">
               <TabsList className="bg-neutral-700 w-full">
+                <TabsTrigger value="google-ai" className="flex-1">
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  Google AI
+                </TabsTrigger>
                 <TabsTrigger value="upload" className="flex-1">
                   <Upload className="mr-2 h-4 w-4" />
                   Upload Media
                 </TabsTrigger>
-                <TabsTrigger value="ai-generate" className="flex-1">
-                  <Palette className="mr-2 h-4 w-4" />
-                  AI Generate
-                </TabsTrigger>
               </TabsList>
+              
+              <TabsContent value="google-ai" className="mt-4">
+                <div className="space-y-4">
+                  <div className="p-4 bg-gradient-to-r from-blue-950/40 to-purple-950/40 rounded-lg border border-blue-600/30">
+                    <div className="flex items-center mb-3">
+                      <Image className="h-5 w-5 text-blue-400 mr-2" />
+                      <span className="font-medium text-blue-300">Google Imagen 3 - Image Generation</span>
+                    </div>
+                    <Input 
+                      placeholder="A vibrant nightclub scene with neon lights and dancing people..."
+                      className="bg-neutral-700 border-neutral-600 text-white mb-3"
+                    />
+                    <div className="flex gap-2">
+                      <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white flex-1">
+                        Generate Image
+                      </Button>
+                      <Select>
+                        <SelectTrigger className="bg-neutral-700 border-neutral-600 text-white w-32">
+                          <SelectValue placeholder="Style" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-neutral-700 border-neutral-600">
+                          <SelectItem value="photorealistic">Photorealistic</SelectItem>
+                          <SelectItem value="artistic">Artistic</SelectItem>
+                          <SelectItem value="minimalist">Minimalist</SelectItem>
+                          <SelectItem value="vintage">Vintage</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  
+                  <div className="p-4 bg-gradient-to-r from-purple-950/40 to-pink-950/40 rounded-lg border border-purple-600/30">
+                    <div className="flex items-center mb-3">
+                      <Video className="h-5 w-5 text-purple-400 mr-2" />
+                      <span className="font-medium text-purple-300">Google Veo - Video Generation</span>
+                    </div>
+                    <Textarea 
+                      placeholder="A cinematic shot of people enjoying drinks at a rooftop bar during sunset, with the city skyline in the background..."
+                      className="bg-neutral-700 border-neutral-600 text-white mb-3"
+                      rows={3}
+                    />
+                    <div className="flex gap-2">
+                      <Button size="sm" className="bg-purple-600 hover:bg-purple-700 text-white flex-1">
+                        Generate Video
+                      </Button>
+                      <Select>
+                        <SelectTrigger className="bg-neutral-700 border-neutral-600 text-white w-32">
+                          <SelectValue placeholder="Length" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-neutral-700 border-neutral-600">
+                          <SelectItem value="5s">5 seconds</SelectItem>
+                          <SelectItem value="15s">15 seconds</SelectItem>
+                          <SelectItem value="30s">30 seconds</SelectItem>
+                          <SelectItem value="60s">60 seconds</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="p-3 bg-gradient-to-r from-green-950/40 to-blue-950/40 rounded-lg border border-green-600/30">
+                    <div className="flex items-center mb-2">
+                      <Palette className="h-4 w-4 text-green-400 mr-2" />
+                      <span className="text-sm font-medium text-green-300">AI Enhancement Features</span>
+                    </div>
+                    <div className="text-xs text-green-200/80 space-y-1">
+                      <p>• Automatic brand consistency across all generated content</p>
+                      <p>• Smart subject isolation and background replacement</p>
+                      <p>• Dynamic text overlay optimization for readability</p>
+                      <p>• Content safety filtering and brand guideline compliance</p>
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
               
               <TabsContent value="upload" className="mt-4">
                 <div className="border-2 border-dashed border-neutral-600 rounded-lg p-8 text-center">
@@ -186,38 +292,6 @@ const AdCreationStudio: React.FC<AdCreationStudioProps> = ({ subscriptionTier })
                   <Button variant="outline" className="border-neutral-600 text-white hover:bg-neutral-700">
                     Choose Files
                   </Button>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="ai-generate" className="mt-4">
-                <div className="space-y-3">
-                  <div className="p-4 bg-gradient-to-r from-purple-950/40 to-blue-950/40 rounded-lg border border-purple-600/30">
-                    <div className="flex items-center mb-2">
-                      <Image className="h-4 w-4 text-purple-400 mr-2" />
-                      <span className="text-sm font-medium text-purple-300">AI Image Generation</span>
-                    </div>
-                    <Input 
-                      placeholder="Describe the image you want..."
-                      className="bg-neutral-700 border-neutral-600 text-white mb-2"
-                    />
-                    <Button size="sm" className="bg-purple-600 hover:bg-purple-700 text-white">
-                      Generate Image
-                    </Button>
-                  </div>
-                  
-                  <div className="p-4 bg-gradient-to-r from-blue-950/40 to-green-950/40 rounded-lg border border-blue-600/30">
-                    <div className="flex items-center mb-2">
-                      <Play className="h-4 w-4 text-blue-400 mr-2" />
-                      <span className="text-sm font-medium text-blue-300">AI Video Generation</span>
-                    </div>
-                    <Input 
-                      placeholder="Describe your video concept..."
-                      className="bg-neutral-700 border-neutral-600 text-white mb-2"
-                    />
-                    <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
-                      Generate Video
-                    </Button>
-                  </div>
                 </div>
               </TabsContent>
             </Tabs>

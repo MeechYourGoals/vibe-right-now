@@ -1,11 +1,10 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
-import { TrendingUp, DollarSign, Users, Eye, MousePointer, Target, Calendar, AlertCircle } from "lucide-react";
+import { TrendingUp, DollarSign, Users, Eye, MousePointer, Target, Calendar, AlertCircle, Sparkles, Image, Video } from "lucide-react";
 
 interface AdvertiserDashboardProps {
   subscriptionTier: 'standard' | 'plus' | 'premium' | 'pro';
@@ -40,6 +39,62 @@ const AdvertiserDashboard: React.FC<AdvertiserDashboardProps> = ({ subscriptionT
   
   return (
     <div className="space-y-6">
+      {/* Google AI Creative Tools Banner */}
+      <Card className="bg-gradient-to-r from-blue-950/80 to-purple-950/80 border-2 border-blue-600/50 backdrop-blur-sm">
+        <CardHeader className="pb-4">
+          <div className="flex justify-between items-center">
+            <div>
+              <CardTitle className="text-2xl text-blue-300 flex items-center">
+                <Sparkles className="mr-3 h-6 w-6" />
+                AI-Powered Creative Suite
+              </CardTitle>
+              <p className="text-blue-200/80 mt-2">
+                Create stunning visuals and videos with Google's Imagen 3 and Veo AI models
+              </p>
+            </div>
+            <Badge variant="outline" className="bg-blue-900/20 text-blue-400 border-blue-600">
+              Google AI Integrated
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-blue-950/40 p-3 rounded-lg">
+              <div className="flex items-center text-blue-300">
+                <Image className="h-4 w-4 mr-2" />
+                <span className="text-sm font-medium">AI Images Generated</span>
+              </div>
+              <p className="text-xl font-bold text-white mt-1">147</p>
+              <p className="text-xs text-blue-200/60">+23 this week</p>
+            </div>
+            <div className="bg-purple-950/40 p-3 rounded-lg">
+              <div className="flex items-center text-purple-300">
+                <Video className="h-4 w-4 mr-2" />
+                <span className="text-sm font-medium">AI Videos Created</span>
+              </div>
+              <p className="text-xl font-bold text-white mt-1">52</p>
+              <p className="text-xs text-purple-200/60">+8 this week</p>
+            </div>
+            <div className="bg-green-950/40 p-3 rounded-lg">
+              <div className="flex items-center text-green-300">
+                <TrendingUp className="h-4 w-4 mr-2" />
+                <span className="text-sm font-medium">AI Content CTR</span>
+              </div>
+              <p className="text-xl font-bold text-white mt-1">4.8%</p>
+              <p className="text-xs text-green-200/60">+1.2% vs manual</p>
+            </div>
+            <div className="bg-amber-950/40 p-3 rounded-lg">
+              <div className="flex items-center text-amber-300">
+                <Sparkles className="h-4 w-4 mr-2" />
+                <span className="text-sm font-medium">Time Saved</span>
+              </div>
+              <p className="text-xl font-bold text-white mt-1">89%</p>
+              <p className="text-xs text-amber-200/60">vs traditional creation</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Key Metrics Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="bg-neutral-800/80 border-neutral-600">

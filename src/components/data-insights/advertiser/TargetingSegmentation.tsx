@@ -239,7 +239,7 @@ const TargetingSegmentation: React.FC<TargetingSegmentationProps> = ({ subscript
                 <SelectContent className="bg-neutral-700 border-neutral-600">
                   <SelectItem value="high">High Spenders ($100+/visit)</SelectItem>
                   <SelectItem value="medium">Medium Spenders ($25-100/visit)</SelectItem>
-                  <SelectItem value="budget">Budget Conscious (<$25/visit)</SelectItem>
+                  <SelectItem value="budget">Budget Conscious (&lt;$25/visit)</SelectItem>
                   <SelectItem value="all">All Spending Levels</SelectItem>
                 </SelectContent>
               </Select>
