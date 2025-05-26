@@ -1,38 +1,98 @@
 
-import React from "react";
+import React from 'react';
+import { Link, useNavigate } from "react-router-dom";
 import { Post } from "@/types";
-import { Card } from "@/components/ui/card";
-import PostMedia from "./post-grid-item/PostMedia";
-import PostOverlay from "./post-grid-item/PostOverlay";
-import PostBadges from "./post-grid-item/PostBadges";
+import { deletePost } from "@/utils/venue/postManagementUtils";
+import { 
+  PostBadges,
+  DeleteButton,
+  PostMedia,
+  PostOverlay
+} from './post-grid-item';
+import UserDropdown from './post-grid-item/UserDropdown';
 
 interface PostGridItemProps {
   post: Post;
+  isVenuePost?: boolean;
+  timeAgo?: string;
+  isDetailView?: boolean;
   canDelete?: boolean;
-  onDelete?: (postId: string) => void;
+  venue?: { id: string; name: string };
+  onPostDeleted?: (postId: string) => void;
 }
 
 const PostGridItem: React.FC<PostGridItemProps> = ({ 
   post, 
-  canDelete = false, 
-  onDelete 
+  isVenuePost = false, 
+  timeAgo,
+  isDetailView = false,
+  canDelete = false,
+  venue,
+  onPostDeleted
 }) => {
-  const handleDelete = () => {
-    if (onDelete) {
-      onDelete(post.id);
+  const navigate = useNavigate();
+  
+  const handleLike = (e: React.MouseEvent) => {
+    e.preventDefault();
+    // Like functionality is handled in the PostOverlay component
+  };
+  
+  const navigateToUserProfile = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigate(`/user/${post.user.username}`);
+  };
+
+  const handleDeletePost = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (venue && deletePost(post.id, venue)) {
+      if (onPostDeleted) {
+        onPostDeleted(post.id);
+      }
     }
   };
 
+  // Generate a semi-random user count based on post ID
+  const getUserCount = () => {
+    const seed = post.id.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
+    return Math.floor((seed % 100) + 10);
+  };
+
   return (
-    <Card className="relative overflow-hidden group cursor-pointer hover:shadow-lg transition-shadow">
-      <PostMedia media={post.media} />
-      <PostOverlay 
+    <Link 
+      to={`/post/${post.id}`} 
+      className={`group relative block aspect-square overflow-hidden rounded-lg ${
+        isVenuePost ? 'ring-2 ring-amber-500' : ''
+      } ${post.isPinned && !isVenuePost ? 'ring-2 ring-amber-300' : ''}`}
+    >
+      <PostMedia post={post} />
+      
+      {/* Show pinned badge if applicable */}
+      {post.isPinned && (
+        <PostBadges post={post} isVenuePost={false} />
+      )}
+      
+      {/* Show delete button if applicable */}
+      {canDelete && !isVenuePost && (
+        <DeleteButton onDelete={handleDeletePost} />
+      )}
+      
+      {/* Add user count dropdown */}
+      <div className="absolute top-2 right-2 z-10">
+        <UserDropdown userCount={getUserCount()} post={post} />
+      </div>
+      
+      <PostOverlay
         post={post}
-        canDelete={canDelete}
-        onDelete={handleDelete}
+        isVenuePost={false} // Don't show venue badge in overlay
+        timeAgo={timeAgo}
+        isDetailView={isDetailView}
+        onUserProfileClick={navigateToUserProfile}
+        onLike={handleLike}
       />
-      <PostBadges post={post} />
-    </Card>
+    </Link>
   );
 };
 

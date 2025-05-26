@@ -1,10 +1,11 @@
 
-import { User } from "@/types";
+import { User } from "@/integrations/supabase/types";
 import { regularUsers } from "./regularUsers";
 import { celebrityUsers } from "./celebrityUsers";
 
 export interface MockUserProfile extends User {
   type: "regular" | "celebrity" | "venue";
+  avatar: string;
 }
 
 // Combine all users and add type information
@@ -22,24 +23,5 @@ export const mockUsers: MockUserProfile[] = [
     isVerified: user.isVerified || false
   }))
 ];
-
-// Simple hash function to generate a numeric hash from a string
-export const hashString = (str: string): number => {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash |= 0; // Convert to 32bit integer
-  }
-  return Math.abs(hash); // Return absolute value to ensure positive number
-};
-
-// Get a mock user profile by index or random
-export const getMockUserProfile = (index?: number): MockUserProfile => {
-  if (index !== undefined && index < mockUsers.length) {
-    return mockUsers[index];
-  }
-  return mockUsers[Math.floor(Math.random() * mockUsers.length)];
-};
 
 export { regularUsers, celebrityUsers };

@@ -26,16 +26,9 @@ interface PostHeaderProps {
   timestamp: string;
   location?: Location;
   isPinned?: boolean;
-  isVenuePost?: boolean;
+  isVenuePost?: boolean; // We'll keep this prop for backwards compatibility
   canDelete?: boolean;
   onDelete?: () => void;
-  locationPostCount?: number;
-  isSponsored?: boolean;
-  sponsorInfo?: {
-    name: string;
-    logo: string;
-    cta: string;
-  };
 }
 
 const PostHeader: React.FC<PostHeaderProps> = ({
@@ -45,10 +38,7 @@ const PostHeader: React.FC<PostHeaderProps> = ({
   isPinned = false,
   isVenuePost = false, 
   canDelete = false,
-  onDelete,
-  locationPostCount,
-  isSponsored,
-  sponsorInfo
+  onDelete
 }) => {
   // Format the timestamp as a relative time (e.g., "2 hours ago")
   const timeAgo = formatDistanceToNow(new Date(timestamp), { addSuffix: true });

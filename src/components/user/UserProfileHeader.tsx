@@ -1,142 +1,134 @@
 import React from "react";
+import { Link } from "react-router-dom";
+import { formatDistanceToNow } from "date-fns";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { 
-  UserPlus, 
-  MessageSquare, 
-  MoreHorizontal, 
-  MapPin, 
-  Calendar, 
-  Verified,
-  Instagram,
-  Twitter,
-  Youtube
+import { VerifiedIcon } from "lucide-react";
+import {
+  UserPlus,
+  UserCheck,
+  Bell,
+  Users,
+  Crown,
+  Instagram as InstagramIcon,
+  Twitter as TwitterIcon,
+  Youtube as YoutubeIcon,
+  Tiktok as TiktokIcon,
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { User } from "@/types";
 
 interface UserProfileHeaderProps {
   user: User;
-  isOwner?: boolean;
-  isFollowing?: boolean;
-  onFollow?: () => void;
-  onMessage?: () => void;
+  isFollowing: boolean;
+  onFollowToggle: () => void;
 }
 
-const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
-  user,
-  isOwner = false,
-  isFollowing = false,
-  onFollow,
-  onMessage
-}) => {
+const UserProfileHeader = ({ user, isFollowing, onFollowToggle }: UserProfileHeaderProps) => {
+  const timeAgo = user.joinedDate ? formatDistanceToNow(new Date(user.joinedDate), { addSuffix: true }) : null;
   
   return (
-    <div className="relative">
-      {/* Cover Photo */}
-      <div className="h-48 md:h-64 bg-gradient-to-r from-purple-500 to-blue-600 relative">
-        {user.coverPhoto && (
-          <img 
-            src={user.coverPhoto} 
-            alt="Cover" 
-            className="w-full h-full object-cover"
-          />
-        )}
-        <div className="absolute inset-0 bg-black/20" />
+    <div className="pb-6">
+      <div className="relative">
+        <img
+          src={user.coverPhoto || "https://source.unsplash.com/random/1200x400/?nature"}
+          alt="Cover"
+          className="w-full h-48 object-cover rounded-md"
+        />
       </div>
-
-      {/* Profile Content */}
-      <div className="px-4 pb-4 -mt-16 relative z-10">
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-4">
-          {/* Avatar and Basic Info */}
-          <div className="flex flex-col md:flex-row md:items-end gap-4">
-            <Avatar className="w-32 h-32 border-4 border-background">
+      
+      <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-4 px-4 pb-2 -mt-12 md:-mt-16 relative z-10">
+        <div className="flex items-end gap-4">
+          <Link to={`/user/${user.username}`}>
+            <Avatar className="h-24 w-24 md:h-32 md:w-32 border-4 border-white">
               <AvatarImage src={user.avatar} alt={user.name} />
-              <AvatarFallback className="text-2xl">{user.name.charAt(0)}</AvatarFallback>
+              <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
             </Avatar>
-            
-            <div className="md:mb-4">
-              <div className="flex items-center gap-2 mb-1">
-                <h1 className="text-2xl md:text-3xl font-bold">{user.name}</h1>
-                {user.isVerified && (
-                  <Verified className="h-6 w-6 text-blue-500 fill-current" />
-                )}
-              </div>
-              <p className="text-muted-foreground text-lg">@{user.username}</p>
-              {user.location && (
-                <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
-                  <MapPin className="h-4 w-4" />
-                  <span>{user.location}</span>
-                </div>
+          </Link>
+          
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-bold">{user.name}</h1>
+              {user.isVerified && (
+                <VerifiedIcon className="h-5 w-5 text-blue-500" />
               )}
             </div>
-          </div>
 
-          {/* Action Buttons */}
-          {!isOwner && (
-            <div className="flex gap-2 mt-4 md:mt-0">
-              <Button 
-                variant={isFollowing ? "outline" : "default"}
-                onClick={onFollow}
-                className="flex-1 md:flex-none"
-              >
-                <UserPlus className="h-4 w-4 mr-2" />
-                {isFollowing ? "Following" : "Follow"}
-              </Button>
-              <Button variant="outline" onClick={onMessage}>
-                <MessageSquare className="h-4 w-4 mr-2" />
-                Message
-              </Button>
-              <Button variant="outline" size="icon">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </div>
+            <p className="text-sm text-muted-foreground">
+              @{user.username}
+            </p>
+            
+            {user.isCelebrity && (
+              <div className="mt-1">
+                <Badge variant="outline" className="bg-gradient-to-r from-purple-100 to-pink-100 text-pink-800 border-pink-200">
+                  <Crown className="h-3 w-3 mr-1 text-amber-500" />
+                  Celebrity
+                </Badge>
+              </div>
+            )}
+            
+            {timeAgo && (
+              <p className="text-sm text-muted-foreground mt-1">
+                Joined {timeAgo}
+              </p>
+            )}
+            
+            {user.isCelebrity && (
+              <p className="text-sm text-muted-foreground mt-1">
+                <Badge variant="secondary" className="mr-1 font-normal">
+                  <Users className="h-3 w-3 mr-1" />
+                  1.2M Followers
+                </Badge>
+              </p>
+            )}
+            
+            {user.location && (
+              <p className="text-sm text-muted-foreground mt-1">
+                {user.location}
+              </p>
+            )}
+            
+            {user.isCelebrity && (
+              <div className="flex items-center gap-1 mt-2">
+                <InstagramIcon className="h-4 w-4 text-pink-600" />
+                <TwitterIcon className="h-4 w-4 text-blue-400" />
+                <TiktokIcon className="h-4 w-4" />
+                <YoutubeIcon className="h-4 w-4 text-red-500" />
+              </div>
+            )}
+          </div>
+        </div>
+        
+        <div>
+          {user.isCelebrity ? (
+            <Button className="relative">
+              <Bell className="h-4 w-4 mr-2" />
+              Get Notifications
+            </Button>
+          ) : (
+            <Button 
+              variant={isFollowing ? "secondary" : "default"}
+              onClick={onFollowToggle}
+              className="relative"
+            >
+              {isFollowing ? (
+                <>
+                  <UserCheck className="h-4 w-4 mr-2" />
+                  Following
+                </>
+              ) : (
+                <>
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Follow
+                </>
+              )}
+            </Button>
           )}
         </div>
-
-        {/* Bio */}
-        {user.bio && (
-          <p className="text-foreground mb-4 max-w-2xl">{user.bio}</p>
-        )}
-
-        {/* Stats and Additional Info */}
-        <div className="flex flex-wrap items-center gap-6 text-sm mb-4">
-          <div className="flex gap-4">
-            <span><strong>{user.followers?.toLocaleString() || 0}</strong> followers</span>
-            <span><strong>{user.following?.toLocaleString() || 0}</strong> following</span>
-          </div>
-          
-          {user.joinedDate && (
-            <div className="flex items-center gap-1 text-muted-foreground">
-              <Calendar className="h-4 w-4" />
-              <span>Joined {new Date(user.joinedDate).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span>
-            </div>
-          )}
-        </div>
-
-        {/* Vibe Tags */}
-        {user.vibeTags && user.vibeTags.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-4">
-            {user.vibeTags.map((tag, index) => (
-              <Badge key={index} variant="secondary" className="bg-primary/10 text-primary">
-                {tag}
-              </Badge>
-            ))}
-          </div>
-        )}
-
-        {/* Social Links */}
-        <div className="flex gap-2">
-          <Button variant="outline" size="icon">
-            <Instagram className="h-4 w-4" />
-          </Button>
-          <Button variant="outline" size="icon">
-            <Twitter className="h-4 w-4" />
-          </Button>
-          <Button variant="outline" size="icon">
-            <Youtube className="h-4 w-4" />
-          </Button>
-        </div>
+      </div>
+      
+      <div className="px-4">
+        <p className="text-sm">{user.bio || "No bio provided."}</p>
       </div>
     </div>
   );

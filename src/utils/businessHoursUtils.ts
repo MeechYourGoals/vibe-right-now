@@ -1,59 +1,86 @@
 
-import { BusinessHours, Location } from "@/types";
+import { Location } from "@/types";
 
-export const getTodaysHours = (hours?: BusinessHours | Location): string => {
-  if (!hours) return "Hours not available";
+export interface BusinessHours {
+  monday: string;
+  tuesday: string;
+  wednesday: string;
+  thursday: string;
+  friday: string;
+  saturday: string;
+  sunday: string;
+}
+
+export const isOpenNow = (location: Location): boolean => {
+  if (!location.hours) return false;
   
-  // If it's a Location object, extract the hours property
-  const businessHours = 'hours' in hours ? hours.hours : hours;
+  const now = new Date();
+  const currentDay = now.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase() as keyof BusinessHours;
+  const currentTime = now.getHours() * 60 + now.getMinutes();
   
-  if (!businessHours) return "Hours not available";
+  const hours = location.hours[currentDay];
+  if (!hours || hours === 'Closed') return false;
   
-  const today = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
-  const todaysHours = businessHours[today];
+  // Parse hours like "9:00 AM - 10:00 PM"
+  const [openTime, closeTime] = hours.split(' - ');
+  if (!openTime || !closeTime) return false;
   
-  if (!todaysHours) return "Closed today";
+  const parseTime = (timeStr: string): number => {
+    const [time, period] = timeStr.split(' ');
+    const [hours, minutes] = time.split(':').map(Number);
+    let totalMinutes = hours * 60 + minutes;
+    
+    if (period === 'PM' && hours !== 12) {
+      totalMinutes += 12 * 60;
+    } else if (period === 'AM' && hours === 12) {
+      totalMinutes = minutes;
+    }
+    
+    return totalMinutes;
+  };
   
-  return todaysHours;
+  const openMinutes = parseTime(openTime);
+  const closeMinutes = parseTime(closeTime);
+  
+  return currentTime >= openMinutes && currentTime <= closeMinutes;
 };
 
-export const formatBusinessHours = (hours?: BusinessHours | Location): string => {
-  if (!hours) return "Hours not available";
+export const formatBusinessHours = (location: Location): string => {
+  if (!location.hours) return 'Hours not available';
   
-  // If it's a Location object, extract the hours property
-  const businessHours = 'hours' in hours ? hours.hours : hours;
+  const now = new Date();
+  const currentDay = now.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase() as keyof BusinessHours;
+  const todayHours = location.hours[currentDay];
   
-  if (!businessHours) return "Hours not available";
-  
-  const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-  const formattedHours = daysOfWeek
-    .map(day => {
-      const dayHours = businessHours[day];
-      if (dayHours) {
-        const capitalizedDay = day.charAt(0).toUpperCase() + day.slice(1);
-        return `${capitalizedDay}: ${dayHours}`;
-      }
-      return null;
-    })
-    .filter(Boolean)
-    .join('\n');
-  
-  return formattedHours || "Hours not available";
-};
-
-export const generateBusinessHours = (location?: any): BusinessHours => {
-  if (location && location.hours) {
-    return location.hours;
+  if (!todayHours || todayHours === 'Closed') {
+    return 'Closed today';
   }
   
-  // Default business hours
+  return `Today: ${todayHours}`;
+};
+
+export const generateBusinessHours = (): BusinessHours => {
   return {
-    monday: "9:00 AM - 5:00 PM",
-    tuesday: "9:00 AM - 5:00 PM", 
-    wednesday: "9:00 AM - 5:00 PM",
-    thursday: "9:00 AM - 5:00 PM",
-    friday: "9:00 AM - 5:00 PM",
-    saturday: "10:00 AM - 4:00 PM",
-    sunday: "Closed"
+    monday: "9:00 AM - 10:00 PM",
+    tuesday: "9:00 AM - 10:00 PM", 
+    wednesday: "9:00 AM - 10:00 PM",
+    thursday: "9:00 AM - 11:00 PM",
+    friday: "9:00 AM - 12:00 AM",
+    saturday: "10:00 AM - 12:00 AM",
+    sunday: "10:00 AM - 9:00 PM"
   };
+};
+
+export const getTodaysHours = (location: Location): string => {
+  if (!location.hours) return 'Hours not available';
+  
+  const now = new Date();
+  const currentDay = now.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase() as keyof BusinessHours;
+  const todayHours = location.hours[currentDay];
+  
+  if (!todayHours || todayHours === 'Closed') {
+    return 'Closed today';
+  }
+  
+  return todayHours;
 };

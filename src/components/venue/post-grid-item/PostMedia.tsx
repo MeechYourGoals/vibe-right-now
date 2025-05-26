@@ -1,38 +1,111 @@
 
-import React from "react";
-import { Media } from "@/types";
+import React, { useState, useEffect } from 'react';
+import { Post } from "@/types";
+import { getMediaForLocation } from "@/utils/map/locationMediaUtils";
 
 interface PostMediaProps {
-  media: Media[];
+  post: Post;
 }
 
-const PostMedia: React.FC<PostMediaProps> = ({ media }) => {
-  if (!media || media.length === 0) {
-    return null;
+const PostMedia: React.FC<PostMediaProps> = ({ post }) => {
+  const [imageError, setImageError] = useState(false);
+  const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
+  const [mediaLoaded, setMediaLoaded] = useState(false);
+  
+  // Use type-specific fallback images for better relevance
+  const getFallbackImage = () => {
+    if (!post.location) {
+      return "https://images.pexels.com/photos/2901209/pexels-photo-2901209.jpeg?auto=compress&cs=tinysrgb&w=600";
+    }
+    
+    // Use the venue's image as a fallback
+    const venueMedia = getMediaForLocation(post.location);
+    return venueMedia.url;
+  };
+  
+  // Try loading the next image in the array if one fails
+  const tryNextImage = () => {
+    if (post.media && post.media.length > currentMediaIndex + 1) {
+      setCurrentMediaIndex(prevIndex => prevIndex + 1);
+      setImageError(false);
+    } else {
+      setImageError(true);
+    }
+  };
+
+  // Reset on post change
+  useEffect(() => {
+    setImageError(false);
+    setCurrentMediaIndex(0);
+    setMediaLoaded(false);
+  }, [post.id]);
+  
+  // Generate a preview text for fallback display
+  const getPreviewText = () => {
+    if (post.content) {
+      return post.content.slice(0, 100) + (post.content.length > 100 ? '...' : '');
+    }
+    return post.location?.name || "Post content";
+  };
+  
+  // Handle case with no media
+  if (!post.media || post.media.length === 0 || imageError) {
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-muted">
+        {imageError ? (
+          <div className="p-2 text-center">
+            <img 
+              src={getFallbackImage()}
+              alt="Venue related content"
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                // Final fallback if even the venue image fails
+                (e.target as HTMLImageElement).src = "https://images.pexels.com/photos/2901209/pexels-photo-2901209.jpeg?auto=compress&cs=tinysrgb&w=600";
+              }}
+            />
+          </div>
+        ) : (
+          <p className="p-2 text-center text-sm">
+            {getPreviewText()}
+          </p>
+        )}
+      </div>
+    );
   }
 
-  return (
-    <div className="relative">
-      {media[0].type === "video" ? (
-        <video 
-          src={media[0].url} 
-          className="w-full h-48 object-cover"
-          controls={false}
-          muted
-        />
-      ) : (
+  // Get current media item
+  const currentMedia = post.media[currentMediaIndex];
+
+  if (currentMedia.type === "image") {
+    // Try to load the image with error handling and fallback
+    return (
+      <>
+        {!mediaLoaded && (
+          <div className="absolute inset-0 flex items-center justify-center bg-muted">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+          </div>
+        )}
         <img 
-          src={media[0].url} 
-          alt="Post media"
-          className="w-full h-48 object-cover"
+          src={currentMedia.url}
+          alt={`Post by ${post.user.username}`}
+          className={`h-full w-full object-cover transition-transform group-hover:scale-105 ${mediaLoaded ? 'opacity-100' : 'opacity-0'}`}
+          onError={() => tryNextImage()}
+          onLoad={() => setMediaLoaded(true)}
+          loading="lazy"
         />
-      )}
-      {media.length > 1 && (
-        <div className="absolute top-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded">
-          +{media.length - 1}
-        </div>
-      )}
-    </div>
+      </>
+    );
+  }
+  
+  return (
+    <video
+      src={currentMedia.url}
+      className="h-full w-full object-cover"
+      poster={getFallbackImage()}
+      onError={() => tryNextImage()}
+      controls={false}
+      muted
+    />
   );
 };
 
