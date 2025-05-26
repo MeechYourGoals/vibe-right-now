@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Auth0Provider } from '@auth0/auth0-react';
-import { useAuth0Config } from '@/auth/auth0-config';
+import { auth0Config } from '@/auth/auth0-config';
 import Index from "@/pages/Index";
 import Explore from "@/pages/Explore";
 import UserProfile from "@/pages/UserProfile";
@@ -24,8 +24,6 @@ import NotFound from "@/pages/NotFound";
 const queryClient = new QueryClient();
 
 function App() {
-  const auth0Config = useAuth0Config();
-
   return (
     <Auth0Provider {...auth0Config}>
       <QueryClientProvider client={queryClient}>

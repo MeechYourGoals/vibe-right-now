@@ -1,236 +1,241 @@
-
-import React, { useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import Header from "@/components/Header";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
+import { Layout } from "@/components/Layout";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import CameraButton from "@/components/CameraButton";
-import NearbyVibesMap from "@/components/NearbyVibesMap";
-import VenuePost from "@/components/VenuePost";
-import useExploreState from "@/hooks/useExploreState";
-import { getCitySpecificContent } from "@/utils/explore/mockGenerators";
-import SearchSection from "@/components/explore/SearchSection";
-import CategoryTabs from "@/components/explore/CategoryTabs";
-import VibeFilter from "@/components/explore/VibeFilter";
-import MusicSection from "@/components/explore/MusicSection";
-import ComedySection from "@/components/explore/ComedySection";
-import NightlifeSection from "@/components/explore/NightlifeSection";
-import LocationsGrid from "@/components/explore/LocationsGrid";
-import RecommendedForYou from "@/components/RecommendedForYou";
-import TrendingLocations from "@/components/TrendingLocations";
-import DiscountLocations from "@/components/DiscountLocations";
-import { format } from "date-fns";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { mockUsers } from "@/mock/users";
+import { Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useExploreState } from "@/hooks/useExploreState";
+import { User } from "@/types";
+
+interface Filter {
+  id: string;
+  label: string;
+  options: { id: string; label: string }[];
+}
+
+const filters: Filter[] = [
+  {
+    id: "category",
+    label: "Category",
+    options: [
+      { id: "restaurant", label: "Restaurants" },
+      { id: "bar", label: "Bars" },
+      { id: "club", label: "Clubs" },
+      { id: "event", label: "Events" },
+    ],
+  },
+  {
+    id: "amenities",
+    label: "Amenities",
+    options: [
+      { id: "wifi", label: "Free Wifi" },
+      { id: "parking", label: "Parking" },
+      { id: "outdoor", label: "Outdoor Seating" },
+      { id: "livemusic", label: "Live Music" },
+    ],
+  },
+  {
+    id: "price",
+    label: "Price Range",
+    options: [
+      { id: "cheap", label: "Budget-friendly" },
+      { id: "moderate", label: "Moderate" },
+      { id: "expensive", label: "High-end" },
+    ],
+  },
+];
+
+const mockUsers: User[] = [
+  {
+    id: "1",
+    username: "johndoe",
+    name: "John Doe",
+    avatarUrl: "https://i.pravatar.cc/150?img=1",
+    bio: "Foodie and craft beer enthusiast",
+    location: "New York, NY",
+    followers: 123,
+    following: 456,
+  },
+  {
+    id: "2",
+    username: "janedoe",
+    name: "Jane Doe",
+    avatarUrl: "https://i.pravatar.cc/150?img=2",
+    bio: "Traveler and adventure seeker",
+    location: "Los Angeles, CA",
+    followers: 789,
+    following: 101,
+  },
+  {
+    id: "3",
+    username: "peterparker",
+    name: "Peter Parker",
+    avatarUrl: "https://i.pravatar.cc/150?img=3",
+    bio: "Photographer and web developer",
+    location: "New York, NY",
+    followers: 112,
+    following: 131,
+  },
+];
 
 const Explore = () => {
-  const isMobile = useIsMobile();
-  const navigate = useNavigate();
-  const {
-    activeTab,
-    searchedCity,
-    searchedState,
-    searchCategory,
-    filteredLocations,
-    locationTags,
-    musicEvents,
-    comedyEvents,
-    nightlifeVenues,
-    vibeFilter,
-    isNaturalLanguageSearch,
-    isLoadingResults,
-    dateRange,
-    showDateFilter,
-    activeSearchTab,
-    getPageTitle,
-    handleSearch,
-    handleTabChange,
-    handleClearVibeFilter,
-    handleDateRangeChange,
-    handleClearDates,
-    handleSearchTabChange,
-    setShowDateFilter
-  } = useExploreState();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { searchTerm, selectedFilters, setSelectedFilters } = useExploreState();
+  const [activeTab, setActiveTab] = useState("venues");
+  const [users, setUsers] = useState(mockUsers);
 
-  // Check if the search category is "users" and if it's a username
-  useEffect(() => {
-    if (searchCategory === "users") {
-      const usernameMatch = searchedCity && searchedCity.match(/^@?([a-zA-Z0-9_]+)$/);
-      if (usernameMatch) {
-        const username = usernameMatch[1];
-        // Check if this is a known user
-        const userExists = mockUsers.some(user => user.username === username);
-        if (userExists) {
-          // Redirect to user profile
-          navigate(`/user/${username}`);
-        } else {
-          // Show "user not found" state or suggest other users
-          // This is handled by the UI rendering below
-        }
+  const handleFilterChange = (filterId: string, optionId: string) => {
+    const isSelected = selectedFilters[filterId]?.includes(optionId);
+
+    setSelectedFilters((prevFilters) => {
+      const filterOptions = prevFilters[filterId] || [];
+
+      if (isSelected) {
+        const updatedOptions = filterOptions.filter((id) => id !== optionId);
+        return {
+          ...prevFilters,
+          [filterId]: updatedOptions.length > 0 ? updatedOptions : undefined,
+        };
+      } else {
+        return {
+          ...prevFilters,
+          [filterId]: [...filterOptions, optionId],
+        };
       }
-    }
-  }, [searchCategory, searchedCity, navigate]);
-
-  // Function to get media for location
-  const getMediaForLocation = (location: any) => {
-    return location.images || [];
+    });
   };
 
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (searchTerm) {
+      params.set("search", searchTerm);
+    }
+    Object.keys(selectedFilters).forEach((filterId) => {
+      selectedFilters[filterId]?.forEach((optionId) => {
+        params.append(filterId, optionId);
+      });
+    });
+    setSearchParams(params);
+  }, [searchTerm, selectedFilters, setSearchParams]);
+
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      
-      <main className="container py-6">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-center mb-6 vibe-gradient-text">
-            {getPageTitle()}
-          </h1>
-          
-          <SearchSection 
-            showDateFilter={showDateFilter}
-            dateRange={dateRange}
-            onSearch={handleSearch}
-            onDateRangeChange={handleDateRangeChange}
-            onClearDates={handleClearDates}
-          />
-          
-          {/* Map centered below search bar */}
-          <div className="w-full mb-6">
-            <NearbyVibesMap />
+    <Layout>
+      <div className="container py-8">
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-2xl font-bold">Explore</h1>
+          <div className="flex items-center space-x-2">
+            <Search className="h-5 w-5 text-gray-500" />
+            <input
+              type="text"
+              placeholder="Search venues or users..."
+              className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:border-blue-500"
+              defaultValue={searchTerm}
+            />
           </div>
-          
-          <VibeFilter 
-            vibeFilter={vibeFilter} 
-            onClearVibeFilter={handleClearVibeFilter} 
-          />
-          
-          <CategoryTabs 
-            activeTab={activeTab}
-            onTabChange={handleTabChange}
-          />
         </div>
 
-        <div className="flex flex-col md:flex-row gap-6">
-          <div className={`${isMobile ? 'w-full' : 'w-3/4'}`}>
-            {isLoadingResults ? (
-              <div className="flex justify-center items-center py-12">
-                <div className="text-center">
-                  <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent motion-reduce:animate-[spin_1.5s_linear_infinite] mb-4"></div>
-                  <p className="text-muted-foreground">Finding the perfect matches for your search...</p>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-4">
+          <TabsList>
+            <TabsTrigger value="venues">Venues</TabsTrigger>
+            <TabsTrigger value="users">Users</TabsTrigger>
+          </TabsList>
+          <TabsContent value="venues" className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filters.map((filter) => (
+                <div key={filter.id} className="border rounded-md p-4">
+                  <h2 className="text-lg font-semibold mb-2">{filter.label}</h2>
+                  <div className="space-y-2">
+                    {filter.options.map((option) => (
+                      <label
+                        key={option.id}
+                        className="flex items-center space-x-2"
+                      >
+                        <input
+                          type="checkbox"
+                          className="rounded"
+                          checked={
+                            selectedFilters[filter.id]?.includes(option.id) ||
+                            false
+                          }
+                          onChange={() => handleFilterChange(filter.id, option.id)}
+                        />
+                        <span>{option.label}</span>
+                      </label>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div>
-                {searchCategory === "users" && filteredLocations.length === 0 && (
-                  <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
-                      <User className="h-8 w-8 text-muted-foreground" />
-                    </div>
-                    <h2 className="text-xl font-semibold mb-2">User Not Found</h2>
-                    <p className="text-muted-foreground mb-6">
-                      We couldn't find the user "{searchedCity}". Here are some suggested users you might like.
+              ))}
+            </div>
+            <div>
+              {/* Mock Venue Results */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <Card className="bg-neutral-900">
+                  <CardContent className="flex flex-col gap-2">
+                    <h3 className="text-xl font-semibold">The Rooftop Lounge</h3>
+                    <p className="text-sm text-gray-500">
+                      Trendy rooftop bar with city views
                     </p>
-                    <div className="flex flex-wrap justify-center gap-4">
-                      {mockUsers.slice(0, 6).map(user => (
-                        <div 
-                          key={user.id}
-                          className="flex flex-col items-center cursor-pointer transition hover:scale-105"
-                          onClick={() => navigate(`/user/${user.username}`)}
-                        >
-                          <Avatar className="h-16 w-16 mb-2">
-                            <AvatarImage src={user.avatar} alt={user.name} />
-                            <AvatarFallback>{user.name.substring(0, 2)}</AvatarFallback>
-                          </Avatar>
-                          <p className="font-medium text-sm">{user.name}</p>
-                          <p className="text-xs text-muted-foreground">@{user.username}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                    <Badge variant="secondary">Bar</Badge>
+                    <Badge variant="secondary">Cocktails</Badge>
+                    <Button variant="outline">View Details</Button>
+                  </CardContent>
+                </Card>
 
-                {activeTab === "music" && searchCategory !== "users" && (
-                  <MusicSection
-                    musicEvents={musicEvents.length > 0 ? musicEvents : []}
-                    searchedCity={searchedCity || "San Francisco"}
-                    dateRange={dateRange}
-                  />
-                )}
-                
-                {activeTab === "comedy" && searchCategory !== "users" && (
-                  <ComedySection
-                    comedyEvents={comedyEvents.length > 0 ? comedyEvents : []}
-                    searchedCity={searchedCity || "San Francisco"}
-                    dateRange={dateRange}
-                  />
-                )}
-                
-                {activeTab === "nightlife" && searchCategory !== "users" && (
-                  <NightlifeSection
-                    nightlifeVenues={nightlifeVenues.length > 0 ? nightlifeVenues : []}
-                    searchedCity={searchedCity || "San Francisco"}
-                    dateRange={dateRange}
-                  />
-                )}
-                
-                {searchCategory === "places" && activeTab === "sports" && (
-                  <div className="mb-6">
-                    <h2 className="text-xl font-semibold mb-4 flex items-center">
-                      Trending Sports Events
-                      {dateRange?.from && (
-                        <Badge className="ml-2 bg-indigo-100 text-indigo-800">
-                          {format(dateRange.from, "MMM yyyy")}
-                          {dateRange.to && ` - ${format(dateRange.to, "MMM yyyy")}`}
-                        </Badge>
-                      )}
-                    </h2>
-                    <div className="space-y-4">
-                      {filteredLocations
-                        .filter(loc => loc.type === "sports")
-                        .slice(0, 3)
-                        .map(location => (
-                          <VenuePost
-                            key={location.id}
-                            venue={location}
-                            content={getCitySpecificContent(location)}
-                            media={getMediaForLocation(location)}
-                            timestamp={new Date().toISOString()}
-                          />
-                        ))}
-                    </div>
-                  </div>
-                )}
-                
-                {activeTab !== "music" && activeTab !== "comedy" && activeTab !== "nightlife" && searchCategory !== "users" && (
-                  <LocationsGrid
-                    locations={filteredLocations}
-                    locationTags={locationTags}
-                  />
-                )}
+                <Card className="bg-neutral-900">
+                  <CardContent className="flex flex-col gap-2">
+                    <h3 className="text-xl font-semibold">Spice Route</h3>
+                    <p className="text-sm text-gray-500">
+                      Authentic Indian cuisine in a vibrant setting
+                    </p>
+                    <Badge variant="secondary">Restaurant</Badge>
+                    <Badge variant="secondary">Indian</Badge>
+                    <Button variant="outline">View Details</Button>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-neutral-900">
+                  <CardContent className="flex flex-col gap-2">
+                    <h3 className="text-xl font-semibold">Electric Ballroom</h3>
+                    <p className="text-sm text-gray-500">
+                      Live music venue with a spacious dance floor
+                    </p>
+                    <Badge variant="secondary">Club</Badge>
+                    <Badge variant="secondary">Live Music</Badge>
+                    <Button variant="outline">View Details</Button>
+                  </CardContent>
+                </Card>
               </div>
-            )}
-          </div>
-          
-          {!isMobile && (
-            <div className="w-1/4 space-y-6">
-              <RecommendedForYou featuredLocations={["5", "7", "10", "13", "20"]} />
-              <TrendingLocations />
-              <DiscountLocations />
             </div>
-          )}
-          
-          {isMobile && (
-            <div className="mt-8 space-y-6">
-              <h2 className="text-xl font-bold mb-4 vibe-gradient-text">Around You</h2>
-              <RecommendedForYou featuredLocations={["5", "7", "10", "13", "20"]} />
-              <TrendingLocations />
-              <DiscountLocations />
+          </TabsContent>
+
+          <TabsContent value="users" className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {users.map((user) => (
+                <Card key={user.id} className="bg-neutral-900">
+                  <CardContent className="flex flex-col items-center gap-4">
+                    <Avatar className="h-20 w-20">
+                      <AvatarImage src={user.avatarUrl} alt={user.name} />
+                      <AvatarFallback>{user.name.slice(0, 2)}</AvatarFallback>
+                    </Avatar>
+                    <h3 className="text-xl font-semibold">{user.name}</h3>
+                    <p className="text-sm text-gray-500">{user.bio}</p>
+                    <div className="flex space-x-2">
+                      <Badge variant="outline">
+                        <Users className="mr-2 h-4 w-4" />
+                        {user.followers} Followers
+                      </Badge>
+                    </div>
+                    <Button variant="outline">View Profile</Button>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
-          )}
-        </div>
-      </main>
-      
-      <CameraButton />
-    </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </Layout>
   );
 };
 

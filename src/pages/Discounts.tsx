@@ -1,131 +1,176 @@
-
 import { useState } from "react";
 import { Layout } from "@/components/Layout";
-import MapContainer from "@/components/map/MapContainer";
-import { Card, CardContent } from "@/components/ui/card";
-import { discountOffers } from "@/mock/discountOffers";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { ArrowRight, MapPin, Ticket } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { VenueWithDiscount } from "@/components/venue/events/types";
-import { Location } from "@/types";
+import { Calendar, Store, Percent, CheckCircle, XCircle } from "lucide-react";
 
-// Convert VenueWithDiscount to Location for MapContainer compatibility
-const convertToLocation = (venue: VenueWithDiscount): Location => {
-  return {
-    id: venue.id,
-    name: venue.name,
-    type: venue.type,
-    address: venue.address,
-    city: venue.city,
-    state: venue.state,
-    country: venue.country,
-    zip: venue.zip,
-    lat: venue.lat,
-    lng: venue.lng,
-    verified: venue.verified,
-    description: venue.discount.description
-  };
-};
+type OfferCategory = "restaurant" | "bar" | "event" | "other";
+
+interface Offer {
+  id: string;
+  venueId: string;
+  venueName: string;
+  description: string;
+  discountPercentage: number;
+  validUntil: string;
+  category: OfferCategory;
+  termsAndConditions: string;
+  isRedeemed: boolean;
+}
 
 const Discounts = () => {
-  const navigate = useNavigate();
-  const [selectedVenue, setSelectedVenue] = useState<VenueWithDiscount | null>(null);
-  const [mapExpanded, setMapExpanded] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<OfferCategory | "all">("all");
 
-  const handleVenueSelect = (location: Location) => {
-    // Find the corresponding venue from discountOffers
-    const venue = discountOffers.find(v => v.id === location.id);
-    if (venue) {
-      setSelectedVenue(venue);
-    }
-  };
+  const mockOffers: Offer[] = [
+    {
+      id: "1",
+      venueId: "venue-1",
+      venueName: "The Rooftop Lounge",
+      description: "25% off all cocktails during happy hour",
+      discountPercentage: 25,
+      validUntil: "2024-12-31",
+      category: "bar",
+      termsAndConditions: "Valid from 5 PM to 7 PM, Monday to Friday.",
+      isRedeemed: false,
+    },
+    {
+      id: "2",
+      venueId: "venue-2",
+      venueName: "Bella Italia",
+      description: "15% off any pasta dish",
+      discountPercentage: 15,
+      validUntil: "2024-11-15",
+      category: "restaurant",
+      termsAndConditions: "Not valid with other offers.",
+      isRedeemed: true,
+    },
+    {
+      id: "3",
+      venueId: "venue-3",
+      venueName: "City Cinema",
+      description: "10% off movie tickets on Tuesdays",
+      discountPercentage: 10,
+      validUntil: "2024-12-20",
+      category: "event",
+      termsAndConditions: "Online bookings only.",
+      isRedeemed: false,
+    },
+    {
+      id: "4",
+      venueId: "venue-4",
+      venueName: "The Daily Grind",
+      description: "Buy one get one free on all coffees",
+      discountPercentage: 50,
+      validUntil: "2024-11-10",
+      category: "other",
+      termsAndConditions: "Valid until 11 AM.",
+      isRedeemed: false,
+    },
+    {
+      id: "5",
+      venueId: "venue-5",
+      venueName: "Spice Route",
+      description: "20% off on dinner buffet",
+      discountPercentage: 20,
+      validUntil: "2024-12-31",
+      category: "restaurant",
+      termsAndConditions: "Valid on weekends only.",
+      isRedeemed: false,
+    },
+    {
+      id: "6",
+      venueId: "venue-6",
+      venueName: "Club Retro",
+      description: "$5 off entry fee",
+      discountPercentage: 50,
+      validUntil: "2024-11-30",
+      category: "event",
+      termsAndConditions: "Must be 21+.",
+      isRedeemed: true,
+    },
+  ];
 
-  const handleCloseLocation = () => {
-    setSelectedVenue(null);
-  };
-
-  // Convert discount venues to Location type for map compatibility
-  const locationsForMap = discountOffers.map(convertToLocation);
+  const filteredOffers =
+    selectedCategory === "all"
+      ? mockOffers
+      : mockOffers.filter((offer) => offer.category === selectedCategory);
 
   return (
     <Layout>
-      <div className="container py-6">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-3xl font-bold vibe-gradient-text">
-              Nearby Discounts & Deals
-            </h1>
-            <p className="text-muted-foreground mt-2">
-              Exclusive offers at venues near you
-            </p>
+      <div className="container py-8">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold">Exclusive Discounts</h1>
+          <div className="space-x-2">
+            <Badge
+              variant={selectedCategory === "all" ? "default" : "outline"}
+              onClick={() => setSelectedCategory("all")}
+              className="cursor-pointer"
+            >
+              All
+            </Badge>
+            <Badge
+              variant={selectedCategory === "restaurant" ? "default" : "outline"}
+              onClick={() => setSelectedCategory("restaurant")}
+              className="cursor-pointer"
+            >
+              Restaurants
+            </Badge>
+            <Badge
+              variant={selectedCategory === "bar" ? "default" : "outline"}
+              onClick={() => setSelectedCategory("bar")}
+              className="cursor-pointer"
+            >
+              Bars
+            </Badge>
+            <Badge
+              variant={selectedCategory === "event" ? "default" : "outline"}
+              onClick={() => setSelectedCategory("event")}
+              className="cursor-pointer"
+            >
+              Events
+            </Badge>
+            <Badge
+              variant={selectedCategory === "other" ? "default" : "outline"}
+              onClick={() => setSelectedCategory("other")}
+              className="cursor-pointer"
+            >
+              Other
+            </Badge>
           </div>
         </div>
-
-        {/* Map Section */}
-        <div className="mb-8">
-          <MapContainer
-            loading={false}
-            isExpanded={mapExpanded}
-            userLocation={null}
-            locations={locationsForMap}
-            searchedCity=""
-            mapStyle="default"
-            selectedLocation={selectedVenue ? convertToLocation(selectedVenue) : null}
-            showDistances={true}
-            userAddressLocation={null}
-            onLocationSelect={handleVenueSelect}
-            onCloseLocation={handleCloseLocation}
-            nearbyCount={discountOffers.length}
-            onToggleDistances={() => {}}
-          />
-        </div>
-
-        {/* Discount List */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {discountOffers.map((venue) => (
-            <Card key={venue.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-              <CardContent className="p-4">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="font-semibold text-lg">{venue.name}</h3>
-                    <p className="text-sm text-muted-foreground flex items-center mt-1">
-                      <MapPin className="h-3 w-3 mr-1" />
-                      {venue.city}, {venue.state}
-                    </p>
-                  </div>
-                  <Badge variant={venue.discount.type === "percentOff" ? "secondary" : "default"}>
-                    <Ticket className="h-3 w-3 mr-1" />
-                    {venue.discount.type === "percentOff" 
-                      ? `${venue.discount.value}% OFF`
-                      : venue.discount.type.replace(/([A-Z])/g, ' $1').trim()}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredOffers.map((offer) => (
+            <Card key={offer.id}>
+              <CardHeader>
+                <CardTitle>{offer.venueName}</CardTitle>
+                <CardDescription>
+                  <Store className="mr-2 inline-block h-4 w-4" />
+                  {offer.description}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <p>
+                  <Percent className="mr-2 inline-block h-4 w-4" />
+                  Discount: {offer.discountPercentage}%
+                </p>
+                <p>
+                  <Calendar className="mr-2 inline-block h-4 w-4" />
+                  Valid Until: {offer.validUntil}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Terms: {offer.termsAndConditions}
+                </p>
+                {offer.isRedeemed ? (
+                  <Badge variant="destructive">
+                    <XCircle className="mr-2 h-4 w-4" />
+                    Redeemed
                   </Badge>
-                </div>
-                
-                <p className="mt-3 text-sm">{venue.discount.description}</p>
-                
-                {venue.discount.conditions && (
-                  <p className="mt-2 text-xs text-muted-foreground">
-                    {venue.discount.conditions}
-                  </p>
+                ) : (
+                  <Badge variant="secondary">
+                    <CheckCircle className="mr-2 h-4 w-4" />
+                    Active
+                  </Badge>
                 )}
-                
-                <div className="mt-4 flex justify-between items-center">
-                  {venue.discount.code && (
-                    <Badge variant="outline" className="text-xs">
-                      Code: {venue.discount.code}
-                    </Badge>
-                  )}
-                  <Button 
-                    size="sm" 
-                    className="ml-auto"
-                    onClick={() => navigate(`/venue/${venue.id}`)}
-                  >
-                    View Venue
-                    <ArrowRight className="h-4 w-4 ml-1" />
-                  </Button>
-                </div>
               </CardContent>
             </Card>
           ))}

@@ -160,3 +160,12 @@ export interface SocialMediaApiKeys {
   yelp: string;
   google: string;
 }
+
+export interface CreditCard {
+  id: string;
+  lastFour: string;
+  brand: string;
+  expiryMonth: number;
+  expiryYear: number;
+  isDefault: boolean;
+}
