@@ -41,32 +41,35 @@ export const SimpleSearchService = {
          query.toLowerCase().includes("what's happening") ||
          query.toLowerCase().includes("things to do"))) {
       
-      return generateCombinedCityResponse(city);
+      return await generateCombinedCityResponse(city); // Added await
     }
     
     // Otherwise, create a response based on the query content
+    // Assuming these other generate...Response functions will also become async
+    // and need to be awaited. If they are not yet async, this await might be harmless
+    // or might need adjustment when those are updated.
     if (query.toLowerCase().includes("events") || 
         query.toLowerCase().includes("happening") || 
         query.toLowerCase().includes("going on")) {
-      return generateEventsResponse(city);
+      return await generateEventsResponse(city);
     } else if (query.toLowerCase().includes("restaurant") || 
                query.toLowerCase().includes("food") || 
                query.toLowerCase().includes("eat")) {
-      return generateRestaurantsResponse(city);
+      return await generateRestaurantsResponse(city);
     } else if (query.toLowerCase().includes("nightlife") || 
                query.toLowerCase().includes("bar") || 
                query.toLowerCase().includes("club")) {
-      return generateNightlifeResponse(city);
+      return await generateNightlifeResponse(city);
     } else if (query.toLowerCase().includes("attraction") || 
                query.toLowerCase().includes("visit") || 
                query.toLowerCase().includes("see")) {
-      return generateAttractionsResponse(city);
+      return await generateAttractionsResponse(city);
     } else if (query.toLowerCase().includes("sports") ||
                query.toLowerCase().includes("game") ||
                query.toLowerCase().includes("team")) {
-      return generateSportsResponse(city);
+      return await generateSportsResponse(city);
     } else {
-      return generateGeneralCityResponse(city);
+      return await generateGeneralCityResponse(city); // Added await
     }
   }
 };

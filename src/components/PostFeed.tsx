@@ -1,338 +1,251 @@
 
-import { useState, useMemo } from "react";
-import { mockPosts, mockComments, mockUsers } from "@/mock/data";
-import { PostCard } from "@/components/post";
-import SearchVibes from "@/components/SearchVibes";
-import { Post, User, Media } from "@/types";
-import { isWithinThreeMonths } from "@/mock/time-utils";
-import { Badge } from "@/components/ui/badge";
-import { Sparkles, Filter } from "lucide-react";
+import React, { useState, useMemo } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { vibeTags } from "@/hooks/useUserProfile";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Heart, MessageCircle, Share, MapPin, Star } from "lucide-react";
+import Verified from "@/components/Verified";
+import { Post, Comment } from "@/types";
 
-interface PostFeedProps {
-  celebrityFeatured?: string[];
-}
-
-// Helper function to ensure media is in the correct format
-const ensureMediaFormat = (media: any[]): Media[] => {
-  return media.map(item => {
-    if (typeof item === 'string') {
-      // Determine type based on extension
-      const isVideo = item.endsWith('.mp4') || item.endsWith('.mov') || item.endsWith('.avi');
-      return {
-        type: isVideo ? 'video' : 'image',
-        url: item
-      };
-    } else if (typeof item === 'object' && item !== null) {
-      // Already in correct format
-      return item;
-    }
-    
-    // Default fallback
-    return {
-      type: 'image',
-      url: 'https://via.placeholder.com/500'
-    };
-  });
-};
-
-const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
-  const [filter, setFilter] = useState("all");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedVibeTags, setSelectedVibeTags] = useState<string[]>([]);
-
-  const handleSearch = (query: string, filterType: string) => {
-    setSearchQuery(query);
-    if (filterType !== "All") {
-      setFilter(filterType.toLowerCase());
-    } else {
-      setFilter("all");
-    }
-  };
-
-  // Toggle vibe tag selection
-  const toggleVibeTag = (tag: string) => {
-    if (selectedVibeTags.includes(tag)) {
-      setSelectedVibeTags(selectedVibeTags.filter(t => t !== tag));
-    } else {
-      setSelectedVibeTags([...selectedVibeTags, tag]);
-    }
-  };
-
-  // Generate vibe tags for posts
-  const postsWithVibeTags = useMemo(() => {
-    return mockPosts.map(post => {
-      // Ensure post has vibe tags
-      if (!post.vibeTags || post.vibeTags.length === 0) {
-        // Generate 1-4 vibe tags per post
-        const seed = parseInt(post.id) || post.id.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
-        const tagCount = 1 + (seed % 4);
-        const shuffledTags = [...vibeTags].sort(() => 0.5 - (seed * 0.0001));
-        const postVibeTags = shuffledTags.slice(0, tagCount);
-        
-        post.vibeTags = postVibeTags;
+// Mock data
+const mockPosts: Post[] = [
+  {
+    id: "1",
+    content: "Amazing rooftop views and craft cocktails! The sunset here is absolutely breathtaking. Perfect spot for a date night or catching up with friends. 🌅🍸",
+    author: {
+      id: "1",
+      username: "foodie_sarah",
+      name: "Sarah Johnson",
+      avatar: "/placeholder.svg",
+      isVerified: true,
+      followersCount: 2500,
+      followingCount: 180,
+      postsCount: 245,
+      isCelebrity: false
+    },
+    user: {
+      id: "1",
+      username: "foodie_sarah",
+      name: "Sarah Johnson",
+      avatar: "/placeholder.svg",
+      isVerified: true,
+      followersCount: 2500,
+      followingCount: 180,
+      postsCount: 245,
+      isCelebrity: false
+    },
+    location: {
+      id: "1",
+      name: "Sky Lounge",
+      address: "123 High Street",
+      city: "New York",
+      state: "NY",
+      zip: "10001",
+      latitude: 40.7128,
+      longitude: -74.0060,
+      lat: 40.7128,
+      lng: -74.0060,
+      category: "nightlife",
+      type: "lounge",
+      rating: 4.8,
+      reviewCount: 324,
+      price: "$$$",
+      imageUrl: "/placeholder.svg",
+      isFeatured: true,
+      verified: true,
+      country: "US",
+      formattedPhoneNumber: "(555) 123-4567",
+      website: "https://skylounge.com",
+      reservable: true
+    },
+    timestamp: "2024-01-15T18:30:00Z",
+    media: [
+      {
+        id: "1",
+        type: "image",
+        url: "/placeholder.svg"
       }
-      
-      // Ensure media is in the correct format
-      post.media = ensureMediaFormat(post.media);
-      
-      return post;
-    });
-  }, []);
-
-  // First, filter posts to only show those from the past 3 months
-  const recentPosts = useMemo(() => {
-    return postsWithVibeTags.filter(post => isWithinThreeMonths(post.timestamp));
-  }, [postsWithVibeTags]);
-
-  // Prioritize posts from featured users if provided
-  const prioritizedPosts = useMemo(() => {
-    if (!celebrityFeatured || celebrityFeatured.length === 0) {
-      return recentPosts;
-    }
-
-    // Create a map of usernames (lowercase) for case-insensitive comparison
-    const featuredUsernames = celebrityFeatured.map(username => username.toLowerCase());
-
-    // Find posts from featured users
-    const featuredUserPosts = recentPosts.filter(post => 
-      featuredUsernames.includes(post.user.username.toLowerCase())
-    );
-    
-    // Get the remaining posts
-    const otherPosts = recentPosts.filter(post => 
-      !featuredUsernames.includes(post.user.username.toLowerCase())
-    );
-    
-    // Combine them with featured posts first
-    return [...featuredUserPosts, ...otherPosts];
-  }, [recentPosts, celebrityFeatured]);
-
-  const filteredPosts = useMemo(() => {
-    return prioritizedPosts.filter((post) => {
-      // Filter by location type if specified
-      if (filter !== "all" && post.location.type !== filter) {
-        return false;
+    ],
+    likes: 127,
+    comments: [],
+    vibedHere: true,
+    isLiked: false
+  },
+  {
+    id: "2",
+    content: "Best tacos in the city! The al pastor is incredible and the atmosphere is so lively. Definitely coming back here soon! 🌮🔥",
+    author: {
+      id: "2",
+      username: "taco_lover_mike",
+      name: "Mike Rodriguez",
+      avatar: "/placeholder.svg",
+      isVerified: false,
+      followersCount: 890,
+      followingCount: 420,
+      postsCount: 156,
+      isCelebrity: false
+    },
+    user: {
+      id: "2",
+      username: "taco_lover_mike",
+      name: "Mike Rodriguez",
+      avatar: "/placeholder.svg",
+      isVerified: false,
+      followersCount: 890,
+      followingCount: 420,
+      postsCount: 156,
+      isCelebrity: false
+    },
+    location: {
+      id: "2",
+      name: "Taco Libre",
+      address: "456 Food Avenue",
+      city: "Los Angeles",
+      state: "CA",
+      zip: "90210",
+      latitude: 34.0522,
+      longitude: -118.2437,
+      lat: 34.0522,
+      lng: -118.2437,
+      category: "food",
+      type: "restaurant",
+      rating: 4.6,
+      reviewCount: 892,
+      price: "$$",
+      imageUrl: "/placeholder.svg",
+      isFeatured: false,
+      verified: true,
+      country: "US",
+      formattedPhoneNumber: "(555) 987-6543",
+      website: "https://tacolibre.com",
+      reservable: false
+    },
+    timestamp: "2024-01-15T19:45:00Z",
+    media: [
+      {
+        id: "2",
+        type: "image",
+        url: "/placeholder.svg"
       }
-      
-      // Filter by vibe tags if any are selected
-      if (selectedVibeTags.length > 0) {
-        // Check if post has any of the selected vibe tags (inclusive filtering)
-        const hasMatchingTag = post.vibeTags?.some(tag => selectedVibeTags.includes(tag));
-        if (!hasMatchingTag) return false;
-      }
-      
-      // Filter by search query if specified
-      if (searchQuery) {
-        const query = searchQuery.toLowerCase();
-        return (
-          post.location.name.toLowerCase().includes(query) ||
-          post.location.city.toLowerCase().includes(query) ||
-          post.content.toLowerCase().includes(query) ||
-          post.vibeTags?.some(tag => tag.toLowerCase().includes(query))
-        );
-      }
-      
-      return true;
-    });
-  }, [prioritizedPosts, filter, searchQuery, selectedVibeTags]);
+    ],
+    likes: 89,
+    comments: [],
+    vibedHere: true,
+    isLiked: true
+  }
+];
 
-  // Group posts by location
-  const postsGroupedByLocation = useMemo(() => {
-    const groupedPosts: Record<string, Post[]> = {};
-    
-    filteredPosts.forEach(post => {
-      const locationId = post.location.id;
-      if (!groupedPosts[locationId]) {
-        groupedPosts[locationId] = [];
-      }
-      groupedPosts[locationId].push(post);
-    });
-    
-    // Sort each location's posts by timestamp (most recent first)
-    Object.keys(groupedPosts).forEach(locationId => {
-      groupedPosts[locationId].sort((a, b) => 
-        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-      );
-    });
-    
-    return groupedPosts;
-  }, [filteredPosts]);
+const PostFeed = () => {
+  const [posts] = useState<Post[]>(mockPosts);
+  const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set(['2']));
 
-  // Calculate the number of posts per location
-  // For demo purposes, add variation to the counts
-  const locationPostCounts = (() => {
-    const counts: Record<string, number> = {};
-    
-    // Define specific counts for certain locations to ensure variety
-    const specificCounts: Record<string, number> = {
-      "1": 15, // Sunset Lounge
-      "2": 23, // Artisan Coffee House
-      "3": 8,  // Summer Music Festival
-      "4": 3,  // Modern Art Museum
-      "5": 42, // Skyline Rooftop Bar
-      "6": 67, // Madison Square Garden
-      "7": 89, // Encore Beach Club
-      "8": 35, // Christ the Redeemer
-      "9": 12, // Aspen Highlands
-      "10": 121, // Allegiant Stadium (Super Bowl)
-      "13": 78, // Houston Rodeo
-      "14": 19, // Laugh Factory
-      "18": 53, // Sydney Opera House
-      "19": 145, // Eiffel Tower
-      "20": 104, // Coachella Valley Music Festival
-      "21": 31, // Gucci Pop-Up
-    };
-    
-    // Apply the specific counts where defined, and calculate naturally for others
-    filteredPosts.forEach(post => {
-      const locationId = post.location.id;
-      if (locationId in specificCounts) {
-        counts[locationId] = specificCounts[locationId];
+  const handleLike = (postId: string) => {
+    setLikedPosts(prev => {
+      const newLikes = new Set(prev);
+      if (newLikes.has(postId)) {
+        newLikes.delete(postId);
       } else {
-        counts[locationId] = (counts[locationId] || 0) + Math.floor(Math.random() * 50) + 1;
+        newLikes.add(postId);
       }
+      return newLikes;
     });
-    
-    return counts;
-  })();
-
-  // Get post comments
-  const getPostComments = (postId: string) => {
-    return mockComments.filter(comment => comment.postId === postId);
   };
 
-  // Render vibe tags for a post
-  const renderVibeTags = (post: Post) => {
-    if (!post.vibeTags || post.vibeTags.length === 0) return null;
-    
-    return (
-      <div className="flex flex-wrap gap-1 mt-2">
-        {post.vibeTags.map((tag, index) => (
-          <Badge 
-            key={index} 
-            variant="outline" 
-            className={`${selectedVibeTags.includes(tag) ? 'bg-primary text-white' : 'bg-primary/10 text-primary'} text-xs`}
-          >
-            <Sparkles className="h-3 w-3 mr-1" />
-            {tag}
-          </Badge>
-        ))}
-      </div>
-    );
+  const handleComment = (postId: string, comment: string) => {
+    console.log('Adding comment to post:', postId, comment);
   };
 
-  // Enhanced PostCard component with vibe tags
-  const EnhancedPostCard = ({ posts, locationPostCount }: { posts: Post[], locationPostCount: number }) => {
-    const postCard = (
-      <PostCard 
-        posts={posts} 
-        locationPostCount={locationPostCount}
-        getComments={getPostComments}
-      />
-    );
-    
-    // Check if any post has vibe tags
-    const hasVibeTags = posts.some(post => post.vibeTags && post.vibeTags.length > 0);
-    
-    if (!hasVibeTags) return postCard;
-    
-    // Add vibe tags below the post card
-    return (
-      <div className="space-y-2">
-        {postCard}
-        <div className="pl-4">
-          {renderVibeTags(posts[0])}
-        </div>
-      </div>
-    );
+  const handleShare = (postId: string) => {
+    console.log('Sharing post:', postId);
   };
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <div className="mb-4">
-        <SearchVibes onSearch={handleSearch} />
-        
-        <div className="mt-2 flex items-center space-x-2">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button 
-                variant={selectedVibeTags.length > 0 ? "default" : "outline"} 
-                size="sm" 
-                className="flex items-center gap-1"
-              >
-                <Filter className="h-4 w-4" />
-                Vibe Filters {selectedVibeTags.length > 0 && `(${selectedVibeTags.length})`}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-2" align="start">
-              <div className="grid grid-cols-2 gap-1 min-w-[280px]">
-                {vibeTags.map(tag => (
-                  <Badge 
-                    key={tag}
-                    variant={selectedVibeTags.includes(tag) ? "default" : "outline"}
-                    className="cursor-pointer justify-start"
-                    onClick={() => toggleVibeTag(tag)}
-                  >
-                    <Sparkles className="h-3 w-3 mr-1" />
-                    {tag}
-                  </Badge>
-                ))}
+    <div className="space-y-6">
+      {posts.map((post) => (
+        <Card key={post.id} className="bg-neutral-900 border-neutral-700">
+          <CardHeader className="pb-3">
+            <div className="flex items-start space-x-3">
+              <Avatar className="h-10 w-10">
+                <AvatarImage src={post.user.avatar} alt={post.user.name} />
+                <AvatarFallback>{post.user.name.charAt(0)}</AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center space-x-2">
+                  <h3 className="text-sm font-semibold text-white truncate">
+                    {post.user.name}
+                  </h3>
+                  {post.user.isVerified && <Verified />}
+                  <span className="text-xs text-neutral-400">
+                    @{post.user.username}
+                  </span>
+                </div>
+                <div className="flex items-center space-x-2 mt-1">
+                  <MapPin className="h-3 w-3 text-neutral-400" />
+                  <span className="text-xs text-neutral-400">
+                    {post.location.name}, {post.location.city}
+                  </span>
+                  <div className="flex items-center space-x-1">
+                    <Star className="h-3 w-3 text-yellow-500 fill-current" />
+                    <span className="text-xs text-neutral-400">
+                      {post.location.rating}
+                    </span>
+                  </div>
+                </div>
               </div>
-              {selectedVibeTags.length > 0 && (
-                <Button 
-                  variant="link" 
-                  size="sm" 
-                  className="mt-2" 
-                  onClick={() => setSelectedVibeTags([])}
-                >
-                  Clear all filters
-                </Button>
-              )}
-            </PopoverContent>
-          </Popover>
-          
-          {selectedVibeTags.length > 0 && (
-            <div className="flex flex-wrap gap-1 items-center">
-              {selectedVibeTags.map(tag => (
-                <Badge 
-                  key={tag}
-                  variant="default"
-                  className="cursor-pointer"
-                  onClick={() => toggleVibeTag(tag)}
-                >
-                  {tag} ×
-                </Badge>
-              ))}
             </div>
-          )}
-        </div>
-      </div>
+          </CardHeader>
 
-      <div className="p-4 space-y-4">
-        {Object.keys(postsGroupedByLocation).length > 0 ? (
-          Object.entries(postsGroupedByLocation).map(([locationId, posts]) => (
-            <EnhancedPostCard 
-              key={locationId} 
-              posts={posts} 
-              locationPostCount={locationPostCounts[locationId]}
-            />
-          ))
-        ) : (
-          <div className="text-center py-10">
-            <h3 className="text-xl font-semibold mb-2">No vibes found</h3>
-            <p className="text-muted-foreground">
-              Try adjusting your filters or post your own vibe!
-            </p>
-          </div>
-        )}
-      </div>
+          <CardContent className="pt-0">
+            <p className="text-sm text-neutral-200 mb-4">{post.content}</p>
+            
+            {post.media && post.media.length > 0 && (
+              <div className="mb-4">
+                <img
+                  src={post.media[0].url}
+                  alt="Post media"
+                  className="w-full h-64 object-cover rounded-lg"
+                />
+              </div>
+            )}
+
+            <div className="flex items-center justify-between pt-3 border-t border-neutral-700">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleLike(post.id)}
+                className={`text-neutral-400 hover:text-red-500 ${
+                  likedPosts.has(post.id) ? 'text-red-500' : ''
+                }`}
+              >
+                <Heart className={`h-4 w-4 mr-1 ${
+                  likedPosts.has(post.id) ? 'fill-current' : ''
+                }`} />
+                {post.likes + (likedPosts.has(post.id) && !post.isLiked ? 1 : 0)}
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleComment(post.id, '')}
+                className="text-neutral-400 hover:text-blue-500"
+              >
+                <MessageCircle className="h-4 w-4 mr-1" />
+                {post.comments.length}
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleShare(post.id)}
+                className="text-neutral-400 hover:text-green-500"
+              >
+                <Share className="h-4 w-4 mr-1" />
+                Share
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
     </div>
   );
 };
