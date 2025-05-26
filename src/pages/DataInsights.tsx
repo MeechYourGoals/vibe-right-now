@@ -58,7 +58,7 @@ const DataInsights = () => {
           {/* Vernon Pro Banner - Only show for Pro users */}
           {isPro && (
             <div className="mb-6">
-              <VernonProBanner subscriptionTier={subscriptionTier} />
+              <VernonProBanner subscriptionTier={subscriptionTier} isPro={isPro} />
             </div>
           )}
           
