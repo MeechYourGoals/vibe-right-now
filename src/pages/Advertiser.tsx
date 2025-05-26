@@ -2,22 +2,20 @@
 import { useState } from "react";
 import Header from "@/components/Header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import VenueInsights from "@/components/VenueInsights";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Crown, FileLock, ChartBar } from "lucide-react";
-import PremiumBanner from "@/components/data-insights/PremiumBanner";
-import AnalyticsTab from "@/components/data-insights/AnalyticsTab";
-import AdvertisingTab from "@/components/data-insights/marketing/AdvertisingTab";
-import VernonProBanner from "@/components/data-insights/VernonProBanner";
+import { Target, TrendingUp, Zap, Eye, Crown } from "lucide-react";
+import AdvertiserDashboard from "@/components/data-insights/advertiser/AdvertiserDashboard";
+import AdCreationStudio from "@/components/data-insights/advertiser/AdCreationStudio";
+import TargetingSegmentation from "@/components/data-insights/advertiser/TargetingSegmentation";
+import AdvertiserReporting from "@/components/data-insights/advertiser/AdvertiserReporting";
 import VernonNext from "@/components/VernonNext";
 
 // Subscription tier types
 type SubscriptionTier = 'standard' | 'plus' | 'premium' | 'pro';
 
-const DataInsights = () => {
+const Advertiser = () => {
   const [subscriptionTier, setSubscriptionTier] = useState<SubscriptionTier>('pro');
-  const isPremium = subscriptionTier === 'premium' || subscriptionTier === 'pro';
   const isPro = subscriptionTier === 'pro';
   
   const handleUpgrade = (tier: SubscriptionTier) => {
@@ -55,17 +53,10 @@ const DataInsights = () => {
       
       <main className="container py-6 bg-neutral-950">
         <div className="max-w-6xl mx-auto">
-          {/* Vernon Pro Banner - Only show for Pro users */}
-          {isPro && (
-            <div className="mb-6">
-              <VernonProBanner subscriptionTier={subscriptionTier} />
-            </div>
-          )}
-          
-          <Tabs defaultValue="overview" className="w-full">
+          <Tabs defaultValue="dashboard" className="w-full">
             <div className="flex justify-between items-center mb-4">
               <div className="flex items-center">
-                <h1 className="text-3xl font-bold text-white">Data Insights</h1>
+                <h1 className="text-3xl font-bold text-white">Advertiser Suite</h1>
                 {getTierBadge()}
               </div>
               
@@ -125,45 +116,51 @@ const DataInsights = () => {
               )}
             </div>
             
-            <TabsList className="mb-4 bg-neutral-800 border-neutral-700">
-              <TabsTrigger value="overview" className="data-[state=active]:bg-neutral-700 data-[state=active]:text-white text-neutral-300">Overview</TabsTrigger>
-              <TabsTrigger value="analytics" className="data-[state=active]:bg-neutral-700 data-[state=active]:text-white text-neutral-300">
-                <div className="flex items-center">
-                  <ChartBar className="mr-2 h-4 w-4" />
-                  Analytics
-                  {subscriptionTier === 'standard' && <FileLock className="ml-2 h-3 w-3 text-neutral-500" />}
-                </div>
+            <TabsList className="mb-4 bg-neutral-800 border-neutral-700 w-full">
+              <TabsTrigger 
+                value="dashboard" 
+                className="data-[state=active]:bg-neutral-700 data-[state=active]:text-white text-neutral-300"
+              >
+                <TrendingUp className="mr-2 h-4 w-4" />
+                Dashboard
               </TabsTrigger>
               <TabsTrigger 
-                value="advertising" 
-                disabled={subscriptionTier === 'standard' || subscriptionTier === 'plus'}
-                className="data-[state=active]:bg-neutral-700 data-[state=active]:text-white text-neutral-300 disabled:text-neutral-600"
+                value="creation" 
+                className="data-[state=active]:bg-neutral-700 data-[state=active]:text-white text-neutral-300"
               >
-                <div className="flex items-center">
-                  Advertising
-                  {(subscriptionTier === 'standard' || subscriptionTier === 'plus') && (
-                    <FileLock className="ml-2 h-3 w-3" />
-                  )}
-                </div>
+                <Zap className="mr-2 h-4 w-4" />
+                Ad Creation
+              </TabsTrigger>
+              <TabsTrigger 
+                value="targeting" 
+                className="data-[state=active]:bg-neutral-700 data-[state=active]:text-white text-neutral-300"
+              >
+                <Target className="mr-2 h-4 w-4" />
+                Targeting
+              </TabsTrigger>
+              <TabsTrigger 
+                value="reporting" 
+                className="data-[state=active]:bg-neutral-700 data-[state=active]:text-white text-neutral-300"
+              >
+                <Eye className="mr-2 h-4 w-4" />
+                Reporting
               </TabsTrigger>
             </TabsList>
             
-            {subscriptionTier === 'standard' && (
-              <PremiumBanner 
-                onUpgrade={(tier) => handleUpgrade(tier as SubscriptionTier)} 
-              />
-            )}
-            
-            <TabsContent value="overview" className="mt-0 bg-neutral-950">
-              <VenueInsights />
+            <TabsContent value="dashboard" className="mt-0 bg-neutral-950">
+              <AdvertiserDashboard subscriptionTier={subscriptionTier} />
             </TabsContent>
             
-            <TabsContent value="analytics" className="mt-0 bg-neutral-950">
-              <AnalyticsTab isPremium={isPremium} subscriptionTier={subscriptionTier} />
+            <TabsContent value="creation" className="mt-0 bg-neutral-950">
+              <AdCreationStudio subscriptionTier={subscriptionTier} />
             </TabsContent>
             
-            <TabsContent value="advertising" className="mt-0 bg-neutral-950">
-              <AdvertisingTab isPremium={isPremium} />
+            <TabsContent value="targeting" className="mt-0 bg-neutral-950">
+              <TargetingSegmentation subscriptionTier={subscriptionTier} />
+            </TabsContent>
+            
+            <TabsContent value="reporting" className="mt-0 bg-neutral-950">
+              <AdvertiserReporting subscriptionTier={subscriptionTier} />
             </TabsContent>
           </Tabs>
         </div>
@@ -175,4 +172,4 @@ const DataInsights = () => {
   );
 };
 
-export default DataInsights;
+export default Advertiser;
