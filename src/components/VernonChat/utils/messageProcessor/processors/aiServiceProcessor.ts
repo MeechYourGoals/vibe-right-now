@@ -10,7 +10,7 @@ export const aiServiceProcessor: MessageProcessor = {
     return text.includes('recommend') || text.includes('suggest') || text.includes('find');
   },
 
-  async process(context: MessageContext): Promise<Message> => {
+  async process(context: MessageContext): Promise<Message> {
     const lastMessage = context.messages[context.messages.length - 1];
     
     // Simulate AI processing delay

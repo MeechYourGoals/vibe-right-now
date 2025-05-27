@@ -1,4 +1,3 @@
-
 import { User } from '@/types';
 
 export const regularUsers: User[] = [
@@ -13,7 +12,11 @@ export const regularUsers: User[] = [
     isVerified: false,
     isPrivate: false,
     joinedDate: '2023-03-15',
-    location: 'Brooklyn, NY'
+    location: 'Brooklyn, NY',
+    postsCount: 42,
+    // Legacy compatibility
+    name: 'Sarah Chen',
+    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah'
   },
   {
     id: '2',
@@ -26,7 +29,10 @@ export const regularUsers: User[] = [
     isVerified: false,
     isPrivate: false,
     joinedDate: '2023-02-20',
-    location: 'Manhattan, NY'
+    location: 'Manhattan, NY',
+    postsCount: 38,
+    name: 'Mike Rodriguez',
+    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Mike'
   },
   {
     id: '3',
@@ -39,7 +45,10 @@ export const regularUsers: User[] = [
     isVerified: true,
     isPrivate: false,
     joinedDate: '2022-11-08',
-    location: 'Queens, NY'
+    location: 'Queens, NY',
+    postsCount: 89,
+    name: 'Jenny Park',
+    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Jenny'
   },
   {
     id: '4',
@@ -281,6 +290,9 @@ export const regularUsers: User[] = [
     followingCount: 434,
     isVerified: false,
     isPrivate: false,
-    joinedDate: '2023-06-03'
+    joinedDate: '2023-06-03',
+    postsCount: 25,
+    name: 'Noah Davis',
+    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Noah'
   }
 ];

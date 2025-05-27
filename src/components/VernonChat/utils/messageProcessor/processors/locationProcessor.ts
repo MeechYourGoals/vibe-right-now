@@ -10,7 +10,7 @@ export const locationProcessor: MessageProcessor = {
     return text.includes('where') || text.includes('location') || text.includes('address') || text.includes('near');
   },
 
-  async process(context: MessageContext): Promise<Message> => {
+  async process(context: MessageContext): Promise<Message> {
     const lastMessage = context.messages[context.messages.length - 1];
     
     // Mock location data

@@ -10,7 +10,7 @@ export const agentProcessor: MessageProcessor = {
     return query.includes('agent') || query.includes('help') || query.includes('support');
   },
 
-  async process(context: MessageContext): Promise<Message> => {
+  async process(context: MessageContext): Promise<Message> {
     const lastMessage = context.messages[context.messages.length - 1];
     const query = lastMessage?.text || '';
 

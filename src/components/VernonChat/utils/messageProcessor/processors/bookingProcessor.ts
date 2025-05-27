@@ -10,7 +10,7 @@ export const bookingProcessor: MessageProcessor = {
     return text.includes('book') || text.includes('reserve') || text.includes('table');
   },
 
-  async process(context: MessageContext): Promise<Message> => {
+  async process(context: MessageContext): Promise<Message> {
     const lastMessage = context.messages[context.messages.length - 1];
     const query = lastMessage?.text || '';
 
