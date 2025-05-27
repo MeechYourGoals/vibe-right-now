@@ -17,6 +17,19 @@ export interface User {
     twitter?: string;
     tiktok?: string;
   };
+  // Legacy properties for backward compatibility
+  avatar?: string;
+  name?: string;
+}
+
+export interface BusinessHours {
+  monday: string;
+  tuesday: string;
+  wednesday: string;
+  thursday: string;
+  friday: string;
+  saturday: string;
+  sunday: string;
 }
 
 export interface Location {
@@ -39,6 +52,34 @@ export interface Location {
   source: string;
   created_at?: string;
   updated_at?: string;
+  // Additional properties
+  type?: 'restaurant' | 'bar' | 'nightclub' | 'lounge' | 'music_venue' | 'comedy_club' | 'attraction' | 'sports' | 'event' | 'other';
+  verified?: boolean;
+  hours?: BusinessHours;
+  // Legacy properties for backward compatibility
+  latitude?: number;
+  longitude?: number;
+  zip?: string;
+  reviewCount?: number;
+  price?: string;
+  imageUrl?: string;
+  isFeatured?: boolean;
+  formattedPhoneNumber?: string;
+  website?: string;
+  reservable?: boolean;
+  images?: string[];
+  vibeTags?: string[];
+  openingHours?: string;
+  customerId?: string;
+  followers?: number;
+  checkins?: number;
+  userProfile?: any;
+}
+
+export interface Media {
+  id: string;
+  type: 'image' | 'video';
+  url: string;
 }
 
 export interface Post {
@@ -56,6 +97,11 @@ export interface Post {
   isLiked?: boolean;
   vibeTag?: string;
   momentScore?: number;
+  // Additional properties
+  media?: Media[];
+  author?: User;
+  vibeTags?: string[];
+  vibedHere?: boolean;
 }
 
 export interface Comment {
@@ -68,6 +114,7 @@ export interface Comment {
   likes: number;
   isLiked?: boolean;
   replies?: Comment[];
+  vibedHere?: boolean;
 }
 
 export interface Event {

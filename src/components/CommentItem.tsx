@@ -15,8 +15,8 @@ const CommentItem = ({ comment }: CommentItemProps) => {
   return (
     <div className={`flex items-start space-x-2 py-2 ${comment.vibedHere ? 'bg-amber-50/30 border border-amber-200/50 rounded-md px-2' : ''}`}>
       <Avatar className="h-6 w-6">
-        <AvatarImage src={comment.user.avatar} alt={comment.user.name} />
-        <AvatarFallback>{comment.user.name.charAt(0)}</AvatarFallback>
+        <AvatarImage src={comment.user.profileImage} alt={comment.user.displayName} />
+        <AvatarFallback>{comment.user.displayName.charAt(0)}</AvatarFallback>
       </Avatar>
       <div className="flex-1">
         <div className="flex items-center gap-1">

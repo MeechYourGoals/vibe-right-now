@@ -8,7 +8,7 @@ import { isWithinThreeMonths } from "@/mock/time-utils";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { vibeTags } from "@/hooks/useUserProfile";
+import { vibeTags } from "@/hooks/useVibeTags";
 import {
   Popover,
   PopoverContent,
@@ -70,41 +70,17 @@ const ensureLocationFormat = (location: any) => {
       country: '',
       formattedPhoneNumber: '',
       website: '',
-      reservable: false
+      reservable: false,
+      source: 'mock'
     };
   }
 
   return {
-    id: location.id || 'default',
-    name: location.name || 'Unknown Location',
-    address: location.address || '',
-    city: location.city || '',
-    state: location.state || null,
-    zip: location.zip || '',
-    latitude: location.latitude || 0,
-    longitude: location.longitude || 0,
+    ...location,
+    source: location.source || 'mock',
+    type: location.type || location.category || 'other',
     lat: location.lat || location.latitude || 0,
-    lng: location.lng || location.longitude || 0,
-    category: location.category || '',
-    type: location.type || 'other' as const,
-    rating: location.rating || 0,
-    reviewCount: location.reviewCount || 0,
-    price: location.price || '',
-    imageUrl: location.imageUrl || '',
-    isFeatured: location.isFeatured || false,
-    verified: location.verified || false,
-    country: location.country || '',
-    formattedPhoneNumber: location.formattedPhoneNumber || '',
-    website: location.website || '',
-    reservable: location.reservable || false,
-    images: location.images || [],
-    vibeTags: location.vibeTags || [],
-    hours: location.hours,
-    openingHours: location.openingHours,
-    customerId: location.customerId,
-    followers: location.followers,
-    checkins: location.checkins,
-    userProfile: location.userProfile
+    lng: location.lng || location.longitude || 0
   };
 };
 
@@ -139,21 +115,23 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
       // Ensure post has required properties
       const enhancedPost = {
         ...post,
-        author: post.author || post.user,
         user: post.user || post.author,
         location: safeLocation,
         comments: post.comments || [],
         vibedHere: post.vibedHere || false
       };
 
-      // Ensure post has vibe tags
+      // Ensure post has vibe tags - use vibeTag if vibeTags doesn't exist
       if (!enhancedPost.vibeTags || enhancedPost.vibeTags.length === 0) {
-        const seed = parseInt(enhancedPost.id) || enhancedPost.id.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
-        const tagCount = 1 + (seed % 4);
-        const shuffledTags = [...vibeTags].sort(() => 0.5 - (seed * 0.0001));
-        const postVibeTags = shuffledTags.slice(0, tagCount);
-        
-        enhancedPost.vibeTags = postVibeTags;
+        if (enhancedPost.vibeTag) {
+          enhancedPost.vibeTags = [enhancedPost.vibeTag];
+        } else {
+          const seed = parseInt(enhancedPost.id) || enhancedPost.id.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
+          const tagCount = 1 + (seed % 4);
+          const shuffledTags = [...vibeTags].sort(() => 0.5 - (seed * 0.0001));
+          const postVibeTags = shuffledTags.slice(0, tagCount);
+          enhancedPost.vibeTags = postVibeTags;
+        }
       }
       
       // Ensure media is in the correct format
@@ -161,7 +139,7 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
         enhancedPost.media = ensureMediaFormat(enhancedPost.media);
       }
       
-      return enhancedPost;
+      return enhancedPost as Post;
     });
   }, []);
 
