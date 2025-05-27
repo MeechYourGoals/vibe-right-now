@@ -20,6 +20,7 @@ export interface User {
   // Legacy properties for backward compatibility
   avatar?: string;
   name?: string;
+  postsCount?: number;
 }
 
 export interface BusinessHours {
@@ -30,6 +31,7 @@ export interface BusinessHours {
   friday: string;
   saturday: string;
   sunday: string;
+  isOpen24Hours?: boolean;
 }
 
 export interface Location {
@@ -55,7 +57,9 @@ export interface Location {
   // Additional properties
   type?: 'restaurant' | 'bar' | 'nightclub' | 'lounge' | 'music_venue' | 'comedy_club' | 'attraction' | 'sports' | 'event' | 'other';
   verified?: boolean;
+  isVerified?: boolean;
   hours?: BusinessHours;
+  vibes?: number;
   // Legacy properties for backward compatibility
   latitude?: number;
   longitude?: number;
@@ -80,6 +84,7 @@ export interface Media {
   id: string;
   type: 'image' | 'video';
   url: string;
+  thumbnail?: string;
 }
 
 export interface Post {
@@ -92,7 +97,7 @@ export interface Post {
   location?: Location;
   timestamp: string;
   likes: number;
-  comments: number;
+  comments: number | Comment[];
   shares: number;
   isLiked?: boolean;
   vibeTag?: string;
@@ -102,6 +107,8 @@ export interface Post {
   author?: User;
   vibeTags?: string[];
   vibedHere?: boolean;
+  isPinned?: boolean;
+  expiresAt?: string;
 }
 
 export interface Comment {
@@ -146,6 +153,7 @@ export interface MessageContext {
   messages: Message[];
   options?: ProcessMessageOptions;
   paginationState?: any;
+  query?: string;
 }
 
 export interface ProcessMessageOptions {
@@ -153,6 +161,15 @@ export interface ProcessMessageOptions {
   includeVibeData?: boolean;
   maxResults?: number;
   temperature?: number;
+  setIsTyping?: (isTyping: boolean) => void;
+  setIsSearching?: (isSearching: boolean) => void;
+  updatePaginationState?: (state: any) => void;
+  isVenueMode?: boolean;
+}
+
+export interface MessageProcessor {
+  canHandle: (context: MessageContext) => boolean;
+  process: (context: MessageContext) => Promise<Message>;
 }
 
 export type SocialMediaSource = 'instagram' | 'google' | 'yelp' | 'other';
@@ -161,10 +178,15 @@ export interface SocialMediaPost {
   id: string;
   content: string;
   author: string;
+  username?: string;
+  userAvatar?: string;
+  venueName?: string;
   rating?: number;
   timestamp: string;
   platform: string;
   source: SocialMediaSource;
+  likes?: number;
+  comments?: number;
   engagement?: {
     likes: number;
     comments: number;
@@ -174,4 +196,24 @@ export interface SocialMediaPost {
     type: 'image' | 'video';
     url: string;
   }[];
+}
+
+export interface VenueInsights {
+  totalViews: number;
+  totalLikes: number;
+  totalComments: number;
+  totalShares: number;
+  engagementRate: number;
+  topVibeTag: string;
+  peakHours: string;
+  demographics: {
+    age: { range: string; percentage: number }[];
+    gender: { type: string; percentage: number }[];
+  };
+}
+
+export interface SocialMediaApiKeys {
+  instagram?: string;
+  google?: string;
+  yelp?: string;
 }

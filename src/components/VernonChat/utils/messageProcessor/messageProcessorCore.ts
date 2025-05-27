@@ -1,91 +1,63 @@
 
-import { Message } from '../../types';
-import { createUserMessage, createErrorMessage } from '../messageFactory';
-import { extractPaginationParams } from '../pagination';
-import { MessageContext, MessageProcessor, ProcessMessageOptions } from './types';
-import { BookingProcessor } from './processors/bookingProcessor';
-import { AgentProcessor } from './processors/agentProcessor';
-import { LocationProcessor } from './processors/locationProcessor';
-import { AIServiceProcessor } from './processors/aiServiceProcessor';
+import { MessageContext, Message } from "@/types";
+import { MessageProcessor } from "./types";
 
 export class MessageProcessorCore {
   private processors: MessageProcessor[] = [];
 
-  constructor() {
-    // Register processors in order of priority
-    this.processors.push(new BookingProcessor());
-    this.processors.push(new AgentProcessor());
-    this.processors.push(new LocationProcessor());
-    this.processors.push(new AIServiceProcessor()); // Fallback processor
+  addProcessor(processor: MessageProcessor) {
+    this.processors.push(processor);
   }
 
-  async processMessage(
-    inputValue: string,
-    setMessages: React.Dispatch<React.SetStateAction<Message[]>>,
-    options: ProcessMessageOptions
-  ): Promise<void> {
-    // Skip processing if the input is empty
-    if (!inputValue || inputValue.trim() === '') {
-      return;
+  async processMessage(context: MessageContext): Promise<Message> {
+    // Set typing state if available
+    if (context.options?.setIsTyping) {
+      context.options.setIsTyping(true);
     }
     
-    console.log('Processing message:', inputValue);
-    
-    // Set typing and searching states to show loading indicators
-    options.setIsTyping(true);
-    options.setIsSearching(true);
-    
+    if (context.options?.setIsSearching) {
+      context.options.setIsSearching(true);
+    }
+
     try {
-      // Create and add the user message
-      const userMessage = createUserMessage(inputValue);
-      setMessages(prev => [...prev, userMessage as Message]); // Type assertion to ensure compatibility
-      
-      // Get current messages for context
-      let messageHistory: Message[] = [];
-      setMessages(prevMessages => {
-        messageHistory = [...prevMessages];
-        return prevMessages;
-      });
-      
-      // Extract pagination parameters from the query
-      const paginationParams = extractPaginationParams(inputValue);
-      
-      // Update pagination state
-      const updatedPaginationState = options.updatePaginationState(paginationParams);
-      
-      // Create context for processors
-      const context: MessageContext = {
-        messages: messageHistory,
-        query: inputValue,
-        paginationState: updatedPaginationState,
-        options
-      };
-      
-      // Try each processor in order until one handles the message
-      let handled = false;
+      // Find the first processor that can handle this message
       for (const processor of this.processors) {
-        if (processor.canProcess(context)) {
-          handled = await processor.process(context, setMessages);
-          if (handled) break;
+        if (processor.canHandle(context)) {
+          const result = await processor.process(context);
+          
+          // Update pagination state if available
+          if (context.options?.updatePaginationState && result.data?.pagination) {
+            context.options.updatePaginationState(result.data.pagination);
+          }
+
+          // Create enhanced context with query for other processors
+          const enhancedContext: MessageContext = {
+            ...context,
+            query: context.messages[context.messages.length - 1]?.text || ''
+          };
+
+          return result;
         }
       }
-      
-      // If no processor handled the message, show an error
-      if (!handled) {
-        const errorMessage = createErrorMessage();
-        setMessages(prev => [...prev, errorMessage as Message]); // Type assertion for compatibility
-      }
-    } catch (error) {
-      console.error('Error processing message:', error);
-      const errorMessage = createErrorMessage();
-      setMessages(prev => [...prev, errorMessage as Message]); // Type assertion for compatibility
+
+      // Default response if no processor can handle the message
+      return {
+        id: Date.now().toString(),
+        sender: 'ai',
+        text: "I'm not sure how to help with that. Could you try rephrasing your question?",
+        timestamp: new Date(),
+        type: 'text'
+      };
     } finally {
-      options.setIsTyping(false);
-      options.setIsSearching(false);
+      // Clear typing/searching states
+      if (context.options?.setIsTyping) {
+        context.options.setIsTyping(false);
+      }
+      if (context.options?.setIsSearching) {
+        context.options.setIsSearching(false);
+      }
     }
   }
 }
 
-// Singleton instance
-const messageProcessor = new MessageProcessorCore();
-export default messageProcessor;
+export const messageProcessorCore = new MessageProcessorCore();

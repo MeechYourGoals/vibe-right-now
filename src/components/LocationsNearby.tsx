@@ -111,7 +111,7 @@ const LocationsNearby = () => {
                 <div>
                   <div className="font-medium flex items-center">
                     {location.name}
-                    {location.isVerified && (
+                    {(location.verified || location.isVerified) && (
                       <VerifiedBadge />
                     )}
                   </div>

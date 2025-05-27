@@ -1,51 +1,64 @@
 
-import React from "react";
 import { Post, Comment, Location } from "@/types";
-import VenuePostsGrid from "./VenuePostsGrid";
-import VenuePostsListComponent from "./VenuePostsListComponent";
+import PostCard from "@/components/post/PostCard";
 
 interface VenuePostsListProps {
   posts: Post[];
   venue: Location;
   viewMode: "list" | "grid";
   getComments: (postId: string) => Comment[];
-  canDelete: boolean;
+  subscriptionTier: "standard" | "plus" | "premium" | "pro";
   onPostDeleted: (postId: string) => void;
 }
 
-const VenuePostsList: React.FC<VenuePostsListProps> = ({
+const VenuePostsList = ({
   posts,
   venue,
   viewMode,
   getComments,
-  canDelete,
+  subscriptionTier,
   onPostDeleted
-}) => {
-  if (posts.length === 0) {
+}: VenuePostsListProps) => {
+  const handleComment = (postId: string, comment: string) => {
+    console.log('Comment added:', postId, comment);
+  };
+
+  const handleLike = (postId: string) => {
+    console.log('Post liked:', postId);
+  };
+
+  const handleShare = (postId: string) => {
+    console.log('Post shared:', postId);
+  };
+
+  if (viewMode === "grid") {
     return (
-      <div className="text-center py-8">
-        <p className="text-muted-foreground">No posts found for {venue.name}</p>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {posts.map((post) => (
+          <PostCard
+            key={post.id}
+            post={post}
+            onComment={handleComment}
+            onLike={handleLike}
+            onShare={handleShare}
+          />
+        ))}
       </div>
     );
   }
 
-  if (viewMode === "grid") {
-    return (
-      <VenuePostsGrid
-        posts={posts}
-        canDelete={canDelete}
-        onPostDeleted={onPostDeleted}
-      />
-    );
-  }
-
   return (
-    <VenuePostsListComponent
-      posts={posts}
-      getComments={getComments}
-      canDelete={canDelete}
-      onPostDeleted={onPostDeleted}
-    />
+    <div className="space-y-4">
+      {posts.map((post) => (
+        <PostCard
+          key={post.id}
+          post={post}
+          onComment={handleComment}
+          onLike={handleLike}
+          onShare={handleShare}
+        />
+      ))}
+    </div>
   );
 };
 

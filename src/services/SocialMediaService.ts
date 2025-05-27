@@ -1,49 +1,50 @@
 
-import { SocialMediaPost, SocialMediaSource } from '@/types';
+import { SocialMediaPost, SocialMediaApiKeys } from "@/types";
 
 export class SocialMediaService {
-  static async fetchPosts(venueId: string): Promise<SocialMediaPost[]> {
-    // Mock data for now
-    return [
+  static getDefaultApiKeys(): SocialMediaApiKeys {
+    return {
+      instagram: process.env.INSTAGRAM_API_KEY || '',
+      google: process.env.GOOGLE_API_KEY || '',
+      yelp: process.env.YELP_API_KEY || ''
+    };
+  }
+
+  static async getAllSocialMediaContent(venueName: string, apiKeys: SocialMediaApiKeys): Promise<SocialMediaPost[]> {
+    // Mock implementation for now
+    const mockPosts: SocialMediaPost[] = [
       {
         id: '1',
-        content: 'Amazing dinner at this place! The ambiance was perfect.',
-        author: 'John D.',
+        content: `Great experience at ${venueName}! Amazing atmosphere and service.`,
+        author: 'John Doe',
+        username: 'johndoe',
+        userAvatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&q=80',
+        venueName,
         rating: 5,
-        timestamp: '2024-01-15T19:30:00Z',
-        platform: 'Google Reviews',
-        source: 'google' as SocialMediaSource,
-        engagement: {
-          likes: 12,
-          comments: 3,
-          shares: 1
-        }
+        timestamp: new Date().toISOString(),
+        platform: 'Google',
+        source: 'google' as const,
+        likes: 42,
+        comments: 8
       },
       {
         id: '2',
-        content: 'Great cocktails and live music. Will definitely come back!',
-        author: 'Sarah M.',
+        content: `Love this place! ${venueName} never disappoints.`,
+        author: 'Jane Smith',
+        username: 'janesmith',
+        userAvatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=150&q=80',
+        venueName,
         rating: 4,
-        timestamp: '2024-01-14T21:15:00Z',
+        timestamp: new Date(Date.now() - 86400000).toISOString(),
         platform: 'Yelp',
-        source: 'yelp' as SocialMediaSource,
-        engagement: {
-          likes: 8,
-          comments: 2,
-          shares: 0
-        }
+        source: 'yelp' as const,
+        likes: 23,
+        comments: 5
       }
     ];
-  }
 
-  static async getConnectedPlatforms(venueId: string): Promise<Record<string, boolean>> {
-    return {
-      instagram: true,
-      google: true,
-      yelp: true,
-      facebook: false
-    };
+    return mockPosts;
   }
 }
 
-export { SocialMediaPost, SocialMediaSource };
+export default SocialMediaService;

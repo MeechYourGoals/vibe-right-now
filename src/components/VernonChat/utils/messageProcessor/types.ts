@@ -1,19 +1,9 @@
 
-export interface ProcessMessageOptions {
-  includeLocation?: boolean;
-  includeVibeData?: boolean;
-  maxResults?: number;
-  temperature?: number;
+import { MessageContext, ProcessMessageOptions, Message } from "@/types";
+
+export interface MessageProcessor {
+  canHandle: (context: MessageContext) => boolean;
+  process: (context: MessageContext) => Promise<Message>;
 }
 
-export interface MessageContext {
-  messages: any[];
-  options?: ProcessMessageOptions;
-  paginationState?: any;
-}
-
-export interface ProcessorResult {
-  text: string;
-  data?: any;
-  requiresFollowUp?: boolean;
-}
+export { MessageContext, ProcessMessageOptions, Message };

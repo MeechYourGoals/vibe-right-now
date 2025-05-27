@@ -14,7 +14,8 @@ export const generateBusinessHours = (venue: Location): BusinessHours => {
         thursday: '11:00 AM - 10:00 PM',
         friday: '11:00 AM - 11:00 PM',
         saturday: '11:00 AM - 11:00 PM',
-        sunday: '11:00 AM - 9:00 PM'
+        sunday: '11:00 AM - 9:00 PM',
+        isOpen24Hours: false
       };
     case 'bar':
     case 'nightclub':
@@ -25,7 +26,8 @@ export const generateBusinessHours = (venue: Location): BusinessHours => {
         thursday: '6:00 PM - 2:00 AM',
         friday: '6:00 PM - 3:00 AM',
         saturday: '6:00 PM - 3:00 AM',
-        sunday: '6:00 PM - 1:00 AM'
+        sunday: '6:00 PM - 1:00 AM',
+        isOpen24Hours: false
       };
     case 'coffee':
       return {
@@ -35,7 +37,8 @@ export const generateBusinessHours = (venue: Location): BusinessHours => {
         thursday: '7:00 AM - 7:00 PM',
         friday: '7:00 AM - 8:00 PM',
         saturday: '8:00 AM - 8:00 PM',
-        sunday: '8:00 AM - 6:00 PM'
+        sunday: '8:00 AM - 6:00 PM',
+        isOpen24Hours: false
       };
     default:
       return {
@@ -45,7 +48,8 @@ export const generateBusinessHours = (venue: Location): BusinessHours => {
         thursday: '9:00 AM - 9:00 PM',
         friday: '9:00 AM - 10:00 PM',
         saturday: '9:00 AM - 10:00 PM',
-        sunday: '10:00 AM - 8:00 PM'
+        sunday: '10:00 AM - 8:00 PM',
+        isOpen24Hours: false
       };
   }
 };
@@ -58,6 +62,10 @@ export const getTodaysHours = (venue: Location): string => {
   const today = new Date().getDay();
   const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
   const dayName = days[today] as keyof BusinessHours;
+  
+  if (venue.hours.isOpen24Hours) {
+    return '24 Hours';
+  }
   
   return venue.hours[dayName] || 'Hours not available';
 };
