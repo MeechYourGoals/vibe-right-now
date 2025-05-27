@@ -1,30 +1,22 @@
 
-import { regularUsers } from "./regularUsers";
-import { celebrityUsers } from "./celebrityUsers";
-import { hashString, generateUserBio } from "./utils";
+import { User } from '@/types';
+import { regularUsers } from './regularUsers';
 
-// Define the MockUserProfile type directly here if missing from @/types
-export interface MockUserProfile {
-  id: string;
-  username: string;
-  avatar: string;
-  bio?: string;
-  type?: 'regular' | 'celebrity' | 'venue';
-  verified?: boolean;
-}
+export const mockUsers: User[] = regularUsers;
 
-// Mock user profile utility
-export const getMockUserProfile = (type: 'regular' | 'celebrity' | 'venue'): MockUserProfile => {
-  const collection = type === 'celebrity' ? celebrityUsers : regularUsers;
-  const randomIndex = Math.floor(Math.random() * collection.length);
-  return {
-    ...collection[randomIndex],
-    type: type,
-    verified: type === 'venue' ? true : collection[randomIndex].verified
-  };
+export const getUserById = (id: string): User | undefined => {
+  return mockUsers.find(user => user.id === id);
 };
 
-// Create a combined mockUsers array
-export const mockUsers = [...regularUsers, ...celebrityUsers];
+export const getUserByUsername = (username: string): User | undefined => {
+  return mockUsers.find(user => user.username === username);
+};
 
-export { regularUsers, celebrityUsers, hashString, generateUserBio };
+export const getVerifiedUsers = (): User[] => {
+  return mockUsers.filter(user => user.isVerified);
+};
+
+export const getRandomUsers = (count: number = 5): User[] => {
+  const shuffled = [...mockUsers].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, count);
+};
