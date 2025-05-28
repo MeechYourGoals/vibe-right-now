@@ -1,4 +1,3 @@
-
 export interface User {
   id: string;
   username: string;
@@ -172,7 +171,17 @@ export interface MessageProcessor {
   process: (context: MessageContext) => Promise<Message>;
 }
 
-export type SocialMediaSource = 'instagram' | 'google' | 'yelp' | 'other';
+export interface CreditCard {
+  id: string;
+  last4: string;
+  brand: string;
+  expiryMonth: number;
+  expiryYear: number;
+  isDefault: boolean;
+  name: string;
+}
+
+export type SocialMediaSource = 'instagram' | 'google' | 'yelp' | 'tiktok' | 'tripadvisor' | 'foursquare' | 'franki' | 'other';
 
 export interface SocialMediaPost {
   id: string;
@@ -196,6 +205,9 @@ export interface SocialMediaPost {
     type: 'image' | 'video';
     url: string;
   }[];
+  mediaUrl?: string;
+  mediaType?: 'image' | 'video';
+  originalUrl?: string;
 }
 
 export interface VenueInsights {
@@ -222,4 +234,10 @@ export interface SocialMediaApiKeys {
   instagram?: string;
   google?: string;
   yelp?: string;
+  tiktok?: string;
+  tripadvisor?: string;
+  foursquare?: string;
+  franki?: string;
+  other?: string;
+  otherUrl?: string;
 }

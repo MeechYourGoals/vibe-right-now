@@ -6,15 +6,26 @@ import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 
 interface SearchVibesProps {
-  searchQuery: string;
-  selectedCategory: string;
+  searchQuery?: string;
+  selectedCategory?: string;
+  onSearch?: (query: string, filterType: string, category?: string) => void;
 }
 
-const SearchVibes: React.FC<SearchVibesProps> = ({ searchQuery, selectedCategory }) => {
+const SearchVibes: React.FC<SearchVibesProps> = ({ 
+  searchQuery = '', 
+  selectedCategory = '',
+  onSearch 
+}) => {
   const trendingVibes = [
     "🔥 Lit", "🎵 Vibes", "💎 Bougie", "🌮 Foodie", "🍸 Classy",
     "🎉 Party", "📸 Aesthetic", "🌃 Chill", "⚡ Electric", "🎭 Artsy"
   ];
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (onSearch) {
+      onSearch(e.target.value, 'all', selectedCategory);
+    }
+  };
 
   return (
     <Card className="bg-neutral-900 border-neutral-700">
@@ -28,6 +39,7 @@ const SearchVibes: React.FC<SearchVibesProps> = ({ searchQuery, selectedCategory
             placeholder="Search for vibes..." 
             className="pl-10 bg-neutral-800 border-neutral-600 text-white"
             defaultValue={searchQuery}
+            onChange={handleInputChange}
           />
         </div>
         
@@ -39,6 +51,7 @@ const SearchVibes: React.FC<SearchVibesProps> = ({ searchQuery, selectedCategory
                 key={vibe}
                 variant="outline" 
                 className="cursor-pointer hover:bg-primary hover:text-white text-neutral-300 border-neutral-600"
+                onClick={() => onSearch && onSearch(vibe, 'all', selectedCategory)}
               >
                 {vibe}
               </Badge>

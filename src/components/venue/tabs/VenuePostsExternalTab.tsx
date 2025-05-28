@@ -1,198 +1,161 @@
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Instagram, Star, MessageCircle, Heart } from "lucide-react";
-import { Location, SocialMediaPost } from '@/types';
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Instagram, MessageCircle, Star } from "lucide-react";
+import { Location } from '@/types';
 
 interface VenuePostsExternalTabProps {
-  venue: Location;
-  connectedPlatforms: Record<string, boolean>;
-  onConnectedPlatformsChange: (platforms: Record<string, boolean>) => void;
+  venue?: Location;
+  venueName?: string;
+  connectedPlatforms?: Record<string, boolean>;
+  onConnectedPlatformsChange?: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
+  instagramKey?: string;
+  yelpKey?: string;
+  googleKey?: string;
+  subscriptionTier?: 'standard' | 'plus' | 'premium' | 'pro';
 }
 
 const VenuePostsExternalTab: React.FC<VenuePostsExternalTabProps> = ({
   venue,
-  connectedPlatforms,
-  onConnectedPlatformsChange
+  venueName,
+  connectedPlatforms = { instagram: false, google: false, yelp: false },
+  onConnectedPlatformsChange,
+  subscriptionTier = 'standard'
 }) => {
-  const [posts, setPosts] = useState<SocialMediaPost[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isConnecting, setIsConnecting] = useState<string | null>(null);
 
-  const mockSocialPosts: SocialMediaPost[] = [
-    {
-      id: 'ext-1',
-      content: 'Had an amazing dinner here! The atmosphere is perfect for date night 💕',
-      author: 'Sarah Johnson',
-      username: 'saraheats',
-      userAvatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b890?w=100&h=100&fit=crop',
-      timestamp: '2024-01-15T19:30:00Z',
-      platform: 'Instagram',
-      source: 'instagram' as const,
-      likes: 124,
-      comments: 15,
-      media: [{
-        type: 'image' as const,
-        url: 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=800&h=600&fit=crop'
-      }]
-    },
-    {
-      id: 'ext-2',
-      content: 'Great service and excellent food! Highly recommend this place.',
-      author: 'Mike Chen',
-      username: 'mikechen',
-      rating: 5,
-      timestamp: '2024-01-14T20:15:00Z',
-      platform: 'Google',
-      source: 'google' as const,
-      likes: 8,
-      comments: 2
+  const displayName = venue?.name || venueName || 'Venue';
+
+  const handleConnect = async (platform: string) => {
+    setIsConnecting(platform);
+    
+    // Simulate API connection
+    setTimeout(() => {
+      if (onConnectedPlatformsChange) {
+        onConnectedPlatformsChange(prev => ({
+          ...prev,
+          [platform]: true
+        }));
+      }
+      setIsConnecting(null);
+    }, 2000);
+  };
+
+  const handleDisconnect = (platform: string) => {
+    if (onConnectedPlatformsChange) {
+      onConnectedPlatformsChange(prev => ({
+        ...prev,
+        [platform]: false
+      }));
     }
-  ];
-
-  useEffect(() => {
-    if (Object.values(connectedPlatforms).some(connected => connected)) {
-      setIsLoading(true);
-      // Simulate API call delay
-      setTimeout(() => {
-        setPosts(mockSocialPosts);
-        setIsLoading(false);
-      }, 1000);
-    } else {
-      setPosts([]);
-    }
-  }, [connectedPlatforms]);
-
-  const handlePlatformToggle = (platform: string) => {
-    const newPlatforms = {
-      ...connectedPlatforms,
-      [platform]: !connectedPlatforms[platform]
-    };
-    onConnectedPlatformsChange(newPlatforms);
   };
 
   const platforms = [
-    { key: 'instagram', name: 'Instagram', icon: Instagram },
-    { key: 'google', name: 'Google Reviews', icon: Star },
-    { key: 'yelp', name: 'Yelp', icon: MessageCircle }
+    {
+      id: 'instagram',
+      name: 'Instagram',
+      icon: Instagram,
+      description: 'Show Instagram posts and stories mentioning your venue',
+      color: 'text-pink-500'
+    },
+    {
+      id: 'google',
+      name: 'Google Reviews',
+      icon: Star,
+      description: 'Display Google Business reviews and ratings',
+      color: 'text-blue-500'
+    },
+    {
+      id: 'yelp',
+      name: 'Yelp Reviews',
+      icon: MessageCircle,
+      description: 'Show Yelp reviews and customer feedback',
+      color: 'text-red-500'
+    }
   ];
-
-  if (isLoading) {
-    return (
-      <div className="text-center py-8">
-        <div className="text-neutral-400">Loading social media posts...</div>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
-      <Card className="bg-neutral-900 border-neutral-700">
-        <CardHeader>
-          <CardTitle className="text-white">Platform Connections</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {platforms.map((platform) => {
-              const IconComponent = platform.icon;
-              return (
-                <div key={platform.key} className="flex items-center justify-between p-3 bg-neutral-800 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <IconComponent className="h-5 w-5 text-neutral-400" />
-                    <span className="text-white">{platform.name}</span>
-                  </div>
-                  <Switch
-                    checked={connectedPlatforms[platform.key] || false}
-                    onCheckedChange={() => handlePlatformToggle(platform.key)}
-                  />
-                </div>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
+      <div className="text-center">
+        <h3 className="text-lg font-semibold mb-2">Social Media Integration</h3>
+        <p className="text-muted-foreground">
+          Connect social platforms to display customer posts and reviews about {displayName}
+        </p>
+      </div>
 
-      {posts.length > 0 ? (
-        <div className="space-y-4">
-          {posts.map((post) => (
-            <Card key={post.id} className="bg-neutral-900 border-neutral-700">
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-3 mb-3">
-                  {post.userAvatar && (
-                    <img 
-                      src={post.userAvatar} 
-                      alt={post.author}
-                      className="w-10 h-10 rounded-full"
-                    />
-                  )}
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2">
-                      <span className="font-medium text-white">{post.author}</span>
-                      {post.username && (
-                        <span className="text-sm text-neutral-400">@{post.username}</span>
-                      )}
+      <div className="grid gap-4">
+        {platforms.map((platform) => {
+          const Icon = platform.icon;
+          const isConnected = connectedPlatforms[platform.id];
+          const isLoading = isConnecting === platform.id;
+
+          return (
+            <Card key={platform.id}>
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <Icon className={`h-6 w-6 ${platform.color}`} />
+                    <div>
+                      <CardTitle className="text-base">{platform.name}</CardTitle>
+                      <CardDescription className="text-sm">
+                        {platform.description}
+                      </CardDescription>
                     </div>
-                    <div className="flex items-center space-x-2 mt-1">
-                      <Badge variant="outline" className="text-xs text-neutral-400">
-                        {post.platform}
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    {isConnected && (
+                      <Badge variant="secondary" className="text-xs">
+                        Connected
                       </Badge>
-                      {post.rating && (
-                        <div className="flex items-center">
-                          <Star className="h-3 w-3 text-yellow-500 mr-1" />
-                          <span className="text-xs text-neutral-400">{post.rating}/5</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                
-                <p className="text-neutral-200 mb-3">{post.content}</p>
-                
-                {post.media && post.media.length > 0 && (
-                  <div className="mb-3">
-                    <img 
-                      src={post.media[0].url} 
-                      alt="Social media post"
-                      className="w-full h-48 object-cover rounded-lg"
+                    )}
+                    <Switch
+                      checked={isConnected}
+                      disabled={isLoading}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          handleConnect(platform.id);
+                        } else {
+                          handleDisconnect(platform.id);
+                        }
+                      }}
                     />
                   </div>
-                )}
-                
-                <div className="flex items-center space-x-4 text-sm text-neutral-400">
-                  <div className="flex items-center space-x-1">
-                    <Heart className="h-4 w-4" />
-                    <span>{post.likes}</span>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <MessageCircle className="h-4 w-4" />
-                    <span>{post.comments}</span>
-                  </div>
-                  <span className="text-xs">
-                    {new Date(post.timestamp).toLocaleDateString()}
-                  </span>
                 </div>
-              </CardContent>
+              </CardHeader>
+              
+              {isConnected && (
+                <CardContent className="pt-0">
+                  <div className="text-sm text-muted-foreground">
+                    Showing recent {platform.name.toLowerCase()} activity for {displayName}
+                  </div>
+                </CardContent>
+              )}
+              
+              {isLoading && (
+                <CardContent className="pt-0">
+                  <div className="text-sm text-muted-foreground">
+                    Connecting to {platform.name}...
+                  </div>
+                </CardContent>
+              )}
             </Card>
-          ))}
-        </div>
-      ) : (
-        <Card className="bg-neutral-900 border-neutral-700">
-          <CardContent className="p-8 text-center">
-            <div className="text-neutral-400">
-              <Instagram className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <h3 className="text-lg font-medium mb-2">No Social Media Posts</h3>
-              <p className="text-sm">
-                Connect your social media platforms to see posts and reviews about {venue.name}
-              </p>
-              <Button 
-                className="mt-4" 
-                onClick={() => handlePlatformToggle('instagram')}
-              >
-                Connect Instagram
-              </Button>
-            </div>
+          );
+        })}
+      </div>
+
+      {Object.values(connectedPlatforms).every(connected => !connected) && (
+        <Card>
+          <CardContent className="pt-6 text-center">
+            <p className="text-muted-foreground mb-4">
+              No platforms connected yet. Connect your social media accounts to start displaying customer content.
+            </p>
+            <Button variant="outline" onClick={() => handleConnect('instagram')}>
+              Get Started with Instagram
+            </Button>
           </CardContent>
         </Card>
       )}

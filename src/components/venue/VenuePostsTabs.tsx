@@ -11,21 +11,38 @@ interface VenuePostsTabsProps {
   posts: Post[];
   getComments: (postId: string) => Comment[];
   onPostDeleted: (postId: string) => void;
+  activeTab?: string;
+  setActiveTab?: (tab: string) => void;
+  viewMode?: "list" | "grid";
+  setViewMode?: (mode: "list" | "grid") => void;
+  filteredPosts?: Post[];
+  allPosts?: Post[];
+  filteredVenuePosts?: Post[];
+  getPostComments?: (postId: string) => Comment[];
 }
 
 const VenuePostsTabs: React.FC<VenuePostsTabsProps> = ({
   venue,
   posts,
   getComments,
-  onPostDeleted
+  onPostDeleted,
+  activeTab: externalActiveTab,
+  setActiveTab: externalSetActiveTab,
+  viewMode: externalViewMode,
+  setViewMode: externalSetViewMode
 }) => {
-  const [activeTab, setActiveTab] = useState("internal");
-  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
+  const [internalActiveTab, setInternalActiveTab] = useState("internal");
+  const [internalViewMode, setInternalViewMode] = useState<"list" | "grid">("list");
   const [connectedPlatforms, setConnectedPlatforms] = useState<Record<string, boolean>>({
     instagram: false,
     google: false,
     yelp: false
   });
+
+  const activeTab = externalActiveTab || internalActiveTab;
+  const setActiveTab = externalSetActiveTab || setInternalActiveTab;
+  const viewMode = externalViewMode || internalViewMode;
+  const setViewMode = externalSetViewMode || setInternalViewMode;
 
   const handleAddPost = () => {
     console.log('Add post clicked');

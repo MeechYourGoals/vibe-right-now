@@ -7,9 +7,19 @@ import { Star, MapPin, Clock } from 'lucide-react';
 
 interface InfoWindowContentProps {
   location: Location;
+  onSelect?: (location: Location) => void;
 }
 
-const InfoWindowContent: React.FC<InfoWindowContentProps> = ({ location }) => {
+const InfoWindowContent: React.FC<InfoWindowContentProps> = ({ 
+  location, 
+  onSelect 
+}) => {
+  const handleViewDetails = () => {
+    if (onSelect) {
+      onSelect(location);
+    }
+  };
+
   return (
     <div className="p-4 max-w-sm">
       <div className="flex items-start justify-between mb-2">
@@ -49,7 +59,7 @@ const InfoWindowContent: React.FC<InfoWindowContentProps> = ({ location }) => {
         <p className="text-sm text-gray-600 mb-3">{location.description}</p>
       )}
       
-      <Button size="sm" className="w-full">
+      <Button size="sm" className="w-full" onClick={handleViewDetails}>
         View Details
       </Button>
     </div>

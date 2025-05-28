@@ -9,7 +9,7 @@ export interface SocialMediaPost {
   rating?: number;
   timestamp: string;
   platform: string;
-  source: 'instagram' | 'google' | 'yelp' | 'other';
+  source: 'instagram' | 'google' | 'yelp' | 'tiktok' | 'tripadvisor' | 'foursquare' | 'franki' | 'other';
   likes?: number;
   comments?: number;
   engagement?: {
@@ -21,10 +21,19 @@ export interface SocialMediaPost {
     type: 'image' | 'video';
     url: string;
   }[];
+  mediaUrl?: string;
+  mediaType?: 'image' | 'video';
+  originalUrl?: string;
 }
 
 export interface SocialMediaApiKeys {
   instagram?: string;
   google?: string;
   yelp?: string;
+  tiktok?: string;
+  tripadvisor?: string;
+  foursquare?: string;
+  franki?: string;
+  other?: string;
+  otherUrl?: string;
 }
