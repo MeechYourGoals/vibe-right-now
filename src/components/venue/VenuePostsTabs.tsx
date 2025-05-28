@@ -1,88 +1,68 @@
 
 import React, { useState } from 'react';
-import { Tabs } from "@/components/ui/tabs";
-import { Post, Comment, Location } from "@/types";
-import VenuePostsTabsHeader from './tabs/VenuePostsTabsHeader';
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import VenuePostsTabsHeader from './VenuePostsTabsHeader';
 import VenuePostsTabsContent from './tabs/VenuePostsTabsContent';
-import AddVenuePostDialog from './AddVenuePostDialog';
-import { useVenueConnections } from '@/hooks/useVenueConnections';
-import { usePostDeletion } from '@/hooks/usePostDeletion';
+import VenuePostsExternalTab from './tabs/VenuePostsExternalTab';
+import { Location, Post, Comment } from '@/types';
 
 interface VenuePostsTabsProps {
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
-  viewMode: "list" | "grid";
-  setViewMode: (mode: "list" | "grid") => void;
-  allPosts: Post[];
-  filteredPosts: Post[];
-  filteredVenuePosts: Post[];
   venue: Location;
-  getPostComments: (postId: string) => Comment[];
+  posts: Post[];
+  getComments: (postId: string) => Comment[];
+  onPostDeleted: (postId: string) => void;
 }
 
 const VenuePostsTabs: React.FC<VenuePostsTabsProps> = ({
-  activeTab,
-  setActiveTab,
-  viewMode,
-  setViewMode,
-  allPosts,
-  filteredPosts,
-  filteredVenuePosts,
   venue,
-  getPostComments
+  posts,
+  getComments,
+  onPostDeleted
 }) => {
-  // Use our custom hooks
-  const {
-    connectedPlatforms,
-    setConnectedPlatforms,
-    subscriptionTier,
-    handleUpgradeSubscription,
-    canEmbed
-  } = useVenueConnections(venue.id);
-  
-  const { deletedPostIds, handlePostDeleted } = usePostDeletion();
-  
-  // State to track add post dialog
-  const [isAddPostDialogOpen, setIsAddPostDialogOpen] = useState(false);
-  
-  // Filter out deleted posts
-  const filteredAllPosts = allPosts.filter(post => !deletedPostIds.includes(post.id));
-  const filteredUserPosts = filteredPosts.filter(post => !deletedPostIds.includes(post.id));
-  
+  const [activeTab, setActiveTab] = useState("internal");
+  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
+  const [connectedPlatforms, setConnectedPlatforms] = useState<Record<string, boolean>>({
+    instagram: false,
+    google: false,
+    yelp: false
+  });
+
+  const handleAddPost = () => {
+    console.log('Add post clicked');
+  };
+
   return (
-    <>
-      <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="mb-6">
-        <VenuePostsTabsHeader 
+    <div className="space-y-4">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <VenuePostsTabsHeader
           activeTab={activeTab}
           viewMode={viewMode}
           setViewMode={setViewMode}
           onConnectedPlatformsChange={setConnectedPlatforms}
-          onAddPost={() => setIsAddPostDialogOpen(true)}
+          onAddPost={handleAddPost}
           venueId={venue.id}
         />
         
-        <VenuePostsTabsContent 
-          activeTab={activeTab}
-          allPosts={filteredAllPosts}
-          filteredPosts={filteredUserPosts}
-          filteredVenuePosts={filteredVenuePosts}
-          venue={venue}
-          viewMode={viewMode}
-          getPostComments={getPostComments}
-          subscriptionTier={subscriptionTier}
-          canEmbed={canEmbed}
-          connectedPlatforms={connectedPlatforms}
-          onUpgradeSubscription={handleUpgradeSubscription}
-          onPostDeleted={handlePostDeleted}
-        />
+        <TabsContent value="internal">
+          <VenuePostsTabsContent
+            posts={posts}
+            venue={venue}
+            viewMode={viewMode}
+            getComments={getComments}
+            canDelete={true}
+            onPostDeleted={onPostDeleted}
+          />
+        </TabsContent>
+        
+        <TabsContent value="external">
+          <VenuePostsExternalTab
+            venue={venue}
+            connectedPlatforms={connectedPlatforms}
+            onConnectedPlatformsChange={setConnectedPlatforms}
+          />
+        </TabsContent>
       </Tabs>
-      
-      <AddVenuePostDialog 
-        open={isAddPostDialogOpen}
-        onOpenChange={setIsAddPostDialogOpen}
-        venue={venue}
-      />
-    </>
+    </div>
   );
 };
 

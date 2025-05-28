@@ -1,239 +1,201 @@
 
-import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Instagram, Star, ExternalLink, RefreshCw, Calendar, TrendingUp, Brain, Mic } from "lucide-react";
-import { SocialMediaService } from "@/services/SocialMediaService";
-import { SocialMediaPost as SocialMediaPostType } from "@/services/socialMedia/types";
-import SocialMediaPost from "../SocialMediaPost";
-import { toast } from "sonner";
+import { Switch } from "@/components/ui/switch";
+import { Instagram, Star, MessageCircle, Heart } from "lucide-react";
+import { Location, SocialMediaPost } from '@/types';
 
 interface VenuePostsExternalTabProps {
-  venueName: string;
-  instagramKey: string;
-  yelpKey: string;
-  googleKey: string;
-  subscriptionTier: 'standard' | 'plus' | 'premium' | 'pro';
+  venue: Location;
+  connectedPlatforms: Record<string, boolean>;
+  onConnectedPlatformsChange: (platforms: Record<string, boolean>) => void;
 }
 
-const VenuePostsExternalTab = ({ 
-  venueName, 
-  instagramKey, 
-  yelpKey, 
-  googleKey,
-  subscriptionTier
-}: VenuePostsExternalTabProps) => {
-  const [posts, setPosts] = useState<SocialMediaPostType[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState("all");
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+const VenuePostsExternalTab: React.FC<VenuePostsExternalTabProps> = ({
+  venue,
+  connectedPlatforms,
+  onConnectedPlatformsChange
+}) => {
+  const [posts, setPosts] = useState<SocialMediaPost[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const isProTier = subscriptionTier === 'pro';
-  const isPremiumPlus = subscriptionTier === 'premium' || subscriptionTier === 'plus';
-
-  const fetchSocialMediaContent = async () => {
-    setLoading(true);
-    try {
-      const apiKeys = {
-        instagram: instagramKey,
-        yelp: yelpKey,
-        google: googleKey
-      };
-      const content = await SocialMediaService.getAllSocialMediaContent(venueName, apiKeys);
-      setPosts(content);
-      setLastUpdated(new Date());
-      if (content.length === 0) {
-        toast.info('No social media content found. Connect your accounts to see posts and reviews.');
-      }
-    } catch (error) {
-      console.error('Error fetching social media content:', error);
-      toast.error('Failed to fetch social media content');
-    } finally {
-      setLoading(false);
+  const mockSocialPosts: SocialMediaPost[] = [
+    {
+      id: 'ext-1',
+      content: 'Had an amazing dinner here! The atmosphere is perfect for date night 💕',
+      author: 'Sarah Johnson',
+      username: 'saraheats',
+      userAvatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b890?w=100&h=100&fit=crop',
+      timestamp: '2024-01-15T19:30:00Z',
+      platform: 'Instagram',
+      source: 'instagram' as const,
+      likes: 124,
+      comments: 15,
+      media: [{
+        type: 'image' as const,
+        url: 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=800&h=600&fit=crop'
+      }]
+    },
+    {
+      id: 'ext-2',
+      content: 'Great service and excellent food! Highly recommend this place.',
+      author: 'Mike Chen',
+      username: 'mikechen',
+      rating: 5,
+      timestamp: '2024-01-14T20:15:00Z',
+      platform: 'Google',
+      source: 'google' as const,
+      likes: 8,
+      comments: 2
     }
-  };
+  ];
 
   useEffect(() => {
-    fetchSocialMediaContent();
-  }, [venueName, instagramKey, yelpKey, googleKey]);
+    if (Object.values(connectedPlatforms).some(connected => connected)) {
+      setIsLoading(true);
+      // Simulate API call delay
+      setTimeout(() => {
+        setPosts(mockSocialPosts);
+        setIsLoading(false);
+      }, 1000);
+    } else {
+      setPosts([]);
+    }
+  }, [connectedPlatforms]);
 
-  const filteredPosts = posts.filter(post => {
-    if (activeTab === "all") return true;
-    return post.source === activeTab;
-  });
-
-  const getAnalyticsInsights = () => {
-    const totalPosts = posts.length;
-    const avgRating = posts.reduce((sum, post) => sum + (post.rating || 0), 0) / totalPosts || 0;
-    const totalEngagement = posts.reduce((sum, post) => sum + (post.likes || 0) + (post.comments || 0), 0);
-
-    return { totalPosts, avgRating, totalEngagement };
+  const handlePlatformToggle = (platform: string) => {
+    const newPlatforms = {
+      ...connectedPlatforms,
+      [platform]: !connectedPlatforms[platform]
+    };
+    onConnectedPlatformsChange(newPlatforms);
   };
 
-  const { totalPosts, avgRating, totalEngagement } = getAnalyticsInsights();
+  const platforms = [
+    { key: 'instagram', name: 'Instagram', icon: Instagram },
+    { key: 'google', name: 'Google Reviews', icon: Star },
+    { key: 'yelp', name: 'Yelp', icon: MessageCircle }
+  ];
+
+  if (isLoading) {
+    return (
+      <div className="text-center py-8">
+        <div className="text-neutral-400">Loading social media posts...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
-      {/* Gemini Deep Research & Notebook LM Section */}
-      <Card className="border-2 border-blue-600 bg-gradient-to-r from-blue-950/20 to-purple-950/20 backdrop-blur-sm">
-        <CardHeader className="pb-2">
-          <div className="flex justify-between items-center">
-            <CardTitle className="flex items-center text-blue-400">
-              <Brain className="mr-2 h-5 w-5" />
-              Gemini Deep Research Powered Analytics
-            </CardTitle>
-            <Badge variant="outline" className="bg-blue-900/20 text-blue-400 border-blue-600">
-              {isProTier ? 'Pro Active' : 'Upgrade to Pro'}
-            </Badge>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4 pb-4">
-          <p className="text-sm text-blue-200">
-            Our AI continuously analyzes your venue's social media presence using Gemini Deep Research 
-            to provide comprehensive insights about customer sentiment, trending topics, and competitive positioning.
-            Export your weekly insights to Google Notebook LM to generate an AI-powered podcast summary.
-          </p>
-          <div className="flex flex-wrap gap-3">
-            <Button 
-              variant="outline" 
-              className="border-blue-600 text-blue-400 hover:bg-blue-900/20 bg-blue-950/30"
-              disabled={!isProTier}
-            >
-              <TrendingUp className="mr-2 h-4 w-4" />
-              Generate Deep Research Report
-            </Button>
-            <Button 
-              variant="outline" 
-              className="border-purple-600 text-purple-400 hover:bg-purple-900/20 bg-purple-950/30"
-              disabled={!isProTier}
-            >
-              <Mic className="mr-2 h-4 w-4" />
-              Create Notebook LM Podcast
-            </Button>
-          </div>
-          {isProTier && (
-            <div className="mt-3 p-3 bg-blue-950/30 rounded-lg border border-blue-800/30">
-              <p className="text-xs text-blue-300">
-                💡 <strong>Pro Tip:</strong> Export your weekly insights to Google Notebook LM to generate 
-                an AI-powered podcast summary of your venue's performance. Perfect for staying informed 
-                on-the-go or sharing with your team.
-              </p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Main Social Media Integration - Dark Theme */}
       <Card className="bg-neutral-900 border-neutral-700">
         <CardHeader>
-          <div className="flex justify-between items-center">
-            <div>
-              <CardTitle className="text-white">Social Media Integration</CardTitle>
-              <CardDescription className="text-neutral-400">
-                Monitor and manage your venue's social media presence
-              </CardDescription>
-            </div>
-            <Button 
-              onClick={fetchSocialMediaContent} 
-              disabled={loading}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-              Refresh
-            </Button>
-          </div>
+          <CardTitle className="text-white">Platform Connections</CardTitle>
         </CardHeader>
         <CardContent>
-          {/* Analytics Summary - Dark Theme */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <Card className="bg-neutral-800 border-neutral-600">
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-2">
-                  <Instagram className="h-5 w-5 text-pink-500" />
-                  <div>
-                    <p className="text-sm text-neutral-400">Total Posts</p>
-                    <p className="text-2xl font-bold text-white">{totalPosts}</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {platforms.map((platform) => {
+              const IconComponent = platform.icon;
+              return (
+                <div key={platform.key} className="flex items-center justify-between p-3 bg-neutral-800 rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <IconComponent className="h-5 w-5 text-neutral-400" />
+                    <span className="text-white">{platform.name}</span>
                   </div>
+                  <Switch
+                    checked={connectedPlatforms[platform.key] || false}
+                    onCheckedChange={() => handlePlatformToggle(platform.key)}
+                  />
                 </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="bg-neutral-800 border-neutral-600">
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-2">
-                  <Star className="h-5 w-5 text-yellow-500" />
-                  <div>
-                    <p className="text-sm text-neutral-400">Avg Rating</p>
-                    <p className="text-2xl font-bold text-white">{avgRating.toFixed(1)}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="bg-neutral-800 border-neutral-600">
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-2">
-                  <TrendingUp className="h-5 w-5 text-green-500" />
-                  <div>
-                    <p className="text-sm text-neutral-400">Engagement</p>
-                    <p className="text-2xl font-bold text-white">{totalEngagement}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+              );
+            })}
           </div>
-
-          {/* Posts Tabs - Dark Theme */}
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="bg-neutral-800 mb-4">
-              <TabsTrigger value="all" className="data-[state=active]:bg-neutral-700 data-[state=active]:text-white">
-                All Posts ({posts.length})
-              </TabsTrigger>
-              <TabsTrigger value="google" className="data-[state=active]:bg-neutral-700 data-[state=active]:text-white">
-                Google ({posts.filter(p => p.source === 'google').length})
-              </TabsTrigger>
-              <TabsTrigger value="yelp" className="data-[state=active]:bg-neutral-700 data-[state=active]:text-white">
-                Yelp ({posts.filter(p => p.source === 'yelp').length})
-              </TabsTrigger>
-              <TabsTrigger value="instagram" className="data-[state=active]:bg-neutral-700 data-[state=active]:text-white">
-                Instagram ({posts.filter(p => p.source === 'instagram').length})
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value={activeTab}>
-              {loading ? (
-                <div className="text-center py-8">
-                  <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4 text-neutral-400" />
-                  <p className="text-neutral-400">Loading social media content...</p>
-                </div>
-              ) : filteredPosts.length > 0 ? (
-                <div className="space-y-4">
-                  {filteredPosts.map((post) => (
-                    <SocialMediaPost key={post.id} post={post} />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <p className="text-neutral-400 mb-4">No posts found for this platform.</p>
-                  <Button variant="outline" className="border-neutral-600 text-neutral-300">
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Connect Account
-                  </Button>
-                </div>
-              )}
-            </TabsContent>
-          </Tabs>
-
-          {lastUpdated && (
-            <div className="mt-4 text-xs text-neutral-500 flex items-center">
-              <Calendar className="h-3 w-3 mr-1" />
-              Last updated: {lastUpdated.toLocaleString()}
-            </div>
-          )}
         </CardContent>
       </Card>
+
+      {posts.length > 0 ? (
+        <div className="space-y-4">
+          {posts.map((post) => (
+            <Card key={post.id} className="bg-neutral-900 border-neutral-700">
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-3 mb-3">
+                  {post.userAvatar && (
+                    <img 
+                      src={post.userAvatar} 
+                      alt={post.author}
+                      className="w-10 h-10 rounded-full"
+                    />
+                  )}
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2">
+                      <span className="font-medium text-white">{post.author}</span>
+                      {post.username && (
+                        <span className="text-sm text-neutral-400">@{post.username}</span>
+                      )}
+                    </div>
+                    <div className="flex items-center space-x-2 mt-1">
+                      <Badge variant="outline" className="text-xs text-neutral-400">
+                        {post.platform}
+                      </Badge>
+                      {post.rating && (
+                        <div className="flex items-center">
+                          <Star className="h-3 w-3 text-yellow-500 mr-1" />
+                          <span className="text-xs text-neutral-400">{post.rating}/5</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                
+                <p className="text-neutral-200 mb-3">{post.content}</p>
+                
+                {post.media && post.media.length > 0 && (
+                  <div className="mb-3">
+                    <img 
+                      src={post.media[0].url} 
+                      alt="Social media post"
+                      className="w-full h-48 object-cover rounded-lg"
+                    />
+                  </div>
+                )}
+                
+                <div className="flex items-center space-x-4 text-sm text-neutral-400">
+                  <div className="flex items-center space-x-1">
+                    <Heart className="h-4 w-4" />
+                    <span>{post.likes}</span>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <MessageCircle className="h-4 w-4" />
+                    <span>{post.comments}</span>
+                  </div>
+                  <span className="text-xs">
+                    {new Date(post.timestamp).toLocaleDateString()}
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <Card className="bg-neutral-900 border-neutral-700">
+          <CardContent className="p-8 text-center">
+            <div className="text-neutral-400">
+              <Instagram className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <h3 className="text-lg font-medium mb-2">No Social Media Posts</h3>
+              <p className="text-sm">
+                Connect your social media platforms to see posts and reviews about {venue.name}
+              </p>
+              <Button 
+                className="mt-4" 
+                onClick={() => handlePlatformToggle('instagram')}
+              >
+                Connect Instagram
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };

@@ -1,19 +1,12 @@
 
-// Main mock data index file
-import { mockUsers } from "./users";
-import { mockLocations } from "./locations";
-import { mockPosts } from "./posts";
-import { mockComments } from "./comments";
-import { getRecentTime, getExpiryTime } from "./time-utils";
-import { cityLocations } from "./cityLocations";
+import { regularUsers } from './users/regularUsers';
+import { mockLocations } from './locations';
+import { mockPosts } from './posts';
 
-// Export everything so existing imports continue to work
-export { 
-  mockUsers,
-  mockLocations,
-  mockPosts,
-  mockComments,
-  getRecentTime,
-  getExpiryTime,
-  cityLocations
+export const mockUsers = regularUsers;
+export { mockLocations, mockPosts };
+export default {
+  users: regularUsers,
+  locations: mockLocations,
+  posts: mockPosts
 };

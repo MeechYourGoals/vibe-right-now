@@ -178,7 +178,7 @@ export interface SocialMediaPost {
   id: string;
   content: string;
   author: string;
-  username?: string;
+  username: string;
   userAvatar?: string;
   venueName?: string;
   rating?: number;
