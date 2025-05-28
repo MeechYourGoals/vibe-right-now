@@ -1,3 +1,4 @@
+
 export interface User {
   id: string;
   username: string;
@@ -137,6 +138,16 @@ export interface Event {
   isAttending?: boolean;
   organizer: User;
   tags?: string[];
+}
+
+export interface EventItem {
+  id: string;
+  title: string;
+  date: string;
+  time: string;
+  venue: string;
+  image?: string;
+  category: string;
 }
 
 export interface Message {

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -5,17 +6,13 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 
-interface Preferences {
-  Vibe: string[];
-  Interests: string[];
-  Crowd: string[];
-  Values: string[];
-  Experience: string[];
+interface PreferencesState {
+  [key: string]: string[];
 }
 
 const PreferencesTab = () => {
   const { toast } = useToast();
-  const [selectedPreferences, setSelectedPreferences] = useState<Partial<Preferences>>({});
+  const [selectedPreferences, setSelectedPreferences] = useState<PreferencesState>({});
 
   useEffect(() => {
     const storedPreferences = localStorage.getItem('userPreferences');
@@ -47,13 +44,7 @@ const PreferencesTab = () => {
   };
 
   const handleSavePreferences = () => {
-    // Convert preferences to arrays for storage
-    const preferencesToSave = Object.entries(selectedPreferences).reduce((acc, [key, value]) => {
-      acc[key] = Array.isArray(value) ? value : [];
-      return acc;
-    }, {} as Record<string, string[]>);
-    
-    localStorage.setItem('userPreferences', JSON.stringify(preferencesToSave));
+    localStorage.setItem('userPreferences', JSON.stringify(selectedPreferences));
     
     toast({
       title: "Preferences saved",
@@ -62,10 +53,10 @@ const PreferencesTab = () => {
   };
 
   const handleResetPreferences = () => {
-    const emptyPreferences = Object.keys(preferenceCategories).reduce((acc, key) => {
+    const emptyPreferences: PreferencesState = Object.keys(preferenceCategories).reduce((acc, key) => {
       acc[key] = [];
       return acc;
-    }, {} as Record<string, string[]>);
+    }, {} as PreferencesState);
     
     setSelectedPreferences(emptyPreferences);
     localStorage.removeItem('userPreferences');

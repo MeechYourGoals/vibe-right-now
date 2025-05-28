@@ -10,6 +10,7 @@ import MusicSection from "@/components/explore/MusicSection";
 import ComedySection from "@/components/explore/ComedySection";
 import { mockLocations } from '@/mock/locations';
 import { DateRange } from "react-day-picker";
+import { Location, EventItem } from '@/types';
 
 const categories = [
   { id: 'all', label: 'All' },
@@ -17,6 +18,17 @@ const categories = [
   { id: 'music', label: 'Music' },
   { id: 'comedy', label: 'Comedy' },
 ];
+
+// Helper function to convert Location to EventItem
+const locationToEventItem = (location: Location): EventItem => ({
+  id: location.id,
+  title: location.name,
+  date: new Date().toISOString().split('T')[0], // Default to today
+  time: '20:00', // Default to 8 PM
+  venue: location.address || location.name,
+  image: location.photos?.[0] || location.imageUrl,
+  category: location.category
+});
 
 const Explore = () => {
   const [activeCategory, setActiveCategory] = useState('all');
@@ -30,8 +42,8 @@ const Explore = () => {
   };
 
   const nightlifeVenues = mockLocations.filter(loc => loc.category === 'nightclub' || loc.category === 'bar');
-  const musicEvents = mockLocations.filter(loc => loc.category === 'music_venue');
-  const comedyEvents = mockLocations.filter(loc => loc.category === 'comedy_club');
+  const musicEvents = mockLocations.filter(loc => loc.category === 'music_venue').map(locationToEventItem);
+  const comedyEvents = mockLocations.filter(loc => loc.category === 'comedy_club').map(locationToEventItem);
 
   return (
     <Layout>

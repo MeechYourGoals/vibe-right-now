@@ -1,4 +1,24 @@
-import { GenerateTextOptions, GenerateTextResponse, SearchOptions } from '../VertexAI/types';
+
+// Define types locally since VertexAI types are not available
+interface GenerateTextOptions {
+  temperature?: number;
+  maxTokens?: number;
+}
+
+interface GenerateTextResponse {
+  text: string;
+}
+
+interface SearchOptions {
+  maxResults?: number;
+  location?: string;
+}
+
+interface TTSOptions {
+  voice?: string;
+  speakingRate?: number;
+  pitch?: number;
+}
 
 export class GoogleAIService {
   static async generateText(prompt: string, options: GenerateTextOptions = {}): Promise<GenerateTextResponse> {
@@ -37,7 +57,7 @@ export class GoogleAIService {
     }
   }
 
-  static async textToSpeech(text: string, options: any = {}): Promise<string> {
+  static async textToSpeech(text: string, options: TTSOptions = {}): Promise<string> {
     try {
       console.log('Google TTS generating audio for:', text.substring(0, 50) + '...');
       
