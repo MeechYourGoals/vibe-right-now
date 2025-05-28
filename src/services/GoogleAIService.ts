@@ -1,4 +1,4 @@
-import { GenerateTextOptions, GenerateTextResponse, SearchOptions, TextToSpeechOptions } from './types';
+import { GenerateTextOptions, GenerateTextResponse, SearchOptions } from '../VertexAI/types';
 
 export class GoogleAIService {
   static async generateText(prompt: string, options: GenerateTextOptions = {}): Promise<GenerateTextResponse> {

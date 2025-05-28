@@ -31,16 +31,23 @@ const VenuePostsContent: React.FC<VenuePostsContentProps> = (props) => {
   
   const { filteredVenuePosts } = useVenuePosts(props);
   
+  const handlePostDeleted = (postId: string) => {
+    console.log('Post deleted:', postId);
+  };
+  
   return (
     <VenuePostsTabs
+      venue={venue}
+      posts={filteredPosts}
+      getComments={getPostComments}
+      onPostDeleted={handlePostDeleted}
       activeTab={activeTab}
       setActiveTab={setActiveTab}
       viewMode={viewMode}
       setViewMode={setViewMode}
-      allPosts={allPosts}
       filteredPosts={filteredPosts}
+      allPosts={allPosts}
       filteredVenuePosts={filteredVenuePosts}
-      venue={venue}
       getPostComments={getPostComments}
     />
   );

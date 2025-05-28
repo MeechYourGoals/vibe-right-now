@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import Layout from '@/components/Layout';
+import { Layout } from '@/components/Layout';
 import SearchSection from "@/components/explore/SearchSection";
 import CategoryTabs from "@/components/explore/CategoryTabs";
 import RecommendedForYou from "@/components/explore/RecommendedForYou";
@@ -28,6 +29,10 @@ const Explore = () => {
     setActiveCategory(category);
   };
 
+  const nightlifeVenues = mockLocations.filter(loc => loc.category === 'nightclub' || loc.category === 'bar');
+  const musicEvents = mockLocations.filter(loc => loc.category === 'music_venue');
+  const comedyEvents = mockLocations.filter(loc => loc.category === 'comedy_club');
+
   return (
     <Layout>
       <div className="max-w-6xl mx-auto p-6 space-y-6">
@@ -48,14 +53,44 @@ const Explore = () => {
             />
 
             <div className="mt-6">
-              {activeCategory === 'nightlife' && <NightlifeSection />}
-              {activeCategory === 'music' && <MusicSection />}
-              {activeCategory === 'comedy' && <ComedySection />}
+              {activeCategory === 'nightlife' && (
+                <NightlifeSection 
+                  nightlifeVenues={nightlifeVenues}
+                  searchedCity=""
+                  dateRange={dateRange}
+                />
+              )}
+              {activeCategory === 'music' && (
+                <MusicSection 
+                  musicEvents={musicEvents}
+                  searchedCity=""
+                  dateRange={dateRange}
+                />
+              )}
+              {activeCategory === 'comedy' && (
+                <ComedySection 
+                  comedyEvents={comedyEvents}
+                  searchedCity=""
+                  dateRange={dateRange}
+                />
+              )}
               {activeCategory === 'all' && (
                 <>
-                  <NightlifeSection />
-                  <MusicSection />
-                  <ComedySection />
+                  <NightlifeSection 
+                    nightlifeVenues={nightlifeVenues}
+                    searchedCity=""
+                    dateRange={dateRange}
+                  />
+                  <MusicSection 
+                    musicEvents={musicEvents}
+                    searchedCity=""
+                    dateRange={dateRange}
+                  />
+                  <ComedySection 
+                    comedyEvents={comedyEvents}
+                    searchedCity=""
+                    dateRange={dateRange}
+                  />
                 </>
               )}
             </div>

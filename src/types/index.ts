@@ -179,6 +179,10 @@ export interface CreditCard {
   expiryYear: number;
   isDefault: boolean;
   name: string;
+  expMonth: number;
+  expYear: number;
+  maxSpendLimit?: number;
+  vernonApproved?: boolean;
 }
 
 export type SocialMediaSource = 'instagram' | 'google' | 'yelp' | 'tiktok' | 'tripadvisor' | 'foursquare' | 'franki' | 'other';
