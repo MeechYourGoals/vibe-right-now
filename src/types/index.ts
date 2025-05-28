@@ -46,6 +46,7 @@ export interface Location {
   photos?: string[];
   description?: string;
   amenities?: string[];
+  vibes?: string[]; // Fixed: This should be an array of strings
   vibeScore?: number;
   isOpen?: boolean;
   city: string;
@@ -59,7 +60,6 @@ export interface Location {
   verified?: boolean;
   isVerified?: boolean;
   hours?: BusinessHours;
-  vibes?: number;
   // Legacy properties for backward compatibility
   latitude?: number;
   longitude?: number;

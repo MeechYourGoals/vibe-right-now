@@ -1,38 +1,31 @@
 
 import { useState } from 'react';
+import { Location } from '@/types';
 import { mockUsers } from '@/mock/users';
 
-export const vibeTags = [
-  "🔥 Lit", "🎵 Vibes", "💎 Bougie", "🌮 Foodie", "🍸 Classy",
-  "🎉 Party", "📸 Aesthetic", "🌃 Chill", "⚡ Electric", "🎭 Artsy"
-];
-
 export const useFilterHandling = () => {
-  const [selectedVibes, setSelectedVibes] = useState<string[]>([]);
-  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const [filters, setFilters] = useState({
+    category: 'all',
+    priceRange: 'all',
+    rating: 0,
+    distance: 50
+  });
 
-  const toggleVibe = (vibe: string) => {
-    setSelectedVibes(prev => 
-      prev.includes(vibe) 
-        ? prev.filter(v => v !== vibe)
-        : [...prev, vibe]
-    );
-  };
-
-  const toggleUser = (userId: string) => {
-    setSelectedUsers(prev => 
-      prev.includes(userId)
-        ? prev.filter(id => id !== userId)
-        : [...prev, userId]
-    );
+  const applyFilters = (locations: Location[]) => {
+    return locations.filter(location => {
+      if (filters.category !== 'all' && location.category !== filters.category) {
+        return false;
+      }
+      if (filters.rating > 0 && (location.rating || 0) < filters.rating) {
+        return false;
+      }
+      return true;
+    });
   };
 
   return {
-    selectedVibes,
-    selectedUsers,
-    toggleVibe,
-    toggleUser,
-    vibeTags,
-    users: mockUsers
+    filters,
+    setFilters,
+    applyFilters
   };
 };
