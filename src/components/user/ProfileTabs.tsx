@@ -1,87 +1,113 @@
 
-import React from 'react';
+import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Comment } from "@/types";
-import ProfileHeader from './ProfileHeader';
+import { User } from "@/types";
 
-const mockUser = {
-  id: '1',
-  username: 'johndoe',
-  name: 'John Doe',
-  avatar: '/placeholder.svg',
-  bio: 'Living life to the fullest!',
-  isVerified: true,
-  followersCount: 1250,
-  followingCount: 380,
-  postsCount: 125
-};
+interface ProfileTabsProps {
+  user: User;
+}
 
-const mockComments: Comment[] = [
-  {
-    id: '1',
-    postId: 'post1',
-    userId: '1',
-    user: { id: '1', username: 'alice', name: 'Alice', avatar: '/placeholder.svg' },
-    content: 'Great post!',
-    timestamp: new Date().toISOString(),
-    vibedHere: true,
-    likes: 5
-  },
-  {
-    id: '2',
-    postId: 'post2',
-    userId: '2',
-    user: { id: '2', username: 'bob', name: 'Bob', avatar: '/placeholder.svg' },
-    content: 'Amazing place!',
-    timestamp: new Date().toISOString(),
-    vibedHere: false,
-    likes: 3
-  }
-];
+const ProfileTabs: React.FC<ProfileTabsProps> = ({ user }) => {
+  // Mock data with proper User interface compliance
+  const mockFollowers: User[] = [
+    {
+      id: '1',
+      username: 'sarah_explorer',
+      displayName: 'Sarah Chen',
+      profileImage: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah',
+      bio: 'Food enthusiast',
+      followersCount: 1248,
+      followingCount: 892,
+      isVerified: false,
+      isPrivate: false,
+      joinedDate: '2023-03-15',
+      name: 'Sarah Chen',
+      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah'
+    },
+    {
+      id: '2',
+      username: 'mike_nightlife',
+      displayName: 'Mike Rodriguez',
+      profileImage: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Mike',
+      bio: 'Living for the weekend vibes',
+      followersCount: 892,
+      followingCount: 634,
+      isVerified: false,
+      isPrivate: false,
+      joinedDate: '2023-02-20',
+      name: 'Mike Rodriguez',
+      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Mike'
+    }
+  ];
 
-const ProfileTabs = () => {
+  const mockFollowing: User[] = [
+    {
+      id: '3',
+      username: 'jenny_foodie',
+      displayName: 'Jenny Park',
+      profileImage: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Jenny',
+      bio: 'Always hunting for the best brunch spots',
+      followersCount: 2156,
+      followingCount: 1243,
+      isVerified: true,
+      isPrivate: false,
+      joinedDate: '2022-11-08',
+      postsCount: 89,
+      name: 'Jenny Park',
+      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Jenny'
+    }
+  ];
+
   return (
-    <div className="max-w-4xl mx-auto">
-      <ProfileHeader user={mockUser} />
+    <Tabs defaultValue="posts" className="w-full">
+      <TabsList className="grid w-full grid-cols-3">
+        <TabsTrigger value="posts">Posts</TabsTrigger>
+        <TabsTrigger value="followers">Followers</TabsTrigger>
+        <TabsTrigger value="following">Following</TabsTrigger>
+      </TabsList>
       
-      <Tabs defaultValue="posts" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="posts">Posts</TabsTrigger>
-          <TabsTrigger value="vibes">Vibes</TabsTrigger>
-          <TabsTrigger value="about">About</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="posts" className="mt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {/* Posts content */}
-            <p className="text-muted-foreground">No posts yet.</p>
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="vibes" className="mt-6">
-          <div className="space-y-4">
-            {mockComments.map((comment) => (
-              <div key={comment.id} className="p-4 border rounded-lg">
-                <p>{comment.content}</p>
-                <div className="flex items-center space-x-2 mt-2 text-sm text-muted-foreground">
-                  <span>@{comment.user.username}</span>
-                  {comment.vibedHere && <span className="text-primary">• Vibed Here</span>}
-                </div>
+      <TabsContent value="posts" className="space-y-4">
+        <div className="text-center py-8">
+          <p className="text-muted-foreground">No posts yet</p>
+        </div>
+      </TabsContent>
+      
+      <TabsContent value="followers" className="space-y-4">
+        <div className="space-y-2">
+          {mockFollowers.map((follower) => (
+            <div key={follower.id} className="flex items-center space-x-3 p-2">
+              <img 
+                src={follower.profileImage || follower.avatar} 
+                alt={follower.displayName || follower.name}
+                className="w-10 h-10 rounded-full"
+              />
+              <div>
+                <p className="font-medium">{follower.displayName || follower.name}</p>
+                <p className="text-sm text-muted-foreground">@{follower.username}</p>
               </div>
-            ))}
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="about" className="mt-6">
-          <div className="space-y-4">
-            <div>
-              <h3 className="font-semibold mb-2">About</h3>
-              <p className="text-muted-foreground">{mockUser.bio}</p>
             </div>
-          </div>
-        </TabsContent>
-      </Tabs>
-    </div>
+          ))}
+        </div>
+      </TabsContent>
+      
+      <TabsContent value="following" className="space-y-4">
+        <div className="space-y-2">
+          {mockFollowing.map((following) => (
+            <div key={following.id} className="flex items-center space-x-3 p-2">
+              <img 
+                src={following.profileImage || following.avatar} 
+                alt={following.displayName || following.name}
+                className="w-10 h-10 rounded-full"
+              />
+              <div>
+                <p className="font-medium">{following.displayName || following.name}</p>
+                <p className="text-sm text-muted-foreground">@{following.username}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </TabsContent>
+    </Tabs>
   );
 };
 

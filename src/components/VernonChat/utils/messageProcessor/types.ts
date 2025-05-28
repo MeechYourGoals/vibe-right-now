@@ -1,9 +1,9 @@
 
-import { MessageContext, ProcessMessageOptions, Message } from "@/types";
+import type { MessageContext, ProcessMessageOptions, Message } from "@/types";
 
 export interface MessageProcessor {
   canHandle: (context: MessageContext) => boolean;
   process: (context: MessageContext) => Promise<Message>;
 }
 
-export { MessageContext, ProcessMessageOptions, Message };
+export type { MessageContext, ProcessMessageOptions, Message };

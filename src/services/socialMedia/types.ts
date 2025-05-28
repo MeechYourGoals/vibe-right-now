@@ -1,23 +1,30 @@
 
-// Types for social media posts and API keys (Google ecosystem only)
 export interface SocialMediaPost {
   id: string;
   content: string;
-  timestamp: string;
+  author: string;
   username: string;
-  userAvatar: string;
-  venueName: string;
-  source: 'instagram' | 'yelp' | 'google' | 'other';
-  mediaUrl?: string;
-  mediaType?: 'image' | 'video';
+  userAvatar?: string;
+  venueName?: string;
+  rating?: number;
+  timestamp: string;
+  platform: string;
+  source: 'instagram' | 'google' | 'yelp' | 'other';
   likes?: number;
   comments?: number;
-  rating?: number;
-  originalUrl?: string; // URL to the original post
+  engagement?: {
+    likes: number;
+    comments: number;
+    shares: number;
+  };
+  media?: {
+    type: 'image' | 'video';
+    url: string;
+  }[];
 }
 
 export interface SocialMediaApiKeys {
-  instagram: string;
-  yelp: string;
-  google: string;
+  instagram?: string;
+  google?: string;
+  yelp?: string;
 }

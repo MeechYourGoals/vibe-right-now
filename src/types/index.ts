@@ -206,6 +206,12 @@ export interface VenueInsights {
   engagementRate: number;
   topVibeTag: string;
   peakHours: string;
+  totalVisits: number;
+  visitors: number;
+  visitorsChange: number;
+  checkins: number;
+  viewsCount: number;
+  impressions: number;
   demographics: {
     age: { range: string; percentage: number }[];
     gender: { type: string; percentage: number }[];
