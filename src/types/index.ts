@@ -140,16 +140,6 @@ export interface Event {
   tags?: string[];
 }
 
-export interface EventItem {
-  id: string;
-  title: string;
-  date: string;
-  time: string;
-  venue: string;
-  image?: string;
-  category: string;
-}
-
 export interface Message {
   id: string;
   sender: 'user' | 'ai';

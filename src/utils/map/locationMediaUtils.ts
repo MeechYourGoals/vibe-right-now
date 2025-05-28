@@ -1,3 +1,4 @@
+
 import { Location, Media } from "@/types";
 
 // Get media for a location
@@ -63,6 +64,7 @@ export const getMediaForLocation = (location: Location): Media => {
                   fallbackImage;
 
   return {
+    id: `media_${location.id}`,
     type: "image" as const,
     url: imageUrl
   };

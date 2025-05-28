@@ -10,7 +10,13 @@ interface PreferencesState {
   [key: string]: string[];
 }
 
-const PreferencesTab = () => {
+interface PreferencesTabProps {
+  onSave?: () => void;
+  isVenueMode?: boolean;
+  subscriptionTier?: "standard" | "plus" | "premium" | "pro";
+}
+
+const PreferencesTab = ({ onSave, isVenueMode, subscriptionTier }: PreferencesTabProps) => {
   const { toast } = useToast();
   const [selectedPreferences, setSelectedPreferences] = useState<PreferencesState>({});
 
@@ -50,13 +56,17 @@ const PreferencesTab = () => {
       title: "Preferences saved",
       description: "Your preferences have been saved successfully.",
     });
+
+    if (onSave) {
+      onSave();
+    }
   };
 
   const handleResetPreferences = () => {
-    const emptyPreferences: PreferencesState = Object.keys(preferenceCategories).reduce((acc, key) => {
-      acc[key] = [];
-      return acc;
-    }, {} as PreferencesState);
+    const emptyPreferences: PreferencesState = {};
+    Object.keys(preferenceCategories).forEach(key => {
+      emptyPreferences[key] = [];
+    });
     
     setSelectedPreferences(emptyPreferences);
     localStorage.removeItem('userPreferences');

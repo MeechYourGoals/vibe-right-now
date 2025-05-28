@@ -10,7 +10,8 @@ import MusicSection from "@/components/explore/MusicSection";
 import ComedySection from "@/components/explore/ComedySection";
 import { mockLocations } from '@/mock/locations';
 import { DateRange } from "react-day-picker";
-import { Location, EventItem } from '@/types';
+import { Location } from '@/types';
+import { EventItem } from '@/components/venue/events/types';
 
 const categories = [
   { id: 'all', label: 'All' },
@@ -26,8 +27,13 @@ const locationToEventItem = (location: Location): EventItem => ({
   date: new Date().toISOString().split('T')[0], // Default to today
   time: '20:00', // Default to 8 PM
   venue: location.address || location.name,
-  image: location.photos?.[0] || location.imageUrl,
-  category: location.category
+  location: `${location.city}, ${location.state || location.country}`,
+  description: location.description || `Experience the vibes at ${location.name}`,
+  price: location.priceRange ? `${location.priceRange}${location.priceRange}` : '$50',
+  ticketsAvailable: Math.floor(Math.random() * 100) + 20,
+  type: location.category === 'music_venue' ? 'music' : 
+        location.category === 'comedy_club' ? 'comedy' : 'other',
+  image: location.photos?.[0] || location.imageUrl
 });
 
 const Explore = () => {
