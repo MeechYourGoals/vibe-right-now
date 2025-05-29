@@ -1,7 +1,6 @@
 
 import { useState } from 'react';
 import { Location } from '@/types';
-import { mockUsers } from '@/mock/users';
 
 export const useFilterHandling = () => {
   const [filters, setFilters] = useState({
