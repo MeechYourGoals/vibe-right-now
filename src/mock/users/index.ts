@@ -51,5 +51,3 @@ export const mockUsers: MockUser[] = [
 export const getMockUserProfile = (userId: string): MockUser | null => {
   return mockUsers.find(user => user.id === userId) || null;
 };
-
-export const regularUsers = mockUsers;

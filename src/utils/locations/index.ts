@@ -1,6 +1,15 @@
 
 import { Location } from '@/types';
 
+export interface CityCoordinates {
+  [key: string]: {
+    name: string;
+    lat: number;
+    lng: number;
+    state: string;
+  };
+}
+
 export const generateLocationData = (city: string, state: string): Location[] => {
   // Generate mock location data
   return [
