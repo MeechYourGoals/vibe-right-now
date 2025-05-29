@@ -56,9 +56,6 @@ const AddCardForm = ({ onSubmit, onCancel }: AddCardFormProps) => {
         onSubmit({
           last4,
           brand,
-          name: cardHolder,
-          expiryMonth: parseInt(expMonth),
-          expiryYear: parseInt(expYear),
           expMonth: parseInt(expMonth),
           expYear: parseInt(expYear),
         });

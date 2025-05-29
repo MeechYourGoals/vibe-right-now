@@ -1,121 +1,119 @@
 
-import { Post, User, Location } from '@/types';
-import { regularUsers } from './users/regularUsers';
-import { mockLocations } from './locations';
+import { Post, Media } from "@/types";
+import { regularUsers, celebrityUsers } from "./users";
+import { mockLocations } from "./locations";
+import { getRecentTime, getExpiryTime } from "./time-utils";
+
+const allUsers = [...regularUsers, ...celebrityUsers];
 
 export const mockPosts: Post[] = [
   {
-    id: '1',
-    userId: regularUsers[0].id,
-    user: regularUsers[0],
-    author: regularUsers[0],
+    id: "1",
+    user: allUsers[0],
+    author: allUsers[0],
     location: mockLocations[0],
-    content: "The vibes at The Rooftop are absolutely incredible tonight! 🔥",
+    content: "The sunset view here is incredible tonight! DJ is playing the best vibes 🎵",
     media: [
       {
-        id: '1',
-        type: 'image',
-        url: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&h=600&fit=crop'
-      }
+        id: "1-1",
+        type: "image",
+        url: "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=600&q=80&auto=format&fit=crop",
+      },
+      {
+        id: "1-2",
+        type: "image",
+        url: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600&q=80&auto=format&fit=crop",
+      },
     ],
-    timestamp: '2024-01-15T20:30:00Z',
-    expiresAt: '2024-01-16T02:30:00Z',
-    likes: 247,
+    timestamp: getRecentTime(1),
+    expiresAt: getExpiryTime(getRecentTime(1), true),
+    likes: 42,
     comments: [],
-    shares: 45,
     isPinned: true,
     vibedHere: true,
-    vibeTags: ['🔥 Lit', '🎵 Vibes']
+    vibeTags: ["Lively", "Upscale", "NightOwl"]
   },
   {
-    id: '2',
-    userId: regularUsers[1].id,
-    user: regularUsers[1],
-    author: regularUsers[1],
+    id: "2",
+    user: allUsers[1],
+    author: allUsers[1],
     location: mockLocations[1],
-    content: "Best pasta in the city! Trust me on this one 🍝",
+    content: "They just put out fresh pastries! Get here quick, there's no line right now.",
     media: [
       {
-        id: '2',
-        type: 'image',
-        url: 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=800&h=600&fit=crop'
-      }
+        id: "2-1",
+        type: "image",
+        url: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600&q=80&auto=format&fit=crop",
+      },
     ],
-    timestamp: '2024-01-15T19:15:00Z',
-    expiresAt: '2024-01-16T01:15:00Z',
-    likes: 89,
+    timestamp: getRecentTime(2),
+    expiresAt: getExpiryTime(getRecentTime(2)),
+    likes: 18,
     comments: [],
-    shares: 23,
     vibedHere: false
   },
   {
-    id: '3',
-    userId: regularUsers[2].id,
-    user: regularUsers[2],
-    author: regularUsers[2],
+    id: "3",
+    user: allUsers[2],
+    author: allUsers[2],
     location: mockLocations[2],
-    content: "Epic show tonight! The energy is off the charts! ⚡",
+    content: "The headline act is about to start! Crowd is energetic but not too packed yet.",
     media: [
       {
-        id: '3',
-        type: 'video',
-        url: 'https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4'
+        id: "3-1",
+        type: "video",
+        url: "https://www.w3schools.com/html/mov_bbb.mp4",
       },
       {
-        id: '4',
-        type: 'image',
-        url: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=600&fit=crop'
-      }
+        id: "3-2",
+        type: "image",
+        url: "https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=600&q=80&auto=format&fit=crop",
+      },
     ],
-    timestamp: '2024-01-15T21:45:00Z',
-    expiresAt: '2024-01-16T03:45:00Z',
-    likes: 312,
+    timestamp: getRecentTime(0.5),
+    expiresAt: getExpiryTime(getRecentTime(0.5)),
+    likes: 104,
     comments: [],
-    shares: 78,
     vibedHere: true
   },
   {
-    id: '4',
-    userId: regularUsers[3].id,
-    user: regularUsers[3],
-    author: regularUsers[3],
+    id: "4",
+    user: allUsers[3],
+    author: allUsers[3],
     location: mockLocations[3],
-    content: "Perfect latte art ☕ This place never disappoints!",
+    content: "New exhibit just opened! Only a small crowd so far, perfect time to check it out.",
     media: [
       {
-        id: '5',
-        type: 'image',
-        url: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=800&h=600&fit=crop'
-      }
+        id: "4-1",
+        type: "image",
+        url: "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=600&q=80&auto=format&fit=crop",
+      },
     ],
-    timestamp: '2024-01-15T08:30:00Z',
-    expiresAt: '2024-01-15T14:30:00Z',
-    likes: 156,
+    timestamp: getRecentTime(3),
+    expiresAt: getExpiryTime(getRecentTime(3)),
+    likes: 29,
     comments: [],
-    shares: 34,
     vibedHere: false
   },
   {
-    id: '5',
-    userId: regularUsers[4].id,
-    user: regularUsers[4],
-    author: regularUsers[4],
+    id: "5",
+    user: allUsers[4],
+    author: allUsers[4],
     location: mockLocations[4],
-    content: "This gallery opening is mind-blowing! 🎨✨",
+    content: "Line is around the block tonight! But the view is worth the wait.",
     media: [
       {
-        id: '6',
-        type: 'image',
-        url: 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=800&h=600&fit=crop'
-      }
+        id: "5-1",
+        type: "image",
+        url: "https://images.unsplash.com/photo-1519214605650-76a613ee3245?w=600&q=80&auto=format&fit=crop",
+      },
     ],
-    timestamp: '2024-01-15T18:00:00Z',
-    expiresAt: '2024-01-16T00:00:00Z',
-    likes: 203,
+    timestamp: getRecentTime(1.5),
+    expiresAt: getExpiryTime(getRecentTime(1.5)),
+    likes: 56,
     comments: [],
-    shares: 67,
     isPinned: true,
     vibedHere: true,
-    vibeTags: ['🎭 Artsy', '📸 Aesthetic']
+    vibeTags: ["Lively", "Upscale", "NightOwl"]
   }
 ];

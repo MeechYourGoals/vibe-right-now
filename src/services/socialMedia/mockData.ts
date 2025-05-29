@@ -1,4 +1,3 @@
-
 import { SocialMediaPost } from './types';
 
 // Mock data for demonstration with reliable image URLs
@@ -7,16 +6,12 @@ export const mockInstagramPosts: SocialMediaPost[] = [
     id: 'ig1',
     content: 'Amazing vibes at this place tonight! 🔥 #nightlife #goodtimes',
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-    author: 'partygoer123',
     username: 'partygoer123',
     userAvatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&auto=format',
     venueName: 'The Rooftop',
-    platform: 'Instagram',
     source: 'instagram',
-    media: [{
-      type: 'image',
-      url: 'https://images.unsplash.com/photo-1572116469696-31de0f17cc34?w=500&q=80&auto=format&fit=crop'
-    }],
+    mediaUrl: 'https://images.unsplash.com/photo-1572116469696-31de0f17cc34?w=500&q=80&auto=format&fit=crop',
+    mediaType: 'image',
     likes: 127,
     comments: 14,
     originalUrl: 'https://instagram.com/p/AB123'
@@ -25,16 +20,12 @@ export const mockInstagramPosts: SocialMediaPost[] = [
     id: 'ig2',
     content: 'Best cocktails in the city! 🍹 #cocktails #datenight',
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 6).toISOString(),
-    author: 'cocktail_lover',
     username: 'cocktail_lover',
     userAvatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&auto=format',
     venueName: 'The Rooftop',
-    platform: 'Instagram',
     source: 'instagram',
-    media: [{
-      type: 'image',
-      url: 'https://images.unsplash.com/photo-1470813740244-df37b8c1edcb?w=500&q=80&auto=format&fit=crop'
-    }],
+    mediaUrl: 'https://images.unsplash.com/photo-1470813740244-df37b8c1edcb?w=500&q=80&auto=format&fit=crop',
+    mediaType: 'image',
     likes: 89,
     comments: 7,
     originalUrl: 'https://instagram.com/p/CD456'
@@ -43,16 +34,12 @@ export const mockInstagramPosts: SocialMediaPost[] = [
     id: 'ig3',
     content: 'Live music was incredible! 🎵 #livemusic #weekend',
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-    author: 'music_fan',
     username: 'music_fan',
     userAvatar: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=100&h=100&fit=crop&auto=format',
     venueName: 'Jazz Club',
-    platform: 'Instagram',
     source: 'instagram',
-    media: [{
-      type: 'image',
-      url: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=500&q=80&auto=format&fit=crop'
-    }],
+    mediaUrl: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=500&q=80&auto=format&fit=crop',
+    mediaType: 'image',
     likes: 215,
     comments: 23,
     originalUrl: 'https://instagram.com/p/EF789'
@@ -65,16 +52,12 @@ export const mockTikTokPosts: SocialMediaPost[] = [
     id: 'tt1',
     content: 'Check out this amazing DJ set! 🎧 #nightlife #dj #vibes',
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString(),
-    author: 'club_hopper',
     username: 'club_hopper',
     userAvatar: 'https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=100&h=100&fit=crop&auto=format',
     venueName: 'The Rooftop',
-    platform: 'TikTok',
     source: 'tiktok',
-    media: [{
-      type: 'video',
-      url: 'https://www.w3schools.com/html/mov_bbb.mp4'
-    }],
+    mediaUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
+    mediaType: 'video',
     likes: 1243,
     comments: 87,
     originalUrl: 'https://tiktok.com/@club_hopper/video/123456'
@@ -83,16 +66,12 @@ export const mockTikTokPosts: SocialMediaPost[] = [
     id: 'tt2',
     content: 'This place is PACKED tonight! 🔥 #trending #hotspot',
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 8).toISOString(),
-    author: 'viral_content',
     username: 'viral_content',
     userAvatar: 'https://images.unsplash.com/photo-1603415526960-f7e0328c63b1?w=100&h=100&fit=crop&auto=format',
     venueName: 'The Rooftop',
-    platform: 'TikTok',
     source: 'tiktok',
-    media: [{
-      type: 'video',
-      url: 'https://www.w3schools.com/html/movie.mp4'
-    }],
+    mediaUrl: 'https://www.w3schools.com/html/movie.mp4',
+    mediaType: 'video',
     likes: 4592,
     comments: 213,
     originalUrl: 'https://tiktok.com/@viral_content/video/654321'
@@ -105,11 +84,9 @@ export const mockYelpReviews: SocialMediaPost[] = [
     id: 'yelp1',
     content: 'Excellent service and amazing food. The atmosphere was perfect for a date night. Would definitely come back!',
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
-    author: 'foodie_explorer',
     username: 'foodie_explorer',
     userAvatar: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=100&h=100&fit=crop&auto=format',
     venueName: 'The Rooftop',
-    platform: 'Yelp',
     source: 'yelp',
     rating: 5,
     likes: 8,
@@ -120,11 +97,9 @@ export const mockYelpReviews: SocialMediaPost[] = [
     id: 'yelp2',
     content: 'Great venue but a bit overpriced. The cocktails were good but not worth $18 each. Nice views though!',
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 72).toISOString(),
-    author: 'value_seeker',
     username: 'value_seeker',
     userAvatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop&auto=format',
     venueName: 'The Rooftop',
-    platform: 'Yelp',
     source: 'yelp',
     rating: 3,
     likes: 4,
@@ -139,17 +114,13 @@ export const mockTripAdvisorPosts: SocialMediaPost[] = [
     id: 'ta1',
     content: 'We visited during our vacation and had an exceptional experience. The staff were attentive and the views were breathtaking. Highly recommend for special occasions!',
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 96).toISOString(),
-    author: 'traveler2023',
     username: 'traveler2023',
     userAvatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=100&h=100&fit=crop&auto=format',
     venueName: 'The Rooftop',
-    platform: 'TripAdvisor',
     source: 'tripadvisor',
     rating: 5,
-    media: [{
-      type: 'image',
-      url: 'https://images.unsplash.com/photo-1466441523277-1f06163a098d?w=500&q=80&auto=format&fit=crop'
-    }],
+    mediaUrl: 'https://images.unsplash.com/photo-1466441523277-1f06163a098d?w=500&q=80&auto=format&fit=crop',
+    mediaType: 'image',
     likes: 12,
     originalUrl: 'https://tripadvisor.com/ShowUserReviews-g123-d456-r789-The_Rooftop.html'
   },
@@ -157,11 +128,9 @@ export const mockTripAdvisorPosts: SocialMediaPost[] = [
     id: 'ta2',
     content: 'Food was good but service was slow. We waited almost 30 minutes for our appetizers. Location is beautiful though and worth the visit for the ambiance.',
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 120).toISOString(),
-    author: 'familytravels',
     username: 'familytravels',
     userAvatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&h=100&fit=crop&auto=format',
     venueName: 'The Rooftop',
-    platform: 'TripAdvisor',
     source: 'tripadvisor',
     rating: 3,
     likes: 5,
@@ -175,16 +144,12 @@ export const mockFoursquarePosts: SocialMediaPost[] = [
     id: 'fs1',
     content: 'Great spot for after-work drinks! The happy hour specials are a great deal.',
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 150).toISOString(),
-    author: 'cityexplorer',
     username: 'cityexplorer',
     userAvatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&auto=format',
     venueName: 'The Rooftop',
-    platform: 'Foursquare',
     source: 'foursquare',
-    media: [{
-      type: 'image',
-      url: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=500&q=80&auto=format&fit=crop'
-    }],
+    mediaUrl: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=500&q=80&auto=format&fit=crop',
+    mediaType: 'image',
     likes: 8,
     originalUrl: 'https://foursquare.com/v/the-rooftop/123456/tip/789'
   }
@@ -196,11 +161,9 @@ export const mockGoogleReviews: SocialMediaPost[] = [
     id: 'gr1',
     content: 'One of the best rooftop experiences in the city. Parking can be difficult so I recommend using a ride service.',
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 170).toISOString(),
-    author: 'LocalGuide',
     username: 'LocalGuide',
     userAvatar: 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=100&h=100&fit=crop&auto=format',
     venueName: 'The Rooftop',
-    platform: 'Google',
     source: 'google',
     rating: 5,
     likes: 22,
@@ -210,11 +173,9 @@ export const mockGoogleReviews: SocialMediaPost[] = [
     id: 'gr2',
     content: 'Beautiful view but the prices are quite steep. The service was excellent though.',
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 220).toISOString(),
-    author: 'JohnD',
     username: 'JohnD',
     userAvatar: 'https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?w=100&h=100&fit=crop&auto=format',
     venueName: 'The Rooftop',
-    platform: 'Google',
     source: 'google',
     rating: 4,
     likes: 7,
@@ -228,16 +189,12 @@ export const mockFrankiPosts: SocialMediaPost[] = [
     id: 'fr1',
     content: 'Discovered this hidden gem last weekend! Their signature cocktail is a must-try.',
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 130).toISOString(),
-    author: 'cocktailhunter',
     username: 'cocktailhunter',
     userAvatar: 'https://images.unsplash.com/photo-1546456073-6712f79251bb?w=100&h=100&fit=crop&auto=format',
     venueName: 'The Rooftop',
-    platform: 'Franki',
     source: 'franki',
-    media: [{
-      type: 'image',
-      url: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=500&q=80&auto=format&fit=crop'
-    }],
+    mediaUrl: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=500&q=80&auto=format&fit=crop',
+    mediaType: 'image',
     likes: 45,
     comments: 5,
     originalUrl: 'https://franki.app/venue/the-rooftop/posts/12345'
@@ -249,16 +206,12 @@ export const mockOtherPosts: SocialMediaPost[] = [
     id: 'ot1',
     content: 'Featured this venue in our "Top 10 Rooftop Spots" article. The sunset views are unmatched!',
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 200).toISOString(),
-    author: 'CityBlogger',
     username: 'CityBlogger',
     userAvatar: 'https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?w=100&h=100&fit=crop&auto=format',
     venueName: 'The Rooftop',
-    platform: 'Blog',
     source: 'other',
-    media: [{
-      type: 'image',
-      url: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=500&q=80&auto=format&fit=crop'
-    }],
+    mediaUrl: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=500&q=80&auto=format&fit=crop',
+    mediaType: 'image',
     likes: 67,
     originalUrl: 'https://cityblog.com/articles/top-rooftop-spots'
   }

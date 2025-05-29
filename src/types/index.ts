@@ -46,7 +46,6 @@ export interface Location {
   photos?: string[];
   description?: string;
   amenities?: string[];
-  vibes?: string[]; // Fixed: This should be an array of strings
   vibeScore?: number;
   isOpen?: boolean;
   city: string;
@@ -60,6 +59,7 @@ export interface Location {
   verified?: boolean;
   isVerified?: boolean;
   hours?: BusinessHours;
+  vibes?: number;
   // Legacy properties for backward compatibility
   latitude?: number;
   longitude?: number;
@@ -172,27 +172,13 @@ export interface MessageProcessor {
   process: (context: MessageContext) => Promise<Message>;
 }
 
-export interface CreditCard {
-  id: string;
-  last4: string;
-  brand: string;
-  expiryMonth: number;
-  expiryYear: number;
-  isDefault: boolean;
-  name: string;
-  expMonth: number;
-  expYear: number;
-  maxSpendLimit?: number;
-  vernonApproved?: boolean;
-}
-
-export type SocialMediaSource = 'instagram' | 'google' | 'yelp' | 'tiktok' | 'tripadvisor' | 'foursquare' | 'franki' | 'other';
+export type SocialMediaSource = 'instagram' | 'google' | 'yelp' | 'other';
 
 export interface SocialMediaPost {
   id: string;
   content: string;
   author: string;
-  username: string;
+  username?: string;
   userAvatar?: string;
   venueName?: string;
   rating?: number;
@@ -210,9 +196,6 @@ export interface SocialMediaPost {
     type: 'image' | 'video';
     url: string;
   }[];
-  mediaUrl?: string;
-  mediaType?: 'image' | 'video';
-  originalUrl?: string;
 }
 
 export interface VenueInsights {
@@ -239,10 +222,4 @@ export interface SocialMediaApiKeys {
   instagram?: string;
   google?: string;
   yelp?: string;
-  tiktok?: string;
-  tripadvisor?: string;
-  foursquare?: string;
-  franki?: string;
-  other?: string;
-  otherUrl?: string;
 }

@@ -1,79 +1,49 @@
 
-import { SocialMediaPost, SocialMediaApiKeys } from '@/types';
+import { SocialMediaPost, SocialMediaApiKeys } from "@/types";
 
 export class SocialMediaService {
-  private static apiKeys: SocialMediaApiKeys = {};
-
-  static setApiKeys(keys: SocialMediaApiKeys) {
-    this.apiKeys = { ...this.apiKeys, ...keys };
+  static getDefaultApiKeys(): SocialMediaApiKeys {
+    return {
+      instagram: process.env.INSTAGRAM_API_KEY || '',
+      google: process.env.GOOGLE_API_KEY || '',
+      yelp: process.env.YELP_API_KEY || ''
+    };
   }
 
-  static async fetchInstagramPosts(venueId: string): Promise<SocialMediaPost[]> {
-    // Mock implementation
-    return [
+  static async getAllSocialMediaContent(venueName: string, apiKeys: SocialMediaApiKeys): Promise<SocialMediaPost[]> {
+    // Mock implementation for now
+    const mockPosts: SocialMediaPost[] = [
       {
-        id: 'ig-1',
-        content: 'Amazing vibes at this place! 🔥',
-        author: '@foodie_explorer',
-        username: 'foodie_explorer',
-        userAvatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b890?w=100&h=100&fit=crop',
-        timestamp: '2024-01-15T19:30:00Z',
-        platform: 'Instagram',
-        source: 'instagram',
-        likes: 245,
-        comments: 23,
-        media: [{
-          type: 'image',
-          url: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&h=600&fit=crop'
-        }]
-      }
-    ];
-  }
-
-  static async fetchGoogleReviews(venueId: string): Promise<SocialMediaPost[]> {
-    // Mock implementation
-    return [
-      {
-        id: 'google-1',
-        content: 'Excellent food and great atmosphere. Highly recommend!',
-        author: 'John Smith',
-        username: 'johnsmith',
+        id: '1',
+        content: `Great experience at ${venueName}! Amazing atmosphere and service.`,
+        author: 'John Doe',
+        username: 'johndoe',
+        userAvatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&q=80',
+        venueName,
         rating: 5,
-        timestamp: '2024-01-14T16:20:00Z',
+        timestamp: new Date().toISOString(),
         platform: 'Google',
-        source: 'google',
-        likes: 12,
-        comments: 3
-      }
-    ];
-  }
-
-  static async fetchYelpReviews(venueId: string): Promise<SocialMediaPost[]> {
-    // Mock implementation
-    return [
+        source: 'google' as const,
+        likes: 42,
+        comments: 8
+      },
       {
-        id: 'yelp-1',
-        content: 'Great service and delicious food. Will definitely come back!',
-        author: 'Sarah M.',
-        username: 'sarahm',
+        id: '2',
+        content: `Love this place! ${venueName} never disappoints.`,
+        author: 'Jane Smith',
+        username: 'janesmith',
+        userAvatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=150&q=80',
+        venueName,
         rating: 4,
-        timestamp: '2024-01-13T20:15:00Z',
+        timestamp: new Date(Date.now() - 86400000).toISOString(),
         platform: 'Yelp',
-        source: 'yelp',
-        likes: 8,
-        comments: 1
+        source: 'yelp' as const,
+        likes: 23,
+        comments: 5
       }
     ];
-  }
 
-  static async fetchAllPosts(venueId: string): Promise<SocialMediaPost[]> {
-    const [instagram, google, yelp] = await Promise.all([
-      this.fetchInstagramPosts(venueId),
-      this.fetchGoogleReviews(venueId),
-      this.fetchYelpReviews(venueId)
-    ]);
-
-    return [...instagram, ...google, ...yelp];
+    return mockPosts;
   }
 }
 
