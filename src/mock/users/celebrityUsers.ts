@@ -1,5 +1,4 @@
-
-import { User } from "@/types";
+import { User } from "@/integrations/supabase/types";
 
 export const celebrityUsers: User[] = [
   {
