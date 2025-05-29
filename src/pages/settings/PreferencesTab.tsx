@@ -1,188 +1,110 @@
-import { useState, useEffect } from "react";
+
+import React, { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import { PREFERENCE_TAGS, PREFERENCE_CATEGORIES } from "./constants";
 import { useToast } from "@/hooks/use-toast";
-import { Coffee, Music, Users, Heart, Star } from "lucide-react";
 
-// Import components
-import UserPreferences from "./components/UserPreferences";
-import VenueTaggingSection from "./components/VenueTaggingSection";
-import LocationSettings from "./components/LocationSettings";
-import ContentPreferences from "./components/ContentPreferences";
-import VenueDisplaySettings from "./components/VenueDisplaySettings";
-import CompetitorTags from "./components/CompetitorTags";
-
-export interface PreferencesTabProps {
-  onSave: () => void;
-  isVenueMode?: boolean;
-  subscriptionTier?: 'standard' | 'plus' | 'premium' | 'pro';
+interface PreferencesState {
+  [key: string]: string[];
 }
 
-const PreferencesTab = ({ 
-  onSave, 
-  isVenueMode = false, 
-  subscriptionTier = 'standard' 
-}: PreferencesTabProps) => {
-  const [distanceUnit, setDistanceUnit] = useState("miles");
-  const [searchRadius, setSearchRadius] = useState([10]);
-  const [showNearbyLocations, setShowNearbyLocations] = useState(true);
-  const [autoplayVideos, setAutoplayVideos] = useState(false);
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
-  const [newTag, setNewTag] = useState("");
-  const [favorites, setFavorites] = useState<string[]>([]);
-  
-  const { toast } = useToast();
-  const [competitorVenues, setCompetitorVenues] = useState([
-    { id: 1, name: "The Corner Bar", tags: ["Cozy", "Lounges", "Date Night"] },
-    { id: 2, name: "Downtown Café", tags: ["Cozy", "Locally Owned", "Budget Friendly"] },
-    { id: 3, name: "The Luxury Lounge", tags: ["High Energy", "Luxury", "Night Owls"] },
-    { id: 4, name: "Family Fun Center", tags: ["Family Friendly", "Budget Friendly", "Physical Adventure"] }
-  ]);
-  
-  // Map preference categories to the expected format with icons and IDs
-  const preferenceCategories = PREFERENCE_CATEGORIES.map((cat, index) => ({
-    name: cat.name,
-    icon: getCategoryIcon(cat.name),
-    id: `category-${index}`
-  }));
+interface PreferencesTabProps {
+  onSave?: () => void;
+  isVenueMode?: boolean;
+  subscriptionTier?: "standard" | "plus" | "premium" | "pro";
+}
 
-  // Helper function to get icon based on category name
-  function getCategoryIcon(categoryName: string) {
-    switch (categoryName) {
-      case "Vibe":
-        return Star;
-      case "Interests":
-        return Music;
-      case "Crowd":
-        return Users;
-      case "Values":
-        return Heart;
-      case "Experience":
-      default:
-        return Coffee;
-    }
-  }
-  
-  // Generate AI suggested tags based on venue type for premium/pro users
+const PreferencesTab = ({ onSave, isVenueMode, subscriptionTier }: PreferencesTabProps) => {
+  const { toast } = useToast();
+  const [selectedPreferences, setSelectedPreferences] = useState<PreferencesState>({});
+
   useEffect(() => {
-    if (isVenueMode && (subscriptionTier === 'premium' || subscriptionTier === 'pro')) {
-      // These would normally be AI-generated based on venue data
-      setSuggestedTags([
-        "Cozy", 
-        "Locally Owned", 
-        "Night Owls", 
-        "Live Music", 
-        "Good for Groups", 
-        "Date Night"
-      ]);
+    const storedPreferences = localStorage.getItem('userPreferences');
+    if (storedPreferences) {
+      setSelectedPreferences(JSON.parse(storedPreferences));
     }
-  }, [isVenueMode, subscriptionTier]);
-  
-  const handleTagSelect = (tag: string) => {
-    if (!selectedTags.includes(tag)) {
-      setSelectedTags([...selectedTags, tag]);
-    }
+  }, []);
+
+  const preferenceCategories = {
+    Vibe: ["Energetic", "Chill", "Sophisticated", "Casual", "Trendy", "Classic"],
+    Interests: ["Music", "Food", "Sports", "Art", "Technology", "Travel"],
+    Crowd: ["Young Professional", "Students", "Families", "Tourists", "Locals"],
+    Values: ["Sustainability", "Community", "Innovation", "Tradition", "Diversity"],
+    Experience: ["First Timer", "Regular", "Explorer", "Connoisseur", "Socializer"]
   };
-  
-  const handleTagRemove = (tag: string) => {
-    setSelectedTags(selectedTags.filter(t => t !== tag));
-  };
-  
-  const handleAddCustomTag = (tag: string) => {
-    if (tag.trim() && !selectedTags.includes(tag.trim())) {
-      setSelectedTags([...selectedTags, tag.trim()]);
-    }
-  };
-  
-  const handleAddFavorite = (favorite: string) => {
-    if (favorite.trim() && !favorites.includes(favorite.trim())) {
-      if (favorites.length < 10) {
-        setFavorites([...favorites, favorite.trim()]);
-      } else {
-        // Show a message indicating the limit has been reached
-        toast({
-          title: "Favorites limit reached",
-          description: "You can only add up to 10 favorites. Remove one to add another.",
-          variant: "destructive"
-        });
-      }
-    }
-  };
-  
-  const handleRemoveFavorite = (favorite: string) => {
-    setFavorites(favorites.filter(f => f !== favorite));
-  };
-  
-  const renderCompetitorTags = () => {
-    return (
-      <CompetitorTags 
-        competitorVenues={competitorVenues}
-        onTagSelect={handleTagSelect}
-      />
-    );
-  };
-  
-  return (
-    <div className="bg-card p-6 rounded-lg border shadow-sm">
-      <h2 className="text-xl font-semibold mb-4">Preferences</h2>
+
+  const handlePreferenceToggle = (category: string, preference: string) => {
+    setSelectedPreferences(prev => {
+      const categoryPrefs = prev[category] || [];
+      const isSelected = categoryPrefs.includes(preference);
       
-      <div className="space-y-6">
-        {/* User Preferences Section - Always shown when not in venue mode */}
-        {!isVenueMode && (
-          <UserPreferences
-            selectedTags={selectedTags}
-            favorites={favorites}
-            onTagSelect={handleTagSelect}
-            onTagRemove={handleTagRemove}
-            onAddCustomTag={handleAddCustomTag}
-            onAddFavorite={handleAddFavorite}
-            onRemoveFavorite={handleRemoveFavorite}
-            preferenceCategories={preferenceCategories}
-            preferenceTags={PREFERENCE_TAGS}
-          />
-        )}
-        
-        {/* Venue Tagging Section - Only shown in venue mode */}
-        {isVenueMode && (
-          <VenueTaggingSection
-            subscriptionTier={subscriptionTier}
-            selectedTags={selectedTags}
-            suggestedTags={suggestedTags}
-            onTagSelect={handleTagSelect}
-            onTagRemove={handleTagRemove}
-            onAddCustomTag={handleAddCustomTag}
-            preferenceCategories={preferenceCategories}
-            preferenceTags={PREFERENCE_TAGS}
-            renderCompetitorTags={renderCompetitorTags}
-          />
-        )}
-        
-        {/* Location Settings - Always shown */}
-        <LocationSettings
-          searchRadius={searchRadius}
-          setSearchRadius={setSearchRadius}
-          distanceUnit={distanceUnit}
-          setDistanceUnit={setDistanceUnit}
-          showNearbyLocations={showNearbyLocations}
-          setShowNearbyLocations={setShowNearbyLocations}
-        />
-        
-        {/* Content Preferences - Always shown */}
-        <ContentPreferences
-          autoplayVideos={autoplayVideos}
-          setAutoplayVideos={setAutoplayVideos}
-          isVenueMode={isVenueMode}
-        />
-        
-        {/* Venue Display Settings - Only shown in venue mode */}
-        {isVenueMode && (
-          <VenueDisplaySettings />
-        )}
-        
-        <Button onClick={onSave} className="w-full">Save Preferences</Button>
-      </div>
-    </div>
+      return {
+        ...prev,
+        [category]: isSelected 
+          ? categoryPrefs.filter(p => p !== preference)
+          : [...categoryPrefs, preference]
+      };
+    });
+  };
+
+  const handleSavePreferences = () => {
+    localStorage.setItem('userPreferences', JSON.stringify(selectedPreferences));
+    
+    toast({
+      title: "Preferences saved",
+      description: "Your preferences have been saved successfully.",
+    });
+
+    if (onSave) {
+      onSave();
+    }
+  };
+
+  const handleResetPreferences = () => {
+    const emptyPreferences: PreferencesState = {};
+    Object.keys(preferenceCategories).forEach(key => {
+      emptyPreferences[key] = [];
+    });
+    
+    setSelectedPreferences(emptyPreferences);
+    localStorage.removeItem('userPreferences');
+    
+    toast({
+      title: "Preferences reset",
+      description: "All preferences have been reset to default.",
+    });
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Your Preferences</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {Object.entries(preferenceCategories).map(([category, preferences]) => (
+          <div key={category} className="space-y-2">
+            <Label>{category}</Label>
+            <div className="flex flex-wrap gap-2">
+              {preferences.map(preference => (
+                <Button
+                  key={preference}
+                  variant={selectedPreferences[category]?.includes(preference) ? "default" : "outline"}
+                  onClick={() => handlePreferenceToggle(category, preference)}
+                >
+                  {preference}
+                </Button>
+              ))}
+            </div>
+          </div>
+        ))}
+        <div className="flex justify-end space-x-2">
+          <Button variant="ghost" onClick={handleResetPreferences}>Reset</Button>
+          <Button onClick={handleSavePreferences}>Save Preferences</Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 

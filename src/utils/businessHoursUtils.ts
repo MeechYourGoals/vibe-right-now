@@ -29,17 +29,13 @@ export const generateBusinessHours = (venue: Location): BusinessHours => {
         sunday: '6:00 PM - 1:00 AM',
         isOpen24Hours: false
       };
-    case 'coffee':
-      return {
-        monday: '7:00 AM - 7:00 PM',
-        tuesday: '7:00 AM - 7:00 PM',
-        wednesday: '7:00 AM - 7:00 PM',
-        thursday: '7:00 AM - 7:00 PM',
-        friday: '7:00 AM - 8:00 PM',
-        saturday: '8:00 AM - 8:00 PM',
-        sunday: '8:00 AM - 6:00 PM',
-        isOpen24Hours: false
-      };
+    case 'attraction':
+    case 'music_venue':
+    case 'comedy_club':
+    case 'sports':
+    case 'event':
+    case 'lounge':
+    case 'other':
     default:
       return {
         monday: '9:00 AM - 9:00 PM',
@@ -67,5 +63,6 @@ export const getTodaysHours = (venue: Location): string => {
     return '24 Hours';
   }
   
-  return venue.hours[dayName] || 'Hours not available';
+  const hoursValue = venue.hours[dayName];
+  return typeof hoursValue === 'string' ? hoursValue : 'Hours not available';
 };

@@ -1,63 +1,37 @@
 
 import React from 'react';
-import { Post, Comment, Location } from "@/types";
-import { TabsContent } from "@/components/ui/tabs";
-import VenuePostsList from '../VenuePostsList';
+import VenuePostsList from '../venue-posts-list/VenuePostsList';
+import { Post, Comment, Location } from '@/types';
 
 interface VenuePostsTabsContentProps {
-  activeTab: string;
-  allPosts: Post[];
-  filteredPosts: Post[];
-  filteredVenuePosts: Post[];
+  posts: Post[];
   venue: Location;
   viewMode: "list" | "grid";
-  getPostComments: (postId: string) => Comment[];
-  subscriptionTier: 'standard' | 'plus' | 'premium' | 'pro';
-  canEmbed: boolean;
-  connectedPlatforms: Record<string, boolean>;
-  onUpgradeSubscription: () => void;
-  onPostDeleted?: (postId: string) => void;
+  getComments: (postId: string) => Comment[];
+  canDelete: boolean;
+  onPostDeleted: (postId: string) => void;
 }
 
 const VenuePostsTabsContent: React.FC<VenuePostsTabsContentProps> = ({
-  activeTab,
-  allPosts,
-  filteredPosts,
-  filteredVenuePosts,
+  posts,
   venue,
   viewMode,
-  getPostComments,
-  subscriptionTier,
-  canEmbed,
-  connectedPlatforms,
-  onUpgradeSubscription,
+  getComments,
+  canDelete,
   onPostDeleted
 }) => {
   return (
-    <>
-      <TabsContent value="posts" className="mt-6">
-        <VenuePostsList
-          posts={filteredVenuePosts}
-          venue={venue}
-          viewMode={viewMode}
-          getComments={getPostComments}
-          canDelete={canEmbed}
-          onPostDeleted={onPostDeleted || (() => {})}
-        />
-      </TabsContent>
-      
-      <TabsContent value="reviews" className="mt-6">
-        <div className="text-center py-8">
-          <p className="text-muted-foreground">Reviews will be displayed here</p>
-        </div>
-      </TabsContent>
-      
-      <TabsContent value="events" className="mt-6">
-        <div className="text-center py-8">
-          <p className="text-muted-foreground">Events will be displayed here</p>
-        </div>
-      </TabsContent>
-    </>
+    <div className="space-y-4">
+      <VenuePostsList
+        posts={posts}
+        venue={venue}
+        viewMode={viewMode}
+        getComments={getComments}
+        canDelete={canDelete}
+        onPostDeleted={onPostDeleted}
+        subscriptionTier="standard"
+      />
+    </div>
   );
 };
 

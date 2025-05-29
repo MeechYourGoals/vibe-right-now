@@ -64,7 +64,35 @@ export const getMediaForLocation = (location: Location): Media => {
                   fallbackImage;
 
   return {
+    id: `media_${location.id}`,
     type: "image" as const,
     url: imageUrl
   };
+};
+
+// Helper function to get media for location
+export const getLocationMedia = (location: Location): Media[] => {
+  const mediaItems: Media[] = [];
+  
+  // Add photos as images
+  if (location.photos && location.photos.length > 0) {
+    location.photos.forEach((photo, index) => {
+      mediaItems.push({
+        id: `photo_${location.id}_${index}`,
+        type: 'image',
+        url: photo
+      });
+    });
+  }
+  
+  // Add legacy imageUrl if available
+  if (location.imageUrl && !location.photos?.includes(location.imageUrl)) {
+    mediaItems.push({
+      id: `legacy_image_${location.id}`,
+      type: 'image',
+      url: location.imageUrl
+    });
+  }
+  
+  return mediaItems;
 };

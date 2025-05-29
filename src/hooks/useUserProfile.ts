@@ -1,44 +1,65 @@
 
 import { useState, useEffect } from 'react';
-import { User } from '@/types';
+import { User, Post, Location } from '@/types';
+import { mockUsers } from '@/mock/users';
 
-export const useUserProfile = (username?: string) => {
-  const [user, setUser] = useState<User>(() => ({
-    id: '1',
-    username: 'johndoe',
-    displayName: 'John Doe',
-    profileImage: 'https://api.dicebear.com/7.x/avataaars/svg?seed=John',
-    bio: 'Living my best life in the city! 🌟',
-    followersCount: 1250,
-    followingCount: 890,
-    isVerified: false,
-    isPrivate: false,
-    joinedDate: '2023-01-15',
-    location: 'New York, NY'
-  }));
-
-  const [isLoading, setIsLoading] = useState(false);
+export const useUserProfile = (userId?: string) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userPosts, setUserPosts] = useState<Post[]>([]);
+  const [followedVenues, setFollowedVenues] = useState<Location[]>([]);
+  const [visitedPlaces, setVisitedPlaces] = useState<Location[]>([]);
 
-  const followUser = () => {
-    setUser(prev => ({
-      ...prev,
-      followersCount: prev.followersCount + 1
-    }));
+  useEffect(() => {
+    if (userId) {
+      const foundUser = mockUsers.find(u => u.id === userId);
+      if (foundUser) {
+        const userProfile: User = {
+          id: foundUser.id,
+          username: foundUser.username,
+          displayName: foundUser.displayName,
+          profileImage: foundUser.profileImage,
+          bio: foundUser.bio,
+          followersCount: foundUser.followersCount,
+          followingCount: foundUser.followingCount,
+          isVerified: foundUser.isVerified,
+          isPrivate: foundUser.isPrivate,
+          joinedDate: foundUser.joinedDate,
+          location: foundUser.location,
+          website: foundUser.website,
+          socialLinks: foundUser.socialLinks
+        };
+        setUser(userProfile);
+      } else {
+        setError('User not found');
+      }
+    }
+    setLoading(false);
+    setIsLoading(false);
+  }, [userId]);
+
+  const followUser = async () => {
+    // Mock follow functionality
+    console.log('Following user:', userId);
   };
 
-  const unfollowUser = () => {
-    setUser(prev => ({
-      ...prev,
-      followersCount: Math.max(0, prev.followersCount - 1)
-    }));
+  const unfollowUser = async () => {
+    // Mock unfollow functionality
+    console.log('Unfollowing user:', userId);
   };
 
   return {
     user,
+    loading,
     isLoading,
     error,
+    setUser,
     followUser,
-    unfollowUser
+    unfollowUser,
+    userPosts,
+    followedVenues,
+    visitedPlaces
   };
 };
