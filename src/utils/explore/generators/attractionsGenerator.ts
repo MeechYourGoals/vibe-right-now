@@ -1,6 +1,7 @@
 
 import { Location } from '@/types';
 import { generateBusinessHours } from '@/utils/businessHoursUtils';
+import { getMockUserProfile } from '@/mock/users';
 
 export const generateAttractions = (city: string, state: string): Location[] => {
   const baseAttractions = [
@@ -22,7 +23,8 @@ export const generateAttractions = (city: string, state: string): Location[] => 
       source: 'generated',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
-      hours: generateBusinessHours({} as Location)
+      hours: generateBusinessHours({} as Location),
+      userProfile: getMockUserProfile('user1')
     },
     {
       id: '8',
@@ -42,7 +44,8 @@ export const generateAttractions = (city: string, state: string): Location[] => 
       source: 'generated',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
-      hours: generateBusinessHours({} as Location)
+      hours: generateBusinessHours({} as Location),
+      userProfile: getMockUserProfile('user2')
     }
   ];
 
