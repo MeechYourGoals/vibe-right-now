@@ -55,7 +55,7 @@ export const TICKETING_PLATFORMS = [
   { id: "other", name: "Other Platform" }
 ];
 
-// Add the PREFERENCE_TAGS export
+// Add the missing PREFERENCE_TAGS export
 export const PREFERENCE_TAGS = {
   "Vibe": ["Cozy", "Trendy", "Upscale", "Casual", "Intimate", "Lively", "Romantic", "NightOwl", "Hidden Gem"],
   "Interests": ["Live Music", "Art", "Comedy", "Sports", "Gaming", "Dancing", "Theatre", "Food"],

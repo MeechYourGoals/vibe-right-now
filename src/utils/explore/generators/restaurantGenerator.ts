@@ -1,50 +1,65 @@
 
-import { Location } from '@/types';
-import { generateBusinessHours } from '@/utils/businessHoursUtils';
+import { Location } from "@/types";
+import { getMockUserProfile } from "@/mock/users";
+import { getRandomItems } from "@/utils/explore/mockGenerators";
+import { vibeTags } from "../helpers/vibeTags";
+import { generateZipCode } from "../helpers/zipCodeGenerator";
 
-export const generateRestaurants = (city: string, state: string): Location[] => {
-  const baseRestaurants = [
-    {
-      id: '2',
-      name: 'Artisan Coffee',
-      address: '456 Coffee Blvd',
-      city,
-      state,
-      country: 'US',
-      category: 'restaurant' as const,
-      rating: 4.3,
-      priceRange: '$$' as const,
-      description: 'Specialty coffee and artisan pastries',
-      amenities: ['WiFi', 'Outdoor Seating', 'Vegan Options'],
-      vibes: ['☕ Coffee', '📖 Study', '🌱 Organic'],
-      lat: 34.0522 + Math.random() * 0.01,
-      lng: -118.2437 + Math.random() * 0.01,
-      source: 'generated',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      hours: generateBusinessHours({} as Location)
+// Generate restaurant locations for a city
+export const generateRestaurantLocations = (city: string, state: string = ""): Location[] => {
+  const locations: Location[] = [];
+  
+  // First restaurant
+  locations.push({
+    id: `${city.toLowerCase().replace(/\s+/g, '-')}-restaurant-1`,
+    name: `Taste of ${city}`,
+    address: `123 Main Street`,
+    city: city,
+    state: state || 'CA',
+    country: 'USA',
+    zip: generateZipCode(city),
+    lat: 37.7749 + (Math.random() * 0.02 - 0.01),
+    lng: -122.4194 + (Math.random() * 0.02 - 0.01),
+    type: 'restaurant',
+    verified: true,
+    hours: {
+      monday: '11:00 AM - 10:00 PM',
+      tuesday: '11:00 AM - 10:00 PM',
+      wednesday: '11:00 AM - 10:00 PM',
+      thursday: '11:00 AM - 10:00 PM',
+      friday: '11:00 AM - 11:00 PM',
+      saturday: '11:00 AM - 11:00 PM',
+      sunday: '12:00 PM - 9:00 PM'
     },
-    {
-      id: '11',
-      name: "Mama's Fish House",
-      address: '799 Poho Pl',
-      city,
-      state,
-      country: 'US',
-      category: 'restaurant' as const,
-      rating: 4.8,
-      priceRange: '$$$$' as const,
-      description: 'Fresh seafood with ocean views',
-      amenities: ['Ocean View', 'Fresh Fish', 'Romantic Setting'],
-      vibes: ['🐟 Fresh', '🌊 Ocean', '🌮 Foodie'],
-      lat: 34.0522 + Math.random() * 0.01,
-      lng: -118.2437 + Math.random() * 0.01,
-      source: 'generated',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      hours: generateBusinessHours({} as Location)
-    }
-  ];
-
-  return baseRestaurants;
+    vibes: getRandomItems(vibeTags, 3),
+    userProfile: getMockUserProfile('venue'),
+  });
+  
+  // Second restaurant
+  locations.push({
+    id: `${city.toLowerCase().replace(/\s+/g, '-')}-restaurant-2`,
+    name: `${city} Bistro`,
+    address: `456 Oak Avenue`,
+    city: city,
+    state: state || 'CA',
+    country: 'USA',
+    zip: generateZipCode(city),
+    lat: 37.7749 + (Math.random() * 0.02 - 0.01),
+    lng: -122.4194 + (Math.random() * 0.02 - 0.01),
+    type: 'restaurant',
+    verified: true,
+    hours: {
+      monday: '5:00 PM - 10:00 PM',
+      tuesday: '5:00 PM - 10:00 PM',
+      wednesday: '5:00 PM - 10:00 PM',
+      thursday: '5:00 PM - 10:00 PM',
+      friday: '5:00 PM - 11:00 PM',
+      saturday: '5:00 PM - 11:00 PM',
+      sunday: '5:00 PM - 9:00 PM'
+    },
+    vibes: getRandomItems(vibeTags, 3),
+    userProfile: getMockUserProfile('venue'),
+  });
+  
+  return locations;
 };

@@ -1,61 +1,88 @@
 
-import { useState, useCallback } from 'react';
-import { mockLocations } from '@/mock/locations';
-import { Location } from '@/types';
+import { useState } from "react";
+import { EventItem, Location } from "@/types";
 
-export const useQueryProcessing = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [results, setResults] = useState<Location[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalResults, setTotalResults] = useState(0);
+export const useQueryProcessing = (
+  setSearchedCity: (city: string) => void,
+  setSearchedState: (state: string) => void,
+  setFilteredLocations: (locations: Location[]) => void,
+  setComedyEvents: (events: EventItem[]) => void,
+  setActiveTab: (tab: string) => void,
+  setNightlifeVenues: (venues: Location[]) => void,
+  setVibeFilter: (filter: string) => void,
+  setIsNaturalLanguageSearch: (isNatural: boolean) => void
+) => {
+  const [isLoadingResults, setIsLoadingResults] = useState(false);
 
-  const processQuery = useCallback(async (query: string, vibes: string[], users: string[]) => {
-    setIsLoading(true);
+  const processComplexQuery = async (query: string) => {
+    setIsLoadingResults(true);
     
     try {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Simulate processing time
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      let filteredResults = mockLocations;
+      // Mock natural language processing
+      const lowerQuery = query.toLowerCase();
       
-      // Filter by query
-      if (query.trim()) {
-        filteredResults = filteredResults.filter(location =>
-          location.name.toLowerCase().includes(query.toLowerCase()) ||
-          location.description?.toLowerCase().includes(query.toLowerCase()) ||
-          location.address.toLowerCase().includes(query.toLowerCase())
-        );
+      if (lowerQuery.includes('comedy') || lowerQuery.includes('funny')) {
+        setActiveTab('comedy');
+        const comedyEvents = await generateComedyEvents();
+        setComedyEvents(comedyEvents);
+      } else if (lowerQuery.includes('music') || lowerQuery.includes('concert')) {
+        setActiveTab('music');
+      } else if (lowerQuery.includes('nightlife') || lowerQuery.includes('bar') || lowerQuery.includes('club')) {
+        setActiveTab('nightlife');
+        const nightlifeVenues = await generateNightlifeVenues();
+        setNightlifeVenues(nightlifeVenues);
       }
       
-      // Filter by vibes (simplified for mock data)
-      if (vibes.length > 0) {
-        filteredResults = filteredResults.filter(location =>
-          location.vibeScore && location.vibeScore > 8
-        );
+      // Extract location if mentioned
+      const cityMatch = lowerQuery.match(/in ([a-z\s]+)/);
+      if (cityMatch) {
+        setSearchedCity(cityMatch[1].trim());
       }
       
-      setResults(filteredResults);
-      setTotalResults(filteredResults.length);
-      setCurrentPage(1);
-    } catch (error) {
-      console.error('Error processing query:', error);
-      setResults([]);
-      setTotalResults(0);
+      setIsNaturalLanguageSearch(true);
     } finally {
-      setIsLoading(false);
+      setIsLoadingResults(false);
     }
-  }, []);
+  };
 
-  const loadMore = useCallback(() => {
-    setCurrentPage(prev => prev + 1);
-  }, []);
+  const generateComedyEvents = async (): Promise<EventItem[]> => {
+    // Mock comedy events generation
+    return [
+      {
+        id: '1',
+        name: 'Comedy Night',
+        address: '123 Main St',
+        city: 'San Francisco',
+        state: 'CA',
+        type: 'comedy',
+        date: '2025-06-01',
+        startTime: '8:00 PM',
+        performers: ['John Comedian']
+      }
+    ];
+  };
+
+  const generateNightlifeVenues = async (): Promise<Location[]> => {
+    // Mock nightlife venues generation
+    return [
+      {
+        id: '1',
+        name: 'Night Club',
+        address: '456 Party St',
+        city: 'San Francisco',
+        state: 'CA',
+        type: 'nightlife',
+        lat: 37.7749,
+        lng: -122.4194
+      }
+    ];
+  };
 
   return {
-    isLoading,
-    results,
-    currentPage,
-    totalResults,
-    processQuery,
-    loadMore
+    isLoadingResults,
+    processComplexQuery
   };
 };

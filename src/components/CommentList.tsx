@@ -30,11 +30,11 @@ const CommentList = ({ postId, commentsCount }: CommentListProps) => {
     // Regular comment
     exampleComments.push({
       id: `example-${postId}-1`,
+      userId: "example-user-1",
       postId: postId,
-      userId: mockUsers[0].id,
       user: mockUsers[Math.floor(Math.random() * mockUsers.length)],
       content: "This place looks amazing! How's the crowd right now?",
-      timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
+      timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30 minutes ago
       vibedHere: false,
       likes: 0
     });
@@ -42,11 +42,11 @@ const CommentList = ({ postId, commentsCount }: CommentListProps) => {
     // "Vibed Here" comment
     exampleComments.push({
       id: `example-${postId}-2`,
+      userId: "example-user-2",
       postId: postId,
-      userId: mockUsers[1].id,
       user: mockUsers[Math.floor(Math.random() * mockUsers.length)],
       content: "I was here yesterday and it was incredible! The line moves fast if you go around to the side entrance.",
-      timestamp: new Date(Date.now() - 1000 * 60 * 120).toISOString(),
+      timestamp: new Date(Date.now() - 1000 * 60 * 120).toISOString(), // 2 hours ago
       vibedHere: true,
       likes: 0
     });
@@ -55,14 +55,14 @@ const CommentList = ({ postId, commentsCount }: CommentListProps) => {
     if (commentCount > 2) {
       exampleComments.push({
         id: `example-${postId}-3`,
+        userId: "example-user-3",
         postId: postId,
-        userId: mockUsers[2].id,
         user: mockUsers[Math.floor(Math.random() * mockUsers.length)],
         content: "Heading there now! Anyone want to meet up?",
-        timestamp: new Date(Date.now() - 1000 * 60 * 10).toISOString(),
-        vibedHere: Math.random() > 0.5,
+        timestamp: new Date(Date.now() - 1000 * 60 * 10).toISOString(), // 10 minutes ago
+        vibedHere: Math.random() > 0.5, // 50% chance of being "Vibed Here"
         likes: 0
-    });
+      });
     }
     
     postComments = exampleComments;
@@ -98,25 +98,28 @@ const CommentList = ({ postId, commentsCount }: CommentListProps) => {
         </div>
       ) : (
         <div className="text-center py-4 text-muted-foreground text-sm">
-          No comments yet. Be the first to share your thoughts!
+          No comments yet. Be the first to comment!
         </div>
       )}
       
-      <div className="mt-4 space-y-2">
-        <Textarea
-          value={newComment}
-          onChange={(e) => setNewComment(e.target.value)}
-          placeholder="Add a comment..."
-          className="min-h-[60px]"
-        />
-        <div className="flex justify-end">
+      <div className="mt-3 flex gap-2">
+        <Avatar className="h-8 w-8">
+          <AvatarImage src="https://randomuser.me/api/portraits/men/1.jpg" alt="Your avatar" />
+          <AvatarFallback>Y</AvatarFallback>
+        </Avatar>
+        <div className="flex-1 flex items-end gap-2">
+          <Textarea
+            placeholder="Add a comment..."
+            className="min-h-[60px] flex-1"
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+          />
           <Button 
-            onClick={handleSubmitComment}
+            size="icon"
             disabled={!newComment.trim() || isSubmitting}
-            size="sm"
+            onClick={handleSubmitComment}
           >
-            <Send className="h-3 w-3 mr-1" />
-            {isSubmitting ? "Posting..." : "Post"}
+            <Send className="h-4 w-4" />
           </Button>
         </div>
       </div>

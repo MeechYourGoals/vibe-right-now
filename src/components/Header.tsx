@@ -144,9 +144,9 @@ const Header = () => {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link to="/advertising-suite">
+                      <Link to="/advertiser">
                         <Megaphone className="mr-2 h-4 w-4" />
-                        <span>Advertising Suite</span>
+                        <span>Advertiser</span>
                       </Link>
                     </DropdownMenuItem>
                   </DropdownMenuContent>

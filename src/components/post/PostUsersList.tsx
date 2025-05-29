@@ -1,70 +1,59 @@
 
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useMemo } from "react";
+import { Link } from "react-router-dom";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Heart, MessageCircle, Share, User } from "lucide-react";
-import { regularUsers } from '@/mock/users/regularUsers';
+import { Location } from "@/types";
+import { mockUsers } from "@/mock/users";
+import { hashString } from "@/mock/users";
 
 interface PostUsersListProps {
-  type: 'likes' | 'comments' | 'shares';
-  postId: string;
+  location: Location;
+  setShowAllUsers: (show: boolean) => void;
 }
 
-const PostUsersList: React.FC<PostUsersListProps> = ({ type, postId }) => {
-  // Mock data - in a real app, this would fetch based on postId and type
-  const users = regularUsers.slice(0, 5);
-  
-  const getIcon = () => {
-    switch (type) {
-      case 'likes': return <Heart className="h-4 w-4 text-red-500" />;
-      case 'comments': return <MessageCircle className="h-4 w-4 text-blue-500" />;
-      case 'shares': return <Share className="h-4 w-4 text-green-500" />;
-    }
-  };
-
-  const getTitle = () => {
-    switch (type) {
-      case 'likes': return 'Liked by';
-      case 'comments': return 'Comments from';
-      case 'shares': return 'Shared by';
-    }
-  };
+const PostUsersList: React.FC<PostUsersListProps> = ({ location, setShowAllUsers }) => {
+  // Deterministically select users for each location based on location ID
+  const getLocationUsers = useMemo(() => {
+    const locationSeed = parseInt(location.id) || hashString(location.name);
+    
+    // Always include our 5 main profile users
+    const featuredUsernames = ['sarah_vibes', 'jay_experiences', 'adventure_alex', 'marco_travels', 'local_explorer'];
+    const featuredUsers = mockUsers.filter(user => featuredUsernames.includes(user.username));
+    
+    // Select additional random users based on location seed
+    const otherUsers = mockUsers.filter(user => !featuredUsernames.includes(user.username));
+    const shuffled = [...otherUsers].sort(() => 0.5 - (locationSeed * 0.0001));
+    const additionalUsers = shuffled.slice(0, 95); // Get 95 more for a total of 100
+    
+    return [...featuredUsers, ...additionalUsers];
+  }, [location.id, location.name]);
 
   return (
-    <Card className="bg-neutral-900 border-neutral-700">
-      <CardHeader>
-        <CardTitle className="flex items-center text-white">
-          {getIcon()}
-          <span className="ml-2">{getTitle()}</span>
-          <Badge variant="outline" className="ml-2 text-neutral-400">
-            {users.length}
-          </Badge>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        {users.map((user) => (
-          <div key={user.id} className="flex items-center space-x-3 p-3 bg-neutral-800 rounded-lg">
-            <img 
-              src={user.profileImage} 
-              alt={user.displayName}
-              className="w-10 h-10 rounded-full"
-            />
-            <div className="flex-1">
-              <p className="font-medium text-white">{user.displayName}</p>
-              <p className="text-sm text-neutral-400">@{user.username}</p>
-              {user.bio && (
-                <p className="text-xs text-neutral-500 mt-1">{user.bio}</p>
-              )}
-            </div>
-            <Button variant="outline" size="sm" className="text-white border-neutral-600">
-              <User className="h-3 w-3 mr-1" />
-              {user.isPrivate ? 'Request' : 'Follow'}
-            </Button>
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowAllUsers(false)}>
+      <div className="bg-background rounded-lg max-w-md w-full max-h-[80vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
+        <div className="p-4 border-b flex justify-between items-center">
+          <h3 className="font-bold">People who visited {location.name}</h3>
+          <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setShowAllUsers(false)}>×</Button>
+        </div>
+        <div className="p-4 overflow-y-auto max-h-[calc(80vh-4rem)]">
+          <div className="grid gap-2">
+            {getLocationUsers.map((user, index) => (
+              <Link key={index} to={`/user/${user.username}`} className="flex items-center p-2 hover:bg-muted rounded-md">
+                <Avatar className="h-8 w-8 mr-2">
+                  <AvatarImage src={user.avatar} alt={user.name} />
+                  <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <div className="font-medium text-sm">@{user.username}</div>
+                  <div className="text-xs text-muted-foreground">{user.name}</div>
+                </div>
+              </Link>
+            ))}
           </div>
-        ))}
-      </CardContent>
-    </Card>
+        </div>
+      </div>
+    </div>
   );
 };
 

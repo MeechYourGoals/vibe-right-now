@@ -45,7 +45,7 @@ const LocationCard = ({ location, onViewVibes }: LocationCardProps) => {
             className="w-full"
           >
             <Button variant="outline" size="sm" className="w-full h-7 text-xs">
-              {getActionButtonText(location.type || location.category)}
+              {getActionButtonText(location.type)}
             </Button>
           </a>
         </div>

@@ -1,165 +1,140 @@
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Instagram, MessageCircle, Star } from "lucide-react";
-import { Location } from '@/types';
+import { Plus, ExternalLink } from "lucide-react";
+import SocialMediaFeed from "@/components/venue/SocialMediaFeed";
+import { toast } from 'sonner';
+import { SocialMediaApiKeys } from '@/services/SocialMediaService';
 
 interface VenuePostsExternalTabProps {
-  venue?: Location;
-  venueName?: string;
-  connectedPlatforms?: Record<string, boolean>;
-  onConnectedPlatformsChange?: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
-  instagramKey?: string;
-  yelpKey?: string;
-  googleKey?: string;
-  subscriptionTier?: 'standard' | 'plus' | 'premium' | 'pro';
+  venueName: string;
+  connectedPlatforms: Record<string, boolean>;
+  subscriptionTier: 'standard' | 'plus' | 'premium' | 'pro';
+  canEmbed: boolean;
+  onUpgradeSubscription: () => void;
 }
 
 const VenuePostsExternalTab: React.FC<VenuePostsExternalTabProps> = ({
-  venue,
   venueName,
-  connectedPlatforms = { instagram: false, google: false, yelp: false },
-  onConnectedPlatformsChange,
-  subscriptionTier = 'standard'
+  connectedPlatforms,
+  subscriptionTier,
+  canEmbed,
+  onUpgradeSubscription
 }) => {
-  const [isConnecting, setIsConnecting] = useState<string | null>(null);
-
-  const displayName = venue?.name || venueName || 'Venue';
-
-  const handleConnect = async (platform: string) => {
-    setIsConnecting(platform);
-    
-    // Simulate API connection
-    setTimeout(() => {
-      if (onConnectedPlatformsChange) {
-        onConnectedPlatformsChange(prev => ({
-          ...prev,
-          [platform]: true
-        }));
+  // Get API keys from localStorage for embedded content
+  const getApiKeys = (): SocialMediaApiKeys => {
+    try {
+      const savedKeys = localStorage.getItem('socialMediaApiKeys');
+      if (savedKeys) {
+        return JSON.parse(savedKeys);
       }
-      setIsConnecting(null);
-    }, 2000);
-  };
-
-  const handleDisconnect = (platform: string) => {
-    if (onConnectedPlatformsChange) {
-      onConnectedPlatformsChange(prev => ({
-        ...prev,
-        [platform]: false
-      }));
+    } catch (error) {
+      console.error('Error parsing API keys:', error);
     }
+    
+    return {
+      instagram: '',
+      tiktok: '',
+      yelp: '',
+      tripadvisor: '',
+      foursquare: '',
+      google: '',
+      franki: '',
+      other: ''
+    };
   };
-
-  const platforms = [
-    {
-      id: 'instagram',
-      name: 'Instagram',
-      icon: Instagram,
-      description: 'Show Instagram posts and stories mentioning your venue',
-      color: 'text-pink-500'
-    },
-    {
-      id: 'google',
-      name: 'Google Reviews',
-      icon: Star,
-      description: 'Display Google Business reviews and ratings',
-      color: 'text-blue-500'
-    },
-    {
-      id: 'yelp',
-      name: 'Yelp Reviews',
-      icon: MessageCircle,
-      description: 'Show Yelp reviews and customer feedback',
-      color: 'text-red-500'
-    }
-  ];
-
+  
+  const handleUpgradeClick = () => {
+    toast.info("This would navigate to subscription upgrade page. Premium and Pro accounts have full embedding capability.");
+    onUpgradeSubscription();
+  };
+  
   return (
-    <div className="space-y-6">
-      <div className="text-center">
-        <h3 className="text-lg font-semibold mb-2">Social Media Integration</h3>
-        <p className="text-muted-foreground">
-          Connect social platforms to display customer posts and reviews about {displayName}
-        </p>
+    <>
+      <div className="mb-4 p-4 border rounded-lg bg-muted/10">
+        <h3 className="text-sm font-medium mb-2">Connected External Platforms</h3>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          {Object.entries(connectedPlatforms).map(([platform, isConnected]) => (
+            <div 
+              key={platform}
+              className={`p-2 rounded-md text-center text-xs border 
+                ${isConnected 
+                  ? 'bg-green-500/10 border-green-500/30 text-green-600' 
+                  : 'bg-muted/20 border-muted/30 text-muted-foreground'}`}
+            >
+              {platform.charAt(0).toUpperCase() + platform.slice(1)}
+              {isConnected ? ' ✓' : ''}
+            </div>
+          ))}
+        </div>
+        <div className="flex items-center justify-between mt-2">
+          <p className="text-xs text-muted-foreground">
+            Content is aggregated from connected platforms to provide a comprehensive view of this venue
+          </p>
+          <div className="text-xs py-1 px-2 rounded-full bg-primary/10 text-primary">
+            {subscriptionTier.toUpperCase()} ACCOUNT
+          </div>
+        </div>
       </div>
-
-      <div className="grid gap-4">
-        {platforms.map((platform) => {
-          const Icon = platform.icon;
-          const isConnected = connectedPlatforms[platform.id];
-          const isLoading = isConnecting === platform.id;
-
-          return (
-            <Card key={platform.id}>
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <Icon className={`h-6 w-6 ${platform.color}`} />
-                    <div>
-                      <CardTitle className="text-base">{platform.name}</CardTitle>
-                      <CardDescription className="text-sm">
-                        {platform.description}
-                      </CardDescription>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    {isConnected && (
-                      <Badge variant="secondary" className="text-xs">
-                        Connected
-                      </Badge>
-                    )}
-                    <Switch
-                      checked={isConnected}
-                      disabled={isLoading}
-                      onCheckedChange={(checked) => {
-                        if (checked) {
-                          handleConnect(platform.id);
-                        } else {
-                          handleDisconnect(platform.id);
-                        }
-                      }}
-                    />
-                  </div>
-                </div>
-              </CardHeader>
-              
-              {isConnected && (
-                <CardContent className="pt-0">
-                  <div className="text-sm text-muted-foreground">
-                    Showing recent {platform.name.toLowerCase()} activity for {displayName}
-                  </div>
-                </CardContent>
-              )}
-              
-              {isLoading && (
-                <CardContent className="pt-0">
-                  <div className="text-sm text-muted-foreground">
-                    Connecting to {platform.name}...
-                  </div>
-                </CardContent>
-              )}
-            </Card>
-          );
-        })}
+      
+      <div className="flex justify-end mb-4">
+        <Button variant="default" size="sm" onClick={handleUpgradeClick}>
+          <Plus className="h-4 w-4 mr-1" />
+          {subscriptionTier === 'standard' || subscriptionTier === 'plus' 
+            ? 'Upgrade to Premium' 
+            : 'Connect Platform'}
+        </Button>
       </div>
-
-      {Object.values(connectedPlatforms).every(connected => !connected) && (
-        <Card>
-          <CardContent className="pt-6 text-center">
-            <p className="text-muted-foreground mb-4">
-              No platforms connected yet. Connect your social media accounts to start displaying customer content.
+      
+      {canEmbed ? (
+        <SocialMediaFeed 
+          venueName={venueName} 
+          apiKeys={getApiKeys()} 
+        />
+      ) : (
+        <div className="space-y-4">
+          <div className="p-6 border border-dashed rounded-lg text-center">
+            <h3 className="text-lg font-medium mb-2">Upgrade to Premium</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Premium and Pro accounts can embed external content directly in the feed.
+              With your current {subscriptionTier.toUpperCase()} account, links to external platforms are provided.
             </p>
-            <Button variant="outline" onClick={() => handleConnect('instagram')}>
-              Get Started with Instagram
+            <Button onClick={handleUpgradeClick}>
+              Upgrade Account
             </Button>
-          </CardContent>
-        </Card>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {Object.entries(connectedPlatforms)
+              .filter(([_, isConnected]) => isConnected)
+              .map(([platform]) => (
+                <a 
+                  key={platform}
+                  href={`https://${platform}.com/search?q=${encodeURIComponent(venueName)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50"
+                >
+                  <div>
+                    <h4 className="font-medium">{platform.charAt(0).toUpperCase() + platform.slice(1)}</h4>
+                    <p className="text-sm text-muted-foreground">View on {platform}</p>
+                  </div>
+                  <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                </a>
+              ))}
+          </div>
+          
+          {Object.values(connectedPlatforms).filter(Boolean).length === 0 && (
+            <div className="text-center p-4 bg-muted/10 rounded-lg">
+              <p>No external platforms connected.</p>
+              <Button variant="outline" size="sm" className="mt-2" onClick={() => document.querySelector<HTMLButtonElement>('[data-trigger="connections"]')?.click()}>
+                Connect Platforms
+              </Button>
+            </div>
+          )}
+        </div>
       )}
-    </div>
+    </>
   );
 };
 

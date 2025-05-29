@@ -1,50 +1,65 @@
 
-import { Location } from '@/types';
-import { generateBusinessHours } from '@/utils/businessHoursUtils';
+import { Location } from "@/types";
+import { getMockUserProfile } from "@/mock/users";
+import { getRandomItems } from "@/utils/explore/mockGenerators";
+import { vibeTags } from "../helpers/vibeTags";
+import { generateZipCode } from "../helpers/zipCodeGenerator";
 
-export const generateBars = (city: string, state: string): Location[] => {
-  const baseBars = [
-    {
-      id: '1',
-      name: 'Sunset Lounge',
-      address: '123 Main St',
-      city,
-      state,
-      country: 'US',
-      category: 'bar' as const,
-      rating: 4.5,
-      priceRange: '$$$' as const,
-      description: 'Rooftop bar with stunning sunset views',
-      amenities: ['Happy Hour', 'Live Music', 'Outdoor Seating'],
-      vibes: ['🌅 Sunset', '🍸 Classy', '🎵 Vibes'],
-      lat: 34.0522 + Math.random() * 0.01,
-      lng: -118.2437 + Math.random() * 0.01,
-      source: 'generated',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      hours: generateBusinessHours({} as Location)
+// Generate bar/nightlife locations for a city
+export const generateBarLocations = (city: string, state: string = ""): Location[] => {
+  const locations: Location[] = [];
+  
+  // Bar location
+  locations.push({
+    id: `${city.toLowerCase().replace(/\s+/g, '-')}-bar-1`,
+    name: `${city} Brewing Co.`,
+    address: `789 Elm Street`,
+    city: city,
+    state: state || 'CA',
+    country: 'USA',
+    zip: generateZipCode(city),
+    lat: 37.7749 + (Math.random() * 0.02 - 0.01),
+    lng: -122.4194 + (Math.random() * 0.02 - 0.01),
+    type: 'bar',
+    verified: true,
+    hours: {
+      monday: '4:00 PM - 12:00 AM',
+      tuesday: '4:00 PM - 12:00 AM',
+      wednesday: '4:00 PM - 12:00 AM',
+      thursday: '4:00 PM - 1:00 AM',
+      friday: '3:00 PM - 2:00 AM',
+      saturday: '12:00 PM - 2:00 AM',
+      sunday: '12:00 PM - 10:00 PM'
     },
-    {
-      id: '5',
-      name: 'Skyline Rooftop',
-      address: '789 High St',
-      city,
-      state,
-      country: 'US',
-      category: 'bar' as const,
-      rating: 4.7,
-      priceRange: '$$$$' as const,
-      description: 'Premium rooftop experience with city views',
-      amenities: ['VIP Sections', 'Craft Cocktails', '360° Views'],
-      vibes: ['🏙️ Skyline', '💎 Bougie', '🌃 Chill'],
-      lat: 34.0522 + Math.random() * 0.01,
-      lng: -118.2437 + Math.random() * 0.01,
-      source: 'generated',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      hours: generateBusinessHours({} as Location)
-    }
-  ];
-
-  return baseBars;
+    vibes: getRandomItems(vibeTags, 3),
+    userProfile: getMockUserProfile('venue'),
+  });
+  
+  // Nightlife location
+  locations.push({
+    id: `${city.toLowerCase().replace(/\s+/g, '-')}-nightlife-1`,
+    name: `Club ${city}`,
+    address: `500 Nightlife Blvd`,
+    city: city,
+    state: state || 'CA',
+    country: 'USA',
+    zip: generateZipCode(city),
+    lat: 37.7749 + (Math.random() * 0.02 - 0.01),
+    lng: -122.4194 + (Math.random() * 0.02 - 0.01),
+    type: 'bar',
+    verified: true,
+    hours: {
+      monday: 'Closed',
+      tuesday: 'Closed',
+      wednesday: '9:00 PM - 2:00 AM',
+      thursday: '9:00 PM - 2:00 AM',
+      friday: '9:00 PM - 3:00 AM',
+      saturday: '9:00 PM - 3:00 AM',
+      sunday: '9:00 PM - 1:00 AM'
+    },
+    vibes: [...getRandomItems(vibeTags, 2), 'Nightowl'],
+    userProfile: getMockUserProfile('venue'),
+  });
+  
+  return locations;
 };

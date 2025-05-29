@@ -1,37 +1,52 @@
 
 import React from 'react';
-import VenuePostsList from '../venue-posts-list/VenuePostsList';
-import { Post, Comment, Location } from '@/types';
+import { Post, Comment, Location } from "@/types";
+import TabContent from './TabContent';
 
 interface VenuePostsTabsContentProps {
-  posts: Post[];
+  activeTab: string;
+  allPosts: Post[];
+  filteredPosts: Post[];
+  filteredVenuePosts: Post[];
   venue: Location;
   viewMode: "list" | "grid";
-  getComments: (postId: string) => Comment[];
-  canDelete: boolean;
-  onPostDeleted: (postId: string) => void;
+  getPostComments: (postId: string) => Comment[];
+  subscriptionTier: 'standard' | 'plus' | 'premium' | 'pro';
+  canEmbed: boolean;
+  connectedPlatforms: Record<string, boolean>;
+  onUpgradeSubscription: () => void;
+  onPostDeleted?: (postId: string) => void;
 }
 
 const VenuePostsTabsContent: React.FC<VenuePostsTabsContentProps> = ({
-  posts,
+  activeTab,
+  allPosts,
+  filteredPosts,
+  filteredVenuePosts,
   venue,
   viewMode,
-  getComments,
-  canDelete,
+  getPostComments,
+  subscriptionTier,
+  canEmbed,
+  connectedPlatforms,
+  onUpgradeSubscription,
   onPostDeleted
 }) => {
   return (
-    <div className="space-y-4">
-      <VenuePostsList
-        posts={posts}
-        venue={venue}
-        viewMode={viewMode}
-        getComments={getComments}
-        canDelete={canDelete}
-        onPostDeleted={onPostDeleted}
-        subscriptionTier="standard"
-      />
-    </div>
+    <TabContent
+      tab={activeTab}
+      allPosts={allPosts}
+      filteredPosts={filteredPosts}
+      filteredVenuePosts={filteredVenuePosts}
+      venue={venue}
+      viewMode={viewMode}
+      getComments={getPostComments}
+      subscriptionTier={subscriptionTier}
+      canEmbed={canEmbed}
+      connectedPlatforms={connectedPlatforms}
+      onUpgradeSubscription={onUpgradeSubscription}
+      onPostDeleted={onPostDeleted}
+    />
   );
 };
 

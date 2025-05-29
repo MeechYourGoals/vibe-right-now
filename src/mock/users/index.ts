@@ -1,53 +1,37 @@
 
-export interface MockUser {
-  id: string;
-  username: string;
-  displayName: string;
-  profileImage: string;
-  bio?: string;
-  followersCount: number;
-  followingCount: number;
-  isVerified: boolean;
-  isPrivate: boolean;
-  joinedDate: string;
-  location?: string;
-  website?: string;
-  socialLinks?: {
-    instagram?: string;
-    twitter?: string;
-    tiktok?: string;
-  };
+import { User } from "@/types";
+import { regularUsers } from "./regularUsers";
+import { celebrityUsers } from "./celebrityUsers";
+
+export interface MockUserProfile extends User {
+  type: "regular" | "celebrity" | "venue";
 }
 
-export const mockUsers: MockUser[] = [
-  {
-    id: "user1",
-    username: "john_doe",
-    displayName: "John Doe",
-    profileImage: "https://randomuser.me/api/portraits/men/1.jpg",
-    bio: "Food enthusiast and adventure seeker",
-    followersCount: 1250,
-    followingCount: 380,
-    isVerified: true,
-    isPrivate: false,
-    joinedDate: "2023-01-15",
-    location: "Los Angeles, CA"
-  },
-  {
-    id: "user2", 
-    username: "jane_smith",
-    displayName: "Jane Smith",
-    profileImage: "https://randomuser.me/api/portraits/women/1.jpg",
-    bio: "Travel blogger and photographer",
-    followersCount: 850,
-    followingCount: 290,
-    isVerified: false,
-    isPrivate: false,
-    joinedDate: "2023-02-20",
-    location: "New York, NY"
-  }
+// Combine all users and add type information
+export const mockUsers: MockUserProfile[] = [
+  ...regularUsers.map(user => ({
+    ...user,
+    type: "regular" as const,
+    avatar: user.avatar || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+    isVerified: user.isVerified || false
+  })),
+  ...celebrityUsers.map(user => ({
+    ...user,
+    type: "celebrity" as const,
+    avatar: user.avatar || "https://images.unsplash.com/photo-1494790108755-2616b612b77c?w=150&h=150&fit=crop&crop=face",
+    isVerified: user.isVerified || false
+  }))
 ];
 
-export const getMockUserProfile = (userId: string): MockUser | null => {
-  return mockUsers.find(user => user.id === userId) || null;
+// Simple hash function to generate a numeric hash from a string
+export const hashString = (str: string): number => {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash |= 0; // Convert to 32bit integer
+  }
+  return Math.abs(hash); // Return absolute value to ensure positive number
 };
+
+export { regularUsers, celebrityUsers };

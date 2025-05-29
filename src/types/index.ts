@@ -1,114 +1,22 @@
 
 export interface User {
   id: string;
-  username: string;
-  displayName: string;
-  profileImage: string;
-  bio?: string;
-  followersCount: number;
-  followingCount: number;
-  isVerified: boolean;
-  isPrivate: boolean;
-  joinedDate: string;
-  location?: string;
-  website?: string;
-  socialLinks?: {
-    instagram?: string;
-    twitter?: string;
-    tiktok?: string;
-  };
-  // Legacy properties for backward compatibility
-  avatar?: string;
-  name?: string;
-  postsCount?: number;
-}
-
-export interface BusinessHours {
-  monday: string;
-  tuesday: string;
-  wednesday: string;
-  thursday: string;
-  friday: string;
-  saturday: string;
-  sunday: string;
-  isOpen24Hours?: boolean;
-}
-
-export interface Location {
-  id: string;
   name: string;
-  address: string;
-  lat: number;
-  lng: number;
-  category: 'restaurant' | 'bar' | 'nightclub' | 'lounge' | 'music_venue' | 'comedy_club' | 'attraction' | 'sports' | 'event' | 'other';
-  rating?: number;
-  priceRange?: '$' | '$$' | '$$$' | '$$$$';
-  photos?: string[];
-  description?: string;
-  amenities?: string[];
-  vibes?: string[]; // Fixed: This should be an array of strings
-  vibeScore?: number;
-  isOpen?: boolean;
-  city: string;
-  state?: string;
-  country: string;
-  source: string;
-  created_at?: string;
-  updated_at?: string;
-  // Additional properties
-  type?: 'restaurant' | 'bar' | 'nightclub' | 'lounge' | 'music_venue' | 'comedy_club' | 'attraction' | 'sports' | 'event' | 'other';
-  verified?: boolean;
+  username: string;
+  email?: string;
+  bio?: string;
+  avatar?: string;
   isVerified?: boolean;
-  hours?: BusinessHours;
-  // Legacy properties for backward compatibility
-  latitude?: number;
-  longitude?: number;
-  zip?: string;
-  reviewCount?: number;
-  price?: string;
-  imageUrl?: string;
-  isFeatured?: boolean;
-  formattedPhoneNumber?: string;
-  website?: string;
-  reservable?: boolean;
-  images?: string[];
-  vibeTags?: string[];
-  openingHours?: string;
-  customerId?: string;
   followers?: number;
-  checkins?: number;
-  userProfile?: any;
-}
-
-export interface Media {
-  id: string;
-  type: 'image' | 'video';
-  url: string;
-  thumbnail?: string;
-}
-
-export interface Post {
-  id: string;
-  userId: string;
-  user: User;
-  content: string;
-  images?: string[];
-  videos?: string[];
-  location?: Location;
-  timestamp: string;
-  likes: number;
-  comments: number | Comment[];
-  shares: number;
-  isLiked?: boolean;
-  vibeTag?: string;
-  momentScore?: number;
-  // Additional properties
-  media?: Media[];
-  author?: User;
+  following?: number;
+  posts?: number;
   vibeTags?: string[];
-  vibedHere?: boolean;
-  isPinned?: boolean;
-  expiresAt?: string;
+  coverPhoto?: string;
+  joinedDate?: string;
+  location?: string;
+  isPrivate?: boolean;
+  isCelebrity?: boolean;
+  verified?: boolean;
 }
 
 export interface Comment {
@@ -118,131 +26,98 @@ export interface Comment {
   user: User;
   content: string;
   timestamp: string;
+  vibedHere: boolean;
   likes: number;
-  isLiked?: boolean;
-  replies?: Comment[];
-  vibedHere?: boolean;
 }
 
-export interface Event {
+export interface Media {
+  type: 'image' | 'video';
+  url: string;
+}
+
+export interface Post {
   id: string;
-  title: string;
-  description: string;
-  date: string;
-  time: string;
-  location: Location;
-  category: 'music' | 'sports' | 'food' | 'nightlife' | 'arts' | 'comedy' | 'other';
-  price?: number;
-  image?: string;
-  attendees: number;
-  isAttending?: boolean;
-  organizer: User;
-  tags?: string[];
-}
-
-export interface Message {
-  id: string;
-  sender: 'user' | 'ai';
-  text: string;
-  timestamp: Date;
-  type: 'text' | 'location' | 'recommendation';
-  data?: any;
-}
-
-export interface MessageContext {
-  messages: Message[];
-  options?: ProcessMessageOptions;
-  paginationState?: any;
-  query?: string;
-}
-
-export interface ProcessMessageOptions {
-  includeLocation?: boolean;
-  includeVibeData?: boolean;
-  maxResults?: number;
-  temperature?: number;
-  setIsTyping?: (isTyping: boolean) => void;
-  setIsSearching?: (isSearching: boolean) => void;
-  updatePaginationState?: (state: any) => void;
-  isVenueMode?: boolean;
-}
-
-export interface MessageProcessor {
-  canHandle: (context: MessageContext) => boolean;
-  process: (context: MessageContext) => Promise<Message>;
-}
-
-export interface CreditCard {
-  id: string;
-  last4: string;
-  brand: string;
-  expiryMonth: number;
-  expiryYear: number;
-  isDefault: boolean;
-  name: string;
-  expMonth: number;
-  expYear: number;
-  maxSpendLimit?: number;
-  vernonApproved?: boolean;
-}
-
-export type SocialMediaSource = 'instagram' | 'google' | 'yelp' | 'tiktok' | 'tripadvisor' | 'foursquare' | 'franki' | 'other';
-
-export interface SocialMediaPost {
-  id: string;
+  user: User;
   content: string;
-  author: string;
-  username: string;
-  userAvatar?: string;
-  venueName?: string;
-  rating?: number;
+  media: Media[];
+  location: Location;
   timestamp: string;
-  platform: string;
-  source: SocialMediaSource;
-  likes?: number;
-  comments?: number;
-  engagement?: {
-    likes: number;
-    comments: number;
-    shares: number;
+  likes: number;
+  comments: number;
+  vibeTags?: string[];
+  isSponsored?: boolean;
+  sponsorInfo?: {
+    name: string;
+    logo: string;
+    cta: string;
   };
-  media?: {
-    type: 'image' | 'video';
-    url: string;
-  }[];
-  mediaUrl?: string;
-  mediaType?: 'image' | 'video';
-  originalUrl?: string;
+}
+
+export interface Location {
+  id: string;
+  name: string;
+  address: string;
+  city: string;
+  state?: string;
+  country: string;
+  zip?: string;
+  lat: number;
+  lng: number;
+  type: "restaurant" | "bar" | "event" | "attraction" | "sports" | "other";
+  verified: boolean;
+  hours?: Record<string, string>;
+  vibes?: string[];
+  userProfile?: User;
+  rating?: number;
+  followers?: number;
+  checkins?: number;
+}
+
+export interface BusinessHours {
+  [key: string]: string;
+}
+
+// VernonChat types
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant' | 'system' | 'error';
+  content: string;
+  timestamp: string;
+  // For compatibility with older format
+  text?: string;
+  sender?: 'user' | 'ai';
+}
+
+export interface ChatState {
+  messages: ChatMessage[];
+  loading: boolean;
+  error: string | null;
+  isOpen?: boolean;
+  isMinimized?: boolean;
+  isLoading?: boolean;
+  isListening?: boolean;
+  isSpeaking?: boolean;
+  searchResults?: any[];
+  transcript?: string;
+  interimTranscript?: string;
 }
 
 export interface VenueInsights {
-  totalViews: number;
-  totalLikes: number;
-  totalComments: number;
-  totalShares: number;
-  engagementRate: number;
-  topVibeTag: string;
-  peakHours: string;
-  totalVisits: number;
   visitors: number;
-  visitorsChange: number;
-  checkins: number;
-  viewsCount: number;
+  visitorsChange: string;
+  posts: number;
+  postsChange: string;
+  shares: number;
+  sharesChange: string;
+  likes: number;
+  likesChange: string;
+  engagementRate: string;
+  followerGrowth: string;
+  clickThroughRate: string;
+  totalVisits: number;
+  revenueImpact: string;
+  totalReach: number;
   impressions: number;
-  demographics: {
-    age: { range: string; percentage: number }[];
-    gender: { type: string; percentage: number }[];
-  };
-}
-
-export interface SocialMediaApiKeys {
-  instagram?: string;
-  google?: string;
-  yelp?: string;
-  tiktok?: string;
-  tripadvisor?: string;
-  foursquare?: string;
-  franki?: string;
-  other?: string;
-  otherUrl?: string;
+  viewsPer: number;
+  viewsCount?: number;
 }

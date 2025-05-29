@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronRight, Star } from "lucide-react";
 import { mockLocations } from "@/mock/locations";
 import { Location } from "@/types";
-import { PREFERENCE_TAGS } from "@/pages/settings/constants";
+import { PREFERENCE_CATEGORIES } from "@/pages/settings/constants";
 
 interface RecommendedForYouProps {
   featuredLocations: string[];
@@ -62,10 +62,6 @@ const RecommendedForYou = ({ featuredLocations }: RecommendedForYouProps) => {
     }
   }, [userPreferences, featuredLocations]);
 
-  const handleLocationClick = (locationId: string) => {
-    navigate(`/venue/${locationId}`);
-  };
-
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -79,7 +75,7 @@ const RecommendedForYou = ({ featuredLocations }: RecommendedForYouProps) => {
           <div 
             key={location.id}
             className="flex items-start gap-3 cursor-pointer hover:bg-muted p-2 rounded-md transition"
-            onClick={() => handleLocationClick(location.id)}
+            onClick={() => navigate(`/venue/${location.id}`)}
           >
             <div 
               className="w-14 h-14 rounded-md bg-cover bg-center" 

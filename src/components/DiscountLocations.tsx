@@ -7,6 +7,7 @@ import { ArrowRight, Ticket, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Link, useNavigate } from "react-router-dom";
+import { Media } from "@/types";
 
 const DiscountLocations = () => {
   const navigate = useNavigate();
@@ -14,6 +15,22 @@ const DiscountLocations = () => {
   const discountPosts = mockPosts.filter(post => 
     ["29", "30", "31", "32"].includes(post.id)
   ).slice(0, 3); // Only show first 3 in the sidebar
+  
+  // Helper function to get media URL
+  const getMediaUrl = (media: string[] | Media[] | undefined): string => {
+    if (!media || media.length === 0) {
+      return `https://source.unsplash.com/random/200x200/?venue`;
+    }
+    
+    const firstMedia = media[0];
+    if (typeof firstMedia === 'string') {
+      return firstMedia;
+    } else if (typeof firstMedia === 'object' && firstMedia !== null) {
+      return firstMedia.url;
+    }
+    
+    return `https://source.unsplash.com/random/200x200/?venue`;
+  };
   
   return (
     <Card>
@@ -35,15 +52,15 @@ const DiscountLocations = () => {
               <div className="flex gap-3">
                 <Avatar className="h-10 w-10">
                   <AvatarImage 
-                    src={post.images?.[0] || `https://source.unsplash.com/random/200x200/?${post.location?.type || 'restaurant'}`} 
-                    alt={post.location?.name || 'Location'} 
+                    src={getMediaUrl(post.media) || `https://source.unsplash.com/random/200x200/?${post.location.type}`} 
+                    alt={post.location.name} 
                   />
-                  <AvatarFallback>{post.location?.name?.charAt(0) || 'L'}</AvatarFallback>
+                  <AvatarFallback>{post.location.name.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div>
-                  <div className="font-medium">{post.location?.name || 'Unknown Location'}</div>
+                  <div className="font-medium">{post.location.name}</div>
                   <div className="text-sm text-muted-foreground">
-                    {post.location?.city}, {post.location?.state}
+                    {post.location.city}, {post.location.state}
                   </div>
                   <div className="mt-1">
                     <Badge variant="secondary" className="text-xs">
@@ -60,7 +77,7 @@ const DiscountLocations = () => {
                 variant="ghost" 
                 size="sm" 
                 className="h-8" 
-                onClick={() => navigate(`/venue/${post.location?.id || '1'}`)}
+                onClick={() => navigate(`/venue/${post.location.id}`)}
               >
                 <ArrowRight className="h-4 w-4" />
               </Button>

@@ -1,107 +1,144 @@
 import React from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { MapPin, Link, Calendar, MessageSquare } from "lucide-react";
-import VerifiedBadge from "@/components/icons/VerifiedIcon";
+import { Badge } from "@/components/ui/badge";
+import { 
+  UserPlus, 
+  MessageSquare, 
+  MoreHorizontal, 
+  MapPin, 
+  Calendar, 
+  Verified,
+  Instagram,
+  Twitter,
+  Youtube
+} from "lucide-react";
+import { User } from "@/types";
 
 interface UserProfileHeaderProps {
-  user: {
-    id: string;
-    name: string;
-    username: string;
-    avatar: string;
-    isVerified: boolean;
-    bio?: string;
-    location?: string;
-    joinedDate?: string;
-    website?: string;
-    followerCount?: number;
-    followingCount?: number;
-  };
-  onFollowToggle?: () => void;
-  onMessageClick?: () => void;
+  user: User;
+  isOwner?: boolean;
+  isFollowing?: boolean;
+  onFollow?: () => void;
+  onMessage?: () => void;
 }
 
-const UserProfileHeader = ({ user, onFollowToggle, onMessageClick }: UserProfileHeaderProps) => {
-  const handleFollowToggle = () => {
-    if (onFollowToggle) {
-      onFollowToggle();
-    }
-  };
-
-  const handleMessageClick = () => {
-    if (onMessageClick) {
-      onMessageClick();
-    }
-  };
-
+const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
+  user,
+  isOwner = false,
+  isFollowing = false,
+  onFollow,
+  onMessage
+}) => {
+  
   return (
-    <Card className="vibe-card">
-      <CardContent className="p-6">
-        <div className="flex flex-col md:flex-row gap-6">
-          <div className="flex flex-col items-center md:items-start">
-            <Avatar className="h-24 w-24 mb-4">
+    <div className="relative">
+      {/* Cover Photo */}
+      <div className="h-48 md:h-64 bg-gradient-to-r from-purple-500 to-blue-600 relative">
+        {user.coverPhoto && (
+          <img 
+            src={user.coverPhoto} 
+            alt="Cover" 
+            className="w-full h-full object-cover"
+          />
+        )}
+        <div className="absolute inset-0 bg-black/20" />
+      </div>
+
+      {/* Profile Content */}
+      <div className="px-4 pb-4 -mt-16 relative z-10">
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-4">
+          {/* Avatar and Basic Info */}
+          <div className="flex flex-col md:flex-row md:items-end gap-4">
+            <Avatar className="w-32 h-32 border-4 border-background">
               <AvatarImage src={user.avatar} alt={user.name} />
-              <AvatarFallback className="text-lg">{user.name.charAt(0)}</AvatarFallback>
+              <AvatarFallback className="text-2xl">{user.name.charAt(0)}</AvatarFallback>
             </Avatar>
             
-            <div className="text-center md:text-left">
+            <div className="md:mb-4">
               <div className="flex items-center gap-2 mb-1">
-                <h1 className="text-2xl font-bold">{user.name}</h1>
-                {user.isVerified && <VerifiedBadge />}
-              </div>
-              <p className="text-muted-foreground mb-2">{user.username}</p>
-              {user.bio && <p className="text-sm mb-3">{user.bio}</p>}
-              
-              <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-4">
-                {user.location && (
-                  <div className="flex items-center gap-1">
-                    <MapPin className="h-4 w-4" />
-                    <span>{user.location}</span>
-                  </div>
-                )}
-                {user.website && (
-                  <div className="flex items-center gap-1">
-                    <Link className="h-4 w-4" />
-                    <a href={`https://${user.website}`} target="_blank" rel="noopener noreferrer" className="hover:text-primary">
-                      {user.website}
-                    </a>
-                  </div>
-                )}
-                {user.joinedDate && (
-                  <div className="flex items-center gap-1">
-                    <Calendar className="h-4 w-4" />
-                    <span>Joined {user.joinedDate}</span>
-                  </div>
+                <h1 className="text-2xl md:text-3xl font-bold">{user.name}</h1>
+                {user.isVerified && (
+                  <Verified className="h-6 w-6 text-blue-500 fill-current" />
                 )}
               </div>
+              <p className="text-muted-foreground text-lg">@{user.username}</p>
+              {user.location && (
+                <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
+                  <MapPin className="h-4 w-4" />
+                  <span>{user.location}</span>
+                </div>
+              )}
             </div>
           </div>
-          
-          <div className="flex flex-col justify-between">
-            <div className="flex items-center justify-center md:justify-start gap-4 mb-4">
-              <div className="text-center">
-                <p className="font-bold text-lg">{user.followerCount}</p>
-                <p className="text-muted-foreground text-sm">Followers</p>
-              </div>
-              <div className="text-center">
-                <p className="font-bold text-lg">{user.followingCount}</p>
-                <p className="text-muted-foreground text-sm">Following</p>
-              </div>
-            </div>
-            
-            <div className="flex justify-center md:justify-start gap-2">
-              <Button onClick={handleFollowToggle}>Follow</Button>
-              <Button variant="outline" onClick={handleMessageClick}>
-                <MessageSquare className="mr-2 h-4 w-4" />
+
+          {/* Action Buttons */}
+          {!isOwner && (
+            <div className="flex gap-2 mt-4 md:mt-0">
+              <Button 
+                variant={isFollowing ? "outline" : "default"}
+                onClick={onFollow}
+                className="flex-1 md:flex-none"
+              >
+                <UserPlus className="h-4 w-4 mr-2" />
+                {isFollowing ? "Following" : "Follow"}
+              </Button>
+              <Button variant="outline" onClick={onMessage}>
+                <MessageSquare className="h-4 w-4 mr-2" />
                 Message
               </Button>
+              <Button variant="outline" size="icon">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
             </div>
-          </div>
+          )}
         </div>
-      </CardContent>
-    </Card>
+
+        {/* Bio */}
+        {user.bio && (
+          <p className="text-foreground mb-4 max-w-2xl">{user.bio}</p>
+        )}
+
+        {/* Stats and Additional Info */}
+        <div className="flex flex-wrap items-center gap-6 text-sm mb-4">
+          <div className="flex gap-4">
+            <span><strong>{user.followers?.toLocaleString() || 0}</strong> followers</span>
+            <span><strong>{user.following?.toLocaleString() || 0}</strong> following</span>
+          </div>
+          
+          {user.joinedDate && (
+            <div className="flex items-center gap-1 text-muted-foreground">
+              <Calendar className="h-4 w-4" />
+              <span>Joined {new Date(user.joinedDate).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Vibe Tags */}
+        {user.vibeTags && user.vibeTags.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-4">
+            {user.vibeTags.map((tag, index) => (
+              <Badge key={index} variant="secondary" className="bg-primary/10 text-primary">
+                {tag}
+              </Badge>
+            ))}
+          </div>
+        )}
+
+        {/* Social Links */}
+        <div className="flex gap-2">
+          <Button variant="outline" size="icon">
+            <Instagram className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="icon">
+            <Twitter className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="icon">
+            <Youtube className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 };
 
