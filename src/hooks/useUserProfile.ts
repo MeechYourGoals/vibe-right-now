@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { User, Post, Location } from '@/types';
-import { mockUsers } from '@/mock/users';
+import { mockUsers } from '@/mock/users/index';
 
 export const useUserProfile = (userId?: string) => {
   const [user, setUser] = useState<User | null>(null);
