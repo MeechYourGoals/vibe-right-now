@@ -1,174 +1,135 @@
+
 import { useState } from "react";
 import { Layout } from "@/components/Layout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import MapContainer from "@/components/map/MapContainer";
+import { Card, CardContent } from "@/components/ui/card";
+import { discountOffers } from "@/mock/discountOffers";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MapPin, Clock, Percent, Star, Search, Filter } from "lucide-react";
-import DiscountLocations from "@/components/DiscountLocations";
+import { ArrowRight, MapPin, Ticket } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { VenueWithDiscount } from "@/components/venue/events/types";
+import { Location } from "@/types";
+
+// Convert VenueWithDiscount to Location for MapContainer compatibility
+const convertToLocation = (venue: VenueWithDiscount): Location => {
+  return {
+    id: venue.id,
+    name: venue.name,
+    type: venue.type,
+    address: venue.address,
+    city: venue.city,
+    state: venue.state,
+    country: venue.country,
+    zip: venue.zip,
+    lat: venue.lat,
+    lng: venue.lng,
+    verified: venue.verified,
+    description: venue.discount.description
+  };
+};
 
 const Discounts = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
+  const navigate = useNavigate();
+  const [selectedVenue, setSelectedVenue] = useState<VenueWithDiscount | null>(null);
+  const [mapExpanded, setMapExpanded] = useState(false);
 
-  const discounts = [
-    {
-      id: 1,
-      title: "Happy Hour Special",
-      venue: "The Rooftop Bar",
-      discount: "50% off cocktails",
-      category: "bar" as const,
-      validUntil: "10:00 PM",
-      rating: 4.8,
-      distance: "0.3 miles",
-      image: "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=400&h=300&fit=crop",
-      description: "Premium cocktails at half price during happy hour",
-      terms: "Valid 5-7 PM weekdays only"
-    },
-    {
-      id: 2,
-      title: "Burger Tuesday",
-      venue: "Burger Joint",
-      discount: "$5 off any burger",
-      category: "restaurant" as const,
-      validUntil: "All Day",
-      rating: 4.5,
-      distance: "0.5 miles",
-      image: "https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=400&h=300&fit=crop",
-      description: "Enjoy any burger on our menu for $5 off every Tuesday",
-      terms: "Valid all day Tuesdays only"
-    },
-    {
-      id: 3,
-      title: "Live Music Night",
-      venue: "The Music Hall",
-      discount: "20% off tickets",
-      category: "music_venue" as const,
-      validUntil: "11:00 PM",
-      rating: 4.2,
-      distance: "1.2 miles",
-      image: "https://images.unsplash.com/photo-1494976388535-893e9ea5c3bf?w=400&h=300&fit=crop",
-      description: "Get 20% off tickets for live music performances",
-      terms: "Valid on select nights only"
-    },
-    {
-      id: 4,
-      title: "Comedy Show Discount",
-      venue: "Comedy Club",
-      discount: "15% off admission",
-      category: "comedy_club" as const,
-      validUntil: "10:30 PM",
-      rating: 4.6,
-      distance: "0.8 miles",
-      image: "https://images.unsplash.com/photo-1506157786151-b8491531f063?w=400&h=300&fit=crop",
-      description: "Enjoy a night of laughter with 15% off admission",
-      terms: "Valid on all shows"
-    },
-    {
-      id: 5,
-      title: "Weekend Brunch",
-      venue: "Brunch Cafe",
-      discount: "10% off total bill",
-      category: "restaurant" as const,
-      validUntil: "3:00 PM",
-      rating: 4.7,
-      distance: "0.7 miles",
-      image: "https://images.unsplash.com/photo-1551782450-a2132b4ba212?w=400&h=300&fit=crop",
-      description: "Enjoy a leisurely brunch with 10% off your entire bill",
-      terms: "Valid weekends only"
+  const handleVenueSelect = (location: Location) => {
+    // Find the corresponding venue from discountOffers
+    const venue = discountOffers.find(v => v.id === location.id);
+    if (venue) {
+      setSelectedVenue(venue);
     }
-  ];
+  };
 
-  const filteredDiscounts = discounts.filter(discount => {
-    const matchesSearch = discount.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         discount.venue.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === "all" || discount.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+  const handleCloseLocation = () => {
+    setSelectedVenue(null);
+  };
+
+  // Convert discount venues to Location type for map compatibility
+  const locationsForMap = discountOffers.map(convertToLocation);
 
   return (
     <Layout>
       <div className="container py-6">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-3xl font-bold">Discounts & Deals</h1>
-            <p className="text-muted-foreground">Save money at your favorite spots</p>
+            <h1 className="text-3xl font-bold vibe-gradient-text">
+              Nearby Discounts & Deals
+            </h1>
+            <p className="text-muted-foreground mt-2">
+              Exclusive offers at venues near you
+            </p>
           </div>
-          <Badge variant="secondary" className="bg-green-100 text-green-700">
-            {filteredDiscounts.length} active deals
-          </Badge>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-4 mb-6">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <Input
-              placeholder="Search discounts..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="Category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              <SelectItem value="restaurant">Restaurants</SelectItem>
-              <SelectItem value="bar">Bars</SelectItem>
-              <SelectItem value="music_venue">Music Venues</SelectItem>
-              <SelectItem value="comedy_club">Comedy Clubs</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button variant="outline">
-            <Filter className="h-4 w-4 mr-2" />
-            Filter
-          </Button>
+        {/* Map Section */}
+        <div className="mb-8">
+          <MapContainer
+            loading={false}
+            isExpanded={mapExpanded}
+            userLocation={null}
+            locations={locationsForMap}
+            searchedCity=""
+            mapStyle="default"
+            selectedLocation={selectedVenue ? convertToLocation(selectedVenue) : null}
+            showDistances={true}
+            userAddressLocation={null}
+            onLocationSelect={handleVenueSelect}
+            onCloseLocation={handleCloseLocation}
+            nearbyCount={discountOffers.length}
+            onToggleDistances={() => {}}
+          />
         </div>
 
-        <Tabs defaultValue="list" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="list">List View</TabsTrigger>
-            <TabsTrigger value="map">Map View</TabsTrigger>
-          </TabsList>
-          <TabsContent value="list" className="space-y-4">
-            {filteredDiscounts.map(discount => (
-              <Card key={discount.id}>
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    {discount.title}
-                    <Badge variant="secondary">{discount.category}</Badge>
-                  </CardTitle>
-                  <CardDescription>{discount.venue}</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Percent className="h-4 w-4" />
-                    <span>{discount.discount}</span>
+        {/* Discount List */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {discountOffers.map((venue) => (
+            <Card key={venue.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+              <CardContent className="p-4">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="font-semibold text-lg">{venue.name}</h3>
+                    <p className="text-sm text-muted-foreground flex items-center mt-1">
+                      <MapPin className="h-3 w-3 mr-1" />
+                      {venue.city}, {venue.state}
+                    </p>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4" />
-                    <span>Valid until {discount.validUntil}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Star className="h-4 w-4" />
-                    <span>{discount.rating} ({discount.distance})</span>
-                  </div>
-                  <p className="text-sm">{discount.description}</p>
-                  <p className="text-xs text-muted-foreground">{discount.terms}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </TabsContent>
-          <TabsContent value="map">
-            <div className="h-[600px] rounded-lg overflow-hidden">
-              <DiscountLocations discounts={filteredDiscounts} />
-            </div>
-          </TabsContent>
-        </Tabs>
+                  <Badge variant={venue.discount.type === "percentOff" ? "secondary" : "default"}>
+                    <Ticket className="h-3 w-3 mr-1" />
+                    {venue.discount.type === "percentOff" 
+                      ? `${venue.discount.value}% OFF`
+                      : venue.discount.type.replace(/([A-Z])/g, ' $1').trim()}
+                  </Badge>
+                </div>
+                
+                <p className="mt-3 text-sm">{venue.discount.description}</p>
+                
+                {venue.discount.conditions && (
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    {venue.discount.conditions}
+                  </p>
+                )}
+                
+                <div className="mt-4 flex justify-between items-center">
+                  {venue.discount.code && (
+                    <Badge variant="outline" className="text-xs">
+                      Code: {venue.discount.code}
+                    </Badge>
+                  )}
+                  <Button 
+                    size="sm" 
+                    className="ml-auto"
+                    onClick={() => navigate(`/venue/${venue.id}`)}
+                  >
+                    View Venue
+                    <ArrowRight className="h-4 w-4 ml-1" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     </Layout>
   );

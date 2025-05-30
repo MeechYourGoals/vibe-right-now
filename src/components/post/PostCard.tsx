@@ -1,149 +1,161 @@
-
-import { useState } from "react";
-import { Post, Comment } from "@/types";
-import { formatDistanceToNow } from "date-fns";
-import { Heart, MessageCircle, Share, MapPin, Star } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import React, { useState } from 'react';
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import PostMedia from "./PostMedia";
-import CommentItem from "@/components/CommentItem";
+import { Button } from "@/components/ui/button";
+import { VerifiedBadge } from "@/components/icons";
+import { MoreHorizontal, MapPin, Calendar, Link, Pin, Building } from "lucide-react";
+import PostMedia from "@/components/post/PostMedia";
+import PostFooter from "@/components/post/PostFooter";
+import CommentList from "@/components/post/CommentList";
+import { Post, User, Location, Media } from "@/types";
 
 interface PostCardProps {
   post: Post;
-  onComment: (postId: string, comment: string) => void;
-  onLike: (postId: string) => void;
-  onShare: (postId: string) => void;
+  onLike?: (postId: string) => void;
+  onComment?: (postId: string, comment: string) => void;
+  onShare?: (postId: string) => void;
 }
 
-const PostCard = ({ post, onComment, onLike, onShare }: PostCardProps) => {
-  const [showComments, setShowComments] = useState(false);
-  const [newComment, setNewComment] = useState("");
-  
-  const timeAgo = formatDistanceToNow(new Date(post.timestamp), { addSuffix: true });
+interface PostHeaderProps {
+  author: User;
+  location: Location;
+  timestamp: string;
+  isPinned?: boolean;
+  isVenueOwned?: boolean;
+}
 
-  const handleComment = () => {
-    if (newComment.trim()) {
-      onComment(post.id, newComment);
-      setNewComment("");
+interface PostContentProps {
+  content: string;
+}
+
+const PostHeader = ({ author, location, timestamp, isPinned, isVenueOwned }: PostHeaderProps) => {
+  const formatTimestamp = (timestamp: string) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+
+    if (minutes < 60) {
+      return `${minutes}m`;
+    } else if (hours < 24) {
+      return `${hours}h`;
+    } else {
+      return `${days}d`;
     }
   };
 
-  // Safely get comment count
-  const commentCount = Array.isArray(post.comments) ? post.comments.length : (typeof post.comments === 'number' ? post.comments : 0);
-  const commentsArray = Array.isArray(post.comments) ? post.comments : [];
-
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-      {/* Header */}
-      <div className="p-4">
+    <CardHeader className="pb-3">
+      <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
           <Avatar>
-            <AvatarImage src={post.user.profileImage || post.user.avatar} alt={post.user.displayName || post.user.name} />
-            <AvatarFallback>{(post.user.displayName || post.user.name || '').charAt(0)}</AvatarFallback>
+            <AvatarImage src={author.avatar} alt={author.name} />
+            <AvatarFallback>{author.name.charAt(0)}</AvatarFallback>
           </Avatar>
-          <div className="flex-1">
-            <div className="flex items-center space-x-2">
-              <h3 className="font-semibold text-sm">@{post.user.username}</h3>
-              {post.user.isVerified && (
-                <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-xs">
-                  ✓
-                </Badge>
-              )}
-              {post.vibedHere && (
-                <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-300 text-xs">
-                  <MapPin className="h-3 w-3 mr-1" />
-                  Vibed Here
-                </Badge>
-              )}
-            </div>
-            <div className="flex items-center text-xs text-muted-foreground">
-              <span>{timeAgo}</span>
-              {post.location && (
-                <>
-                  <span className="mx-1">•</span>
-                  <span>{post.location.name}</span>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="px-4 pb-2">
-        <p className="text-sm">{post.content}</p>
-      </div>
-
-      {/* Media */}
-      {post.media && post.media.length > 0 && (
-        <PostMedia media={post.media} />
-      )}
-
-      {/* Actions */}
-      <div className="px-4 py-3 border-t border-gray-100 dark:border-gray-700">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onLike(post.id)}
-              className={`flex items-center space-x-1 ${post.isLiked ? 'text-red-500' : ''}`}
-            >
-              <Heart className={`h-4 w-4 ${post.isLiked ? 'fill-current' : ''}`} />
-              <span className="text-xs">{post.likes}</span>
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowComments(!showComments)}
-              className="flex items-center space-x-1"
-            >
-              <MessageCircle className="h-4 w-4" />
-              <span className="text-xs">{commentCount}</span>
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onShare(post.id)}
-              className="flex items-center space-x-1"
-            >
-              <Share className="h-4 w-4" />
-              <span className="text-xs">{post.shares}</span>
-            </Button>
-          </div>
-          {post.momentScore && (
-            <div className="flex items-center space-x-1">
-              <Star className="h-4 w-4 text-amber-500" />
-              <span className="text-xs font-medium">{post.momentScore}/10</span>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Comments */}
-      {showComments && (
-        <div className="border-t border-gray-100 dark:border-gray-700 px-4 py-3">
-          {commentsArray.map((comment) => (
-            <CommentItem key={comment.id} comment={comment} />
-          ))}
           
-          <div className="mt-3 flex space-x-2">
-            <input
-              type="text"
-              placeholder="Add a comment..."
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              className="flex-1 px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
-              onKeyPress={(e) => e.key === 'Enter' && handleComment()}
-            />
-            <Button size="sm" onClick={handleComment}>
-              Post
-            </Button>
+          <div className="flex flex-col">
+            <div className="flex items-center space-x-1">
+              <span className="font-semibold text-sm">{author.name}</span>
+              {author.isVerified && <VerifiedBadge />}
+            </div>
+            
+            <div className="flex items-center space-x-1 text-xs text-muted-foreground">
+              <MapPin className="h-3 w-3" />
+              <span>{location.name}</span>
+              <span>•</span>
+              <span>{formatTimestamp(timestamp)}</span>
+            </div>
           </div>
         </div>
+        
+        <div className="flex items-center space-x-2">
+          {isPinned && (
+            <Badge variant="secondary" className="text-xs">
+              <Pin className="h-3 w-3 mr-1" />
+              Pinned
+            </Badge>
+          )}
+          {isVenueOwned && (
+            <Badge variant="outline" className="text-xs">
+              <Building className="h-3 w-3 mr-1" />
+              Venue
+            </Badge>
+          )}
+          <Button variant="ghost" size="icon" className="h-8 w-8">
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    </CardHeader>
+  );
+};
+
+const PostContent = ({ content }: PostContentProps) => {
+  return (
+    <CardContent className="pb-4">
+      <p className="text-sm">{content}</p>
+    </CardContent>
+  );
+};
+
+const PostCard = ({ post, onLike, onComment, onShare }: PostCardProps) => {
+  const [isLiked, setIsLiked] = useState(post.isLiked || false);
+  const [likesCount, setLikesCount] = useState(post.likes);
+  const [showComments, setShowComments] = useState(false);
+
+  const handleLike = () => {
+    setIsLiked(!isLiked);
+    setLikesCount(isLiked ? likesCount - 1 : likesCount + 1);
+    if (onLike) {
+      onLike(post.id);
+    }
+  };
+
+  // Convert media to proper Media array
+  const mediaArray: Media[] = Array.isArray(post.media) 
+    ? post.media.map(item => 
+        typeof item === 'string' 
+          ? { id: Math.random().toString(), type: 'image' as const, url: item }
+          : item
+      )
+    : [];
+
+  return (
+    <Card className="vibe-card overflow-hidden">
+      <PostHeader 
+        author={post.author} 
+        location={post.location} 
+        timestamp={post.timestamp}
+        isPinned={post.isPinned}
+        isVenueOwned={post.isVenueOwned}
+      />
+      
+      <PostContent content={post.content} />
+      
+      {mediaArray.length > 0 && (
+        <PostMedia media={mediaArray} />
       )}
-    </div>
+      
+      <PostFooter
+        isLiked={isLiked}
+        likesCount={likesCount}
+        commentsCount={post.comments?.length || 0}
+        vibedHere={post.vibedHere}
+        onLike={handleLike}
+        onComment={() => setShowComments(!showComments)}
+        onShare={onShare}
+      />
+      
+      {showComments && (
+        <CommentList 
+          comments={post.comments || []} 
+          onAddComment={onComment}
+        />
+      )}
+    </Card>
   );
 };
 

@@ -1,114 +1,133 @@
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { SocialMediaApiKeys } from "@/services/socialMedia/types";
-import { Instagram, Star, Save } from "lucide-react";
-import { toast } from "sonner";
+import React, { useState, useEffect } from 'react';
+import { SocialMediaApiKeys } from '@/services/SocialMediaService';
+import ApiKeyTabSwitcher from './settings/ApiKeyTabSwitcher';
+import ContentPlatformSettings from './settings/ContentPlatformSettings';
+import ReviewPlatformSettings from './settings/ReviewPlatformSettings';
+import SettingsFooter from './settings/SettingsFooter';
 
-const SocialMediaSettings = () => {
-  const [apiKeys, setApiKeys] = useLocalStorage<SocialMediaApiKeys>('social_media_keys', {
+interface SocialMediaSettingsProps {
+  onSaveApiKeys: (keys: SocialMediaApiKeys) => void;
+  initialApiKeys?: SocialMediaApiKeys;
+}
+
+const SocialMediaSettings: React.FC<SocialMediaSettingsProps> = ({ 
+  onSaveApiKeys,
+  initialApiKeys 
+}) => {
+  const [apiKeys, setApiKeys] = useState<SocialMediaApiKeys>({
     instagram: '',
+    tiktok: '',
     yelp: '',
-    google: ''
+    tripadvisor: '',
+    foursquare: '',
+    google: '',
+    franki: '',
+    other: '',
+    otherUrl: ''
   });
+  
+  const [activeTab, setActiveTab] = useState('content');
+  const [saveStatus, setSaveStatus] = useState<string | null>(null);
+  const [otherPlatformName, setOtherPlatformName] = useState('');
 
-  const [tempKeys, setTempKeys] = useState(apiKeys);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleSave = async () => {
-    setIsLoading(true);
-    try {
-      // Simulate API validation
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setApiKeys(tempKeys);
-      toast.success('Social media settings saved successfully');
-    } catch (error) {
-      toast.error('Failed to save settings');
-    } finally {
-      setIsLoading(false);
+  // Load saved keys on component mount
+  useEffect(() => {
+    if (initialApiKeys) {
+      setApiKeys(initialApiKeys);
+    } else {
+      const savedKeys = localStorage.getItem('socialMediaApiKeys');
+      if (savedKeys) {
+        try {
+          const parsedKeys = JSON.parse(savedKeys);
+          setApiKeys(parsedKeys);
+          
+          // Also load custom platform name if it exists
+          const savedPlatformName = localStorage.getItem('otherPlatformName');
+          if (savedPlatformName) {
+            setOtherPlatformName(savedPlatformName);
+          }
+        } catch (error) {
+          console.error('Error parsing saved API keys:', error);
+        }
+      }
     }
-  };
+  }, [initialApiKeys]);
 
   const handleInputChange = (platform: keyof SocialMediaApiKeys, value: string) => {
-    setTempKeys(prev => ({
+    setApiKeys(prev => ({
       ...prev,
       [platform]: value
     }));
   };
 
-  const hasChanges = JSON.stringify(tempKeys) !== JSON.stringify(apiKeys);
+  const handleSave = () => {
+    // Save to localStorage for persistence
+    localStorage.setItem('socialMediaApiKeys', JSON.stringify(apiKeys));
+    
+    // Save custom platform name if provided
+    if (otherPlatformName) {
+      localStorage.setItem('otherPlatformName', otherPlatformName);
+    }
+    
+    // Call the provided callback with the updated keys
+    onSaveApiKeys(apiKeys);
+    
+    // Show success message
+    setSaveStatus('Settings saved successfully');
+    setTimeout(() => setSaveStatus(null), 3000);
+  };
+
+  const clearAll = () => {
+    const emptyKeys: SocialMediaApiKeys = {
+      instagram: '',
+      tiktok: '',
+      yelp: '',
+      tripadvisor: '',
+      foursquare: '',
+      google: '',
+      franki: '',
+      other: '',
+      otherUrl: ''
+    };
+    
+    setApiKeys(emptyKeys);
+    setOtherPlatformName('');
+    localStorage.removeItem('socialMediaApiKeys');
+    localStorage.removeItem('otherPlatformName');
+    onSaveApiKeys(emptyKeys);
+    
+    setSaveStatus('All connections cleared');
+    setTimeout(() => setSaveStatus(null), 3000);
+  };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Social Media Integration</CardTitle>
-        <CardDescription>
-          Connect your social media platforms to display reviews and posts from customers.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Instagram */}
-        <div className="space-y-2">
-          <div className="flex items-center space-x-2">
-            <Instagram className="h-5 w-5 text-pink-500" />
-            <Label htmlFor="instagram">Instagram API Key</Label>
-          </div>
-          <Input
-            id="instagram"
-            type="password"
-            placeholder="Enter Instagram API key"
-            value={tempKeys.instagram}
-            onChange={(e) => handleInputChange('instagram', e.target.value)}
-          />
-        </div>
-
-        {/* Yelp */}
-        <div className="space-y-2">
-          <div className="flex items-center space-x-2">
-            <Star className="h-5 w-5 text-red-500" />
-            <Label htmlFor="yelp">Yelp API Key</Label>
-          </div>
-          <Input
-            id="yelp"
-            type="password"
-            placeholder="Enter Yelp API key"
-            value={tempKeys.yelp}
-            onChange={(e) => handleInputChange('yelp', e.target.value)}
-          />
-        </div>
-
-        {/* Google */}
-        <div className="space-y-2">
-          <div className="flex items-center space-x-2">
-            <div className="h-5 w-5 bg-blue-500 rounded-full" />
-            <Label htmlFor="google">Google Places API Key</Label>
-          </div>
-          <Input
-            id="google"
-            type="password"
-            placeholder="Enter Google Places API key"
-            value={tempKeys.google}
-            onChange={(e) => handleInputChange('google', e.target.value)}
-          />
-        </div>
-
-        <div className="flex justify-end">
-          <Button 
-            onClick={handleSave} 
-            disabled={!hasChanges || isLoading}
-            className="flex items-center space-x-2"
-          >
-            <Save className="h-4 w-4" />
-            <span>{isLoading ? 'Saving...' : 'Save Settings'}</span>
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="space-y-4">
+      <ApiKeyTabSwitcher
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+      />
+      
+      {activeTab === 'content' ? (
+        <ContentPlatformSettings
+          apiKeys={apiKeys}
+          onInputChange={handleInputChange}
+        />
+      ) : (
+        <ReviewPlatformSettings
+          apiKeys={apiKeys}
+          onInputChange={handleInputChange}
+          otherPlatformName={otherPlatformName}
+          setOtherPlatformName={setOtherPlatformName}
+        />
+      )}
+      
+      <SettingsFooter
+        saveStatus={saveStatus}
+        onSave={handleSave}
+        onClear={clearAll}
+      />
+    </div>
   );
 };
 

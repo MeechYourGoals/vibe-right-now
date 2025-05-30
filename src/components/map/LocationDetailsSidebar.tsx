@@ -1,3 +1,4 @@
+
 import { Location } from "@/types";
 import { useNavigate } from "react-router-dom";
 import LocationHeader from "./location-details/LocationHeader";
@@ -25,7 +26,7 @@ const LocationDetailsSidebar = ({ location, onClose, onViewVibes }: LocationDeta
     <div className="absolute right-4 top-4 w-1/3 max-h-[70vh] bg-background/90 backdrop-blur-sm rounded-lg p-4 shadow-lg overflow-y-auto">
       <LocationHeader location={location} onClose={onClose} />
       <LocationActions location={location} onViewVibes={handleViewVibes} />
-      <RecentVibes locationId={location.id} />
+      <RecentVibes location={location} />
     </div>
   );
 };

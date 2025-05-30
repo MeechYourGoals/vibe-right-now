@@ -1,59 +1,63 @@
 
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { SocialMediaApiKeys } from "@/services/socialMedia/types";
-import { Instagram } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { SocialMediaApiKeys } from '@/services/SocialMediaService';
 
 interface ContentPlatformSettingsProps {
   apiKeys: SocialMediaApiKeys;
-  onApiKeyChange: (platform: keyof SocialMediaApiKeys, value: string) => void;
+  onInputChange: (platform: keyof SocialMediaApiKeys, value: string) => void;
 }
 
-const ContentPlatformSettings = ({ apiKeys, onApiKeyChange }: ContentPlatformSettingsProps) => {
+const ContentPlatformSettings: React.FC<ContentPlatformSettingsProps> = ({ 
+  apiKeys, 
+  onInputChange 
+}) => {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Content Platform Settings</CardTitle>
-        <CardDescription>
-          Configure which content platforms to display on your venue page.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Instagram */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <Instagram className="h-5 w-5 text-pink-500" />
-            <div>
-              <Label htmlFor="instagram-enabled">Instagram Posts</Label>
-              <p className="text-sm text-muted-foreground">Display Instagram posts from customers</p>
-            </div>
-          </div>
-          <Switch 
-            id="instagram-enabled"
-            checked={!!apiKeys.instagram}
-            disabled={!apiKeys.instagram}
-          />
-        </div>
-
-        {/* Google */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="h-5 w-5 bg-blue-500 rounded-full" />
-            <div>
-              <Label htmlFor="google-enabled">Google Reviews</Label>
-              <p className="text-sm text-muted-foreground">Show Google Business reviews</p>
-            </div>
-          </div>
-          <Switch 
-            id="google-enabled"
-            checked={!!apiKeys.google}
-            disabled={!apiKeys.google}
-          />
-        </div>
-      </CardContent>
-    </Card>
+    <div className="space-y-4">
+      <div className="grid gap-2">
+        <Label htmlFor="instagram">Instagram API Key <Badge className="ml-1" variant="outline">Content</Badge></Label>
+        <Input
+          id="instagram"
+          type="text"
+          value={apiKeys.instagram}
+          onChange={(e) => onInputChange('instagram', e.target.value)}
+          placeholder="Enter Instagram API Key"
+        />
+        <p className="text-xs text-muted-foreground">
+          Used to fetch images and videos posted on Instagram about this venue
+        </p>
+      </div>
+      
+      <div className="grid gap-2">
+        <Label htmlFor="tiktok">TikTok API Key <Badge className="ml-1" variant="outline">Content</Badge></Label>
+        <Input
+          id="tiktok"
+          type="text"
+          value={apiKeys.tiktok}
+          onChange={(e) => onInputChange('tiktok', e.target.value)}
+          placeholder="Enter TikTok API Key"
+        />
+        <p className="text-xs text-muted-foreground">
+          Used to fetch TikTok videos tagged with this venue
+        </p>
+      </div>
+      
+      <div className="grid gap-2">
+        <Label htmlFor="franki">Franki API Key <Badge className="ml-1" variant="outline">Content</Badge></Label>
+        <Input
+          id="franki"
+          type="text"
+          value={apiKeys.franki}
+          onChange={(e) => onInputChange('franki', e.target.value)}
+          placeholder="Enter Franki API Key"
+        />
+        <p className="text-xs text-muted-foreground">
+          Used to fetch Franki posts and recommendations for this venue
+        </p>
+      </div>
+    </div>
   );
 };
 

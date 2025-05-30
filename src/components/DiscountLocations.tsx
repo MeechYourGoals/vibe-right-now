@@ -35,15 +35,15 @@ const DiscountLocations = () => {
               <div className="flex gap-3">
                 <Avatar className="h-10 w-10">
                   <AvatarImage 
-                    src={post.images?.[0] || `https://source.unsplash.com/random/200x200/?${post.location?.type || 'restaurant'}`} 
-                    alt={post.location?.name || 'Location'} 
+                    src={post.media[0]?.url || `https://source.unsplash.com/random/200x200/?${post.location.type}`} 
+                    alt={post.location.name} 
                   />
-                  <AvatarFallback>{post.location?.name?.charAt(0) || 'L'}</AvatarFallback>
+                  <AvatarFallback>{post.location.name.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div>
-                  <div className="font-medium">{post.location?.name || 'Unknown Location'}</div>
+                  <div className="font-medium">{post.location.name}</div>
                   <div className="text-sm text-muted-foreground">
-                    {post.location?.city}, {post.location?.state}
+                    {post.location.city}, {post.location.state}
                   </div>
                   <div className="mt-1">
                     <Badge variant="secondary" className="text-xs">
@@ -60,7 +60,7 @@ const DiscountLocations = () => {
                 variant="ghost" 
                 size="sm" 
                 className="h-8" 
-                onClick={() => navigate(`/venue/${post.location?.id || '1'}`)}
+                onClick={() => navigate(`/venue/${post.location.id}`)}
               >
                 <ArrowRight className="h-4 w-4" />
               </Button>
