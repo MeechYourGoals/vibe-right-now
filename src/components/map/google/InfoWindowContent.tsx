@@ -1,67 +1,92 @@
 
 import React from 'react';
 import { Location } from '@/types';
+import { MapPin, Share2, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Star, MapPin, Clock } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { generateBusinessHours } from '@/utils/businessHoursUtils';
+import WaitTimeDisplay from '@/components/venue/WaitTimeDisplay';
 
 interface InfoWindowContentProps {
   location: Location;
-  onSelect?: (location: Location) => void;
+  onSelect: (location: Location) => void;
 }
 
-const InfoWindowContent: React.FC<InfoWindowContentProps> = ({ 
-  location, 
-  onSelect 
-}) => {
-  const handleViewDetails = () => {
-    if (onSelect) {
-      onSelect(location);
+const InfoWindowContent: React.FC<InfoWindowContentProps> = ({ location, onSelect }) => {
+  const navigate = useNavigate();
+
+  // Ensure we have business hours
+  if (!location.hours) {
+    location.hours = generateBusinessHours(location);
+  }
+  
+  // Get today's hours
+  const today = new Date();
+  const dayOfWeek = today.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+  const todaysHours = location.hours[dayOfWeek as keyof typeof location.hours] || 'Closed';
+
+  const handleViewVenue = () => {
+    navigate(`/venue/${location.id}`);
+  };
+
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: `Check out ${location.name}`,
+        text: `I found this amazing spot in ${location.city}!`,
+        url: `${window.location.origin}/venue/${location.id}`
+      }).catch(err => console.error('Error sharing:', err));
+    } else {
+      // Fallback for browsers that don't support navigator.share
+      navigator.clipboard.writeText(`${window.location.origin}/venue/${location.id}`)
+        .then(() => alert('Link copied to clipboard!'))
+        .catch(err => console.error('Could not copy text: ', err));
     }
   };
 
   return (
-    <div className="p-4 max-w-sm">
-      <div className="flex items-start justify-between mb-2">
-        <h3 className="font-semibold text-lg">{location.name}</h3>
-        {location.isVerified && (
-          <Badge variant="secondary" className="ml-2">
-            Verified
-          </Badge>
-        )}
+    <div className="w-64 p-2">
+      <div className="font-bold text-lg mb-1">{location.name}</div>
+      <div className="text-sm text-muted-foreground flex items-center mb-1">
+        <MapPin className="h-3 w-3 mr-1" />
+        <span>{location.address}, {location.city}</span>
+      </div>
+      <div className="text-sm mb-2">
+        <span className="font-medium">Today:</span> {todaysHours}
       </div>
       
-      <div className="flex items-center mb-2">
-        <MapPin className="h-4 w-4 text-gray-500 mr-1" />
-        <span className="text-sm text-gray-600">{location.address}</span>
+      {/* Display wait time if available */}
+      <div className="mb-2">
+        <WaitTimeDisplay venueId={location.id} showLastUpdated={false} />
       </div>
       
-      {location.rating && (
-        <div className="flex items-center mb-2">
-          <Star className="h-4 w-4 text-yellow-500 mr-1" />
-          <span className="text-sm">{location.rating}</span>
-          {location.priceRange && (
-            <span className="text-sm text-gray-500 ml-2">{location.priceRange}</span>
-          )}
-        </div>
-      )}
-      
-      {location.isOpen !== undefined && (
-        <div className="flex items-center mb-3">
-          <Clock className="h-4 w-4 text-gray-500 mr-1" />
-          <span className={`text-sm ${location.isOpen ? 'text-green-600' : 'text-red-600'}`}>
-            {location.isOpen ? 'Open' : 'Closed'}
+      <div className="text-sm mb-3">
+        <span className="inline-block px-2 py-1 bg-primary/10 rounded-full text-xs">
+          {location.type.charAt(0).toUpperCase() + location.type.slice(1)}
+        </span>
+        {location.vibes && location.vibes.map((vibe, i) => (
+          <span key={i} className="inline-block ml-1 px-2 py-1 bg-muted rounded-full text-xs">
+            {vibe}
           </span>
-        </div>
-      )}
-      
-      {location.description && (
-        <p className="text-sm text-gray-600 mb-3">{location.description}</p>
-      )}
-      
-      <Button size="sm" className="w-full" onClick={handleViewDetails}>
-        View Details
-      </Button>
+        ))}
+      </div>
+      <div className="flex gap-2">
+        <Button 
+          size="sm" 
+          className="w-full bg-gradient-vibe"
+          onClick={handleViewVenue}
+        >
+          <ExternalLink className="h-3 w-3 mr-1" />
+          View Vibes
+        </Button>
+        <Button 
+          size="sm" 
+          variant="outline" 
+          onClick={handleShare}
+        >
+          <Share2 className="h-3 w-3" />
+        </Button>
+      </div>
     </div>
   );
 };

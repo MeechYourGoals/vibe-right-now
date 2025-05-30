@@ -1,37 +1,63 @@
 
 import React from 'react';
-import VenuePostsList from '../venue-posts-list/VenuePostsList';
-import { Post, Comment, Location } from '@/types';
+import { Post, Comment, Location } from "@/types";
+import { TabsContent } from "@/components/ui/tabs";
+import VenuePostsList from '../VenuePostsList';
 
 interface VenuePostsTabsContentProps {
-  posts: Post[];
+  activeTab: string;
+  allPosts: Post[];
+  filteredPosts: Post[];
+  filteredVenuePosts: Post[];
   venue: Location;
   viewMode: "list" | "grid";
-  getComments: (postId: string) => Comment[];
-  canDelete: boolean;
-  onPostDeleted: (postId: string) => void;
+  getPostComments: (postId: string) => Comment[];
+  subscriptionTier: 'standard' | 'plus' | 'premium' | 'pro';
+  canEmbed: boolean;
+  connectedPlatforms: Record<string, boolean>;
+  onUpgradeSubscription: () => void;
+  onPostDeleted?: (postId: string) => void;
 }
 
 const VenuePostsTabsContent: React.FC<VenuePostsTabsContentProps> = ({
-  posts,
+  activeTab,
+  allPosts,
+  filteredPosts,
+  filteredVenuePosts,
   venue,
   viewMode,
-  getComments,
-  canDelete,
+  getPostComments,
+  subscriptionTier,
+  canEmbed,
+  connectedPlatforms,
+  onUpgradeSubscription,
   onPostDeleted
 }) => {
   return (
-    <div className="space-y-4">
-      <VenuePostsList
-        posts={posts}
-        venue={venue}
-        viewMode={viewMode}
-        getComments={getComments}
-        canDelete={canDelete}
-        onPostDeleted={onPostDeleted}
-        subscriptionTier="standard"
-      />
-    </div>
+    <>
+      <TabsContent value="posts" className="mt-6">
+        <VenuePostsList
+          posts={filteredVenuePosts}
+          venue={venue}
+          viewMode={viewMode}
+          getComments={getPostComments}
+          canDelete={canEmbed}
+          onPostDeleted={onPostDeleted || (() => {})}
+        />
+      </TabsContent>
+      
+      <TabsContent value="reviews" className="mt-6">
+        <div className="text-center py-8">
+          <p className="text-muted-foreground">Reviews will be displayed here</p>
+        </div>
+      </TabsContent>
+      
+      <TabsContent value="events" className="mt-6">
+        <div className="text-center py-8">
+          <p className="text-muted-foreground">Events will be displayed here</p>
+        </div>
+      </TabsContent>
+    </>
   );
 };
 

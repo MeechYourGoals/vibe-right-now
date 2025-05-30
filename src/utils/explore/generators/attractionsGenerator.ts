@@ -1,50 +1,65 @@
 
-import { Location } from '@/types';
-import { generateBusinessHours } from '@/utils/businessHoursUtils';
+import { Location } from "@/types";
+import { getMockUserProfile } from "@/mock/users";
+import { getRandomItems } from "@/utils/explore/mockGenerators";
+import { vibeTags } from "../helpers/vibeTags";
+import { generateZipCode } from "../helpers/zipCodeGenerator";
 
-export const generateAttractions = (city: string, state: string): Location[] => {
-  const baseAttractions = [
-    {
-      id: '4',
-      name: 'Modern Art Museum',
-      address: '456 Culture Ave',
-      city,
-      state,
-      country: 'US',
-      category: 'attraction' as const,
-      rating: 4.6,
-      priceRange: '$$' as const,
-      description: 'Contemporary art exhibitions and installations',
-      amenities: ['Audio Guide', 'Gift Shop', 'Cafe', 'Parking'],
-      vibes: ['🎭 Artsy', '📚 Educational', '🌟 Inspiring'],
-      lat: 34.0522 + Math.random() * 0.01,
-      lng: -118.2437 + Math.random() * 0.01,
-      source: 'generated',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      hours: generateBusinessHours({} as Location)
+// Generate event and attraction locations for a city
+export const generateEventAndAttractionLocations = (city: string, state: string = ""): Location[] => {
+  const locations: Location[] = [];
+  
+  // Event location
+  locations.push({
+    id: `${city.toLowerCase().replace(/\s+/g, '-')}-event-1`,
+    name: `${city} Festival Ground`,
+    address: `101 Festival Way`,
+    city: city,
+    state: state || 'CA',
+    country: 'USA',
+    zip: generateZipCode(city),
+    lat: 37.7749 + (Math.random() * 0.02 - 0.01),
+    lng: -122.4194 + (Math.random() * 0.02 - 0.01),
+    type: 'event',
+    verified: true,
+    hours: {
+      monday: '9:00 AM - 5:00 PM',
+      tuesday: '9:00 AM - 5:00 PM',
+      wednesday: '9:00 AM - 5:00 PM',
+      thursday: '9:00 AM - 5:00 PM',
+      friday: '9:00 AM - 11:00 PM',
+      saturday: '10:00 AM - 11:00 PM',
+      sunday: '10:00 AM - 8:00 PM'
     },
-    {
-      id: '8',
-      name: 'Christ the Redeemer',
-      address: 'Corcovado Mountain',
-      city,
-      state,
-      country: 'US',
-      category: 'attraction' as const,
-      rating: 4.8,
-      priceRange: '$$$' as const,
-      description: 'Iconic statue overlooking the city',
-      amenities: ['Cable Car', 'Viewing Platform', 'Gift Shop'],
-      vibes: ['🙏 Spiritual', '🏔️ Scenic', '📸 Instagram'],
-      lat: 34.0522 + Math.random() * 0.01,
-      lng: -118.2437 + Math.random() * 0.01,
-      source: 'generated',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      hours: generateBusinessHours({} as Location)
-    }
-  ];
-
-  return baseAttractions;
+    vibes: getRandomItems(vibeTags, 3),
+    userProfile: getMockUserProfile('venue'),
+  });
+  
+  // Attraction location
+  locations.push({
+    id: `${city.toLowerCase().replace(/\s+/g, '-')}-attraction-1`,
+    name: `${city} Museum of Art`,
+    address: `200 Culture Blvd`,
+    city: city,
+    state: state || 'CA',
+    country: 'USA',
+    zip: generateZipCode(city),
+    lat: 37.7749 + (Math.random() * 0.02 - 0.01),
+    lng: -122.4194 + (Math.random() * 0.02 - 0.01),
+    type: 'attraction',
+    verified: true,
+    hours: {
+      monday: 'Closed',
+      tuesday: '10:00 AM - 5:00 PM',
+      wednesday: '10:00 AM - 5:00 PM',
+      thursday: '10:00 AM - 5:00 PM',
+      friday: '10:00 AM - 8:00 PM',
+      saturday: '9:00 AM - 6:00 PM',
+      sunday: '10:00 AM - 5:00 PM'
+    },
+    vibes: getRandomItems(vibeTags, 3),
+    userProfile: getMockUserProfile('venue'),
+  });
+  
+  return locations;
 };
