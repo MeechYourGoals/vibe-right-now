@@ -1,3 +1,4 @@
+
 // If this file doesn't exist, we're creating it
 import { MockUserProfile } from "@/mock/users";
 
@@ -11,7 +12,7 @@ export interface Location {
   zip?: string;
   lat: number;
   lng: number;
-  type: "restaurant" | "bar" | "event" | "attraction" | "sports" | "other";
+  type: "restaurant" | "bar" | "event" | "attraction" | "sports" | "other" | "nightclub" | "cafe" | "museum";
   verified: boolean;
   hours?: BusinessHours;
   vibes?: string[];
@@ -55,6 +56,7 @@ export interface Post {
   isVenuePost?: boolean;
   isPinned?: boolean;
   expiresAt?: string;
+  saved?: boolean;
 }
 
 export interface Comment {
@@ -83,6 +85,16 @@ export interface User {
   posts?: number;
   isCelebrity?: boolean;
   isPrivate?: boolean;
+}
+
+// Credit Card types
+export interface CreditCard {
+  id: string;
+  last4: string;
+  brand: string;
+  expiryMonth: number;
+  expiryYear: number;
+  isDefault: boolean;
 }
 
 // VernonChat types

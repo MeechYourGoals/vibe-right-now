@@ -13,29 +13,29 @@ export const useMessageProcessor = () => {
       setUsedFallback(false);
       
       try {
-        console.log("Calling perplexity-search function with:", query.substring(0, 50));
+        console.log("Calling openrouter-search function with:", query.substring(0, 50));
         
-        // Use Perplexity for real-world search results
-        const { data, error } = await supabase.functions.invoke('perplexity-search', {
+        // Use OpenRouter for real-world search results
+        const { data, error } = await supabase.functions.invoke('openrouter-search', {
           body: { 
             query: query
           }
         });
         
         if (error) {
-          console.error("Error calling perplexity-search function:", error);
+          console.error("Error calling openrouter-search function:", error);
           throw new Error(error.message);
         }
         
         if (!data) {
-          throw new Error("No response received from Perplexity");
+          throw new Error("No response received from OpenRouter");
         }
         
         if (!data.text) {
-          throw new Error("No text in response from Perplexity");
+          throw new Error("No text in response from OpenRouter");
         }
         
-        console.log("Received response from perplexity-search:", data.text.substring(0, 50) + "...");
+        console.log("Received response from openrouter-search:", data.text.substring(0, 50) + "...");
         return data.text;
       } catch (error) {
         console.error('Error processing message:', error);
