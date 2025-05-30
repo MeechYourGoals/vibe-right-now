@@ -13,7 +13,6 @@ export interface User {
   joinedDate?: string;
   location?: string;
   vibeTags?: string[];
-  // Add missing properties found in build errors
   isCelebrity?: boolean;
 }
 
@@ -79,7 +78,7 @@ export interface Post {
   userId: string;
   locationId?: string;
   content: string;
-  media?: string[] | Media[];
+  media?: Media[];
   timestamp: string;
   likes: number;
   comments: number;

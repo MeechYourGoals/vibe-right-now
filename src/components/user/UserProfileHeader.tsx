@@ -1,174 +1,105 @@
-
-import { useState, useEffect } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+import React from "react";
 import { Button } from "@/components/ui/button";
-import { MapPin, Calendar, Users, Award, Share2 } from "lucide-react";
-import VerifiedIcon from "@/components/icons/VerifiedIcon";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { MapPin, Calendar, Users, Heart, MessageCircle, Instagram, X } from "lucide-react";
 import { User } from "@/types";
-import { toast } from "sonner";
-import { cn } from "@/lib/utils";
 
 interface UserProfileHeaderProps {
   user: User;
-  getUserBio: () => string;
+  isCurrentUser?: boolean;
 }
 
-const UserProfileHeader = ({ user, getUserBio }: UserProfileHeaderProps) => {
-  const [isFollowing, setIsFollowing] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
-  
-  useEffect(() => {
-    // Trigger entrance animation after component mounts
-    const timer = setTimeout(() => {
-      setIsVisible(true);
-    }, 100);
-    
-    return () => clearTimeout(timer);
-  }, []);
-
-  const handleFollowToggle = () => {
-    setIsFollowing(!isFollowing);
-    
-    if (isFollowing) {
-      toast.success(`Unfollowed @${user?.username}`);
-    } else {
-      toast.success(`Now following @${user?.username}`);
-    }
-  };
-  
-  const handleShareProfile = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: `Check out ${user?.name}'s profile on Vibe Right Now!`,
-        text: `I found ${user?.name} (@${user?.username}) on Vibe Right Now and thought you might want to follow them!`,
-        url: `${window.location.origin}/user/${user?.username}`
-      })
-      .then(() => toast.success("Shared successfully!"))
-      .catch((error) => {
-        console.error('Error sharing:', error);
-        toast.error("Couldn't share. Try copying the link instead.");
-      });
-    } else {
-      // Fallback for browsers that don't support navigator.share
-      const url = `${window.location.origin}/user/${user?.username}`;
-      navigator.clipboard.writeText(url)
-        .then(() => toast.success("Profile link copied to clipboard!"))
-        .catch(() => toast.error("Couldn't copy link. Please try again."));
-    }
-  };
-
+const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({ user, isCurrentUser }) => {
   return (
-    <div 
-      className={cn(
-        "glass-effect p-6 rounded-xl mb-6 transition-all duration-500 transform",
-        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-      )}
-    >
-      <div className="flex items-start gap-6">
-        <Avatar className="h-24 w-24 border-2 border-primary transition-transform hover:scale-105 duration-300">
-          <AvatarImage src={user.avatar} alt={user.name} />
-          <AvatarFallback>{user.name[0]}</AvatarFallback>
-        </Avatar>
-        
-        <div className="flex-1">
-          <div className="flex justify-between items-start">
-            <div>
-              <h1 className="text-2xl font-bold flex items-center gap-2">
-                {user.name}
-                {user.verified && (
-                  <VerifiedIcon className="h-5 w-5 text-primary animate-pulse-slow" />
-                )}
-              </h1>
-              <p className="text-muted-foreground">@{user.username}</p>
-              
-              <div className="flex flex-wrap items-center gap-4 mt-2">
-                <div className="flex items-center text-sm transition-all duration-300 hover:text-primary">
-                  <Users className="h-4 w-4 mr-2" />
-                  <span>{user.isCelebrity ? Math.floor(Math.random() * 90 + 10) + "M" : Math.floor(Math.random() * 900 + 100) + "K"} Followers</span>
-                </div>
-                <div className="flex items-center text-sm transition-all duration-300 hover:text-primary">
-                  <Calendar className="h-4 w-4 mr-2" />
-                  <span>Joined {user.isCelebrity ? "Jan 2020" : "Aug 2023"}</span>
-                </div>
-                <div className="flex items-center text-sm transition-all duration-300 hover:text-primary">
-                  <MapPin className="h-4 w-4 mr-2" />
-                  <span>{user.isCelebrity ? "Los Angeles, CA" : "New York, NY"}</span>
-                </div>
-              </div>
-              
-              <div className="mt-4 flex flex-wrap gap-2">
-                {user.isCelebrity && (
-                  <Badge 
-                    variant="outline" 
-                    className="bg-blue-500/20 text-blue-500 transition-all duration-300 hover:bg-blue-500/30"
-                  >
-                    Verified
-                  </Badge>
-                )}
-                <Badge 
-                  variant="outline" 
-                  className="bg-primary/20 transition-all duration-300 hover:bg-primary/30"
-                >
-                  Top Vibe Creator
-                </Badge>
-                {user.isCelebrity ? (
-                  <Badge 
-                    variant="outline" 
-                    className="bg-rose-500/20 text-rose-500 transition-all duration-300 hover:bg-rose-500/30"
-                  >
-                    Celebrity
-                  </Badge>
-                ) : (
-                  <Badge 
-                    variant="outline" 
-                    className="bg-purple-500/20 text-purple-600 transition-all duration-300 hover:bg-purple-500/30"
-                  >
-                    VIP Member
-                  </Badge>
-                )}
-                <Badge 
-                  variant="outline" 
-                  className="bg-amber-500/20 text-amber-600 transition-all duration-300 hover:bg-amber-500/30"
-                >
-                  <Award className="h-3 w-3 mr-1" />
-                  <span>Vibe Enthusiast</span>
-                </Badge>
+    <Card className="bg-background">
+      <CardContent className="p-0">
+        {/* Cover Photo */}
+        <div className="h-32 bg-muted relative">
+          <img
+            src={user.coverPhoto || "/placeholder-image.jpg"}
+            alt="Cover"
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        </div>
+
+        {/* Profile Info */}
+        <div className="p-4">
+          <div className="flex items-start justify-between">
+            <div className="flex items-center space-x-3">
+              <Avatar className="h-12 w-12">
+                <AvatarImage src={user.avatar || "/placeholder.svg"} alt={user.name} />
+                <AvatarFallback>{user.name?.substring(0, 2)}</AvatarFallback>
+              </Avatar>
+              <div>
+                <h2 className="text-lg font-semibold flex items-center space-x-1">
+                  <span>{user.name}</span>
+                  {user.isVerified && (
+                    <Badge variant="secondary">Verified</Badge>
+                  )}
+                  {user.isCelebrity && (
+                    <Badge>Celebrity</Badge>
+                  )}
+                </h2>
+                <p className="text-sm text-muted-foreground">@{user.username}</p>
               </div>
             </div>
-            
-            <div className="flex items-center gap-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="h-9 transition-all duration-300 hover:bg-accent/30"
-                onClick={handleShareProfile}
-              >
-                <Share2 className="h-4 w-4 mr-2" />
-                Share
+            {isCurrentUser ? (
+              <Button variant="outline" size="sm">
+                Edit Profile
               </Button>
-              <Button 
-                variant={isFollowing ? "default" : "outline"}
-                size="sm"
-                className={cn(
-                  "h-9 transition-all duration-300",
-                  isFollowing 
-                    ? "bg-primary hover:bg-primary/90" 
-                    : "hover:bg-primary/20"
-                )}
-                onClick={handleFollowToggle}
-              >
-                {isFollowing ? "Following" : "Follow"}
-              </Button>
+            ) : (
+              <Button size="sm">Follow</Button>
+            )}
+          </div>
+
+          {/* Bio and Stats */}
+          <div className="mt-3 space-y-2">
+            <p className="text-sm">{user.bio || "No bio available."}</p>
+            <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+              <div className="flex items-center space-x-1">
+                <Users className="h-4 w-4" />
+                <span>{user.followers || 0} Followers</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <Heart className="h-4 w-4" />
+                <span>{user.following || 0} Following</span>
+              </div>
             </div>
           </div>
-          
-          <p className="mt-4 text-sm transition-all duration-500 hover:text-foreground">
-            {getUserBio()}
-          </p>
+
+          {/* Location and Joined Date */}
+          <div className="mt-3 space-y-2 text-sm text-muted-foreground">
+            {user.location && (
+              <div className="flex items-center space-x-2">
+                <MapPin className="h-4 w-4" />
+                <span>{user.location}</span>
+              </div>
+            )}
+            {user.joinedDate && (
+              <div className="flex items-center space-x-2">
+                <Calendar className="h-4 w-4" />
+                <span>Joined {user.joinedDate}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Social Links */}
+          <div className="mt-4 flex space-x-3">
+            <a href="#" className="hover:text-primary transition-colors">
+              <Instagram className="h-5 w-5" />
+            </a>
+            <a href="#" className="hover:text-primary transition-colors">
+              <X className="h-5 w-5" />
+            </a>
+            <a href="#" className="hover:text-primary transition-colors">
+              <MessageCircle className="h-5 w-5" />
+            </a>
+          </div>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 

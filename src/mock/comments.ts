@@ -1,205 +1,95 @@
-
 import { Comment } from "@/types";
 import { mockUsers } from "@/mock/users";
-import { getRecentTime } from "./time-utils";
 
 export const mockComments: Comment[] = [
   {
     id: "1",
     postId: "1",
-    user: mockUsers[5],
-    content: "The view is amazing! What DJ is playing?",
-    timestamp: getRecentTime(0.5),
-    vibedHere: false,
-    likes: 0
+    userId: mockUsers[0].id,
+    content: "This place looks amazing! Can't wait to check it out 🔥",
+    timestamp: "2024-01-15T10:30:00Z",
+    user: {
+      id: mockUsers[0].id,
+      name: mockUsers[0].name,
+      username: mockUsers[0].username,
+      avatar: mockUsers[0].avatar
+    },
+    likes: 12,
+    vibedHere: true
   },
   {
     id: "2",
     postId: "1",
-    user: mockUsers[10],
-    content: "Just arrived! Where are you sitting?",
-    timestamp: getRecentTime(0.2),
-    vibedHere: true,
-    likes: 0
+    userId: mockUsers[1].id,
+    content: "I heard their cocktails are top-notch! 🍹",
+    timestamp: "2024-01-15T11:00:00Z",
+    user: {
+      id: mockUsers[1].id,
+      name: mockUsers[1].name,
+      username: mockUsers[1].username,
+      avatar: mockUsers[1].avatar
+    },
+    likes: 8,
+    vibedHere: false
   },
   {
     id: "3",
     postId: "2",
-    user: mockUsers[3],
-    content: "Heading there now! Save me a chocolate one!",
-    timestamp: getRecentTime(1.8),
-    vibedHere: true,
-    likes: 0
+    userId: mockUsers[2].id,
+    content: "Just had the best pizza ever at this spot! 🍕😋",
+    timestamp: "2024-01-16T14:45:00Z",
+    user: {
+      id: mockUsers[2].id,
+      name: mockUsers[2].name,
+      username: mockUsers[2].username,
+      avatar: mockUsers[2].avatar
+    },
+    likes: 15,
+    vibedHere: true
   },
   {
     id: "4",
-    postId: "3",
-    user: mockUsers[7],
-    content: "Can't wait to see them! Looking for parking now.",
-    timestamp: getRecentTime(0.3),
-    vibedHere: false,
-    likes: 0
+    postId: "2",
+    userId: mockUsers[3].id,
+    content: "Their outdoor seating is so cozy and romantic ✨",
+    timestamp: "2024-01-16T15:20:00Z",
+    user: {
+      id: mockUsers[3].id,
+      name: mockUsers[3].name,
+      username: mockUsers[3].username,
+      avatar: mockUsers[3].avatar
+    },
+    likes: 10,
+    vibedHere: false
   },
   {
     id: "5",
     postId: "3",
-    user: mockUsers[11],
-    content: "I'm near the front! It's not too crowded yet!",
-    timestamp: getRecentTime(0.1),
-    vibedHere: true,
-    likes: 0
+    userId: mockUsers[4].id,
+    content: "This event was absolutely incredible! The energy was electric ⚡️",
+    timestamp: "2024-01-17T20:10:00Z",
+    user: {
+      id: mockUsers[4].id,
+      name: mockUsers[4].name,
+      username: mockUsers[4].username,
+      avatar: mockUsers[4].avatar
+    },
+    likes: 22,
+    vibedHere: true
   },
   {
     id: "6",
-    postId: "6",
-    user: mockUsers[2],
-    content: "Who's winning right now? Stuck in traffic!",
-    timestamp: getRecentTime(0.2),
-    vibedHere: false,
-    likes: 0
-  },
-  {
-    id: "7",
-    postId: "6",
-    user: mockUsers[14],
-    content: "Just got here! The atmosphere is incredible!",
-    timestamp: getRecentTime(0.1),
-    vibedHere: true,
-    likes: 0
-  },
-  {
-    id: "8",
-    postId: "7",
-    user: mockUsers[12],
-    content: "Which DJ is on right now? Coming over!",
-    timestamp: getRecentTime(0.1),
-    vibedHere: true,
-    likes: 0
-  },
-  {
-    id: "9",
-    postId: "10",
-    user: mockUsers[8],
-    content: "Best seats in the house! Jealous!",
-    timestamp: getRecentTime(0.05),
-    vibedHere: false,
-    likes: 0
-  },
-  {
-    id: "10",
-    postId: "10",
-    user: mockUsers[13],
-    content: "I'm in section 115! Let's meet up!",
-    timestamp: getRecentTime(0.02),
-    vibedHere: true,
-    likes: 0
-  },
-  {
-    id: "11",
-    postId: "13",
-    user: mockUsers[9],
-    content: "Which event is on right now? The barrel racing?",
-    timestamp: getRecentTime(0.1),
-    vibedHere: false,
-    likes: 0
-  },
-  {
-    id: "12",
-    postId: "13",
-    user: mockUsers[20],
-    content: "Just arrived! The bull riding is WILD!",
-    timestamp: getRecentTime(0.05),
-    vibedHere: true,
-    likes: 0
-  },
-  {
-    id: "13",
-    postId: "21",
-    user: mockUsers[17],
-    content: "Who's the headliner tonight? Worth coming?",
-    timestamp: getRecentTime(0.05),
-    vibedHere: false,
-    likes: 0
-  },
-  {
-    id: "14",
-    postId: "21",
-    user: mockUsers[19],
-    content: "I'm here too! Best comedy show I've seen all year!",
-    timestamp: getRecentTime(0.02),
-    vibedHere: true,
-    likes: 0
-  },
-  {
-    id: "15",
-    postId: "25",
-    user: mockUsers[21],
-    content: "Is the light show worth it? Thinking of heading over now!",
-    timestamp: getRecentTime(0.3),
-    vibedHere: false,
-    likes: 0
-  },
-  {
-    id: "16",
-    postId: "25",
-    user: mockUsers[22],
-    content: "Just arrived! The colors are magical tonight!",
-    timestamp: getRecentTime(0.2),
-    vibedHere: true,
-    likes: 0
-  },
-  {
-    id: "17",
-    postId: "26",
-    user: mockUsers[14],
-    content: "Did you go to the top? How long is the wait?",
-    timestamp: getRecentTime(0.2),
-    vibedHere: false,
-    likes: 0
-  },
-  {
-    id: "18",
-    postId: "26",
-    user: mockUsers[16],
-    content: "Here now too! The view of Paris at night is unbeatable!",
-    timestamp: getRecentTime(0.1),
-    vibedHere: true,
-    likes: 0
-  },
-  {
-    id: "19",
-    postId: "27",
-    user: mockUsers[15],
-    content: "Who was the surprise guest?? Stuck in traffic!",
-    timestamp: getRecentTime(0.05),
-    vibedHere: false,
-    likes: 0
-  },
-  {
-    id: "20",
-    postId: "27",
-    user: mockUsers[18],
-    content: "Second stage is better right now! No crowds and amazing performance!",
-    timestamp: getRecentTime(0.01),
-    vibedHere: true,
-    likes: 0
-  },
-  {
-    id: "21",
-    postId: "28",
-    user: mockUsers[0],
-    content: "Any exclusive items only available there?",
-    timestamp: getRecentTime(0.1),
-    vibedHere: false,
-    likes: 0
-  },
-  {
-    id: "22",
-    postId: "28",
-    user: mockUsers[1],
-    content: "Just arrived! The limited edition bags are stunning!",
-    timestamp: getRecentTime(0.05),
-    vibedHere: true,
-    likes: 0
-  },
+    postId: "3",
+    userId: mockUsers[5].id,
+    content: "I met so many amazing people at this event! Definitely coming back next year 🎉",
+    timestamp: "2024-01-17T21:00:00Z",
+    user: {
+      id: mockUsers[5].id,
+      name: mockUsers[5].name,
+      username: mockUsers[5].username,
+      avatar: mockUsers[5].avatar
+    },
+    likes: 18,
+    vibedHere: true
+  }
 ];

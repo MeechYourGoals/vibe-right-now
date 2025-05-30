@@ -1,5 +1,4 @@
-
-import React, { useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Header from "@/components/Header";
 import { Badge } from "@/components/ui/badge";
@@ -20,6 +19,8 @@ import TrendingLocations from "@/components/TrendingLocations";
 import DiscountLocations from "@/components/DiscountLocations";
 import { format } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { User } from "@/types";
 import { mockUsers } from "@/mock/users";
 
 const Explore = () => {

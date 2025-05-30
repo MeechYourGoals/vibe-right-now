@@ -1,7 +1,22 @@
+import { MockUserProfile } from './types';
 
-import { User } from "@/types";
-
-export const celebrityUsers: User[] = [
+export const celebrityUsers: MockUserProfile[] = [
+  {
+    id: "101",
+    name: "Emma Stone",
+    username: "emmastone",
+    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
+    bio: "Actress | Oscar Winner | Living life one adventure at a time ✨",
+    verified: true
+  },
+  {
+    id: "102",
+    name: "Ryan Gosling", 
+    username: "ryangosling",
+    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
+    bio: "Actor | Director | Jazz enthusiast 🎷",
+    verified: true
+  },
   {
     id: "24",
     username: "kimkardashian",
