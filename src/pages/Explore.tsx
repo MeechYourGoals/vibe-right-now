@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import Header from "@/components/Header";
 import { Badge } from "@/components/ui/badge";
 import CameraButton from "@/components/CameraButton";
@@ -19,6 +19,7 @@ import TrendingLocations from "@/components/TrendingLocations";
 import DiscountLocations from "@/components/DiscountLocations";
 import { format } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { User } from "@/types";
 
 const Explore = () => {
   const isMobile = useIsMobile();
@@ -57,8 +58,6 @@ const Explore = () => {
           <h1 className="text-3xl font-bold text-center mb-6 vibe-gradient-text">
             {getPageTitle()}
           </h1>
-          
-          {/* Removed the redundant top tabs bar */}
           
           <SearchSection 
             showDateFilter={showDateFilter}
@@ -119,7 +118,7 @@ const Explore = () => {
                   />
                 )}
                 
-                {searchCategory === "places" && activeTab === "sports" && (
+                {activeTab === "sports" && (
                   <div className="mb-6">
                     <h2 className="text-xl font-semibold mb-4 flex items-center">
                       Trending Sports Events
@@ -147,7 +146,7 @@ const Explore = () => {
                   </div>
                 )}
                 
-                {activeTab !== "music" && activeTab !== "comedy" && activeTab !== "nightlife" && (
+                {activeTab !== "music" && activeTab !== "comedy" && activeTab !== "nightlife" && activeTab !== "sports" && (
                   <LocationsGrid
                     locations={filteredLocations}
                     locationTags={locationTags}

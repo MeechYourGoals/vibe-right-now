@@ -14,13 +14,14 @@ const CategoryTabs = ({ activeTab, onTabChange }: CategoryTabsProps) => {
 
   return (
     <Tabs defaultValue={activeTab} value={activeTab} onValueChange={onTabChange}>
-      <TabsList className="w-full grid grid-cols-3 lg:grid-cols-7">
+      <TabsList className="w-full grid grid-cols-4 lg:grid-cols-8">
         <TabsTrigger value="all">All</TabsTrigger>
         <TabsTrigger value="restaurant">Dining</TabsTrigger>
         <TabsTrigger value="bar">Bars</TabsTrigger>
         <TabsTrigger value="nightlife">Nightlife</TabsTrigger>
         <TabsTrigger value="music">Music</TabsTrigger>
         <TabsTrigger value="comedy">Comedy</TabsTrigger>
+        <TabsTrigger value="sports">Sports</TabsTrigger>
         <TabsTrigger value="vibes">Vibes</TabsTrigger>
       </TabsList>
 
