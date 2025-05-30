@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { User, Post, Location, Comment, Media } from "@/types";
 import { mockUsers, mockPosts, mockComments, mockLocations } from "@/mock/data";
@@ -71,8 +72,10 @@ export const useUserProfile = (username: string | undefined) => {
       // Ensure user has all required properties
       const completeUser: User = {
         ...foundUser,
-        verified: foundUser.verified || false,
-        isCelebrity: foundUser.isCelebrity || false
+        isVerified: foundUser.isVerified || foundUser.verified || false,
+        verified: foundUser.verified || foundUser.isVerified || false,
+        isCelebrity: foundUser.isCelebrity || false,
+        isPrivate: foundUser.isPrivate || false
       };
       
       setUser(completeUser);

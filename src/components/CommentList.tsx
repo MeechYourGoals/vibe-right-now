@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MessageSquare, Send } from "lucide-react";
 import CommentItem from "@/components/CommentItem";
 import { mockComments } from "@/mock/data";
-import { mockUsers } from "@/mock/data";
+import { mockUsers } from "@/mock/users";
 
 interface CommentListProps {
   postId: string;
@@ -28,40 +28,61 @@ const CommentList = ({ postId, commentsCount }: CommentListProps) => {
     const exampleComments: Comment[] = [];
     
     // Regular comment
+    const user1 = mockUsers[Math.floor(Math.random() * mockUsers.length)];
     exampleComments.push({
       id: `example-${postId}-1`,
       postId: postId,
-      user: mockUsers[Math.floor(Math.random() * mockUsers.length)],
+      userId: user1.id,
+      user: {
+        id: user1.id,
+        name: user1.name,
+        username: user1.username,
+        avatar: user1.avatar
+      },
       content: "This place looks amazing! How's the crowd right now?",
-      text: "This place looks amazing! How's the crowd right now?", // Add text matching content
-      timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30 minutes ago
+      text: "This place looks amazing! How's the crowd right now?",
+      timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
       vibedHere: false,
-      likes: 0 // Add likes property
+      likes: 0
     });
     
     // "Vibed Here" comment
+    const user2 = mockUsers[Math.floor(Math.random() * mockUsers.length)];
     exampleComments.push({
       id: `example-${postId}-2`,
       postId: postId,
-      user: mockUsers[Math.floor(Math.random() * mockUsers.length)],
+      userId: user2.id,
+      user: {
+        id: user2.id,
+        name: user2.name,
+        username: user2.username,
+        avatar: user2.avatar
+      },
       content: "I was here yesterday and it was incredible! The line moves fast if you go around to the side entrance.",
-      text: "I was here yesterday and it was incredible! The line moves fast if you go around to the side entrance.", // Add text matching content
-      timestamp: new Date(Date.now() - 1000 * 60 * 120).toISOString(), // 2 hours ago
+      text: "I was here yesterday and it was incredible! The line moves fast if you go around to the side entrance.",
+      timestamp: new Date(Date.now() - 1000 * 60 * 120).toISOString(),
       vibedHere: true,
-      likes: 0 // Add likes property
+      likes: 0
     });
     
     // Add a third comment if needed
     if (commentCount > 2) {
+      const user3 = mockUsers[Math.floor(Math.random() * mockUsers.length)];
       exampleComments.push({
         id: `example-${postId}-3`,
         postId: postId,
-        user: mockUsers[Math.floor(Math.random() * mockUsers.length)],
+        userId: user3.id,
+        user: {
+          id: user3.id,
+          name: user3.name,
+          username: user3.username,
+          avatar: user3.avatar
+        },
         content: "Heading there now! Anyone want to meet up?",
-        text: "Heading there now! Anyone want to meet up?", // Add text matching content
-        timestamp: new Date(Date.now() - 1000 * 60 * 10).toISOString(), // 10 minutes ago
-        vibedHere: Math.random() > 0.5, // 50% chance of being "Vibed Here"
-        likes: 0 // Add likes property
+        text: "Heading there now! Anyone want to meet up?",
+        timestamp: new Date(Date.now() - 1000 * 60 * 10).toISOString(),
+        vibedHere: Math.random() > 0.5,
+        likes: 0
       });
     }
     

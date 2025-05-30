@@ -1,8 +1,6 @@
-
 import { useCallback } from 'react';
 import { playAudioBase64 } from '@/components/VernonChat/utils/speech/synthesis';
 import { toast } from "sonner";
-import { VertexAIHub, DEFAULT_MALE_VOICE } from '@/services/VertexAI';
 import { OpenRouterService } from '@/services/OpenRouterService';
 
 interface UseSpeakResponseProps {
@@ -74,41 +72,7 @@ export const useSpeakResponse = ({
       console.error('OpenRouter TTS failed, falling back:', error);
     }
     
-    // If OpenRouter failed, try Vertex AI TTS
-    if (!speechSuccess) {
-      try {
-        console.log('Attempting to use Google Vertex AI TTS...');
-        console.log(`Using voice: ${DEFAULT_MALE_VOICE}`);
-        
-        const audioBase64 = await VertexAIHub.textToSpeech(text, {
-          voice: DEFAULT_MALE_VOICE,
-          speakingRate: 1.0,
-          pitch: 0
-        });
-        
-        if (audioBase64) {
-          console.log('Google TTS successful, playing audio');
-          const audioElement = playAudioBase64(audioBase64);
-          if (audioElement) {
-            speechSuccess = true;
-            
-            // Mark intro as played if this is the first message
-            if (!introHasPlayed.current && text.includes("I'm VeRNon")) {
-              introHasPlayed.current = true;
-            }
-            return;
-          } else {
-            console.warn('Audio element creation failed, falling back to browser TTS');
-          }
-        } else {
-          console.warn('Google TTS returned null, falling back to browser TTS');
-        }
-      } catch (error) {
-        console.error('Google TTS failed, falling back to browser TTS:', error);
-      }
-    }
-    
-    // If both failed, fall back to browser's speech synthesis
+    // If OpenRouter failed, fall back to browser's speech synthesis
     try {
       if (!speechSuccess) {
         console.log('Attempting to use browser speech synthesis...');
@@ -124,7 +88,6 @@ export const useSpeakResponse = ({
         // If we found a male voice, use it specifically
         if (maleVoice) {
           console.log('Using browser male voice:', maleVoice.name);
-          // Create a speech synthesis utterance with the selected voice
           speechSuccess = await speakWithBrowser(text, [maleVoice]);
         } else {
           // Otherwise use default browser voice selection
@@ -139,7 +102,6 @@ export const useSpeakResponse = ({
     } catch (error) {
       console.error('Browser speech synthesis failed:', error);
       toast.error("Voice synthesis unavailable. Please try again later.");
-      // Even if speech fails completely, we continue with the app's functionality
     }
     
     // The function completes regardless of speech success to ensure conversation flow continues

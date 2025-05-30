@@ -10,10 +10,12 @@ export interface User {
   followers?: number;
   following?: number;
   isVerified?: boolean;
+  verified?: boolean; // Keep both for backward compatibility
   joinedDate?: string;
   location?: string;
   vibeTags?: string[];
   isCelebrity?: boolean;
+  isPrivate?: boolean; // Add missing property
 }
 
 export interface Location {
@@ -23,6 +25,7 @@ export interface Location {
   city?: string;
   state?: string;
   zipCode?: string;
+  zip?: string; // Add missing property for backward compatibility
   lat?: number;
   lng?: number;
   type?: string;
@@ -52,6 +55,9 @@ export interface EventItem extends Omit<Location, 'openNow' | 'hours'> {
   ticketUrl?: string;
   category?: string;
   venueName?: string;
+  title?: string; // Add missing property
+  time?: string; // Add missing property
+  venue?: string; // Add missing property
 }
 
 export interface Media {
@@ -87,6 +93,7 @@ export interface Post {
   vibeTags?: string[];
   isVenuePost?: boolean;
   isPinned?: boolean;
+  expiresAt?: string; // Add missing property
 }
 
 export interface SavedPlace {
@@ -114,4 +121,12 @@ export interface VenueInsights {
   peakHours: Record<string, number>;
   customerDemographics?: any;
   venue?: Location;
+  
+  // Add missing properties for backward compatibility
+  totalVisits?: number;
+  visitors?: number;
+  visitorsChange?: string;
+  checkins?: number;
+  viewsCount?: number;
+  impressions?: number;
 }
