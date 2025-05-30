@@ -1,6 +1,7 @@
 
 // Speech synthesis helpers using Google's TTS
 import { toast } from "sonner";
+import { VertexAIHub, DEFAULT_MALE_VOICE } from "@/services/VertexAI";
 
 export const initializeSpeechSynthesis = (): SpeechSynthesis | null => {
   if ('speechSynthesis' in window) {
@@ -20,6 +21,24 @@ export const initializeSpeechSynthesis = (): SpeechSynthesis | null => {
   
   console.error('Speech synthesis not supported');
   return null;
+};
+
+// Google TTS using Cloud Text-to-Speech API implementation
+export const getGoogleTTS = async (text: string): Promise<string | null> => {
+  try {
+    console.log('Requesting Google TTS for text:', text.substring(0, 50) + '...');
+    
+    // Use our VertexAIHub to handle TTS
+    return await VertexAIHub.textToSpeech(text, {
+      voice: DEFAULT_MALE_VOICE,
+      speakingRate: 1.0,
+      pitch: 0
+    });
+  } catch (error) {
+    console.error('Error calling Google TTS:', error);
+    toast.error('Error generating speech, falling back to browser TTS');
+    return null;
+  }
 };
 
 // Helper to play audio from base64 string

@@ -16,7 +16,7 @@ const MetricsOverview = ({ insights, timeframe }: MetricsOverviewProps) => {
         value={insights.totalVisits || insights.visitors || 0}
         icon={Users}
         iconColor="text-blue-500"
-        changePercentage={parseInt(insights.visitorsChange) || 12}
+        changePercentage={insights.visitorsChange || 12}
         timeframe={timeframe}
       />
       

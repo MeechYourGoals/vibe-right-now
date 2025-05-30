@@ -1,132 +1,162 @@
-
-export interface User {
-  id: string;
-  name: string;
-  username: string;
-  email?: string;
-  bio?: string;
-  avatar?: string;
-  coverPhoto?: string;
-  followers?: number;
-  following?: number;
-  isVerified?: boolean;
-  verified?: boolean; // Keep both for backward compatibility
-  joinedDate?: string;
-  location?: string;
-  vibeTags?: string[];
-  isCelebrity?: boolean;
-  isPrivate?: boolean; // Add missing property
-}
-
 export interface Location {
   id: string;
   name: string;
   address: string;
-  city?: string;
-  state?: string;
-  zipCode?: string;
-  zip?: string; // Add missing property for backward compatibility
-  lat?: number;
-  lng?: number;
-  type?: string;
-  rating?: number;
-  priceLevel?: number;
-  openNow?: boolean;
+  city: string;
+  state: string | null;
+  zip: string;
+  latitude: number;
+  longitude: number;
+  lat: number;
+  lng: number;
+  category: string;
+  type: "restaurant" | "bar" | "event" | "attraction" | "sports" | "other" | "music_venue" | "comedy_club" | "nightclub" | "lounge";
+  rating: number;
+  reviewCount: number;
+  price: string;
+  imageUrl: string;
+  isFeatured: boolean;
+  verified: boolean;
+  country: string;
   images?: string[];
-  logo?: string;
-  description?: string;
-  website?: string;
-  phone?: string;
-  hours?: Record<string, string>;
-  tags?: string[];
   vibeTags?: string[];
-  verified?: boolean;
-  country?: string;
   vibes?: string[];
-  url?: string;
+  hours?: {
+    monday: string;
+    tuesday: string;
+    wednesday: string;
+    thursday: string;
+    friday: string;
+    saturday: string;
+    sunday: string;
+    weekdayText?: string[];
+    isOpen24Hours?: boolean;
+    isOpenNow?: string;
+    timezone?: string;
+  };
+  openingHours?: {
+    weekdayText: string[];
+  };
+  formattedPhoneNumber: string;
+  website: string;
+  reservable: boolean;
+  customerId?: string;
+  followers?: number;
+  checkins?: number;
+  userProfile?: {
+    id: string;
+    username: string;
+    avatar: string;
+    bio?: string;
+    verified: boolean;
+  };
 }
 
-export interface EventItem extends Omit<Location, 'openNow' | 'hours'> {
-  date?: string;
-  startTime?: string;
-  endTime?: string;
-  performers?: string[];
-  ticketPrice?: string;
-  ticketUrl?: string;
-  category?: string;
-  venueName?: string;
-  title?: string; // Add missing property
-  time?: string; // Add missing property
-  venue?: string; // Add missing property
+export interface EventItem {
+  id: string;
+  title: string;
+  description: string;
+  location: Location;
+  startTime: string;
+  endTime: string;
+  imageUrl: string;
+  category: string;
+  isFeatured: boolean;
+  price: string;
+  organizer: string;
+  contactEmail: string;
+  contactPhone: string;
+  website: string;
+  reservable: boolean;
+}
+
+export interface Comment {
+  id: string;
+  postId: string;
+  userId: string;
+  user: User;
+  content: string;
+  timestamp: string;
+  vibedHere: boolean;
+  likes: number;
+}
+
+export interface VenueInsights {
+  totalVisits?: number;
+  visitors?: number;
+  visitorsChange?: number;
+  checkins?: number;
+  viewsCount?: number;
+  impressions?: number;
+  posts?: number;
+  postsChange?: number;
+  likes?: number;
+  likesChange?: number;
+  mentions?: number;
+  mentionsChange?: number;
+  checkinsChange?: number;
+  reviews?: number;
+  reviewsChange?: number;
+  rating?: number;
+  ratingChange?: number;
+}
+
+export interface Post {
+  id: string;
+  content: string;
+  author: User;
+  user: User;
+  location: Location;
+  timestamp: string;
+  media?: Media[];
+  likes: number;
+  comments: Comment[];
+  vibedHere: boolean;
+  isLiked?: boolean;
+  isPinned?: boolean;
+  isVenueOwned?: boolean;
+  isVenuePost?: boolean;
+  expiresAt?: string;
+  vibeTags?: string[];
+}
+
+export interface User {
+  id: string;
+  username: string;
+  name: string;
+  avatar: string;
+  bio?: string;
+  isVerified?: boolean;
+  followersCount?: number;
+  followingCount?: number;
+  postsCount?: number;
+  isCelebrity?: boolean;
 }
 
 export interface Media {
+  id: string;
   type: 'image' | 'video';
   url: string;
   thumbnail?: string;
 }
 
-export interface Comment {
+// Social Media Types (Google ecosystem only)
+export interface SocialMediaPost {
   id: string;
-  userId: string;
-  postId: string;
   content: string;
+  author: string;
   timestamp: string;
-  user?: User;
+  platform: 'google' | 'yelp' | 'instagram' | 'other';
   likes?: number;
-  replies?: Comment[];
-  text?: string;
-  vibedHere?: boolean;
-}
-
-export interface Post {
-  id: string;
-  userId: string;
-  locationId?: string;
-  content: string;
-  media?: Media[];
-  timestamp: string;
-  likes: number;
-  comments: number;
-  user?: User;
-  location?: Location;
-  vibeTags?: string[];
-  isVenuePost?: boolean;
-  isPinned?: boolean;
-  expiresAt?: string; // Add missing property
-}
-
-export interface SavedPlace {
-  id: string;
-  locationId: string;
-  userId: string;
-  savedAt: string;
-  notes?: string;
-  visitedAt?: string;
+  comments?: number;
   rating?: number;
-  status: 'visited' | 'want_to_visit';
-  location?: Location;
+  venueName: string;
+  source: 'google' | 'yelp' | 'instagram' | 'other';
+  url?: string;
 }
 
-export interface VenueInsights {
-  id: string;
-  venueId: string;
-  period: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
-  date: string;
-  visitorCount: number;
-  checkInsCount: number;
-  newFollowersCount: number;
-  postEngagement: number;
-  averageRating: number;
-  peakHours: Record<string, number>;
-  customerDemographics?: any;
-  venue?: Location;
-  
-  // Add missing properties for backward compatibility
-  totalVisits?: number;
-  visitors?: number;
-  visitorsChange?: string;
-  checkins?: number;
-  viewsCount?: number;
-  impressions?: number;
+export interface SocialMediaApiKeys {
+  instagram: string;
+  yelp: string;
+  google: string;
 }

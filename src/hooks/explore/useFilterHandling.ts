@@ -1,4 +1,3 @@
-
 import { mockLocations } from "@/mock/locations";
 import { Location } from "@/types";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -198,10 +197,30 @@ export const useFilterHandling = () => {
     handleSearch(searchQuery, "", searchCategory);
   };
 
+  const filterLocationsByCategory = (locations: Location[], category: string) => {
+    if (category === 'all') return locations;
+    
+    return locations.filter(location => {
+      // Map category values to location types
+      if (category === 'music') {
+        return location.type === 'bar' || location.type === 'event';
+      }
+      if (category === 'comedy') {
+        return location.type === 'bar' || location.type === 'event';
+      }
+      if (category === 'nightlife') {
+        return location.type === 'bar' || location.type === 'other';
+      }
+      
+      return location.type === category;
+    });
+  };
+
   return {
     handleTabChange,
     handleSearch,
-    handleClearVibeFilter
+    handleClearVibeFilter,
+    filterLocationsByCategory
   };
 };
 

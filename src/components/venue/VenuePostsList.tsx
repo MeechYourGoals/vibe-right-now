@@ -1,8 +1,8 @@
 
-import React, { useState } from 'react';
-import { Location, Post, Comment } from "@/types";
-import { canDeleteUserPosts } from '@/utils/venue/postManagementUtils';
-import { VenuePostsGrid, VenuePostsListView, EmptyState } from './venue-posts-list';
+import React from "react";
+import { Post, Comment, Location } from "@/types";
+import VenuePostsGrid from "./VenuePostsGrid";
+import VenuePostsListComponent from "./VenuePostsListComponent";
 
 interface VenuePostsListProps {
   posts: Post[];
@@ -10,6 +10,7 @@ interface VenuePostsListProps {
   viewMode: "list" | "grid";
   getComments: (postId: string) => Comment[];
   subscriptionTier?: 'standard' | 'plus' | 'premium' | 'pro';
+  canDelete?: boolean;
   onPostDeleted?: (postId: string) => void;
 }
 
@@ -19,41 +20,33 @@ const VenuePostsList: React.FC<VenuePostsListProps> = ({
   viewMode,
   getComments,
   subscriptionTier = 'standard',
+  canDelete = false,
   onPostDeleted
 }) => {
-  const [localPosts, setLocalPosts] = useState<Post[]>(posts);
-  
-  // Check if venue manager can delete posts based on subscription tier
-  const canDelete = canDeleteUserPosts(subscriptionTier);
-  
-  const handlePostDeleted = (postId: string) => {
-    // Update local state to remove the deleted post
-    setLocalPosts(prevPosts => prevPosts.filter(post => post.id !== postId));
-    
-    // Call parent handler if provided
-    if (onPostDeleted) {
-      onPostDeleted(postId);
-    }
-  };
-  
-  if (localPosts.length === 0) {
-    return <EmptyState venueName={venue.name} />;
+  if (posts.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-muted-foreground">No posts found for {venue.name}</p>
+      </div>
+    );
   }
-  
-  return viewMode === "grid" ? (
-    <VenuePostsGrid 
-      posts={localPosts} 
-      venue={venue}
-      canDelete={canDelete}
-      onPostDeleted={handlePostDeleted}
-    />
-  ) : (
-    <VenuePostsListView 
-      posts={localPosts} 
-      venue={venue}
+
+  if (viewMode === "grid") {
+    return (
+      <VenuePostsGrid
+        posts={posts}
+        canDelete={canDelete}
+        onPostDeleted={onPostDeleted || (() => {})}
+      />
+    );
+  }
+
+  return (
+    <VenuePostsListComponent
+      posts={posts}
       getComments={getComments}
       canDelete={canDelete}
-      onPostDeleted={handlePostDeleted}
+      onPostDeleted={onPostDeleted || (() => {})}
     />
   );
 };

@@ -16,7 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Brain, FileSpreadsheet, Bot } from "lucide-react";
 
 const VenueInsights = () => {
-  const [subscriptionTier, setSubscriptionTier] = useState<'standard' | 'plus' | 'premium' | 'pro'>('standard');
+  const [subscriptionTier, setSubscriptionTier] = useState<'standard' | 'plus' | 'premium' | 'pro'>('pro');
   const mediaData = generateWeeklyData();
   
   // Add mock venue insights data for PerformanceMetrics
@@ -43,7 +43,7 @@ const VenueInsights = () => {
   };
   
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 min-h-screen bg-neutral-950 text-white p-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2">
           <PerformanceMetrics venueInsights={mockVenueInsights} />
@@ -53,29 +53,29 @@ const VenueInsights = () => {
         </div>
       </div>
       
-      <Card className="border-green-200 bg-green-50/30 dark:bg-green-900/10 dark:border-green-800/30">
+      <Card className="border-2 border-green-600/50 bg-gradient-to-r from-green-950/40 to-blue-950/40 backdrop-blur-sm">
         <CardHeader className="pb-2">
           <div className="flex justify-between items-center">
-            <CardTitle className="flex items-center text-green-700 dark:text-green-400">
+            <CardTitle className="flex items-center text-green-400">
               <Brain className="mr-2 h-5 w-5" /> 
               Gemini Agent Mode & Notebook LM Analytics
             </CardTitle>
-            <Badge variant="outline" className="bg-green-100 text-green-700 border-green-300 dark:bg-green-900/40 dark:border-green-700/30 dark:text-green-400">
+            <Badge variant="outline" className="bg-green-900/20 text-green-400 border-green-600">
               Pro Features
             </Badge>
           </div>
         </CardHeader>
         <CardContent className="space-y-4 pb-4">
-          <p className="text-sm text-green-700/80 dark:text-green-400/80">
+          <p className="text-sm text-green-200">
             Gemini Agent Mode automatically processes your business data to provide actionable insights. 
             Notebook LM helps analyze financial documents, P&L sheets, and generates executive summaries.
           </p>
           <div className="flex flex-wrap gap-3">
-            <Button variant="outline" className="border-green-500 text-green-700 hover:bg-green-100 dark:border-green-700 dark:text-green-400 dark:hover:bg-green-900/40">
+            <Button variant="outline" className="border-green-600 text-green-400 hover:bg-green-900/20 bg-green-950/30">
               <FileSpreadsheet className="mr-2 h-4 w-4" />
               Upload Business Documents
             </Button>
-            <Button variant="outline" className="border-green-500 text-green-700 hover:bg-green-100 dark:border-green-700 dark:text-green-400 dark:hover:bg-green-900/40">
+            <Button variant="outline" className="border-green-600 text-green-400 hover:bg-green-900/20 bg-green-950/30">
               <Bot className="mr-2 h-4 w-4" />
               Run Gemini Analysis
             </Button>
@@ -84,17 +84,17 @@ const VenueInsights = () => {
       </Card>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
+        <Card className="bg-neutral-900 border-neutral-700">
           <CardHeader>
-            <CardTitle>Media Engagement</CardTitle>
+            <CardTitle className="text-white">Media Engagement</CardTitle>
           </CardHeader>
           <CardContent>
             <MediaEngagementChart data={mediaData} />
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-neutral-900 border-neutral-700">
           <CardHeader>
-            <CardTitle>Audience Insights</CardTitle>
+            <CardTitle className="text-white">Audience Insights</CardTitle>
           </CardHeader>
           <CardContent>
             <AudienceInsights />

@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MessageSquare, Send } from "lucide-react";
 import CommentItem from "@/components/CommentItem";
 import { mockComments } from "@/mock/data";
-import { mockUsers } from "@/mock/users";
+import { mockUsers } from "@/mock/data";
 
 interface CommentListProps {
   postId: string;
@@ -28,38 +28,24 @@ const CommentList = ({ postId, commentsCount }: CommentListProps) => {
     const exampleComments: Comment[] = [];
     
     // Regular comment
-    const user1 = mockUsers[Math.floor(Math.random() * mockUsers.length)];
     exampleComments.push({
       id: `example-${postId}-1`,
       postId: postId,
-      userId: user1.id,
-      user: {
-        id: user1.id,
-        name: user1.name,
-        username: user1.username,
-        avatar: user1.avatar
-      },
+      userId: mockUsers[0].id,
+      user: mockUsers[Math.floor(Math.random() * mockUsers.length)],
       content: "This place looks amazing! How's the crowd right now?",
-      text: "This place looks amazing! How's the crowd right now?",
       timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
       vibedHere: false,
       likes: 0
     });
     
     // "Vibed Here" comment
-    const user2 = mockUsers[Math.floor(Math.random() * mockUsers.length)];
     exampleComments.push({
       id: `example-${postId}-2`,
       postId: postId,
-      userId: user2.id,
-      user: {
-        id: user2.id,
-        name: user2.name,
-        username: user2.username,
-        avatar: user2.avatar
-      },
+      userId: mockUsers[1].id,
+      user: mockUsers[Math.floor(Math.random() * mockUsers.length)],
       content: "I was here yesterday and it was incredible! The line moves fast if you go around to the side entrance.",
-      text: "I was here yesterday and it was incredible! The line moves fast if you go around to the side entrance.",
       timestamp: new Date(Date.now() - 1000 * 60 * 120).toISOString(),
       vibedHere: true,
       likes: 0
@@ -67,23 +53,16 @@ const CommentList = ({ postId, commentsCount }: CommentListProps) => {
     
     // Add a third comment if needed
     if (commentCount > 2) {
-      const user3 = mockUsers[Math.floor(Math.random() * mockUsers.length)];
       exampleComments.push({
         id: `example-${postId}-3`,
         postId: postId,
-        userId: user3.id,
-        user: {
-          id: user3.id,
-          name: user3.name,
-          username: user3.username,
-          avatar: user3.avatar
-        },
+        userId: mockUsers[2].id,
+        user: mockUsers[Math.floor(Math.random() * mockUsers.length)],
         content: "Heading there now! Anyone want to meet up?",
-        text: "Heading there now! Anyone want to meet up?",
         timestamp: new Date(Date.now() - 1000 * 60 * 10).toISOString(),
         vibedHere: Math.random() > 0.5,
         likes: 0
-      });
+    });
     }
     
     postComments = exampleComments;
@@ -119,28 +98,25 @@ const CommentList = ({ postId, commentsCount }: CommentListProps) => {
         </div>
       ) : (
         <div className="text-center py-4 text-muted-foreground text-sm">
-          No comments yet. Be the first to comment!
+          No comments yet. Be the first to share your thoughts!
         </div>
       )}
       
-      <div className="mt-3 flex gap-2">
-        <Avatar className="h-8 w-8">
-          <AvatarImage src="https://randomuser.me/api/portraits/men/1.jpg" alt="Your avatar" />
-          <AvatarFallback>Y</AvatarFallback>
-        </Avatar>
-        <div className="flex-1 flex items-end gap-2">
-          <Textarea
-            placeholder="Add a comment..."
-            className="min-h-[60px] flex-1"
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-          />
+      <div className="mt-4 space-y-2">
+        <Textarea
+          value={newComment}
+          onChange={(e) => setNewComment(e.target.value)}
+          placeholder="Add a comment..."
+          className="min-h-[60px]"
+        />
+        <div className="flex justify-end">
           <Button 
-            size="icon"
-            disabled={!newComment.trim() || isSubmitting}
             onClick={handleSubmitComment}
+            disabled={!newComment.trim() || isSubmitting}
+            size="sm"
           >
-            <Send className="h-4 w-4" />
+            <Send className="h-3 w-3 mr-1" />
+            {isSubmitting ? "Posting..." : "Post"}
           </Button>
         </div>
       </div>
