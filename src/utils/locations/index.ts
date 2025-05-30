@@ -1,5 +1,2 @@
-
-// Consolidated exports file for locations module
-export { cityCoordinates } from './cityDatabase';
+export { CityCoordinates as cityCoordinates } from './types';
 export { generateCityLocations, generateAllCityLocations } from './locationGenerator';
-export type { CityCoordinates } from './types';
