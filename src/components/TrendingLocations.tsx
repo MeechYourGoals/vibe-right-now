@@ -37,14 +37,18 @@ const TrendingLocations: React.FC = () => {
     if (userLocation) {
       // Filter locations within approximately 10 miles radius
       const nearbyLocations = mockLocations.filter(location => {
-        if (!location.lat || !location.lng) return false;
+        // Use coordinates if available, fall back to lat/lng
+        const locationLat = location.lat || location.coordinates?.lat;
+        const locationLng = location.lng || location.coordinates?.lng;
+        
+        if (!locationLat || !locationLng) return false;
         
         // Calculate distance (rough approximation)
         const distance = calculateDistance(
           userLocation.lat,
           userLocation.lng,
-          location.lat,
-          location.lng
+          locationLat,
+          locationLng
         );
         
         return distance <= 10; // 10 miles radius
@@ -110,7 +114,7 @@ const TrendingLocations: React.FC = () => {
               >
                 <Avatar>
                   <AvatarImage 
-                    src={getMediaForLocationMock(location)?.url || location.image} 
+                    src={getMediaForLocationMock(location)?.url || location.images?.[0]} 
                     alt={location.name}
                   />
                   <AvatarFallback>{location.name.slice(0, 2)}</AvatarFallback>

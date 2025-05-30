@@ -1,3 +1,4 @@
+
 export interface User {
   id: string;
   name: string;
@@ -6,6 +7,7 @@ export interface User {
   avatar: string;
   bio: string;
   isVerified: boolean;
+  verified?: boolean; // For backward compatibility
   isCelebrity?: boolean;
   followers: number;
   following: number;
@@ -66,26 +68,20 @@ export interface User {
   vrnSubscriptionLastPaymentErrorReason?: string;
   vrnSubscriptionLastPaymentErrorReasonDescription?: string;
   vrnSubscriptionLastPaymentErrorReasonTimestamp?: string;
-  vrnSubscriptionLastPaymentErrorType?: string;
-  vrnSubscriptionLastPaymentErrorSubType?: string;
 }
 
 export interface Post {
   id: string;
   userId: string;
+  user?: MockUserProfile; // Add user property
   content: string;
   media?: Media[];
   timestamp: string;
   likes: number;
   comments: Comment[];
-  location?: {
-    name: string;
-    coordinates: {
-      lat: number;
-      lng: number;
-    };
-  };
+  location?: Location;
   tags?: string[];
+  vibeTags?: string[]; // Add vibeTags property
   saved?: boolean;
   expiresAt?: string;
 }
@@ -114,6 +110,8 @@ export interface Location {
     lat: number;
     lng: number;
   };
+  lat?: number; // Add for backward compatibility
+  lng?: number; // Add for backward compatibility
   type: string;
   category?: string;
   rating: number;
@@ -131,6 +129,7 @@ export interface Location {
   amenities?: string[];
   priceRange?: string;
   tags?: string[];
+  vibes?: string[]; // Add vibes property
   userProfile?: any;
 }
 
@@ -158,6 +157,7 @@ export interface MockUserProfile {
   avatar: string;
   bio: string;
   isVerified: boolean;
+  verified?: boolean; // For backward compatibility
   isCelebrity?: boolean;
   followers: number;
   following: number;
@@ -178,7 +178,7 @@ export interface CreditCard {
 }
 
 export interface Media {
-  id: string;
+  id?: string;
   url: string;
   type: 'image' | 'video';
   altText?: string;
