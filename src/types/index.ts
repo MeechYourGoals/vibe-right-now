@@ -1,3 +1,4 @@
+
 // If this file doesn't exist, we're creating it
 import { MockUserProfile } from "@/mock/users";
 
@@ -23,13 +24,13 @@ export interface Location {
 }
 
 export interface BusinessHours {
-  monday: { open: string; close: string; } | string;
-  tuesday: { open: string; close: string; } | string;
-  wednesday: { open: string; close: string; } | string;
-  thursday: { open: string; close: string; } | string;
-  friday: { open: string; close: string; } | string;
-  saturday: { open: string; close: string; } | string;
-  sunday: { open: string; close: string; } | string;
+  monday: { open: string; close: string; };
+  tuesday: { open: string; close: string; };
+  wednesday: { open: string; close: string; };
+  thursday: { open: string; close: string; };
+  friday: { open: string; close: string; };
+  saturday: { open: string; close: string; };
+  sunday: { open: string; close: string; };
   isOpenNow?: string;
   timezone?: string;
   isOpen24Hours?: boolean;
@@ -81,8 +82,6 @@ export interface User {
   followers?: number;
   following?: number;
   posts?: number;
-  isCelebrity?: boolean;
-  isPrivate?: boolean;
 }
 
 // VernonChat types

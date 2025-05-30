@@ -5,6 +5,8 @@ import ChatWindow from './ChatWindow';
 import ChatButton from './ChatButton';
 import { Message, MessageDirection, ChatMode } from './types';
 import { useMessageProcessor } from './hooks/useMessageProcessor';
+import { useSpeechRecognition } from './hooks/useSpeechRecognition';
+import { useSpeechSynthesis } from './hooks/speechSynthesis/useSpeechSynthesis';
 
 const VernonChat: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,8 +14,10 @@ const VernonChat: React.FC = () => {
   const [input, setInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [chatMode, setChatMode] = useLocalStorage<ChatMode>('vernon_chat_mode', 'user');
+  const [isListening, setIsListening] = useState(false);
   const [isModelLoading, setIsModelLoading] = useState(false);
   const { processMessage } = useMessageProcessor();
+  const { speak, cancel, isSpeaking } = useSpeechSynthesis();
 
   const toggleChat = () => {
     setIsOpen(!isOpen);
@@ -54,13 +58,33 @@ const VernonChat: React.FC = () => {
     try {
       const response = await processMessage(text, messages, chatMode);
       addMessage(response, 'incoming', true);
+      
+      // Speak the response if it's an AI message
+      speak(response);
     } catch (error) {
       console.error('Error processing message:', error);
       addMessage('Sorry, I encountered an error. Please try again later.', 'incoming');
     } finally {
       setIsProcessing(false);
     }
-  }, [addMessage, messages, processMessage, chatMode]);
+  }, [addMessage, messages, processMessage, chatMode, speak]);
+
+  // Handle speech recognition
+  const { transcript, resetTranscript, listening, toggleListening } = useSpeechRecognition({
+    onResult: (finalTranscript) => {
+      if (finalTranscript) {
+        handleSendMessage(finalTranscript);
+      }
+    }
+  });
+
+  useEffect(() => {
+    setIsListening(listening);
+  }, [listening]);
+
+  const toggleMicrophoneListening = useCallback(() => {
+    toggleListening();
+  }, [toggleListening]);
 
   // Add welcome message on first load if no messages exist
   useEffect(() => {
@@ -70,11 +94,11 @@ const VernonChat: React.FC = () => {
       setMessages([
         {
           id: 'welcome',
-          content: 'Hello! I\'m Vernon, your AI assistant powered by Google Gemini. How can I help you discover venues and events today?',
+          content: 'Hello! I\'m Vernon, your AI assistant powered by Google Gemini. How can I help you today?',
           direction: 'incoming',
           timestamp,
           aiResponse: true,
-          text: 'Hello! I\'m Vernon, your AI assistant powered by Google Gemini. How can I help you discover venues and events today?',
+          text: 'Hello! I\'m Vernon, your AI assistant powered by Google Gemini. How can I help you today?',
           sender: 'ai'
         }
       ]);
@@ -94,10 +118,10 @@ const VernonChat: React.FC = () => {
           chatMode={chatMode}
           toggleMode={toggleMode}
           clearMessages={clearMessages}
-          isListening={false}
-          toggleListening={() => {}}
+          isListening={isListening}
+          toggleListening={toggleMicrophoneListening}
           isModelLoading={isModelLoading}
-          transcript=""
+          transcript={transcript}
         />
       ) : (
         <ChatButton onClick={toggleChat} />

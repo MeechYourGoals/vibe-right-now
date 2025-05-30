@@ -19,13 +19,6 @@ const BusinessHours = ({ venue }: BusinessHoursProps) => {
   
   const todaysHours = getTodaysHours(venue);
   
-  const formatHours = (hours: { open: string; close: string; } | string) => {
-    if (typeof hours === 'string') {
-      return hours;
-    }
-    return `${hours.open} - ${hours.close}`;
-  };
-  
   return (
     <div className="mt-2">
       <div className="flex items-center text-sm">
@@ -50,31 +43,31 @@ const BusinessHours = ({ venue }: BusinessHoursProps) => {
         <div className="mt-2 text-sm grid grid-cols-2 gap-1">
           <div className="flex justify-between pr-2">
             <span className="text-muted-foreground">Monday:</span>
-            <span>{formatHours(venue.hours.monday)}</span>
+            <span>{venue.hours.monday}</span>
           </div>
           <div className="flex justify-between pr-2">
             <span className="text-muted-foreground">Tuesday:</span>
-            <span>{formatHours(venue.hours.tuesday)}</span>
+            <span>{venue.hours.tuesday}</span>
           </div>
           <div className="flex justify-between pr-2">
             <span className="text-muted-foreground">Wednesday:</span>
-            <span>{formatHours(venue.hours.wednesday)}</span>
+            <span>{venue.hours.wednesday}</span>
           </div>
           <div className="flex justify-between pr-2">
             <span className="text-muted-foreground">Thursday:</span>
-            <span>{formatHours(venue.hours.thursday)}</span>
+            <span>{venue.hours.thursday}</span>
           </div>
           <div className="flex justify-between pr-2">
             <span className="text-muted-foreground">Friday:</span>
-            <span>{formatHours(venue.hours.friday)}</span>
+            <span>{venue.hours.friday}</span>
           </div>
           <div className="flex justify-between pr-2">
             <span className="text-muted-foreground">Saturday:</span>
-            <span>{formatHours(venue.hours.saturday)}</span>
+            <span>{venue.hours.saturday}</span>
           </div>
           <div className="flex justify-between pr-2">
             <span className="text-muted-foreground">Sunday:</span>
-            <span>{formatHours(venue.hours.sunday)}</span>
+            <span>{venue.hours.sunday}</span>
           </div>
         </div>
       )}
