@@ -1,3 +1,4 @@
+
 // Re-export functionality from GoogleAIService for backward compatibility
 import { GoogleAIService } from '../GoogleAIService';
 
@@ -29,6 +30,3 @@ export const VertexAIHub = {
   extractEntities: GoogleAIService.extractEntities.bind(GoogleAIService),
   extractCategories: GoogleAIService.extractCategories.bind(GoogleAIService)
 };
-
-export const DEFAULT_MALE_VOICE = 'en-US-Standard-B';
-export const DEFAULT_FEMALE_VOICE = 'en-US-Standard-C';

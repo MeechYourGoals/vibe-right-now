@@ -38,12 +38,7 @@ const VenuePost = ({
   const backupMedia = mediaError ? getMediaForLocation(venue) : null;
   
   // Use the media provided or the backup if there's an error
-  // Ensure media has required id property
-  const displayMedia = mediaError ? backupMedia : {
-    id: `media-${venue.id}-${Date.now()}`,
-    type: media.type,
-    url: media.url
-  };
+  const displayMedia = mediaError ? backupMedia : media;
 
   return (
     <Card className={`vibe-card overflow-hidden ${isExternalContent ? 'border-blue-500/50' : ''}`}>

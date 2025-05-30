@@ -1,79 +1,205 @@
-import { useState, useCallback } from 'react';
-import { Location, EventItem } from '@/types';
-import useQueryProcessing from './useQueryProcessing';
 
-const useExploreState = () => {
-  const [locations, setLocations] = useState<Location[]>([]);
-  const [filteredLocations, setFilteredLocations] = useState<Location[]>([]);
-  const [events, setEvents] = useState<EventItem[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [currentCategory, setCurrentCategory] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
-  const [cityFilter, setCityFilter] = useState('all');
+import { useState, useEffect } from "react";
+import { useSearchParams } from "./explore/useSearchParams";
+import { useLocationData } from "./explore/useLocationData";
+import { useQueryProcessing } from "./explore/useQueryProcessing";
+import { useFilterHandling } from "./explore/useFilterHandling";
+import { EventItem, Location } from "@/types";
+import { useNavigate } from "react-router-dom";
+import { mockUsers } from "@/mock/users";
 
-  const { processQuery } = useQueryProcessing();
-
-  const setInitialLocations = useCallback((initialLocations: Location[]) => {
-    setLocations(initialLocations);
-    setFilteredLocations(initialLocations);
-  }, []);
-
-  const handleCategoryChange = useCallback((category: string) => {
-    setCurrentCategory(category);
-  }, []);
-
-  const handleCityFilterChange = useCallback((city: string) => {
-    setCityFilter(city);
-  }, []);
-
-  const handleDateChange = useCallback((date: Date | undefined) => {
-    setSelectedDate(date);
-  }, []);
-
-  const handleSearchQueryChange = useCallback((query: string) => {
-    setSearchQuery(query);
-  }, []);
-
-  const handleSearch = useCallback(async (query: string) => {
-    if (!query.trim()) {
-      setFilteredLocations(locations);
-      return;
+export const useExploreState = () => {
+  const [activeTab, setActiveTab] = useState("all");
+  const navigate = useNavigate();
+  
+  // Import modularized hooks
+  const {
+    searchQuery,
+    searchedCity,
+    searchedState,
+    searchCategory,
+    vibeFilter,
+    isNaturalLanguageSearch,
+    dateRange,
+    showDateFilter,
+    activeSearchTab,
+    setSearchQuery,
+    setSearchedCity,
+    setSearchedState,
+    setSearchCategory,
+    setVibeFilter,
+    setIsNaturalLanguageSearch,
+    handleSearchTabChange,
+    handleDateRangeChange,
+    handleClearDates,
+    setShowDateFilter
+  } = useSearchParams();
+  
+  const {
+    filteredLocations,
+    locationTags,
+    musicEvents,
+    comedyEvents,
+    nightlifeVenues,
+    setFilteredLocations,
+    setMusicEvents,
+    setComedyEvents,
+    setNightlifeVenues
+  } = useLocationData(searchedCity, searchedState, dateRange);
+  
+  const {
+    isLoadingResults,
+    processComplexQuery
+  } = useQueryProcessing(
+    setSearchedCity,
+    setSearchedState,
+    setFilteredLocations,
+    setComedyEvents as React.Dispatch<React.SetStateAction<Location[]>>,
+    setActiveTab,
+    setNightlifeVenues as React.Dispatch<React.SetStateAction<Location[]>>,
+    setVibeFilter,
+    setIsNaturalLanguageSearch
+  );
+  
+  const {
+    handleTabChange: filterHandleTabChange,
+    handleSearch: filterHandleSearch,
+    handleClearVibeFilter: filterHandleClearVibeFilter
+  } = useFilterHandling();
+  
+  // Initialize with default search
+  useEffect(() => {
+    if (!searchQuery && !searchedCity && searchCategory !== 'users') {
+      setSearchedCity("San Francisco");
+      setSearchedState("CA");
     }
-
-    setLoading(true);
-    try {
-      const results = await processQuery(
-        query,
-        currentCategory,
-        setEvents as React.Dispatch<React.SetStateAction<Location[]>>,
-        selectedDate,
-        cityFilter
+  }, [searchQuery, searchedCity, searchCategory, setSearchedCity, setSearchedState]);
+  
+  // Handle user search specifically
+  useEffect(() => {
+    if (searchCategory === 'users' && searchQuery) {
+      const cleanUsername = searchQuery.replace('@', '').toLowerCase().trim();
+      // Check if user exists in mock data
+      const userExists = mockUsers.some(user => 
+        user.username.toLowerCase() === cleanUsername || 
+        user.name.toLowerCase().includes(cleanUsername)
       );
-      setFilteredLocations(results || []);
-    } catch (error) {
-      console.error('Search error:', error);
-      setFilteredLocations([]);
-    } finally {
-      setLoading(false);
+      
+      if (userExists) {
+        const foundUser = mockUsers.find(user => 
+          user.username.toLowerCase() === cleanUsername ||
+          user.name.toLowerCase().includes(cleanUsername)
+        );
+        if (foundUser) {
+          navigate(`/user/${foundUser.username}`);
+        }
+      }
     }
-  }, [locations, currentCategory, processQuery, selectedDate, cityFilter]);
+  }, [searchCategory, searchQuery, navigate]);
+  
+  // Get page title
+  const getPageTitle = () => {
+    if (isNaturalLanguageSearch) {
+      return "Smart Search Results";
+    } else if (searchCategory === "users") {
+      return `User Search: ${searchQuery || ""}`;
+    } else if (searchedCity) {
+      return `Explore Vibes in ${searchedCity}${searchedState ? `, ${searchedState}` : ''}`;
+    }
+    return "Explore Vibes";
+  };
+  
+  // Wrapper functions to maintain the same API
+  const handleSearch = (query: string, filterType: string, category: string) => {
+    // Handle user search specifically
+    if (category === 'users' && query) {
+      const cleanUsername = query.replace('@', '').toLowerCase().trim();
+      // Check if user exists in mock data
+      const userExists = mockUsers.some(user => 
+        user.username.toLowerCase() === cleanUsername || 
+        user.name.toLowerCase().includes(cleanUsername)
+      );
+      
+      if (userExists) {
+        const foundUser = mockUsers.find(user => 
+          user.username.toLowerCase() === cleanUsername ||
+          user.name.toLowerCase().includes(cleanUsername)
+        );
+        if (foundUser) {
+          navigate(`/user/${foundUser.username}`);
+          return;
+        }
+      }
+    }
+    
+    filterHandleSearch(
+      query,
+      filterType,
+      category,
+      searchQuery,
+      setSearchQuery,
+      setSearchCategory,
+      setActiveTab,
+      setSearchedCity,
+      setSearchedState,
+      setMusicEvents,
+      setComedyEvents,
+      setNightlifeVenues,
+      setFilteredLocations,
+      vibeFilter,
+      setVibeFilter,
+      dateRange,
+      processComplexQuery,
+      setIsNaturalLanguageSearch
+    );
+  };
+  
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    filterHandleTabChange(
+      value, 
+      searchQuery,
+      searchedCity,
+      searchedState,
+      searchCategory,
+      vibeFilter,
+      setFilteredLocations
+    );
+  };
+  
+  const handleClearVibeFilter = () => {
+    filterHandleClearVibeFilter(
+      searchQuery,
+      searchCategory,
+      setVibeFilter,
+      handleSearch
+    );
+  };
 
   return {
-    locations,
+    activeTab,
+    searchedCity,
+    searchedState,
+    searchCategory,
     filteredLocations,
-    events,
-    loading,
-    currentCategory,
-    searchQuery,
-    selectedDate,
-    cityFilter,
-    setInitialLocations,
-    handleCategoryChange,
-    handleSearchQueryChange,
+    locationTags,
+    musicEvents,
+    comedyEvents,
+    nightlifeVenues,
+    vibeFilter,
+    isNaturalLanguageSearch,
+    isLoadingResults,
+    dateRange,
+    showDateFilter,
+    activeSearchTab,
+    getPageTitle,
     handleSearch,
-    handleDateChange,
-    handleCityFilterChange
+    handleTabChange,
+    handleClearVibeFilter,
+    handleDateRangeChange,
+    handleClearDates,
+    handleSearchTabChange,
+    setShowDateFilter
   };
 };
 

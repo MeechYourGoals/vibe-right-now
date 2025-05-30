@@ -1,160 +1,197 @@
-import React, { useState } from 'react';
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+
+import React, { useState } from "react";
+import { Post, Comment, Location } from "@/types";
+import { Card } from "@/components/ui/card";
+import PostHeader from "./PostHeader";
+import PostContent from "./PostContent";
+import PostMedia from "./PostMedia";
+import PostFooter from "./PostFooter";
 import { Button } from "@/components/ui/button";
-import { VerifiedBadge } from "@/components/icons";
-import { MoreHorizontal, MapPin, Calendar, Link, Pin, Building } from "lucide-react";
-import PostMedia from "@/components/post/PostMedia";
-import PostFooter from "@/components/post/PostFooter";
-import CommentList from "@/components/post/CommentList";
-import { Post, User, Location, Media } from "@/types";
+import { Link } from "react-router-dom";
+import { UserPlus, UserCheck } from "lucide-react";
+import { deletePost } from "@/utils/venue/postManagementUtils";
+import UserDropdown from "@/components/venue/post-grid-item/UserDropdown";
 
 interface PostCardProps {
-  post: Post;
-  onLike?: (postId: string) => void;
-  onComment?: (postId: string, comment: string) => void;
-  onShare?: (postId: string) => void;
+  post?: Post;
+  posts?: Post[];
+  comments?: Comment[];
+  locationPostCount?: number;
+  isDetailView?: boolean;
+  canDelete?: boolean;
+  venue?: Location;
+  onPostDeleted?: (postId: string) => void;
+  getComments?: (postId: string) => Comment[];
 }
 
-interface PostHeaderProps {
-  author: User;
-  location: Location;
-  timestamp: string;
-  isPinned?: boolean;
-  isVenueOwned?: boolean;
-}
-
-interface PostContentProps {
-  content: string;
-}
-
-const PostHeader = ({ author, location, timestamp, isPinned, isVenueOwned }: PostHeaderProps) => {
-  const formatTimestamp = (timestamp: string) => {
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
-
-    if (minutes < 60) {
-      return `${minutes}m`;
-    } else if (hours < 24) {
-      return `${hours}h`;
-    } else {
-      return `${days}d`;
-    }
+const PostCard: React.FC<PostCardProps> = ({ 
+  post, 
+  posts,
+  comments = [],
+  locationPostCount,
+  isDetailView = false,
+  canDelete = false,
+  venue,
+  onPostDeleted,
+  getComments
+}) => {
+  const [isDeleted, setIsDeleted] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
+  
+  const toggleFollow = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsFollowing(!isFollowing);
   };
 
-  return (
-    <CardHeader className="pb-3">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <Avatar>
-            <AvatarImage src={author.avatar} alt={author.name} />
-            <AvatarFallback>{author.name.charAt(0)}</AvatarFallback>
-          </Avatar>
-          
-          <div className="flex flex-col">
-            <div className="flex items-center space-x-1">
-              <span className="font-semibold text-sm">{author.name}</span>
-              {author.isVerified && <VerifiedBadge />}
+  // Generate random user count (between 5 and 120) based on location
+  const getUserCount = (locationId: string) => {
+    // Use location ID to generate a consistent but seemingly random number
+    const seed = parseInt(locationId) || 5;
+    return Math.floor((seed * 13) % 115) + 5;
+  };
+  
+  // Handle multiple posts mode (used in feed)
+  if (posts && posts.length > 0 && getComments) {
+    const firstPost = posts[0];
+    
+    return (
+      <Card className="overflow-hidden">
+        <div className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <div className="flex flex-col">
+                <Link to={`/venue/${firstPost.location.id}`}>
+                  <h3 className="text-lg font-semibold hover:underline">{firstPost.location.name}</h3>
+                </Link>
+                <div className="flex items-center">
+                  {locationPostCount !== undefined && (
+                    <span className="text-sm text-muted-foreground mr-3">
+                      {locationPostCount} posts
+                    </span>
+                  )}
+                  <div className="relative z-10">
+                    <UserDropdown 
+                      userCount={getUserCount(firstPost.location.id)} 
+                      post={firstPost}
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
-            
-            <div className="flex items-center space-x-1 text-xs text-muted-foreground">
-              <MapPin className="h-3 w-3" />
-              <span>{location.name}</span>
-              <span>•</span>
-              <span>{formatTimestamp(timestamp)}</span>
-            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className={isFollowing ? "bg-primary/10" : ""}
+              onClick={toggleFollow}
+            >
+              {isFollowing ? (
+                <>
+                  <UserCheck className="h-4 w-4 mr-1" />
+                  Following
+                </>
+              ) : (
+                <>
+                  <UserPlus className="h-4 w-4 mr-1" />
+                  Follow
+                </>
+              )}
+            </Button>
           </div>
+          <p className="text-sm text-muted-foreground mt-1">
+            <Link to={`/venue/${firstPost.location.id}`} className="hover:underline">
+              {firstPost.location.city}, {firstPost.location.state}
+            </Link>
+          </p>
         </div>
         
-        <div className="flex items-center space-x-2">
-          {isPinned && (
-            <Badge variant="secondary" className="text-xs">
-              <Pin className="h-3 w-3 mr-1" />
-              Pinned
-            </Badge>
-          )}
-          {isVenueOwned && (
-            <Badge variant="outline" className="text-xs">
-              <Building className="h-3 w-3 mr-1" />
-              Venue
-            </Badge>
-          )}
-          <Button variant="ghost" size="icon" className="h-8 w-8">
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-    </CardHeader>
-  );
-};
+        {posts.map(post => {
+          // Determine if the post is from the venue itself
+          const isVenuePost = post.isVenuePost || post.location?.id === firstPost.location.id;
+          
+          return (
+            <div 
+              key={post.id} 
+              className={`border-t ${isVenuePost ? 'ring-2 ring-amber-500' : ''}`}
+            >
+              <PostHeader 
+                user={post.user} 
+                timestamp={String(post.timestamp)}
+                location={post.location}
+                isPinned={post.isPinned}
+                isVenuePost={isVenuePost}
+                canDelete={canDelete}
+                onDelete={() => {}}
+              />
+              
+              <div className="px-4">
+                <PostContent content={post.content} />
+                
+                {post.media && post.media.length > 0 && (
+                  <PostMedia media={post.media} />
+                )}
+                
+                <PostFooter 
+                  post={post} 
+                  comments={getComments(post.id)} 
+                  isDetailView={false} 
+                />
+              </div>
+            </div>
+          );
+        })}
+      </Card>
+    );
+  }
+  
+  // Single post mode
+  if (!post) {
+    return null; // Don't render if no post is provided
+  }
+  
+  // Don't render if the post has been deleted
+  if (isDeleted) {
+    return null;
+  }
 
-const PostContent = ({ content }: PostContentProps) => {
-  return (
-    <CardContent className="pb-4">
-      <p className="text-sm">{content}</p>
-    </CardContent>
-  );
-};
-
-const PostCard = ({ post, onLike, onComment, onShare }: PostCardProps) => {
-  const [isLiked, setIsLiked] = useState(post.isLiked || false);
-  const [likesCount, setLikesCount] = useState(post.likes);
-  const [showComments, setShowComments] = useState(false);
-
-  const handleLike = () => {
-    setIsLiked(!isLiked);
-    setLikesCount(isLiked ? likesCount - 1 : likesCount + 1);
-    if (onLike) {
-      onLike(post.id);
+  const handleDelete = () => {
+    if (venue && deletePost(post.id, venue)) {
+      setIsDeleted(true);
+      if (onPostDeleted) {
+        onPostDeleted(post.id);
+      }
     }
   };
 
-  // Convert media to proper Media array
-  const mediaArray: Media[] = Array.isArray(post.media) 
-    ? post.media.map(item => 
-        typeof item === 'string' 
-          ? { id: Math.random().toString(), type: 'image' as const, url: item }
-          : item
-      )
-    : [];
+  const isVenuePost = post.isVenuePost || post.location?.id === venue?.id;
 
   return (
-    <Card className="vibe-card overflow-hidden">
+    <Card className={`overflow-hidden ${isVenuePost ? 'ring-2 ring-amber-500' : ''} ${post.isPinned && !isVenuePost ? 'ring-2 ring-amber-300' : ''}`}>
       <PostHeader 
-        author={post.author} 
-        location={post.location} 
-        timestamp={post.timestamp}
+        user={post.user} 
+        timestamp={String(post.timestamp)} 
+        location={post.location}
         isPinned={post.isPinned}
-        isVenueOwned={post.isVenueOwned}
+        isVenuePost={isVenuePost}
+        canDelete={canDelete && !isVenuePost}
+        onDelete={handleDelete}
       />
+      
+      <div className="px-4 py-2 flex justify-end">
+        <UserDropdown userCount={getUserCount(post.location.id)} post={post} />
+      </div>
       
       <PostContent content={post.content} />
       
-      {mediaArray.length > 0 && (
-        <PostMedia media={mediaArray} />
+      {post.media && post.media.length > 0 && (
+        <PostMedia media={post.media} />
       )}
       
-      <PostFooter
-        isLiked={isLiked}
-        likesCount={likesCount}
-        commentsCount={post.comments?.length || 0}
-        vibedHere={post.vibedHere}
-        onLike={handleLike}
-        onComment={() => setShowComments(!showComments)}
-        onShare={onShare}
+      <PostFooter 
+        post={post} 
+        comments={comments} 
+        isDetailView={isDetailView} 
       />
-      
-      {showComments && (
-        <CommentList 
-          comments={post.comments || []} 
-          onAddComment={onComment}
-        />
-      )}
     </Card>
   );
 };
