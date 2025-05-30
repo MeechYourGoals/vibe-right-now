@@ -1,5 +1,5 @@
 
-import { SocialMediaApiKeys, SocialMediaPost } from '@/types';
+import { SocialMediaApiKeys, SocialMediaPost } from './types';
 import { InstagramService } from './platforms/instagramService';
 import { TikTokService } from './platforms/tiktokService';
 import { YelpService } from './platforms/yelpService';
@@ -8,51 +8,43 @@ import { FoursquareService } from './platforms/foursquareService';
 import { GoogleService } from './platforms/googleService';
 import { FrankiService } from './platforms/frankiService';
 import { OtherPlatformService } from './platforms/otherPlatformService';
-
-// Mock data for demonstration
-const mockPosts: SocialMediaPost[] = [
-  {
-    id: '1',
-    content: 'Great venue with amazing atmosphere!',
-    author: 'user123',
-    username: 'user123',
-    userAvatar: '/placeholder.svg',
-    timestamp: '2024-01-15T18:30:00Z',
-    platform: 'google',
-    source: 'google',
-    venueName: 'Demo Venue',
-    likes: 15,
-    comments: 3,
-    rating: 5
-  },
-  {
-    id: '2',
-    content: 'Love this place! Best food in town.',
-    author: 'foodie456',
-    username: 'foodie456',
-    userAvatar: '/placeholder.svg',
-    timestamp: '2024-01-14T19:45:00Z',
-    platform: 'yelp',
-    source: 'yelp',
-    venueName: 'Demo Venue',
-    likes: 8,
-    comments: 2,
-    rating: 4
-  }
-];
+import { mockInstagramPosts, mockTripAdvisorPosts, mockYelpReviews, mockTikTokPosts } from './mockData';
 
 export const SocialMediaAggregator = {
-  async getAllSocialMediaContent(venueName: string, apiKeys: Partial<SocialMediaApiKeys>): Promise<SocialMediaPost[]> {
+  async getAllSocialMediaContent(venueName: string, apiKeys: SocialMediaApiKeys): Promise<SocialMediaPost[]> {
     try {
-      // For now, return mock data since we don't have real API implementations
-      // In a real implementation, you would call the various service methods here
+      // Create an array of promises for each platform that has an API key
+      const promises: Promise<SocialMediaPost[]>[] = [];
       
-      const filteredMockPosts = mockPosts.filter(post => 
-        post.venueName.toLowerCase().includes(venueName.toLowerCase()) ||
-        venueName.toLowerCase().includes('demo')
-      );
+      if (apiKeys.instagram) promises.push(InstagramService.getPosts(venueName, apiKeys.instagram));
+      if (apiKeys.tiktok) promises.push(TikTokService.getPosts(venueName, apiKeys.tiktok));
+      if (apiKeys.yelp) promises.push(YelpService.getReviews(venueName, apiKeys.yelp));
+      if (apiKeys.tripadvisor) promises.push(TripAdvisorService.getContent(venueName, apiKeys.tripadvisor));
+      if (apiKeys.foursquare) promises.push(FoursquareService.getContent(venueName, apiKeys.foursquare));
+      if (apiKeys.google) promises.push(GoogleService.getReviews(venueName, apiKeys.google));
+      if (apiKeys.franki) promises.push(FrankiService.getPosts(venueName, apiKeys.franki));
+      if (apiKeys.other) promises.push(OtherPlatformService.getContent(venueName, apiKeys.other, apiKeys.otherUrl || ''));
       
-      return filteredMockPosts.sort((a, b) => 
+      // If no API keys are provided, return mock data for demonstration
+      if (promises.length === 0) {
+        const mockData = [
+          ...mockInstagramPosts.slice(0, 1),
+          ...mockTripAdvisorPosts.slice(0, 1),
+          ...mockYelpReviews.slice(0, 1),
+          ...mockTikTokPosts.slice(0, 1)
+        ].filter(post => post.venueName.toLowerCase() === venueName.toLowerCase());
+        
+        return mockData.sort((a, b) => 
+          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+        );
+      }
+      
+      // Execute all promises and combine results
+      const results = await Promise.all(promises);
+      const allPosts = results.flat();
+      
+      // Combine and sort all posts by timestamp (newest first)
+      return allPosts.sort((a, b) => 
         new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
       );
     } catch (error) {

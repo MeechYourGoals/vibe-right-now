@@ -1,33 +1,67 @@
-
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { User } from '@/types';
 
-// Export vibeTags for use in other components
-export const vibeTags = [
-  'Cozy', 'Trendy', 'Upscale', 'Casual', 'Romantic', 'Lively', 'Intimate',
-  'Family Friendly', 'NightOwl', 'Chill', 'Energetic', 'Sophisticated',
-  'Alternative', 'Hip', 'Classic', 'Modern', 'Artsy', 'Sports', 'Foodie'
-];
+export interface UserProfile extends User {
+  // Additional profile properties can be added here
+}
 
 export const useUserProfile = () => {
-  const [user, setUser] = useState<User | null>(null);
-  
-  useEffect(() => {
-    // Mock user data
-    const mockUser: User = {
-      id: '1',
-      username: 'johndoe',
-      name: 'John Doe',
-      email: 'john@example.com',
-      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&auto=format',
-      bio: 'Love exploring new places and vibes!',
-      verified: true,
-      followersCount: 1234,
-      followingCount: 567
-    };
-    
-    setUser(mockUser);
-  }, []);
-  
-  return { user, vibeTags };
+  const [user, setUser] = useState<UserProfile>({
+    id: '1',
+    name: 'John Doe',
+    username: 'johndoe',
+    bio: 'Love exploring new places and vibes!',
+    avatar: 'https://randomuser.me/api/portraits/men/1.jpg',
+    coverPhoto: 'https://source.unsplash.com/1200x400/?city',
+    followers: 1250,
+    following: 890,
+    isVerified: true,
+    joinedDate: '2023-01-15',
+    location: 'San Francisco, CA',
+    vibeTags: ['Trendy', 'Foodie', 'NightOwl', 'Artsy']
+  });
+
+  const updateProfile = (updates: Partial<UserProfile>) => {
+    setUser(prev => ({ ...prev, ...updates }));
+  };
+
+  return {
+    user,
+    updateProfile,
+    isLoading: false,
+    error: null
+  };
 };
+
+// Named export for vibeTags
+export const vibeTags = [
+  "Chill",
+  "Lively", 
+  "Upscale",
+  "Casual",
+  "Romantic",
+  "Family-Friendly",
+  "Trendy",
+  "Historic",
+  "Artsy",
+  "Outdoorsy",
+  "Sporty",
+  "Foodie",
+  "NightOwl",
+  "EarlyBird",
+  "Pet-Friendly",
+  "StudentHangout",
+  "BusinessCasual",
+  "LGBTQ-Friendly",
+  "LiveMusic",
+  "Quiet",
+  "Bustling",
+  "Intimate",
+  "Scenic",
+  "Hipster",
+  "Retro",
+  "Local",
+  "Touristy"
+];
+
+export default useUserProfile;

@@ -1,61 +1,160 @@
 
-import { useState } from 'react';
-import { Location } from '@/types';
+import { useState, useEffect } from "react";
+import { useSearchParams } from "./explore/useSearchParams";
+import { useLocationData } from "./explore/useLocationData";
+import { useQueryProcessing } from "./explore/useQueryProcessing";
+import { useFilterHandling } from "./explore/useFilterHandling";
+import { EventItem, Location } from "@/types";
 
 export const useExploreState = () => {
-  const [filteredLocations, setFilteredLocations] = useState<Location[]>([]);
-  const [locationTags, setLocationTags] = useState<Record<string, string[]>>({});
-  const [eventVenues, setEventVenues] = useState<Location[]>([]);
-  const [foodVenues, setFoodVenues] = useState<Location[]>([]);
-  const [drinkVenues, setDrinkVenues] = useState<Location[]>([]);
-  const [sportsVenues, setSportsVenues] = useState<Location[]>([]);
-  const [nightlifeVenues, setNightlifeVenues] = useState<Location[]>([]);
+  const [activeTab, setActiveTab] = useState("all");
   
-  // Add the missing state for filters and search
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedFilters, setSelectedFilters] = useState<Record<string, string[]>>({});
+  // Import modularized hooks
+  const {
+    searchQuery,
+    searchedCity,
+    searchedState,
+    searchCategory,
+    vibeFilter,
+    isNaturalLanguageSearch,
+    dateRange,
+    showDateFilter,
+    activeSearchTab,
+    setSearchQuery,
+    setSearchedCity,
+    setSearchedState,
+    setSearchCategory,
+    setVibeFilter,
+    setIsNaturalLanguageSearch,
+    handleSearchTabChange,
+    handleDateRangeChange,
+    handleClearDates,
+    setShowDateFilter
+  } = useSearchParams();
   
-  // Mock implementations for the missing properties
-  const locations: Location[] = [];
-  const loading = false;
-  const setLocations = (locations: Location[]) => console.log('Setting locations:', locations);
-  const setLoading = (loading: boolean) => console.log('Setting loading:', loading);
-  
-  const detectedCity = '';
-  const setDetectedCity = (city: string) => console.log('Setting detected city:', city);
-  
-  const handleCategoryChange = (category: string) => console.log('Category changed:', category);
-  const handleVibeChange = (vibe: string) => console.log('Vibe changed:', vibe);
-  const handleDateChange = (date: string) => console.log('Date changed:', date);
-  
-  return {
+  const {
     filteredLocations,
-    setFilteredLocations,
     locationTags,
-    setLocationTags,
-    eventVenues,
-    setEventVenues,
-    foodVenues,
-    setFoodVenues,
-    drinkVenues,
-    setDrinkVenues,
-    sportsVenues,
-    setSportsVenues,
+    musicEvents,
+    comedyEvents,
     nightlifeVenues,
-    setNightlifeVenues,
-    locations,
-    loading,
-    setLocations,
-    setLoading,
-    detectedCity,
-    setDetectedCity,
-    handleCategoryChange,
-    handleVibeChange,
-    handleDateChange,
-    // Add the missing properties
-    searchTerm,
-    setSearchTerm,
-    selectedFilters,
-    setSelectedFilters
+    setFilteredLocations,
+    setMusicEvents,
+    setComedyEvents,
+    setNightlifeVenues
+  } = useLocationData(searchedCity, searchedState, dateRange);
+  
+  const {
+    isLoadingResults,
+    processComplexQuery
+  } = useQueryProcessing(
+    setSearchedCity,
+    setSearchedState,
+    setFilteredLocations,
+    setComedyEvents as React.Dispatch<React.SetStateAction<Location[]>>,
+    setActiveTab,
+    setNightlifeVenues as React.Dispatch<React.SetStateAction<Location[]>>,
+    setVibeFilter,
+    setIsNaturalLanguageSearch
+  );
+  
+  const {
+    handleTabChange: filterHandleTabChange,
+    handleSearch: filterHandleSearch,
+    handleClearVibeFilter: filterHandleClearVibeFilter
+  } = useFilterHandling();
+  
+  // Initialize with default search
+  useEffect(() => {
+    if (!searchQuery && !searchedCity) {
+      setSearchedCity("San Francisco");
+      setSearchedState("CA");
+    }
+  }, [searchQuery, searchedCity, setSearchedCity, setSearchedState]);
+  
+  // Get page title
+  const getPageTitle = () => {
+    if (isNaturalLanguageSearch) {
+      return "Smart Search Results";
+    } else if (searchCategory === "users") {
+      return `User Search: ${searchedCity || ""}`;
+    } else if (searchedCity) {
+      return `Explore Vibes in ${searchedCity}${searchedState ? `, ${searchedState}` : ''}`;
+    }
+    return "Explore Vibes";
+  };
+  
+  // Wrapper functions to maintain the same API
+  const handleSearch = (query: string, filterType: string, category: string) => {
+    filterHandleSearch(
+      query,
+      filterType,
+      category,
+      searchQuery,
+      setSearchQuery,
+      setSearchCategory,
+      setActiveTab,
+      setSearchedCity,
+      setSearchedState,
+      setMusicEvents,
+      setComedyEvents,
+      setNightlifeVenues,
+      setFilteredLocations,
+      vibeFilter,
+      setVibeFilter,
+      dateRange,
+      processComplexQuery,
+      setIsNaturalLanguageSearch
+    );
+  };
+  
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    filterHandleTabChange(
+      value, 
+      searchQuery,
+      searchedCity,
+      searchedState,
+      searchCategory,
+      vibeFilter,
+      setFilteredLocations
+    );
+  };
+  
+  const handleClearVibeFilter = () => {
+    filterHandleClearVibeFilter(
+      searchQuery,
+      searchCategory,
+      setVibeFilter,
+      handleSearch
+    );
+  };
+
+  return {
+    activeTab,
+    searchedCity,
+    searchedState,
+    searchCategory,
+    filteredLocations,
+    locationTags,
+    musicEvents,
+    comedyEvents,
+    nightlifeVenues,
+    vibeFilter,
+    isNaturalLanguageSearch,
+    isLoadingResults,
+    dateRange,
+    showDateFilter,
+    activeSearchTab,
+    getPageTitle,
+    handleSearch,
+    handleTabChange,
+    handleClearVibeFilter,
+    handleDateRangeChange,
+    handleClearDates,
+    handleSearchTabChange,
+    setShowDateFilter
   };
 };
+
+export default useExploreState;

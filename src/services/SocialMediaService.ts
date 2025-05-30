@@ -1,11 +1,4 @@
 
-import { SocialMediaApiKeys, SocialMediaPost } from '@/types';
-import { SocialMediaAggregator } from './socialMedia/aggregator';
-
-export type { SocialMediaPost, SocialMediaApiKeys };
-
-export const SocialMediaService = {
-  async getAllSocialMediaContent(venueName: string, apiKeys: Partial<SocialMediaApiKeys>): Promise<SocialMediaPost[]> {
-    return SocialMediaAggregator.getAllSocialMediaContent(venueName, apiKeys as SocialMediaApiKeys);
-  }
-};
+// This file exports from the new module structure
+export { SocialMediaService } from './socialMedia';
+export type { SocialMediaPost, SocialMediaApiKeys } from './socialMedia/types';

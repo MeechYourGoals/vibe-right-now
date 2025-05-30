@@ -1,23 +1,23 @@
 
 import { getCitySpecificWebsite } from './locationService';
 
-export async function generateSportsResponse(city: string): Promise<string> { // Modified signature
+export function generateSportsResponse(city: string): string {
   return `Sports fans in ${city} have plenty to cheer about:
 
-1. **${await getCitySpecificSportsTeam(city, "baseball")}** - The local baseball team plays at ${await getCitySpecificStadium(city, "baseball")}. [Schedule & Tickets](${await getSportsWebsite(city, "baseball")})
+1. **${getCitySpecificSportsTeam(city, "baseball")}** - The local baseball team plays at ${getCitySpecificStadium(city, "baseball")}. [Schedule & Tickets](${getSportsWebsite(city, "baseball")})
 
-2. **${await getCitySpecificSportsTeam(city, "basketball")}** - Catch an exciting basketball game at the ${await getCitySpecificArena(city)}. [Official Team Site](${await getSportsWebsite(city, "basketball")})
+2. **${getCitySpecificSportsTeam(city, "basketball")}** - Catch an exciting basketball game at the ${getCitySpecificArena(city)}. [Official Team Site](${getSportsWebsite(city, "basketball")})
 
-3. **${await getCitySpecificSportsTeam(city, "football")}** - Football games are a major event at ${await getCitySpecificStadium(city, "football")}. Season typically runs September through January.
+3. **${getCitySpecificSportsTeam(city, "football")}** - Football games are a major event at ${getCitySpecificStadium(city, "football")}. Season typically runs September through January.
 
-4. **${city} Marathon** - Annual racing event that draws participants from around the country. [Registration Information](${await getCitySpecificWebsite(city, "marathon")})
+4. **${city} Marathon** - Annual racing event that draws participants from around the country. [Registration Information](${getCitySpecificWebsite(city, "marathon")})
 
-5. **Local College Sports** - ${await getCitySpecificCollege(city)} has competitive teams in various sports with affordable ticket prices.
+5. **Local College Sports** - ${getCitySpecificCollege(city)} has competitive teams in various sports with affordable ticket prices.
 
 Be sure to book tickets in advance for professional games, as they often sell out.`;
 }
 
-export async function getCitySpecificSportsTeam(city: string, sport: string = "basketball"): Promise<string> { // Modified signature
+export function getCitySpecificSportsTeam(city: string, sport: string = "basketball"): string {
   const cityLower = city.toLowerCase();
   
   if (sport === "basketball") {
@@ -59,7 +59,7 @@ export async function getCitySpecificSportsTeam(city: string, sport: string = "b
   return `${city} Sports Team`;
 }
 
-export async function getCitySpecificSportsEvent(city: string): Promise<string> { // Modified signature
+export function getCitySpecificSportsEvent(city: string): string {
   const cityLower = city.toLowerCase();
   
   if (cityLower.includes("boston")) {
@@ -75,7 +75,7 @@ export async function getCitySpecificSportsEvent(city: string): Promise<string> 
   }
 }
 
-export async function getSportsEventWebsite(city: string): Promise<string> { // Modified signature
+export function getSportsEventWebsite(city: string): string {
   const cityLower = city.toLowerCase();
   
   if (cityLower.includes("boston") && cityLower.includes("marathon")) {
@@ -87,18 +87,18 @@ export async function getSportsEventWebsite(city: string): Promise<string> { // 
   }
 }
 
-export async function getCitySpecificStadium(city: string, sport: string = "baseball"): Promise<string> { // Modified signature
+export function getCitySpecificStadium(city: string, sport: string = "baseball"): string {
   return `${city} ${sport === "baseball" ? "Ballpark" : "Stadium"}`;
 }
 
-export async function getCitySpecificArena(city: string): Promise<string> { // Modified signature
+export function getCitySpecificArena(city: string): string {
   return `${city} Arena`;
 }
 
-export async function getSportsWebsite(city: string, sport: string = "basketball"): Promise<string> { // Modified signature
+export function getSportsWebsite(city: string, sport: string = "basketball"): string {
   return `https://www.${city.toLowerCase().replace(/\s+/g, "")}${sport}.com`;
 }
 
-export async function getCitySpecificCollege(city: string): Promise<string> { // Modified signature
+export function getCitySpecificCollege(city: string): string {
   return `University of ${city}`;
 }

@@ -1,98 +1,130 @@
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
-import { toast } from "sonner";
+import { Coffee, Music, MapPin, Heart, Star } from "lucide-react";
+import UserPreferences from "./components/UserPreferences";
 
-const PreferencesTab = () => {
-  const [selectedPreferences, setSelectedPreferences] = useState<string[]>([]);
-  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
+interface PreferencesTabProps {
+  onSave: () => void;
+  isVenueMode: boolean;
+  subscriptionTier: 'standard' | 'plus' | 'premium' | 'pro';
+}
 
-  // Flatten the preference categories for easier handling
-  const allPreferences = [
-    'Cozy', 'Trendy', 'Upscale', 'Casual', 'Romantic', 'Lively', 'Intimate',
-    'Family Friendly', 'NightOwl', 'Chill', 'Energetic', 'Sophisticated'
+const PreferencesTab = ({ onSave, isVenueMode, subscriptionTier }: PreferencesTabProps) => {
+  const [selectedTags, setSelectedTags] = useState<string[]>([
+    "Trendy", "Foodie", "Artsy", "LiveMusic"
+  ]);
+  
+  const [favorites, setFavorites] = useState<string[]>([
+    "Coffee Shops", "Art Galleries", "Live Music Venues"
+  ]);
+
+  // Define preference categories and their tags
+  const preferenceCategories = [
+    {
+      name: "Vibe",
+      icon: Star,
+      id: "vibe"
+    },
+    {
+      name: "Interests", 
+      icon: Heart,
+      id: "interests"
+    },
+    {
+      name: "Crowd",
+      icon: MapPin,
+      id: "crowd"
+    },
+    {
+      name: "Values",
+      icon: Coffee,
+      id: "values"
+    },
+    {
+      name: "Experience",
+      icon: Music,
+      id: "experience"
+    }
   ];
 
-  const allInterests = [
-    'Live Music', 'Sports', 'Outdoors', 'Business', 'Arts', 'Food', 'Drinks',
-    'Dancing', 'Gaming', 'Shopping', 'Photography', 'Technology'
-  ];
-
-  const handlePreferenceToggle = (preference: string) => {
-    setSelectedPreferences(prev => 
-      prev.includes(preference) 
-        ? prev.filter(p => p !== preference)
-        : [...prev, preference]
-    );
+  // Organize preference tags by category
+  const preferenceTags = {
+    Vibe: [
+      "Chill", "Lively", "Upscale", "Casual", "Romantic", "Trendy", 
+      "Historic", "Artsy", "Quiet", "Bustling", "Intimate", "Scenic"
+    ],
+    Interests: [
+      "Foodie", "NightOwl", "EarlyBird", "LiveMusic", "Sporty", 
+      "Outdoorsy", "Hipster", "Retro", "Local", "Touristy"
+    ],
+    Crowd: [
+      "Family-Friendly", "Pet-Friendly", "StudentHangout", 
+      "BusinessCasual", "LGBTQ-Friendly"
+    ],
+    Values: [
+      "Sustainable", "Local-Owned", "Community-Focused", "Inclusive"
+    ],
+    Experience: [
+      "Interactive", "Educational", "Relaxing", "Adventurous", "Cultural"
+    ]
   };
 
-  const handleInterestToggle = (interest: string) => {
-    setSelectedInterests(prev => 
-      prev.includes(interest)
-        ? prev.filter(i => i !== interest)
-        : [...prev, interest]
-    );
+  const handleTagSelect = (tag: string) => {
+    if (!selectedTags.includes(tag)) {
+      setSelectedTags([...selectedTags, tag]);
+    }
   };
 
-  const handleSave = () => {
-    // Save preferences logic here
-    toast.success('Preferences saved successfully!');
+  const handleTagRemove = (tag: string) => {
+    setSelectedTags(selectedTags.filter(t => t !== tag));
+  };
+
+  const handleAddCustomTag = (tag: string) => {
+    if (!selectedTags.includes(tag)) {
+      setSelectedTags([...selectedTags, tag]);
+    }
+  };
+
+  const handleAddFavorite = (favorite: string) => {
+    if (!favorites.includes(favorite)) {
+      setFavorites([...favorites, favorite]);
+    }
+  };
+
+  const handleRemoveFavorite = (favorite: string) => {
+    setFavorites(favorites.filter(f => f !== favorite));
   };
 
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Vibe Preferences</CardTitle>
-          <CardDescription>
-            Select the vibes that match your style
-          </CardDescription>
+          <CardTitle>
+            {isVenueMode ? "Venue Preferences" : "Personal Preferences"}
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-wrap gap-2">
-            {allPreferences.map((preference) => (
-              <Badge
-                key={preference}
-                variant={selectedPreferences.includes(preference) ? "default" : "outline"}
-                className="cursor-pointer"
-                onClick={() => handlePreferenceToggle(preference)}
-              >
-                {preference}
-              </Badge>
-            ))}
-          </div>
+          <UserPreferences
+            selectedTags={selectedTags}
+            favorites={favorites}
+            onTagSelect={handleTagSelect}
+            onTagRemove={handleTagRemove}
+            onAddCustomTag={handleAddCustomTag}
+            onAddFavorite={handleAddFavorite}
+            onRemoveFavorite={handleRemoveFavorite}
+            preferenceCategories={preferenceCategories}
+            preferenceTags={preferenceTags}
+          />
         </CardContent>
       </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Interests</CardTitle>
-          <CardDescription>
-            Choose your interests to get better recommendations
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-2">
-            {allInterests.map((interest) => (
-              <Badge
-                key={interest}
-                variant={selectedInterests.includes(interest) ? "default" : "outline"}
-                className="cursor-pointer"
-                onClick={() => handleInterestToggle(interest)}
-              >
-                {interest}
-              </Badge>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      <Button onClick={handleSave} className="w-full">
-        Save Preferences
-      </Button>
+      
+      <div className="flex justify-end">
+        <Button onClick={onSave} className="bg-primary hover:bg-primary/90">
+          Save Preferences
+        </Button>
+      </div>
     </div>
   );
 };

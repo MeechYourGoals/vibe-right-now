@@ -1,34 +1,47 @@
-// Re-export functionality from GoogleAIService for backward compatibility
-import { GoogleAIService } from '../GoogleAIService';
 
-// Re-export all functionality for backward compatibility
-export const generateText = GoogleAIService.generateText;
-export const searchWithAI = GoogleAIService.search;
-export const textToSpeech = GoogleAIService.textToSpeech;
-export const speechToText = GoogleAIService.speechToText;
-export const checkContentSafety = GoogleAIService.checkContentSafety;
-export const analyzeText = GoogleAIService.analyzeText;
-export const extractEntities = GoogleAIService.extractEntities;
-export const extractCategories = GoogleAIService.extractCategories;
+// Re-export all functionality from the Vertex AI service
+export * from './text';
+export * from './speech';
+export * from './safety';
+export * from './analysis';
+export * from './types';
 
-// Create a hub to simplify imports (backward compatibility)
+// Create a hub to simplify imports
 export const VertexAIHub = {
-  // Text generation
-  generateText: GoogleAIService.generateText.bind(GoogleAIService),
-  searchWithAI: GoogleAIService.search.bind(GoogleAIService),
+  // Text generation with Gemini
+  generateText: (await import('./text')).generateText,
+  searchWithAI: (await import('./text')).searchWithAI,
   
   // Speech services
-  textToSpeech: GoogleAIService.textToSpeech.bind(GoogleAIService),
-  speechToText: GoogleAIService.speechToText.bind(GoogleAIService),
+  textToSpeech: (await import('./speech')).textToSpeech,
+  speechToText: (await import('./speech')).speechToText,
   
   // Content safety
-  checkContentSafety: GoogleAIService.checkContentSafety.bind(GoogleAIService),
+  checkContentSafety: (await import('./safety')).checkContentSafety,
   
-  // Analysis
-  analyzeText: GoogleAIService.analyzeText.bind(GoogleAIService),
-  extractEntities: GoogleAIService.extractEntities.bind(GoogleAIService),
-  extractCategories: GoogleAIService.extractCategories.bind(GoogleAIService)
+  // Analysis with Notebook LM
+  analyzeText: (await import('./analysis')).analyzeText,
+  extractEntities: (await import('./analysis')).extractEntities,
+  extractCategories: (await import('./analysis')).extractCategories,
+  
+  // Project Mariner integration for agentic booking
+  bookWithMariner: async (details: any) => {
+    // This would integrate with Project Mariner for agentic bookings
+    console.log("Booking with Project Mariner:", details);
+    return { success: true, message: "Booked with Project Mariner" };
+  },
+  
+  // Veo API for video generation
+  generateVideo: async (prompt: string, options: any = {}) => {
+    // This would integrate with Veo API
+    console.log("Generating video with Veo:", prompt);
+    return null;
+  },
+  
+  // Imagen API for image generation
+  generateImage: async (prompt: string, options: any = {}) => {
+    // This would integrate with Imagen API
+    console.log("Generating image with Imagen:", prompt);
+    return null;
+  }
 };
-
-export const DEFAULT_MALE_VOICE = 'en-US-Standard-B';
-export const DEFAULT_FEMALE_VOICE = 'en-US-Standard-C';

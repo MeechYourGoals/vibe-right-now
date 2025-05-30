@@ -1,125 +1,62 @@
 
 import { useState } from "react";
-import { Layout } from "@/components/Layout";
-import { Tabs, TabsContent } from "@/components/ui/tabs";
-import { useToast } from "@/hooks/use-toast";
-import VernonChat from "@/components/VernonChat";
-
-import SettingsHeader from "@/components/settings/SettingsHeader";
-import SettingsTabs from "@/components/settings/SettingsTabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Header from "@/components/Header";
 import PreferencesTab from "./settings/PreferencesTab";
-import PrivacyTab from "./settings/PrivacyTab";
-import TransportationTab from "./settings/TransportationTab";
-import TicketingTab from "./settings/TicketingTab";
-import AccountTab from "./settings/AccountTab";
-import VenueManagementTab from "./settings/VenueManagementTab";
-import MarketingTab from "./settings/MarketingTab";
-import PaymentsTab from "./settings/PaymentsTab";
+import PaymentsTabContent from "./settings/components/payments/PaymentsTabContent";
 
 const Settings = () => {
-  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("preferences");
-  const [isVenueMode, setIsVenueMode] = useState(false);
-  const [subscriptionTier, setSubscriptionTier] = useState<'standard' | 'plus' | 'premium' | 'pro'>('standard');
 
-  const isPro = subscriptionTier === 'pro';
-
-  const handleSaveSettings = () => {
-    toast({
-      title: "Settings saved",
-      description: "Your preferences have been updated successfully.",
-    });
-  };
-
-  const handleConnectPlatform = (platformId: string) => {
-    toast({
-      title: "Connecting to platform",
-      description: `Initiating connection to ${platformId === 'other' ? "custom platform" : platformId}...`,
-    });
-    // In a real app, this would trigger an OAuth flow or similar
-  };
-
-  const toggleMode = () => {
-    setIsVenueMode(!isVenueMode);
-    toast({
-      title: `Switched to ${!isVenueMode ? "Venue" : "User"} Mode`,
-      description: `Settings are now configured for ${!isVenueMode ? "venue management" : "regular user"}.`,
-    });
-  };
-
-  // Helper function to upgrade subscription tier
-  const upgradeTier = (tier: 'standard' | 'plus' | 'premium' | 'pro') => {
-    setSubscriptionTier(tier);
-    toast({
-      title: `Upgraded to ${tier.charAt(0).toUpperCase() + tier.slice(1)}`,
-      description: `Your subscription has been upgraded to ${tier}.`,
-    });
+  const handleSave = () => {
+    console.log("Settings saved");
   };
 
   return (
-    <Layout>
-      <div className="container py-8">
-        <SettingsHeader 
-          isVenueMode={isVenueMode}
-          onModeToggle={toggleMode}
-          subscriptionTier={subscriptionTier}
-          onTierChange={upgradeTier}
-        />
-        
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <SettingsTabs activeTab={activeTab} isVenueMode={isVenueMode} />
-          
-          <TabsContent value="preferences" className="space-y-6">
-            <PreferencesTab 
-              onSave={handleSaveSettings} 
-              isVenueMode={isVenueMode} 
-              subscriptionTier={subscriptionTier}
-            />
-          </TabsContent>
-          
-          <TabsContent value="privacy" className="space-y-6">
-            <PrivacyTab onSave={handleSaveSettings} isVenueMode={isVenueMode} />
-          </TabsContent>
-          
-          {isVenueMode ? (
-            <>
-              <TabsContent value="management" className="space-y-6">
-                <VenueManagementTab 
-                  onSave={handleSaveSettings} 
-                  isVenueMode={isVenueMode} 
-                  subscriptionTier={subscriptionTier} 
-                />
-              </TabsContent>
-              
-              <TabsContent value="marketing" className="space-y-6">
-                <MarketingTab subscriptionTier={subscriptionTier} />
-              </TabsContent>
-            </>
-          ) : (
-            <>
-              <TabsContent value="transportation" className="space-y-6">
-                <TransportationTab onSave={handleSaveSettings} />
-              </TabsContent>
-              
-              <TabsContent value="ticketing" className="space-y-6">
-                <TicketingTab onConnectPlatform={handleConnectPlatform} />
-              </TabsContent>
-            </>
-          )}
-          
-          <TabsContent value="payments" className="space-y-6">
-            <PaymentsTab isVenueMode={isVenueMode} />
-          </TabsContent>
-          
-          <TabsContent value="account" className="space-y-6">
-            <AccountTab onSave={handleSaveSettings} isVenueMode={isVenueMode} />
-          </TabsContent>
-        </Tabs>
-      </div>
+    <div className="min-h-screen bg-background">
+      <Header />
       
-      {/* Vernon Chat - Only show for Pro users in venue mode */}
-      {isPro && isVenueMode && <VernonChat />}
-    </Layout>
+      <main className="container py-6">
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-3xl font-bold mb-6">Settings</h1>
+          
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="preferences">Preferences</TabsTrigger>
+              <TabsTrigger value="payments">Payments</TabsTrigger>
+              <TabsTrigger value="notifications">Notifications</TabsTrigger>
+              <TabsTrigger value="privacy">Privacy</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="preferences" className="mt-6">
+              <PreferencesTab 
+                onSave={handleSave}
+                isVenueMode={false}
+                subscriptionTier="standard"
+              />
+            </TabsContent>
+            
+            <TabsContent value="payments" className="mt-6">
+              <PaymentsTabContent />
+            </TabsContent>
+            
+            <TabsContent value="notifications" className="mt-6">
+              <div className="text-center py-12">
+                <h3 className="text-lg font-medium mb-2">Notifications Settings</h3>
+                <p className="text-muted-foreground">Coming soon...</p>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="privacy" className="mt-6">
+              <div className="text-center py-12">
+                <h3 className="text-lg font-medium mb-2">Privacy Settings</h3>
+                <p className="text-muted-foreground">Coming soon...</p>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </div>
+      </main>
+    </div>
   );
 };
 

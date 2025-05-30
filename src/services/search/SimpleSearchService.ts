@@ -41,35 +41,32 @@ export const SimpleSearchService = {
          query.toLowerCase().includes("what's happening") ||
          query.toLowerCase().includes("things to do"))) {
       
-      return await generateCombinedCityResponse(city); // Added await
+      return generateCombinedCityResponse(city);
     }
     
     // Otherwise, create a response based on the query content
-    // Assuming these other generate...Response functions will also become async
-    // and need to be awaited. If they are not yet async, this await might be harmless
-    // or might need adjustment when those are updated.
     if (query.toLowerCase().includes("events") || 
         query.toLowerCase().includes("happening") || 
         query.toLowerCase().includes("going on")) {
-      return await generateEventsResponse(city);
+      return generateEventsResponse(city);
     } else if (query.toLowerCase().includes("restaurant") || 
                query.toLowerCase().includes("food") || 
                query.toLowerCase().includes("eat")) {
-      return await generateRestaurantsResponse(city);
+      return generateRestaurantsResponse(city);
     } else if (query.toLowerCase().includes("nightlife") || 
                query.toLowerCase().includes("bar") || 
                query.toLowerCase().includes("club")) {
-      return await generateNightlifeResponse(city);
+      return generateNightlifeResponse(city);
     } else if (query.toLowerCase().includes("attraction") || 
                query.toLowerCase().includes("visit") || 
                query.toLowerCase().includes("see")) {
-      return await generateAttractionsResponse(city);
+      return generateAttractionsResponse(city);
     } else if (query.toLowerCase().includes("sports") ||
                query.toLowerCase().includes("game") ||
                query.toLowerCase().includes("team")) {
-      return await generateSportsResponse(city);
+      return generateSportsResponse(city);
     } else {
-      return await generateGeneralCityResponse(city); // Added await
+      return generateGeneralCityResponse(city);
     }
   }
 };
