@@ -1,79 +1,92 @@
 
-import { Location, Media, Post } from "@/types";
-import VenuePost from "@/components/VenuePost";
-import { getMediaForLocation } from "@/utils/map/locationMediaUtils";
-import { getLocationVibes } from "@/utils/locationUtils";
-import { 
-  isWithinThreeMonths, 
-  getDaySpecificContent, 
-  getDaySpecificImageUrl
-} from "@/mock/time-utils";
-import { formatTimestamp } from "@/lib/utils";
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Heart, MessageCircle, Share } from "lucide-react";
 
-interface RecentVibesProps {
-  location: Location;
+interface Media {
+  id: string;
+  type: 'image' | 'video';
+  url: string;
 }
 
-const RecentVibes = ({ location }: RecentVibesProps) => {
-  const locationVibes = getLocationVibes(location.id)
-    .filter(vibe => isWithinThreeMonths(vibe.timestamp));
-  
-  // Get current day of week to show content for today
-  const today = new Date();
-  const dayOfWeek = today.getDay();
-  
-  // Get content specific to today's day of week
-  const todayContent = getDaySpecificContent(location.type || 'default', dayOfWeek);
-  const todayImage: Media = {
-    type: "image" as const,
-    url: getDaySpecificImageUrl(location.type || 'default', dayOfWeek)
-  };
-  
-  // Get content for another day (2 days earlier)
-  const previousDay = (dayOfWeek - 2 + 7) % 7; // Ensure it's a positive number
-  const previousContent = getDaySpecificContent(location.type || 'default', previousDay);
-  const previousImage: Media = {
-    type: "image" as const,
-    url: getDaySpecificImageUrl(location.type || 'default', previousDay)
-  };
-  
+interface RecentVibesProps {
+  locationId: string;
+}
+
+const RecentVibes = ({ locationId }: RecentVibesProps) => {
+  // Mock data for recent vibes at this location
+  const recentPosts = [
+    {
+      id: "1",
+      user: { name: "Sarah Johnson", avatar: "/placeholder.svg", username: "sarah_j" },
+      content: "Amazing night at this place! The vibe was perfect 🎉",
+      timestamp: "2 hours ago",
+      likes: 24,
+      comments: 8,
+      media: [
+        { id: "1", type: "image" as const, url: "/placeholder.svg" }
+      ]
+    },
+    {
+      id: "2", 
+      user: { name: "Mike Chen", avatar: "/placeholder.svg", username: "mike_c" },
+      content: "Great cocktails and awesome music. Definitely coming back!",
+      timestamp: "1 day ago",
+      likes: 15,
+      comments: 3,
+      media: [
+        { id: "2", type: "image" as const, url: "/placeholder.svg" }
+      ]
+    }
+  ];
+
   return (
-    <>
-      <h4 className="font-medium text-sm mb-2">Recent Vibes <span className="text-xs text-muted-foreground">(up to 3 months)</span></h4>
+    <div className="space-y-4">
+      <h3 className="text-lg font-semibold">Recent Vibes</h3>
       <div className="space-y-4">
-        {locationVibes.length > 0 ? (
-          locationVibes.map(post => (
-            <div key={post.id} className="border-2 border-amber-500/50 rounded-lg overflow-hidden">
-              <VenuePost
-                venue={location}
-                content={post.content || ''}
-                media={getMediaForLocation(location)}
-                timestamp={formatTimestamp(post.timestamp)}
+        {recentPosts.map((post) => (
+          <div key={post.id} className="border rounded-lg p-4 space-y-3">
+            <div className="flex items-center space-x-3">
+              <img 
+                src={post.user.avatar} 
+                alt={post.user.name}
+                className="w-8 h-8 rounded-full"
               />
+              <div>
+                <p className="font-medium text-sm">{post.user.name}</p>
+                <p className="text-xs text-muted-foreground">@{post.user.username}</p>
+              </div>
+              <span className="text-xs text-muted-foreground ml-auto">{post.timestamp}</span>
             </div>
-          ))
-        ) : (
-          <>
-            <div className="border-2 border-amber-500/50 rounded-lg overflow-hidden">
-              <VenuePost
-                venue={location}
-                content={todayContent}
-                media={todayImage}
-                timestamp={formatTimestamp(new Date().toISOString())}
+            
+            <p className="text-sm">{post.content}</p>
+            
+            {post.media.length > 0 && (
+              <img 
+                src={post.media[0].url} 
+                alt="Post media"
+                className="w-full h-32 object-cover rounded-lg"
               />
+            )}
+            
+            <div className="flex items-center space-x-4 pt-2">
+              <Button variant="ghost" size="sm" className="flex items-center space-x-1">
+                <Heart className="h-4 w-4" />
+                <span>{post.likes}</span>
+              </Button>
+              <Button variant="ghost" size="sm" className="flex items-center space-x-1">
+                <MessageCircle className="h-4 w-4" />
+                <span>{post.comments}</span>
+              </Button>
+              <Button variant="ghost" size="sm">
+                <Share className="h-4 w-4" />
+              </Button>
             </div>
-            <div className="border-2 border-amber-500/50 rounded-lg overflow-hidden">
-              <VenuePost
-                venue={location}
-                content={previousContent}
-                media={previousImage}
-                timestamp={formatTimestamp(new Date(Date.now() - 3600000 * 48).toISOString())}
-              />
-            </div>
-          </>
-        )}
+          </div>
+        ))}
       </div>
-    </>
+    </div>
   );
 };
 

@@ -1,41 +1,39 @@
 
-import { MessageContext, MessageProcessor } from '../types';
-import { Message } from '../../../types';
-import { BookingAgent } from '../../bookingAgent';
-import { createAIMessage } from '../../messageFactory';
+import { MessageContext, Message } from "@/types";
+import { MessageProcessor } from "../types";
 
-export class BookingProcessor implements MessageProcessor {
-  canProcess(context: MessageContext): boolean {
-    return BookingAgent.isBookingRequest(context.query);
-  }
+export const bookingProcessor: MessageProcessor = {
+  canHandle: (context: MessageContext) => {
+    const lastMessage = context.messages[context.messages.length - 1];
+    const text = lastMessage?.text?.toLowerCase() || '';
+    
+    return text.includes('book') || text.includes('reserve') || text.includes('table');
+  },
 
-  async process(
-    context: MessageContext,
-    setMessages: React.Dispatch<React.SetStateAction<Message[]>>
-  ): Promise<boolean> {
-    const bookingDetails = BookingAgent.extractBookingDetails(context.query);
-    
-    if (bookingDetails) {
-      // Add a processing message with Project Mariner attribution
-      const processingMessage = createAIMessage(
-        "I'm working on your booking request using Google's Project Mariner for hands-off reservation processing. Please wait a moment..."
-      );
-      setMessages(prev => [...prev, processingMessage]);
-      
-      const bookingResult = await BookingAgent.bookVenue(bookingDetails);
-      const confirmationText = BookingAgent.generateBookingConfirmation(bookingResult);
-      
-      // Update the message with booking confirmation
-      setMessages(prev => prev.map(msg => 
-        msg.id === processingMessage.id ? {
-          ...msg, 
-          text: confirmationText + "\n\n(Powered by Google's Project Mariner agent technology)"
-        } : msg
-      ));
-      
-      return true;
-    }
-    
-    return false;
+  async process(context: MessageContext): Promise<Message> {
+    const lastMessage = context.messages[context.messages.length - 1];
+    const query = lastMessage?.text || '';
+
+    // Mock booking processing
+    const mockBookingResult = {
+      venue: 'Sample Restaurant',
+      time: '7:00 PM',
+      date: 'Today',
+      party: 2
+    };
+
+    const bookingText = `I can help you make a reservation! For "${query}", I found availability at ${mockBookingResult.venue} for ${mockBookingResult.party} people at ${mockBookingResult.time} on ${mockBookingResult.date}. Would you like me to proceed with this booking?`;
+
+    return {
+      id: Date.now().toString(),
+      sender: 'ai',
+      text: bookingText,
+      timestamp: new Date(),
+      type: 'text',
+      data: {
+        query,
+        booking: mockBookingResult
+      }
+    };
   }
-}
+};

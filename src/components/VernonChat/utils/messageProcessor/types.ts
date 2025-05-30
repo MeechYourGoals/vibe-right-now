@@ -1,22 +1,9 @@
 
-import { Message } from '../../types';
-
-export interface ProcessMessageOptions {
-  isVenueMode: boolean;
-  isProPlan: boolean;
-  updatePaginationState: (params: Record<string, number>) => Record<string, number>;
-  setIsTyping: (isTyping: boolean) => void;
-  setIsSearching: (isSearching: boolean) => void;
-}
-
-export interface MessageContext {
-  messages: Message[];
-  query: string;
-  paginationState: Record<string, number>;
-  options: ProcessMessageOptions;
-}
+import type { MessageContext, ProcessMessageOptions, Message } from "@/types";
 
 export interface MessageProcessor {
-  canProcess: (context: MessageContext) => boolean;
-  process: (context: MessageContext, setMessages: React.Dispatch<React.SetStateAction<Message[]>>) => Promise<boolean>;
+  canHandle: (context: MessageContext) => boolean;
+  process: (context: MessageContext) => Promise<Message>;
 }
+
+export type { MessageContext, ProcessMessageOptions, Message };

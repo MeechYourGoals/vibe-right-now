@@ -1,198 +1,149 @@
 
-import React, { useState } from "react";
-import { Post, Comment, Location } from "@/types";
-import { Card } from "@/components/ui/card";
-import PostHeader from "./PostHeader";
-import PostContent from "./PostContent";
-import PostMedia from "./PostMedia";
-import PostFooter from "./PostFooter";
+import { useState } from "react";
+import { Post, Comment } from "@/types";
+import { formatDistanceToNow } from "date-fns";
+import { Heart, MessageCircle, Share, MapPin, Star } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
-import { UserPlus, UserCheck } from "lucide-react";
-import { deletePost } from "@/utils/venue/postManagementUtils";
-import UserDropdown from "@/components/venue/post-grid-item/UserDropdown";
+import { Badge } from "@/components/ui/badge";
+import PostMedia from "./PostMedia";
+import CommentItem from "@/components/CommentItem";
 
 interface PostCardProps {
-  post?: Post;
-  posts?: Post[];
-  comments?: Comment[];
-  locationPostCount?: number;
-  isDetailView?: boolean;
-  canDelete?: boolean;
-  venue?: Location;
-  onPostDeleted?: (postId: string) => void;
-  getComments?: (postId: string) => Comment[];
+  post: Post;
+  onComment: (postId: string, comment: string) => void;
+  onLike: (postId: string) => void;
+  onShare: (postId: string) => void;
 }
 
-const PostCard: React.FC<PostCardProps> = ({ 
-  post, 
-  posts,
-  comments = [],
-  locationPostCount,
-  isDetailView = false,
-  canDelete = false,
-  venue,
-  onPostDeleted,
-  getComments
-}) => {
-  const [isDeleted, setIsDeleted] = useState(false);
-  const [isFollowing, setIsFollowing] = useState(false);
+const PostCard = ({ post, onComment, onLike, onShare }: PostCardProps) => {
+  const [showComments, setShowComments] = useState(false);
+  const [newComment, setNewComment] = useState("");
   
-  const toggleFollow = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsFollowing(!isFollowing);
-  };
+  const timeAgo = formatDistanceToNow(new Date(post.timestamp), { addSuffix: true });
 
-  // Generate random user count (between 5 and 120) based on location
-  const getUserCount = (locationId: string) => {
-    // Use location ID to generate a consistent but seemingly random number
-    const seed = parseInt(locationId) || 5;
-    return Math.floor((seed * 13) % 115) + 5;
-  };
-  
-  // Handle multiple posts mode (used in feed)
-  if (posts && posts.length > 0 && getComments) {
-    const firstPost = posts[0];
-    
-    return (
-      <Card className="overflow-hidden">
-        <div className="p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <div className="flex flex-col">
-                <Link to={`/venue/${firstPost.location.id}`}>
-                  <h3 className="text-lg font-semibold hover:underline">{firstPost.location.name}</h3>
-                </Link>
-                <div className="flex items-center">
-                  {locationPostCount !== undefined && (
-                    <span className="text-sm text-muted-foreground mr-3">
-                      {locationPostCount} posts
-                    </span>
-                  )}
-                  <div className="relative z-10">
-                    <UserDropdown 
-                      userCount={getUserCount(firstPost.location.id)} 
-                      post={firstPost}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              className={isFollowing ? "bg-primary/10" : ""}
-              onClick={toggleFollow}
-            >
-              {isFollowing ? (
-                <>
-                  <UserCheck className="h-4 w-4 mr-1" />
-                  Following
-                </>
-              ) : (
-                <>
-                  <UserPlus className="h-4 w-4 mr-1" />
-                  Follow
-                </>
-              )}
-            </Button>
-          </div>
-          <p className="text-sm text-muted-foreground mt-1">
-            <Link to={`/venue/${firstPost.location.id}`} className="hover:underline">
-              {firstPost.location.city}, {firstPost.location.state}
-            </Link>
-          </p>
-        </div>
-        
-        {posts.map(post => {
-          // Determine if the post is from the venue itself
-          const isVenuePost = post.isVenuePost || post.location?.id === firstPost.location.id;
-          
-          return (
-            <div 
-              key={post.id} 
-              className={`border-t ${isVenuePost ? 'ring-2 ring-amber-500' : ''}`}
-            >
-              <PostHeader 
-                user={post.user} 
-                timestamp={String(post.timestamp)}
-                location={post.location}
-                isPinned={post.isPinned}
-                isVenuePost={isVenuePost}
-                canDelete={canDelete}
-                onDelete={() => {}}
-              />
-              
-              <div className="px-4">
-                <PostContent content={post.content} />
-                
-                {post.media && post.media.length > 0 && (
-                  <PostMedia media={post.media} />
-                )}
-                
-                <PostFooter 
-                  post={post} 
-                  comments={getComments(post.id)} 
-                  isDetailView={false} 
-                />
-              </div>
-            </div>
-          );
-        })}
-      </Card>
-    );
-  }
-  
-  // Single post mode
-  if (!post) {
-    return null; // Don't render if no post is provided
-  }
-  
-  // Don't render if the post has been deleted
-  if (isDeleted) {
-    return null;
-  }
-
-  const handleDelete = () => {
-    if (venue && deletePost(post.id, venue)) {
-      setIsDeleted(true);
-      if (onPostDeleted) {
-        onPostDeleted(post.id);
-      }
+  const handleComment = () => {
+    if (newComment.trim()) {
+      onComment(post.id, newComment);
+      setNewComment("");
     }
   };
 
-  const isVenuePost = post.isVenuePost || post.location?.id === venue?.id;
+  // Safely get comment count
+  const commentCount = Array.isArray(post.comments) ? post.comments.length : (typeof post.comments === 'number' ? post.comments : 0);
+  const commentsArray = Array.isArray(post.comments) ? post.comments : [];
 
   return (
-    <Card className={`overflow-hidden ${isVenuePost ? 'ring-2 ring-amber-500' : ''} ${post.isPinned && !isVenuePost ? 'ring-2 ring-amber-300' : ''}`}>
-      <PostHeader 
-        user={post.user} 
-        timestamp={String(post.timestamp)} 
-        location={post.location}
-        isPinned={post.isPinned}
-        isVenuePost={isVenuePost}
-        canDelete={canDelete && !isVenuePost}
-        onDelete={handleDelete}
-      />
-      
-      <div className="px-4 py-2 flex justify-end">
-        <UserDropdown userCount={getUserCount(post.location.id)} post={post} />
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+      {/* Header */}
+      <div className="p-4">
+        <div className="flex items-center space-x-3">
+          <Avatar>
+            <AvatarImage src={post.user.profileImage || post.user.avatar} alt={post.user.displayName || post.user.name} />
+            <AvatarFallback>{(post.user.displayName || post.user.name || '').charAt(0)}</AvatarFallback>
+          </Avatar>
+          <div className="flex-1">
+            <div className="flex items-center space-x-2">
+              <h3 className="font-semibold text-sm">@{post.user.username}</h3>
+              {post.user.isVerified && (
+                <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-xs">
+                  ✓
+                </Badge>
+              )}
+              {post.vibedHere && (
+                <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-300 text-xs">
+                  <MapPin className="h-3 w-3 mr-1" />
+                  Vibed Here
+                </Badge>
+              )}
+            </div>
+            <div className="flex items-center text-xs text-muted-foreground">
+              <span>{timeAgo}</span>
+              {post.location && (
+                <>
+                  <span className="mx-1">•</span>
+                  <span>{post.location.name}</span>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
-      
-      <PostContent content={post.content} />
-      
+
+      {/* Content */}
+      <div className="px-4 pb-2">
+        <p className="text-sm">{post.content}</p>
+      </div>
+
+      {/* Media */}
       {post.media && post.media.length > 0 && (
         <PostMedia media={post.media} />
       )}
-      
-      <PostFooter 
-        post={post} 
-        comments={comments} 
-        isDetailView={isDetailView} 
-      />
-    </Card>
+
+      {/* Actions */}
+      <div className="px-4 py-3 border-t border-gray-100 dark:border-gray-700">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onLike(post.id)}
+              className={`flex items-center space-x-1 ${post.isLiked ? 'text-red-500' : ''}`}
+            >
+              <Heart className={`h-4 w-4 ${post.isLiked ? 'fill-current' : ''}`} />
+              <span className="text-xs">{post.likes}</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowComments(!showComments)}
+              className="flex items-center space-x-1"
+            >
+              <MessageCircle className="h-4 w-4" />
+              <span className="text-xs">{commentCount}</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onShare(post.id)}
+              className="flex items-center space-x-1"
+            >
+              <Share className="h-4 w-4" />
+              <span className="text-xs">{post.shares}</span>
+            </Button>
+          </div>
+          {post.momentScore && (
+            <div className="flex items-center space-x-1">
+              <Star className="h-4 w-4 text-amber-500" />
+              <span className="text-xs font-medium">{post.momentScore}/10</span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Comments */}
+      {showComments && (
+        <div className="border-t border-gray-100 dark:border-gray-700 px-4 py-3">
+          {commentsArray.map((comment) => (
+            <CommentItem key={comment.id} comment={comment} />
+          ))}
+          
+          <div className="mt-3 flex space-x-2">
+            <input
+              type="text"
+              placeholder="Add a comment..."
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              className="flex-1 px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
+              onKeyPress={(e) => e.key === 'Enter' && handleComment()}
+            />
+            <Button size="sm" onClick={handleComment}>
+              Post
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 

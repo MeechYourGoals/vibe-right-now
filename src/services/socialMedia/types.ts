@@ -1,29 +1,39 @@
 
-// Types for social media posts and API keys
 export interface SocialMediaPost {
   id: string;
   content: string;
-  timestamp: string;
+  author: string;
   username: string;
-  userAvatar: string;
-  venueName: string;
-  source: 'instagram' | 'tiktok' | 'yelp' | 'tripadvisor' | 'foursquare' | 'google' | 'franki' | 'other';
-  mediaUrl?: string;
-  mediaType?: 'image' | 'video';
+  userAvatar?: string;
+  venueName?: string;
+  rating?: number;
+  timestamp: string;
+  platform: string;
+  source: 'instagram' | 'google' | 'yelp' | 'tiktok' | 'tripadvisor' | 'foursquare' | 'franki' | 'other';
   likes?: number;
   comments?: number;
-  rating?: number;
-  originalUrl?: string; // URL to the original post
+  engagement?: {
+    likes: number;
+    comments: number;
+    shares: number;
+  };
+  media?: {
+    type: 'image' | 'video';
+    url: string;
+  }[];
+  mediaUrl?: string;
+  mediaType?: 'image' | 'video';
+  originalUrl?: string;
 }
 
 export interface SocialMediaApiKeys {
-  instagram: string;
-  tiktok: string;
-  yelp: string;
+  instagram?: string;
+  google?: string;
+  yelp?: string;
+  tiktok?: string;
   tripadvisor?: string;
   foursquare?: string;
-  google?: string;
   franki?: string;
   other?: string;
-  otherUrl?: string; // Custom URL for other platform
+  otherUrl?: string;
 }

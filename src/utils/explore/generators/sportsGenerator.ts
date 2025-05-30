@@ -1,39 +1,50 @@
 
-import { Location } from "@/types";
-import { getMockUserProfile } from "@/mock/users";
-import { getRandomItems } from "@/utils/explore/mockGenerators";
-import { vibeTags } from "../helpers/vibeTags";
-import { generateZipCode } from "../helpers/zipCodeGenerator";
+import { Location } from '@/types';
+import { generateBusinessHours } from '@/utils/businessHoursUtils';
 
-// Generate sports venues for a city
-export const generateSportsLocations = (city: string, state: string = ""): Location[] => {
-  const locations: Location[] = [];
-  
-  // Sports location
-  locations.push({
-    id: `${city.toLowerCase().replace(/\s+/g, '-')}-sports-1`,
-    name: `${city} Arena`,
-    address: `300 Sports Center Drive`,
-    city: city,
-    state: state || 'CA',
-    country: 'USA',
-    zip: generateZipCode(city),
-    lat: 37.7749 + (Math.random() * 0.02 - 0.01),
-    lng: -122.4194 + (Math.random() * 0.02 - 0.01),
-    type: 'sports',
-    verified: true,
-    hours: {
-      monday: 'Varies by event',
-      tuesday: 'Varies by event',
-      wednesday: 'Varies by event',
-      thursday: 'Varies by event',
-      friday: 'Varies by event',
-      saturday: 'Varies by event',
-      sunday: 'Varies by event'
+export const generateSportsVenues = (city: string, state: string): Location[] => {
+  const baseSportsVenues = [
+    {
+      id: '30',
+      name: 'Lakers Arena',
+      address: '1111 S Figueroa St',
+      city,
+      state,
+      country: 'US',
+      category: 'sports' as const,
+      rating: 4.6,
+      priceRange: '$$$' as const,
+      description: 'Home of the Lakers basketball team',
+      amenities: ['Concessions', 'Team Store', 'Premium Seating'],
+      vibes: ['🏀 Basketball', '🔥 Lit', '🏆 Champions'],
+      lat: 34.0522 + Math.random() * 0.01,
+      lng: -118.2437 + Math.random() * 0.01,
+      source: 'generated',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      hours: generateBusinessHours({} as Location)
     },
-    vibes: getRandomItems(vibeTags, 3),
-    userProfile: getMockUserProfile('venue'),
-  });
-  
-  return locations;
+    {
+      id: '32',
+      name: 'Dodger Stadium',
+      address: '1000 Vin Scully Ave',
+      city,
+      state,
+      country: 'US',
+      category: 'sports' as const,
+      rating: 4.5,
+      priceRange: '$$' as const,
+      description: 'Historic baseball stadium',
+      amenities: ['Parking', 'Food Courts', 'Stadium Tours'],
+      vibes: ['⚾ Baseball', '🏟️ Classic', '🌭 Americana'],
+      lat: 34.0522 + Math.random() * 0.01,
+      lng: -118.2437 + Math.random() * 0.01,
+      source: 'generated',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      hours: generateBusinessHours({} as Location)
+    }
+  ];
+
+  return baseSportsVenues;
 };

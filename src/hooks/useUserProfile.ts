@@ -1,67 +1,65 @@
-import { useState } from 'react';
-import { User } from '@/types';
 
-export interface UserProfile extends User {
-  // Additional profile properties can be added here
-}
+import { useState, useEffect } from 'react';
+import { User, Post, Location } from '@/types';
+import { mockUsers } from '@/mock/users';
 
-export const useUserProfile = () => {
-  const [user, setUser] = useState<UserProfile>({
-    id: '1',
-    name: 'John Doe',
-    username: 'johndoe',
-    bio: 'Love exploring new places and vibes!',
-    avatar: 'https://randomuser.me/api/portraits/men/1.jpg',
-    coverPhoto: 'https://source.unsplash.com/1200x400/?city',
-    followers: 1250,
-    following: 890,
-    isVerified: true,
-    joinedDate: '2023-01-15',
-    location: 'San Francisco, CA',
-    vibeTags: ['Trendy', 'Foodie', 'NightOwl', 'Artsy']
-  });
+export const useUserProfile = (userId?: string) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [userPosts, setUserPosts] = useState<Post[]>([]);
+  const [followedVenues, setFollowedVenues] = useState<Location[]>([]);
+  const [visitedPlaces, setVisitedPlaces] = useState<Location[]>([]);
 
-  const updateProfile = (updates: Partial<UserProfile>) => {
-    setUser(prev => ({ ...prev, ...updates }));
+  useEffect(() => {
+    if (userId) {
+      const foundUser = mockUsers.find(u => u.id === userId);
+      if (foundUser) {
+        const userProfile: User = {
+          id: foundUser.id,
+          username: foundUser.username,
+          displayName: foundUser.displayName,
+          profileImage: foundUser.profileImage,
+          bio: foundUser.bio,
+          followersCount: foundUser.followersCount,
+          followingCount: foundUser.followingCount,
+          isVerified: foundUser.isVerified,
+          isPrivate: foundUser.isPrivate,
+          joinedDate: foundUser.joinedDate,
+          location: foundUser.location,
+          website: foundUser.website,
+          socialLinks: foundUser.socialLinks
+        };
+        setUser(userProfile);
+      } else {
+        setError('User not found');
+      }
+    }
+    setLoading(false);
+    setIsLoading(false);
+  }, [userId]);
+
+  const followUser = async () => {
+    // Mock follow functionality
+    console.log('Following user:', userId);
+  };
+
+  const unfollowUser = async () => {
+    // Mock unfollow functionality
+    console.log('Unfollowing user:', userId);
   };
 
   return {
     user,
-    updateProfile,
-    isLoading: false,
-    error: null
+    loading,
+    isLoading,
+    error,
+    setUser,
+    followUser,
+    unfollowUser,
+    userPosts,
+    followedVenues,
+    visitedPlaces
   };
 };
-
-// Named export for vibeTags
-export const vibeTags = [
-  "Chill",
-  "Lively", 
-  "Upscale",
-  "Casual",
-  "Romantic",
-  "Family-Friendly",
-  "Trendy",
-  "Historic",
-  "Artsy",
-  "Outdoorsy",
-  "Sporty",
-  "Foodie",
-  "NightOwl",
-  "EarlyBird",
-  "Pet-Friendly",
-  "StudentHangout",
-  "BusinessCasual",
-  "LGBTQ-Friendly",
-  "LiveMusic",
-  "Quiet",
-  "Bustling",
-  "Intimate",
-  "Scenic",
-  "Hipster",
-  "Retro",
-  "Local",
-  "Touristy"
-];
-
-export default useUserProfile;

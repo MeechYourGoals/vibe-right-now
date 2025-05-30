@@ -1,86 +1,68 @@
 
-import { Location } from "@/types";
+import { Location, BusinessHours } from "@/types";
 
-export interface BusinessHours {
-  monday: string;
-  tuesday: string;
-  wednesday: string;
-  thursday: string;
-  friday: string;
-  saturday: string;
-  sunday: string;
-}
-
-export const isOpenNow = (location: Location): boolean => {
-  if (!location.hours) return false;
+export const generateBusinessHours = (venue: Location): BusinessHours => {
+  // Generate realistic business hours based on venue type
+  const venueType = venue.type || venue.category;
   
-  const now = new Date();
-  const currentDay = now.toLocaleDateString('en-US', { weekday: 'lowercase' }) as keyof BusinessHours;
-  const currentTime = now.getHours() * 60 + now.getMinutes();
-  
-  const hours = location.hours[currentDay];
-  if (!hours || hours === 'Closed') return false;
-  
-  // Parse hours like "9:00 AM - 10:00 PM"
-  const [openTime, closeTime] = hours.split(' - ');
-  if (!openTime || !closeTime) return false;
-  
-  const parseTime = (timeStr: string): number => {
-    const [time, period] = timeStr.split(' ');
-    const [hours, minutes] = time.split(':').map(Number);
-    let totalMinutes = hours * 60 + minutes;
-    
-    if (period === 'PM' && hours !== 12) {
-      totalMinutes += 12 * 60;
-    } else if (period === 'AM' && hours === 12) {
-      totalMinutes = minutes;
-    }
-    
-    return totalMinutes;
-  };
-  
-  const openMinutes = parseTime(openTime);
-  const closeMinutes = parseTime(closeTime);
-  
-  return currentTime >= openMinutes && currentTime <= closeMinutes;
+  switch (venueType) {
+    case 'restaurant':
+      return {
+        monday: '11:00 AM - 10:00 PM',
+        tuesday: '11:00 AM - 10:00 PM',
+        wednesday: '11:00 AM - 10:00 PM',
+        thursday: '11:00 AM - 10:00 PM',
+        friday: '11:00 AM - 11:00 PM',
+        saturday: '11:00 AM - 11:00 PM',
+        sunday: '11:00 AM - 9:00 PM',
+        isOpen24Hours: false
+      };
+    case 'bar':
+    case 'nightclub':
+      return {
+        monday: 'Closed',
+        tuesday: 'Closed',
+        wednesday: '6:00 PM - 2:00 AM',
+        thursday: '6:00 PM - 2:00 AM',
+        friday: '6:00 PM - 3:00 AM',
+        saturday: '6:00 PM - 3:00 AM',
+        sunday: '6:00 PM - 1:00 AM',
+        isOpen24Hours: false
+      };
+    case 'attraction':
+    case 'music_venue':
+    case 'comedy_club':
+    case 'sports':
+    case 'event':
+    case 'lounge':
+    case 'other':
+    default:
+      return {
+        monday: '9:00 AM - 9:00 PM',
+        tuesday: '9:00 AM - 9:00 PM',
+        wednesday: '9:00 AM - 9:00 PM',
+        thursday: '9:00 AM - 9:00 PM',
+        friday: '9:00 AM - 10:00 PM',
+        saturday: '9:00 AM - 10:00 PM',
+        sunday: '10:00 AM - 8:00 PM',
+        isOpen24Hours: false
+      };
+  }
 };
 
-export const formatBusinessHours = (hours: BusinessHours): string => {
-  if (!hours) return 'Hours not available';
-  
-  const now = new Date();
-  const currentDay = now.toLocaleDateString('en-US', { weekday: 'lowercase' }) as keyof BusinessHours;
-  const todayHours = hours[currentDay];
-  
-  if (!todayHours || todayHours === 'Closed') {
-    return 'Closed today';
+export const getTodaysHours = (venue: Location): string => {
+  if (!venue.hours) {
+    venue.hours = generateBusinessHours(venue);
   }
   
-  return `Today: ${todayHours}`;
-};
-
-export const generateBusinessHours = (): BusinessHours => {
-  return {
-    monday: "9:00 AM - 10:00 PM",
-    tuesday: "9:00 AM - 10:00 PM", 
-    wednesday: "9:00 AM - 10:00 PM",
-    thursday: "9:00 AM - 11:00 PM",
-    friday: "9:00 AM - 12:00 AM",
-    saturday: "10:00 AM - 12:00 AM",
-    sunday: "10:00 AM - 9:00 PM"
-  };
-};
-
-export const getTodaysHours = (hours: BusinessHours): string => {
-  if (!hours) return 'Hours not available';
+  const today = new Date().getDay();
+  const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+  const dayName = days[today] as keyof BusinessHours;
   
-  const now = new Date();
-  const currentDay = now.toLocaleDateString('en-US', { weekday: 'lowercase' }) as keyof BusinessHours;
-  const todayHours = hours[currentDay];
-  
-  if (!todayHours || todayHours === 'Closed') {
-    return 'Closed today';
+  if (venue.hours.isOpen24Hours) {
+    return '24 Hours';
   }
   
-  return todayHours;
+  const hoursValue = venue.hours[dayName];
+  return typeof hoursValue === 'string' ? hoursValue : 'Hours not available';
 };

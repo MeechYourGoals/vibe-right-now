@@ -1,135 +1,145 @@
 
-import { useState } from "react";
+import React from "react";
 import { Layout } from "@/components/Layout";
-import MapContainer from "@/components/map/MapContainer";
-import { Card, CardContent } from "@/components/ui/card";
-import { discountOffers } from "@/mock/discountOffers";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, MapPin, Ticket } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { VenueWithDiscount } from "@/components/venue/events/types";
-import { Location } from "@/types";
+import { Star, Clock, MapPin, Percent } from "lucide-react";
 
-// Convert VenueWithDiscount to Location for MapContainer compatibility
-const convertToLocation = (venue: VenueWithDiscount): Location => {
-  return {
-    id: venue.id,
-    name: venue.name,
-    type: venue.type,
-    address: venue.address,
-    city: venue.city,
-    state: venue.state,
-    country: venue.country,
-    zip: venue.zip,
-    lat: venue.lat,
-    lng: venue.lng,
-    verified: venue.verified,
-    description: venue.discount.description
-  };
+interface Discount {
+  id: number;
+  title: string;
+  venue: string;
+  discount: string;
+  category: 'restaurant' | 'bar' | 'nightclub' | 'lounge' | 'music_venue' | 'comedy_club' | 'attraction' | 'sports' | 'event' | 'other';
+  validUntil: string;
+  rating: number;
+  distance: string;
+  image: string;
+  description: string;
+  terms: string;
+}
+
+const mockDiscounts: Discount[] = [
+  {
+    id: 1,
+    title: "Happy Hour Special",
+    venue: "The Rooftop Bar",
+    discount: "50% off drinks",
+    category: "bar",
+    validUntil: "2024-02-15",
+    rating: 4.8,
+    distance: "0.3 miles",
+    image: "https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=400&h=300&fit=crop",
+    description: "Join us for happy hour with stunning city views",
+    terms: "Valid 5-7 PM weekdays only"
+  },
+  {
+    id: 2,
+    title: "Student Night",
+    venue: "Club Electric",
+    discount: "Free entry + 1 drink",
+    category: "nightclub",
+    validUntil: "2024-02-20",
+    rating: 4.5,
+    distance: "0.8 miles",
+    image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop",
+    description: "Show your student ID for free entry and a welcome drink",
+    terms: "Valid student ID required. Thursday nights only."
+  },
+  {
+    id: 3,
+    title: "Dinner Special",
+    venue: "Bella Vista",
+    discount: "25% off all entrees",
+    category: "restaurant",
+    validUntil: "2024-02-10",
+    rating: 4.7,
+    distance: "1.2 miles",
+    image: "https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=400&h=300&fit=crop",
+    description: "Authentic Italian cuisine with fresh ingredients",
+    terms: "Cannot be combined with other offers"
+  }
+];
+
+interface DiscountGridProps {
+  discounts: Discount[];
+}
+
+const DiscountGrid: React.FC<DiscountGridProps> = ({ discounts }) => {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {discounts.map((discount) => (
+        <Card key={discount.id} className="bg-neutral-900 border-neutral-700 overflow-hidden">
+          <div className="relative">
+            <img 
+              src={discount.image} 
+              alt={discount.venue}
+              className="w-full h-48 object-cover"
+            />
+            <Badge 
+              className="absolute top-3 right-3 bg-green-600 hover:bg-green-700"
+            >
+              <Percent className="h-3 w-3 mr-1" />
+              {discount.discount}
+            </Badge>
+          </div>
+          
+          <CardHeader className="pb-3">
+            <div className="flex items-start justify-between">
+              <div>
+                <CardTitle className="text-lg text-white">{discount.title}</CardTitle>
+                <CardDescription className="text-neutral-300">{discount.venue}</CardDescription>
+              </div>
+              <Badge variant="outline" className="text-neutral-400 border-neutral-600">
+                {discount.category}
+              </Badge>
+            </div>
+          </CardHeader>
+          
+          <CardContent className="space-y-4">
+            <p className="text-sm text-neutral-300">{discount.description}</p>
+            
+            <div className="flex items-center justify-between text-sm text-neutral-400">
+              <div className="flex items-center">
+                <Star className="h-4 w-4 text-yellow-500 mr-1" />
+                <span>{discount.rating}</span>
+              </div>
+              <div className="flex items-center">
+                <MapPin className="h-4 w-4 mr-1" />
+                <span>{discount.distance}</span>
+              </div>
+            </div>
+            
+            <div className="flex items-center text-sm text-neutral-400">
+              <Clock className="h-4 w-4 mr-1" />
+              <span>Valid until {new Date(discount.validUntil).toLocaleDateString()}</span>
+            </div>
+            
+            <div className="p-3 bg-neutral-800 rounded-lg">
+              <p className="text-xs text-neutral-400">{discount.terms}</p>
+            </div>
+            
+            <Button className="w-full bg-green-600 hover:bg-green-700">
+              Claim Offer
+            </Button>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
 };
 
 const Discounts = () => {
-  const navigate = useNavigate();
-  const [selectedVenue, setSelectedVenue] = useState<VenueWithDiscount | null>(null);
-  const [mapExpanded, setMapExpanded] = useState(false);
-
-  const handleVenueSelect = (location: Location) => {
-    // Find the corresponding venue from discountOffers
-    const venue = discountOffers.find(v => v.id === location.id);
-    if (venue) {
-      setSelectedVenue(venue);
-    }
-  };
-
-  const handleCloseLocation = () => {
-    setSelectedVenue(null);
-  };
-
-  // Convert discount venues to Location type for map compatibility
-  const locationsForMap = discountOffers.map(convertToLocation);
-
   return (
     <Layout>
-      <div className="container py-6">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-3xl font-bold vibe-gradient-text">
-              Nearby Discounts & Deals
-            </h1>
-            <p className="text-muted-foreground mt-2">
-              Exclusive offers at venues near you
-            </p>
-          </div>
-        </div>
-
-        {/* Map Section */}
+      <div className="container py-8">
         <div className="mb-8">
-          <MapContainer
-            loading={false}
-            isExpanded={mapExpanded}
-            userLocation={null}
-            locations={locationsForMap}
-            searchedCity=""
-            mapStyle="default"
-            selectedLocation={selectedVenue ? convertToLocation(selectedVenue) : null}
-            showDistances={true}
-            userAddressLocation={null}
-            onLocationSelect={handleVenueSelect}
-            onCloseLocation={handleCloseLocation}
-            nearbyCount={discountOffers.length}
-            onToggleDistances={() => {}}
-          />
+          <h1 className="text-3xl font-bold text-white mb-2">Exclusive Discounts</h1>
+          <p className="text-neutral-400">Discover amazing deals at your favorite venues</p>
         </div>
-
-        {/* Discount List */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {discountOffers.map((venue) => (
-            <Card key={venue.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-              <CardContent className="p-4">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="font-semibold text-lg">{venue.name}</h3>
-                    <p className="text-sm text-muted-foreground flex items-center mt-1">
-                      <MapPin className="h-3 w-3 mr-1" />
-                      {venue.city}, {venue.state}
-                    </p>
-                  </div>
-                  <Badge variant={venue.discount.type === "percentOff" ? "secondary" : "default"}>
-                    <Ticket className="h-3 w-3 mr-1" />
-                    {venue.discount.type === "percentOff" 
-                      ? `${venue.discount.value}% OFF`
-                      : venue.discount.type.replace(/([A-Z])/g, ' $1').trim()}
-                  </Badge>
-                </div>
-                
-                <p className="mt-3 text-sm">{venue.discount.description}</p>
-                
-                {venue.discount.conditions && (
-                  <p className="mt-2 text-xs text-muted-foreground">
-                    {venue.discount.conditions}
-                  </p>
-                )}
-                
-                <div className="mt-4 flex justify-between items-center">
-                  {venue.discount.code && (
-                    <Badge variant="outline" className="text-xs">
-                      Code: {venue.discount.code}
-                    </Badge>
-                  )}
-                  <Button 
-                    size="sm" 
-                    className="ml-auto"
-                    onClick={() => navigate(`/venue/${venue.id}`)}
-                  >
-                    View Venue
-                    <ArrowRight className="h-4 w-4 ml-1" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        
+        <DiscountGrid discounts={mockDiscounts} />
       </div>
     </Layout>
   );

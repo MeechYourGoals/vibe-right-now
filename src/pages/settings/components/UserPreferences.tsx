@@ -33,24 +33,6 @@ const UserPreferences = ({
   preferenceCategories,
   preferenceTags
 }: UserPreferencesProps) => {
-  // Convert preferenceTags object to array for PreferenceTagSelection
-  const allTags: string[] = [];
-  
-  // Make sure preferenceTags is an object and not undefined
-  if (preferenceTags && typeof preferenceTags === 'object') {
-    // Handle if preferenceTags is an object with category keys
-    if (!Array.isArray(preferenceTags)) {
-      Object.values(preferenceTags).forEach(categoryTags => {
-        if (Array.isArray(categoryTags)) {
-          allTags.push(...categoryTags);
-        }
-      });
-    } else {
-      // If preferenceTags is already an array, use it directly
-      allTags.push(...preferenceTags);
-    }
-  }
-
   return (
     <div className="space-y-4">
       <div className="space-y-2">
@@ -83,7 +65,7 @@ const UserPreferences = ({
         
         <PreferenceTagSelection
           selectedTags={selectedTags}
-          availableTags={allTags}
+          availableTags={preferenceTags}
           onTagSelect={onTagSelect}
           onTagRemove={onTagRemove}
         />

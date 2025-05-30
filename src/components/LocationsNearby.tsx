@@ -7,7 +7,7 @@ import { MapPin, ArrowRight, Navigation } from "lucide-react";
 import OpenStreetMap from "./map/OpenStreetMap";
 import { Location } from "@/types";
 import { getNearbyLocations } from "@/mock/cityLocations";
-import VerifiedIcon from "@/components/icons/VerifiedIcon";
+import VerifiedBadge from "@/components/icons/VerifiedIcon";
 
 const LocationsNearby = () => {
   const navigate = useNavigate();
@@ -111,8 +111,8 @@ const LocationsNearby = () => {
                 <div>
                   <div className="font-medium flex items-center">
                     {location.name}
-                    {location.verified && (
-                      <VerifiedIcon className="h-3 w-3 ml-1 text-primary" />
+                    {(location.verified || location.isVerified) && (
+                      <VerifiedBadge />
                     )}
                   </div>
                   <div className="text-sm text-muted-foreground">
