@@ -1,7 +1,6 @@
 
 import { regularUsers } from "./regularUsers";
 import { celebrityUsers } from "./celebrityUsers";
-import { hashString, generateUserBio } from "./utils";
 
 // Define the MockUserProfile type directly here if missing from @/types
 export interface MockUserProfile {
@@ -27,4 +26,27 @@ export const getMockUserProfile = (type: 'regular' | 'celebrity' | 'venue'): Moc
 // Create a combined mockUsers array
 export const mockUsers = [...regularUsers, ...celebrityUsers];
 
-export { regularUsers, celebrityUsers, hashString, generateUserBio };
+// Utility functions
+export const hashString = (str: string): string => {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return Math.abs(hash).toString();
+};
+
+export const generateUserBio = (username: string): string => {
+  const bios = [
+    `${username} vibes everywhere ✨`,
+    `Living my best life one vibe at a time 🌟`,
+    `Exploring the world through amazing vibes 🌎`,
+    `Collecting memories and good vibes 📸`,
+    `Just here for the vibes and good times 🎉`
+  ];
+  const hash = hashString(username);
+  return bios[parseInt(hash) % bios.length];
+};
+
+export { regularUsers, celebrityUsers };

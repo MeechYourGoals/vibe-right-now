@@ -1,187 +1,178 @@
 
+// If this file doesn't exist, we're creating it
+import { MockUserProfile } from "@/mock/users";
+
 export interface Location {
   id: string;
   name: string;
   address: string;
   city: string;
-  state: string;
-  zip: string;
+  state?: string;
   country: string;
+  zip?: string;
   lat: number;
   lng: number;
-  type?: string;
-  phone?: string;
-  website?: string;
-  rating?: number;
-  price?: string;
+  type: "restaurant" | "bar" | "event" | "attraction" | "sports" | "other";
+  verified: boolean;
   hours?: BusinessHours;
-  description?: string;
-  tags?: string[];
-  images?: string[];
-  verified?: boolean;
   vibes?: string[];
-  userProfile?: any; // Adding for compatibility with locationGenerator
-  amenities?: any[]; // Adding for compatibility with Discounts.tsx
-  reviews?: any[]; // Adding for compatibility
-  distance?: string; // Adding for compatibility
+  userProfile?: MockUserProfile;
+  rating?: number;
+  followers?: number;
+  checkins?: number;
 }
 
 export interface BusinessHours {
-  [day: string]: string;
-}
-
-export interface User {
-  id: string;
-  username: string;
-  name: string;
-  avatar: string;
-  isPrivate?: boolean;
-  bio?: string;
-  verified?: boolean;
-  isCelebrity?: boolean;
+  monday: { open: string; close: string; };
+  tuesday: { open: string; close: string; };
+  wednesday: { open: string; close: string; };
+  thursday: { open: string; close: string; };
+  friday: { open: string; close: string; };
+  saturday: { open: string; close: string; };
+  sunday: { open: string; close: string; };
+  isOpenNow?: string;
+  timezone?: string;
+  isOpen24Hours?: boolean;
 }
 
 export interface Media {
   type: "image" | "video";
   url: string;
-  thumbnail?: string; // Adding for backward compatibility
+  thumbnail?: string;
 }
 
 export interface Post {
   id: string;
-  user: User;
-  location: Location;
+  user: MockUserProfile;
   content: string;
-  text?: string; // Added for backward compatibility
   media: Media[];
   timestamp: string;
   likes: number;
-  comments: number | any[]; // Updated to support both number and array types
-  vibeTags?: string[]; // Array of vibe tags for the post
+  comments: number;
+  shares: number;
+  location?: Location;
+  vibeTags?: string[];
   isVenuePost?: boolean;
   isPinned?: boolean;
-  expiresAt?: string;
-  saved?: boolean;
 }
 
 export interface Comment {
   id: string;
   postId: string;
-  user: User;
+  userId: string;
+  user: MockUserProfile;
   content: string;
+  text: string;
   timestamp: string;
+  vibedHere: boolean;
   likes: number;
-  text?: string; // For backward compatibility
-  vibedHere?: boolean;
-}
-
-export interface Event {
-  id: string;
-  title: string;
-  description: string;
-  location: Location;
-  startDate: string;
-  endDate: string;
-  media?: Media[];
-  ticketUrl?: string;
-  price?: string;
-  tags?: string[];
-  attendees?: number;
-  interested?: number;
-}
-
-export interface Trip {
-  id: string;
-  title: string;
-  description: string;
-  startDate: string;
-  endDate: string;
-  creator: User;
-  collaborators: User[];
-  places: TripPlace[];
-  visibility: 'public' | 'private' | 'friends';
-  status: 'planning' | 'in-progress' | 'completed';
-}
-
-export interface TripPlace {
-  id: string;
-  tripId: string;
-  location: Location;
-  notes?: string;
-  date?: string;
-  order: number;
-  status: 'must-see' | 'tentative' | 'visited';
-}
-
-export interface Notification {
-  id: string;
-  type: 'like' | 'comment' | 'follow' | 'mention' | 'trip-invite' | 'trip-update' | 'check-in';
-  read: boolean;
-  timestamp: string;
-  user: User;
-  post?: Post;
-  trip?: Trip;
-  location?: Location;
-  content?: string;
 }
 
 // VernonChat types
 export interface ChatMessage {
   id: string;
-  role: 'user' | 'assistant' | 'system';
+  role: 'user' | 'assistant' | 'system' | 'error';
   content: string;
   timestamp: string;
+  // For compatibility with older format
+  text?: string;
+  sender?: 'user' | 'ai';
 }
 
 export interface ChatState {
   messages: ChatMessage[];
   loading: boolean;
   error: string | null;
+  isOpen?: boolean;
+  isMinimized?: boolean;
+  isLoading?: boolean;
+  isListening?: boolean;
+  isSpeaking?: boolean;
+  searchResults?: any[];
+  transcript?: string;
+  interimTranscript?: string;
 }
 
-export interface ExtractedIntent {
-  intent: string;
-  entities: Record<string, any>;
-  confidence: number;
-}
-
-// Venue insights types
 export interface VenueInsights {
   visitors: number;
-  visitorsCount?: number;
-  visitorsChange: number;
+  visitorsChange: string;
   posts: number;
-  postsChange: number;
-  engagement: number;
-  engagementChange: number;
+  postsChange: string;
+  shares: number;
+  sharesChange: string;
   likes: number;
-  likesChange: number;
-  comments: number;
-  commentsChange: number;
-  topPosts: Post[];
-  demographics: {
-    ageGroups: Record<string, number>;
-    gender: Record<string, number>;
-    interests: Record<string, number>;
-  };
-  visitorsByTime: Record<string, number>;
-  visitorsByDay: Record<string, number>;
-  
-  // Adding these properties to fix build errors
+  likesChange: string;
+  engagementRate: string;
+  followerGrowth: string;
+  clickThroughRate: string;
+  totalVisits: number;
+  revenueImpact: string;
+  totalReach: number;
+  impressions: number;
+  viewsPer: number;
+  viewsCount?: number;
   visitorCount?: number;
   checkInCount?: number;
   receiptUploads?: number;
   discountRedemptions?: number;
-  totalViews?: number; // For compatibility
 }
 
-export interface CreditCard {
-  id: string;
-  last4: string;
-  brand: string;
-  expMonth: number;
-  expYear: number;
-  isDefault: boolean;
-  maxSpendLimit?: number; // Maximum amount allowed per transaction
-  vernonApproved?: boolean; // Whether Vernon AI can use this card
+export interface DateRange {
+  from: Date | undefined;
+  to: Date | undefined;
 }
+
+// Advertising Suite Types
+export interface AdFormat {
+  id: string;
+  name: string;
+  description: string;
+  type: 'MomentCard' | 'VibeOverlay' | 'SpawnPoint' | 'HeatRingTakeover';
+  duration?: string;
+  placement: string;
+  kpis: string[];
+}
+
+export interface Campaign {
+  id: string;
+  name: string;
+  adFormat: AdFormat;
+  targeting: TargetingOptions;
+  budget: number;
+  status: 'active' | 'paused' | 'completed';
+  performance: CampaignPerformance;
+}
+
+export interface TargetingOptions {
+  demographics: {
+    ageRange: [number, number];
+    gender: string[];
+    location: string[];
+  };
+  behavioral: {
+    pastAttendance: string[];
+    clipHistory: string[];
+    tripsIntent: boolean;
+  };
+  contextual: {
+    vibeTags: string[];
+    venueTypes: string[];
+    daypart: string[];
+  };
+  momentScore: {
+    hypeLevel: number;
+    crowdDensity: number;
+  };
+}
+
+export interface CampaignPerformance {
+  impressions: number;
+  clicks: number;
+  ctr: number;
+  conversions: number;
+  spend: number;
+  roas: number;
+  footTrafficLift: number;
+}
+
+export * from "./index";
