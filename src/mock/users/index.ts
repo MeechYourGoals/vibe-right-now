@@ -8,16 +8,22 @@ export interface MockUserProfile {
   username: string;
   avatar: string;
   bio?: string;
+  name: string;
   type?: 'regular' | 'celebrity' | 'venue';
   verified?: boolean;
+  followers?: number;
+  following?: number;
+  posts?: number;
 }
 
 // Mock user profile utility
 export const getMockUserProfile = (type: 'regular' | 'celebrity' | 'venue'): MockUserProfile => {
   const collection = type === 'celebrity' ? celebrityUsers : regularUsers;
   const randomIndex = Math.floor(Math.random() * collection.length);
+  const user = collection[randomIndex];
   return {
-    ...collection[randomIndex],
+    ...user,
+    name: user.name || user.username, // Ensure name property exists
     type: type,
     verified: type === 'venue' ? true : collection[randomIndex].verified
   };

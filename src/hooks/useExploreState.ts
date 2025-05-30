@@ -63,19 +63,14 @@ export const useExploreState = () => {
     handleClearVibeFilter: filterHandleClearVibeFilter
   } = useFilterHandling();
   
-  // Initialize with default search
-  useEffect(() => {
-    if (!searchQuery && !searchedCity) {
-      setSearchedCity("San Francisco");
-      setSearchedState("CA");
-    }
-  }, [searchQuery, searchedCity, setSearchedCity, setSearchedState]);
+  // Remove the auto-initialization to San Francisco
+  // Let it start empty until user searches
   
   // Get page title
   const getPageTitle = () => {
     if (isNaturalLanguageSearch) {
       return "Smart Search Results";
-    } else if (searchedCity) {
+    } else if (searchedCity && searchedCity.trim() !== "") {
       return `Explore Vibes in ${searchedCity}${searchedState ? `, ${searchedState}` : ''}`;
     }
     return "Explore Vibes";

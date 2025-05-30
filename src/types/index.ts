@@ -20,6 +20,7 @@ export interface Location {
   rating?: number;
   followers?: number;
   checkins?: number;
+  tags?: string[];
 }
 
 export interface BusinessHours {
@@ -54,6 +55,7 @@ export interface Post {
   vibeTags?: string[];
   isVenuePost?: boolean;
   isPinned?: boolean;
+  expiresAt?: string;
 }
 
 export interface Comment {
@@ -66,6 +68,20 @@ export interface Comment {
   timestamp: string;
   vibedHere: boolean;
   likes: number;
+}
+
+// Add User type for backward compatibility
+export interface User {
+  id: string;
+  username: string;
+  avatar: string;
+  bio?: string;
+  name: string;
+  type?: 'regular' | 'celebrity' | 'venue';
+  verified?: boolean;
+  followers?: number;
+  following?: number;
+  posts?: number;
 }
 
 // VernonChat types

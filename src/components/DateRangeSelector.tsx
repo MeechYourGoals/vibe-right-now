@@ -6,11 +6,11 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { CalendarIcon, X } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { DateRange } from "@/types";
+import { DateRange as ReactDayPickerDateRange } from "react-day-picker";
 
 export interface DateRangeSelectorProps {
-  dateRange: DateRange;
-  onDateRangeChange: (range: DateRange) => void;
+  dateRange: { from: Date | undefined; to: Date | undefined };
+  onDateRangeChange: (range: { from: Date | undefined; to: Date | undefined }) => void;
   onClear: () => void;
 }
 
@@ -19,6 +19,14 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
   onDateRangeChange,
   onClear
 }) => {
+  const handleDateRangeSelect = (range: ReactDayPickerDateRange | undefined) => {
+    if (range) {
+      onDateRangeChange({ from: range.from, to: range.to });
+    } else {
+      onDateRangeChange({ from: undefined, to: undefined });
+    }
+  };
+
   return (
     <div className="flex items-center gap-2">
       <Popover>
@@ -50,8 +58,8 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
             initialFocus
             mode="range"
             defaultMonth={dateRange.from}
-            selected={dateRange}
-            onSelect={(range) => onDateRangeChange(range || { from: undefined, to: undefined })}
+            selected={dateRange as ReactDayPickerDateRange}
+            onSelect={handleDateRangeSelect}
             numberOfMonths={2}
             className="pointer-events-auto"
           />

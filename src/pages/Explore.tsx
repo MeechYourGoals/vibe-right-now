@@ -9,7 +9,6 @@ import useExploreState from "@/hooks/useExploreState";
 import { getCitySpecificContent, getMediaForLocation } from "@/utils/explore/mockGenerators";
 import SearchSection from "@/components/explore/SearchSection";
 import CategoryTabs from "@/components/explore/CategoryTabs";
-import VibeFilter from "@/components/explore/VibeFilter";
 import MusicSection from "@/components/explore/MusicSection";
 import ComedySection from "@/components/explore/ComedySection";
 import NightlifeSection from "@/components/explore/NightlifeSection";
@@ -48,6 +47,16 @@ const Explore = () => {
     setShowDateFilter
   } = useExploreState();
 
+  // Update the page title logic to handle empty cities
+  const getDisplayTitle = () => {
+    if (isNaturalLanguageSearch) {
+      return "Smart Search Results";
+    } else if (searchedCity && searchedCity.trim() !== "") {
+      return `Explore Vibes in ${searchedCity}${searchedState ? `, ${searchedState}` : ''}`;
+    }
+    return "Explore Vibes";
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -55,10 +64,8 @@ const Explore = () => {
       <main className="container py-6">
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-center mb-6 vibe-gradient-text">
-            {getPageTitle()}
+            {getDisplayTitle()}
           </h1>
-          
-          {/* Removed the redundant top tabs bar */}
           
           <SearchSection 
             showDateFilter={showDateFilter}
@@ -72,11 +79,6 @@ const Explore = () => {
           <div className="w-full mb-6">
             <NearbyVibesMap />
           </div>
-          
-          <VibeFilter 
-            vibeFilter={vibeFilter} 
-            onClearVibeFilter={handleClearVibeFilter} 
-          />
           
           <CategoryTabs 
             activeTab={activeTab}
@@ -98,7 +100,7 @@ const Explore = () => {
                 {activeTab === "music" && (
                   <MusicSection
                     musicEvents={musicEvents.length > 0 ? musicEvents : []}
-                    searchedCity={searchedCity || "San Francisco"}
+                    searchedCity={searchedCity || ""}
                     dateRange={dateRange}
                   />
                 )}
@@ -106,7 +108,7 @@ const Explore = () => {
                 {activeTab === "comedy" && (
                   <ComedySection
                     comedyEvents={comedyEvents.length > 0 ? comedyEvents : []}
-                    searchedCity={searchedCity || "San Francisco"}
+                    searchedCity={searchedCity || ""}
                     dateRange={dateRange}
                   />
                 )}
@@ -114,7 +116,7 @@ const Explore = () => {
                 {activeTab === "nightlife" && (
                   <NightlifeSection
                     nightlifeVenues={nightlifeVenues.length > 0 ? nightlifeVenues : []}
-                    searchedCity={searchedCity || "San Francisco"}
+                    searchedCity={searchedCity || ""}
                     dateRange={dateRange}
                   />
                 )}

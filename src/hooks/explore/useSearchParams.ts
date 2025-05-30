@@ -5,7 +5,7 @@ import { DateRange } from "react-day-picker";
 
 export const useSearchParams = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchedCity, setSearchedCity] = useState("");
+  const [searchedCity, setSearchedCity] = useState(""); // Remove default San Francisco
   const [searchedState, setSearchedState] = useState("");
   const [searchCategory, setSearchCategory] = useState("all");
   const [vibeFilter, setVibeFilter] = useState<string>("");
