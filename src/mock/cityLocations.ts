@@ -33,37 +33,13 @@ export const getRecommendedLocations = (): Location[] => {
     .slice(0, 5);
 };
 
-// Get nearby locations based on coordinates with improved distance calculation
+// Get nearby locations based on coordinates
 export const getNearbyLocations = (lat: number, lng: number, radius: number = 10): Location[] => {
-  // More accurate distance calculation using the Haversine formula
-  const getDistanceInMiles = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
-    const R = 3958.8; // Earth's radius in miles
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLng = (lng2 - lng1) * Math.PI / 180;
-    
-    const a = 
-      Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-      Math.sin(dLng/2) * Math.sin(dLng/2);
-      
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    return R * c;
-  };
-  
-  // Filter locations within the specified radius
-  const nearbyLocations = cityLocations.filter(location => {
-    const distance = getDistanceInMiles(location.lat, location.lng, lat, lng);
+  // Simple distance calculation (not accurate for large distances but fine for prototype)
+  return cityLocations.filter(location => {
+    const distance = Math.sqrt(
+      Math.pow(location.lat - lat, 2) + Math.pow(location.lng - lng, 2)
+    ) * 69; // Rough miles conversion
     return distance <= radius;
-  });
-  
-  // Sort by distance and limit to reasonable number
-  const sortedLocations = nearbyLocations
-    .sort((a, b) => {
-      const distanceA = getDistanceInMiles(a.lat, a.lng, lat, lng);
-      const distanceB = getDistanceInMiles(b.lat, b.lng, lat, lng);
-      return distanceA - distanceB;
-    })
-    .slice(0, 20); // Limit to 20 locations
-  
-  return sortedLocations;
+  }).slice(0, 20); // Limit to 20 locations
 };

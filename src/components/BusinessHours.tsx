@@ -43,31 +43,31 @@ const BusinessHours = ({ venue }: BusinessHoursProps) => {
         <div className="mt-2 text-sm grid grid-cols-2 gap-1">
           <div className="flex justify-between pr-2">
             <span className="text-muted-foreground">Monday:</span>
-            <span>{venue.hours.monday.open} - {venue.hours.monday.close}</span>
+            <span>{venue.hours.monday}</span>
           </div>
           <div className="flex justify-between pr-2">
             <span className="text-muted-foreground">Tuesday:</span>
-            <span>{venue.hours.tuesday.open} - {venue.hours.tuesday.close}</span>
+            <span>{venue.hours.tuesday}</span>
           </div>
           <div className="flex justify-between pr-2">
             <span className="text-muted-foreground">Wednesday:</span>
-            <span>{venue.hours.wednesday.open} - {venue.hours.wednesday.close}</span>
+            <span>{venue.hours.wednesday}</span>
           </div>
           <div className="flex justify-between pr-2">
             <span className="text-muted-foreground">Thursday:</span>
-            <span>{venue.hours.thursday.open} - {venue.hours.thursday.close}</span>
+            <span>{venue.hours.thursday}</span>
           </div>
           <div className="flex justify-between pr-2">
             <span className="text-muted-foreground">Friday:</span>
-            <span>{venue.hours.friday.open} - {venue.hours.friday.close}</span>
+            <span>{venue.hours.friday}</span>
           </div>
           <div className="flex justify-between pr-2">
             <span className="text-muted-foreground">Saturday:</span>
-            <span>{venue.hours.saturday.open} - {venue.hours.saturday.close}</span>
+            <span>{venue.hours.saturday}</span>
           </div>
           <div className="flex justify-between pr-2">
             <span className="text-muted-foreground">Sunday:</span>
-            <span>{venue.hours.sunday.open} - {venue.hours.sunday.close}</span>
+            <span>{venue.hours.sunday}</span>
           </div>
         </div>
       )}

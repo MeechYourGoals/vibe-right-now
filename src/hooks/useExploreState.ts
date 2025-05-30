@@ -52,7 +52,7 @@ export const useExploreState = () => {
     setFilteredLocations,
     setComedyEvents,
     setActiveTab,
-    setNightlifeVenues as any,
+    setNightlifeVenues,
     setVibeFilter,
     setIsNaturalLanguageSearch
   );

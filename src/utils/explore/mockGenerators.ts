@@ -1,6 +1,5 @@
 
 import { Location } from "@/types";
-import { getMediaForLocation } from "@/utils/map/locationMediaUtils";
 
 // Function to get random items from an array
 export const getRandomItems = <T>(items: T[], count: number): T[] => {
@@ -13,9 +12,11 @@ export const getCitySpecificContent = (location: Location) => {
   return `Experience the unique atmosphere of ${location.name} in ${location.city}`;
 };
 
-export const getMediaForLocationMock = (location: Location) => {
-  // Use our central media utility for consistency
-  return getMediaForLocation(location);
+export const getMediaForLocation = (location: Location) => {
+  return {
+    url: `/images/venues/${location.type || 'restaurant'}-${Math.floor(Math.random() * 5) + 1}.jpg`,
+    type: "image" as "image" | "video"
+  };
 };
 
 export const getAdditionalTags = (location: Location) => {

@@ -54,12 +54,12 @@ export const useNearbyLocations = () => {
     } else if (userAddressLocation) {
       // If we have a custom address location but no city search
       const [lng, lat] = userAddressLocation;
-      const nearbyLocs = getNearbyLocations(lat, lng, 10); // Ensure 10 mile radius
+      const nearbyLocs = getNearbyLocations(lat, lng);
       setNearbyLocations(nearbyLocs);
       setLoading(false);
     } else if (userLocation) {
       // Use actual user location if available and no city search
-      const nearbyLocs = getNearbyLocations(userLocation.latitude, userLocation.longitude, 10); // Ensure 10 mile radius
+      const nearbyLocs = getNearbyLocations(userLocation.latitude, userLocation.longitude);
       setNearbyLocations(nearbyLocs);
       setLoading(false);
     } else {

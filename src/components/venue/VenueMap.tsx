@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Maximize, MapPin } from "lucide-react";
 import { Location } from "@/types";
 import GoogleMapComponent from "@/components/map/google/GoogleMapComponent";
+import WaitTimeDisplay from "@/components/venue/WaitTimeDisplay";
 
 interface VenueMapProps {
   venue: Location;
@@ -18,6 +19,7 @@ const VenueMap: React.FC<VenueMapProps> = ({ venue, onExpand }) => {
           <MapPin className="h-4 w-4 mr-1 text-primary" />
           <span className="font-medium">{venue.address}</span>
         </div>
+        <WaitTimeDisplay venueId={venue.id} showLastUpdated={false} />
       </div>
       
       <div className="h-48 rounded-md overflow-hidden relative">

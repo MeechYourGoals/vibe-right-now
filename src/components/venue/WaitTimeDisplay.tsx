@@ -21,14 +21,10 @@ interface WaitTimeData {
 const WaitTimeDisplay = ({ venueId, showLastUpdated = true, className = "" }: WaitTimeDisplayProps) => {
   const [waitTimeData, setWaitTimeData] = useState<WaitTimeData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   
   useEffect(() => {
     const fetchWaitTime = async () => {
       try {
-        setLoading(true);
-        setError(null);
-        
         // For now, simulate wait times based on venue ID
         // This is a temporary solution until the database schema is fixed
         const mockWaitTimes: Record<string, number> = {
@@ -69,18 +65,13 @@ const WaitTimeDisplay = ({ venueId, showLastUpdated = true, className = "" }: Wa
                 wait_minutes: data.value,
                 updated_at: data.timestamp
               });
-            } else if (error) {
-              console.error('Supabase error:', error);
-              setError('Failed to fetch wait time data');
             }
           } catch (dbError) {
             console.error('Supabase error in wait time fetch:', dbError);
-            setError('Database error occurred');
           }
         }
       } catch (error) {
         console.error('Error in wait time fetch:', error);
-        setError('Failed to load wait time');
       } finally {
         setLoading(false);
       }
@@ -96,7 +87,7 @@ const WaitTimeDisplay = ({ venueId, showLastUpdated = true, className = "" }: Wa
     </div>;
   }
   
-  if (error || !waitTimeData || waitTimeData.wait_minutes === null) {
+  if (!waitTimeData || waitTimeData.wait_minutes === null) {
     return null;
   }
 
@@ -117,7 +108,7 @@ const WaitTimeDisplay = ({ venueId, showLastUpdated = true, className = "" }: Wa
           ? "No wait time" 
           : `~${waitTimeData.wait_minutes} min wait`}
       </span>
-      {showLastUpdated && timeAgo && (
+      {showLastUpdated && (
         <span className="text-xs text-muted-foreground ml-1">
           Updated {timeAgo}
         </span>
