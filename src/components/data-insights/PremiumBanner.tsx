@@ -1,8 +1,9 @@
 
-import { Crown, CreditCard, Star, ChartBar, BarChart3, FileText, Instagram, Phone } from "lucide-react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Crown, Video, Image, Brain } from "lucide-react";
 
 interface PremiumBannerProps {
   onUpgrade: (tier: string) => void;
@@ -10,114 +11,97 @@ interface PremiumBannerProps {
 
 const PremiumBanner = ({ onUpgrade }: PremiumBannerProps) => {
   return (
-    <Card className="mb-6 border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800/30">
+    <Card className="bg-gradient-to-r from-orange-500/10 to-amber-500/10 border-orange-500/20 mb-6">
       <CardHeader>
-        <CardTitle className="flex items-center text-amber-700 dark:text-amber-400">
+        <CardTitle className="flex items-center text-orange-400">
           <Crown className="mr-2 h-5 w-5" />
           Upgrade Your Venue Subscription
         </CardTitle>
-        <CardDescription className="text-amber-600 dark:text-amber-500">
+        <p className="text-muted-foreground">
           Choose the perfect tier to grow your venue's presence on Vibe Right Now
-        </CardDescription>
+        </p>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="plus" className="w-full">
-          <TabsList className="grid grid-cols-3 w-full max-w-md mx-auto mb-6">
-            <TabsTrigger value="plus">Plus</TabsTrigger>
-            <TabsTrigger value="premium">Premium</TabsTrigger>
-            <TabsTrigger value="pro">Pro</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="plus">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="flex flex-col items-center text-center p-4 rounded-lg bg-white dark:bg-amber-950/40 shadow-sm">
-                <h3 className="font-semibold mb-2">Pin User Posts</h3>
-                <p className="text-sm text-muted-foreground">Highlight the best user-generated content on your venue page</p>
-              </div>
-              <div className="flex flex-col items-center text-center p-4 rounded-lg bg-white dark:bg-amber-950/40 shadow-sm">
-                <h3 className="font-semibold mb-2">Offer Discounts</h3>
-                <p className="text-sm text-muted-foreground">Create and manage special offers to attract more customers</p>
-              </div>
-              <div className="flex flex-col items-center text-center p-4 rounded-lg bg-white dark:bg-amber-950/40 shadow-sm">
-                <h3 className="font-semibold mb-2">Social Media Links</h3>
-                <p className="text-sm text-muted-foreground">Link to your external platforms like Yelp, TikTok, Instagram, and more</p>
-              </div>
-            </div>
-            
-            <div className="mt-6 text-center">
-              <p className="text-lg font-medium mb-4">$29.99/month</p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          {/* Plus Tier */}
+          <div className="bg-card/50 border border-border rounded-lg p-4">
+            <div className="text-center mb-4">
               <Button 
-                className="bg-gradient-to-r from-plus-primary to-plus-secondary hover:from-purple-600 hover:to-teal-600"
-                onClick={() => onUpgrade('plus')}
+                variant="outline" 
+                className="w-full bg-slate-600 hover:bg-slate-700 text-white border-slate-500"
               >
-                <CreditCard className="mr-2 h-4 w-4" />
-                Upgrade to Plus
+                Plus
               </Button>
             </div>
-          </TabsContent>
-          
-          <TabsContent value="premium">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="flex flex-col items-center text-center p-4 rounded-lg bg-white dark:bg-amber-950/40 shadow-sm">
-                <h3 className="font-semibold mb-2">Full Analytics</h3>
-                <p className="text-sm text-muted-foreground">Access detailed insights about visitor demographics and behavior patterns</p>
+            <div className="space-y-3 text-center text-sm text-muted-foreground">
+              <div className="flex items-center justify-center">
+                <Brain className="mr-2 h-4 w-4 text-purple-400" />
+                AI-Powered Financial Analysis
               </div>
-              <div className="flex flex-col items-center text-center p-4 rounded-lg bg-white dark:bg-amber-950/40 shadow-sm">
-                <h3 className="font-semibold mb-2">Advertising Tools</h3>
-                <p className="text-sm text-muted-foreground">Create targeted promotions and track their performance in real-time</p>
-              </div>
-              <div className="flex flex-col items-center text-center p-4 rounded-lg bg-white dark:bg-amber-950/40 shadow-sm">
-                <h3 className="font-semibold mb-2">Weekly Content Import</h3>
-                <p className="text-sm text-muted-foreground">Automatically import and display your content from Yelp, Google, TikTok, Instagram, and more</p>
-              </div>
+              <p className="text-xs">
+                Use Notebook LM to analyze financial records and get advanced insights
+              </p>
             </div>
-            
-            <div className="mt-6 text-center">
-              <p className="text-lg font-medium mb-4">$49.99/month</p>
+          </div>
+
+          {/* Premium Tier */}
+          <div className="bg-card/50 border border-border rounded-lg p-4">
+            <div className="text-center mb-4">
               <Button 
-                className="bg-gradient-to-r from-premium-primary to-premium-secondary hover:from-green-600 hover:to-blue-600"
-                onClick={() => onUpgrade('premium')}
+                variant="outline" 
+                className="w-full bg-slate-600 hover:bg-slate-700 text-white border-slate-500"
               >
-                <CreditCard className="mr-2 h-4 w-4" />
-                Upgrade to Premium
+                Premium
               </Button>
             </div>
-          </TabsContent>
-          
-          <TabsContent value="pro">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="flex flex-col items-center text-center p-4 rounded-lg bg-white dark:bg-amber-950/40 shadow-sm">
-                <h3 className="font-semibold mb-2">AI-Powered Analysis</h3>
-                <p className="text-sm text-muted-foreground">Upload financial records for advanced AI insights and recommendations</p>
+            <div className="space-y-3 text-center text-sm text-muted-foreground">
+              <div className="flex items-center justify-center">
+                <Video className="mr-2 h-4 w-4 text-blue-400" />
+                Veo 3 Video Generation
               </div>
-              <div className="flex flex-col items-center text-center p-4 rounded-lg bg-white dark:bg-amber-950/40 shadow-sm">
-                <h3 className="font-semibold mb-2">Promoted Listings</h3>
-                <p className="text-sm text-muted-foreground">Your venue automatically highlighted in trending and recommended sections</p>
-              </div>
-              <div className="flex flex-col items-center text-center p-4 rounded-lg bg-white dark:bg-amber-950/40 shadow-sm">
-                <h3 className="font-semibold mb-2">Curated Content Import</h3>
-                <p className="text-sm text-muted-foreground">AI selects and imports your most flattering content from all social platforms weekly</p>
-              </div>
+              <p className="text-xs">
+                Create auto-generated promo videos for social media in just 15 seconds using Google's Veo AI
+              </p>
             </div>
-            
-            <div className="mt-6 text-center">
-              <p className="text-lg font-medium mb-4">$99.99/month</p>
+          </div>
+
+          {/* Pro Tier */}
+          <div className="bg-card/50 border border-border rounded-lg p-4">
+            <div className="text-center mb-4">
               <Button 
-                className="bg-gradient-to-r from-pro-primary to-pro-secondary hover:from-amber-600 hover:to-orange-600"
-                onClick={() => onUpgrade('pro')}
+                variant="outline" 
+                className="w-full bg-orange-600 hover:bg-orange-700 text-white border-orange-500"
               >
-                <CreditCard className="mr-2 h-4 w-4" />
-                Upgrade to Pro
+                Pro
               </Button>
             </div>
-          </TabsContent>
-        </Tabs>
+            <div className="space-y-3 text-center text-sm text-muted-foreground">
+              <div className="flex items-center justify-center">
+                <Image className="mr-2 h-4 w-4 text-green-400" />
+                Imagen 4 Graphics
+              </div>
+              <p className="text-xs">
+                Generate high-quality posters, banners and promotional images for your venue using Google's Imagen AI
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="text-center">
+          <div className="text-2xl font-bold text-foreground mb-4">$99.99/month</div>
+          <Button 
+            className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white px-8"
+            onClick={() => onUpgrade('pro')}
+          >
+            Upgrade to Pro
+          </Button>
+          <p className="text-xs text-muted-foreground mt-4 max-w-2xl mx-auto">
+            All plans include basic venue profile features. Upgrade to Pro for access to Google's cutting-edge Gemini, Veo, Imagen, 
+            and Notebook LM technologies to grow your business. Project Mariner handles bookings automatically. Annual billing 
+            available with a 15% discount.
+          </p>
+        </div>
       </CardContent>
-      <CardFooter className="flex justify-center">
-        <p className="text-xs text-muted-foreground text-center max-w-xl">
-          All plans include basic venue profile features. Upgrade anytime to access more powerful tools to grow your business. Annual billing available with a 15% discount.
-        </p>
-      </CardFooter>
     </Card>
   );
 };

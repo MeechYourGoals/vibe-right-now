@@ -55,7 +55,7 @@ const DataInsights = () => {
           <Tabs defaultValue="overview" className="w-full">
             <div className="flex justify-between items-center mb-4">
               <div className="flex items-center">
-                <h1 className="text-3xl font-bold">Data Insights</h1>
+                <h1 className="text-3xl font-bold text-foreground">Data Insights</h1>
                 {getTierBadge()}
               </div>
               
@@ -115,9 +115,9 @@ const DataInsights = () => {
               )}
             </div>
             
-            <TabsList className="mb-4 bg-neutral-800">
-              <TabsTrigger value="overview" className="data-[state=active]:bg-neutral-700 data-[state=active]:text-white">Overview</TabsTrigger>
-              <TabsTrigger value="analytics" className="data-[state=active]:bg-neutral-700 data-[state=active]:text-white">
+            <TabsList className="mb-4 bg-card border border-border">
+              <TabsTrigger value="overview" className="data-[state=active]:bg-muted data-[state=active]:text-foreground">Overview</TabsTrigger>
+              <TabsTrigger value="analytics" className="data-[state=active]:bg-muted data-[state=active]:text-foreground">
                 <div className="flex items-center">
                   <ChartBar className="mr-2 h-4 w-4" />
                   Analytics
@@ -127,7 +127,7 @@ const DataInsights = () => {
               <TabsTrigger 
                 value="advertising" 
                 disabled={subscriptionTier === 'standard' || subscriptionTier === 'plus'}
-                className="data-[state=active]:bg-neutral-700 data-[state=active]:text-white"
+                className="data-[state=active]:bg-muted data-[state=active]:text-foreground"
               >
                 <div className="flex items-center">
                   Advertising
