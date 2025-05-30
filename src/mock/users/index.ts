@@ -1,38 +1,39 @@
 
-import { User } from "@/integrations/supabase/types";
-import { regularUsers } from "./regularUsers";
-import { celebrityUsers } from "./celebrityUsers";
+import { celebrityUsers } from './celebrityUsers';
+import { regularUsers } from './regularUsers';
 
-export interface MockUserProfile extends User {
-  type: "regular" | "celebrity" | "venue";
-  avatar: string;
-}
+export const mockUsers = [...celebrityUsers, ...regularUsers];
 
-// Combine all users and add type information
-export const mockUsers: MockUserProfile[] = [
-  ...regularUsers.map(user => ({
-    ...user,
-    type: "regular" as const,
-    avatar: user.avatar || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
-    isVerified: user.isVerified || false
-  })),
-  ...celebrityUsers.map(user => ({
-    ...user,
-    type: "celebrity" as const,
-    avatar: user.avatar || "https://images.unsplash.com/photo-1494790108755-2616b612b77c?w=150&h=150&fit=crop&crop=face",
-    isVerified: user.isVerified || false
-  }))
-];
+// Helper function to get user by username
+export const getUserByUsername = (username: string) => {
+  return mockUsers.find(user => user.username === username);
+};
 
-// Simple hash function to generate a numeric hash from a string
+// Helper function to check if user is verified
+export const isUserVerified = (username: string) => {
+  const user = getUserByUsername(username);
+  return user?.isVerified || false;
+};
+
+// Helper function to get featured users
+export const getFeaturedUsers = () => {
+  return mockUsers.filter(user => user.isCelebrity || user.isVerified);
+};
+
+// Helper function to hash string for deterministic selection
 export const hashString = (str: string): number => {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
     const char = str.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash |= 0; // Convert to 32bit integer
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32-bit integer
   }
-  return Math.abs(hash); // Return absolute value to ensure positive number
+  return Math.abs(hash);
 };
 
-export { regularUsers, celebrityUsers };
+// Helper function to get mock user profile
+export const getMockUserProfile = (id: string) => {
+  return mockUsers.find(user => user.id === id) || mockUsers[0];
+};
+
+export { celebrityUsers, regularUsers };

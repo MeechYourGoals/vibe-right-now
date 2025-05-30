@@ -1,86 +1,116 @@
 
 import { useState } from "react";
-import { EventItem, Location } from "@/types";
+import { toast } from "sonner";
+import { Location } from "@/types";
+import { supabase } from "@/integrations/supabase/client";
+import { generateMockLocationsForCity, generateLocalNightlifeVenues } from "@/utils/explore/locationGenerators";
+import { getComedyEventsForCity } from "@/services/search/eventService";
 
 export const useQueryProcessing = (
   setSearchedCity: (city: string) => void,
   setSearchedState: (state: string) => void,
   setFilteredLocations: (locations: Location[]) => void,
-  setComedyEvents: (events: EventItem[]) => void,
+  setComedyEvents: (events: any[]) => void,
   setActiveTab: (tab: string) => void,
   setNightlifeVenues: (venues: Location[]) => void,
-  setVibeFilter: (filter: string) => void,
-  setIsNaturalLanguageSearch: (isNatural: boolean) => void
+  setVibeFilter: (vibe: string) => void,
+  setIsNaturalLanguageSearch: (isNL: boolean) => void
 ) => {
   const [isLoadingResults, setIsLoadingResults] = useState(false);
-
-  const processComplexQuery = async (query: string) => {
-    setIsLoadingResults(true);
-    
+  
+  // Process complex natural language queries
+  const processComplexQuery = async (queryText: string) => {
     try {
-      // Simulate processing time
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      setIsLoadingResults(true);
+      toast("Finding venues and events that match all your criteria...");
       
-      // Mock natural language processing
-      const lowerQuery = query.toLowerCase();
+      const { data, error } = await supabase.functions.invoke('vector-search', {
+        body: { query: queryText }
+      });
       
-      if (lowerQuery.includes('comedy') || lowerQuery.includes('funny')) {
-        setActiveTab('comedy');
-        const comedyEvents = await generateComedyEvents();
-        setComedyEvents(comedyEvents);
-      } else if (lowerQuery.includes('music') || lowerQuery.includes('concert')) {
-        setActiveTab('music');
-      } else if (lowerQuery.includes('nightlife') || lowerQuery.includes('bar') || lowerQuery.includes('club')) {
-        setActiveTab('nightlife');
-        const nightlifeVenues = await generateNightlifeVenues();
-        setNightlifeVenues(nightlifeVenues);
+      if (error) {
+        console.error('Error calling vector-search function:', error);
+        setIsLoadingResults(false);
+        return;
       }
       
-      // Extract location if mentioned
-      const cityMatch = lowerQuery.match(/in ([a-z\s]+)/);
-      if (cityMatch) {
-        setSearchedCity(cityMatch[1].trim());
+      if (data && data.categories && data.categories.length > 0) {
+        const locationMatch = queryText.match(/in\s+([a-zA-Z\s]+)(?:,\s*([a-zA-Z\s]+))?/i);
+        
+        if (locationMatch && locationMatch[1]) {
+          const city = locationMatch[1].trim();
+          const state = locationMatch[2] ? locationMatch[2].trim() : "";
+          
+          setSearchedCity(city);
+          setSearchedState(state);
+          
+          const needsComedy = data.categories.includes('comedy');
+          if (needsComedy) {
+            try {
+              const comedyEvents = getComedyEventsForCity(city, state);
+              setComedyEvents(comedyEvents);
+              setActiveTab('comedy');
+            } catch (e) {
+              console.error('Error loading comedy events:', e);
+            }
+          }
+          
+          setNightlifeVenues(generateLocalNightlifeVenues(city, state));
+          
+          let results = generateMockLocationsForCity(city, state);
+          
+          const categoryMap: Record<string, string> = {
+            'restaurant': 'restaurant',
+            'dining': 'restaurant',
+            'bar': 'bar',
+            'nightlife': 'bar',
+            'attraction': 'attraction',
+            'sport': 'sports',
+            'sports': 'sports',
+            'event': 'event',
+            'upscale': 'restaurant',
+            'family friendly': 'restaurant'
+          };
+          
+          const relevantTypes = data.categories
+            .map((cat: string) => categoryMap[cat.toLowerCase()])
+            .filter(Boolean);
+          
+          if (relevantTypes.length > 0) {
+            results = results.filter(location => 
+              relevantTypes.includes(location.type)
+            );
+          }
+          
+          const vibes = data.categories.filter((cat: string) => 
+            ['upscale', 'family friendly', 'casual', 'romantic', 'cozy', 'trendy', 'nightowl'].includes(cat.toLowerCase())
+          );
+          
+          if (vibes.length > 0) {
+            results.forEach(location => {
+              if (!location.vibes) {
+                location.vibes = [];
+              }
+              location.vibes.push(...vibes);
+            });
+            
+            if (vibes[0]) {
+              setVibeFilter(vibes[0]);
+            }
+          }
+          
+          setFilteredLocations(results);
+        }
       }
       
-      setIsNaturalLanguageSearch(true);
+      toast("We've found venues and events matching your criteria");
+    } catch (e) {
+      console.error('Error processing complex query:', e);
     } finally {
       setIsLoadingResults(false);
     }
   };
-
-  const generateComedyEvents = async (): Promise<EventItem[]> => {
-    // Mock comedy events generation
-    return [
-      {
-        id: '1',
-        name: 'Comedy Night',
-        address: '123 Main St',
-        city: 'San Francisco',
-        state: 'CA',
-        type: 'comedy',
-        date: '2025-06-01',
-        startTime: '8:00 PM',
-        performers: ['John Comedian']
-      }
-    ];
-  };
-
-  const generateNightlifeVenues = async (): Promise<Location[]> => {
-    // Mock nightlife venues generation
-    return [
-      {
-        id: '1',
-        name: 'Night Club',
-        address: '456 Party St',
-        city: 'San Francisco',
-        state: 'CA',
-        type: 'nightlife',
-        lat: 37.7749,
-        lng: -122.4194
-      }
-    ];
-  };
-
+  
   return {
     isLoadingResults,
     processComplexQuery

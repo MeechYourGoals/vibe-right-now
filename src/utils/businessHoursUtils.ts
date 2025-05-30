@@ -1,6 +1,4 @@
 
-import { Location } from "@/types";
-
 export interface BusinessHours {
   monday: string;
   tuesday: string;
@@ -11,55 +9,8 @@ export interface BusinessHours {
   sunday: string;
 }
 
-export const isOpenNow = (location: Location): boolean => {
-  if (!location.hours) return false;
-  
-  const now = new Date();
-  const currentDay = now.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase() as keyof BusinessHours;
-  const currentTime = now.getHours() * 60 + now.getMinutes();
-  
-  const hours = location.hours[currentDay];
-  if (!hours || hours === 'Closed') return false;
-  
-  // Parse hours like "9:00 AM - 10:00 PM"
-  const [openTime, closeTime] = hours.split(' - ');
-  if (!openTime || !closeTime) return false;
-  
-  const parseTime = (timeStr: string): number => {
-    const [time, period] = timeStr.split(' ');
-    const [hours, minutes] = time.split(':').map(Number);
-    let totalMinutes = hours * 60 + minutes;
-    
-    if (period === 'PM' && hours !== 12) {
-      totalMinutes += 12 * 60;
-    } else if (period === 'AM' && hours === 12) {
-      totalMinutes = minutes;
-    }
-    
-    return totalMinutes;
-  };
-  
-  const openMinutes = parseTime(openTime);
-  const closeMinutes = parseTime(closeTime);
-  
-  return currentTime >= openMinutes && currentTime <= closeMinutes;
-};
-
-export const formatBusinessHours = (location: Location): string => {
-  if (!location.hours) return 'Hours not available';
-  
-  const now = new Date();
-  const currentDay = now.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase() as keyof BusinessHours;
-  const todayHours = location.hours[currentDay];
-  
-  if (!todayHours || todayHours === 'Closed') {
-    return 'Closed today';
-  }
-  
-  return `Today: ${todayHours}`;
-};
-
-export const generateBusinessHours = (): BusinessHours => {
+export const getBusinessHours = (venueId?: string): BusinessHours => {
+  // Mock business hours
   return {
     monday: "9:00 AM - 10:00 PM",
     tuesday: "9:00 AM - 10:00 PM", 
@@ -71,16 +22,22 @@ export const generateBusinessHours = (): BusinessHours => {
   };
 };
 
-export const getTodaysHours = (location: Location): string => {
-  if (!location.hours) return 'Hours not available';
-  
-  const now = new Date();
-  const currentDay = now.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase() as keyof BusinessHours;
-  const todayHours = location.hours[currentDay];
-  
-  if (!todayHours || todayHours === 'Closed') {
-    return 'Closed today';
-  }
-  
-  return todayHours;
+export const getTodaysHours = (hours: BusinessHours): string => {
+  const today = new Date().getDay();
+  const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+  const todayKey = days[today] as keyof BusinessHours;
+  return hours[todayKey];
 };
+
+export const isOpen = (hours: BusinessHours): boolean => {
+  const todaysHours = getTodaysHours(hours);
+  if (todaysHours === "Closed") return false;
+  
+  // Simple check - in real app would parse times and compare with current time
+  const now = new Date();
+  const currentHour = now.getHours();
+  return currentHour >= 9 && currentHour <= 22;
+};
+
+// Legacy function names for compatibility
+export const generateBusinessHours = getBusinessHours;

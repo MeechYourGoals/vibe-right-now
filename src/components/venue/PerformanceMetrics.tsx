@@ -1,177 +1,84 @@
 
-import React from 'react';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { ArrowUp, ArrowDown } from 'lucide-react';
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Users, MessageSquare, Heart, MapPin, Star, Calendar } from "lucide-react";
 
-// Update the venueInsights prop type to match the actual structure
-interface Props {
-  venueInsights?: {
-    visitors: number;
-    visitorsChange: number;
-    posts: number;
-    postsChange: number;
-    likes: number;
-    likesChange: number;
-    mentions: number;
-    mentionsChange: number;
-    checkins: number;
-    checkinsChange: number;
-    reviews: number;
-    reviewsChange: number;
-    rating: number;
-    ratingChange: number;
-  };
+interface VenueInsights {
+  visitors: number;
+  visitorsChange: number;
+  posts: number;
+  postsChange: number;
+  likes: number;
+  likesChange: number;
+  mentions: number;
+  mentionsChange: number;
+  checkins: number;
+  checkinsChange: number;
+  reviews: number;
+  reviewsChange: number;
+  rating: number;
+  ratingChange: number;
 }
 
-// Default values to use when venueInsights is not provided
-const defaultInsights = {
-  visitors: 1200,
-  visitorsChange: 5,
-  posts: 25,
-  postsChange: 8,
-  likes: 450,
-  likesChange: 12,
-  mentions: 30,
-  mentionsChange: 4,
-  checkins: 85,
-  checkinsChange: 7,
-  reviews: 15,
-  reviewsChange: 3,
-  rating: 4.5,
-  ratingChange: 0.2,
-};
+interface PerformanceMetricsProps {
+  venueInsights: VenueInsights;
+}
 
-const PerformanceMetrics: React.FC<Props> = ({ venueInsights = defaultInsights }) => {
-  const {
-    visitors,
-    visitorsChange,
-    posts,
-    postsChange,
-    likes,
-    likesChange,
-    mentions,
-    mentionsChange,
-    checkins,
-    checkinsChange,
-    reviews,
-    reviewsChange,
-    rating,
-    ratingChange,
-  } = venueInsights;
-
-  const getChangeIndicator = (change: number) => {
-    const isPositive = change > 0;
-    const Icon = isPositive ? ArrowUp : ArrowDown;
-    const colorClass = isPositive ? 'text-green-500' : 'text-red-500';
-    const changeText = `${Math.abs(change)}%`;
-
-    return (
-      <div className="flex items-center">
-        <Icon className={`h-4 w-4 ${colorClass} mr-1`} />
-        <span className={colorClass}>{changeText}</span>
-      </div>
-    );
+const PerformanceMetrics = ({ venueInsights }: PerformanceMetricsProps) => {
+  const formatChange = (change: number) => {
+    const sign = change > 0 ? "+" : "";
+    return `${sign}${change}%`;
   };
 
+  const getChangeColor = (change: number) => {
+    return change > 0 ? "text-green-400" : "text-red-400";
+  };
+
+  const metrics = [
+    {
+      title: "Visitors",
+      value: venueInsights.visitors.toLocaleString(),
+      change: venueInsights.visitorsChange,
+      icon: Users,
+      description: "Total number of visitors"
+    },
+    {
+      title: "Posts", 
+      value: venueInsights.posts.toString(),
+      change: venueInsights.postsChange,
+      icon: MessageSquare,
+      description: "Number of posts mentioning the venue"
+    },
+    {
+      title: "Likes",
+      value: venueInsights.likes.toLocaleString(),
+      change: venueInsights.likesChange,
+      icon: Heart,
+      description: "Total number of likes on posts"
+    }
+  ];
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <Card>
-        <CardHeader>
-          <CardTitle>Visitors</CardTitle>
-          <CardDescription>Total number of visitors</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{visitors}</div>
-          <div className="text-sm text-muted-foreground mt-1">
-            {getChangeIndicator(visitorsChange)}
-            <span>vs. last month</span>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Posts</CardTitle>
-          <CardDescription>Number of posts mentioning the venue</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{posts}</div>
-          <div className="text-sm text-muted-foreground mt-1">
-            {getChangeIndicator(postsChange)}
-            <span>vs. last month</span>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Likes</CardTitle>
-          <CardDescription>Total number of likes on posts</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{likes}</div>
-          <div className="text-sm text-muted-foreground mt-1">
-            {getChangeIndicator(likesChange)}
-            <span>vs. last month</span>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Mentions</CardTitle>
-          <CardDescription>Number of times the venue was mentioned</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{mentions}</div>
-          <div className="text-sm text-muted-foreground mt-1">
-            {getChangeIndicator(mentionsChange)}
-            <span>vs. last month</span>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Check-ins</CardTitle>
-          <CardDescription>Number of check-ins at the venue</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{checkins}</div>
-          <div className="text-sm text-muted-foreground mt-1">
-            {getChangeIndicator(checkinsChange)}
-            <span>vs. last month</span>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Reviews</CardTitle>
-          <CardDescription>Number of reviews received</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{reviews}</div>
-          <div className="text-sm text-muted-foreground mt-1">
-            {getChangeIndicator(reviewsChange)}
-            <span>vs. last month</span>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Rating</CardTitle>
-          <CardDescription>Average rating of the venue</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{rating}</div>
-          <div className="text-sm text-muted-foreground mt-1">
-            {getChangeIndicator(ratingChange)}
-            <span>vs. last month</span>
-          </div>
-        </CardContent>
-      </Card>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {metrics.map((metric, index) => (
+        <Card key={index} className="bg-neutral-800/80 border-neutral-600">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-white text-lg flex items-center">
+              <metric.icon className="h-5 w-5 mr-2 text-teal-400" />
+              {metric.title}
+            </CardTitle>
+            <p className="text-neutral-400 text-sm">{metric.description}</p>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-white mb-1">
+              {metric.value}
+            </div>
+            <div className={`text-sm ${getChangeColor(metric.change)}`}>
+              {formatChange(metric.change)} vs. last month
+            </div>
+          </CardContent>
+        </Card>
+      ))}
     </div>
   );
 };

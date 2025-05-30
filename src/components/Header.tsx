@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { User, Bookmark, MapPin, Award, UserCircle, LogIn, Settings, BarChart, Headphones, Megaphone } from "lucide-react";
+import { User, Bookmark, MapPin, Award, UserCircle, LogIn, Settings, BarChart, Headphones, Target } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AuthDialog } from "@/components/AuthDialog";
 import VernonConciergeDialog from "./VernonConcierge/VernonConciergeDialog";
@@ -145,8 +145,8 @@ const Header = () => {
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link to="/advertiser">
-                        <Megaphone className="mr-2 h-4 w-4" />
-                        <span>Advertiser</span>
+                        <Target className="mr-2 h-4 w-4" />
+                        <span>Advertiser Suite</span>
                       </Link>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
