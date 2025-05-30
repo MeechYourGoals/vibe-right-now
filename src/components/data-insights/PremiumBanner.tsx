@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Crown, Video, Image, Brain } from "lucide-react";
+import { Crown, Video, Image, Brain, Pin, Percent, Link, BarChart, Target, Podcast, FileText, Users } from "lucide-react";
 
 interface PremiumBannerProps {
   onUpgrade: (tier: string) => void;
@@ -28,19 +28,30 @@ const PremiumBanner = ({ onUpgrade }: PremiumBannerProps) => {
             <div className="text-center mb-4">
               <Button 
                 variant="outline" 
-                className="w-full bg-slate-600 hover:bg-slate-700 text-white border-slate-500"
+                className="w-full bg-purple-600 hover:bg-purple-700 text-white border-purple-500"
               >
                 Plus
               </Button>
             </div>
             <div className="space-y-3 text-center text-sm text-muted-foreground">
               <div className="flex items-center justify-center">
-                <Brain className="mr-2 h-4 w-4 text-purple-400" />
-                AI-Powered Financial Analysis
+                <Pin className="mr-2 h-4 w-4 text-purple-400" />
+                Pin User Posts
+              </div>
+              <div className="flex items-center justify-center">
+                <Percent className="mr-2 h-4 w-4 text-purple-400" />
+                Offer Discounts
+              </div>
+              <div className="flex items-center justify-center">
+                <Link className="mr-2 h-4 w-4 text-purple-400" />
+                External Platform Links
               </div>
               <p className="text-xs">
-                Use Notebook LM to analyze financial records and get advanced insights
+                Highlight the best user-generated content, create special offers, and link to your external platforms like Yelp, Instagram, and more
               </p>
+            </div>
+            <div className="text-center mt-4">
+              <div className="text-lg font-bold text-foreground">$29.99/month</div>
             </div>
           </div>
 
@@ -49,19 +60,30 @@ const PremiumBanner = ({ onUpgrade }: PremiumBannerProps) => {
             <div className="text-center mb-4">
               <Button 
                 variant="outline" 
-                className="w-full bg-slate-600 hover:bg-slate-700 text-white border-slate-500"
+                className="w-full bg-green-600 hover:bg-green-700 text-white border-green-500"
               >
                 Premium
               </Button>
             </div>
             <div className="space-y-3 text-center text-sm text-muted-foreground">
               <div className="flex items-center justify-center">
-                <Video className="mr-2 h-4 w-4 text-blue-400" />
-                Veo 3 Video Generation
+                <BarChart className="mr-2 h-4 w-4 text-green-400" />
+                Gemini Deep Research Analytics
+              </div>
+              <div className="flex items-center justify-center">
+                <Target className="mr-2 h-4 w-4 text-green-400" />
+                Enhanced Advertising Tools
+              </div>
+              <div className="flex items-center justify-center">
+                <Podcast className="mr-2 h-4 w-4 text-green-400" />
+                Notebook LM Podcast Reports
               </div>
               <p className="text-xs">
-                Create auto-generated promo videos for social media in just 15 seconds using Google's Veo AI
+                Access detailed insights powered by Google's Gemini AI about visitor demographics and behavior patterns, create targeted promotions and track their performance in real-time, and generate AI-powered podcast summaries of your weekly insights using Google Notebook LM
               </p>
+            </div>
+            <div className="text-center mt-4">
+              <div className="text-lg font-bold text-foreground">$49.99/month</div>
             </div>
           </div>
 
@@ -77,18 +99,32 @@ const PremiumBanner = ({ onUpgrade }: PremiumBannerProps) => {
             </div>
             <div className="space-y-3 text-center text-sm text-muted-foreground">
               <div className="flex items-center justify-center">
-                <Image className="mr-2 h-4 w-4 text-green-400" />
+                <FileText className="mr-2 h-4 w-4 text-orange-400" />
+                AI Financial Analysis
+              </div>
+              <div className="flex items-center justify-center">
+                <Video className="mr-2 h-4 w-4 text-orange-400" />
+                Veo 3 Video Generation
+              </div>
+              <div className="flex items-center justify-center">
+                <Image className="mr-2 h-4 w-4 text-orange-400" />
                 Imagen 4 Graphics
               </div>
+              <div className="flex items-center justify-center">
+                <Users className="mr-2 h-4 w-4 text-orange-400" />
+                Influencer Marketplace
+              </div>
               <p className="text-xs">
-                Generate high-quality posters, banners and promotional images for your venue using Google's Imagen AI
+                Everything in Plus and Premium, plus AI-Powered Gemini analysis of uploaded financial records, access to Google's Veo and Imagen AI models to create ads and videos for marketing campaigns, and access to the Influencer Marketplace
               </p>
+            </div>
+            <div className="text-center mt-4">
+              <div className="text-lg font-bold text-foreground">$99.99/month</div>
             </div>
           </div>
         </div>
 
         <div className="text-center">
-          <div className="text-2xl font-bold text-foreground mb-4">$99.99/month</div>
           <Button 
             className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white px-8"
             onClick={() => onUpgrade('pro')}
