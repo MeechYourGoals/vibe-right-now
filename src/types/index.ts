@@ -1,123 +1,33 @@
+
 export interface Location {
   id: string;
   name: string;
   address: string;
   city: string;
-  state: string | null;
+  state: string;
   zip: string;
-  latitude: number;
-  longitude: number;
+  country: string;
   lat: number;
   lng: number;
-  category: string;
-  type: "restaurant" | "bar" | "event" | "attraction" | "sports" | "other" | "music_venue" | "comedy_club" | "nightclub" | "lounge";
-  rating: number;
-  reviewCount: number;
-  price: string;
-  imageUrl: string;
-  isFeatured: boolean;
-  verified: boolean;
-  country: string;
-  images?: string[];
-  vibeTags?: string[];
-  vibes?: string[];
-  hours?: {
-    monday: string;
-    tuesday: string;
-    wednesday: string;
-    thursday: string;
-    friday: string;
-    saturday: string;
-    sunday: string;
-    weekdayText?: string[];
-    isOpen24Hours?: boolean;
-    isOpenNow?: string;
-    timezone?: string;
-  };
-  openingHours?: {
-    weekdayText: string[];
-  };
-  formattedPhoneNumber: string;
-  website: string;
-  reservable: boolean;
-  customerId?: string;
-  followers?: number;
-  checkins?: number;
-  userProfile?: {
-    id: string;
-    username: string;
-    avatar: string;
-    bio?: string;
-    verified: boolean;
-  };
-}
-
-export interface EventItem {
-  id: string;
-  title: string;
-  description: string;
-  location: Location;
-  startTime: string;
-  endTime: string;
-  imageUrl: string;
-  category: string;
-  isFeatured: boolean;
-  price: string;
-  organizer: string;
-  contactEmail: string;
-  contactPhone: string;
-  website: string;
-  reservable: boolean;
-}
-
-export interface Comment {
-  id: string;
-  postId: string;
-  userId: string;
-  user: User;
-  content: string;
-  timestamp: string;
-  vibedHere: boolean;
-  likes: number;
-}
-
-export interface VenueInsights {
-  totalVisits?: number;
-  visitors?: number;
-  visitorsChange?: number;
-  checkins?: number;
-  viewsCount?: number;
-  impressions?: number;
-  posts?: number;
-  postsChange?: number;
-  likes?: number;
-  likesChange?: number;
-  mentions?: number;
-  mentionsChange?: number;
-  checkinsChange?: number;
-  reviews?: number;
-  reviewsChange?: number;
+  type?: string;
+  phone?: string;
+  website?: string;
   rating?: number;
-  ratingChange?: number;
+  price?: string;
+  hours?: BusinessHours;
+  description?: string;
+  tags?: string[];
+  images?: string[];
+  verified?: boolean;
+  vibes?: string[];
+  userProfile?: any; // Adding for compatibility with locationGenerator
+  amenities?: any[]; // Adding for compatibility with Discounts.tsx
+  reviews?: any[]; // Adding for compatibility
+  distance?: string; // Adding for compatibility
 }
 
-export interface Post {
-  id: string;
-  content: string;
-  author: User;
-  user: User;
-  location: Location;
-  timestamp: string;
-  media?: Media[];
-  likes: number;
-  comments: Comment[];
-  vibedHere: boolean;
-  isLiked?: boolean;
-  isPinned?: boolean;
-  isVenueOwned?: boolean;
-  isVenuePost?: boolean;
-  expiresAt?: string;
-  vibeTags?: string[];
+export interface BusinessHours {
+  [day: string]: string;
 }
 
 export interface User {
@@ -125,38 +35,153 @@ export interface User {
   username: string;
   name: string;
   avatar: string;
+  isPrivate?: boolean;
   bio?: string;
-  isVerified?: boolean;
-  followersCount?: number;
-  followingCount?: number;
-  postsCount?: number;
+  verified?: boolean;
   isCelebrity?: boolean;
 }
 
 export interface Media {
-  id: string;
-  type: 'image' | 'video';
+  type: "image" | "video";
   url: string;
-  thumbnail?: string;
+  thumbnail?: string; // Adding for backward compatibility
 }
 
-// Social Media Types (Google ecosystem only)
-export interface SocialMediaPost {
+export interface Post {
   id: string;
+  user: User;
+  location: Location;
   content: string;
-  author: string;
+  text?: string; // Added for backward compatibility
+  media: Media[];
   timestamp: string;
-  platform: 'google' | 'yelp' | 'instagram' | 'other';
-  likes?: number;
-  comments?: number;
-  rating?: number;
-  venueName: string;
-  source: 'google' | 'yelp' | 'instagram' | 'other';
-  url?: string;
+  likes: number;
+  comments: number | any[]; // Updated to support both number and array types
+  vibeTags?: string[]; // Array of vibe tags for the post
+  isVenuePost?: boolean;
+  isPinned?: boolean;
+  expiresAt?: string;
+  saved?: boolean;
 }
 
-export interface SocialMediaApiKeys {
-  instagram: string;
-  yelp: string;
-  google: string;
+export interface Comment {
+  id: string;
+  postId: string;
+  user: User;
+  content: string;
+  timestamp: string;
+  likes: number;
+  text?: string; // For backward compatibility
+  vibedHere?: boolean;
+}
+
+export interface Event {
+  id: string;
+  title: string;
+  description: string;
+  location: Location;
+  startDate: string;
+  endDate: string;
+  media?: Media[];
+  ticketUrl?: string;
+  price?: string;
+  tags?: string[];
+  attendees?: number;
+  interested?: number;
+}
+
+export interface Trip {
+  id: string;
+  title: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+  creator: User;
+  collaborators: User[];
+  places: TripPlace[];
+  visibility: 'public' | 'private' | 'friends';
+  status: 'planning' | 'in-progress' | 'completed';
+}
+
+export interface TripPlace {
+  id: string;
+  tripId: string;
+  location: Location;
+  notes?: string;
+  date?: string;
+  order: number;
+  status: 'must-see' | 'tentative' | 'visited';
+}
+
+export interface Notification {
+  id: string;
+  type: 'like' | 'comment' | 'follow' | 'mention' | 'trip-invite' | 'trip-update' | 'check-in';
+  read: boolean;
+  timestamp: string;
+  user: User;
+  post?: Post;
+  trip?: Trip;
+  location?: Location;
+  content?: string;
+}
+
+// VernonChat types
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  timestamp: string;
+}
+
+export interface ChatState {
+  messages: ChatMessage[];
+  loading: boolean;
+  error: string | null;
+}
+
+export interface ExtractedIntent {
+  intent: string;
+  entities: Record<string, any>;
+  confidence: number;
+}
+
+// Venue insights types
+export interface VenueInsights {
+  visitors: number;
+  visitorsCount?: number;
+  visitorsChange: number;
+  posts: number;
+  postsChange: number;
+  engagement: number;
+  engagementChange: number;
+  likes: number;
+  likesChange: number;
+  comments: number;
+  commentsChange: number;
+  topPosts: Post[];
+  demographics: {
+    ageGroups: Record<string, number>;
+    gender: Record<string, number>;
+    interests: Record<string, number>;
+  };
+  visitorsByTime: Record<string, number>;
+  visitorsByDay: Record<string, number>;
+  
+  // Adding these properties to fix build errors
+  visitorCount?: number;
+  checkInCount?: number;
+  receiptUploads?: number;
+  discountRedemptions?: number;
+  totalViews?: number; // For compatibility
+}
+
+export interface CreditCard {
+  id: string;
+  last4: string;
+  brand: string;
+  expMonth: number;
+  expYear: number;
+  isDefault: boolean;
+  maxSpendLimit?: number; // Maximum amount allowed per transaction
+  vernonApproved?: boolean; // Whether Vernon AI can use this card
 }

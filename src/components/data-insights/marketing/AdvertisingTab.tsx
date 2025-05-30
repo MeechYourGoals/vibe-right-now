@@ -1,5 +1,5 @@
 
-import { FileLock, Zap, Award, TrendingUp, BarChart, Lightbulb, Target, Video, Image } from "lucide-react";
+import { FileLock, Zap, Award, TrendingUp, BarChart, Lightbulb, Target } from "lucide-react";
 import AiMarketingTools from "./AiMarketingTools";
 import AiMarketerSuggestions from "./AiMarketerSuggestions";
 import DiscountCodeAnalysis from "./DiscountCodeAnalysis";
@@ -70,42 +70,6 @@ const AdvertisingTab = ({ isPremium }: AdvertisingTabProps) => {
           Your premium account includes access to all AI-powered marketing tools and industry-standard templates.
         </AlertDescription>
       </Alert>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card className="bg-blue-50/50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800/30">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Video className="h-5 w-5 mr-2 text-blue-600" /> 
-              Veo 3 Video Generator
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm mb-4">
-              Google's Veo 3 technology lets you create professional promo videos in one click. Simply enter your event details to generate a 15-second trailer perfect for TikTok, Instagram Reels, and other social platforms.
-            </p>
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-              Create Promo Video
-            </Button>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-amber-50/50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800/30">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Image className="h-5 w-5 mr-2 text-amber-600" /> 
-              Imagen 4 Marketing Materials
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm mb-4">
-              Google's Imagen 4 generates high-quality, on-brand posters, banners, and thumbnails for your venue events. Create consistent marketing materials with type-safe text and 2k resolution images.
-            </p>
-            <Button className="bg-amber-600 hover:bg-amber-700 text-white">
-              Generate Marketing Images
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <AiMarketingTools />

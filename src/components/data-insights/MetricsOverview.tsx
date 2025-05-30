@@ -13,16 +13,16 @@ const MetricsOverview = ({ insights, timeframe }: MetricsOverviewProps) => {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       <InsightMetricCard
         title="Total Visitors"
-        value={insights.totalVisits || insights.visitors || 0}
+        value={insights.visitorCount || insights.visitors}
         icon={Users}
         iconColor="text-blue-500"
-        changePercentage={insights.visitorsChange || 12}
+        changePercentage={12}
         timeframe={timeframe}
       />
       
       <InsightMetricCard
         title="Check-ins"
-        value={insights.checkins || 0}
+        value={insights.checkInCount || 0}
         icon={CalendarIcon}
         iconColor="text-green-500"
         changePercentage={8}
@@ -31,7 +31,7 @@ const MetricsOverview = ({ insights, timeframe }: MetricsOverviewProps) => {
       
       <InsightMetricCard
         title="Receipt Uploads"
-        value={insights.viewsCount || 0}
+        value={insights.receiptUploads || 0}
         icon={Receipt}
         iconColor="text-amber-500"
         changePercentage={23}
@@ -40,7 +40,7 @@ const MetricsOverview = ({ insights, timeframe }: MetricsOverviewProps) => {
       
       <InsightMetricCard
         title="Discounts Redeemed"
-        value={insights.impressions || 0}
+        value={insights.discountRedemptions || 0}
         icon={Tag}
         iconColor="text-purple-500"
         changePercentage={5}

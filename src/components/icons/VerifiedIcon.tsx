@@ -1,10 +1,18 @@
 
 import { CheckCircle } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-const VerifiedBadge = () => {
+interface VerifiedIconProps {
+  className?: string;
+}
+
+const VerifiedIcon = ({ className }: VerifiedIconProps) => {
   return (
-    <CheckCircle className="h-4 w-4 text-blue-500 fill-current" />
+    <div className="relative inline-block">
+      <CheckCircle className={cn("transition-all duration-300", className)} />
+      <span className="absolute inset-0 rounded-full bg-primary opacity-20 animate-ping" />
+    </div>
   );
 };
 
-export default VerifiedBadge;
+export default VerifiedIcon;

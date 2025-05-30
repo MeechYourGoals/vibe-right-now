@@ -1,65 +1,61 @@
 
+// Only write this file if it doesn't already exist or doesn't have PREFERENCE_TAGS
 export const PREFERENCE_CATEGORIES = [
   {
-    id: "food",
-    name: "Food & Dining",
-    icon: "Utensils",
-    options: ["Fine Dining", "Casual Dining", "Fast Food", "Cafes", "Bakeries", "Desserts"]
+    name: "Vibe",
+    description: "What atmosphere do you enjoy?",
+    tags: ["High Energy", "Relaxed", "Cozy", "Luxury", "Professional", "Creative", "Romantic", "Family Friendly"]
   },
   {
-    id: "music",
-    name: "Music",
-    icon: "Music",
-    options: ["Rock", "Pop", "Hip Hop", "Jazz", "Classical", "Electronic", "Country"]
+    name: "Interests",
+    description: "What activities interest you?",
+    tags: ["Live Music", "Sports", "Arts", "Dance", "Gaming", "Education", "Tech", "Food", "Wine & Spirits", "Fitness"]
   },
   {
-    id: "nightlife",
-    name: "Nightlife",
-    icon: "Moon",
-    options: ["Bars", "Clubs", "Lounges", "Live Music Venues", "Breweries", "Wine Bars"]
+    name: "Crowd",
+    description: "Who do you like to be around?",
+    tags: ["Young Professionals", "Students", "Night Owls", "Early Birds", "Industry", "Celebrities", "Artists", "Business"]
   },
   {
-    id: "outdoor",
-    name: "Outdoor Activities",
-    icon: "Mountain",
-    options: ["Parks", "Hiking", "Beaches", "Camping", "Biking", "Skiing", "Water Sports"]
+    name: "Values",
+    description: "What matters to you?",
+    tags: ["Sustainable", "Locally Owned", "Minority Owned", "LGBTQ+ Friendly", "Health Conscious", "Budget Friendly", "Female Owned", "Accessible"]
   },
   {
-    id: "arts",
-    name: "Arts & Culture",
-    icon: "Palette",
-    options: ["Museums", "Galleries", "Theaters", "Concert Halls", "Historic Sites", "Festivals"]
-  },
-  {
-    id: "sports",
-    name: "Sports",
-    icon: "Trophy",
-    options: ["Football", "Basketball", "Baseball", "Soccer", "Tennis", "Golf", "Fitness"]
-  },
-  {
-    id: "shopping",
-    name: "Shopping",
-    icon: "ShoppingBag",
-    options: ["Malls", "Boutiques", "Markets", "Vintage Shops", "Outlets", "Department Stores"]
+    name: "Experience",
+    description: "What kind of experience do you seek?",
+    tags: ["Trending", "Hidden Gem", "Historical", "Tourist Attraction", "Modern", "Traditional", "Interactive", "Physical Adventure"]
   }
 ];
 
-export const TICKETING_PLATFORMS = [
-  { id: "ticketmaster", name: "Ticketmaster" },
-  { id: "eventbrite", name: "Eventbrite" },
-  { id: "stubhub", name: "StubHub" },
-  { id: "seatgeek", name: "SeatGeek" },
-  { id: "axs", name: "AXS" },
-  { id: "opentable", name: "OpenTable" },
-  { id: "resy", name: "Resy" },
-  { id: "other", name: "Other Platform" }
+// Flatten all tags into a single array for easy access
+export const PREFERENCE_TAGS = PREFERENCE_CATEGORIES.flatMap(category => category.tags).sort();
+
+// Types of venues
+export const VENUE_TYPES = [
+  "restaurant",
+  "bar",
+  "event",
+  "attraction",
+  "sports",
+  "nightlife",
+  "concert",
+  "comedy",
+  "museum",
+  "theater",
+  "park",
+  "shopping"
 ];
 
-// Add the PREFERENCE_TAGS export
-export const PREFERENCE_TAGS = {
-  "Vibe": ["Cozy", "Trendy", "Upscale", "Casual", "Intimate", "Lively", "Romantic", "NightOwl", "Hidden Gem"],
-  "Interests": ["Live Music", "Art", "Comedy", "Sports", "Gaming", "Dancing", "Theatre", "Food"],
-  "Crowd": ["Family Friendly", "LGBTQ+ Friendly", "Pet Friendly", "Student", "Business", "Young Crowd", "Mature Crowd", "Diverse"],
-  "Values": ["Locally Owned", "Sustainable", "Minority-Owned", "Accessible", "Budget Friendly", "Luxury", "Historic"],
-  "Experience": ["Good for Groups", "Date Night", "Solo Adventure", "Physical Adventure", "Mentally Stimulating", "Unique Experience"]
-};
+// Add ticketing platforms for TicketingTab
+export const TICKETING_PLATFORMS = [
+  "Ticketmaster",
+  "Eventbrite",
+  "StubHub",
+  "AXS",
+  "SeatGeek",
+  "LiveNation",
+  "TicketWeb",
+  "Showclix",
+  "Brown Paper Tickets"
+];

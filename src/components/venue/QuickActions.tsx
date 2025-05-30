@@ -11,28 +11,28 @@ interface QuickActionsProps {
 
 const QuickActions = ({ onTierChange, currentTier }: QuickActionsProps) => {
   return (
-    <Card className="bg-neutral-900 border-neutral-700">
+    <Card>
       <CardHeader>
-        <CardTitle className="text-white">Quick Actions</CardTitle>
+        <CardTitle>Quick Actions</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-2 gap-2">
-          <Button size="sm" className="flex items-center justify-start gap-2 bg-teal-600 hover:bg-teal-700 text-white">
+          <Button size="sm" className="flex items-center justify-start gap-2">
             <Plus className="h-4 w-4" />
             New Post
           </Button>
           
-          <Button size="sm" className="flex items-center justify-start gap-2 bg-teal-600 hover:bg-teal-700 text-white">
+          <Button size="sm" className="flex items-center justify-start gap-2">
             <Calendar className="h-4 w-4" />
             Add Event
           </Button>
           
-          <Button size="sm" className="flex items-center justify-start gap-2 bg-teal-600 hover:bg-teal-700 text-white">
+          <Button size="sm" className="flex items-center justify-start gap-2">
             <Users className="h-4 w-4" />
             Promotions
           </Button>
           
-          <Button size="sm" className="flex items-center justify-start gap-2 bg-teal-600 hover:bg-teal-700 text-white">
+          <Button size="sm" className="flex items-center justify-start gap-2">
             <MessageSquare className="h-4 w-4" />
             Send Message
           </Button>

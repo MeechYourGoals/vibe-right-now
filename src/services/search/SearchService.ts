@@ -1,41 +1,85 @@
 
+import { GoogleVertexProvider } from './providers/GoogleVertexProvider';
+import { VertexAIService } from '@/services/VertexAIService';
+
+/**
+ * Unified search service that coordinates between multiple search providers
+ */
 export class SearchService {
+  /**
+   * Search using the best available provider
+   * @param query The search query
+   * @returns The search results
+   */
   static async search(query: string): Promise<string> {
+    console.log('Searching with query:', query);
+    
     try {
-      console.log('Performing search for:', query);
-      
-      // Use Google's search capabilities through Vertex AI
-      const searchResult = await this.performGoogleSearch(query);
-      
-      if (searchResult) {
-        return searchResult;
+      // Try Google Vertex AI first
+      const vertexResult = await GoogleVertexProvider.search(query);
+      if (vertexResult) {
+        console.log('Got result from Google Vertex AI');
+        return vertexResult;
       }
       
-      return `I searched for "${query}" but couldn't find specific results. Please try rephrasing your question.`;
+      // Fall back to a direct call to Vertex AI service
+      try {
+        const vertexServiceResult = await VertexAIService.searchWithVertex(query);
+        if (vertexServiceResult) {
+          console.log('Got result from VertexAIService search');
+          return vertexServiceResult;
+        }
+      } catch (vertexError) {
+        console.error('Error with VertexAIService search:', vertexError);
+      }
+      
+      // Fall back to a generic response if all searches fail
+      return `I couldn't find detailed information about "${query}". Could you try rephrasing your question or provide more details about what you're looking for?`;
     } catch (error) {
       console.error('Error in SearchService:', error);
       return `I encountered an error while searching for "${query}". Please try again later.`;
     }
   }
-
-  static async vectorSearch(query: string): Promise<string> {
-    // Fallback to regular search for now
-    return this.search(query);
-  }
-
+  
+  /**
+   * Specialized search for comedy events
+   */
   static async comedySearch(query: string): Promise<string> {
-    // Specialized comedy search using Google
-    return this.search(`comedy shows events ${query}`);
-  }
-
-  private static async performGoogleSearch(query: string): Promise<string | null> {
     try {
-      // This would call Google's search API or Vertex AI
-      // For now, return a mock response
-      return `Search results for "${query}": Found relevant information about local venues and events.`;
+      // Enhance the query to focus on comedy
+      const enhancedQuery = `comedy events: ${query}`;
+      
+      // Use Vertex AI's contextual search
+      return await VertexAIService.searchWithVertex(enhancedQuery, ['Comedy', 'Entertainment']);
     } catch (error) {
-      console.error('Google search error:', error);
-      return null;
+      console.error('Error in comedy search:', error);
+      return await this.search(query);
+    }
+  }
+  
+  /**
+   * Semantic vector search using Google's natural language understanding
+   */
+  static async vectorSearch(query: string, filters?: any): Promise<string> {
+    try {
+      // Use Google's NLP capabilities through Vertex AI
+      const categories = filters?.categories || [];
+      
+      // Create a more detailed search prompt
+      const searchPrompt = `
+        I need detailed information about "${query}".
+        ${categories.length > 0 ? `Focus on these categories: ${categories.join(', ')}` : ''}
+        Please provide:
+        - Specific venues, events, or locations
+        - Dates, times, and prices if applicable
+        - Contact information and websites where available
+        - Any other relevant details
+      `;
+      
+      return await VertexAIService.generateResponse(searchPrompt, 'search');
+    } catch (error) {
+      console.error('Error in vector search:', error);
+      return await this.search(query);
     }
   }
 }

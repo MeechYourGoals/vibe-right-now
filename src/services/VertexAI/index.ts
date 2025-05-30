@@ -1,34 +1,26 @@
-// Re-export functionality from GoogleAIService for backward compatibility
-import { GoogleAIService } from '../GoogleAIService';
 
-// Re-export all functionality for backward compatibility
-export const generateText = GoogleAIService.generateText;
-export const searchWithAI = GoogleAIService.search;
-export const textToSpeech = GoogleAIService.textToSpeech;
-export const speechToText = GoogleAIService.speechToText;
-export const checkContentSafety = GoogleAIService.checkContentSafety;
-export const analyzeText = GoogleAIService.analyzeText;
-export const extractEntities = GoogleAIService.extractEntities;
-export const extractCategories = GoogleAIService.extractCategories;
+// Re-export all functionality from the Vertex AI service
+export * from './text';
+export * from './speech';
+export * from './safety';
+export * from './analysis';
+export * from './types';
 
-// Create a hub to simplify imports (backward compatibility)
+// Create a hub to simplify imports
 export const VertexAIHub = {
   // Text generation
-  generateText: GoogleAIService.generateText.bind(GoogleAIService),
-  searchWithAI: GoogleAIService.search.bind(GoogleAIService),
+  generateText: (await import('./text')).generateText,
+  searchWithAI: (await import('./text')).searchWithAI,
   
   // Speech services
-  textToSpeech: GoogleAIService.textToSpeech.bind(GoogleAIService),
-  speechToText: GoogleAIService.speechToText.bind(GoogleAIService),
+  textToSpeech: (await import('./speech')).textToSpeech,
+  speechToText: (await import('./speech')).speechToText,
   
   // Content safety
-  checkContentSafety: GoogleAIService.checkContentSafety.bind(GoogleAIService),
+  checkContentSafety: (await import('./safety')).checkContentSafety,
   
   // Analysis
-  analyzeText: GoogleAIService.analyzeText.bind(GoogleAIService),
-  extractEntities: GoogleAIService.extractEntities.bind(GoogleAIService),
-  extractCategories: GoogleAIService.extractCategories.bind(GoogleAIService)
+  analyzeText: (await import('./analysis')).analyzeText,
+  extractEntities: (await import('./analysis')).extractEntities,
+  extractCategories: (await import('./analysis')).extractCategories
 };
-
-export const DEFAULT_MALE_VOICE = 'en-US-Standard-B';
-export const DEFAULT_FEMALE_VOICE = 'en-US-Standard-C';

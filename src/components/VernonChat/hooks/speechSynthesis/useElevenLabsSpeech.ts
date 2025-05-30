@@ -1,8 +1,9 @@
 
-import { useCallback, useRef } from 'react';
-import { GoogleTTSService } from '@/services/GoogleTTSService';
+import { useCallback } from 'react';
+import { ElevenLabsService } from '@/services/ElevenLabsService';
+import { toast } from '@/hooks/use-toast';
 
-interface UseGoogleTTSSpeechProps {
+interface UseElevenLabsSpeechProps {
   audioElement: React.MutableRefObject<HTMLAudioElement | null>;
   isSpeaking: boolean;
   setIsSpeaking: (value: boolean) => void;
@@ -10,59 +11,86 @@ interface UseGoogleTTSSpeechProps {
   stopSpeaking: () => void;
 }
 
-// Migrated from ElevenLabs to Google TTS
-export const useGoogleTTSSpeech = ({
+export const useElevenLabsSpeech = ({
   audioElement,
   isSpeaking,
   setIsSpeaking,
   currentlyPlayingText,
   stopSpeaking
-}: UseGoogleTTSSpeechProps) => {
+}: UseElevenLabsSpeechProps) => {
   
-  const speakWithGoogleTTS = useCallback(async (text: string): Promise<boolean> => {
+  const speakWithElevenLabs = useCallback(async (text: string): Promise<boolean> => {
     try {
+      // Don't repeat the same text if it's already playing
       if (isSpeaking && currentlyPlayingText.current === text) {
         console.log('This text is already being spoken, skipping duplicate');
         return true;
       }
       
+      // Stop any currently playing speech first
       stopSpeaking();
+      
+      // Set state to speaking and track current text
       setIsSpeaking(true);
       currentlyPlayingText.current = text;
       
-      console.log('Requesting Google Cloud TTS');
-      const audioContent = await GoogleTTSService.synthesizeSpeech(text);
+      // Request to convert text to speech
+      console.log('Requesting Eleven Labs text-to-speech with Adam voice');
+      const audioData = await ElevenLabsService.textToSpeech(text);
       
-      if (!audioContent || !audioElement.current) {
-        console.error('Failed to get audio from Google TTS or audio element not available');
+      if (!audioData || !audioElement.current) {
+        console.error('Failed to get audio from Eleven Labs or audio element not available');
+        // If failed, don't show error toast as the browser speech synthesis will take over
         setIsSpeaking(false);
         currentlyPlayingText.current = null;
         return false;
       }
       
-      audioElement.current.src = `data:audio/mp3;base64,${audioContent}`;
+      // Create blob from array buffer
+      const blob = new Blob([audioData], { type: 'audio/mpeg' });
+      const url = URL.createObjectURL(blob);
+      
+      // Set audio source and play
+      audioElement.current.src = url;
       
       try {
         await audioElement.current.play();
         
+        // Clean up blob URL after playback
         audioElement.current.onended = () => {
+          URL.revokeObjectURL(url);
           setIsSpeaking(false);
           currentlyPlayingText.current = null;
         };
         return true;
       } catch (error) {
         console.error('Error playing audio:', error);
+        URL.revokeObjectURL(url);
         setIsSpeaking(false);
         currentlyPlayingText.current = null;
         return false;
       }
     } catch (error) {
-      console.error('Error with Google TTS speech synthesis:', error);
+      if (error instanceof Error && error.message.includes('quota_exceeded')) {
+        console.warn('ElevenLabs quota exceeded, falling back to browser speech');
+        // Show toast only once per session
+        if (!localStorage.getItem('elevenlabs_quota_notified')) {
+          toast({
+            title: "Voice Synthesis Fallback",
+            description: "Your ElevenLabs quota has been exceeded. Using browser voice instead.",
+            duration: 5000,
+          });
+          localStorage.setItem('elevenlabs_quota_notified', 'true');
+        }
+      } else {
+        console.error('Error with Eleven Labs speech synthesis:', error);
+      }
+      
       setIsSpeaking(false);
       currentlyPlayingText.current = null;
       return false;
     }
   }, [audioElement, isSpeaking, currentlyPlayingText, setIsSpeaking, stopSpeaking]);
   
-  return { speakWithGoogleTTS };
+  return { speakWithElevenLabs };
 };

@@ -1,13 +1,12 @@
 
-import React, { useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import React from "react";
 import Header from "@/components/Header";
 import { Badge } from "@/components/ui/badge";
 import CameraButton from "@/components/CameraButton";
 import NearbyVibesMap from "@/components/NearbyVibesMap";
 import VenuePost from "@/components/VenuePost";
 import useExploreState from "@/hooks/useExploreState";
-import { getCitySpecificContent } from "@/utils/explore/mockGenerators";
+import { getCitySpecificContent, getMediaForLocationMock } from "@/utils/explore/mockGenerators";
 import SearchSection from "@/components/explore/SearchSection";
 import CategoryTabs from "@/components/explore/CategoryTabs";
 import VibeFilter from "@/components/explore/VibeFilter";
@@ -20,11 +19,9 @@ import TrendingLocations from "@/components/TrendingLocations";
 import DiscountLocations from "@/components/DiscountLocations";
 import { format } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { mockUsers } from "@/mock/users";
 
 const Explore = () => {
   const isMobile = useIsMobile();
-  const navigate = useNavigate();
   const {
     activeTab,
     searchedCity,
@@ -51,30 +48,6 @@ const Explore = () => {
     setShowDateFilter
   } = useExploreState();
 
-  // Check if the search category is "users" and if it's a username
-  useEffect(() => {
-    if (searchCategory === "users") {
-      const usernameMatch = searchedCity && searchedCity.match(/^@?([a-zA-Z0-9_]+)$/);
-      if (usernameMatch) {
-        const username = usernameMatch[1];
-        // Check if this is a known user
-        const userExists = mockUsers.some(user => user.username === username);
-        if (userExists) {
-          // Redirect to user profile
-          navigate(`/user/${username}`);
-        } else {
-          // Show "user not found" state or suggest other users
-          // This is handled by the UI rendering below
-        }
-      }
-    }
-  }, [searchCategory, searchedCity, navigate]);
-
-  // Function to get media for location
-  const getMediaForLocation = (location: any) => {
-    return location.images || [];
-  };
-
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -84,6 +57,8 @@ const Explore = () => {
           <h1 className="text-3xl font-bold text-center mb-6 vibe-gradient-text">
             {getPageTitle()}
           </h1>
+          
+          {/* Removed the redundant top tabs bar */}
           
           <SearchSection 
             showDateFilter={showDateFilter}
@@ -120,35 +95,7 @@ const Explore = () => {
               </div>
             ) : (
               <div>
-                {searchCategory === "users" && filteredLocations.length === 0 && (
-                  <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
-                      <User className="h-8 w-8 text-muted-foreground" />
-                    </div>
-                    <h2 className="text-xl font-semibold mb-2">User Not Found</h2>
-                    <p className="text-muted-foreground mb-6">
-                      We couldn't find the user "{searchedCity}". Here are some suggested users you might like.
-                    </p>
-                    <div className="flex flex-wrap justify-center gap-4">
-                      {mockUsers.slice(0, 6).map(user => (
-                        <div 
-                          key={user.id}
-                          className="flex flex-col items-center cursor-pointer transition hover:scale-105"
-                          onClick={() => navigate(`/user/${user.username}`)}
-                        >
-                          <Avatar className="h-16 w-16 mb-2">
-                            <AvatarImage src={user.avatar} alt={user.name} />
-                            <AvatarFallback>{user.name.substring(0, 2)}</AvatarFallback>
-                          </Avatar>
-                          <p className="font-medium text-sm">{user.name}</p>
-                          <p className="text-xs text-muted-foreground">@{user.username}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {activeTab === "music" && searchCategory !== "users" && (
+                {activeTab === "music" && (
                   <MusicSection
                     musicEvents={musicEvents.length > 0 ? musicEvents : []}
                     searchedCity={searchedCity || "San Francisco"}
@@ -156,7 +103,7 @@ const Explore = () => {
                   />
                 )}
                 
-                {activeTab === "comedy" && searchCategory !== "users" && (
+                {activeTab === "comedy" && (
                   <ComedySection
                     comedyEvents={comedyEvents.length > 0 ? comedyEvents : []}
                     searchedCity={searchedCity || "San Francisco"}
@@ -164,7 +111,7 @@ const Explore = () => {
                   />
                 )}
                 
-                {activeTab === "nightlife" && searchCategory !== "users" && (
+                {activeTab === "nightlife" && (
                   <NightlifeSection
                     nightlifeVenues={nightlifeVenues.length > 0 ? nightlifeVenues : []}
                     searchedCity={searchedCity || "San Francisco"}
@@ -192,7 +139,7 @@ const Explore = () => {
                             key={location.id}
                             venue={location}
                             content={getCitySpecificContent(location)}
-                            media={getMediaForLocation(location)}
+                            media={getMediaForLocationMock(location)}
                             timestamp={new Date().toISOString()}
                           />
                         ))}
@@ -200,7 +147,7 @@ const Explore = () => {
                   </div>
                 )}
                 
-                {activeTab !== "music" && activeTab !== "comedy" && activeTab !== "nightlife" && searchCategory !== "users" && (
+                {activeTab !== "music" && activeTab !== "comedy" && activeTab !== "nightlife" && (
                   <LocationsGrid
                     locations={filteredLocations}
                     locationTags={locationTags}

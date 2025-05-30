@@ -59,7 +59,7 @@ export const handleSearchQuery = async (
       return await SearchService.search(inputValue);
     } catch (error) {
       console.error('Error using SearchService with categories, falling back to standard search:', error);
-      return await SearchService.search(inputValue);
+      return await SearchService.vectorSearch(inputValue);
     }
   } catch (error) {
     console.error('Error in search query handler with NLP:', error);
