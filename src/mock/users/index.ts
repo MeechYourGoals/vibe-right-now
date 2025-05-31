@@ -14,7 +14,6 @@ export interface MockUserProfile {
   followers?: number;
   following?: number;
   posts?: number;
-  vibeTags?: string[];
 }
 
 // Mock user profile utility
@@ -28,13 +27,6 @@ export const getMockUserProfile = (type: 'regular' | 'celebrity' | 'venue'): Moc
     type: type,
     verified: type === 'venue' ? true : collection[randomIndex].verified
   };
-};
-
-// Add the missing getRandomUserProfile function
-export const getRandomUserProfile = (): MockUserProfile => {
-  const types: ('regular' | 'celebrity' | 'venue')[] = ['regular', 'celebrity', 'venue'];
-  const randomType = types[Math.floor(Math.random() * types.length)];
-  return getMockUserProfile(randomType);
 };
 
 // Create a combined mockUsers array
