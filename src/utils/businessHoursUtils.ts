@@ -1,3 +1,4 @@
+
 import { BusinessHours, Location } from "@/types";
 
 export const formatBusinessHours = (hours: BusinessHours | Record<string, string>): string => {
@@ -47,6 +48,60 @@ export const formatBusinessHours = (hours: BusinessHours | Record<string, string
   } else {
     return "Hours not available";
   }
+};
+
+export const generateBusinessHours = (location: Location): BusinessHours => {
+  // Generate default business hours based on venue type
+  if (location.type === "bar" || location.type === "nightclub") {
+    return {
+      monday: { open: "17:00", close: "02:00" },
+      tuesday: { open: "17:00", close: "02:00" },
+      wednesday: { open: "17:00", close: "02:00" },
+      thursday: { open: "17:00", close: "02:00" },
+      friday: { open: "17:00", close: "03:00" },
+      saturday: { open: "17:00", close: "03:00" },
+      sunday: { open: "17:00", close: "01:00" }
+    };
+  } else if (location.type === "restaurant") {
+    return {
+      monday: { open: "11:00", close: "22:00" },
+      tuesday: { open: "11:00", close: "22:00" },
+      wednesday: { open: "11:00", close: "22:00" },
+      thursday: { open: "11:00", close: "22:00" },
+      friday: { open: "11:00", close: "23:00" },
+      saturday: { open: "11:00", close: "23:00" },
+      sunday: { open: "11:00", close: "21:00" }
+    };
+  } else {
+    return {
+      monday: { open: "09:00", close: "18:00" },
+      tuesday: { open: "09:00", close: "18:00" },
+      wednesday: { open: "09:00", close: "18:00" },
+      thursday: { open: "09:00", close: "18:00" },
+      friday: { open: "09:00", close: "18:00" },
+      saturday: { open: "10:00", close: "17:00" },
+      sunday: { open: "10:00", close: "17:00" }
+    };
+  }
+};
+
+export const getTodaysHours = (location: Location): string => {
+  const today = new Date();
+  const dayOfWeek = today.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+  
+  if (!location.hours) {
+    return "Hours not available";
+  }
+  
+  const todaysHours = location.hours[dayOfWeek as keyof BusinessHours];
+  
+  if (typeof todaysHours === 'string') {
+    return todaysHours;
+  } else if (todaysHours && typeof todaysHours === 'object' && 'open' in todaysHours && 'close' in todaysHours) {
+    return `${todaysHours.open} - ${todaysHours.close}`;
+  }
+  
+  return "Closed";
 };
 
 export const isOpenNow = (businessHours: BusinessHours, timezone: string, location: Location): boolean => {
