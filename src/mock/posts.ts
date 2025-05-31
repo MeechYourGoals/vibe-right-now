@@ -1,5 +1,6 @@
+
 import { Post, Location, User } from "@/types";
-import { MockUserProfile, mockUsers } from "./users";
+import { mockUsers } from "./users";
 import { mockVenues } from "./venues";
 
 // Helper function to get random elements from array
@@ -8,10 +9,14 @@ const getRandomElements = <T>(arr: T[], count: number): T[] => {
   return shuffled.slice(0, count);
 };
 
+// Convert mockUsers object to array for easier access
+const userArray = Object.values(mockUsers);
+const getUserByName = (name: keyof typeof mockUsers) => mockUsers[name];
+
 export const mockPosts: Post[] = [
   {
     id: "1",
-    user: mockUsers.alex,
+    user: getUserByName('alex'),
     location: mockVenues[0],
     content: "Amazing rooftop experience at this incredible venue! The city views are absolutely breathtaking and the atmosphere is perfect for a night out. 🌃✨",
     media: [
@@ -27,7 +32,7 @@ export const mockPosts: Post[] = [
   },
   {
     id: "2",
-    user: mockUsers.sarah,
+    user: getUserByName('sarah'),
     location: mockVenues[1],
     content: "Best brunch spot in the city! The avocado toast here is next level and the coffee is perfectly crafted. Highly recommend! ☕🥑",
     media: [
@@ -41,7 +46,7 @@ export const mockPosts: Post[] = [
   },
   {
     id: "3",
-    user: mockUsers.mike,
+    user: getUserByName('mike'),
     location: mockVenues[2],
     content: "Live music night was absolutely incredible! The acoustics in this venue are perfect and the energy was off the charts. 🎵🔥",
     media: [
@@ -56,7 +61,7 @@ export const mockPosts: Post[] = [
   },
   {
     id: "4",
-    user: mockUsers.emma,
+    user: getUserByName('emma'),
     location: mockVenues[3],
     content: "Stunning views and amazing cocktails! This place never disappoints. Perfect for date night or catching up with friends. 🍸💫",
     media: [
@@ -70,7 +75,7 @@ export const mockPosts: Post[] = [
   },
   {
     id: "5",
-    user: mockUsers.alex,
+    user: getUserByName('alex'),
     location: mockVenues[4],
     content: "The energy here tonight is absolutely electric! Dance floor is packed and the DJ is killing it. This is what nightlife should be! 🕺💃",
     media: [
@@ -86,7 +91,7 @@ export const mockPosts: Post[] = [
   },
   {
     id: "6",
-    user: mockUsers.olivia,
+    user: getUserByName('olivia'),
     location: mockVenues[5],
     content: "Just tried the new menu at this restaurant and it was phenomenal! Every dish was a work of art. 🍽️🎨",
     media: [
@@ -100,7 +105,7 @@ export const mockPosts: Post[] = [
   },
   {
     id: "7",
-    user: mockUsers.liam,
+    user: getUserByName('liam'),
     location: mockVenues[6],
     content: "Spent the afternoon exploring this hidden gem. The architecture is stunning and the history is fascinating. 🏛️📜",
     media: [
@@ -114,7 +119,7 @@ export const mockPosts: Post[] = [
   },
   {
     id: "8",
-    user: mockUsers.sophia,
+    user: getUserByName('sophia'),
     location: mockVenues[7],
     content: "This sports bar is the perfect place to catch a game. Great atmosphere and even better company! 🍻🏈",
     media: [
@@ -128,7 +133,7 @@ export const mockPosts: Post[] = [
   },
   {
     id: "9",
-    user: mockUsers.noah,
+    user: getUserByName('noah'),
     location: mockVenues[8],
     content: "Had an unforgettable night at this event. The music, the crowd, everything was perfect! 🎉🎶",
     media: [
@@ -142,7 +147,7 @@ export const mockPosts: Post[] = [
   },
   {
     id: "10",
-    user: mockUsers.isabella,
+    user: getUserByName('isabella'),
     location: mockVenues[9],
     content: "This attraction is a must-see for anyone visiting the city. The views are incredible and the experience is unforgettable. 🏞️📸",
     media: [
@@ -157,8 +162,8 @@ export const mockPosts: Post[] = [
 ];
 
 // Generate additional posts
-for (let i = 6; i <= 50; i++) {
-  const randomUser = mockUsers[Object.keys(mockUsers)[Math.floor(Math.random() * Object.keys(mockUsers).length)] as keyof typeof mockUsers];
+for (let i = 11; i <= 50; i++) {
+  const randomUser = userArray[Math.floor(Math.random() * userArray.length)];
   const randomVenue = mockVenues[Math.floor(Math.random() * mockVenues.length)];
   
   mockPosts.push({
