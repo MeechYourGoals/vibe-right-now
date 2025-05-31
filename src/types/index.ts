@@ -24,13 +24,13 @@ export interface Location {
 }
 
 export interface BusinessHours {
-  monday: { open: string; close: string; };
-  tuesday: { open: string; close: string; };
-  wednesday: { open: string; close: string; };
-  thursday: { open: string; close: string; };
-  friday: { open: string; close: string; };
-  saturday: { open: string; close: string; };
-  sunday: { open: string; close: string; };
+  monday: string;
+  tuesday: string;
+  wednesday: string;
+  thursday: string;
+  friday: string;
+  saturday: string;
+  sunday: string;
   isOpenNow?: string;
   timezone?: string;
   isOpen24Hours?: boolean;
@@ -56,12 +56,13 @@ export interface Post {
   isVenuePost?: boolean;
   isPinned?: boolean;
   expiresAt?: string;
+  saved?: boolean;
 }
 
 export interface Comment {
   id: string;
   postId: string;
-  userId: string;
+  userId?: string;
   user: MockUserProfile;
   content: string;
   text: string;

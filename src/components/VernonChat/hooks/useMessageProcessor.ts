@@ -19,7 +19,6 @@ export const useMessageProcessor = () => {
           .map(msg => ({
             sender: msg.direction === 'outgoing' ? 'user' : 'ai',
             text: msg.content,
-            // Include additional fields that might be needed
             direction: msg.direction,
             timestamp: msg.timestamp?.toISOString?.() || new Date().toISOString()
           }));
@@ -30,14 +29,18 @@ export const useMessageProcessor = () => {
         console.log("Calling vertex-ai function with:", query.substring(0, 50), vertexMode);
         console.log("Context messages:", JSON.stringify(contextMessages));
         
-        // Direct call to Supabase Edge Function
+        // Enhanced prompt for venue discovery and recommendations
+        const enhancedPrompt = chatMode === 'venue' 
+          ? `As a venue analytics assistant, help with: ${query}`
+          : `As a venue discovery assistant, help me find places and provide specific recommendations for: ${query}. Include venue names, addresses, hours, and helpful details when possible.`;
+        
+        // Direct call to Supabase Edge Function using your unified Gemini API
         const { data, error } = await supabase.functions.invoke('vertex-ai', {
           body: { 
-            prompt: query,
+            prompt: enhancedPrompt,
             mode: vertexMode,
             context: contextMessages,
             model: 'gemini-1.5-pro',
-            // Include additional parameters for better handling
             options: {
               temperature: 0.7,
               maxTokens: 1024,
@@ -83,7 +86,6 @@ export const useMessageProcessor = () => {
         // Try to extract meaningful error message
         let errorMessage = "I'm having trouble connecting to my AI services right now. Please try again later.";
         
-        // If we can identify specific errors, provide better messages
         if (error.message?.includes('429') || error.message?.includes('quota')) {
           errorMessage = "I've reached my usage limit for the moment. Please try again in a minute or two.";
         } else if (error.message?.includes('401') || error.message?.includes('403')) {

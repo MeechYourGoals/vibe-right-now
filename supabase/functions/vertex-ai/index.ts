@@ -7,8 +7,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Use the provided API key
-const VERTEX_AI_API_KEY = "AIzaSyDHBe4hL8fQZdz9wSYi9srL0BGTnZ6XmyM";
+// Use your unified Gemini API key for all Google services
+const GEMINI_API_KEY = "AIzaSyCfJFLglZMGwe2j-XbYtbHKB8-xN15PXZM";
 
 // Models to use with fallback logic
 const MODELS = {
@@ -32,15 +32,15 @@ serve(async (req) => {
         console.log('Text-to-speech request for:', text.substring(0, 30) + '...');
         
         // Call Google's Text-to-Speech API
-        const ttsResponse = await fetch(`https://texttospeech.googleapis.com/v1/text:synthesize?key=${VERTEX_AI_API_KEY}`, {
+        const ttsResponse = await fetch(`https://texttospeech.googleapis.com/v1/text:synthesize?key=${GEMINI_API_KEY}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             input: { text },
             voice: {
               languageCode: 'en-US',
-              name: options?.voice || 'en-US-Neural2-D', // Default to male voice
-              ssmlGender: 'MALE' // Consistently use male voice
+              name: options?.voice || 'en-US-Neural2-D',
+              ssmlGender: 'MALE'
             },
             audioConfig: {
               audioEncoding: 'MP3',
@@ -73,7 +73,7 @@ serve(async (req) => {
       try {
         console.log('Speech-to-text request received');
         
-        // Mock implementation for now - would be replaced with actual Google Speech-to-Text API call
+        // Google Speech-to-Text API call would go here
         return new Response(JSON.stringify({ transcript: "Speech transcription with Google Speech-to-Text" }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
@@ -94,17 +94,17 @@ serve(async (req) => {
       // Define system context based on mode
       let systemPrompt = '';
       if (mode === 'venue') {
-        systemPrompt = "You are Vernon, a venue analytics assistant powered by Google Gemini. Provide insightful business analysis and recommendations for venue owners.";
+        systemPrompt = "You are Vernon, a venue analytics assistant powered by Google Gemini. Provide insightful business analysis and recommendations for venue owners. When users ask about venues, events, or places, provide detailed information including names, locations, hours, and recommendations.";
       } else if (mode === 'search') {
-        systemPrompt = "You are a search assistant powered by Google Gemini. Provide detailed information about places, events, and activities.";
+        systemPrompt = "You are Vernon, a search assistant powered by Google Gemini. Provide detailed information about places, events, and activities. Include specific venue names, addresses, hours, prices, and helpful recommendations.";
       } else {
-        systemPrompt = `You are Vernon, a helpful AI assistant powered by Google Gemini within the 'Vibe Right Now' app. Your primary goal is to help users discover great places to go and things to do.`;
+        systemPrompt = `You are Vernon, a helpful AI assistant powered by Google Gemini within the 'Vibe Right Now' app. Your primary goal is to help users discover great places to go and things to do. When users ask about venues, restaurants, bars, events, or activities, provide specific recommendations with names, locations, hours, and other helpful details.`;
       }
       
       // Prepare the messages for Gemini
       let messages = [];
       
-      // Process context properly - ensure it's in the correct format
+      // Process context properly
       if (context && context.length > 0) {
         messages = context.map(msg => ({
           role: msg.sender === 'user' ? 'user' : 'model',
@@ -112,7 +112,7 @@ serve(async (req) => {
         }));
       }
       
-      // Add system prompt as a "model" message at the beginning if not already included
+      // Add system prompt as a "model" message at the beginning
       if (messages.length === 0 || messages[0].role !== 'model' || !messages[0].parts[0].text.includes(systemPrompt)) {
         messages.unshift({
           role: 'model',
@@ -158,7 +158,6 @@ serve(async (req) => {
             throw new Error(`Failed with both primary and fallback models: ${fallbackError.message}`);
           }
         } else {
-          // Rethrow if it's not a rate limit issue or we've already tried fallback
           throw error;
         }
       }
@@ -179,7 +178,7 @@ serve(async (req) => {
 
 // Helper function to call Gemini API
 async function callGeminiAPI(model, messages) {
-  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${VERTEX_AI_API_KEY}`, {
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
