@@ -14,6 +14,7 @@ import AccountTab from "./settings/AccountTab";
 import VenueManagementTab from "./settings/VenueManagementTab";
 import MarketingTab from "./settings/MarketingTab";
 import PaymentsTab from "./settings/PaymentsTab";
+import VenueSubmissionTab from "@/components/settings/VenueSubmissionTab";
 
 const Settings = () => {
   const { toast } = useToast();
@@ -90,6 +91,10 @@ const Settings = () => {
               
               <TabsContent value="marketing" className="space-y-6">
                 <MarketingTab subscriptionTier={subscriptionTier} />
+              </TabsContent>
+              
+              <TabsContent value="submission" className="space-y-6">
+                <VenueSubmissionTab onSave={handleSaveSettings} />
               </TabsContent>
             </>
           ) : (

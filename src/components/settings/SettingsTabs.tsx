@@ -1,6 +1,16 @@
 
-import { Tag, Shield, Car, Ticket, User, Building2, CreditCard } from "lucide-react";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  User, 
+  Shield, 
+  Car, 
+  Ticket, 
+  CreditCard, 
+  Settings,
+  Building2,
+  Megaphone,
+  Upload
+} from "lucide-react";
 
 interface SettingsTabsProps {
   activeTab: string;
@@ -9,45 +19,56 @@ interface SettingsTabsProps {
 
 const SettingsTabs = ({ activeTab, isVenueMode }: SettingsTabsProps) => {
   return (
-    <TabsList className="mb-6 grid grid-cols-3 md:grid-cols-7 gap-2">
+    <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 mb-6">
       <TabsTrigger value="preferences" className="flex items-center gap-2">
-        <Tag className="h-4 w-4" />
-        <span className="hidden md:inline">Preferences</span>
+        <User className="h-4 w-4" />
+        <span className="hidden sm:inline">Preferences</span>
       </TabsTrigger>
+      
       <TabsTrigger value="privacy" className="flex items-center gap-2">
         <Shield className="h-4 w-4" />
-        <span className="hidden md:inline">Privacy</span>
+        <span className="hidden sm:inline">Privacy</span>
       </TabsTrigger>
+      
       {isVenueMode ? (
         <>
           <TabsTrigger value="management" className="flex items-center gap-2">
             <Building2 className="h-4 w-4" />
-            <span className="hidden md:inline">Management</span>
+            <span className="hidden sm:inline">Management</span>
           </TabsTrigger>
+          
           <TabsTrigger value="marketing" className="flex items-center gap-2">
-            <Ticket className="h-4 w-4" />
-            <span className="hidden md:inline">Marketing</span>
+            <Megaphone className="h-4 w-4" />
+            <span className="hidden sm:inline">Marketing</span>
+          </TabsTrigger>
+          
+          <TabsTrigger value="submission" className="flex items-center gap-2">
+            <Upload className="h-4 w-4" />
+            <span className="hidden sm:inline">Submit Venue</span>
           </TabsTrigger>
         </>
       ) : (
         <>
           <TabsTrigger value="transportation" className="flex items-center gap-2">
             <Car className="h-4 w-4" />
-            <span className="hidden md:inline">Transportation</span>
+            <span className="hidden sm:inline">Transportation</span>
           </TabsTrigger>
+          
           <TabsTrigger value="ticketing" className="flex items-center gap-2">
             <Ticket className="h-4 w-4" />
-            <span className="hidden md:inline">Ticketing</span>
+            <span className="hidden sm:inline">Ticketing</span>
           </TabsTrigger>
         </>
       )}
+      
       <TabsTrigger value="payments" className="flex items-center gap-2">
         <CreditCard className="h-4 w-4" />
-        <span className="hidden md:inline">Payments</span>
+        <span className="hidden sm:inline">Payments</span>
       </TabsTrigger>
+      
       <TabsTrigger value="account" className="flex items-center gap-2">
-        <User className="h-4 w-4" />
-        <span className="hidden md:inline">Account</span>
+        <Settings className="h-4 w-4" />
+        <span className="hidden sm:inline">Account</span>
       </TabsTrigger>
     </TabsList>
   );
