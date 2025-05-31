@@ -129,8 +129,10 @@ export const useChat = (isProPlan: boolean = false, isVenueMode: boolean = false
       setMessages(prev => [...prev.slice(0, -1), userMessage, aiMessage]); // Replace user message if AI responds, or add AI
     } catch (error) {
       console.error('Error processing message with AI:', error);
-      const errorMessage = error.message || "I'm sorry, I encountered an error. Please try again later.";
-      const aiErrorMessage = createAIMessage(errorMessage);
+      // This is an unexpected error caught by our own code. Prefix it.
+      const rawErrorMessage = error.message || "I'm sorry, I encountered an error. Please try again later.";
+      const displayErrorMessage = `⚠️ *Oops, something went wrong:* ${rawErrorMessage}`;
+      const aiErrorMessage = createAIMessage(displayErrorMessage);
       // Ensure user message is still there, then add error
       setMessages(prev => [...prev.filter(m => m.id !== userMessage.id), userMessage, aiErrorMessage]);
     } finally {
