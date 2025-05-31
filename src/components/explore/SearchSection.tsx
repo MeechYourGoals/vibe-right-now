@@ -1,72 +1,64 @@
+
 import React from 'react';
-import { Search, MapPin, Calendar } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { DateRange } from '@/types';
+import SearchVibes from "@/components/SearchVibes";
+import DateRangeSelector from "@/components/DateRangeSelector";
+import { Calendar } from "lucide-react";
+import { DateRange } from "react-day-picker";
+import { format } from "date-fns";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface SearchSectionProps {
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
-  location: string;
-  setLocation: (location: string) => void;
-  dateRange: DateRange;
-  setDateRange: (range: DateRange) => void;
+  showDateFilter: boolean;
+  dateRange: DateRange | undefined;
+  onSearch: (query: string, filterType: string, category: string) => void;
+  onDateRangeChange: (range: DateRange | undefined) => void;
+  onClearDates: () => void;
 }
 
 const SearchSection: React.FC<SearchSectionProps> = ({
-  searchQuery,
-  setSearchQuery,
-  location,
-  setLocation,
+  showDateFilter,
   dateRange,
-  setDateRange,
+  onSearch,
+  onDateRangeChange,
+  onClearDates
 }) => {
-  const handleSearch = () => {
-    // Ensure both dates are set for search
-    const searchDateRange = dateRange.from && dateRange.to 
-      ? { from: dateRange.from, to: dateRange.to }
-      : { from: new Date(), to: new Date() };
-    
-    console.log('Searching with:', {
-      query: searchQuery,
-      location,
-      dateRange: searchDateRange,
-    });
-  };
-
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
-      <div className="space-y-4">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-          <Input
-            type="text"
-            placeholder="What are you looking for?"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 h-12 text-lg bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 focus:border-primary dark:focus:border-primary"
+    <div className="max-w-xl mx-auto mb-6">
+      <SearchVibes onSearch={onSearch} />
+      
+      {showDateFilter && (
+        <div className="p-3 bg-card border border-input rounded-lg max-w-xl mx-auto mt-4">
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="text-sm font-medium flex items-center">
+              <Calendar className="h-4 w-4 mr-2 text-primary" />
+              Find Future Vibes
+            </h3>
+            {dateRange && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-7 text-xs" 
+                onClick={onClearDates}
+              >
+                Clear Dates
+              </Button>
+            )}
+          </div>
+          <DateRangeSelector 
+            dateRange={dateRange} 
+            onDateRangeChange={onDateRangeChange} 
           />
+          {dateRange?.from && (
+            <p className="text-xs text-foreground mt-2">
+              {dateRange.to 
+                ? `Showing events from ${format(dateRange.from, "MMM d, yyyy")} to ${format(dateRange.to, "MMM d, yyyy")}` 
+                : `Showing events from ${format(dateRange.from, "MMM d, yyyy")}`}
+            </p>
+          )}
         </div>
-        
-        <div className="relative">
-          <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-          <Input
-            type="text"
-            placeholder="Where?"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            className="pl-10 h-12 text-lg bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 focus:border-primary dark:focus:border-primary"
-          />
-        </div>
-
-        <Button
-          onClick={handleSearch}
-          className="w-full h-12 text-lg font-medium bg-primary hover:bg-primary/90"
-        >
-          <Search className="mr-2 h-5 w-5" />
-          Search Experiences
-        </Button>
-      </div>
+      )}
     </div>
   );
 };
