@@ -28,7 +28,7 @@ const VernonChat: React.FC = () => {
 
     window.addEventListener('open-vernon-chat', handleOpenChat as EventListener);
     return () => {
-      window.addEventListener('open-vernon-chat', handleOpenChat as EventListener);
+      window.removeEventListener('open-vernon-chat', handleOpenChat as EventListener);
     };
   }, [setChatMode]);
 
@@ -85,23 +85,24 @@ const VernonChat: React.FC = () => {
       setIsListening(false);
       setTranscript('');
       // Stop speech recognition if available
-      if (window.speechRecognition) {
-        window.speechRecognition.stop();
+      const SpeechRecognition = window.SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (SpeechRecognition && (window as any).currentRecognition) {
+        (window as any).currentRecognition.stop();
       }
     } else {
       setIsListening(true);
       setTranscript('Listening...');
       
       // Start speech recognition if available
-      if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const SpeechRecognition = window.SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (SpeechRecognition) {
         const recognition = new SpeechRecognition();
         
         recognition.continuous = false;
         recognition.interimResults = true;
         recognition.lang = 'en-US';
         
-        recognition.onresult = (event) => {
+        recognition.onresult = (event: any) => {
           const current = event.resultIndex;
           const transcript = event.results[current][0].transcript;
           setTranscript(transcript);
@@ -124,7 +125,7 @@ const VernonChat: React.FC = () => {
         };
         
         recognition.start();
-        window.speechRecognition = recognition;
+        (window as any).currentRecognition = recognition;
       } else {
         console.warn('Speech recognition not supported');
         setIsListening(false);
