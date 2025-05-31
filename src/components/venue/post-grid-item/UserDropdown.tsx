@@ -11,14 +11,18 @@ import { Button } from '@/components/ui/button';
 import { getUserByHash } from '@/mock/users';
 
 interface UserDropdownProps {
-  userId: string;
+  userId?: string;
+  userCount?: number;
+  post?: any;
   onMessage?: () => void;
   onShare?: () => void;
   onReport?: () => void;
 }
 
 const UserDropdown: React.FC<UserDropdownProps> = ({
-  userId,
+  userId = '',
+  userCount,
+  post,
   onMessage,
   onShare,
   onReport

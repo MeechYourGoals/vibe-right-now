@@ -1,249 +1,32 @@
 
-import { Comment } from "@/types";
-import { mockUsers } from "@/mock/users";
-import { getRecentTime } from "./time-utils";
+import { Comment } from '@/types';
+import mockUsers from '@/mock/users';
 
 export const mockComments: Comment[] = [
   {
     id: "1",
-    postId: "1",
-    userId: mockUsers[5].id,
-    user: mockUsers[5],
-    content: "The view is amazing! What DJ is playing?",
-    text: "The view is amazing! What DJ is playing?",
-    timestamp: getRecentTime(0.5),
-    vibedHere: false,
-    likes: 0
+    user: mockUsers[0],
+    content: "This looks amazing! 😍",
+    timestamp: "2024-01-15T11:00:00Z",
+    likes: 5,
+    replies: []
   },
   {
-    id: "2",
-    postId: "1",
-    userId: mockUsers[10].id,
-    user: mockUsers[10],
-    content: "Just arrived! Where are you sitting?",
-    text: "Just arrived! Where are you sitting?",
-    timestamp: getRecentTime(0.2),
-    vibedHere: true,
-    likes: 0
+    id: "2", 
+    user: mockUsers[1],
+    content: "I need to check this place out!",
+    timestamp: "2024-01-15T11:15:00Z",
+    likes: 3,
+    replies: []
   },
   {
     id: "3",
-    postId: "2",
-    userId: mockUsers[3].id,
-    user: mockUsers[3],
-    content: "Heading there now! Save me a chocolate one!",
-    text: "Heading there now! Save me a chocolate one!",
-    timestamp: getRecentTime(1.8),
-    vibedHere: true,
-    likes: 0
-  },
-  {
-    id: "4",
-    postId: "3",
-    userId: mockUsers[7].id,
-    user: mockUsers[7],
-    content: "Can't wait to see them! Looking for parking now.",
-    text: "Can't wait to see them! Looking for parking now.",
-    timestamp: getRecentTime(0.3),
-    vibedHere: false,
-    likes: 0
-  },
-  {
-    id: "5",
-    postId: "3",
-    userId: mockUsers[11].id,
-    user: mockUsers[11],
-    content: "I'm near the front! It's not too crowded yet!",
-    text: "I'm near the front! It's not too crowded yet!",
-    timestamp: getRecentTime(0.1),
-    vibedHere: true,
-    likes: 0
-  },
-  {
-    id: "6",
-    postId: "6",
-    userId: mockUsers[2].id,
-    user: mockUsers[2],
-    content: "Who's winning right now? Stuck in traffic!",
-    text: "Who's winning right now? Stuck in traffic!",
-    timestamp: getRecentTime(0.2),
-    vibedHere: false,
-    likes: 0
-  },
-  {
-    id: "7",
-    postId: "6",
-    userId: mockUsers[14].id,
-    user: mockUsers[14],
-    content: "Just got here! The atmosphere is incredible!",
-    text: "Just got here! The atmosphere is incredible!",
-    timestamp: getRecentTime(0.1),
-    vibedHere: true,
-    likes: 0
-  },
-  {
-    id: "8",
-    postId: "7",
-    userId: mockUsers[12].id,
-    user: mockUsers[12],
-    content: "Which DJ is on right now? Coming over!",
-    text: "Which DJ is on right now? Coming over!",
-    timestamp: getRecentTime(0.1),
-    vibedHere: true,
-    likes: 0
-  },
-  {
-    id: "9",
-    postId: "10",
-    userId: mockUsers[8].id,
-    user: mockUsers[8],
-    content: "Best seats in the house! Jealous!",
-    text: "Best seats in the house! Jealous!",
-    timestamp: getRecentTime(0.05),
-    vibedHere: false,
-    likes: 0
-  },
-  {
-    id: "10",
-    postId: "10",
-    userId: mockUsers[13].id,
-    user: mockUsers[13],
-    content: "I'm in section 115! Let's meet up!",
-    text: "I'm in section 115! Let's meet up!",
-    timestamp: getRecentTime(0.02),
-    vibedHere: true,
-    likes: 0
-  },
-  {
-    id: "11",
-    postId: "13",
-    userId: mockUsers[9].id,
-    user: mockUsers[9],
-    content: "Which event is on right now? The barrel racing?",
-    text: "Which event is on right now? The barrel racing?",
-    timestamp: getRecentTime(0.1),
-    vibedHere: false,
-    likes: 0
-  },
-  {
-    id: "12",
-    postId: "13",
-    userId: mockUsers[20].id,
-    user: mockUsers[20],
-    content: "Just arrived! The bull riding is WILD!",
-    text: "Just arrived! The bull riding is WILD!",
-    timestamp: getRecentTime(0.05),
-    vibedHere: true,
-    likes: 0
-  },
-  {
-    id: "13",
-    postId: "21",
-    userId: mockUsers[17].id,
-    user: mockUsers[17],
-    content: "Who's the headliner tonight? Worth coming?",
-    text: "Who's the headliner tonight? Worth coming?",
-    timestamp: getRecentTime(0.05),
-    vibedHere: false,
-    likes: 0
-  },
-  {
-    id: "14",
-    postId: "21",
-    userId: mockUsers[19].id,
-    user: mockUsers[19],
-    content: "I'm here too! Best comedy show I've seen all year!",
-    text: "I'm here too! Best comedy show I've seen all year!",
-    timestamp: getRecentTime(0.02),
-    vibedHere: true,
-    likes: 0
-  },
-  {
-    id: "15",
-    postId: "25",
-    userId: mockUsers[21].id,
-    user: mockUsers[21],
-    content: "Is the light show worth it? Thinking of heading over now!",
-    text: "Is the light show worth it? Thinking of heading over now!",
-    timestamp: getRecentTime(0.3),
-    vibedHere: false,
-    likes: 0
-  },
-  {
-    id: "16",
-    postId: "25",
-    userId: mockUsers[22].id,
-    user: mockUsers[22],
-    content: "Just arrived! The colors are magical tonight!",
-    text: "Just arrived! The colors are magical tonight!",
-    timestamp: getRecentTime(0.2),
-    vibedHere: true,
-    likes: 0
-  },
-  {
-    id: "17",
-    postId: "26",
-    userId: mockUsers[14].id,
-    user: mockUsers[14],
-    content: "Did you go to the top? How long is the wait?",
-    text: "Did you go to the top? How long is the wait?",
-    timestamp: getRecentTime(0.2),
-    vibedHere: false,
-    likes: 0
-  },
-  {
-    id: "18",
-    postId: "26",
-    userId: mockUsers[16].id,
-    user: mockUsers[16],
-    content: "Here now too! The view of Paris at night is unbeatable!",
-    text: "Here now too! The view of Paris at night is unbeatable!",
-    timestamp: getRecentTime(0.1),
-    vibedHere: true,
-    likes: 0
-  },
-  {
-    id: "19",
-    postId: "27",
-    userId: mockUsers[15].id,
-    user: mockUsers[15],
-    content: "Who was the surprise guest?? Stuck in traffic!",
-    text: "Who was the surprise guest?? Stuck in traffic!",
-    timestamp: getRecentTime(0.05),
-    vibedHere: false,
-    likes: 0
-  },
-  {
-    id: "20",
-    postId: "27",
-    userId: mockUsers[18].id,
-    user: mockUsers[18],
-    content: "Second stage is better right now! No crowds and amazing performance!",
-    text: "Second stage is better right now! No crowds and amazing performance!",
-    timestamp: getRecentTime(0.01),
-    vibedHere: true,
-    likes: 0
-  },
-  {
-    id: "21",
-    postId: "28",
-    userId: mockUsers[0].id,
-    user: mockUsers[0],
-    content: "Any exclusive items only available there?",
-    text: "Any exclusive items only available there?",
-    timestamp: getRecentTime(0.1),
-    vibedHere: false,
-    likes: 0
-  },
-  {
-    id: "22",
-    postId: "28",
-    userId: mockUsers[1].id,
-    user: mockUsers[1],
-    content: "Just arrived! The limited edition bags are stunning!",
-    text: "Just arrived! The limited edition bags are stunning!",
-    timestamp: getRecentTime(0.05),
-    vibedHere: true,
-    likes: 0
-  },
+    user: mockUsers[2], 
+    content: "The vibes are immaculate ✨",
+    timestamp: "2024-01-15T11:30:00Z",
+    likes: 8,
+    replies: []
+  }
 ];
+
+export default mockComments;

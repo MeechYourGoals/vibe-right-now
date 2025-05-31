@@ -1,6 +1,12 @@
 
 import { useState, useEffect } from 'react';
 import { MockUserProfile, getUserByHash } from '@/mock/users';
+import mockPosts from '@/mock/posts';
+import { mockLocations } from '@/mock/locations';
+
+export const vibeTags = [
+  'aesthetic', 'vibes', 'foodie', 'nightlife', 'coffee', 'sunset', 'brunch', 'party', 'peaceful'
+];
 
 export const useUserProfile = (identifier?: string) => {
   const [userProfile, setUserProfile] = useState<MockUserProfile | null>(null);
@@ -15,9 +21,17 @@ export const useUserProfile = (identifier?: string) => {
     setLoading(false);
   }, [identifier]);
 
+  // Mock additional data for user profile
+  const user = userProfile;
+  const userPosts = mockPosts.filter(post => post.user.username === userProfile?.username);
+  const followedVenues = mockLocations.slice(0, 3);
+
   return {
-    userProfile,
+    userProfile: userProfile!,
     loading,
-    setUserProfile
+    setUserProfile,
+    user,
+    userPosts,
+    followedVenues
   };
 };

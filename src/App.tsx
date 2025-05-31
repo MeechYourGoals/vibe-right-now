@@ -3,16 +3,15 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/sonner';
-import { ThemeProvider } from '@/components/theme-provider';
-import Home from '@/pages/Home';
+import { ThemeProvider } from '@/components/ThemeProvider';
+import Index from '@/pages/Index';
 import Explore from '@/pages/Explore';
-import Profile from '@/pages/Profile';
+import UserProfile from '@/pages/UserProfile';
 import VenueProfile from '@/pages/VenueProfile';
-import Post from '@/pages/Post';
 import Settings from '@/pages/Settings';
 import Discounts from '@/pages/Discounts';
-import Analytics from '@/pages/Analytics';
-import AdvertisingSuite from '@/pages/AdvertisingSuite';
+import DataInsights from '@/pages/DataInsights';
+import AdvertiserHub from '@/pages/AdvertiserHub';
 
 const queryClient = new QueryClient();
 
@@ -23,15 +22,14 @@ function App() {
         <Router>
           <div className="min-h-screen bg-background">
             <Routes>
-              <Route path="/" element={<Home />} />
+              <Route path="/" element={<Index />} />
               <Route path="/explore" element={<Explore />} />
-              <Route path="/profile/:username" element={<Profile />} />
+              <Route path="/profile/:username" element={<UserProfile />} />
               <Route path="/venue/:venueId" element={<VenueProfile />} />
-              <Route path="/post/:postId" element={<Post />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/discounts" element={<Discounts />} />
-              <Route path="/analytics" element={<Analytics />} />
-              <Route path="/advertising" element={<AdvertisingSuite />} />
+              <Route path="/analytics" element={<DataInsights />} />
+              <Route path="/advertising" element={<AdvertiserHub />} />
             </Routes>
             <Toaster />
           </div>

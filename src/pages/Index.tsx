@@ -3,7 +3,6 @@ import { useState } from "react";
 import { Layout } from "@/components/Layout";
 import PostFeed from "@/components/PostFeed";
 import CameraButton from "@/components/CameraButton";
-import VernonNext from "@/components/VernonNext";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const Index = () => {
@@ -31,7 +30,6 @@ const Index = () => {
       </main>
       
       <CameraButton />
-      <VernonNext />
     </Layout>
   );
 };
