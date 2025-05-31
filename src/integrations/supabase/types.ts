@@ -54,6 +54,42 @@ export type Database = {
         }
         Relationships: []
       }
+      review_sentiment_cache: {
+        Row: {
+          analyzed_at: string
+          expires_at: string
+          id: string
+          platform: string
+          review_id: string
+          review_text: string
+          sentiment_score: number
+          themes: Json | null
+          venue_id: string
+        }
+        Insert: {
+          analyzed_at?: string
+          expires_at?: string
+          id?: string
+          platform: string
+          review_id: string
+          review_text: string
+          sentiment_score: number
+          themes?: Json | null
+          venue_id: string
+        }
+        Update: {
+          analyzed_at?: string
+          expires_at?: string
+          id?: string
+          platform?: string
+          review_id?: string
+          review_text?: string
+          sentiment_score?: number
+          themes?: Json | null
+          venue_id?: string
+        }
+        Relationships: []
+      }
       trend_keywords: {
         Row: {
           fetched_at: string | null
@@ -78,6 +114,45 @@ export type Database = {
           keyword?: string
           location_name?: string
           source?: string
+        }
+        Relationships: []
+      }
+      venue_sentiment_analysis: {
+        Row: {
+          created_at: string
+          id: string
+          last_analyzed_at: string
+          overall_sentiment: number
+          platform: string
+          review_count: number | null
+          sentiment_summary: string
+          themes: Json | null
+          updated_at: string
+          venue_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_analyzed_at?: string
+          overall_sentiment: number
+          platform: string
+          review_count?: number | null
+          sentiment_summary: string
+          themes?: Json | null
+          updated_at?: string
+          venue_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_analyzed_at?: string
+          overall_sentiment?: number
+          platform?: string
+          review_count?: number | null
+          sentiment_summary?: string
+          themes?: Json | null
+          updated_at?: string
+          venue_id?: string
         }
         Relationships: []
       }
@@ -162,7 +237,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      cleanup_expired_reviews: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

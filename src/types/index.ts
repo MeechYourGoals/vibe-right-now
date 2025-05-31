@@ -1,3 +1,4 @@
+
 // If this file doesn't exist, we're creating it
 import { MockUserProfile } from "@/mock/users";
 
@@ -190,6 +191,48 @@ export interface CampaignPerformance {
   spend: number;
   roas: number;
   footTrafficLift: number;
+}
+
+// Sentiment Analysis Types
+export interface VenueSentimentAnalysis {
+  id: string;
+  venue_id: string;
+  platform: string;
+  overall_sentiment: number; // -1.0 to 1.0
+  sentiment_summary: string;
+  themes: Record<string, number>; // e.g., {"ambience": 0.8, "service": 0.6}
+  review_count: number;
+  last_analyzed_at: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ReviewSentimentCache {
+  id: string;
+  venue_id: string;
+  platform: string;
+  review_id: string;
+  review_text: string;
+  sentiment_score: number;
+  themes: Record<string, number>;
+  analyzed_at: string;
+  expires_at: string;
+}
+
+export interface SentimentTheme {
+  name: string;
+  score: number;
+  mentions: number;
+  examples: string[];
+}
+
+export interface PlatformSentimentSummary {
+  platform: string;
+  overallSentiment: number;
+  summary: string;
+  themes: SentimentTheme[];
+  reviewCount: number;
+  lastUpdated: string;
 }
 
 export * from "./index";
