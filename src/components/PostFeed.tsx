@@ -6,14 +6,14 @@ import SearchVibes from "@/components/SearchVibes";
 import { Post, User, Media } from "@/types";
 import { isWithinThreeMonths } from "@/mock/time-utils";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, Filter } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { vibeTags } from "@/hooks/useUserProfile";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Sparkles } from "lucide-react";
+
+// Define vibe tags locally since we're removing the filter functionality
+const vibeTags = [
+  "Cozy", "Family Friendly", "NightOwl", "Trendy", "Chill", "Upscale", 
+  "Casual", "Romantic", "Lively", "Intimate", "Artsy", "Historic", 
+  "Modern", "Quirky", "Elegant", "Rustic", "Vibrant", "Peaceful"
+];
 
 interface PostFeedProps {
   celebrityFeatured?: string[];
@@ -45,7 +45,6 @@ const ensureMediaFormat = (media: any[]): Media[] => {
 const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
   const [filter, setFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedVibeTags, setSelectedVibeTags] = useState<string[]>([]);
 
   const handleSearch = (query: string, filterType: string) => {
     setSearchQuery(query);
@@ -53,15 +52,6 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
       setFilter(filterType.toLowerCase());
     } else {
       setFilter("all");
-    }
-  };
-
-  // Toggle vibe tag selection
-  const toggleVibeTag = (tag: string) => {
-    if (selectedVibeTags.includes(tag)) {
-      setSelectedVibeTags(selectedVibeTags.filter(t => t !== tag));
-    } else {
-      setSelectedVibeTags([...selectedVibeTags, tag]);
     }
   };
 
@@ -121,13 +111,6 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
         return false;
       }
       
-      // Filter by vibe tags if any are selected
-      if (selectedVibeTags.length > 0) {
-        // Check if post has any of the selected vibe tags (inclusive filtering)
-        const hasMatchingTag = post.vibeTags?.some(tag => selectedVibeTags.includes(tag));
-        if (!hasMatchingTag) return false;
-      }
-      
       // Filter by search query if specified
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
@@ -141,7 +124,7 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
       
       return true;
     });
-  }, [prioritizedPosts, filter, searchQuery, selectedVibeTags]);
+  }, [prioritizedPosts, filter, searchQuery]);
 
   // Group posts by location
   const postsGroupedByLocation = useMemo(() => {
@@ -218,7 +201,7 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
           <Badge 
             key={index} 
             variant="outline" 
-            className={`${selectedVibeTags.includes(tag) ? 'bg-primary text-white' : 'bg-primary/10 text-primary'} text-xs`}
+            className="bg-primary/10 text-primary text-xs"
           >
             <Sparkles className="h-3 w-3 mr-1" />
             {tag}
@@ -258,61 +241,6 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
     <div className="max-w-3xl mx-auto">
       <div className="mb-4">
         <SearchVibes onSearch={handleSearch} />
-        
-        <div className="mt-2 flex items-center space-x-2">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button 
-                variant={selectedVibeTags.length > 0 ? "default" : "outline"} 
-                size="sm" 
-                className="flex items-center gap-1"
-              >
-                <Filter className="h-4 w-4" />
-                Vibe Filters {selectedVibeTags.length > 0 && `(${selectedVibeTags.length})`}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-2" align="start">
-              <div className="grid grid-cols-2 gap-1 min-w-[280px]">
-                {vibeTags.map(tag => (
-                  <Badge 
-                    key={tag}
-                    variant={selectedVibeTags.includes(tag) ? "default" : "outline"}
-                    className="cursor-pointer justify-start"
-                    onClick={() => toggleVibeTag(tag)}
-                  >
-                    <Sparkles className="h-3 w-3 mr-1" />
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-              {selectedVibeTags.length > 0 && (
-                <Button 
-                  variant="link" 
-                  size="sm" 
-                  className="mt-2" 
-                  onClick={() => setSelectedVibeTags([])}
-                >
-                  Clear all filters
-                </Button>
-              )}
-            </PopoverContent>
-          </Popover>
-          
-          {selectedVibeTags.length > 0 && (
-            <div className="flex flex-wrap gap-1 items-center">
-              {selectedVibeTags.map(tag => (
-                <Badge 
-                  key={tag}
-                  variant="default"
-                  className="cursor-pointer"
-                  onClick={() => toggleVibeTag(tag)}
-                >
-                  {tag} ×
-                </Badge>
-              ))}
-            </div>
-          )}
-        </div>
       </div>
 
       <div className="p-4 space-y-4">
