@@ -1,56 +1,34 @@
 
 import { useState, useCallback } from 'react';
 import { Message, ChatMode } from '../types';
-import { supabase } from '@/integrations/supabase/client';
+import { VertexAIService } from '@/services/VertexAIService';
 
 export const useMessageProcessor = () => {
   const [isProcessing, setIsProcessing] = useState(false);
-  const [usedFallback, setUsedFallback] = useState(false);
 
   const processMessage = useCallback(
     async (query: string, previousMessages: Message[], chatMode: ChatMode): Promise<string> => {
       setIsProcessing(true);
-      setUsedFallback(false);
       
+      const mappedMode = chatMode === 'venue' ? 'venue' : 'default';
+      const context = previousMessages.map(msg => ({
+        sender: msg.direction === 'outgoing' ? 'user' : 'ai',
+        text: msg.content
+      }));
+
+      console.log(`Calling VertexAIService.generateResponse with mode: ${mappedMode}, query: ${query.substring(0,50)}...`);
+      console.log("Context being sent:", JSON.stringify(context.slice(-2), null, 2)); // Log last 2 messages for brevity
+
       try {
-        console.log("Calling perplexity-search function with:", query.substring(0, 50));
+        const responseText = await VertexAIService.generateResponse(query, mappedMode, context);
         
-        // Use Perplexity for real-world search results
-        const { data, error } = await supabase.functions.invoke('perplexity-search', {
-          body: { 
-            query: query
-          }
-        });
-        
-        if (error) {
-          console.error("Error calling perplexity-search function:", error);
-          throw new Error(error.message);
-        }
-        
-        if (!data) {
-          throw new Error("No response received from Perplexity");
-        }
-        
-        if (!data.text) {
-          throw new Error("No text in response from Perplexity");
-        }
-        
-        console.log("Received response from perplexity-search:", data.text.substring(0, 50) + "...");
-        return data.text;
+        console.log("Received response from VertexAIService:", responseText.substring(0, 50) + "...");
+        return responseText;
       } catch (error) {
-        console.error('Error processing message:', error);
-        
-        // Try to extract meaningful error message
-        let errorMessage = "I'm having trouble connecting to my search services right now. Please try again later.";
-        
-        // If we can identify specific errors, provide better messages
-        if (error.message?.includes('429') || error.message?.includes('quota')) {
-          errorMessage = "I've reached my usage limit for the moment. Please try again in a minute or two.";
-        } else if (error.message?.includes('401') || error.message?.includes('403')) {
-          errorMessage = "I'm having authentication issues with my search services. Please try again later.";
-        }
-        
-        return errorMessage;
+        console.error('Error processing message with VertexAIService:', error);
+        // VertexAIService.generateResponse already returns a user-friendly error message.
+        // If it throws an error, it's likely an unexpected issue, so we return its message or a generic one.
+        return error.message || "An unexpected error occurred while processing your message.";
       } finally {
         setIsProcessing(false);
       }
@@ -60,7 +38,7 @@ export const useMessageProcessor = () => {
 
   return {
     processMessage,
-    isProcessing,
-    usedFallback
+    isProcessing
+    // usedFallback is removed
   };
 };
