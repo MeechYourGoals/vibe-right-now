@@ -1,7 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const PERPLEXITY_API_KEY = Deno.env.get('PERPLEXITY_API_KEY') || '';
+const PERPLEXITY_API_KEY = "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";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',

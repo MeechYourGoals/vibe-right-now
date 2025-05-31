@@ -13,83 +13,41 @@ export const useMessageProcessor = () => {
       setUsedFallback(false);
       
       try {
-        // Convert messages to format expected by Vertex AI
-        const contextMessages = previousMessages
-          .slice(-5)
-          .map(msg => ({
-            sender: msg.direction === 'outgoing' ? 'user' : 'ai',
-            text: msg.content,
-            direction: msg.direction,
-            timestamp: msg.timestamp?.toISOString?.() || new Date().toISOString()
-          }));
+        console.log("Calling perplexity-search function with:", query.substring(0, 50));
         
-        // Map chatMode to the mode expected by VertexAIService
-        const vertexMode = chatMode === 'venue' ? 'venue' : 'default';
-        
-        console.log("Calling vertex-ai function with:", query.substring(0, 50), vertexMode);
-        console.log("Context messages:", JSON.stringify(contextMessages));
-        
-        // Enhanced prompt for venue discovery and recommendations
-        const enhancedPrompt = chatMode === 'venue' 
-          ? `As a venue analytics assistant, help with: ${query}`
-          : `As a venue discovery assistant, help me find places and provide specific recommendations for: ${query}. Include venue names, addresses, hours, and helpful details when possible.`;
-        
-        // Direct call to Supabase Edge Function using your unified Gemini API
-        const { data, error } = await supabase.functions.invoke('vertex-ai', {
+        // Use Perplexity for real-world search results
+        const { data, error } = await supabase.functions.invoke('perplexity-search', {
           body: { 
-            prompt: enhancedPrompt,
-            mode: vertexMode,
-            context: contextMessages,
-            model: 'gemini-1.5-pro',
-            options: {
-              temperature: 0.7,
-              maxTokens: 1024,
-              safetySettings: {
-                harassment: "block_none",
-                hateSpeech: "block_none",
-                sexualContent: "block_none",
-                dangerousContent: "block_none"
-              }
-            }
+            query: query
           }
         });
         
         if (error) {
-          console.error("Error calling vertex-ai function:", error);
+          console.error("Error calling perplexity-search function:", error);
           throw new Error(error.message);
         }
         
         if (!data) {
-          throw new Error("No response received from Vertex AI");
-        }
-
-        // Check if we used the fallback model
-        if (data.usedFallbackModel) {
-          setUsedFallback(true);
-          console.log("Used fallback model due to rate limiting");
+          throw new Error("No response received from Perplexity");
         }
         
         if (!data.text) {
-          // If there's no text but we have a fallbackResponse, use that
-          if (data.fallbackResponse) {
-            console.log("Using fallback response:", data.fallbackResponse);
-            return data.fallbackResponse;
-          }
-          throw new Error("No text in response from Vertex AI");
+          throw new Error("No text in response from Perplexity");
         }
         
-        console.log("Received response from vertex-ai:", data.text.substring(0, 50) + "...");
+        console.log("Received response from perplexity-search:", data.text.substring(0, 50) + "...");
         return data.text;
       } catch (error) {
         console.error('Error processing message:', error);
         
         // Try to extract meaningful error message
-        let errorMessage = "I'm having trouble connecting to my AI services right now. Please try again later.";
+        let errorMessage = "I'm having trouble connecting to my search services right now. Please try again later.";
         
+        // If we can identify specific errors, provide better messages
         if (error.message?.includes('429') || error.message?.includes('quota')) {
           errorMessage = "I've reached my usage limit for the moment. Please try again in a minute or two.";
         } else if (error.message?.includes('401') || error.message?.includes('403')) {
-          errorMessage = "I'm having authentication issues with my AI services. Please try again later.";
+          errorMessage = "I'm having authentication issues with my search services. Please try again later.";
         }
         
         return errorMessage;

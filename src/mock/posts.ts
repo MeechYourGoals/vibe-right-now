@@ -1,428 +1,579 @@
-import { Post } from "@/types";
-import { mockUsers } from "./users";
+import { Post, Media } from "@/types";
+import { regularUsers, celebrityUsers } from "./users";
 import { mockLocations } from "./locations";
+import { getRecentTime, getExpiryTime } from "./time-utils";
+
+const allUsers = [...regularUsers, ...celebrityUsers];
 
 export const mockPosts: Post[] = [
   {
     id: "1",
-    user: mockUsers[0],
+    user: allUsers[0],
     location: mockLocations[0],
-    content: "Amazing rooftop view! The sunset here is incredible. Perfect spot for evening drinks with friends.",
+    content: "The sunset view here is incredible tonight! DJ is playing the best vibes 🎵",
     media: [
-      { type: "image", url: "https://images.unsplash.com/photo-1514933651103-005eec06c04b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80" }
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
     ],
-    timestamp: "2024-01-15T18:30:00Z",
-    expiresAt: "2024-01-16T06:00:00Z",
+    timestamp: getRecentTime(1),
+    expiresAt: getExpiryTime(getRecentTime(1), true), // Pinned post (90 days)
     likes: 42,
-    comments: 8,
-    shares: 3,
+    comments: 7,
     isPinned: true,
     saved: false,
-    vibeTags: ["rooftop", "sunset", "drinks"]
+    vibeTags: ["Lively", "Upscale", "NightOwl"]
   },
   {
     id: "2",
-    user: mockUsers[1],
+    user: allUsers[1],
     location: mockLocations[1],
-    content: "Best donuts in the city! Just got here and the line is worth it. The glazed ones are still warm!",
+    content: "They just put out fresh pastries! Get here quick, there's no line right now.",
     media: [
-      { type: "image", url: "https://images.unsplash.com/photo-1551024506-0bccd828d307?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1114&q=80" }
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
     ],
-    timestamp: "2024-01-15T09:15:00Z",
-    expiresAt: "2024-01-15T21:00:00Z",
-    likes: 28,
-    comments: 5,
-    shares: 2,
+    timestamp: getRecentTime(2),
+    expiresAt: getExpiryTime(getRecentTime(2)),
+    likes: 18,
+    comments: 3,
     saved: false
   },
   {
     id: "3",
-    user: mockUsers[2],
+    user: allUsers[2],
     location: mockLocations[2],
-    content: "Incredible concert tonight! The energy is electric. So glad I didn't miss this.",
+    content: "The headline act is about to start! Crowd is energetic but not too packed yet.",
     media: [
-      { type: "image", url: "https://images.unsplash.com/photo-1494935408836-507490c54305?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" }
+      {
+        type: "video",
+        url: "https://www.w3schools.com/html/mov_bbb.mp4",
+      },
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
     ],
-    timestamp: "2024-01-14T22:45:00Z",
-    likes: 55,
-    comments: 12,
-    shares: 5,
-    saved: false,
-    vibeTags: ["concert", "livemusic", "nightlife"]
+    timestamp: getRecentTime(0.5),
+    expiresAt: getExpiryTime(getRecentTime(0.5)),
+    likes: 104,
+    comments: 22,
+    saved: false
   },
   {
     id: "4",
-    user: mockUsers[3],
+    user: allUsers[3],
     location: mockLocations[3],
-    content: "Just tried the new burger at this spot. Seriously the best I've ever had. Juicy and full of flavor!",
+    content: "New exhibit just opened! Only a small crowd so far, perfect time to check it out.",
     media: [
-      { type: "image", url: "https://images.unsplash.com/photo-1568901342037-24c7b2c5188f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=960&q=80" }
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1553877522-43269d4ea984?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
     ],
-    timestamp: "2024-01-14T13:20:00Z",
-    likes: 31,
-    comments: 7,
-    shares: 1,
-    saved: false,
-    vibeTags: ["burger", "foodporn", "lunch"]
+    timestamp: getRecentTime(3),
+    expiresAt: getExpiryTime(getRecentTime(3)),
+    likes: 29,
+    comments: 5,
+    saved: false
   },
   {
     id: "5",
-    user: mockUsers[4],
+    user: allUsers[4],
     location: mockLocations[4],
-    content: "Exploring the art museum today. So many amazing pieces. Definitely worth a visit!",
+    content: "Line is around the block tonight! But the view is worth the wait.",
     media: [
-      { type: "image", url: "https://images.unsplash.com/photo-1556139804-f4f3520becb0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" }
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1519214605650-76a613ee3245?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
     ],
-    timestamp: "2024-01-13T16:55:00Z",
-    likes: 19,
-    comments: 3,
-    shares: 0,
+    timestamp: getRecentTime(1.5),
+    expiresAt: getExpiryTime(getRecentTime(1.5)),
+    likes: 56,
+    comments: 11,
+    isPinned: true,
     saved: false,
-    vibeTags: ["art", "museum", "culture"]
+    vibeTags: ["Lively", "Upscale", "NightOwl"]
   },
   {
     id: "6",
-    user: mockUsers[5],
+    user: allUsers[5],
     location: mockLocations[5],
-    content: "Game day at the stadium! The atmosphere is electric. Let's go team!",
+    content: "Knicks vs Lakers game is 🔥! Court side seats are insane, can see all the action up close.",
     media: [
-      { type: "image", url: "https://images.unsplash.com/photo-1556833460-5ca414ca3449?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" }
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1504450758481-7efbbe195018?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
     ],
-    timestamp: "2024-01-13T19:00:00Z",
-    likes: 63,
-    comments: 15,
-    shares: 7,
-    saved: false,
-    vibeTags: ["sports", "gameday", "stadium"]
+    timestamp: getRecentTime(0.3),
+    expiresAt: getExpiryTime(getRecentTime(0.3)),
+    likes: 87,
+    comments: 14,
+    saved: false
   },
   {
     id: "7",
-    user: mockUsers[6],
+    user: allUsers[6],
     location: mockLocations[6],
-    content: "Dancing the night away at this club. The music is on point and the crowd is amazing!",
+    content: "Pool party is going crazy right now! DJs just switched and the energy is insane 🎉",
     media: [
-      { type: "image", url: "https://images.unsplash.com/photo-1514525253161-7a46d1cd28f1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80" }
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1566737236500-c8ac43014a67?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
     ],
-    timestamp: "2024-01-12T01:30:00Z",
-    likes: 38,
-    comments: 9,
-    shares: 4,
-    saved: false,
-    vibeTags: ["club", "nightlife", "dancing"]
+    timestamp: getRecentTime(0.2),
+    expiresAt: getExpiryTime(getRecentTime(0.2)),
+    likes: 112,
+    comments: 19,
+    saved: false
   },
   {
     id: "8",
-    user: mockUsers[7],
+    user: allUsers[7],
     location: mockLocations[7],
-    content: "Relaxing afternoon at the park. Perfect weather for a picnic and some reading.",
+    content: "The view from Christ the Redeemer is breathtaking! Clear skies today, you can see all of Rio!",
     media: [
-      { type: "image", url: "https://images.unsplash.com/photo-1504754524776-8f8f4bf79e45?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" }
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1483729558449-99ef09a8c325?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
     ],
-    timestamp: "2024-01-11T14:00:00Z",
-    likes: 22,
-    comments: 4,
-    shares: 1,
-    saved: false,
-    vibeTags: ["park", "picnic", "nature"]
+    timestamp: getRecentTime(1.1),
+    expiresAt: getExpiryTime(getRecentTime(1.1)),
+    likes: 203,
+    comments: 31,
+    saved: false
   },
   {
     id: "9",
-    user: mockUsers[8],
+    user: allUsers[8],
     location: mockLocations[8],
-    content: "Enjoying a quiet evening at the library. So many books, so little time!",
+    content: "Top of the mountain at Aspen Highlands! Fresh powder and no lines for the lift right now.",
     media: [
-      { type: "image", url: "https://images.unsplash.com/photo-1507842214779-8d045a092233?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80" }
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1551524559-8af4e6624178?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
     ],
-    timestamp: "2024-01-10T20:10:00Z",
-    likes: 15,
-    comments: 2,
-    shares: 0,
-    saved: false,
-    vibeTags: ["library", "books", "reading"]
+    timestamp: getRecentTime(0.4),
+    expiresAt: getExpiryTime(getRecentTime(0.4)),
+    likes: 91,
+    comments: 12,
+    saved: false
   },
   {
     id: "10",
-    user: mockUsers[9],
+    user: allUsers[9],
     location: mockLocations[9],
-    content: "Watching the game from the VIP box. What a view! Go team!",
+    content: "Super Bowl from a field suite! The energy is electric and halftime show setup looks epic.",
     media: [
-      { type: "image", url: "https://images.unsplash.com/photo-1560184853-0ca95f923991?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" }
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
     ],
-    timestamp: "2024-01-09T17:40:00Z",
-    likes: 75,
-    comments: 18,
-    shares: 8,
+    timestamp: getRecentTime(0.1),
+    expiresAt: getExpiryTime(getRecentTime(0.1)),
+    likes: 256,
+    comments: 42,
+    isPinned: true,
     saved: false,
-    vibeTags: ["sports", "vip", "stadium"]
+    vibeTags: ["Lively", "Upscale", "NightOwl"]
   },
   {
     id: "11",
-    user: mockUsers[10],
+    user: allUsers[10],
     location: mockLocations[10],
-    content: "Just finished a workout at the gym. Feeling great and energized!",
+    content: "Dinner at Mama's Fish House with the sunset view is perfection. Got the last oceanfront table!",
     media: [
-      { type: "image", url: "https://images.unsplash.com/photo-1517836357463-dcaaa73c36ca?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" }
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1545579133-99bb5ab189bd?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
     ],
-    timestamp: "2024-01-08T08:25:00Z",
-    likes: 27,
-    comments: 6,
-    shares: 2,
-    saved: false,
-    vibeTags: ["gym", "workout", "fitness"]
+    timestamp: getRecentTime(0.6),
+    expiresAt: getExpiryTime(getRecentTime(0.6)),
+    likes: 78,
+    comments: 9,
+    saved: false
   },
   {
     id: "12",
-    user: mockUsers[11],
+    user: allUsers[11],
     location: mockLocations[11],
-    content: "Enjoying a cup of coffee at my favorite cafe. Perfect way to start the day!",
+    content: "Outdoor workout at Barry's today! Special beach class is killing it - spots still open for the 10am.",
     media: [
-      { type: "image", url: "https://images.unsplash.com/photo-1495516375742-b9c5abef0734?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" }
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
     ],
-    timestamp: "2024-01-07T07:00:00Z",
-    likes: 33,
-    comments: 7,
-    shares: 3,
-    saved: false,
-    vibeTags: ["coffee", "cafe", "morning"]
+    timestamp: getRecentTime(0.3),
+    expiresAt: getExpiryTime(getRecentTime(0.3)),
+    likes: 64,
+    comments: 8,
+    saved: false
   },
   {
     id: "13",
-    user: mockUsers[12],
+    user: allUsers[12],
     location: mockLocations[12],
-    content: "Rodeo night! The energy here is wild. Yeehaw!",
+    content: "Houston Rodeo is wild tonight! Bull riding competition just started and the crowd is going crazy!",
     media: [
-      { type: "image", url: "https://images.unsplash.com/photo-1608501824793-c5e39491d38b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" }
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1560147307-7fef1854cd4a?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
     ],
-    timestamp: "2024-01-06T21:50:00Z",
-    likes: 48,
-    comments: 11,
-    shares: 5,
-    saved: false,
-    vibeTags: ["rodeo", "country", "nightlife"]
+    timestamp: getRecentTime(0.2),
+    expiresAt: getExpiryTime(getRecentTime(0.2)),
+    likes: 118,
+    comments: 21,
+    saved: false
   },
   {
     id: "14",
-    user: mockUsers[13],
-    location: mockLocations[13],
-    content: "Exploring the botanical garden. So peaceful and beautiful!",
+    user: allUsers[13],
+    location: mockLocations[1],
+    content: "New seasonal latte just dropped and it's incredible! Lavender honey flavor is perfect.",
     media: [
-      { type: "image", url: "https://images.unsplash.com/photo-1575424909348-22c39c904579?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" }
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1517256064527-09c73fc73e38?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
     ],
-    timestamp: "2024-01-05T15:30:00Z",
-    likes: 29,
-    comments: 6,
-    shares: 1,
-    saved: false,
-    vibeTags: ["garden", "nature", "peaceful"]
+    timestamp: getRecentTime(0.4),
+    expiresAt: getExpiryTime(getRecentTime(0.4)),
+    likes: 42,
+    comments: 7,
+    saved: false
   },
   {
     id: "15",
-    user: mockUsers[14],
-    location: mockLocations[14],
-    content: "Just got a new tattoo at this shop. Absolutely love it!",
+    user: allUsers[14],
+    location: mockLocations[1],
+    content: "The back corner by the bookshelf is empty and it's the best spot to work from! Great wifi today.",
     media: [
-      { type: "image", url: "https://images.unsplash.com/photo-1604162451982-0990a14c1946?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" }
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
     ],
-    timestamp: "2024-01-04T16:15:00Z",
-    likes: 36,
-    comments: 8,
-    shares: 3,
-    saved: false,
-    vibeTags: ["tattoo", "art", "bodyart"]
+    timestamp: getRecentTime(0.7),
+    expiresAt: getExpiryTime(getRecentTime(0.7)),
+    likes: 35,
+    comments: 5,
+    saved: false
   },
   {
     id: "16",
-    user: mockUsers[15],
-    location: mockLocations[15],
-    content: "Enjoying a spa day. Feeling relaxed and rejuvenated!",
+    user: allUsers[0],
+    location: mockLocations[7],
+    content: "Made it to the top! The climb was worth it - barely any crowds this early in the morning.",
     media: [
-      { type: "image", url: "https://images.unsplash.com/photo-1540555700478-4408e64c279b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" }
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1572358337087-ab2addf09aa1?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
     ],
-    timestamp: "2024-01-03T14:50:00Z",
-    likes: 24,
-    comments: 5,
-    shares: 1,
-    saved: false,
-    vibeTags: ["spa", "relax", "selfcare"]
+    timestamp: getRecentTime(0.9),
+    expiresAt: getExpiryTime(getRecentTime(0.9)),
+    likes: 89,
+    comments: 12,
+    saved: false
   },
   {
     id: "17",
-    user: mockUsers[16],
-    location: mockLocations[16],
-    content: "Just bought a new guitar at this shop. Time to rock!",
+    user: allUsers[1],
+    location: mockLocations[21], // Bitcoin Conference location
+    content: "Bitcoin Conference is packed today! Great keynotes happening on the main stage with minimal wait times for entry.",
     media: [
-      { type: "image", url: "https://images.unsplash.com/photo-1519763446582-a9353902ca9c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" }
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1639815188546-c43c240ff4df?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
     ],
-    timestamp: "2024-01-02T17:20:00Z",
-    likes: 41,
-    comments: 9,
-    shares: 4,
-    saved: false,
-    vibeTags: ["guitar", "music", "rock"]
+    timestamp: getRecentTime(0.15),
+    expiresAt: getExpiryTime(getRecentTime(0.15)),
+    likes: 125,
+    comments: 18,
+    saved: false
   },
   {
     id: "18",
-    user: mockUsers[17],
-    location: mockLocations[17],
-    content: "Enjoying a hike in the mountains. The view is breathtaking!",
+    user: allUsers[2],
+    location: mockLocations[22], // InvestFest location
+    content: "InvestFest workshops are incredible! The west wing has shorter lines for the top speakers right now.",
     media: [
-      { type: "image", url: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8c00?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" }
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1515187029135-18ee286d815b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
     ],
-    timestamp: "2024-01-01T10:00:00Z",
-    likes: 30,
-    comments: 7,
-    shares: 2,
-    saved: false,
-    vibeTags: ["hike", "mountains", "nature"]
+    timestamp: getRecentTime(0.2),
+    expiresAt: getExpiryTime(getRecentTime(0.2)),
+    likes: 72,
+    comments: 10,
+    saved: false
   },
   {
     id: "19",
-    user: mockUsers[18],
-    location: mockLocations[18],
-    content: "Just got a new haircut at this salon. Feeling fresh and stylish!",
+    user: allUsers[3],
+    location: mockLocations[9], // Keep one Allegiant Stadium post
+    content: "VIP entrance on south side has no wait right now! Regular entrances are packed.",
     media: [
-      { type: "image", url: "https://images.unsplash.com/photo-1588731092669-4ff8c4343a4d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" }
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1504215680853-026ed2a45def?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
     ],
-    timestamp: "2023-12-31T13:40:00Z",
-    likes: 26,
-    comments: 5,
-    shares: 1,
-    saved: false,
-    vibeTags: ["haircut", "salon", "style"]
+    timestamp: getRecentTime(0.3),
+    expiresAt: getExpiryTime(getRecentTime(0.3)),
+    likes: 54,
+    comments: 8,
+    saved: false
   },
   {
     id: "20",
-    user: mockUsers[19],
-    location: mockLocations[19],
-    content: "Enjoying a movie night at home. Perfect way to end the year!",
+    user: allUsers[4],
+    location: {
+      id: "29",
+      name: "CES Las Vegas",
+      address: "3150 Paradise Rd",
+      city: "Las Vegas",
+      state: "NV",
+      country: "USA",
+      zip: "89101", // Added zip code
+      lat: 36.1318,
+      lng: -115.1516,
+      type: "event",
+      verified: true,
+    },
+    content: "Just spotted the newest tech innovations at CES! North hall is less crowded if you want to see the automotive displays.",
     media: [
-      { type: "image", url: "https://images.unsplash.com/photo-1485098500506-5d79669805f1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" }
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
     ],
-    timestamp: "2023-12-30T20:20:00Z",
-    likes: 32,
-    comments: 7,
-    shares: 3,
-    saved: false,
-    vibeTags: ["movie", "home", "relax"]
+    timestamp: getRecentTime(0.25),
+    expiresAt: getExpiryTime(getRecentTime(0.25)),
+    likes: 198,
+    comments: 34,
+    saved: false
   },
   {
     id: "21",
-    user: mockUsers[0],
-    location: mockLocations[20],
-    content: "Hilarious comedy show tonight! Laughed so hard my stomach hurts.",
+    user: allUsers[15],
+    location: mockLocations[13],
+    content: "Thanks for the free tix VRN! Can't believe I'm getting to see a comedy legend right now. The opening act just finished and everyone is crying laughing already!",
     media: [
-      { type: "image", url: "https://images.unsplash.com/photo-1504297050568-9107e4f49e05?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" }
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
     ],
-    timestamp: "2024-01-16T22:00:00Z",
-    likes: 68,
-    comments: 14,
-    shares: 6,
-    saved: false,
-    vibeTags: ["comedy", "show", "nightlife"]
+    timestamp: getRecentTime(0.1),
+    expiresAt: getExpiryTime(getRecentTime(0.1)),
+    likes: 78,
+    comments: 12,
+    saved: false
   },
   {
     id: "22",
-    user: mockUsers[1],
-    location: mockLocations[21],
-    content: "Just got a new piercing at this studio. Super professional and clean!",
+    user: allUsers[16],
+    location: mockLocations[14],
+    content: "Day 2 on the Disney Wonder and it's magical! Character breakfast just ended and the kids are loving it. Almost no wait for the water slide right now!",
     media: [
-      { type: "image", url: "https://images.unsplash.com/photo-1623440579747-442889f44496?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" }
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1548574505-5e239809ee19?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
     ],
-    timestamp: "2024-01-17T15:45:00Z",
-    likes: 39,
-    comments: 9,
-    shares: 3,
-    saved: false,
-    vibeTags: ["piercing", "studio", "bodyart"]
+    timestamp: getRecentTime(0.3),
+    expiresAt: getExpiryTime(getRecentTime(0.3)),
+    likes: 91,
+    comments: 15,
+    saved: false
   },
   {
     id: "23",
-    user: mockUsers[2],
-    location: mockLocations[22],
-    content: "Enjoying a wine tasting event. So many delicious wines!",
+    user: allUsers[17],
+    location: mockLocations[15],
+    content: "This new bakery in Des Moines is incredible! They just took out fresh croissants and they smell amazing. Get here before they sell out!",
     media: [
-      { type: "image", url: "https://images.unsplash.com/photo-1547592180-85f19999864f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" }
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1555507036-ab1f4038808a?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
     ],
-    timestamp: "2024-01-18T19:30:00Z",
-    likes: 45,
-    comments: 10,
-    shares: 4,
-    saved: false,
-    vibeTags: ["wine", "tasting", "event"]
+    timestamp: getRecentTime(0.4),
+    expiresAt: getExpiryTime(getRecentTime(0.4)),
+    likes: 54,
+    comments: 7,
+    saved: false
   },
   {
     id: "24",
-    user: mockUsers[3],
-    location: mockLocations[23],
-    content: "Just got a new bike at this shop. Time to explore the city!",
+    user: allUsers[18],
+    location: mockLocations[16],
+    content: "Sunset cocktails at the Waldorf Rooftop Bar are unmatched! Just got seated with no wait - seems like a hidden gem tonight. View of downtown LA is spectacular!",
     media: [
-      { type: "image", url: "https://images.unsplash.com/photo-1543699535-ca9994c897a5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" }
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1534353436294-0dbd4bdac845?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
     ],
-    timestamp: "2024-01-19T14:10:00Z",
-    likes: 33,
-    comments: 7,
-    shares: 2,
-    saved: false,
-    vibeTags: ["bike", "shop", "city"]
+    timestamp: getRecentTime(0.2),
+    expiresAt: getExpiryTime(getRecentTime(0.2)),
+    likes: 112,
+    comments: 15,
+    saved: false
   },
   {
     id: "25",
-    user: mockUsers[4],
-    location: mockLocations[24],
-    content: "Magical light show tonight! The colors are mesmerizing.",
+    user: allUsers[19],
+    location: mockLocations[17],
+    content: "Sydney Opera House is absolutely stunning tonight! Special light show happening right now with barely any crowds.",
     media: [
-      { type: "image", url: "https://images.unsplash.com/photo-1519183071296-a8c39245c124?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" }
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1624138784614-87fd1b6528f8?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
     ],
-    timestamp: "2024-01-20T21:40:00Z",
-    likes: 52,
-    comments: 12,
-    shares: 5,
-    saved: false,
-    vibeTags: ["lightshow", "night", "magic"]
+    timestamp: getRecentTime(0.5),
+    expiresAt: getExpiryTime(getRecentTime(0.5)),
+    likes: 143,
+    comments: 23,
+    saved: false
   },
   {
     id: "26",
-    user: mockUsers[5],
-    location: mockLocations[25],
-    content: "Visited the Eiffel Tower today. What a view of Paris!",
+    user: allUsers[20],
+    location: mockLocations[18],
+    content: "Perfect evening at the Eiffel Tower! The lights just turned on and it's magical. Pro tip: south side entrance has almost no line right now.",
     media: [
-      { type: "image", url: "https://images.unsplash.com/photo-1502605235544-464d8925a3ac?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" }
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
     ],
-    timestamp: "2024-01-21T16:25:00Z",
-    likes: 47,
-    comments: 11,
-    shares: 4,
-    saved: false,
-    vibeTags: ["eiffeltower", "paris", "travel"]
+    timestamp: getRecentTime(0.3),
+    expiresAt: getExpiryTime(getRecentTime(0.3)),
+    likes: 278,
+    comments: 42,
+    saved: false
   },
   {
     id: "27",
-    user: mockUsers[6],
-    location: mockLocations[26],
-    content: "Amazing music festival! So many great bands.",
+    user: allUsers[22],
+    location: mockLocations[19],
+    content: "Coachella day 2 is UNREAL! Just caught the surprise guest performance - mind blown! Main stage area still has room if you hurry.",
     media: [
-      { type: "image", url: "https://images.unsplash.com/photo-1493225452140-c25d279b9746?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" }
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
     ],
-    timestamp: "2024-01-22T22:10:00Z",
-    likes: 58,
-    comments: 13,
-    shares: 6,
-    saved: false,
-    vibeTags: ["music", "festival", "livemusic"]
+    timestamp: getRecentTime(0.1),
+    expiresAt: getExpiryTime(getRecentTime(0.1)),
+    likes: 345,
+    comments: 67,
+    saved: false
   },
   {
     id: "28",
-    user: mockUsers[7],
-    location: mockLocations[27],
-    content: "Visited the new exhibit at the museum. So many interesting artifacts.",
+    user: allUsers[21],
+    location: mockLocations[20],
+    content: "Gucci pop-up on Rodeo Drive is a must-see! They're giving out free champagne and the limited collection just dropped. Still some pieces left!",
     media: [
-      { type: "image", url: "https://images.unsplash.com/photo-1559059694-15c49c999383?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" }
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
     ],
-    timestamp: "2024-01-23T15:55:00Z",
-    likes: 35,
-    comments: 8,
-    shares: 2,
-    saved: false,
-    vibeTags: ["museum", "exhibit", "culture"]
-  }
+    timestamp: getRecentTime(0.2),
+    expiresAt: getExpiryTime(getRecentTime(0.2)),
+    likes: 167,
+    comments: 29,
+    saved: false
+  },
+  {
+    id: "29",
+    user: allUsers[8],
+    location: mockLocations[24],  // The Comedy Cellar (id: "25")
+    content: "Comedy Cellar is offering FREE TICKETS tonight! Just mention 'VRN' at the door. The 9pm show has plenty of seats but they're going fast!",
+    media: [
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1527224857830-43a7acc85260?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
+    ],
+    timestamp: getRecentTime(0.05),
+    expiresAt: getExpiryTime(getRecentTime(0.05)),
+    likes: 88,
+    comments: 15,
+    saved: false
+  },
+  {
+    id: "30",
+    user: allUsers[12],
+    location: mockLocations[25],  // Skyline Nightclub (id: "26")
+    content: "Skyline is offering FREE COVER until midnight! Just show this post at the door. DJ started at 10 and the dance floor is filling up!",
+    media: [
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1566737236500-c8ac43014a67?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
+    ],
+    timestamp: getRecentTime(0.1),
+    expiresAt: getExpiryTime(getRecentTime(0.1)),
+    likes: 132,
+    comments: 24,
+    saved: false
+  },
+  {
+    id: "31",
+    user: allUsers[15],
+    location: mockLocations[26],  // Sunrise Bakery (id: "27")
+    content: "New bakery alert! Sunrise is offering a FREE pastry with any large coffee purchase until noon. The chocolate croissants are incredible and still warm from the oven!",
+    media: [
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1517433367423-c7e5b0f35086?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
+    ],
+    timestamp: getRecentTime(0.3),
+    expiresAt: getExpiryTime(getRecentTime(0.3)),
+    likes: 67,
+    comments: 9,
+    saved: false
+  },
+  {
+    id: "32",
+    user: allUsers[19],
+    location: mockLocations[27],  // Coachella VIP Experience (id: "28")
+    content: "American Express Tent access included with VIP ticket purchase! Just picked up my credentials and the lounge has free drinks, charging stations and AC. Perfect escape from the heat!",
+    media: [
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1535086181678-5a5c4d23aa7d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
+    ],
+    timestamp: getRecentTime(0.15),
+    expiresAt: getExpiryTime(getRecentTime(0.15)),
+    likes: 215,
+    comments: 39,
+    saved: false
+  },
 ];
