@@ -1,104 +1,136 @@
 
-import React from 'react';
-import { CalendarIcon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { DateRange } from '@/types';
-import { format } from 'date-fns';
+import { useState } from "react";
+import { DateRange } from "react-day-picker";
+import { format, addMonths } from "date-fns";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Calendar, CalendarRange, X, Sparkles } from "lucide-react";
+import DateRangeSelector from "@/components/DateRangeSelector";
+import { useToast } from "@/components/ui/use-toast";
+import { useNavigate, useLocation } from "react-router-dom";
 
 interface DateFilterSectionProps {
-  dateRange: DateRange;
-  onDateRangeChange: (range: DateRange) => void;
+  dateRange: DateRange | undefined;
+  setDateRange: (range: DateRange | undefined) => void;
+  showDateFilter: boolean;
+  setShowDateFilter: (show: boolean) => void;
+  searchedCity: string;
+  handleDateRangeChange: (range: DateRange | undefined) => void;
+  vibeFilter: string;
+  setVibeFilter: (vibe: string) => void;
+  searchQuery: string;
+  searchCategory: string;
+  handleSearch: (query: string, filterType: string, category: string) => void;
 }
 
-const DateFilterSection: React.FC<DateFilterSectionProps> = ({
+const DateFilterSection = ({
   dateRange,
-  onDateRangeChange
-}) => {
-  const handleDateSelect = (range: DateRange | undefined) => {
-    if (range) {
-      onDateRangeChange(range);
+  setDateRange,
+  showDateFilter,
+  setShowDateFilter,
+  searchedCity,
+  handleDateRangeChange,
+  vibeFilter,
+  setVibeFilter,
+  searchQuery,
+  searchCategory,
+  handleSearch
+}: DateFilterSectionProps) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { toast } = useToast();
+
+  const toggleDateFilter = () => {
+    setShowDateFilter(!showDateFilter);
+    if (!showDateFilter && !dateRange) {
+      const today = new Date();
+      setDateRange({ 
+        from: today, 
+        to: addMonths(today, 1) 
+      });
     }
   };
 
-  const formatDateRange = () => {
-    if (dateRange.from && dateRange.to) {
-      return `${format(dateRange.from, 'MMM dd')} - ${format(dateRange.to, 'MMM dd')}`;
-    }
-    if (dateRange.from) {
-      return format(dateRange.from, 'MMM dd, yyyy');
-    }
-    return 'Select dates';
+  const clearDateFilter = () => {
+    setDateRange(undefined);
+    setShowDateFilter(false);
+    
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.delete('from');
+    searchParams.delete('to');
+    navigate(`/explore?${searchParams.toString()}`, { replace: true });
+    
+    toast({
+      title: "Date filter cleared",
+      description: "Showing events for all upcoming dates",
+      duration: 3000,
+    });
   };
 
   return (
-    <div className="space-y-4">
-      <h3 className="font-semibold text-gray-900 dark:text-gray-100">
-        Date Range
-      </h3>
-      
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            className="w-full justify-start text-left font-normal"
-          >
-            <CalendarIcon className="mr-2 h-4 w-4" />
-            {formatDateRange()}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
-          <Calendar
-            initialFocus
-            mode="range"
-            defaultMonth={dateRange.from}
-            selected={dateRange.from && dateRange.to ? {
-              from: dateRange.from,
-              to: dateRange.to
-            } : undefined}
-            onSelect={handleDateSelect}
-            numberOfMonths={2}
-          />
-        </PopoverContent>
-      </Popover>
-
-      <div className="space-y-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => onDateRangeChange({ from: new Date(), to: undefined })}
-          className="w-full justify-start"
+    <div className="max-w-xl mx-auto mb-4 flex flex-col gap-2">
+      <div className="flex items-center justify-between">
+        {vibeFilter && (
+          <Badge className="bg-indigo-800 dark:bg-indigo-900 text-white px-3 py-1 text-sm flex items-center">
+            <Sparkles className="h-4 w-4 mr-1 text-amber-300" />
+            Filtering by vibe: {vibeFilter}
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-5 w-5 ml-2 rounded-full text-white hover:bg-indigo-700" 
+              onClick={() => {
+                setVibeFilter("");
+                handleSearch(searchQuery, "All", searchCategory);
+              }}
+            >
+              <X className="h-3 w-3" />
+            </Button>
+          </Badge>
+        )}
+        
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className={`bg-background text-foreground ${showDateFilter ? "border-primary" : "border-input"}`}
+          onClick={toggleDateFilter}
         >
-          Today
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => {
-            const today = new Date();
-            const tomorrow = new Date(today);
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            onDateRangeChange({ from: today, to: tomorrow });
-          }}
-          className="w-full justify-start"
-        >
-          This Weekend
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => {
-            const today = new Date();
-            const nextWeek = new Date(today);
-            nextWeek.setDate(nextWeek.getDate() + 7);
-            onDateRangeChange({ from: today, to: nextWeek });
-          }}
-          className="w-full justify-start"
-        >
-          Next Week
+          <CalendarRange className="h-4 w-4 mr-2" />
+          {showDateFilter ? "Hide Date Filter" : "Filter by Date"}
         </Button>
       </div>
+      
+      {showDateFilter && (
+        <div className="p-3 bg-card border border-input rounded-lg">
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="text-sm font-medium flex items-center">
+              <Calendar className="h-4 w-4 mr-2 text-primary" />
+              Find Future Vibes
+            </h3>
+            {dateRange && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-7 text-xs" 
+                onClick={clearDateFilter}
+              >
+                Clear Dates
+              </Button>
+            )}
+          </div>
+          <DateRangeSelector 
+            dateRange={dateRange} 
+            onDateRangeChange={handleDateRangeChange} 
+          />
+          {dateRange?.from && (
+            <p className="text-xs text-foreground mt-2">
+              {dateRange.to 
+                ? `Showing events from ${format(dateRange.from, "MMM d, yyyy")} to ${format(dateRange.to, "MMM d, yyyy")}` 
+                : `Showing events from ${format(dateRange.from, "MMM d, yyyy")}`}
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 };

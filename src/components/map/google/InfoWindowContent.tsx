@@ -1,106 +1,91 @@
 
 import React from 'react';
 import { Location } from '@/types';
-import { Star, MapPin, Clock } from 'lucide-react';
+import { MapPin, Share2, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
+import { generateBusinessHours } from '@/utils/businessHoursUtils';
+import WaitTimeDisplay from '@/components/venue/WaitTimeDisplay';
 
 interface InfoWindowContentProps {
   location: Location;
-  onClose?: () => void;
-  onViewDetails?: (location: Location) => void;
+  onSelect: (location: Location) => void;
 }
 
-const InfoWindowContent: React.FC<InfoWindowContentProps> = ({
-  location,
-  onClose,
-  onViewDetails
-}) => {
-  const formatBusinessHours = (hours: any) => {
-    if (typeof hours === 'string') {
-      return hours;
-    }
-    if (typeof hours === 'object' && hours.open && hours.close) {
-      return `${hours.open} - ${hours.close}`;
-    }
-    return 'Hours not available';
+const InfoWindowContent: React.FC<InfoWindowContentProps> = ({ location, onSelect }) => {
+  const navigate = useNavigate();
+
+  // Ensure we have business hours
+  if (!location.hours) {
+    location.hours = generateBusinessHours(location);
+  }
+  
+  // Get today's hours
+  const today = new Date();
+  const dayOfWeek = today.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+  const todaysHours = location.hours[dayOfWeek as keyof typeof location.hours] || 'Closed';
+
+  const handleViewVenue = () => {
+    navigate(`/venue/${location.id}`);
   };
 
-  const getTodaysHours = () => {
-    if (!location.hours) return 'Hours not available';
-    
-    const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-    const today = new Date().getDay();
-    const dayName = days[today];
-    const dayHours = location.hours[dayName as keyof typeof location.hours];
-    
-    if (!dayHours) return 'Closed today';
-    
-    return formatBusinessHours(dayHours);
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: `Check out ${location.name}`,
+        text: `I found this amazing spot in ${location.city}!`,
+        url: `${window.location.origin}/venue/${location.id}`
+      }).catch(err => console.error('Error sharing:', err));
+    } else {
+      // Fallback for browsers that don't support navigator.share
+      navigator.clipboard.writeText(`${window.location.origin}/venue/${location.id}`)
+        .then(() => alert('Link copied to clipboard!'))
+        .catch(err => console.error('Could not copy text: ', err));
+    }
   };
 
   return (
-    <div className="p-4 max-w-sm">
-      <div className="flex items-start justify-between mb-3">
-        <h3 className="font-semibold text-lg text-gray-900">{location.name}</h3>
-        {location.verified && (
-          <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
-            Verified
+    <div className="w-64 p-2">
+      <div className="font-bold text-lg mb-1">{location.name}</div>
+      <div className="text-sm text-muted-foreground flex items-center mb-1">
+        <MapPin className="h-3 w-3 mr-1" />
+        <span>{location.address}, {location.city}</span>
+      </div>
+      <div className="text-sm mb-2">
+        <span className="font-medium">Today:</span> {todaysHours}
+      </div>
+      
+      {/* Display wait time if available */}
+      <div className="mb-2">
+        <WaitTimeDisplay venueId={location.id} showLastUpdated={false} />
+      </div>
+      
+      <div className="text-sm mb-3">
+        <span className="inline-block px-2 py-1 bg-primary/10 rounded-full text-xs">
+          {location.type.charAt(0).toUpperCase() + location.type.slice(1)}
+        </span>
+        {location.vibes && location.vibes.map((vibe, i) => (
+          <span key={i} className="inline-block ml-1 px-2 py-1 bg-muted rounded-full text-xs">
+            {vibe}
           </span>
-        )}
+        ))}
       </div>
-
-      <div className="space-y-2 mb-4">
-        <div className="flex items-center text-sm text-gray-600">
-          <MapPin className="w-4 h-4 mr-2" />
-          <span>{location.address}, {location.city}</span>
-        </div>
-
-        {location.rating && (
-          <div className="flex items-center text-sm">
-            <Star className="w-4 h-4 mr-1 fill-yellow-400 text-yellow-400" />
-            <span className="font-medium">{location.rating}</span>
-            <span className="text-gray-500 ml-1">rating</span>
-          </div>
-        )}
-
-        <div className="flex items-center text-sm text-gray-600">
-          <Clock className="w-4 h-4 mr-2" />
-          <span>{getTodaysHours()}</span>
-        </div>
-      </div>
-
-      {location.vibes && location.vibes.length > 0 && (
-        <div className="mb-4">
-          <div className="flex flex-wrap gap-1">
-            {location.vibes.slice(0, 3).map((vibe, index) => (
-              <span
-                key={index}
-                className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full"
-              >
-                {vibe}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
-
       <div className="flex gap-2">
-        <Button
-          size="sm"
-          onClick={() => onViewDetails?.(location)}
-          className="flex-1"
+        <Button 
+          size="sm" 
+          className="w-full bg-gradient-vibe"
+          onClick={handleViewVenue}
         >
-          View Details
+          <ExternalLink className="h-3 w-3 mr-1" />
+          View Vibes
         </Button>
-        {onClose && (
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={onClose}
-          >
-            Close
-          </Button>
-        )}
+        <Button 
+          size="sm" 
+          variant="outline" 
+          onClick={handleShare}
+        >
+          <Share2 className="h-3 w-3" />
+        </Button>
       </div>
     </div>
   );

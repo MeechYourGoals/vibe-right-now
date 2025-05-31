@@ -1,77 +1,62 @@
 
-import React, { useState } from 'react';
-import { Search, Filter, MapPin, Calendar } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { DateRange } from '@/types';
-import DateFilterSection from './DateFilterSection';
+import React from 'react';
+import SearchVibes from "@/components/SearchVibes";
+import DateRangeSelector from "@/components/DateRangeSelector";
+import { Calendar } from "lucide-react";
+import { DateRange } from "react-day-picker";
+import { format } from "date-fns";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface SearchSectionProps {
-  searchQuery: string;
-  onSearchChange: (query: string) => void;
-  dateRange: DateRange;
-  onDateRangeChange: (range: DateRange) => void;
-  onSearch: () => void;
+  showDateFilter: boolean;
+  dateRange: DateRange | undefined;
+  onSearch: (query: string, filterType: string, category: string) => void;
+  onDateRangeChange: (range: DateRange | undefined) => void;
+  onClearDates: () => void;
 }
 
 const SearchSection: React.FC<SearchSectionProps> = ({
-  searchQuery,
-  onSearchChange,
+  showDateFilter,
   dateRange,
+  onSearch,
   onDateRangeChange,
-  onSearch
+  onClearDates
 }) => {
-  const [showFilters, setShowFilters] = useState(false);
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      onSearch();
-    }
-  };
-
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700">
-      {/* Search Input */}
-      <div className="relative mb-4">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-        <Input
-          type="text"
-          placeholder="Search venues, events, or experiences..."
-          value={searchQuery}
-          onChange={(e) => onSearchChange(e.target.value)}
-          onKeyPress={handleKeyPress}
-          className="pl-10 pr-4 py-3"
-        />
-      </div>
-
-      {/* Action Buttons */}
-      <div className="flex gap-2 mb-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setShowFilters(!showFilters)}
-          className="flex items-center gap-2"
-        >
-          <Filter className="w-4 h-4" />
-          Filters
-        </Button>
-        <Button
-          size="sm"
-          onClick={onSearch}
-          className="flex items-center gap-2"
-        >
-          <Search className="w-4 h-4" />
-          Search
-        </Button>
-      </div>
-
-      {/* Filters Panel */}
-      {showFilters && (
-        <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-          <DateFilterSection
-            dateRange={dateRange}
-            onDateRangeChange={onDateRangeChange}
+    <div className="max-w-xl mx-auto mb-6">
+      <SearchVibes onSearch={onSearch} />
+      
+      {showDateFilter && (
+        <div className="p-3 bg-card border border-input rounded-lg max-w-xl mx-auto mt-4">
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="text-sm font-medium flex items-center">
+              <Calendar className="h-4 w-4 mr-2 text-primary" />
+              Find Future Vibes
+            </h3>
+            {dateRange && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-7 text-xs" 
+                onClick={onClearDates}
+              >
+                Clear Dates
+              </Button>
+            )}
+          </div>
+          <DateRangeSelector 
+            dateRange={dateRange} 
+            onDateRangeChange={onDateRangeChange} 
           />
+          {dateRange?.from && (
+            <p className="text-xs text-foreground mt-2">
+              {dateRange.to 
+                ? `Showing events from ${format(dateRange.from, "MMM d, yyyy")} to ${format(dateRange.to, "MMM d, yyyy")}` 
+                : `Showing events from ${format(dateRange.from, "MMM d, yyyy")}`}
+            </p>
+          )}
         </div>
       )}
     </div>

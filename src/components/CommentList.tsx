@@ -1,78 +1,131 @@
 
-import React from 'react';
-import { Comment } from '@/types';
-import { Heart, MoreHorizontal } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useState } from "react";
+import { Comment, User } from "@/types";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { MessageSquare, Send } from "lucide-react";
+import CommentItem from "@/components/CommentItem";
+import { mockComments } from "@/mock/comments";
+import { mockUsers } from "@/mock/users";
 
 interface CommentListProps {
-  comments: Comment[];
-  onCommentLike?: (commentId: string) => void;
+  postId: string;
+  commentsCount: number;
 }
 
-const CommentList: React.FC<CommentListProps> = ({ comments, onCommentLike }) => {
-  const formatTimestamp = (timestamp: string) => {
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+const CommentList = ({ postId, commentsCount }: CommentListProps) => {
+  const [newComment, setNewComment] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Filter comments for this specific post
+  let postComments = mockComments.filter(comment => comment.postId === postId);
+  
+  // If no comments found in mock data, generate example comments
+  if (postComments.length === 0 && commentsCount > 0) {
+    // Generate 2-3 example comments
+    const commentCount = Math.min(commentsCount, Math.floor(Math.random() * 2) + 2);
+    const exampleComments: Comment[] = [];
     
-    if (diffInHours < 1) {
-      const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
-      return `${diffInMinutes}m`;
-    } else if (diffInHours < 24) {
-      return `${diffInHours}h`;
-    } else {
-      const diffInDays = Math.floor(diffInHours / 24);
-      return `${diffInDays}d`;
+    // Regular comment
+    exampleComments.push({
+      id: `example-${postId}-1`,
+      postId: postId,
+      userId: mockUsers[Math.floor(Math.random() * mockUsers.length)].id,
+      user: mockUsers[Math.floor(Math.random() * mockUsers.length)],
+      content: "This place looks amazing! How's the crowd right now?",
+      text: "This place looks amazing! How's the crowd right now?",
+      timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
+      vibedHere: false,
+      likes: 0
+    });
+    
+    // "Vibed Here" comment
+    exampleComments.push({
+      id: `example-${postId}-2`,
+      postId: postId,
+      userId: mockUsers[Math.floor(Math.random() * mockUsers.length)].id,
+      user: mockUsers[Math.floor(Math.random() * mockUsers.length)],
+      content: "I was here yesterday and it was incredible! The line moves fast if you go around to the side entrance.",
+      text: "I was here yesterday and it was incredible! The line moves fast if you go around to the side entrance.",
+      timestamp: new Date(Date.now() - 1000 * 60 * 120).toISOString(),
+      vibedHere: true,
+      likes: 0
+    });
+    
+    // Add a third comment if needed
+    if (commentCount > 2) {
+      exampleComments.push({
+        id: `example-${postId}-3`,
+        postId: postId,
+        userId: mockUsers[Math.floor(Math.random() * mockUsers.length)].id,
+        user: mockUsers[Math.floor(Math.random() * mockUsers.length)],
+        content: "Heading there now! Anyone want to meet up?",
+        text: "Heading there now! Anyone want to meet up?",
+        timestamp: new Date(Date.now() - 1000 * 60 * 10).toISOString(),
+        vibedHere: Math.random() > 0.5,
+        likes: 0
+      });
     }
+    
+    postComments = exampleComments;
+  }
+
+  const handleSubmitComment = () => {
+    if (!newComment.trim()) return;
+    
+    setIsSubmitting(true);
+    
+    // Simulate API call
+    setTimeout(() => {
+      setNewComment("");
+      setIsSubmitting(false);
+      // In a real app, we would add the new comment to the list
+    }, 500);
   };
 
   return (
-    <div className="space-y-3">
-      {comments.map((comment) => (
-        <div key={comment.id} className="flex space-x-3">
-          <img
-            src={comment.user.avatar}
-            alt={comment.user.name}
-            className="w-8 h-8 rounded-full flex-shrink-0"
+    <div className="pt-3 border-t">
+      <div className="flex items-center mb-3">
+        <h4 className="font-medium flex items-center">
+          <MessageSquare className="h-4 w-4 mr-1" />
+          Comments ({commentsCount})
+        </h4>
+      </div>
+      
+      {postComments.length > 0 ? (
+        <div className="space-y-1 max-h-80 overflow-y-auto pr-1">
+          {postComments.map((comment) => (
+            <CommentItem key={comment.id} comment={comment} />
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-4 text-muted-foreground text-sm">
+          No comments yet. Be the first to comment!
+        </div>
+      )}
+      
+      <div className="mt-3 flex gap-2">
+        <Avatar className="h-8 w-8">
+          <AvatarImage src="https://randomuser.me/api/portraits/men/1.jpg" alt="Your avatar" />
+          <AvatarFallback>Y</AvatarFallback>
+        </Avatar>
+        <div className="flex-1 flex items-end gap-2">
+          <Textarea
+            placeholder="Add a comment..."
+            className="min-h-[60px] flex-1"
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
           />
-          <div className="flex-1 min-w-0">
-            <div className="bg-gray-100 dark:bg-gray-800 rounded-lg px-3 py-2">
-              <div className="flex items-center space-x-2 mb-1">
-                <span className="font-semibold text-sm text-gray-900 dark:text-gray-100">
-                  {comment.user.name}
-                </span>
-                <span className="text-xs text-gray-500">
-                  {formatTimestamp(comment.timestamp)}
-                </span>
-              </div>
-              <p className="text-sm text-gray-800 dark:text-gray-200">
-                {comment.content}
-              </p>
-            </div>
-            <div className="flex items-center space-x-4 mt-1 ml-3">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onCommentLike?.(comment.id)}
-                className="text-xs text-gray-500 hover:text-red-500 p-0 h-auto"
-              >
-                <Heart className="w-3 h-3 mr-1" />
-                {comment.likes > 0 && comment.likes}
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-xs text-gray-500 p-0 h-auto"
-              >
-                Reply
-              </Button>
-            </div>
-          </div>
-          <Button variant="ghost" size="sm" className="text-gray-400 p-1 h-auto">
-            <MoreHorizontal className="w-4 h-4" />
+          <Button 
+            size="icon"
+            disabled={!newComment.trim() || isSubmitting}
+            onClick={handleSubmitComment}
+          >
+            <Send className="h-4 w-4" />
           </Button>
         </div>
-      ))}
+      </div>
     </div>
   );
 };
