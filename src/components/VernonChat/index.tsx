@@ -33,13 +33,13 @@ const VernonChat: React.FC = () => {
     setMessages(prevMessages => [
       ...prevMessages, 
       { 
-        id: `msg-${Date.now()}`, 
+        id: `msg-${Date.now()}-${Math.random()}`, 
         content, 
         direction, 
         timestamp,
         aiResponse,
-        text: content, // Add for compatibility
-        sender: direction === 'outgoing' ? 'user' : 'ai' // Add for compatibility
+        text: content,
+        sender: direction === 'outgoing' ? 'user' : 'ai'
       }
     ]);
   }, [setMessages]);
@@ -52,11 +52,13 @@ const VernonChat: React.FC = () => {
     setIsProcessing(true);
 
     try {
+      console.log('Sending message to Vernon:', text);
       const response = await processMessage(text, messages, chatMode);
+      console.log('Received response from Vernon:', response.substring(0, 100));
       addMessage(response, 'incoming', true);
     } catch (error) {
       console.error('Error processing message:', error);
-      addMessage('Sorry, I encountered an error. Please try again later.', 'incoming');
+      addMessage('Sorry, I encountered an error while processing your message. Please try again.', 'incoming');
     } finally {
       setIsProcessing(false);
     }
@@ -65,16 +67,15 @@ const VernonChat: React.FC = () => {
   // Add welcome message on first load if no messages exist
   useEffect(() => {
     if (messages.length === 0) {
-      // Add welcome message with current timestamp
       const timestamp = new Date();
       setMessages([
         {
           id: 'welcome',
-          content: 'Hello! I\'m Vernon, your AI assistant powered by Google Gemini. How can I help you discover venues and events today?',
+          content: 'Hi! I\'m Vernon, your AI assistant powered by Google Gemini. I can help you discover venues, events, answer questions, and provide real-time information. What would you like to know?',
           direction: 'incoming',
           timestamp,
           aiResponse: true,
-          text: 'Hello! I\'m Vernon, your AI assistant powered by Google Gemini. How can I help you discover venues and events today?',
+          text: 'Hi! I\'m Vernon, your AI assistant powered by Google Gemini. I can help you discover venues, events, answer questions, and provide real-time information. What would you like to know?',
           sender: 'ai'
         }
       ]);
