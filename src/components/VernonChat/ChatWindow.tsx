@@ -1,6 +1,6 @@
 
 import React, { useEffect, useRef } from 'react';
-import { X, Send, Mic, MicOff, User, Bot, Trash2 } from 'lucide-react';
+import { X, Send, Mic, MicOff, User, Bot, Trash2, Sparkles } from 'lucide-react';
 import { ChatWindowProps, Message } from './types';
 
 const ChatWindow: React.FC<ChatWindowProps> = ({
@@ -48,131 +48,176 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
 
   const renderMessage = (message: Message) => {
     const isIncoming = message.direction === 'incoming';
+    const content = message.content || message.text || "";
 
     return (
       <div
         key={message.id}
-        className={`mb-3 ${isIncoming ? 'self-start' : 'self-end'}`}
+        className={`flex ${isIncoming ? 'justify-start' : 'justify-end'} mb-6 group`}
       >
-        <div className="flex items-start gap-2">
-          {isIncoming && (
-            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white">
-              <Bot size={16} />
+        {isIncoming && (
+          <div className="flex-shrink-0 mr-3">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
+              <Sparkles size={16} className="text-white" />
             </div>
-          )}
-
-          <div
-            className={`p-3 rounded-lg max-w-[80%] ${
-              isIncoming
-                ? 'bg-muted text-foreground'
-                : 'bg-primary text-primary-foreground'
-            }`}
-          >
-            <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
           </div>
+        )}
 
-          {!isIncoming && (
-            <div className="w-8 h-8 rounded-full bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center">
-              <User size={16} />
+        <div className={`max-w-[85%] ${isIncoming ? 'mr-12' : 'ml-12'}`}>
+          <div
+            className={`px-4 py-3 rounded-2xl shadow-sm ${
+              isIncoming
+                ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-bl-sm'
+                : 'bg-blue-600 text-white rounded-br-sm'
+            } transition-all duration-200 hover:shadow-md`}
+          >
+            <div className="text-sm leading-relaxed whitespace-pre-wrap">
+              {content.split('\n').map((line, i) => (
+                <p key={i} className={i > 0 ? 'mt-2' : ''}>{line}</p>
+              ))}
             </div>
-          )}
+          </div>
+          
+          <div className={`text-xs text-gray-500 mt-1 px-1 ${
+            isIncoming ? 'text-left' : 'text-right'
+          }`}>
+            {new Date(message.timestamp).toLocaleTimeString([], { 
+              hour: '2-digit', 
+              minute: '2-digit' 
+            })}
+          </div>
         </div>
+
+        {!isIncoming && (
+          <div className="flex-shrink-0 ml-3">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-500 to-blue-500 flex items-center justify-center shadow-lg">
+              <User size={16} className="text-white" />
+            </div>
+          </div>
+        )}
       </div>
     );
   };
 
-  return (
-    <div className="fixed right-6 bottom-6 w-96 h-[600px] max-h-[80vh] bg-background border rounded-lg shadow-lg flex flex-col z-50">
-      {/* Header */}
-      <div className="flex items-center justify-between p-3 border-b">
-        <div className="flex items-center space-x-2">
-          <Bot className="w-5 h-5 text-primary" />
-          <span className="font-medium">Vernon - Google AI Assistant</span>
+  const renderTypingIndicator = () => (
+    <div className="flex justify-start mb-6">
+      <div className="flex-shrink-0 mr-3">
+        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
+          <Sparkles size={16} className="text-white" />
         </div>
-        <div className="flex items-center space-x-2">
-          <button
-            onClick={toggleMode}
-            className="p-1 rounded-md hover:bg-muted"
-            title={chatMode === 'user' ? 'Switch to venue mode' : 'Switch to user mode'}
-          >
-            {chatMode === 'user' ? 'User Mode' : 'Venue Mode'}
-          </button>
+      </div>
+      <div className="bg-gray-100 dark:bg-gray-800 px-4 py-3 rounded-2xl rounded-bl-sm shadow-sm">
+        <div className="flex space-x-1">
+          <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce"></div>
+          <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+          <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="fixed right-6 bottom-6 w-96 h-[600px] max-h-[80vh] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-2xl flex flex-col z-50 overflow-hidden">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-800">
+        <div className="flex items-center space-x-3">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
+            <Sparkles size={16} className="text-white" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-gray-900 dark:text-white">Vernon</h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400">AI Assistant by Gemini</p>
+          </div>
+        </div>
+        <div className="flex items-center space-x-1">
           <button
             onClick={clearMessages}
-            className="p-1 rounded-md hover:bg-muted"
+            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             title="Clear conversation"
           >
-            <Trash2 className="w-4 h-4" />
+            <Trash2 className="w-4 h-4 text-gray-500" />
           </button>
           <button
             onClick={onClose}
-            className="p-1 rounded-md hover:bg-muted"
+            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             title="Close chat"
           >
-            <X className="w-4 h-4" />
+            <X className="w-4 h-4 text-gray-500" />
           </button>
         </div>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 flex flex-col">
-        {messages.map(renderMessage)}
-        {isProcessing && (
-          <div className="self-start mb-3">
-            <div className="flex items-center p-3 rounded-lg bg-muted text-foreground">
-              <div className="typing-indicator">
-                <span></span>
-                <span></span>
-                <span></span>
-              </div>
+      <div className="flex-1 overflow-y-auto p-4 bg-gradient-to-b from-gray-50/50 to-white dark:from-gray-900 dark:to-gray-900">
+        {messages.length === 0 && (
+          <div className="text-center py-8">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center mx-auto mb-4 shadow-lg">
+              <Sparkles size={24} className="text-white" />
             </div>
+            <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Hello! I'm Vernon</h4>
+            <p className="text-gray-600 dark:text-gray-400 text-sm px-4">
+              I'm your AI assistant powered by Google Gemini. I can help you with information, questions, and conversations. How can I assist you today?
+            </p>
           </div>
         )}
+        
+        {messages.map(renderMessage)}
+        {isProcessing && renderTypingIndicator()}
         <div ref={messagesEndRef} />
       </div>
 
       {/* Transcript display */}
       {isListening && transcript && (
-        <div className="px-3 py-2 bg-muted/50 text-sm text-foreground/80 italic border-t">
-          {transcript}
+        <div className="px-4 py-2 bg-blue-50 dark:bg-blue-900/20 border-t border-blue-200 dark:border-blue-800">
+          <div className="flex items-center space-x-2">
+            <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
+            <span className="text-xs font-medium text-blue-700 dark:text-blue-300">Listening...</span>
+          </div>
+          <p className="text-sm text-blue-800 dark:text-blue-200 mt-1">{transcript}</p>
         </div>
       )}
 
       {/* Input area */}
-      <form onSubmit={handleSubmit} className="p-3 border-t flex items-center gap-2">
-        <button
-          type="button"
-          onClick={toggleListening}
-          className={`p-2 rounded-full ${
-            isListening ? 'bg-red-100 text-red-500' : 'bg-muted text-foreground'
-          }`}
-          title={isListening ? 'Stop listening' : 'Start listening'}
-        >
-          {isListening ? <MicOff size={18} /> : <Mic size={18} />}
-        </button>
+      <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+        <form onSubmit={handleSubmit} className="flex items-end space-x-3">
+          <button
+            type="button"
+            onClick={toggleListening}
+            className={`flex-shrink-0 p-3 rounded-full transition-all duration-200 ${
+              isListening 
+                ? 'bg-red-500 text-white shadow-lg scale-110' 
+                : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+            }`}
+            title={isListening ? 'Stop listening' : 'Start voice input'}
+          >
+            {isListening ? <MicOff size={18} /> : <Mic size={18} />}
+          </button>
 
-        <input
-          type="text"
-          value={input}
-          onChange={handleInputChange}
-          ref={inputRef}
-          placeholder="Type your message..."
-          disabled={isProcessing || isModelLoading}
-          className="flex-1 p-2 bg-background border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
-        />
+          <div className="flex-1 relative">
+            <input
+              type="text"
+              value={input}
+              onChange={handleInputChange}
+              ref={inputRef}
+              placeholder="Message Vernon..."
+              disabled={isProcessing || isModelLoading}
+              className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-800 border-0 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200"
+            />
+          </div>
 
-        <button
-          type="submit"
-          disabled={!input || isProcessing}
-          className={`p-2 rounded-full ${
-            !input || isProcessing
-              ? 'bg-muted text-muted-foreground'
-              : 'bg-primary text-primary-foreground'
-          }`}
-        >
-          <Send size={18} />
-        </button>
-      </form>
+          <button
+            type="submit"
+            disabled={!input?.trim() || isProcessing}
+            className={`flex-shrink-0 p-3 rounded-full transition-all duration-200 ${
+              input?.trim() && !isProcessing
+                ? 'bg-blue-600 text-white shadow-lg hover:bg-blue-700 hover:scale-105'
+                : 'bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed'
+            }`}
+          >
+            <Send size={18} />
+          </button>
+        </form>
+      </div>
     </div>
   );
 };
