@@ -13,18 +13,15 @@ interface PostUsersListProps {
 }
 
 const PostUsersList: React.FC<PostUsersListProps> = ({ location, setShowAllUsers }) => {
-  // Deterministically select users for each location based on location ID
   const getLocationUsers = useMemo(() => {
     const locationSeed = parseInt(location.id) || hashString(location.name);
     
-    // Always include our 5 main profile users
     const featuredUsernames = ['sarah_vibes', 'jay_experiences', 'adventure_alex', 'marco_travels', 'local_explorer'];
     const featuredUsers = mockUsers.filter(user => featuredUsernames.includes(user.username));
     
-    // Select additional random users based on location seed
     const otherUsers = mockUsers.filter(user => !featuredUsernames.includes(user.username));
     const shuffled = [...otherUsers].sort(() => 0.5 - (locationSeed * 0.0001));
-    const additionalUsers = shuffled.slice(0, 95); // Get 95 more for a total of 100
+    const additionalUsers = shuffled.slice(0, 95);
     
     return [...featuredUsers, ...additionalUsers];
   }, [location.id, location.name]);

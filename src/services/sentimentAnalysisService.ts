@@ -3,7 +3,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { VenueSentimentAnalysis, PlatformSentimentSummary, SentimentTheme } from "@/types";
 
 export class SentimentAnalysisService {
-  // Analyze reviews for a venue on a specific platform
   static async analyzeVenueReviews(
     venueId: string, 
     platform: string, 
@@ -30,7 +29,6 @@ export class SentimentAnalysisService {
     }
   }
 
-  // Get sentiment analysis for a venue across all platforms
   static async getVenueSentimentAnalysis(venueId: string): Promise<VenueSentimentAnalysis[]> {
     try {
       const { data, error } = await supabase
@@ -44,14 +42,19 @@ export class SentimentAnalysisService {
         return [];
       }
 
-      return data || [];
+      // Type-safe conversion of Supabase data
+      return (data || []).map(item => ({
+        ...item,
+        themes: typeof item.themes === 'object' && item.themes !== null 
+          ? item.themes as Record<string, number>
+          : {}
+      })) as VenueSentimentAnalysis[];
     } catch (error) {
       console.error('Error in getVenueSentimentAnalysis:', error);
       return [];
     }
   }
 
-  // Get formatted platform summaries for display
   static async getPlatformSentimentSummaries(venueId: string): Promise<PlatformSentimentSummary[]> {
     const analyses = await this.getVenueSentimentAnalysis(venueId);
     
@@ -65,17 +68,15 @@ export class SentimentAnalysisService {
     }));
   }
 
-  // Format themes for display
   private static formatThemes(themes: Record<string, number>): SentimentTheme[] {
     return Object.entries(themes).map(([name, score]) => ({
       name: name.charAt(0).toUpperCase() + name.slice(1),
       score,
-      mentions: 1, // Simplified for now
-      examples: [] // Could be enhanced to include example phrases
+      mentions: 1,
+      examples: []
     }));
   }
 
-  // Get sentiment summary for a specific platform
   static async getPlatformSentiment(venueId: string, platform: string): Promise<VenueSentimentAnalysis | null> {
     try {
       const { data, error } = await supabase
@@ -85,19 +86,26 @@ export class SentimentAnalysisService {
         .eq('platform', platform)
         .single();
 
-      if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
+      if (error && error.code !== 'PGRST116') {
         console.error('Error fetching platform sentiment:', error);
         return null;
       }
 
-      return data || null;
+      if (!data) return null;
+
+      // Type-safe conversion
+      return {
+        ...data,
+        themes: typeof data.themes === 'object' && data.themes !== null 
+          ? data.themes as Record<string, number>
+          : {}
+      } as VenueSentimentAnalysis;
     } catch (error) {
       console.error('Error in getPlatformSentiment:', error);
       return null;
     }
   }
 
-  // Trigger analysis for mock data (for demo purposes)
   static async triggerMockAnalysis(venueId: string): Promise<void> {
     const mockReviews = {
       yelp: [
@@ -117,7 +125,6 @@ export class SentimentAnalysisService {
       ]
     };
 
-    // Trigger analysis for each platform
     for (const [platform, reviews] of Object.entries(mockReviews)) {
       await this.analyzeVenueReviews(venueId, platform, reviews);
     }

@@ -1,5 +1,4 @@
 
-// If this file doesn't exist, we're creating it
 import { MockUserProfile } from "@/mock/users";
 
 export interface Location {
@@ -12,7 +11,7 @@ export interface Location {
   zip?: string;
   lat: number;
   lng: number;
-  type: "restaurant" | "bar" | "event" | "attraction" | "sports" | "other";
+  type: "restaurant" | "bar" | "event" | "attraction" | "sports" | "other" | "nightclub" | "cafe" | "museum";
   verified: boolean;
   hours?: BusinessHours;
   vibes?: string[];
@@ -56,6 +55,7 @@ export interface Post {
   isVenuePost?: boolean;
   isPinned?: boolean;
   expiresAt?: string;
+  saved?: boolean;
 }
 
 export interface Comment {
@@ -70,7 +70,6 @@ export interface Comment {
   likes: number;
 }
 
-// Add User type for backward compatibility
 export interface User {
   id: string;
   username: string;
@@ -86,13 +85,20 @@ export interface User {
   isPrivate?: boolean;
 }
 
-// VernonChat types
+export interface CreditCard {
+  id: string;
+  last4: string;
+  brand: string;
+  expiryMonth: number;
+  expiryYear: number;
+  isDefault?: boolean;
+}
+
 export interface ChatMessage {
   id: string;
   role: 'user' | 'assistant' | 'system' | 'error';
   content: string;
   timestamp: string;
-  // For compatibility with older format
   text?: string;
   sender?: 'user' | 'ai';
 }
@@ -140,7 +146,6 @@ export interface DateRange {
   to: Date | undefined;
 }
 
-// Advertising Suite Types
 export interface AdFormat {
   id: string;
   name: string;
@@ -193,14 +198,13 @@ export interface CampaignPerformance {
   footTrafficLift: number;
 }
 
-// Sentiment Analysis Types
 export interface VenueSentimentAnalysis {
   id: string;
   venue_id: string;
   platform: string;
-  overall_sentiment: number; // -1.0 to 1.0
+  overall_sentiment: number;
   sentiment_summary: string;
-  themes: Record<string, number>; // e.g., {"ambience": 0.8, "service": 0.6}
+  themes: Record<string, number>;
   review_count: number;
   last_analyzed_at: string;
   created_at: string;
@@ -234,5 +238,3 @@ export interface PlatformSentimentSummary {
   reviewCount: number;
   lastUpdated: string;
 }
-
-export * from "./index";
