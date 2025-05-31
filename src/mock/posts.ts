@@ -22,11 +22,11 @@ export const mockPosts: Post[] = [
       },
     ],
     timestamp: getRecentTime(1),
-    expiresAt: getExpiryTime(getRecentTime(1), true),
+    expiresAt: getExpiryTime(getRecentTime(1), true), // Pinned post (90 days)
     likes: 42,
     comments: 7,
-    shares: 0,
     isPinned: true,
+    saved: false,
     vibeTags: ["Lively", "Upscale", "NightOwl"]
   },
   {
@@ -44,7 +44,7 @@ export const mockPosts: Post[] = [
     expiresAt: getExpiryTime(getRecentTime(2)),
     likes: 18,
     comments: 3,
-    shares: 0
+    saved: false
   },
   {
     id: "3",
@@ -65,7 +65,7 @@ export const mockPosts: Post[] = [
     expiresAt: getExpiryTime(getRecentTime(0.5)),
     likes: 104,
     comments: 22,
-    shares: 0
+    saved: false
   },
   {
     id: "4",
@@ -82,7 +82,7 @@ export const mockPosts: Post[] = [
     expiresAt: getExpiryTime(getRecentTime(3)),
     likes: 29,
     comments: 5,
-    shares: 0
+    saved: false
   },
   {
     id: "5",
@@ -99,8 +99,8 @@ export const mockPosts: Post[] = [
     expiresAt: getExpiryTime(getRecentTime(1.5)),
     likes: 56,
     comments: 11,
-    shares: 0,
     isPinned: true,
+    saved: false,
     vibeTags: ["Lively", "Upscale", "NightOwl"]
   },
   {
@@ -118,7 +118,7 @@ export const mockPosts: Post[] = [
     expiresAt: getExpiryTime(getRecentTime(0.3)),
     likes: 87,
     comments: 14,
-    shares: 0
+    saved: false
   },
   {
     id: "7",
@@ -135,7 +135,7 @@ export const mockPosts: Post[] = [
     expiresAt: getExpiryTime(getRecentTime(0.2)),
     likes: 112,
     comments: 19,
-    shares: 0
+    saved: false
   },
   {
     id: "8",
@@ -152,7 +152,7 @@ export const mockPosts: Post[] = [
     expiresAt: getExpiryTime(getRecentTime(1.1)),
     likes: 203,
     comments: 31,
-    shares: 0
+    saved: false
   },
   {
     id: "9",
@@ -169,7 +169,7 @@ export const mockPosts: Post[] = [
     expiresAt: getExpiryTime(getRecentTime(0.4)),
     likes: 91,
     comments: 12,
-    shares: 0
+    saved: false
   },
   {
     id: "10",
@@ -186,8 +186,8 @@ export const mockPosts: Post[] = [
     expiresAt: getExpiryTime(getRecentTime(0.1)),
     likes: 256,
     comments: 42,
-    shares: 0,
     isPinned: true,
+    saved: false,
     vibeTags: ["Lively", "Upscale", "NightOwl"]
   },
   {
@@ -205,7 +205,7 @@ export const mockPosts: Post[] = [
     expiresAt: getExpiryTime(getRecentTime(0.6)),
     likes: 78,
     comments: 9,
-    shares: 0
+    saved: false
   },
   {
     id: "12",
@@ -222,7 +222,7 @@ export const mockPosts: Post[] = [
     expiresAt: getExpiryTime(getRecentTime(0.3)),
     likes: 64,
     comments: 8,
-    shares: 0
+    saved: false
   },
   {
     id: "13",
@@ -239,7 +239,7 @@ export const mockPosts: Post[] = [
     expiresAt: getExpiryTime(getRecentTime(0.2)),
     likes: 118,
     comments: 21,
-    shares: 0
+    saved: false
   },
   {
     id: "14",
@@ -256,7 +256,7 @@ export const mockPosts: Post[] = [
     expiresAt: getExpiryTime(getRecentTime(0.4)),
     likes: 42,
     comments: 7,
-    shares: 0
+    saved: false
   },
   {
     id: "15",
@@ -273,7 +273,7 @@ export const mockPosts: Post[] = [
     expiresAt: getExpiryTime(getRecentTime(0.7)),
     likes: 35,
     comments: 5,
-    shares: 0
+    saved: false
   },
   {
     id: "16",
@@ -290,7 +290,7 @@ export const mockPosts: Post[] = [
     expiresAt: getExpiryTime(getRecentTime(0.9)),
     likes: 89,
     comments: 12,
-    shares: 0
+    saved: false
   },
   {
     id: "17",
@@ -307,7 +307,7 @@ export const mockPosts: Post[] = [
     expiresAt: getExpiryTime(getRecentTime(0.15)),
     likes: 125,
     comments: 18,
-    shares: 0
+    saved: false
   },
   {
     id: "18",
@@ -324,7 +324,7 @@ export const mockPosts: Post[] = [
     expiresAt: getExpiryTime(getRecentTime(0.2)),
     likes: 72,
     comments: 10,
-    shares: 0
+    saved: false
   },
   {
     id: "19",
@@ -341,7 +341,7 @@ export const mockPosts: Post[] = [
     expiresAt: getExpiryTime(getRecentTime(0.3)),
     likes: 54,
     comments: 8,
-    shares: 0
+    saved: false
   },
   {
     id: "20",
@@ -370,7 +370,7 @@ export const mockPosts: Post[] = [
     expiresAt: getExpiryTime(getRecentTime(0.25)),
     likes: 198,
     comments: 34,
-    shares: 0
+    saved: false
   },
   {
     id: "21",
@@ -387,7 +387,7 @@ export const mockPosts: Post[] = [
     expiresAt: getExpiryTime(getRecentTime(0.1)),
     likes: 78,
     comments: 12,
-    shares: 0
+    saved: false
   },
   {
     id: "22",
@@ -404,7 +404,7 @@ export const mockPosts: Post[] = [
     expiresAt: getExpiryTime(getRecentTime(0.3)),
     likes: 91,
     comments: 15,
-    shares: 0
+    saved: false
   },
   {
     id: "23",
@@ -421,7 +421,7 @@ export const mockPosts: Post[] = [
     expiresAt: getExpiryTime(getRecentTime(0.4)),
     likes: 54,
     comments: 7,
-    shares: 0
+    saved: false
   },
   {
     id: "24",
@@ -438,7 +438,7 @@ export const mockPosts: Post[] = [
     expiresAt: getExpiryTime(getRecentTime(0.2)),
     likes: 112,
     comments: 15,
-    shares: 0
+    saved: false
   },
   {
     id: "25",
@@ -455,7 +455,7 @@ export const mockPosts: Post[] = [
     expiresAt: getExpiryTime(getRecentTime(0.5)),
     likes: 143,
     comments: 23,
-    shares: 0
+    saved: false
   },
   {
     id: "26",
@@ -472,7 +472,7 @@ export const mockPosts: Post[] = [
     expiresAt: getExpiryTime(getRecentTime(0.3)),
     likes: 278,
     comments: 42,
-    shares: 0
+    saved: false
   },
   {
     id: "27",
@@ -489,7 +489,7 @@ export const mockPosts: Post[] = [
     expiresAt: getExpiryTime(getRecentTime(0.1)),
     likes: 345,
     comments: 67,
-    shares: 0
+    saved: false
   },
   {
     id: "28",
@@ -506,7 +506,7 @@ export const mockPosts: Post[] = [
     expiresAt: getExpiryTime(getRecentTime(0.2)),
     likes: 167,
     comments: 29,
-    shares: 0
+    saved: false
   },
   {
     id: "29",
@@ -523,7 +523,7 @@ export const mockPosts: Post[] = [
     expiresAt: getExpiryTime(getRecentTime(0.05)),
     likes: 88,
     comments: 15,
-    shares: 0
+    saved: false
   },
   {
     id: "30",
@@ -540,7 +540,7 @@ export const mockPosts: Post[] = [
     expiresAt: getExpiryTime(getRecentTime(0.1)),
     likes: 132,
     comments: 24,
-    shares: 0
+    saved: false
   },
   {
     id: "31",
@@ -557,7 +557,7 @@ export const mockPosts: Post[] = [
     expiresAt: getExpiryTime(getRecentTime(0.3)),
     likes: 67,
     comments: 9,
-    shares: 0
+    saved: false
   },
   {
     id: "32",
@@ -574,6 +574,6 @@ export const mockPosts: Post[] = [
     expiresAt: getExpiryTime(getRecentTime(0.15)),
     likes: 215,
     comments: 39,
-    shares: 0
+    saved: false
   },
 ];

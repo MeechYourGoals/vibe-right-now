@@ -4,7 +4,7 @@ import { Location } from '@/types';
 import { MapPin, Share2, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { generateBusinessHours, getTodaysHours } from '@/utils/businessHoursUtils';
+import { generateBusinessHours } from '@/utils/businessHoursUtils';
 import WaitTimeDisplay from '@/components/venue/WaitTimeDisplay';
 
 interface InfoWindowContentProps {
@@ -15,11 +15,15 @@ interface InfoWindowContentProps {
 const InfoWindowContent: React.FC<InfoWindowContentProps> = ({ location, onSelect }) => {
   const navigate = useNavigate();
 
+  // Ensure we have business hours
   if (!location.hours) {
     location.hours = generateBusinessHours(location);
   }
   
-  const todaysHours = getTodaysHours(location);
+  // Get today's hours
+  const today = new Date();
+  const dayOfWeek = today.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+  const todaysHours = location.hours[dayOfWeek as keyof typeof location.hours] || 'Closed';
 
   const handleViewVenue = () => {
     navigate(`/venue/${location.id}`);
@@ -33,6 +37,7 @@ const InfoWindowContent: React.FC<InfoWindowContentProps> = ({ location, onSelec
         url: `${window.location.origin}/venue/${location.id}`
       }).catch(err => console.error('Error sharing:', err));
     } else {
+      // Fallback for browsers that don't support navigator.share
       navigator.clipboard.writeText(`${window.location.origin}/venue/${location.id}`)
         .then(() => alert('Link copied to clipboard!'))
         .catch(err => console.error('Could not copy text: ', err));
@@ -50,6 +55,7 @@ const InfoWindowContent: React.FC<InfoWindowContentProps> = ({ location, onSelec
         <span className="font-medium">Today:</span> {todaysHours}
       </div>
       
+      {/* Display wait time if available */}
       <div className="mb-2">
         <WaitTimeDisplay venueId={location.id} showLastUpdated={false} />
       </div>

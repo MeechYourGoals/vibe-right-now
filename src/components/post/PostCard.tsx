@@ -44,11 +44,14 @@ const PostCard: React.FC<PostCardProps> = ({
     setIsFollowing(!isFollowing);
   };
 
+  // Generate random user count (between 5 and 120) based on location
   const getUserCount = (locationId: string) => {
+    // Use location ID to generate a consistent but seemingly random number
     const seed = parseInt(locationId) || 5;
     return Math.floor((seed * 13) % 115) + 5;
   };
   
+  // Handle multiple posts mode (used in feed)
   if (posts && posts.length > 0 && getComments) {
     const firstPost = posts[0];
     
@@ -103,6 +106,7 @@ const PostCard: React.FC<PostCardProps> = ({
         </div>
         
         {posts.map(post => {
+          // Determine if the post is from the venue itself
           const isVenuePost = post.isVenuePost || post.location?.id === firstPost.location.id;
           
           return (
@@ -128,7 +132,8 @@ const PostCard: React.FC<PostCardProps> = ({
                 )}
                 
                 <PostFooter 
-                  post={post}
+                  post={post} 
+                  comments={getComments(post.id)} 
                   isDetailView={false} 
                 />
               </div>
@@ -139,10 +144,12 @@ const PostCard: React.FC<PostCardProps> = ({
     );
   }
   
+  // Single post mode
   if (!post) {
-    return null;
+    return null; // Don't render if no post is provided
   }
   
+  // Don't render if the post has been deleted
   if (isDeleted) {
     return null;
   }
@@ -181,7 +188,8 @@ const PostCard: React.FC<PostCardProps> = ({
       )}
       
       <PostFooter 
-        post={post}
+        post={post} 
+        comments={comments} 
         isDetailView={isDetailView} 
       />
     </Card>
