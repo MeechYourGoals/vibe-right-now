@@ -12,7 +12,7 @@ export interface Location {
   zip?: string;
   lat: number;
   lng: number;
-  type: "restaurant" | "bar" | "event" | "attraction" | "sports" | "other";
+  type: "restaurant" | "bar" | "event" | "attraction" | "sports" | "other" | "nightclub" | "cafe" | "museum";
   verified: boolean;
   hours?: BusinessHours;
   vibes?: string[];
@@ -68,6 +68,20 @@ export interface Comment {
   timestamp: string;
   vibedHere: boolean;
   likes: number;
+}
+
+export interface DateRange {
+  from: Date | undefined;
+  to: Date | undefined;
+}
+
+export interface CreditCard {
+  id: string;
+  last4: string;
+  brand: string;
+  expiryMonth: number;
+  expiryYear: number;
+  isDefault: boolean;
 }
 
 // Add User type for backward compatibility
@@ -133,11 +147,6 @@ export interface VenueInsights {
   checkInCount?: number;
   receiptUploads?: number;
   discountRedemptions?: number;
-}
-
-export interface DateRange {
-  from: Date | undefined;
-  to: Date | undefined;
 }
 
 // Advertising Suite Types
