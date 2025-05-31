@@ -13,8 +13,6 @@ const VernonChat: React.FC = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [chatMode, setChatMode] = useLocalStorage<ChatMode>('vernon_chat_mode', 'user');
   const [isModelLoading, setIsModelLoading] = useState(false);
-  const [isListening, setIsListening] = useState(false);
-  const [transcript, setTranscript] = useState('');
   const { processMessage } = useMessageProcessor();
 
   const toggleChat = () => {
@@ -35,13 +33,13 @@ const VernonChat: React.FC = () => {
     setMessages(prevMessages => [
       ...prevMessages, 
       { 
-        id: `msg-${Date.now()}-${Math.random()}`, 
+        id: `msg-${Date.now()}`, 
         content, 
         direction, 
         timestamp,
         aiResponse,
-        text: content,
-        sender: direction === 'outgoing' ? 'user' : 'ai'
+        text: content, // Add for compatibility
+        sender: direction === 'outgoing' ? 'user' : 'ai' // Add for compatibility
       }
     ]);
   }, [setMessages]);
@@ -64,24 +62,19 @@ const VernonChat: React.FC = () => {
     }
   }, [addMessage, messages, processMessage, chatMode]);
 
-  const toggleListening = useCallback(() => {
-    setIsListening(prev => !prev);
-    // Here you would implement actual speech recognition
-    // For now, this is a placeholder
-  }, []);
-
   // Add welcome message on first load if no messages exist
   useEffect(() => {
     if (messages.length === 0) {
+      // Add welcome message with current timestamp
       const timestamp = new Date();
       setMessages([
         {
           id: 'welcome',
-          content: 'Hello! I\'m Vernon, your AI assistant powered by Google Gemini. I can help you discover venues, answer questions, and have meaningful conversations. How can I assist you today?',
+          content: 'Hello! I\'m Vernon, your AI assistant powered by Google Gemini. How can I help you discover venues and events today?',
           direction: 'incoming',
           timestamp,
           aiResponse: true,
-          text: 'Hello! I\'m Vernon, your AI assistant powered by Google Gemini. I can help you discover venues, answer questions, and have meaningful conversations. How can I assist you today?',
+          text: 'Hello! I\'m Vernon, your AI assistant powered by Google Gemini. How can I help you discover venues and events today?',
           sender: 'ai'
         }
       ]);
@@ -101,10 +94,10 @@ const VernonChat: React.FC = () => {
           chatMode={chatMode}
           toggleMode={toggleMode}
           clearMessages={clearMessages}
-          isListening={isListening}
-          toggleListening={toggleListening}
+          isListening={false}
+          toggleListening={() => {}}
           isModelLoading={isModelLoading}
-          transcript={transcript}
+          transcript=""
         />
       ) : (
         <ChatButton onClick={toggleChat} />

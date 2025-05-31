@@ -92,6 +92,7 @@ export interface ChatMessage {
   role: 'user' | 'assistant' | 'system' | 'error';
   content: string;
   timestamp: string;
+  // For compatibility with older format
   text?: string;
   sender?: 'user' | 'ai';
 }
@@ -233,3 +234,5 @@ export interface PlatformSentimentSummary {
   reviewCount: number;
   lastUpdated: string;
 }
+
+export * from "./index";
