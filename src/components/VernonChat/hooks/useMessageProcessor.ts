@@ -13,66 +13,41 @@ export const useMessageProcessor = () => {
       setUsedFallback(false);
       
       try {
-        console.log("Processing message with Vertex AI:", query.substring(0, 50));
+        console.log("Calling perplexity-search function with:", query.substring(0, 50));
         
-        // Format conversation history for Vertex AI
-        const history = previousMessages.slice(-5).map(msg => ({
-          sender: msg.sender || (msg.direction === 'outgoing' ? 'user' : 'ai'),
-          text: msg.content || msg.text || '',
-          content: msg.content || msg.text || ''
-        }));
-        
-        // Determine the mode for Vertex AI
-        const mode = chatMode === 'venue' ? 'venue' : 'default';
-        
-        console.log("Calling vertex-ai function with mode:", mode);
-        
-        // Use Vertex AI via the vertex-ai function
-        const { data, error } = await supabase.functions.invoke('vertex-ai', {
+        // Use Perplexity for real-world search results
+        const { data, error } = await supabase.functions.invoke('perplexity-search', {
           body: { 
-            prompt: query,
-            mode: mode,
-            context: history
+            query: query
           }
         });
         
-        console.log("Vertex AI response:", { data, error });
-        
         if (error) {
-          console.error("Error calling vertex-ai function:", error);
-          return "I'm having trouble connecting to my AI services right now. Please try again in a moment.";
+          console.error("Error calling perplexity-search function:", error);
+          throw new Error(error.message);
         }
         
         if (!data) {
-          return "I didn't receive a response from my AI services. Please try again.";
+          throw new Error("No response received from Perplexity");
         }
         
-        if (!data.text && !data.fallbackResponse) {
-          return "I encountered an issue generating a response. Please try rephrasing your question.";
+        if (!data.text) {
+          throw new Error("No text in response from Perplexity");
         }
         
-        // Check if there's a fallback response
-        if (data.fallbackResponse && !data.text) {
-          setUsedFallback(true);
-          return data.fallbackResponse;
-        }
-        
-        const responseText = data.text || data.fallbackResponse || "I'm having trouble generating a response right now.";
-        console.log("Received response from Vertex AI:", responseText.substring(0, 50) + "...");
-        return responseText;
-        
+        console.log("Received response from perplexity-search:", data.text.substring(0, 50) + "...");
+        return data.text;
       } catch (error) {
-        console.error('Error processing message with Vertex AI:', error);
+        console.error('Error processing message:', error);
         
-        // Enhanced error handling with user-friendly messages
-        let errorMessage = "I'm having trouble connecting to my AI services right now. Please try again later.";
+        // Try to extract meaningful error message
+        let errorMessage = "I'm having trouble connecting to my search services right now. Please try again later.";
         
+        // If we can identify specific errors, provide better messages
         if (error.message?.includes('429') || error.message?.includes('quota')) {
           errorMessage = "I've reached my usage limit for the moment. Please try again in a minute or two.";
         } else if (error.message?.includes('401') || error.message?.includes('403')) {
-          errorMessage = "I'm having authentication issues with my AI services. Please try again later.";
-        } else if (error.message?.includes('network') || error.message?.includes('fetch')) {
-          errorMessage = "I'm having network connectivity issues. Please check your connection and try again.";
+          errorMessage = "I'm having authentication issues with my search services. Please try again later.";
         }
         
         return errorMessage;
