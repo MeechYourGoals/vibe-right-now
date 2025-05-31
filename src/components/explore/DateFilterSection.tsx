@@ -45,10 +45,11 @@ const DateFilterSection = ({
     setShowDateFilter(!showDateFilter);
     if (!showDateFilter && !dateRange) {
       const today = new Date();
-      setDateRange({ 
+      const validDateRange: DateRange = { 
         from: today, 
         to: addMonths(today, 1) 
-      });
+      };
+      setDateRange(validDateRange);
     }
   };
 

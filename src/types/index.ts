@@ -1,3 +1,4 @@
+
 import { Database } from './supabase';
 
 export type Json =
@@ -14,6 +15,7 @@ export interface User {
   name: string;
   avatar: string;
   isVerified: boolean;
+  verified?: boolean; // Add for backward compatibility
   bio: string;
   followers: number;
   following: number;
@@ -28,12 +30,15 @@ export interface Location {
   address: string;
   city: string;
   state: string;
+  country?: string; // Add missing country property
   zip: string;
   phone: string;
   website: string;
   email: string;
   latitude: number;
   longitude: number;
+  lat?: number; // Add for backward compatibility
+  lng?: number; // Add for backward compatibility
   type: string;
   hours: any;
   price: string;
@@ -54,6 +59,7 @@ export interface Location {
   is_favorite: boolean;
   is_featured: boolean;
   is_verified: boolean;
+  verified?: boolean; // Add for backward compatibility
   created_at: string;
   updated_at: string;
 }
@@ -61,6 +67,7 @@ export interface Location {
 export interface Media {
   type: 'image' | 'video';
   url: string;
+  thumbnail?: string; // Add missing thumbnail property
 }
 
 export interface Comment {
@@ -70,6 +77,8 @@ export interface Comment {
   timestamp: string;
   likes: number;
   replies: Comment[];
+  postId?: string; // Add missing postId property
+  vibedHere?: boolean; // Add missing vibedHere property
 }
 
 export interface Review {
@@ -271,6 +280,46 @@ export interface Post {
   saved?: boolean;
   shares?: number;
   vibeTags?: string[];
+  isVenuePost?: boolean; // Add missing isVenuePost property
+  isPinned?: boolean; // Add missing isPinned property
+  comments?: Comment[]; // Add missing comments property
+}
+
+// Add missing advertising types
+export interface AdFormat {
+  id: string;
+  name: string;
+  description: string;
+  dimensions: string;
+  pricing: number;
+}
+
+export interface TargetingOptions {
+  age: string[];
+  interests: string[];
+  location: string[];
+  demographics: string[];
+}
+
+// Add missing VenueInsights type
+export interface VenueInsights {
+  visitors: number;
+  visitorsChange: string;
+  posts: number;
+  postsChange: string;
+  shares: number;
+  sharesChange: string;
+  likes: number;
+  likesChange: string;
+  engagementRate: string;
+  followerGrowth: string;
+  clickThroughRate: string;
+  totalVisits: number;
+  revenueImpact: string;
+  totalReach: number;
+  impressions: number;
+  viewsPer: number;
+  viewsCount?: number;
 }
 
 export type VenueSentimentAnalysis = Database['public']['Tables']['venue_sentiment_analysis']['Row'];
