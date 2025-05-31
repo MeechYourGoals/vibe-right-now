@@ -259,7 +259,7 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
   const handleUserSelect = (username: string) => {
     setSearchQuery(username);
     setShowUserSuggestions(false);
-    onSearch(username, selectedFilter, searchCategory);
+    navigate(`/user/${username}`);
   };
 
   const handlePlaceSelect = (placeName: string) => {
