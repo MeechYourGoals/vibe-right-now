@@ -86,31 +86,6 @@ export interface User {
   isPrivate?: boolean;
 }
 
-// VernonChat types
-export interface ChatMessage {
-  id: string;
-  role: 'user' | 'assistant' | 'system' | 'error';
-  content: string;
-  timestamp: string;
-  // For compatibility with older format
-  text?: string;
-  sender?: 'user' | 'ai';
-}
-
-export interface ChatState {
-  messages: ChatMessage[];
-  loading: boolean;
-  error: string | null;
-  isOpen?: boolean;
-  isMinimized?: boolean;
-  isLoading?: boolean;
-  isListening?: boolean;
-  isSpeaking?: boolean;
-  searchResults?: any[];
-  transcript?: string;
-  interimTranscript?: string;
-}
-
 export interface VenueInsights {
   visitors: number;
   visitorsChange: string;
@@ -233,6 +208,15 @@ export interface PlatformSentimentSummary {
   themes: SentimentTheme[];
   reviewCount: number;
   lastUpdated: string;
+}
+
+export interface CreditCard {
+  id: string;
+  last4: string;
+  brand: string;
+  expiryMonth: number;
+  expiryYear: number;
+  isDefault: boolean;
 }
 
 export * from "./index";

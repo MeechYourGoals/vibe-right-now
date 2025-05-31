@@ -1,184 +1,216 @@
+import React, { useState, useMemo } from 'react';
+import { Search, MapPin, Calendar, Filter } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Location, Post } from '@/types';
+import mockPosts from '@/mock/posts';
 
-import React from "react";
-import Header from "@/components/Header";
-import { Badge } from "@/components/ui/badge";
-import CameraButton from "@/components/CameraButton";
-import NearbyVibesMap from "@/components/NearbyVibesMap";
-import VenuePost from "@/components/VenuePost";
-import useExploreState from "@/hooks/useExploreState";
-import { getCitySpecificContent, getMediaForLocation } from "@/utils/explore/mockGenerators";
-import SearchSection from "@/components/explore/SearchSection";
-import CategoryTabs from "@/components/explore/CategoryTabs";
-import MusicSection from "@/components/explore/MusicSection";
-import ComedySection from "@/components/explore/ComedySection";
-import NightlifeSection from "@/components/explore/NightlifeSection";
-import LocationsGrid from "@/components/explore/LocationsGrid";
-import RecommendedForYou from "@/components/RecommendedForYou";
-import TrendingLocations from "@/components/TrendingLocations";
-import DiscountLocations from "@/components/DiscountLocations";
-import { format } from "date-fns";
-import { useIsMobile } from "@/hooks/use-mobile";
+// Mock locations data for exploration
+const mockLocations: Location[] = [
+  {
+    id: "1",
+    name: "Ocean Drive Restaurant",
+    address: "123 Ocean Drive",
+    city: "Miami",
+    country: "USA",
+    lat: 25.7617,
+    lng: -80.1918,
+    type: "restaurant",
+    verified: true,
+    rating: 4.5,
+    vibes: ["oceanview", "romantic", "upscale"]
+  },
+  {
+    id: "2", 
+    name: "Rooftop Lounge",
+    address: "456 Collins Ave",
+    city: "Miami",
+    country: "USA",
+    lat: 25.7907,
+    lng: -80.1300,
+    type: "bar",
+    verified: true,
+    rating: 4.8,
+    vibes: ["skyline", "cocktails", "nightlife"]
+  },
+  {
+    id: "3",
+    name: "Art Deco Museum",
+    address: "789 Washington Ave",
+    city: "Miami",
+    country: "USA", 
+    lat: 25.7753,
+    lng: -80.1889,
+    type: "attraction",
+    verified: true,
+    rating: 4.2,
+    vibes: ["culture", "historic", "educational"]
+  }
+];
 
-const Explore = () => {
-  const isMobile = useIsMobile();
-  const {
-    activeTab,
-    searchedCity,
-    searchedState,
-    searchCategory,
-    filteredLocations,
-    locationTags,
-    musicEvents,
-    comedyEvents,
-    nightlifeVenues,
-    vibeFilter,
-    isNaturalLanguageSearch,
-    isLoadingResults,
-    dateRange,
-    showDateFilter,
-    activeSearchTab,
-    getPageTitle,
-    handleSearch,
-    handleTabChange,
-    handleClearVibeFilter,
-    handleDateRangeChange,
-    handleClearDates,
-    handleSearchTabChange,
-    setShowDateFilter
-  } = useExploreState();
+const Explore: React.FC = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<'all' | 'locations' | 'posts'>('all');
+  const [locationFilter, setLocationFilter] = useState('');
 
-  // Update the page title logic to handle empty cities
-  const getDisplayTitle = () => {
-    if (isNaturalLanguageSearch) {
-      return "Smart Search Results";
-    } else if (searchedCity && searchedCity.trim() !== "") {
-      return `Explore Vibes in ${searchedCity}${searchedState ? `, ${searchedState}` : ''}`;
+  // Combine and filter data
+  const filteredResults = useMemo(() => {
+    const results: (Location | Post)[] = [];
+    
+    if (selectedCategory === 'all' || selectedCategory === 'locations') {
+      const filteredLocations = mockLocations.filter(location => 
+        location.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        location.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        location.vibes?.some(vibe => vibe.toLowerCase().includes(searchQuery.toLowerCase()))
+      );
+      results.push(...filteredLocations);
     }
-    return "Explore Vibes";
-  };
+    
+    if (selectedCategory === 'all' || selectedCategory === 'posts') {
+      const filteredPosts = mockPosts.filter(post =>
+        post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        post.vibeTags?.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+      );
+      results.push(...filteredPosts);
+    }
+    
+    return results.sort((a, b) => {
+      // Sort posts by timestamp if they have one
+      if ('timestamp' in a && 'timestamp' in b) {
+        return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
+      }
+      // Keep locations at the top
+      if ('type' in a && !('timestamp' in b)) return -1;
+      if ('type' in b && !('timestamp' in a)) return 1;
+      return 0;
+    });
+  }, [searchQuery, selectedCategory]);
 
-  return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      
-      <main className="container py-6">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-center mb-6 vibe-gradient-text">
-            {getDisplayTitle()}
-          </h1>
-          
-          <SearchSection 
-            showDateFilter={showDateFilter}
-            dateRange={dateRange}
-            onSearch={handleSearch}
-            onDateRangeChange={handleDateRangeChange}
-            onClearDates={handleClearDates}
-          />
-          
-          {/* Map centered below search bar */}
-          <div className="w-full mb-6">
-            <NearbyVibesMap />
-          </div>
-          
-          <CategoryTabs 
-            activeTab={activeTab}
-            onTabChange={handleTabChange}
-          />
+  const renderLocationCard = (location: Location) => (
+    <Card key={location.id} className="p-4 hover:shadow-md transition-shadow">
+      <div className="flex items-start space-x-3">
+        <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-semibold">
+          {location.name.charAt(0)}
         </div>
-
-        <div className="flex flex-col md:flex-row gap-6">
-          <div className={`${isMobile ? 'w-full' : 'w-3/4'}`}>
-            {isLoadingResults ? (
-              <div className="flex justify-center items-center py-12">
-                <div className="text-center">
-                  <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent motion-reduce:animate-[spin_1.5s_linear_infinite] mb-4"></div>
-                  <p className="text-muted-foreground">Finding the perfect matches for your search...</p>
-                </div>
-              </div>
-            ) : (
-              <div>
-                {activeTab === "music" && (
-                  <MusicSection
-                    musicEvents={musicEvents.length > 0 ? musicEvents : []}
-                    searchedCity={searchedCity || ""}
-                    dateRange={dateRange}
-                  />
-                )}
-                
-                {activeTab === "comedy" && (
-                  <ComedySection
-                    comedyEvents={comedyEvents.length > 0 ? comedyEvents : []}
-                    searchedCity={searchedCity || ""}
-                    dateRange={dateRange}
-                  />
-                )}
-                
-                {activeTab === "nightlife" && (
-                  <NightlifeSection
-                    nightlifeVenues={nightlifeVenues.length > 0 ? nightlifeVenues : []}
-                    searchedCity={searchedCity || ""}
-                    dateRange={dateRange}
-                  />
-                )}
-                
-                {searchCategory === "places" && activeTab === "sports" && (
-                  <div className="mb-6">
-                    <h2 className="text-xl font-semibold mb-4 flex items-center">
-                      Trending Sports Events
-                      {dateRange?.from && (
-                        <Badge className="ml-2 bg-indigo-100 text-indigo-800">
-                          {format(dateRange.from, "MMM yyyy")}
-                          {dateRange.to && ` - ${format(dateRange.to, "MMM yyyy")}`}
-                        </Badge>
-                      )}
-                    </h2>
-                    <div className="space-y-4">
-                      {filteredLocations
-                        .filter(loc => loc.type === "sports")
-                        .slice(0, 3)
-                        .map(location => (
-                          <VenuePost
-                            key={location.id}
-                            venue={location}
-                            content={getCitySpecificContent(location)}
-                            media={getMediaForLocation(location)}
-                            timestamp={new Date().toISOString()}
-                          />
-                        ))}
-                    </div>
-                  </div>
-                )}
-                
-                {activeTab !== "music" && activeTab !== "comedy" && activeTab !== "nightlife" && (
-                  <LocationsGrid
-                    locations={filteredLocations}
-                    locationTags={locationTags}
-                  />
-                )}
-              </div>
+        <div className="flex-1">
+          <h3 className="font-semibold text-gray-900 dark:text-gray-100">{location.name}</h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center mt-1">
+            <MapPin className="w-4 h-4 mr-1" />
+            {location.address}, {location.city}
+          </p>
+          <div className="flex items-center mt-2">
+            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full mr-2">
+              {location.type}
+            </span>
+            {location.verified && (
+              <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                Verified
+              </span>
             )}
           </div>
-          
-          {!isMobile && (
-            <div className="w-1/4 space-y-6">
-              <RecommendedForYou featuredLocations={["5", "7", "10", "13", "20"]} />
-              <TrendingLocations />
-              <DiscountLocations />
-            </div>
+        </div>
+      </div>
+    </Card>
+  );
+
+  const renderPostCard = (post: Post) => (
+    <Card key={post.id} className="p-4 hover:shadow-md transition-shadow">
+      <div className="flex items-start space-x-3">
+        <img 
+          src={post.user.avatar} 
+          alt={post.user.name}
+          className="w-10 h-10 rounded-full"
+        />
+        <div className="flex-1">
+          <div className="flex items-center space-x-2">
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100">{post.user.name}</h3>
+            <span className="text-sm text-gray-500">@{post.user.username}</span>
+          </div>
+          <p className="text-gray-700 dark:text-gray-300 mt-1">{post.content}</p>
+          {post.location && (
+            <p className="text-sm text-gray-500 mt-2 flex items-center">
+              <MapPin className="w-4 h-4 mr-1" />
+              {post.location.name}
+            </p>
           )}
+          <div className="flex items-center mt-3 space-x-4 text-sm text-gray-500">
+            <span>{post.likes} likes</span>
+            <span>{post.comments} comments</span>
+            <span>{post.shares} shares</span>
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Header */}
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-6">
+            Explore
+          </h1>
           
-          {isMobile && (
-            <div className="mt-8 space-y-6">
-              <h2 className="text-xl font-bold mb-4 vibe-gradient-text">Around You</h2>
-              <RecommendedForYou featuredLocations={["5", "7", "10", "13", "20"]} />
-              <TrendingLocations />
-              <DiscountLocations />
+          {/* Search Bar */}
+          <div className="relative mb-6">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <Input
+              type="text"
+              placeholder="Search venues, posts, or vibes..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 py-3"
+            />
+          </div>
+
+          {/* Filter Buttons */}
+          <div className="flex space-x-2 mb-4">
+            <Button
+              variant="outline"
+              onClick={() => setSelectedCategory('all')}
+              className={selectedCategory === 'all' ? 'bg-blue-100 border-blue-300' : ''}
+            >
+              All
+            </Button>
+            <Button
+              variant="outline" 
+              onClick={() => setSelectedCategory('locations')}
+              className={selectedCategory === 'locations' ? 'bg-blue-100 border-blue-300' : ''}
+            >
+              Locations
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setSelectedCategory('posts')}
+              className={selectedCategory === 'posts' ? 'bg-blue-100 border-blue-300' : ''}
+            >
+              Posts
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Results */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="space-y-4">
+          {filteredResults.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-500 text-lg">No results found</p>
+              <p className="text-gray-400 text-sm mt-2">Try adjusting your search terms</p>
             </div>
+          ) : (
+            filteredResults.map((item) => {
+              if ('type' in item) {
+                return renderLocationCard(item);
+              } else {
+                return renderPostCard(item);
+              }
+            })
           )}
         </div>
-      </main>
-      
-      <CameraButton />
+      </div>
     </div>
   );
 };
