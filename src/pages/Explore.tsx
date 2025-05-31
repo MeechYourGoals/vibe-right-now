@@ -18,13 +18,9 @@ import TrendingLocations from "@/components/TrendingLocations";
 import DiscountLocations from "@/components/DiscountLocations";
 import { format } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useGooglePlaces } from "@/hooks/useGooglePlaces";
-import { useUserLocation } from "@/hooks/useUserLocation";
 
 const Explore = () => {
   const isMobile = useIsMobile();
-  const { userLocation } = useUserLocation();
-  
   const {
     activeTab,
     searchedCity,
@@ -50,15 +46,6 @@ const Explore = () => {
     handleSearchTabChange,
     setShowDateFilter
   } = useExploreState();
-
-  // Fetch real places from Google Places API
-  const { places: googlePlaces, isLoading: placesLoading } = useGooglePlaces(
-    userLocation,
-    searchedCity ? `${searchedCity} attractions restaurants bars` : undefined
-  );
-
-  // Combine mock locations with real Google Places
-  const combinedLocations = [...filteredLocations, ...googlePlaces];
 
   // Update the page title logic to handle empty cities
   const getDisplayTitle = () => {
@@ -88,9 +75,9 @@ const Explore = () => {
             onClearDates={handleClearDates}
           />
           
-          {/* Map centered below search bar - now shows real places too */}
+          {/* Map centered below search bar */}
           <div className="w-full mb-6">
-            <NearbyVibesMap locations={combinedLocations} />
+            <NearbyVibesMap />
           </div>
           
           <CategoryTabs 
@@ -101,13 +88,11 @@ const Explore = () => {
 
         <div className="flex flex-col md:flex-row gap-6">
           <div className={`${isMobile ? 'w-full' : 'w-3/4'}`}>
-            {isLoadingResults || placesLoading ? (
+            {isLoadingResults ? (
               <div className="flex justify-center items-center py-12">
                 <div className="text-center">
                   <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent motion-reduce:animate-[spin_1.5s_linear_infinite] mb-4"></div>
-                  <p className="text-muted-foreground">
-                    {placesLoading ? 'Finding real venues near you...' : 'Finding the perfect matches for your search...'}
-                  </p>
+                  <p className="text-muted-foreground">Finding the perfect matches for your search...</p>
                 </div>
               </div>
             ) : (
@@ -148,7 +133,7 @@ const Explore = () => {
                       )}
                     </h2>
                     <div className="space-y-4">
-                      {combinedLocations
+                      {filteredLocations
                         .filter(loc => loc.type === "sports")
                         .slice(0, 3)
                         .map(location => (
@@ -166,7 +151,7 @@ const Explore = () => {
                 
                 {activeTab !== "music" && activeTab !== "comedy" && activeTab !== "nightlife" && (
                   <LocationsGrid
-                    locations={combinedLocations}
+                    locations={filteredLocations}
                     locationTags={locationTags}
                   />
                 )}
