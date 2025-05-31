@@ -1,95 +1,83 @@
 
-import { supabase } from '@/integrations/supabase/client';
+import { VertexAIService } from './VertexAIService'; // Import VertexAIService
 
 export class OpenAIService {
   /**
-   * Send a chat request to the OpenAI API (now with OpenRouter support)
+   * Send a chat request, now proxied to VertexAIService.
+   * Note: OpenAI-specific options like model, stream, maxTokens, useOpenRouter are ignored.
    */
   static async sendChatRequest(
     messages: { role: string; content: string }[],
     options: { 
-      model?: string; 
-      context?: string;
-      stream?: boolean;
-      maxTokens?: number;
-      useOpenRouter?: boolean;
+      model?: string; // Will be ignored
+      context?: string; // Will be mapped to VertexAI 'mode'
+      stream?: boolean; // Will be ignored, VertexAI does not stream in this implementation
+      maxTokens?: number; // Will be ignored
+      useOpenRouter?: boolean; // Will be ignored
     } = {}
-  ) {
+  ): Promise<string> {
     try {
-      const {
-        model = 'anthropic/claude-3-haiku',
-        context = 'user',
-        stream = false,
-        maxTokens = 1000,
-        useOpenRouter = true
-      } = options;
-
-      const { data, error } = await supabase.functions.invoke('openai-chat', {
-        body: {
-          messages,
-          model,
-          context,
-          stream,
-          useOpenRouter
-        }
-      });
-
-      if (error) {
-        console.error('Error calling chat function:', error);
-        throw new Error(`Failed to call chat function: ${error.message}`);
+      if (!messages || messages.length === 0) {
+        throw new Error("Messages array cannot be empty.");
       }
 
-      return stream ? data : data?.response?.choices?.[0]?.message?.content || '';
+      const currentMessage = messages[messages.length - 1];
+      const prompt = currentMessage.content;
+
+      const transformedContext = messages.slice(0, -1).map(msg => ({
+        sender: msg.role === 'user' ? 'user' : 'ai', // Map 'user' to 'user', others to 'ai'
+        text: msg.content
+      }));
+
+      let mode: 'default' | 'search' | 'venue' = 'default';
+      if (options.context === 'venue') {
+        mode = 'venue';
+      } else if (options.context === 'search') { // Assuming 'search' might be a context from OpenAI options
+        mode = 'search';
+      }
+      // Other options.context values will use 'default'
+
+      console.log(`OpenAIService.sendChatRequest redirecting to VertexAIService.generateResponse. Prompt: ${prompt.substring(0,30)}... Mode: ${mode}`);
+      // OpenAI-specific options (model, stream, maxTokens, useOpenRouter) are not directly applicable to VertexAIService.generateResponse
+      // The stream option specifically: VertexAIService.generateResponse returns a Promise<string>, not a stream.
+      // The original OpenAIService returned `data?.response?.choices?.[0]?.message?.content || ''` for non-streamed, which is a string.
+      const responseText = await VertexAIService.generateResponse(prompt, mode, transformedContext);
+      return responseText; // This is already a string
     } catch (error) {
-      console.error('Error in chat service:', error);
+      console.error('Error in OpenAIService.sendChatRequest (proxied to VertexAI):', error);
+      // Re-throw to allow calling code to handle, or return a generic error string
       throw error;
     }
   }
 
   /**
-   * Convert speech to text using OpenAI's Whisper API
+   * Convert speech to text, now proxied to VertexAIService.
    */
-  static async speechToText(audioBase64: string) {
+  static async speechToText(audioBase64: string): Promise<string> {
     try {
-      const { data, error } = await supabase.functions.invoke('openai-speech', {
-        body: {
-          action: 'speech-to-text',
-          audio: audioBase64
-        }
-      });
-
-      if (error) {
-        console.error('Error calling speech-to-text function:', error);
-        throw new Error(`Failed to convert speech to text: ${error.message}`);
-      }
-
-      return data?.text || '';
+      console.log('OpenAIService.speechToText redirecting to VertexAIService.speechToText');
+      // VertexAIService.speechToText expects options for encoding, lang, etc.
+      // Since original OpenAI S2T here didn't have them, pass empty options for Vertex defaults.
+      const transcript = await VertexAIService.speechToText(audioBase64, {});
+      return transcript || ''; // Match original return type (empty string for null)
     } catch (error) {
-      console.error('Error in speech-to-text service:', error);
+      console.error('Error in OpenAIService.speechToText (proxied to VertexAI):', error);
       throw error;
     }
   }
 
   /**
-   * Convert text to speech using OpenAI's TTS API
+   * Convert text to speech, now proxied to VertexAIService.
    */
-  static async textToSpeech(text: string) {
+  static async textToSpeech(text: string): Promise<string> {
     try {
-      const { data, error } = await supabase.functions.invoke('openai-speech', {
-        body: {
-          action: 'text-to-speech',
-          text
-        }
-      });
-
-      if (error) {
-        console.error('Error calling text-to-speech function:', error);
-        throw new Error(`Failed to convert text to speech: ${error.message}`);
-      }
-
-      return data?.audio || '';
+      console.log('OpenAIService.textToSpeech redirecting to VertexAIService.textToSpeech');
+      // VertexAIService.textToSpeech expects options for voice, rate, pitch.
+      // Pass empty options for Vertex defaults.
+      const audioBase64 = await VertexAIService.textToSpeech(text, {});
+      return audioBase64 || ''; // Match original return type (empty string if Vertex returns null, though it throws on error)
     } catch (error) {
-      console.error('Error in text-to-speech service:', error);
+      console.error('Error in OpenAIService.textToSpeech (proxied to VertexAI):', error);
       throw error;
     }
   }

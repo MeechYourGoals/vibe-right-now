@@ -71,14 +71,65 @@ serve(async (req) => {
     // Handle speech-to-text requests
     if (action === 'speech-to-text' && prompt) {
       try {
-        console.log('Speech-to-text request received');
+        console.log('Speech-to-text request received.');
+        const audioBase64 = prompt; // Assuming prompt is the base64 audio data
+        const audioEncoding = options?.audioEncoding || 'WEBM_OPUS'; // Default to WEBM_OPUS
+        const languageCode = options?.languageCode || 'en-US';
+        const sampleRateHertz = options?.sampleRateHertz; // Only include if provided, useful for LINEAR16
+
+        const sttPayload: any = {
+          audio: {
+            content: audioBase64,
+          },
+          config: {
+            encoding: audioEncoding,
+            languageCode: languageCode,
+            // Potentially add model selection, punctuation, etc. here if needed
+          },
+        };
+
+        // Add sampleRateHertz only if encoding is LINEAR16 or if explicitly provided
+        if (sampleRateHertz && (audioEncoding === 'LINEAR16' || options?.sampleRateHertz)) {
+          sttPayload.config.sampleRateHertz = sampleRateHertz;
+        }
+        if (audioEncoding === 'LINEAR16' && !sampleRateHertz) {
+            console.warn("Warning: sampleRateHertz is typically required for LINEAR16 encoding but was not provided. API might default or error.");
+        }
+
+
+        console.log(`Calling Google Speech-to-Text API with encoding: ${audioEncoding}, lang: ${languageCode}`);
+
+        const sttResponse = await fetch(`https://speech.googleapis.com/v1/speech:recognize?key=${VERTEX_AI_API_KEY}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(sttPayload),
+        });
+
+        if (!sttResponse.ok) {
+          const errorBody = await sttResponse.text();
+          console.error('Google STT API error:', sttResponse.status, errorBody);
+          throw new Error(`Google STT API error: ${sttResponse.status} - ${errorBody}`);
+        }
+
+        const sttData = await sttResponse.json();
+        console.log("STT API Response:", JSON.stringify(sttData).substring(0,100) + "...");
+
+        // Extract transcript
+        // Typical response structure: results[0].alternatives[0].transcript
+        const transcript = sttData.results?.[0]?.alternatives?.[0]?.transcript || "";
         
-        // Mock implementation for now - would be replaced with actual Google Speech-to-Text API call
-        return new Response(JSON.stringify({ transcript: "Speech transcription with Google Speech-to-Text" }), {
+        if (!transcript && sttData.results && sttData.results.length === 0) {
+            console.log("STT API returned no results, possibly empty audio or no speech detected.");
+        } else if (!transcript) {
+            console.log("Transcript not found in expected place in STT response. Full response:", sttData);
+        }
+
+
+        return new Response(JSON.stringify({ transcript: transcript }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       } catch (error) {
-        console.error('Error in speech-to-text:', error);
+        console.error('Error in speech-to-text:', error.message);
         return new Response(JSON.stringify({ error: error.message, transcript: null }), {
           status: 500,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -128,42 +179,111 @@ serve(async (req) => {
       
       console.log("Sending request to Gemini API with messages:", JSON.stringify(messages));
 
-      // Try with primary model first
-      try {
-        const response = await callGeminiAPI(requestedModel, messages);
-        const generatedText = response.candidates?.[0]?.content?.parts?.[0]?.text || '';
-        console.log('Generated response successfully:', generatedText.substring(0, 50) + '...');
-        
-        return new Response(JSON.stringify({ text: generatedText }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      } catch (error) {
-        // If we get a rate limit error and we're using the primary model, try fallback
-        if (error.message.includes('429') && requestedModel === MODELS.PRIMARY) {
-          console.log(`Rate limit exceeded for ${MODELS.PRIMARY}, trying fallback model ${MODELS.FALLBACK}`);
+      // Try with primary model first, with fallback logic
+      let attemptModel = requestedModel;
+      let finalResponseText = '';
+      let usedFallback = false;
+      let loopMessages = [...messages]; // Create a mutable copy for the loop
+
+      for (let attempt = 0; attempt < 2; attempt++) { // Max 2 attempts (primary, then fallback)
+        try {
+          console.log(`Calling Gemini with model: ${attemptModel}. Current message count: ${loopMessages.length}`);
           
-          try {
-            const fallbackResponse = await callGeminiAPI(MODELS.FALLBACK, messages);
-            const fallbackText = fallbackResponse.candidates?.[0]?.content?.parts?.[0]?.text || '';
-            console.log('Generated response with fallback model:', fallbackText.substring(0, 50) + '...');
-            
-            return new Response(JSON.stringify({ 
-              text: fallbackText,
-              usedFallbackModel: true 
-            }), {
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            });
-          } catch (fallbackError) {
-            console.error('Error with fallback model:', fallbackError);
-            throw new Error(`Failed with both primary and fallback models: ${fallbackError.message}`);
+          let currentTools = undefined;
+          if (mode === 'search') {
+            currentTools = googleSearchTool;
           }
-        } else {
-          // Rethrow if it's not a rate limit issue or we've already tried fallback
-          throw error;
+
+          let geminiResponse = await callGeminiAPI(attemptModel, loopMessages, currentTools);
+          let candidate = geminiResponse.candidates?.[0];
+
+          // Handle function calling
+          if (candidate?.content?.parts?.[0]?.functionCall) {
+            const functionCall = candidate.content.parts[0].functionCall;
+            console.log(`Gemini requested function call: ${functionCall.name}`);
+
+            if (functionCall.name === 'google_search') {
+              const searchQuery = functionCall.args?.query;
+              if (!searchQuery) {
+                console.error("Google Search tool called by Gemini without a query.");
+                // Send a result indicating error to Gemini
+                 loopMessages.push(candidate.content); // Gemini's request
+                 loopMessages.push({
+                  role: "function",
+                  parts: [{ functionResponse: { name: "google_search", response: { error: "Missing search query", summary: "Search could not be performed."} }}]
+                });
+              } else {
+                const searchResults = await executeGoogleSearch(searchQuery);
+
+                const functionResponsePart = {
+                  role: "function",
+                  parts: [{
+                    functionResponse: {
+                      name: "google_search",
+                      response: searchResults, // searchResults contains {summary} or {error, summary}
+                    }
+                  }]
+                };
+                // Add Gemini's function call message and our function response to history for the next turn
+                loopMessages.push(candidate.content);
+                loopMessages.push(functionResponsePart);
+              }
+
+              console.log("Calling Gemini again with function response. Message count: " + loopMessages.length);
+              // Call Gemini again with the function response, tools are typically not needed for this direct response generation.
+              geminiResponse = await callGeminiAPI(attemptModel, loopMessages /*, undefined tools */);
+              candidate = geminiResponse.candidates?.[0];
+            } else {
+              console.warn(`Unsupported function call requested: ${functionCall.name}. Responding to Gemini that tool is unavailable.`);
+              // Add Gemini's function call message
+              loopMessages.push(candidate.content);
+              // Add a function response indicating the tool is not available or there was an error
+              loopMessages.push({
+                role: "function",
+                parts: [{ functionResponse: { name: functionCall.name, response: { error: `Function ${functionCall.name} is not available.`, summary: `Tool ${functionCall.name} could not be executed.` } } }]
+              });
+              console.log("Calling Gemini again after unsupported function call. Message count: " + loopMessages.length);
+              geminiResponse = await callGeminiAPI(attemptModel, loopMessages);
+              candidate = geminiResponse.candidates?.[0];
+            }
+          }
+
+          finalResponseText = candidate?.content?.parts?.[0]?.text || '';
+          if (finalResponseText) {
+            console.log(`Generated response successfully with ${attemptModel}:`, finalResponseText.substring(0, 80) + '...');
+            if (attemptModel === MODELS.FALLBACK) usedFallback = true;
+            break; // Success
+          } else {
+            console.warn(`Empty text response from ${attemptModel}. Full response:`, JSON.stringify(geminiResponse).substring(0, 200));
+            if (attempt === 0 && requestedModel === MODELS.PRIMARY && attemptModel === MODELS.PRIMARY) {
+                attemptModel = MODELS.FALLBACK; // Set up for next iteration
+                console.log(`Primary model ${requestedModel} returned empty. Trying fallback ${attemptModel}.`);
+                // loopMessages are already set for the next attempt
+                continue;
+            }
+            // If already on fallback or it wasn't an empty text from primary that could trigger fallback
+            throw new Error(`Empty text response from ${attemptModel} after potential function calling.`);
+          }
+
+        } catch (error) {
+          console.error(`Error with ${attemptModel}:`, error.message);
+          if (attempt === 0 && requestedModel === MODELS.PRIMARY && attemptModel === MODELS.PRIMARY) {
+            console.log(`Error with primary model ${requestedModel}. Trying fallback ${MODELS.FALLBACK}.`);
+            attemptModel = MODELS.FALLBACK; // Set up for next iteration
+             // Reset loopMessages to the original state before this failed attempt if function calling modified it
+            loopMessages = [...messages];
+          } else {
+            throw error;
+          }
         }
-      }
+      } // End of for loop for attempts
+
+      return new Response(JSON.stringify({ text: finalResponseText, usedFallbackModel: usedFallback }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+
     } else {
-      throw new Error('Invalid request: missing prompt or action');
+      throw new Error('Invalid request: missing prompt or action for chat completion.');
     }
   } catch (error) {
     console.error('Error in vertex-ai function:', error);
@@ -177,28 +297,94 @@ serve(async (req) => {
   }
 });
 
+// Placeholder for Google Custom Search API credentials - REPLACE THESE!
+const GOOGLE_CUSTOM_SEARCH_API_KEY = Deno.env.get("GOOGLE_CUSTOM_SEARCH_API_KEY") || "YOUR_CUSTOM_SEARCH_API_KEY_HERE";
+const GOOGLE_CUSTOM_SEARCH_ENGINE_ID = Deno.env.get("GOOGLE_CUSTOM_SEARCH_ENGINE_ID") || "YOUR_CUSTOM_SEARCH_ENGINE_ID_HERE";
+
+// Tool definition for Google Search
+const googleSearchTool = {
+  function_declarations: [
+    {
+      name: "google_search",
+      description: "Get information from Google Search. Use this for questions about current events, specific facts, or anything that requires up-to-date information from the web.",
+      parameters: {
+        type: "OBJECT",
+        properties: {
+          query: {
+            type: "STRING",
+            description: "The search query."
+          }
+        },
+        required: ["query"]
+      }
+    }
+  ]
+};
+
+// Helper function to execute Google Search
+async function executeGoogleSearch(query: string) {
+  if (GOOGLE_CUSTOM_SEARCH_API_KEY === "YOUR_CUSTOM_SEARCH_API_KEY_HERE" ||
+      GOOGLE_CUSTOM_SEARCH_ENGINE_ID === "YOUR_CUSTOM_SEARCH_ENGINE_ID_HERE") {
+    console.warn("Google Custom Search API Key or Engine ID is not configured in environment variables (GOOGLE_CUSTOM_SEARCH_API_KEY, GOOGLE_CUSTOM_SEARCH_ENGINE_ID). Returning mock search results.");
+    return { summary: `Mock search results for query: '${query}'. Configure API keys for real results.` };
+  }
+
+  const url = `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_CUSTOM_SEARCH_API_KEY}&cx=${GOOGLE_CUSTOM_SEARCH_ENGINE_ID}&q=${encodeURIComponent(query)}&num=3&fields=items(title,link,snippet)`;
+
+  console.log(`Executing Google Search for query: ${query}`);
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Google Custom Search API error:", response.status, errorText);
+      return { error: `Search API failed with status ${response.status}`, summary: "Could not retrieve search results." };
+    }
+    const data = await response.json();
+
+    const items = data.items || [];
+    let summary = items.slice(0, 3)
+                       .map((item: any) => `Title: ${item.title}\nSnippet: ${item.snippet}\nLink: ${item.link}`)
+                       .join("\n\n---\n\n");
+
+    if (!summary && items.length > 0) summary = "Found some results, but could not extract snippets.";
+    if (items.length === 0) summary = "No relevant search results found for your query.";
+
+    return { summary: summary };
+  } catch (error) {
+    console.error("Error during Google Custom Search API call:", error);
+    return { error: error.message, summary: "Failed to execute search." };
+  }
+}
+
+
 // Helper function to call Gemini API
-async function callGeminiAPI(model, messages) {
+async function callGeminiAPI(model: string, messages: any[], tools?: any) {
+  const requestBody: any = {
+    contents: messages,
+    generationConfig: {
+      temperature: 0.7,
+      topK: 40,
+      topP: 0.95,
+      maxOutputTokens: 1024,
+    }
+  };
+
+  if (tools) {
+    requestBody.tools = tools;
+  }
+
   const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${VERTEX_AI_API_KEY}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      contents: messages,
-      generationConfig: {
-        temperature: 0.7,
-        topK: 40,
-        topP: 0.95,
-        maxOutputTokens: 1024,
-      }
-    }),
+    body: JSON.stringify(requestBody),
   });
   
   if (!response.ok) {
     const errorText = await response.text();
-    console.error(`Google Gemini API error: ${response.status}:`, errorText);
-    throw new Error(`Google Gemini API error: ${response.status}: ${errorText}`);
+    console.error(`Google Gemini API error (${model}): ${response.status}:`, errorText);
+    throw new Error(`Google Gemini API error (${model}): ${response.status}: ${errorText}`);
   }
   
   return await response.json();

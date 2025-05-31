@@ -95,63 +95,20 @@ export class VertexAIService {
    * @returns The search results as text
    */
   static async searchWithVertex(
-    query: string,
-    categories?: string[]
+    query: string
+    // context: any[] = [] // context can be passed if needed for search queries
   ): Promise<string> {
     try {
-      console.log('Searching with Google Vertex AI:', query);
-      if (categories && categories.length > 0) {
-        console.log('With categories:', categories);
-      }
-      
-      const searchPrompt = `
-        Please provide real information about "${query}".
-        ${categories && categories.length > 0 ? `Focusing on these categories: ${categories.join(', ')}` : ''}
-        Include:
-        - Names of specific places or events
-        - Actual addresses and locations if known
-        - Opening hours and pricing when available
-        - Any other helpful details
-        
-        Format your response in a clear, readable way.
-      `;
-      
-      // Try with primary model first
-      try {
-        return await this.generateResponse(searchPrompt, 'search');
-      } catch (primaryError) {
-        console.error('Error with primary model for search:', primaryError);
-        
-        // Try with fallback model
-        if (primaryError.message?.includes('429') || primaryError.message?.includes('quota')) {
-          try {
-            console.log('Using fallback model for search');
-            
-            const { data, error } = await supabase.functions.invoke('vertex-ai', {
-              body: { 
-                prompt: searchPrompt,
-                mode: 'search',
-                model: this.FALLBACK_MODEL
-              }
-            });
-            
-            if (error) {
-              throw error;
-            }
-            
-            if (data?.text) {
-              return data.text;
-            }
-          } catch (fallbackError) {
-            console.error('Fallback model also failed for search:', fallbackError);
-          }
-        }
-        
-        throw primaryError;
-      }
+      console.log('Performing search-enabled generation for query:', query);
+      // The 'search' mode in `generateResponse` will trigger tool use in the Supabase function
+      return await VertexAIService.generateResponse(query, 'search', []); // Pass empty context or relevant context
     } catch (error) {
-      console.error('Error in Vertex AI search:', error);
-      return `I couldn't find specific information about "${query}". Please try a different search.`;
+      // generateResponse already has robust error handling including fallback and user-friendly messages.
+      // This catch block is for any unexpected errors specific to searchWithVertex itself,
+      // or if generateResponse re-throws an error that should be specifically handled for search.
+      console.error('Error in searchWithVertex:', error);
+      // Return the error message from generateResponse, or a generic search error.
+      return error.message || `I couldn't find specific information about "${query}". Please try a different search.`;
     }
   }
 
@@ -199,27 +156,43 @@ export class VertexAIService {
    * @param audioBase64 The audio data as a base64 string
    * @returns The transcribed text
    */
-  static async speechToText(audioBase64: string): Promise<string | null> {
+  static async speechToText(
+    audioBase64: string,
+    options: { audioEncoding?: string; languageCode?: string; sampleRateHertz?: number } = {}
+  ): Promise<string | null> {
     try {
+      console.log('Sending audio to STT function with options:', options);
       const { data, error } = await supabase.functions.invoke('vertex-ai', {
         body: { 
           action: 'speech-to-text',
-          prompt: audioBase64
+          prompt: audioBase64, // 'prompt' field is used for base64 audio in the Supabase func
+          options: options      // Pass STT specific options
         }
       });
       
       if (error) {
         console.error('Error calling Vertex AI STT function:', error);
-        throw new Error(`Speech-to-text conversion failed: ${error.message}`);
+        // Supabase function invocation errors might be in error.message or error.details
+        const errorMessage = error.message || (error.details ? JSON.stringify(error.details) : 'Unknown STT error');
+        throw new Error(`Speech-to-text conversion failed: ${errorMessage}`);
       }
       
-      if (!data || !data.transcript) {
+      // The Supabase function returns { transcript: "..." } or { error: "...", transcript: null }
+      if (data && data.error) {
+        console.error('STT function returned an error:', data.error);
+        throw new Error(`Speech-to-text failed: ${data.error}`);
+      }
+
+      if (!data || typeof data.transcript !== 'string') { // Check type of transcript
+        console.error('No transcript string received from Vertex AI STT. Data:', data);
         throw new Error('No transcript received from Vertex AI STT');
       }
       
       return data.transcript;
     } catch (error) {
-      console.error('Error in speech-to-text:', error);
+      console.error('Error in speechToText service method:', error.message);
+      // Optionally, display a toast or specific user feedback here
+      // For now, let the caller handle the thrown error or return null
       return null;
     }
   }
@@ -227,14 +200,20 @@ export class VertexAIService {
   /**
    * Analyze text using Google Natural Language API
    * @param text The text to analyze
-   * @returns Analysis results including entities, sentiment, and categories
+   * @param tasks Specifies which NLP tasks to perform
+   * @returns Analysis results
    */
-  static async analyzeText(text: string): Promise<any> {
+  static async analyzeText(
+    text: string,
+    tasks: { entities?: boolean; sentiment?: boolean; syntax?: boolean; entitySentiment?: boolean } =
+           { entities: true, sentiment: true } // Default tasks
+  ): Promise<any> {
     try {
+      console.log('Analyzing text with tasks:', tasks);
       const { data, error } = await supabase.functions.invoke('google-nlp', {
         body: { 
           text,
-          features: ['entities', 'sentiment', 'categories']
+          tasks: tasks // Pass the tasks object to the Supabase function
         }
       });
       
@@ -242,11 +221,17 @@ export class VertexAIService {
         console.error('Error calling Google NLP function:', error);
         throw new Error(`Text analysis failed: ${error.message}`);
       }
+
+      // The Supabase function returns the full response from NLP API or an error object
+      if (data && data.error) {
+        console.error('NLP function returned an error:', data.error);
+        throw new Error(`Text analysis failed: ${data.error}`);
+      }
       
       return data;
     } catch (error) {
-      console.error('Error in text analysis:', error);
-      toast.error('Text analysis failed');
+      console.error('Error in analyzeText service method:', error.message);
+      toast.error(`Text analysis failed: ${error.message}`);
       return null;
     }
   }
