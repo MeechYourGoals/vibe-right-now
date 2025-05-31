@@ -21,6 +21,12 @@ const PostCard: React.FC<PostCardProps> = ({ post, onClick, isDetailView = false
     setImageError(true);
   };
 
+  // Add safety checks for undefined data
+  if (!post || !post.user || !post.location) {
+    console.error('PostCard received invalid post data:', post);
+    return null;
+  }
+
   return (
     <Card className={`overflow-hidden hover:shadow-lg transition-shadow cursor-pointer ${isDetailView ? 'max-w-none' : ''}`}>
       <div onClick={onClick}>
@@ -94,7 +100,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, onClick, isDetailView = false
         <div className="px-4 pb-2">
           <Badge variant="outline" className="text-xs">
             <MapPin className="h-3 w-3 mr-1" />
-            {post.location.city}, {post.location.state}
+            {post.location.city}{post.location.state ? `, ${post.location.state}` : ''}
           </Badge>
         </div>
       </div>
