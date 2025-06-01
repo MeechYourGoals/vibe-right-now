@@ -1,26 +1,28 @@
 
+import { VertexAIService } from './VertexAIService';
+
 /**
- * Speech recognition service using browser's Web Speech API
+ * Whisper Speech Service that proxies through Google Speech-to-Text
+ * Maintains backward compatibility while using Google ecosystem
  */
 export class WhisperSpeechService {
   private static isInitialized = false;
   
   /**
-   * Initialize the speech recognition model
+   * Initialize the speech recognition (now using Google STT)
    */
   static async initSpeechRecognition() {
     try {
-      // Check if browser supports SpeechRecognition
+      // Check if browser supports SpeechRecognition as fallback
       const SpeechRecognition = window.SpeechRecognition || (window as any).webkitSpeechRecognition;
       
       if (!SpeechRecognition) {
-        console.warn('Speech recognition not supported in this browser');
-        return false;
+        console.warn('Speech recognition not supported in this browser, using Google STT');
       }
       
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      console.log('Speech recognition service initialized');
+      console.log('Whisper proxy: Google Speech-to-Text service initialized');
       this.isInitialized = true;
       return true;
     } catch (error) {
@@ -41,20 +43,20 @@ export class WhisperSpeechService {
   }
 
   /**
-   * Convert speech to text using browser's SpeechRecognition API
+   * Convert speech to text using Google Speech-to-Text API
    * @param audioBlob The audio recording as a Blob
    */
   static async speechToText(audioBlob: Blob): Promise<string> {
     try {
-      console.log('Processing audio with Web Speech API');
+      console.log('Whisper proxy: Processing audio with Google Speech-to-Text');
       
-      return new Promise((resolve, reject) => {
-        // In a real implementation, we would process the blob
-        // For now, we'll resolve with a placeholder message
-        setTimeout(() => {
-          resolve("I heard what you said using the Web Speech API.");
-        }, 1000);
-      });
+      // Convert blob to base64
+      const base64Audio = await this.blobToBase64(audioBlob);
+      
+      // Use Vertex AI service
+      const result = await VertexAIService.speechToText(base64Audio);
+      
+      return result || "Could not transcribe audio.";
     } catch (error) {
       console.error('Error in speech-to-text:', error);
       throw error;

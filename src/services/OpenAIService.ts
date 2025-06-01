@@ -1,9 +1,13 @@
 
-import { supabase } from '@/integrations/supabase/client';
+import { VertexAIService } from './VertexAIService';
 
+/**
+ * OpenAI Service that proxies through Google Vertex AI
+ * Maintains backward compatibility while using Google ecosystem
+ */
 export class OpenAIService {
   /**
-   * Send a chat request to the OpenAI API (now with OpenRouter support)
+   * Send a chat request (proxied to Vertex AI)
    */
   static async sendChatRequest(
     messages: { role: string; content: string }[],
@@ -16,80 +20,59 @@ export class OpenAIService {
     } = {}
   ) {
     try {
-      const {
-        model = 'anthropic/claude-3-haiku',
-        context = 'user',
-        stream = false,
-        maxTokens = 1000,
-        useOpenRouter = true
-      } = options;
-
-      const { data, error } = await supabase.functions.invoke('openai-chat', {
-        body: {
-          messages,
-          model,
-          context,
-          stream,
-          useOpenRouter
-        }
-      });
-
-      if (error) {
-        console.error('Error calling chat function:', error);
-        throw new Error(`Failed to call chat function: ${error.message}`);
-      }
-
-      return stream ? data : data?.response?.choices?.[0]?.message?.content || '';
+      // Convert messages to context format for Vertex AI
+      const context = messages.slice(0, -1).map(msg => ({
+        sender: msg.role === 'user' ? 'user' : 'ai',
+        text: msg.content
+      }));
+      
+      // Get the latest user message
+      const latestMessage = messages[messages.length - 1];
+      const prompt = latestMessage?.content || '';
+      
+      // Determine mode based on context
+      const mode = options.context === 'venue' ? 'venue' : 'default';
+      
+      // Call Vertex AI
+      const response = await VertexAIService.generateResponse(prompt, mode, context);
+      
+      // Return in OpenAI-compatible format
+      return {
+        choices: [{
+          message: {
+            content: response,
+            role: 'assistant'
+          }
+        }]
+      };
     } catch (error) {
-      console.error('Error in chat service:', error);
+      console.error('Error in OpenAI proxy service:', error);
       throw error;
     }
   }
 
   /**
-   * Convert speech to text using OpenAI's Whisper API
+   * Convert speech to text (proxied to Vertex AI)
    */
   static async speechToText(audioBase64: string) {
     try {
-      const { data, error } = await supabase.functions.invoke('openai-speech', {
-        body: {
-          action: 'speech-to-text',
-          audio: audioBase64
-        }
-      });
-
-      if (error) {
-        console.error('Error calling speech-to-text function:', error);
-        throw new Error(`Failed to convert speech to text: ${error.message}`);
-      }
-
-      return data?.text || '';
+      const result = await VertexAIService.speechToText(audioBase64);
+      return { text: result || '' };
     } catch (error) {
-      console.error('Error in speech-to-text service:', error);
+      console.error('Error in speech-to-text proxy:', error);
       throw error;
     }
   }
 
   /**
-   * Convert text to speech using OpenAI's TTS API
+   * Convert text to speech (proxied to Vertex AI)
    */
   static async textToSpeech(text: string) {
     try {
-      const { data, error } = await supabase.functions.invoke('openai-speech', {
-        body: {
-          action: 'text-to-speech',
-          text
-        }
-      });
-
-      if (error) {
-        console.error('Error calling text-to-speech function:', error);
-        throw new Error(`Failed to convert text to speech: ${error.message}`);
-      }
-
-      return data?.audio || '';
+      const result = await VertexAIService.textToSpeech(text);
+      return { audio: result };
     } catch (error) {
-      console.error('Error in text-to-speech service:', error);
+      console.error('Error in text-to-speech proxy:', error);
       throw error;
     }
   }

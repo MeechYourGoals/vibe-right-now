@@ -8,7 +8,7 @@ const corsHeaders = {
 };
 
 // Use the provided API key
-const VERTEX_AI_API_KEY = "AIzaSyDHBe4hL8fQZdz9wSYi9srL0BGTnZ6XmyM";
+const VERTEX_AI_API_KEY = Deno.env.get('GOOGLE_VERTEX_API_KEY') || '';
 
 // Models to use with fallback logic
 const MODELS = {
@@ -24,7 +24,7 @@ serve(async (req) => {
 
   try {
     console.log("Received request to vertex-ai function");
-    const { prompt, mode = 'default', context = [], model = MODELS.PRIMARY, action, text, options } = await req.json();
+    const { prompt, mode = 'default', context = [], model = MODELS.PRIMARY, action, text, options, audio } = await req.json();
     
     // Handle text-to-speech requests
     if (action === 'text-to-speech' && text) {
@@ -69,17 +69,92 @@ serve(async (req) => {
     }
 
     // Handle speech-to-text requests
-    if (action === 'speech-to-text' && prompt) {
+    if (action === 'speech-to-text' && audio) {
       try {
         console.log('Speech-to-text request received');
         
-        // Mock implementation for now - would be replaced with actual Google Speech-to-Text API call
-        return new Response(JSON.stringify({ transcript: "Speech transcription with Google Speech-to-Text" }), {
+        // Call Google Speech-to-Text API
+        const sttResponse = await fetch(`https://speech.googleapis.com/v1/speech:recognize?key=${VERTEX_AI_API_KEY}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            config: {
+              encoding: 'WEBM_OPUS',
+              sampleRateHertz: 48000,
+              languageCode: 'en-US',
+              model: 'latest_short',
+              enableAutomaticPunctuation: true
+            },
+            audio: {
+              content: audio
+            }
+          })
+        });
+        
+        if (!sttResponse.ok) {
+          throw new Error(`Google STT API error: ${sttResponse.status}`);
+        }
+        
+        const sttData = await sttResponse.json();
+        let transcript = '';
+        if (sttData.results && sttData.results.length > 0) {
+          transcript = sttData.results[0].alternatives[0].transcript;
+        }
+        
+        return new Response(JSON.stringify({ transcript }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       } catch (error) {
         console.error('Error in speech-to-text:', error);
         return new Response(JSON.stringify({ error: error.message, transcript: null }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    }
+
+    // Handle web search requests
+    if (action === 'web-search' && prompt) {
+      try {
+        console.log('Web search request for:', prompt.substring(0, 50) + '...');
+        
+        // Enhanced search prompt for Gemini
+        const searchPrompt = `
+        Please provide detailed, current information about "${prompt}".
+        
+        Include:
+        - Names of specific venues, events, or places
+        - Locations, addresses, and neighborhoods when relevant
+        - Dates, times, and prices if applicable
+        - Contact information and websites when available
+        - Current status and availability
+        
+        Format your response in a clear, readable way with appropriate sections.
+        Focus on providing accurate, up-to-date information.
+        `;
+        
+        const searchResponse = await callGeminiAPI(MODELS.PRIMARY, [
+          {
+            role: 'model',
+            parts: [{ text: 'You are a helpful search assistant that provides accurate, current information about places, events, and activities.' }]
+          },
+          {
+            role: 'user',
+            parts: [{ text: searchPrompt }]
+          }
+        ]);
+        
+        const searchResult = searchResponse.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        
+        return new Response(JSON.stringify({ text: searchResult }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      } catch (error) {
+        console.error('Error in web search:', error);
+        return new Response(JSON.stringify({ 
+          error: error.message,
+          text: `I couldn't find specific information about "${prompt}". Please try a different search.`
+        }), {
           status: 500,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });

@@ -39,6 +39,5 @@ export const useMessageProcessor = () => {
   return {
     processMessage,
     isProcessing
-    // usedFallback is removed
   };
 };
