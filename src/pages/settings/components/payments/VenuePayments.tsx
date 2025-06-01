@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { CreditCard } from "@/types";
+import { CreditCard } from "@/types/subscription";
 import SavedCardsSection from "./SavedCardsSection";
 import AddCardForm from "../AddCardForm";
 import POSServicesConnector from "@/components/data-insights/POSServicesConnector";

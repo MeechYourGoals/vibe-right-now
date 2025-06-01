@@ -90,17 +90,6 @@ export interface DateRange {
   to: Date | undefined;
 }
 
-// Credit card interface
-export interface CreditCard {
-  id: string;
-  lastFour: string;
-  brand: string;
-  expiryMonth: number;
-  expiryYear: number;
-  isDefault: boolean;
-  holderName?: string;
-}
-
 // Export vibe tags
 export const vibeTags = [
   'chill', 'energetic', 'romantic', 'casual', 'upscale', 'trendy', 'cozy', 'lively'
@@ -297,4 +286,3 @@ export interface SavedCard {
 
 // Add subscription-related exports
 export * from './subscription';
-export * from "./index";

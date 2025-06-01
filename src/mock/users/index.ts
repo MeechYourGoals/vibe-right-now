@@ -1,6 +1,7 @@
 
 import { regularUsers } from "./regularUsers";
 import { celebrityUsers } from "./celebrityUsers";
+import { UserSubscriptionTier } from '@/types/subscription';
 
 // Define the MockUserProfile type directly here if missing from @/types
 export interface MockUserProfile {
@@ -14,6 +15,7 @@ export interface MockUserProfile {
   followers?: number;
   following?: number;
   posts?: number;
+  subscription?: UserSubscriptionTier;
 }
 
 // Mock user profile utility
