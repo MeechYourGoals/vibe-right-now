@@ -1,115 +1,88 @@
 
 import React, { useState } from 'react';
-import { Button } from "@/components/ui/button";
-import { Heart, MessageCircle, Share, MapPin, Bookmark } from "lucide-react";
-import { Post } from "@/types";
+import { Heart, MessageCircle, Share2, Bookmark } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Post } from '@/types';
 
 export interface PostFooterProps {
   post: Post;
   isDetailView?: boolean;
   onComment?: () => void;
-  onLike?: () => void;
-  onShare?: () => void;
 }
 
 const PostFooter: React.FC<PostFooterProps> = ({ 
   post, 
   isDetailView = false,
-  onComment,
-  onLike,
-  onShare
+  onComment
 }) => {
-  const [liked, setLiked] = useState(false);
-  const [bookmarked, setBookmarked] = useState(false);
+  const [isLiked, setIsLiked] = useState(post.isLiked || false);
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [likes, setLikes] = useState(post.likes);
 
   const handleLike = () => {
-    setLiked(!liked);
-    onLike?.();
+    setIsLiked(!isLiked);
+    setLikes(prev => isLiked ? prev - 1 : prev + 1);
   };
 
   const handleComment = () => {
-    onComment?.();
+    if (onComment) {
+      onComment();
+    }
   };
 
   const handleShare = () => {
-    onShare?.();
+    // Share functionality
+    console.log('Sharing post:', post.id);
   };
 
   const handleBookmark = () => {
-    setBookmarked(!bookmarked);
+    setIsBookmarked(!isBookmarked);
   };
 
   return (
-    <div className="px-4 py-2">
+    <div className="border-t border-gray-200 pt-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <Button
             variant="ghost"
             size="sm"
-            className={`flex items-center space-x-1 ${liked ? 'text-red-500' : ''}`}
             onClick={handleLike}
+            className={`p-2 ${isLiked ? 'text-red-500' : 'text-gray-600'}`}
           >
-            <Heart className={`h-4 w-4 ${liked ? 'fill-current' : ''}`} />
-            <span className="text-sm">{post.likes + (liked ? 1 : 0)}</span>
+            <Heart className={`h-5 w-5 mr-1 ${isLiked ? 'fill-current' : ''}`} />
+            <span className="text-sm">{likes}</span>
           </Button>
-
-          <Button
-            variant="ghost"
-            size="sm"
-            className="flex items-center space-x-1"
-            onClick={handleComment}
-          >
-            <MessageCircle className="h-4 w-4" />
-            <span className="text-sm">{post.comments}</span>
-          </Button>
-
-          <Button
-            variant="ghost"
-            size="sm"
-            className="flex items-center space-x-1"
-            onClick={handleShare}
-          >
-            <Share className="h-4 w-4" />
-            <span className="text-sm">{post.shares}</span>
-          </Button>
-        </div>
-
-        <div className="flex items-center space-x-2">
-          {post.location && (
-            <div className="flex items-center space-x-1 text-xs text-muted-foreground">
-              <MapPin className="h-3 w-3" />
-              <span>{post.location.name}</span>
-            </div>
-          )}
           
           <Button
             variant="ghost"
             size="sm"
-            className={bookmarked ? 'text-yellow-500' : ''}
-            onClick={handleBookmark}
+            onClick={handleComment}
+            className="p-2 text-gray-600"
           >
-            <Bookmark className={`h-4 w-4 ${bookmarked ? 'fill-current' : ''}`} />
+            <MessageCircle className="h-5 w-5 mr-1" />
+            <span className="text-sm">{post.comments}</span>
+          </Button>
+          
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleShare}
+            className="p-2 text-gray-600"
+          >
+            <Share2 className="h-5 w-5 mr-1" />
+            <span className="text-sm">{post.shares}</span>
           </Button>
         </div>
+        
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleBookmark}
+          className={`p-2 ${isBookmarked ? 'text-blue-500' : 'text-gray-600'}`}
+        >
+          <Bookmark className={`h-5 w-5 ${isBookmarked ? 'fill-current' : ''}`} />
+        </Button>
       </div>
-
-      {post.vibeTags && post.vibeTags.length > 0 && (
-        <div className="flex flex-wrap gap-1 mt-2">
-          {post.vibeTags.slice(0, 3).map((tag, index) => (
-            <span
-              key={index}
-              className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full"
-            >
-              #{tag}
-            </span>
-          ))}
-          {post.vibeTags.length > 3 && (
-            <span className="text-xs text-muted-foreground">
-              +{post.vibeTags.length - 3} more
-            </span>
-          )}
-        </div>
-      )}
     </div>
   );
 };

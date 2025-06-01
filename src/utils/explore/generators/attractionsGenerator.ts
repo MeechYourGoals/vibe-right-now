@@ -1,65 +1,32 @@
 
-import { Location } from "@/types";
-import { getMockUserProfile } from "@/mock/users";
-import { getRandomItems } from "@/utils/explore/mockGenerators";
-import { vibeTags } from "../helpers/vibeTags";
-import { generateZipCode } from "../helpers/zipCodeGenerator";
+import { Post } from '@/types';
+import { mockUsers } from '@/mock/users';
 
-// Generate event and attraction locations for a city
-export const generateEventAndAttractionLocations = (city: string, state: string = ""): Location[] => {
-  const locations: Location[] = [];
+export const generateAttractionPosts = (): Post[] => {
+  const user = mockUsers[0];
   
-  // Event location
-  locations.push({
-    id: `${city.toLowerCase().replace(/\s+/g, '-')}-event-1`,
-    name: `${city} Festival Ground`,
-    address: `101 Festival Way`,
-    city: city,
-    state: state || 'CA',
-    country: 'USA',
-    zip: generateZipCode(city),
-    lat: 37.7749 + (Math.random() * 0.02 - 0.01),
-    lng: -122.4194 + (Math.random() * 0.02 - 0.01),
-    type: 'event',
-    verified: true,
-    hours: {
-      monday: '9:00 AM - 5:00 PM',
-      tuesday: '9:00 AM - 5:00 PM',
-      wednesday: '9:00 AM - 5:00 PM',
-      thursday: '9:00 AM - 5:00 PM',
-      friday: '9:00 AM - 11:00 PM',
-      saturday: '10:00 AM - 11:00 PM',
-      sunday: '10:00 AM - 8:00 PM'
+  return [
+    {
+      id: 'attraction-1',
+      userId: user.id,
+      content: 'Amazing art installation at the downtown gallery! The interactive exhibits are mind-blowing. Perfect spot for a creative afternoon. #ArtLovers #Gallery',
+      images: ['https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=500'],
+      timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+      likes: 45,
+      comments: 8,
+      shares: 12,
+      user
     },
-    vibes: getRandomItems(vibeTags, 3),
-    userProfile: getMockUserProfile('venue'),
-  });
-  
-  // Attraction location
-  locations.push({
-    id: `${city.toLowerCase().replace(/\s+/g, '-')}-attraction-1`,
-    name: `${city} Museum of Art`,
-    address: `200 Culture Blvd`,
-    city: city,
-    state: state || 'CA',
-    country: 'USA',
-    zip: generateZipCode(city),
-    lat: 37.7749 + (Math.random() * 0.02 - 0.01),
-    lng: -122.4194 + (Math.random() * 0.02 - 0.01),
-    type: 'attraction',
-    verified: true,
-    hours: {
-      monday: 'Closed',
-      tuesday: '10:00 AM - 5:00 PM',
-      wednesday: '10:00 AM - 5:00 PM',
-      thursday: '10:00 AM - 5:00 PM',
-      friday: '10:00 AM - 8:00 PM',
-      saturday: '9:00 AM - 6:00 PM',
-      sunday: '10:00 AM - 5:00 PM'
-    },
-    vibes: getRandomItems(vibeTags, 3),
-    userProfile: getMockUserProfile('venue'),
-  });
-  
-  return locations;
+    {
+      id: 'attraction-2',
+      userId: user.id,
+      content: 'The botanical gardens are in full bloom! Spring has definitely arrived. Taking a peaceful walk through nature in the heart of the city.',
+      images: ['https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=500'],
+      timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+      likes: 67,
+      comments: 15,
+      shares: 8,
+      user
+    }
+  ];
 };
