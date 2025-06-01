@@ -131,7 +131,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
 
 
   return (
-    <div className="fixed bottom-0 right-0 w-full h-full max-h-full rounded-none sm:bottom-6 sm:right-6 sm:w-[400px] sm:h-[640px] sm:max-h-[calc(100vh-48px)] bg-background border border-neutral-200 dark:border-neutral-700 sm:rounded-2xl shadow-xl flex flex-col z-50 overflow-hidden">
+    <div className="fixed right-6 bottom-6 w-[400px] h-[640px] max-h-[calc(100vh-48px)] bg-background border border-neutral-200 dark:border-neutral-700 rounded-2xl shadow-xl flex flex-col z-50 overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-neutral-200 dark:border-neutral-700">
         <div className="flex items-center space-x-2">
