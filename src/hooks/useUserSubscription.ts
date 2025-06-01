@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { UserSubscription, UserSubscriptionTier, SubscriptionPlan } from '@/types/subscription';
 
@@ -60,14 +59,40 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
   }
 ];
 
+const LOCAL_STORAGE_KEY = 'userSubscriptionData';
+
 export const useUserSubscription = () => {
-  const [subscription, setSubscription] = useState<UserSubscription>({
-    tier: 'free',
-    status: 'active',
-    billingCycle: 'monthly',
-    currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-    cancelAtPeriodEnd: false
+  const [subscription, setSubscription] = useState<UserSubscription>(() => {
+    try {
+      const storedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (storedData) {
+        const parsedData = JSON.parse(storedData);
+        // Ensure date is correctly parsed back
+        if (parsedData.currentPeriodEnd) {
+          parsedData.currentPeriodEnd = new Date(parsedData.currentPeriodEnd);
+        }
+        return parsedData;
+      }
+    } catch (error) {
+      console.error("Error loading subscription from local storage:", error);
+    }
+    // Default initial state if nothing in local storage or error
+    return {
+      tier: 'free',
+      status: 'active',
+      billingCycle: 'monthly',
+      currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+      cancelAtPeriodEnd: false
+    };
   });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(subscription));
+    } catch (error) {
+      console.error("Error saving subscription to local storage:", error);
+    }
+  }, [subscription]);
 
   // Check if user has access to a specific feature
   const hasFeatureAccess = (feature: string): boolean => {
@@ -99,8 +124,10 @@ export const useUserSubscription = () => {
     setSubscription(prev => ({
       ...prev,
       tier,
-      status: 'active',
-      currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+      status: 'active', // Reset status to active on upgrade
+      billingCycle: SUBSCRIPTION_PLANS.find(p => p.id === tier)?.billingCycle || 'monthly', // update billing cycle
+      currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // Reset period end to 30 days from now
+      cancelAtPeriodEnd: false // Reset cancellation flag
     }));
   };
 
