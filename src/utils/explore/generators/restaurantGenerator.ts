@@ -1,32 +1,65 @@
 
-import { Post } from '@/types';
-import { mockUsers } from '@/mock/users';
+import { Location } from "@/types";
+import { getMockUserProfile } from "@/mock/users";
+import { getRandomItems } from "@/utils/explore/mockGenerators";
+import { vibeTags } from "../helpers/vibeTags";
+import { generateZipCode } from "../helpers/zipCodeGenerator";
 
-export const generateRestaurantPosts = (): Post[] => {
-  const user = mockUsers[0];
+// Generate restaurant locations for a city
+export const generateRestaurantLocations = (city: string, state: string = ""): Location[] => {
+  const locations: Location[] = [];
   
-  return [
-    {
-      id: 'restaurant-1',
-      userId: user.id,
-      content: 'Just had the most incredible farm-to-table experience! Every ingredient tells a story. The chef came out to explain the sourcing. Mind = blown! 🌱👨‍🍳',
-      images: ['https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=500'],
-      timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-      likes: 156,
-      comments: 42,
-      shares: 28,
-      user
+  // First restaurant
+  locations.push({
+    id: `${city.toLowerCase().replace(/\s+/g, '-')}-restaurant-1`,
+    name: `Taste of ${city}`,
+    address: `123 Main Street`,
+    city: city,
+    state: state || 'CA',
+    country: 'USA',
+    zip: generateZipCode(city),
+    lat: 37.7749 + (Math.random() * 0.02 - 0.01),
+    lng: -122.4194 + (Math.random() * 0.02 - 0.01),
+    type: 'restaurant',
+    verified: true,
+    hours: {
+      monday: '11:00 AM - 10:00 PM',
+      tuesday: '11:00 AM - 10:00 PM',
+      wednesday: '11:00 AM - 10:00 PM',
+      thursday: '11:00 AM - 10:00 PM',
+      friday: '11:00 AM - 11:00 PM',
+      saturday: '11:00 AM - 11:00 PM',
+      sunday: '12:00 PM - 9:00 PM'
     },
-    {
-      id: 'restaurant-2',
-      userId: user.id,
-      content: 'Brunch goals achieved! This avocado toast is next level, and don\'t get me started on their house-made everything bagels. Weekend vibes in full effect! 🥑',
-      images: ['https://images.unsplash.com/photo-1482049016688-2d3e1b311543?w=500'],
-      timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-      likes: 203,
-      comments: 67,
-      shares: 45,
-      user
-    }
-  ];
+    vibes: getRandomItems(vibeTags, 3),
+    userProfile: getMockUserProfile('venue'),
+  });
+  
+  // Second restaurant
+  locations.push({
+    id: `${city.toLowerCase().replace(/\s+/g, '-')}-restaurant-2`,
+    name: `${city} Bistro`,
+    address: `456 Oak Avenue`,
+    city: city,
+    state: state || 'CA',
+    country: 'USA',
+    zip: generateZipCode(city),
+    lat: 37.7749 + (Math.random() * 0.02 - 0.01),
+    lng: -122.4194 + (Math.random() * 0.02 - 0.01),
+    type: 'restaurant',
+    verified: true,
+    hours: {
+      monday: '5:00 PM - 10:00 PM',
+      tuesday: '5:00 PM - 10:00 PM',
+      wednesday: '5:00 PM - 10:00 PM',
+      thursday: '5:00 PM - 10:00 PM',
+      friday: '5:00 PM - 11:00 PM',
+      saturday: '5:00 PM - 11:00 PM',
+      sunday: '5:00 PM - 9:00 PM'
+    },
+    vibes: getRandomItems(vibeTags, 3),
+    userProfile: getMockUserProfile('venue'),
+  });
+  
+  return locations;
 };

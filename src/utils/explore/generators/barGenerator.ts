@@ -1,32 +1,65 @@
 
-import { Post } from '@/types';
-import { mockUsers } from '@/mock/users';
+import { Location } from "@/types";
+import { getMockUserProfile } from "@/mock/users";
+import { getRandomItems } from "@/utils/explore/mockGenerators";
+import { vibeTags } from "../helpers/vibeTags";
+import { generateZipCode } from "../helpers/zipCodeGenerator";
 
-export const generateBarPosts = (): Post[] => {
-  const user = mockUsers[0];
+// Generate bar/nightlife locations for a city
+export const generateBarLocations = (city: string, state: string = ""): Location[] => {
+  const locations: Location[] = [];
   
-  return [
-    {
-      id: 'bar-1',
-      userId: user.id,
-      content: 'Found the perfect speakeasy! Hidden behind a bookshelf, craft cocktails that are pure art. The bartender is a magician! 🍸✨',
-      images: ['https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=500'],
-      timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
-      likes: 89,
-      comments: 23,
-      shares: 15,
-      user
+  // Bar location
+  locations.push({
+    id: `${city.toLowerCase().replace(/\s+/g, '-')}-bar-1`,
+    name: `${city} Brewing Co.`,
+    address: `789 Elm Street`,
+    city: city,
+    state: state || 'CA',
+    country: 'USA',
+    zip: generateZipCode(city),
+    lat: 37.7749 + (Math.random() * 0.02 - 0.01),
+    lng: -122.4194 + (Math.random() * 0.02 - 0.01),
+    type: 'bar',
+    verified: true,
+    hours: {
+      monday: '4:00 PM - 12:00 AM',
+      tuesday: '4:00 PM - 12:00 AM',
+      wednesday: '4:00 PM - 12:00 AM',
+      thursday: '4:00 PM - 1:00 AM',
+      friday: '3:00 PM - 2:00 AM',
+      saturday: '12:00 PM - 2:00 AM',
+      sunday: '12:00 PM - 10:00 PM'
     },
-    {
-      id: 'bar-2',
-      userId: user.id,
-      content: 'Rooftop bar with the best city views! Happy hour until 7pm. The sunset here is absolutely stunning. Perfect for after-work drinks.',
-      images: ['https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=500'],
-      timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
-      likes: 134,
-      comments: 31,
-      shares: 22,
-      user
-    }
-  ];
+    vibes: getRandomItems(vibeTags, 3),
+    userProfile: getMockUserProfile('venue'),
+  });
+  
+  // Nightlife location
+  locations.push({
+    id: `${city.toLowerCase().replace(/\s+/g, '-')}-nightlife-1`,
+    name: `Club ${city}`,
+    address: `500 Nightlife Blvd`,
+    city: city,
+    state: state || 'CA',
+    country: 'USA',
+    zip: generateZipCode(city),
+    lat: 37.7749 + (Math.random() * 0.02 - 0.01),
+    lng: -122.4194 + (Math.random() * 0.02 - 0.01),
+    type: 'bar',
+    verified: true,
+    hours: {
+      monday: 'Closed',
+      tuesday: 'Closed',
+      wednesday: '9:00 PM - 2:00 AM',
+      thursday: '9:00 PM - 2:00 AM',
+      friday: '9:00 PM - 3:00 AM',
+      saturday: '9:00 PM - 3:00 AM',
+      sunday: '9:00 PM - 1:00 AM'
+    },
+    vibes: [...getRandomItems(vibeTags, 2), 'Nightowl'],
+    userProfile: getMockUserProfile('venue'),
+  });
+  
+  return locations;
 };
