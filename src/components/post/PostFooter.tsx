@@ -1,33 +1,33 @@
 
 import React, { useState } from 'react';
+import { Heart, MessageCircle, Share2, Bookmark } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Heart, MessageCircle, Share, Bookmark } from 'lucide-react';
 import { Post } from '@/types';
 
 interface PostFooterProps {
   post: Post;
   isDetailView?: boolean;
-  onLike?: () => void;
   onComment?: () => void;
+  onLike?: () => void;
   onShare?: () => void;
   onSave?: () => void;
 }
 
-const PostFooter: React.FC<PostFooterProps> = ({
+export const PostFooter: React.FC<PostFooterProps> = ({
   post,
   isDetailView = false,
-  onLike,
   onComment,
+  onLike,
   onShare,
   onSave
 }) => {
   const [isLiked, setIsLiked] = useState(false);
   const [isSaved, setIsSaved] = useState(post.saved || false);
-  const [likeCount, setLikeCount] = useState(post.likes);
+  const [likesCount, setLikesCount] = useState(post.likes);
 
   const handleLike = () => {
     setIsLiked(!isLiked);
-    setLikeCount(prev => isLiked ? prev - 1 : prev + 1);
+    setLikesCount(prev => isLiked ? prev - 1 : prev + 1);
     onLike?.();
   };
 
@@ -37,36 +37,36 @@ const PostFooter: React.FC<PostFooterProps> = ({
   };
 
   return (
-    <div className="flex items-center justify-between pt-3">
+    <div className="flex items-center justify-between p-4 border-t">
       <div className="flex items-center space-x-4">
         <Button
           variant="ghost"
           size="sm"
           onClick={handleLike}
-          className={`p-2 ${isLiked ? 'text-red-500' : 'text-gray-600'}`}
+          className={`flex items-center space-x-1 ${isLiked ? 'text-red-500' : ''}`}
         >
-          <Heart className={`h-5 w-5 ${isLiked ? 'fill-current' : ''}`} />
-          <span className="ml-1">{likeCount}</span>
+          <Heart className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
+          <span>{likesCount}</span>
         </Button>
         
         <Button
           variant="ghost"
           size="sm"
           onClick={onComment}
-          className="p-2 text-gray-600"
+          className="flex items-center space-x-1"
         >
-          <MessageCircle className="h-5 w-5" />
-          <span className="ml-1">{post.comments}</span>
+          <MessageCircle className="h-4 w-4" />
+          <span>{post.comments}</span>
         </Button>
         
         <Button
           variant="ghost"
           size="sm"
           onClick={onShare}
-          className="p-2 text-gray-600"
+          className="flex items-center space-x-1"
         >
-          <Share className="h-5 w-5" />
-          <span className="ml-1">{post.shares}</span>
+          <Share2 className="h-4 w-4" />
+          <span>{post.shares}</span>
         </Button>
       </div>
       
@@ -74,9 +74,9 @@ const PostFooter: React.FC<PostFooterProps> = ({
         variant="ghost"
         size="sm"
         onClick={handleSave}
-        className={`p-2 ${isSaved ? 'text-blue-500' : 'text-gray-600'}`}
+        className={`${isSaved ? 'text-blue-500' : ''}`}
       >
-        <Bookmark className={`h-5 w-5 ${isSaved ? 'fill-current' : ''}`} />
+        <Bookmark className={`h-4 w-4 ${isSaved ? 'fill-current' : ''}`} />
       </Button>
     </div>
   );

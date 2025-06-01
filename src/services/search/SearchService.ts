@@ -51,4 +51,12 @@ export class SearchService {
       type: 'events'
     });
   }
+
+  static async comedySearch(query: string, location?: string): Promise<string> {
+    return this.searchComedy(query, location);
+  }
+
+  static async vectorSearch(query: string, options?: any): Promise<string> {
+    return this.search(query, options);
+  }
 }

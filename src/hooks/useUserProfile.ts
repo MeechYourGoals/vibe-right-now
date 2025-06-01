@@ -2,6 +2,9 @@
 import { useState } from 'react';
 import { User } from '@/types';
 import { mockUsers } from '@/mock/users';
+import { mockPosts } from '@/mock/posts';
+import { mockComments } from '@/mock/comments';
+import { mockLocations } from '@/mock/locations';
 
 export const useUserProfile = (userId?: string) => {
   const [userProfile, setUserProfile] = useState<User>(() => {
@@ -33,11 +36,33 @@ export const useUserProfile = (userId?: string) => {
     console.log(`Unfollowing user: ${userProfile.username}`);
   };
 
+  // Add the missing properties for UserProfile page
+  const user = userProfile;
+  const userPosts = mockPosts.filter(post => post.user.id === userProfile.id);
+  const followedVenues = mockLocations.slice(0, 3);
+  const visitedPlaces = mockLocations.slice(0, 5);
+  const wantToVisitPlaces = mockLocations.slice(5, 10);
+  
+  const getPostComments = (postId: string) => {
+    return mockComments.filter(comment => comment.postId === postId);
+  };
+  
+  const getUserBio = () => userProfile.bio || "No bio available";
+  const isPrivateProfile = userProfile.isPrivate || false;
+
   return {
     userProfile,
     updateProfile,
     stats,
     followUser,
-    unfollowUser
+    unfollowUser,
+    user,
+    userPosts,
+    followedVenues,
+    visitedPlaces,
+    wantToVisitPlaces,
+    getPostComments,
+    getUserBio,
+    isPrivateProfile
   };
 };
