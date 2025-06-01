@@ -8,9 +8,6 @@ import { VertexAIService } from '@/services/VertexAIService';
 export class SearchService {
   /**
    * Search using Google Vertex AI with search capabilities
-   * @param query The search query
-   * @param options Additional search options
-   * @returns The search results as text
    */
   static async search(
     query: string,

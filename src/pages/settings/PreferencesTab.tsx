@@ -1,163 +1,135 @@
 
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { PREFERENCE_TAGS, PREFERENCE_CATEGORIES } from "./constants";
-import { useToast } from "@/hooks/use-toast";
-
-// Import components
+import React from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import UserPreferences from "./components/UserPreferences";
-import VenueTaggingSection from "./components/VenueTaggingSection";
-import LocationSettings from "./components/LocationSettings";
-import ContentPreferences from "./components/ContentPreferences";
 import VenueDisplaySettings from "./components/VenueDisplaySettings";
-import CompetitorTags from "./components/CompetitorTags";
+import { UserSubscriptionTier } from "@/types/subscription";
+import { useUserSubscription } from "@/hooks/useUserSubscription";
+import FeatureGate from "@/components/ui/feature-gate";
 
-export interface PreferencesTabProps {
+interface PreferencesTabProps {
   onSave: () => void;
-  isVenueMode?: boolean;
-  subscriptionTier?: 'standard' | 'plus' | 'premium' | 'pro';
+  isVenueMode: boolean;
+  subscriptionTier?: UserSubscriptionTier;
 }
 
-const PreferencesTab = ({ 
-  onSave, 
-  isVenueMode = false, 
-  subscriptionTier = 'standard' 
-}: PreferencesTabProps) => {
-  const [distanceUnit, setDistanceUnit] = useState("miles");
-  const [searchRadius, setSearchRadius] = useState([10]);
-  const [showNearbyLocations, setShowNearbyLocations] = useState(true);
-  const [autoplayVideos, setAutoplayVideos] = useState(false);
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
-  const [newTag, setNewTag] = useState("");
-  const [favorites, setFavorites] = useState<string[]>([]);
-  
-  const { toast } = useToast();
-  const [competitorVenues, setCompetitorVenues] = useState([
-    { id: 1, name: "The Corner Bar", tags: ["Cozy", "Lounges", "Date Night"] },
-    { id: 2, name: "Downtown Café", tags: ["Cozy", "Locally Owned", "Budget Friendly"] },
-    { id: 3, name: "The Luxury Lounge", tags: ["High Energy", "Luxury", "Night Owls"] },
-    { id: 4, name: "Family Fun Center", tags: ["Family Friendly", "Budget Friendly", "Physical Adventure"] }
-  ]);
-  
-  // Generate AI suggested tags based on venue type for premium/pro users
-  useEffect(() => {
-    if (isVenueMode && (subscriptionTier === 'premium' || subscriptionTier === 'pro')) {
-      // These would normally be AI-generated based on venue data
-      setSuggestedTags([
-        "Cozy", 
-        "Locally Owned", 
-        "Night Owls", 
-        "Live Music", 
-        "Good for Groups", 
-        "Date Night"
-      ]);
-    }
-  }, [isVenueMode, subscriptionTier]);
-  
-  const handleTagSelect = (tag: string) => {
-    if (!selectedTags.includes(tag)) {
-      setSelectedTags([...selectedTags, tag]);
-    }
-  };
-  
-  const handleTagRemove = (tag: string) => {
-    setSelectedTags(selectedTags.filter(t => t !== tag));
-  };
-  
-  const handleAddCustomTag = (tag: string) => {
-    if (tag.trim() && !selectedTags.includes(tag.trim())) {
-      setSelectedTags([...selectedTags, tag.trim()]);
-    }
-  };
-  
-  const handleAddFavorite = (favorite: string) => {
-    if (favorite.trim() && !favorites.includes(favorite.trim())) {
-      if (favorites.length < 10) {
-        setFavorites([...favorites, favorite.trim()]);
-      } else {
-        // Show a message indicating the limit has been reached
-        toast({
-          title: "Favorites limit reached",
-          description: "You can only add up to 10 favorites. Remove one to add another.",
-          variant: "destructive"
-        });
-      }
-    }
-  };
-  
-  const handleRemoveFavorite = (favorite: string) => {
-    setFavorites(favorites.filter(f => f !== favorite));
-  };
-  
-  const renderCompetitorTags = () => {
-    return (
-      <CompetitorTags 
-        competitorVenues={competitorVenues}
-        onTagSelect={handleTagSelect}
-      />
-    );
-  };
-  
+const PreferencesTab = ({ onSave, isVenueMode, subscriptionTier = 'free' }: PreferencesTabProps) => {
+  const { hasFeatureAccess, upgradeTo } = useUserSubscription();
+
   return (
-    <div className="bg-card p-6 rounded-lg border shadow-sm">
-      <h2 className="text-xl font-semibold mb-4">Preferences</h2>
-      
-      <div className="space-y-6">
-        {/* User Preferences Section - Always shown when not in venue mode */}
-        {!isVenueMode && (
-          <UserPreferences
-            selectedTags={selectedTags}
-            favorites={favorites}
-            onTagSelect={handleTagSelect}
-            onTagRemove={handleTagRemove}
-            onAddCustomTag={handleAddCustomTag}
-            onAddFavorite={handleAddFavorite}
-            onRemoveFavorite={handleRemoveFavorite}
-            preferenceCategories={PREFERENCE_CATEGORIES}
-            preferenceTags={PREFERENCE_TAGS}
-          />
-        )}
-        
-        {/* Venue Tagging Section - Only shown in venue mode */}
-        {isVenueMode && (
-          <VenueTaggingSection
-            subscriptionTier={subscriptionTier}
-            selectedTags={selectedTags}
-            suggestedTags={suggestedTags}
-            onTagSelect={handleTagSelect}
-            onTagRemove={handleTagRemove}
-            onAddCustomTag={handleAddCustomTag}
-            preferenceCategories={PREFERENCE_CATEGORIES}
-            preferenceTags={PREFERENCE_TAGS}
-            renderCompetitorTags={renderCompetitorTags}
-          />
-        )}
-        
-        {/* Location Settings - Always shown */}
-        <LocationSettings
-          searchRadius={searchRadius}
-          setSearchRadius={setSearchRadius}
-          distanceUnit={distanceUnit}
-          setDistanceUnit={setDistanceUnit}
-          showNearbyLocations={showNearbyLocations}
-          setShowNearbyLocations={setShowNearbyLocations}
-        />
-        
-        {/* Content Preferences - Always shown */}
-        <ContentPreferences
-          autoplayVideos={autoplayVideos}
-          setAutoplayVideos={setAutoplayVideos}
-          isVenueMode={isVenueMode}
-        />
-        
-        {/* Venue Display Settings - Only shown in venue mode */}
-        {isVenueMode && (
-          <VenueDisplaySettings />
-        )}
-        
-        <Button onClick={onSave} className="w-full">Save Preferences</Button>
-      </div>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>General Preferences</CardTitle>
+          <CardDescription>
+            Customize your experience and notification settings
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {isVenueMode ? (
+            <VenueDisplaySettings onSave={onSave} />
+          ) : (
+            <UserPreferences onSave={onSave} />
+          )}
+        </CardContent>
+      </Card>
+
+      {!isVenueMode && (
+        <>
+          {/* Enhanced Preferences for Plus and above */}
+          {hasFeatureAccess('preferences') ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>Enhanced Preferences</CardTitle>
+                <CardDescription>
+                  Save your favorite artists, teams, and genres for personalized recommendations
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium">Favorite Artists</label>
+                  <p className="text-sm text-muted-foreground mb-2">Get notified when your favorite artists have events</p>
+                  <input
+                    type="text"
+                    placeholder="Add artists (comma separated)"
+                    className="w-full p-2 border rounded-md"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Favorite Teams</label>
+                  <p className="text-sm text-muted-foreground mb-2">Stay updated on your teams' games and events</p>
+                  <input
+                    type="text"
+                    placeholder="Add teams (comma separated)"
+                    className="w-full p-2 border rounded-md"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Favorite Genres</label>
+                  <p className="text-sm text-muted-foreground mb-2">Discover events in your preferred genres</p>
+                  <input
+                    type="text"
+                    placeholder="Add genres (comma separated)"
+                    className="w-full p-2 border rounded-md"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <FeatureGate
+              requiredTier="plus"
+              currentTier={subscriptionTier}
+              featureName="Enhanced Preferences"
+              onUpgrade={upgradeTo}
+              upgradeMessage="Save your favorite artists, teams, and genres with Plus"
+            >
+              <div />
+            </FeatureGate>
+          )}
+
+          {/* Premium Transportation Features */}
+          {hasFeatureAccess('transportationOptions') ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>Default Transportation</CardTitle>
+                <CardDescription>
+                  Set your preferred transportation options for event planning
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium">Preferred Service</label>
+                  <select className="w-full p-2 border rounded-md mt-1">
+                    <option>Uber</option>
+                    <option>Lyft</option>
+                    <option>Public Transit</option>
+                    <option>Walking</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Maximum Travel Time</label>
+                  <select className="w-full p-2 border rounded-md mt-1">
+                    <option>15 minutes</option>
+                    <option>30 minutes</option>
+                    <option>45 minutes</option>
+                    <option>1 hour</option>
+                  </select>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <FeatureGate
+              requiredTier="premium"
+              currentTier={subscriptionTier}
+              featureName="Transportation Preferences"
+              onUpgrade={upgradeTo}
+              upgradeMessage="Set default transportation options with Premium"
+            >
+              <div />
+            </FeatureGate>
+          )}
+        </>
+      )}
     </div>
   );
 };

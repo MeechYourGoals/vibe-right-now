@@ -23,6 +23,22 @@ export interface ScribeTranscriptionOptions {
 }
 
 export class ElevenLabsService {
+  private static apiKey: string | null = null;
+
+  /**
+   * Set API key (for backward compatibility)
+   */
+  static setApiKey(apiKey: string) {
+    this.apiKey = apiKey;
+  }
+
+  /**
+   * Check if API key is available (for backward compatibility)
+   */
+  static hasApiKey(): boolean {
+    return !!this.apiKey;
+  }
+
   /**
    * Convert text to speech (proxied to Google TTS)
    */
@@ -75,6 +91,14 @@ export class ElevenLabsService {
       { voice_id: 'en-US-Neural2-A', name: 'Alex (Male)', category: 'generated' },
       { voice_id: 'en-US-Neural2-C', name: 'Grace (Female)', category: 'generated' }
     ];
+  }
+
+  /**
+   * Create agent task (mock implementation for compatibility)
+   */
+  static async createAgentTask(request: any): Promise<any> {
+    console.log('ElevenLabs proxy: createAgentTask not implemented, using mock response');
+    return { conversation_id: 'mock-id', status: 'started' };
   }
 }
 
