@@ -1,4 +1,3 @@
-// If this file doesn't exist, we're creating it
 import { MockUserProfile } from "@/mock/users";
 
 export interface Location {
@@ -55,7 +54,7 @@ export interface Post {
   isVenuePost?: boolean;
   isPinned?: boolean;
   expiresAt?: string;
-  saved?: boolean; // Add this missing property
+  saved?: boolean;
 }
 
 export interface Comment {
@@ -70,7 +69,6 @@ export interface Comment {
   likes: number;
 }
 
-// Add User type for backward compatibility
 export interface User {
   id: string;
   username: string;
@@ -87,13 +85,33 @@ export interface User {
   subscription?: UserSubscriptionTier;
 }
 
+export interface DateRange {
+  from: Date | undefined;
+  to: Date | undefined;
+}
+
+// Credit card interface
+export interface CreditCard {
+  id: string;
+  lastFour: string;
+  brand: string;
+  expiryMonth: number;
+  expiryYear: number;
+  isDefault: boolean;
+  holderName?: string;
+}
+
+// Export vibe tags
+export const vibeTags = [
+  'chill', 'energetic', 'romantic', 'casual', 'upscale', 'trendy', 'cozy', 'lively'
+];
+
 // VernonChat types
 export interface ChatMessage {
   id: string;
   role: 'user' | 'assistant' | 'system' | 'error';
   content: string;
   timestamp: string;
-  // For compatibility with older format
   text?: string;
   sender?: 'user' | 'ai';
 }
@@ -136,12 +154,6 @@ export interface VenueInsights {
   discountRedemptions?: number;
 }
 
-export interface DateRange {
-  from: Date | undefined;
-  to: Date | undefined;
-}
-
-// Advertising Suite Types
 export interface AdFormat {
   id: string;
   name: string;
@@ -194,7 +206,6 @@ export interface CampaignPerformance {
   footTrafficLift: number;
 }
 
-// Sentiment Analysis Types
 export interface VenueSentimentAnalysis {
   id: string;
   venue_id: string;

@@ -27,9 +27,9 @@ const PreferencesTab = ({ onSave, isVenueMode, subscriptionTier = 'free' }: Pref
         </CardHeader>
         <CardContent>
           {isVenueMode ? (
-            <VenueDisplaySettings onSave={onSave} />
+            <VenueDisplaySettings />
           ) : (
-            <UserPreferences onSave={onSave} />
+            <UserPreferences />
           )}
         </CardContent>
       </Card>

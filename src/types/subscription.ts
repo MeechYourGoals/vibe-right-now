@@ -46,3 +46,14 @@ export interface SavedCard {
   expiryYear: number;
   isDefault: boolean;
 }
+
+// Credit card type for payment forms
+export interface CreditCard {
+  id: string;
+  lastFour: string;
+  brand: string;
+  expiryMonth: number;
+  expiryYear: number;
+  isDefault: boolean;
+  holderName?: string;
+}
