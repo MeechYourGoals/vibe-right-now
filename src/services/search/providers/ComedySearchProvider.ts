@@ -29,7 +29,7 @@ export const ComedySearchProvider = {
       
       // First try using the Comedy Search Service
       try {
-        const comedyResults = await ComedySearchService.comedySearch(query);
+        const comedyResults = await ComedySearchService.searchComedy(query);
         if (comedyResults && comedyResults.length > 100) {
           return comedyResults;
         }

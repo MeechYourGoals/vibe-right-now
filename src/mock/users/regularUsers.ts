@@ -9,6 +9,7 @@ export const regularUsers: User[] = [
     isPrivate: false,
     verified: true,
     bio: "Food enthusiast and cocktail connoisseur. Always on the hunt for the next great dining experience! 🍹🍣",
+    subscription: 'free',
   },
   {
     id: "2",
@@ -18,6 +19,7 @@ export const regularUsers: User[] = [
     isPrivate: false,
     verified: true,
     bio: "Music venue expert and coffee shop explorer. Creating memories one experience at a time. 🎵☕",
+    subscription: 'free',
   },
   {
     id: "3",
@@ -27,6 +29,7 @@ export const regularUsers: User[] = [
     isPrivate: false,
     verified: true,
     bio: "Outdoor enthusiast and adrenaline junkie. Life is too short to stay indoors! 🏔️🧗‍♀️",
+    subscription: 'free',
   },
   {
     id: "4",
@@ -36,6 +39,7 @@ export const regularUsers: User[] = [
     isPrivate: false,
     verified: true,
     bio: "Cultural explorer and global citizen. Sharing international experiences and hidden landmarks. 🗺️✈️",
+    subscription: 'free',
   },
   {
     id: "5",
@@ -45,6 +49,7 @@ export const regularUsers: User[] = [
     isPrivate: false,
     verified: true,
     bio: "Finding the hidden gems in every city. Local spots with the best vibes! 🏙️🔍",
+    subscription: 'free',
   },
   {
     id: "6",
@@ -52,6 +57,7 @@ export const regularUsers: User[] = [
     name: "Michael Jones",
     avatar: "https://randomuser.me/api/portraits/men/3.jpg",
     isPrivate: true,
+    subscription: 'free',
   },
   {
     id: "7",
@@ -59,6 +65,7 @@ export const regularUsers: User[] = [
     name: "Sophie Garcia",
     avatar: "https://randomuser.me/api/portraits/women/4.jpg",
     isPrivate: false,
+    subscription: 'free',
   },
   {
     id: "8",
@@ -66,6 +73,7 @@ export const regularUsers: User[] = [
     name: "David Thompson",
     avatar: "https://randomuser.me/api/portraits/men/4.jpg",
     isPrivate: true,
+    subscription: 'free',
   },
   {
     id: "9",
@@ -73,6 +81,7 @@ export const regularUsers: User[] = [
     name: "Emma Wilson",
     avatar: "https://randomuser.me/api/portraits/women/5.jpg",
     isPrivate: false,
+    subscription: 'free',
   },
   {
     id: "10",
@@ -80,6 +89,7 @@ export const regularUsers: User[] = [
     name: "James Smith",
     avatar: "https://randomuser.me/api/portraits/men/5.jpg",
     isPrivate: true,
+    subscription: 'free',
   },
   {
     id: "11",
@@ -87,6 +97,7 @@ export const regularUsers: User[] = [
     name: "Olivia Brown",
     avatar: "https://randomuser.me/api/portraits/women/6.jpg",
     isPrivate: false,
+    subscription: 'free',
   },
   {
     id: "12",
@@ -94,6 +105,7 @@ export const regularUsers: User[] = [
     name: "Ryan Davis",
     avatar: "https://randomuser.me/api/portraits/men/6.jpg",
     isPrivate: true,
+    subscription: 'free',
   },
   {
     id: "13",
@@ -101,6 +113,7 @@ export const regularUsers: User[] = [
     name: "Tyler Rodriguez",
     avatar: "https://randomuser.me/api/portraits/men/7.jpg",
     isPrivate: false,
+    subscription: 'free',
   },
   {
     id: "14",
@@ -108,6 +121,7 @@ export const regularUsers: User[] = [
     name: "Lisa Martinez",
     avatar: "https://randomuser.me/api/portraits/women/7.jpg",
     isPrivate: true,
+    subscription: 'free',
   },
   {
     id: "15",
@@ -115,6 +129,7 @@ export const regularUsers: User[] = [
     name: "Amelia Jackson",
     avatar: "https://randomuser.me/api/portraits/women/8.jpg",
     isPrivate: false,
+    subscription: 'free',
   },
   {
     id: "16",
@@ -122,6 +137,7 @@ export const regularUsers: User[] = [
     name: "Emma Lewis",
     avatar: "https://randomuser.me/api/portraits/women/9.jpg",
     isPrivate: true,
+    subscription: 'free',
   },
   {
     id: "17",
@@ -129,6 +145,7 @@ export const regularUsers: User[] = [
     name: "Olivia Parker",
     avatar: "https://randomuser.me/api/portraits/women/10.jpg",
     isPrivate: false,
+    subscription: 'free',
   },
   {
     id: "18",
@@ -136,6 +153,7 @@ export const regularUsers: User[] = [
     name: "Daniel Baker",
     avatar: "https://randomuser.me/api/portraits/men/11.jpg",
     isPrivate: true,
+    subscription: 'free',
   },
   {
     id: "19",
@@ -143,6 +161,7 @@ export const regularUsers: User[] = [
     name: "Isabella Moore",
     avatar: "https://randomuser.me/api/portraits/women/11.jpg",
     isPrivate: false,
+    subscription: 'free',
   },
   {
     id: "20",
@@ -150,6 +169,7 @@ export const regularUsers: User[] = [
     name: "William Harris",
     avatar: "https://randomuser.me/api/portraits/men/12.jpg",
     isPrivate: true,
+    subscription: 'free',
   },
   {
     id: "21",
@@ -157,6 +177,7 @@ export const regularUsers: User[] = [
     name: "Charlotte Thomas",
     avatar: "https://randomuser.me/api/portraits/women/12.jpg",
     isPrivate: false,
+    subscription: 'free',
   },
   {
     id: "22",
@@ -164,6 +185,7 @@ export const regularUsers: User[] = [
     name: "Zoe Campbell",
     avatar: "https://randomuser.me/api/portraits/women/13.jpg",
     isPrivate: true,
+    subscription: 'free',
   },
   {
     id: "23",
@@ -171,5 +193,6 @@ export const regularUsers: User[] = [
     name: "Jordan Rivers",
     avatar: "https://randomuser.me/api/portraits/men/13.jpg",
     isPrivate: false,
+    subscription: 'free',
   },
 ];
