@@ -3,7 +3,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 // Get API key from environment variable
 const GOOGLE_NLP_API_KEY = Deno.env.get('GOOGLE_VERTEX_API_KEY');
-const NLP_API_URL = "https://language.googleapis.com/v1/documents:analyzeEntities";
+const NLP_API_URL = "https://language.googleapis.com/v1/documents:annotateText";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -17,7 +17,7 @@ serve(async (req) => {
   }
 
   try {
-    const { text, features = ['entities'] } = await req.json();
+    const { text, features: requestedFeatures = ['entities'] } = await req.json();
     
     if (!text) {
       return new Response(
@@ -26,6 +26,20 @@ serve(async (req) => {
       );
     }
     
+    // Construct the features object for the Google NLP API.
+    const featuresPayload: { [key: string]: boolean } = {};
+    if (requestedFeatures && Array.isArray(requestedFeatures)) {
+      if (requestedFeatures.includes('entities')) {
+        featuresPayload.extractEntities = true;
+      }
+      if (requestedFeatures.includes('sentiment')) {
+        featuresPayload.analyzeDocumentSentiment = true;
+      }
+      if (requestedFeatures.includes('categories')) {
+        featuresPayload.classifyText = true;
+      }
+    }
+
     // Call Google Natural Language API
     const response = await fetch(`${NLP_API_URL}?key=${GOOGLE_NLP_API_KEY}`, {
       method: 'POST',
@@ -37,6 +51,7 @@ serve(async (req) => {
           type: 'PLAIN_TEXT',
           content: text
         },
+        features: featuresPayload,
         encodingType: 'UTF8'
       })
     });
