@@ -1,6 +1,6 @@
 
 import { useState, useCallback } from 'react';
-import { ElevenLabsService } from '@/services/ElevenLabsService';
+import { ElevenLabsService } from '@/services/ElevenLabs';
 
 export const useElevenLabsVoice = () => {
   const [isElevenLabsReady, setIsElevenLabsReady] = useState<boolean>(ElevenLabsService.hasApiKey());

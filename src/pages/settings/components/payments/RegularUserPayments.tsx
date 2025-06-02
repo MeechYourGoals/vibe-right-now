@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { CreditCard } from "@/types";
+import { CreditCard } from "@/types/subscription";
 import SavedCardsSection from "./SavedCardsSection";
 import AddCardForm from "../AddCardForm";
 

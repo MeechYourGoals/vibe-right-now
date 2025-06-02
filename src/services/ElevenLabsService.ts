@@ -1,11 +1,6 @@
 
 import { VertexAIService } from './VertexAIService';
 
-/**
- * ElevenLabs Service that proxies through Google Vertex AI
- * Maintains backward compatibility while using Google ecosystem
- */
-
 export interface ElevenLabsOptions {
   voice?: string;
   stability?: number;
@@ -23,9 +18,16 @@ export interface ScribeTranscriptionOptions {
 }
 
 export class ElevenLabsService {
-  /**
-   * Convert text to speech (proxied to Google TTS)
-   */
+  private static apiKey: string | null = null;
+
+  static setApiKey(apiKey: string) {
+    this.apiKey = apiKey;
+  }
+
+  static hasApiKey(): boolean {
+    return !!this.apiKey;
+  }
+
   static async textToSpeech(
     text: string,
     voiceId: string = 'en-US-Neural2-D',
@@ -34,7 +36,6 @@ export class ElevenLabsService {
     try {
       console.log('ElevenLabs proxy: using Google TTS for:', text.substring(0, 50) + '...');
       
-      // Map ElevenLabs options to Google TTS options
       const googleOptions = {
         voice: voiceId,
         speakingRate: 1.0,
@@ -48,9 +49,6 @@ export class ElevenLabsService {
     }
   }
 
-  /**
-   * Convert speech to text (proxied to Google STT)
-   */
   static async speechToText(
     audioBase64: string,
     options: ScribeTranscriptionOptions = {}
@@ -64,11 +62,7 @@ export class ElevenLabsService {
     }
   }
 
-  /**
-   * Get available voices (returning Google TTS voices)
-   */
   static async getVoices(): Promise<any[]> {
-    // Return a list of Google TTS voices in ElevenLabs format for compatibility
     return [
       { voice_id: 'en-US-Neural2-D', name: 'David (Male)', category: 'generated' },
       { voice_id: 'en-US-Neural2-F', name: 'Emma (Female)', category: 'generated' },
@@ -76,7 +70,11 @@ export class ElevenLabsService {
       { voice_id: 'en-US-Neural2-C', name: 'Grace (Female)', category: 'generated' }
     ];
   }
+
+  static async createAgentTask(request: any): Promise<any> {
+    console.log('ElevenLabs proxy: createAgentTask not implemented, using mock response');
+    return { conversation_id: 'mock-id', status: 'started' };
+  }
 }
 
-// Re-export for backward compatibility
 export { ElevenLabsService as default };

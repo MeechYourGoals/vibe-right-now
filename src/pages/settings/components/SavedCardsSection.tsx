@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { CreditCard as CardIcon, Check, Trash2, DollarSign, WalletCards } from "lucide-react";
-import { CreditCard } from "@/types";
+import { CreditCard } from "@/types/subscription";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";

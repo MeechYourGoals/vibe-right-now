@@ -1,17 +1,7 @@
 
 import { VertexAIService } from '@/services/VertexAIService';
 
-/**
- * Unified Search Service using Google Vertex AI
- * Replaces multiple search providers with single Google solution
- */
 export class SearchService {
-  /**
-   * Search using Google Vertex AI with search capabilities
-   * @param query The search query
-   * @param options Additional search options
-   * @returns The search results as text
-   */
   static async search(
     query: string,
     options: {
@@ -23,7 +13,6 @@ export class SearchService {
     try {
       console.log('SearchService: Using Vertex AI for query:', query);
       
-      // Enhanced query for better results
       let enhancedQuery = query;
       if (options.location) {
         enhancedQuery += ` in ${options.location}`;
@@ -39,9 +28,6 @@ export class SearchService {
     }
   }
 
-  /**
-   * Search for comedy shows and events
-   */
   static async searchComedy(query: string, location?: string): Promise<string> {
     return this.search(query, {
       categories: ['comedy', 'entertainment', 'shows'],
@@ -50,9 +36,6 @@ export class SearchService {
     });
   }
 
-  /**
-   * Search for places and venues
-   */
   static async searchPlaces(query: string, location?: string): Promise<string> {
     return this.search(query, {
       categories: ['restaurants', 'bars', 'venues', 'attractions'],
@@ -61,14 +44,19 @@ export class SearchService {
     });
   }
 
-  /**
-   * Search for events
-   */
   static async searchEvents(query: string, location?: string): Promise<string> {
     return this.search(query, {
       categories: ['events', 'concerts', 'shows', 'festivals'],
       location,
       type: 'events'
     });
+  }
+
+  static async comedySearch(query: string, location?: string): Promise<string> {
+    return this.searchComedy(query, location);
+  }
+
+  static async vectorSearch(query: string, options?: any): Promise<string> {
+    return this.search(query, options);
   }
 }
