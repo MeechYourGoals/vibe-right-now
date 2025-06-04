@@ -21,35 +21,35 @@ const SubscriptionTab = () => {
 
   const getTierColor = (tierName: string) => {
     switch (tierName) {
-      case 'plus': return 'border-blue-500 bg-blue-50';
-      case 'premium': return 'border-purple-500 bg-purple-50';
-      case 'pro': return 'border-amber-500 bg-gradient-to-br from-amber-50 to-orange-50';
-      default: return 'border-gray-200 bg-gray-50';
+      case 'plus': return 'border-blue-500/50 bg-blue-950/30';
+      case 'premium': return 'border-purple-500/50 bg-purple-950/30';
+      case 'pro': return 'border-amber-500/50 bg-gradient-to-br from-amber-950/30 to-orange-950/30';
+      default: return 'border-border bg-muted/30';
     }
   };
 
   const getButtonColor = (tierName: string) => {
     switch (tierName) {
-      case 'plus': return 'bg-blue-500 hover:bg-blue-600';
-      case 'premium': return 'bg-purple-500 hover:bg-purple-600';
-      case 'pro': return 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600';
-      default: return 'bg-gray-500 hover:bg-gray-600';
+      case 'plus': return 'bg-blue-600 hover:bg-blue-700 text-white';
+      case 'premium': return 'bg-purple-600 hover:bg-purple-700 text-white';
+      case 'pro': return 'bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white';
+      default: return 'bg-muted hover:bg-muted/80 text-foreground';
     }
   };
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold mb-2">Subscription Plans</h2>
+        <h2 className="text-2xl font-bold mb-2 text-foreground">Subscription Plans</h2>
         <p className="text-muted-foreground">
           Choose the plan that best fits your needs. Upgrade or downgrade at any time.
         </p>
       </div>
 
       {subscription.tier !== 'free' && (
-        <Card className="border-green-200 bg-green-50">
+        <Card className="border-green-500/50 bg-green-950/20">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-green-800">
+            <CardTitle className="flex items-center gap-2 text-green-400">
               <Check className="h-5 w-5" />
               Current Subscription
             </CardTitle>
@@ -57,14 +57,14 @@ const SubscriptionTab = () => {
           <CardContent>
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-semibold text-lg">
+                <h3 className="font-semibold text-lg text-foreground">
                   {tier.charAt(0).toUpperCase() + tier.slice(1)} Plan
                 </h3>
                 <p className="text-sm text-muted-foreground">
                   {subscription.expiresAt && `Expires: ${new Date(subscription.expiresAt).toLocaleDateString()}`}
                 </p>
               </div>
-              <Badge variant="secondary" className="bg-green-100 text-green-800">
+              <Badge variant="secondary" className="bg-green-900/50 text-green-400 border-green-500/50">
                 Active
               </Badge>
             </div>
@@ -76,21 +76,21 @@ const SubscriptionTab = () => {
         {SUBSCRIPTION_PLANS.map((plan) => (
           <Card 
             key={plan.tier} 
-            className={`relative ${getTierColor(plan.tier)} ${
-              tier === plan.tier ? 'ring-2 ring-offset-2 ring-current' : ''
+            className={`relative transition-all duration-300 hover:shadow-lg ${getTierColor(plan.tier)} ${
+              tier === plan.tier ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''
             }`}
           >
             {plan.isPopular && (
-              <Badge className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-blue-500">
+              <Badge className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white">
                 Most Popular
               </Badge>
             )}
             <CardHeader className="text-center">
-              <div className="flex items-center justify-center mb-2">
+              <div className="flex items-center justify-center mb-2 text-foreground">
                 {getTierIcon(plan.tier)}
               </div>
-              <CardTitle className="text-xl">{plan.name}</CardTitle>
-              <div className="text-3xl font-bold">
+              <CardTitle className="text-xl text-foreground">{plan.name}</CardTitle>
+              <div className="text-3xl font-bold text-foreground">
                 {plan.price === 0 ? 'Free' : `$${plan.price}`}
                 {plan.price > 0 && <span className="text-sm font-normal text-muted-foreground">/month</span>}
               </div>
@@ -99,13 +99,13 @@ const SubscriptionTab = () => {
               <ul className="space-y-2 text-sm">
                 {plan.features.map((feature, index) => (
                   <li key={index} className="flex items-start gap-2">
-                    <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span>{feature}</span>
+                    <Check className="h-4 w-4 text-green-400 mt-0.5 flex-shrink-0" />
+                    <span className="text-foreground">{feature}</span>
                   </li>
                 ))}
               </ul>
               <Button 
-                className={`w-full text-white ${getButtonColor(plan.tier)}`}
+                className={`w-full ${getButtonColor(plan.tier)} transition-colors`}
                 onClick={() => updateSubscriptionTier(plan.tier)}
                 disabled={tier === plan.tier}
               >
@@ -117,64 +117,64 @@ const SubscriptionTab = () => {
         ))}
       </div>
 
-      <Card>
+      <Card className="bg-card/50 border-border">
         <CardHeader>
-          <CardTitle>Feature Comparison</CardTitle>
+          <CardTitle className="text-foreground">Feature Comparison</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b">
-                  <th className="text-left py-2">Feature</th>
-                  <th className="text-center py-2">Free</th>
-                  <th className="text-center py-2">Plus</th>
-                  <th className="text-center py-2">Premium</th>
-                  <th className="text-center py-2">Pro</th>
+                <tr className="border-b border-border">
+                  <th className="text-left py-2 text-foreground">Feature</th>
+                  <th className="text-center py-2 text-foreground">Free</th>
+                  <th className="text-center py-2 text-foreground">Plus</th>
+                  <th className="text-center py-2 text-foreground">Premium</th>
+                  <th className="text-center py-2 text-foreground">Pro</th>
                 </tr>
               </thead>
               <tbody className="space-y-2">
-                <tr className="border-b">
-                  <td className="py-2">Basic Exploration</td>
-                  <td className="text-center"><Check className="h-4 w-4 text-green-500 mx-auto" /></td>
-                  <td className="text-center"><Check className="h-4 w-4 text-green-500 mx-auto" /></td>
-                  <td className="text-center"><Check className="h-4 w-4 text-green-500 mx-auto" /></td>
-                  <td className="text-center"><Check className="h-4 w-4 text-green-500 mx-auto" /></td>
+                <tr className="border-b border-border">
+                  <td className="py-2 text-foreground">Basic Exploration</td>
+                  <td className="text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
+                  <td className="text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
+                  <td className="text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
+                  <td className="text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
                 </tr>
-                <tr className="border-b">
-                  <td className="py-2">Enhanced Preferences</td>
-                  <td className="text-center">-</td>
-                  <td className="text-center"><Check className="h-4 w-4 text-green-500 mx-auto" /></td>
-                  <td className="text-center"><Check className="h-4 w-4 text-green-500 mx-auto" /></td>
-                  <td className="text-center"><Check className="h-4 w-4 text-green-500 mx-auto" /></td>
+                <tr className="border-b border-border">
+                  <td className="py-2 text-foreground">Enhanced Preferences</td>
+                  <td className="text-center text-muted-foreground">-</td>
+                  <td className="text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
+                  <td className="text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
+                  <td className="text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
                 </tr>
-                <tr className="border-b">
-                  <td className="py-2">AI Recommendations</td>
-                  <td className="text-center">-</td>
-                  <td className="text-center"><Check className="h-4 w-4 text-green-500 mx-auto" /></td>
-                  <td className="text-center"><Check className="h-4 w-4 text-green-500 mx-auto" /></td>
-                  <td className="text-center"><Check className="h-4 w-4 text-green-500 mx-auto" /></td>
+                <tr className="border-b border-border">
+                  <td className="py-2 text-foreground">AI Recommendations</td>
+                  <td className="text-center text-muted-foreground">-</td>
+                  <td className="text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
+                  <td className="text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
+                  <td className="text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
                 </tr>
-                <tr className="border-b">
-                  <td className="py-2">Vibe With Me Mode</td>
-                  <td className="text-center">-</td>
-                  <td className="text-center">-</td>
-                  <td className="text-center"><Check className="h-4 w-4 text-green-500 mx-auto" /></td>
-                  <td className="text-center"><Check className="h-4 w-4 text-green-500 mx-auto" /></td>
+                <tr className="border-b border-border">
+                  <td className="py-2 text-foreground">Vibe With Me Mode</td>
+                  <td className="text-center text-muted-foreground">-</td>
+                  <td className="text-center text-muted-foreground">-</td>
+                  <td className="text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
+                  <td className="text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
                 </tr>
-                <tr className="border-b">
-                  <td className="py-2">Vernon Chat</td>
-                  <td className="text-center">-</td>
-                  <td className="text-center">-</td>
-                  <td className="text-center">-</td>
-                  <td className="text-center"><Check className="h-4 w-4 text-green-500 mx-auto" /></td>
+                <tr className="border-b border-border">
+                  <td className="py-2 text-foreground">Vernon Chat</td>
+                  <td className="text-center text-muted-foreground">-</td>
+                  <td className="text-center text-muted-foreground">-</td>
+                  <td className="text-center text-muted-foreground">-</td>
+                  <td className="text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
                 </tr>
-                <tr className="border-b">
-                  <td className="py-2">Influencer Marketplace</td>
-                  <td className="text-center">-</td>
-                  <td className="text-center">-</td>
-                  <td className="text-center">-</td>
-                  <td className="text-center"><Check className="h-4 w-4 text-green-500 mx-auto" /></td>
+                <tr className="border-b border-border">
+                  <td className="py-2 text-foreground">Influencer Marketplace</td>
+                  <td className="text-center text-muted-foreground">-</td>
+                  <td className="text-center text-muted-foreground">-</td>
+                  <td className="text-center text-muted-foreground">-</td>
+                  <td className="text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
                 </tr>
               </tbody>
             </table>

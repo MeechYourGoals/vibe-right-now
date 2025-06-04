@@ -31,10 +31,10 @@ interface VenueIdea {
   proposed_by_name: string;
   proposed_by_avatar: string;
   proposed_by_id: string;
-  notes: string;
+  notes: string | null;
   status: 'pending' | 'approved' | 'rejected';
   created_at: string;
-  votes?: Array<{
+  trip_venue_votes?: Array<{
     id: string;
     vote_type: 'up' | 'down';
     user_name: string;
@@ -83,8 +83,7 @@ const TripIdeasSection: React.FC<TripIdeasSectionProps> = ({
       // Transform the data to match our interface
       const transformedData = data?.map(item => ({
         ...item,
-        status: item.status as 'pending' | 'approved' | 'rejected',
-        votes: item.trip_venue_votes || []
+        trip_venue_votes: item.trip_venue_votes || []
       })) || [];
       
       setVenueIdeas(transformedData);
@@ -162,7 +161,7 @@ const TripIdeasSection: React.FC<TripIdeasSectionProps> = ({
       // Check if user already voted
       const existingVote = venueIdeas
         .find(idea => idea.id === venueIdeaId)
-        ?.votes?.find(vote => vote.user_name === currentUser.name);
+        ?.trip_venue_votes?.find(vote => vote.user_name === currentUser.name);
 
       if (existingVote) {
         toast.error('You have already voted on this venue');
@@ -189,13 +188,13 @@ const TripIdeasSection: React.FC<TripIdeasSectionProps> = ({
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'approved': return 'bg-green-100 text-green-800';
-      case 'rejected': return 'bg-red-100 text-red-800';
-      default: return 'bg-yellow-100 text-yellow-800';
+      case 'approved': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      case 'rejected': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+      default: return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
     }
   };
 
-  const getVoteCount = (votes: VenueIdea['votes'], type: 'up' | 'down') => {
+  const getVoteCount = (votes: VenueIdea['trip_venue_votes'], type: 'up' | 'down') => {
     return votes?.filter(vote => vote.vote_type === type).length || 0;
   };
 
@@ -274,7 +273,7 @@ const TripIdeasSection: React.FC<TripIdeasSectionProps> = ({
                       className="flex items-center space-x-1"
                     >
                       <ThumbsUp className="h-3 w-3" />
-                      <span>{getVoteCount(idea.votes, 'up')}</span>
+                      <span>{getVoteCount(idea.trip_venue_votes, 'up')}</span>
                     </Button>
                     <Button
                       variant="outline"
@@ -283,7 +282,7 @@ const TripIdeasSection: React.FC<TripIdeasSectionProps> = ({
                       className="flex items-center space-x-1"
                     >
                       <ThumbsDown className="h-3 w-3" />
-                      <span>{getVoteCount(idea.votes, 'down')}</span>
+                      <span>{getVoteCount(idea.trip_venue_votes, 'down')}</span>
                     </Button>
                   </div>
                 </div>
