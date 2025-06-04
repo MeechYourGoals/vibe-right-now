@@ -14,6 +14,7 @@ import AccountTab from "./settings/AccountTab";
 import VenueManagementTab from "./settings/VenueManagementTab";
 import MarketingTab from "./settings/MarketingTab";
 import PaymentsTab from "./settings/PaymentsTab";
+import SubscriptionTab from "./settings/SubscriptionTab";
 
 const Settings = () => {
   const { toast } = useToast();
@@ -38,6 +39,8 @@ const Settings = () => {
 
   const toggleMode = () => {
     setIsVenueMode(!isVenueMode);
+    // Reset to appropriate default tab for each mode
+    setActiveTab(isVenueMode ? "preferences" : "preferences");
     toast({
       title: `Switched to ${!isVenueMode ? "Venue" : "User"} Mode`,
       description: `Settings are now configured for ${!isVenueMode ? "venue management" : "regular user"}.`,
@@ -77,6 +80,12 @@ const Settings = () => {
           <TabsContent value="privacy" className="space-y-6">
             <PrivacyTab onSave={handleSaveSettings} isVenueMode={isVenueMode} />
           </TabsContent>
+          
+          {!isVenueMode && (
+            <TabsContent value="subscription" className="space-y-6">
+              <SubscriptionTab />
+            </TabsContent>
+          )}
           
           {isVenueMode ? (
             <>

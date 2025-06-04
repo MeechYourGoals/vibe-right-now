@@ -1,6 +1,7 @@
 
 import ModeToggle from "./ModeToggle";
 import SubscriptionTierSelector from "./SubscriptionTierSelector";
+import UserSubscriptionTierSelector from "../subscription/UserSubscriptionTierSelector";
 
 interface SettingsHeaderProps {
   isVenueMode: boolean;
@@ -22,11 +23,13 @@ const SettingsHeader = ({
       <div className="flex flex-wrap items-center gap-4">
         <ModeToggle isVenueMode={isVenueMode} onToggle={onModeToggle} />
         
-        {isVenueMode && (
+        {isVenueMode ? (
           <SubscriptionTierSelector 
             subscriptionTier={subscriptionTier}
             onTierChange={onTierChange}
           />
+        ) : (
+          <UserSubscriptionTierSelector />
         )}
       </div>
     </div>

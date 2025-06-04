@@ -79,7 +79,15 @@ const TripIdeasSection: React.FC<TripIdeasSectionProps> = ({
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setVenueIdeas(data || []);
+      
+      // Transform the data to match our interface
+      const transformedData = data?.map(item => ({
+        ...item,
+        status: item.status as 'pending' | 'approved' | 'rejected',
+        votes: item.trip_venue_votes || []
+      })) || [];
+      
+      setVenueIdeas(transformedData);
     } catch (error) {
       console.error('Error fetching venue ideas:', error);
       toast.error('Failed to load venue ideas');
