@@ -117,6 +117,169 @@ export type Database = {
         }
         Relationships: []
       }
+      trip_message_reactions: {
+        Row: {
+          created_at: string
+          id: string
+          message_id: string | null
+          reaction_type: string
+          user_id: string
+          user_name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message_id?: string | null
+          reaction_type: string
+          user_id: string
+          user_name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message_id?: string | null
+          reaction_type?: string
+          user_id?: string
+          user_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_message_reactions_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "trip_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trip_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          message_type: string
+          trip_id: string
+          updated_at: string
+          user_avatar: string
+          user_id: string
+          user_name: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          message_type?: string
+          trip_id: string
+          updated_at?: string
+          user_avatar: string
+          user_id: string
+          user_name: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          message_type?: string
+          trip_id?: string
+          updated_at?: string
+          user_avatar?: string
+          user_id?: string
+          user_name?: string
+        }
+        Relationships: []
+      }
+      trip_venue_ideas: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          proposed_by_avatar: string
+          proposed_by_id: string
+          proposed_by_name: string
+          status: string
+          trip_id: string
+          updated_at: string
+          venue_address: string | null
+          venue_city: string | null
+          venue_id: string
+          venue_image_url: string | null
+          venue_name: string
+          venue_rating: number | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          proposed_by_avatar: string
+          proposed_by_id: string
+          proposed_by_name: string
+          status?: string
+          trip_id: string
+          updated_at?: string
+          venue_address?: string | null
+          venue_city?: string | null
+          venue_id: string
+          venue_image_url?: string | null
+          venue_name: string
+          venue_rating?: number | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          proposed_by_avatar?: string
+          proposed_by_id?: string
+          proposed_by_name?: string
+          status?: string
+          trip_id?: string
+          updated_at?: string
+          venue_address?: string | null
+          venue_city?: string | null
+          venue_id?: string
+          venue_image_url?: string | null
+          venue_name?: string
+          venue_rating?: number | null
+        }
+        Relationships: []
+      }
+      trip_venue_votes: {
+        Row: {
+          created_at: string
+          id: string
+          user_avatar: string
+          user_id: string
+          user_name: string
+          venue_idea_id: string | null
+          vote_type: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          user_avatar: string
+          user_id: string
+          user_name: string
+          venue_idea_id?: string | null
+          vote_type: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          user_avatar?: string
+          user_id?: string
+          user_name?: string
+          venue_idea_id?: string | null
+          vote_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_venue_votes_venue_idea_id_fkey"
+            columns: ["venue_idea_id"]
+            isOneToOne: false
+            referencedRelation: "trip_venue_ideas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       venue_sentiment_analysis: {
         Row: {
           created_at: string
