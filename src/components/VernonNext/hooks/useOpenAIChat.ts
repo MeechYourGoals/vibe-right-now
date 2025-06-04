@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import { v4 as uuidv4 } from 'uuid';
@@ -126,16 +125,12 @@ export const useOpenAIChat = ({ initialMessages = [], onContentChange }: UseOpen
             
             try {
               // Use Vertex AI speech-to-text
-              const transcriptionResult = await VertexAIService.searchWithVertex(`Transcribe this audio: ${base64Audio}`);
+              const transcriptionResult = await VertexAIService.speechToText(base64Audio);
               
-              // Extract the transcription text
-              let extractedText = transcriptionResult;
-              if (transcriptionResult.includes('Transcription:')) {
-                extractedText = transcriptionResult.split('Transcription:')[1].trim();
+              if (transcriptionResult) {
+                setTranscript(transcriptionResult);
+                sendMessage(transcriptionResult);
               }
-              
-              setTranscript(extractedText);
-              sendMessage(extractedText);
             } catch (error) {
               console.error('Speech recognition error:', error);
               setInterimTranscript('');
@@ -182,27 +177,23 @@ export const useOpenAIChat = ({ initialMessages = [], onContentChange }: UseOpen
     try {
       // Use Vertex AI text-to-speech
       const audioContent = await VertexAIService.textToSpeech(text, {
-        voice: 'en-US-Neural2-J',
+        voice: 'en-US-Neural2-D',
         speakingRate: 1.0,
         pitch: 0
       });
       
       if (audioContent) {
         // Create audio element
-        const audioBlob = new Blob([audioContent], { type: 'audio/mpeg' });
-        const audioUrl = URL.createObjectURL(audioBlob);
-        const audio = new Audio(audioUrl);
+        const audio = new Audio(`data:audio/mp3;base64,${audioContent}`);
         
         // Set up event listeners
         audio.onended = () => {
           setIsSpeaking(false);
-          URL.revokeObjectURL(audioUrl);
         };
         
         audio.onerror = () => {
           console.error('Audio playback error');
           setIsSpeaking(false);
-          URL.revokeObjectURL(audioUrl);
         };
         
         // Play the audio

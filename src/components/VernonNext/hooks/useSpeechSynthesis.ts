@@ -1,16 +1,12 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { VertexAIService } from '@/services/VertexAIService';
 
 interface SpeechSynthesisOptions {
   voice?: 'male' | 'female';
   pitch?: number;
   rate?: number;
 }
-
-// Set a fixed male voice by default
-const DEFAULT_MALE_VOICE = "en-US-Neural2-D";
-const DEFAULT_FEMALE_VOICE = "en-US-Neural2-F";
 
 export const useSpeechSynthesis = (options: SpeechSynthesisOptions = {}) => {
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -26,7 +22,7 @@ export const useSpeechSynthesis = (options: SpeechSynthesisOptions = {}) => {
     };
   }, []);
   
-  // Function to speak text
+  // Function to speak text using Google TTS
   const speak = useCallback(async (text: string): Promise<boolean> => {
     if (!text || text.trim() === '') return false;
     
@@ -37,28 +33,16 @@ export const useSpeechSynthesis = (options: SpeechSynthesisOptions = {}) => {
       console.log('Requesting speech for text:', text.substring(0, 50) + '...');
       setIsSpeaking(true);
       
-      // Force 'male' voice regardless of options to ensure consistency
-      const voice = DEFAULT_MALE_VOICE;
-      
-      // Call Google TTS via Supabase Edge Function
-      const { data, error } = await supabase.functions.invoke('google-tts', {
-        body: {
-          text: text,
-          voice: voice,
-          speakingRate: options.rate || 1.0,
-          pitch: options.pitch || 0
-        }
+      // Use Google TTS via VertexAIService
+      const audioContent = await VertexAIService.textToSpeech(text, {
+        voice: 'en-US-Neural2-D', // Force male voice for consistency
+        speakingRate: options.rate || 1.0,
+        pitch: options.pitch || 0
       });
       
-      if (error) {
-        console.error('Error calling TTS service:', error);
-        setIsSpeaking(false);
-        return fallbackToSpeechSynthesis(text, true); // Force male voice in fallback
-      }
-      
-      if (data?.audioContent) {
+      if (audioContent) {
         // Create audio element and play
-        const audio = new Audio(`data:audio/mp3;base64,${data.audioContent}`);
+        const audio = new Audio(`data:audio/mp3;base64,${audioContent}`);
         currentAudio.current = audio;
         
         // Add event listeners
@@ -71,7 +55,7 @@ export const useSpeechSynthesis = (options: SpeechSynthesisOptions = {}) => {
           console.error('Error playing audio');
           setIsSpeaking(false);
           currentAudio.current = null;
-          return fallbackToSpeechSynthesis(text, true); // Force male voice in fallback
+          return fallbackToSpeechSynthesis(text, true);
         };
         
         // Play the audio
@@ -80,12 +64,12 @@ export const useSpeechSynthesis = (options: SpeechSynthesisOptions = {}) => {
       } else {
         console.warn('No audio content received');
         setIsSpeaking(false);
-        return fallbackToSpeechSynthesis(text, true); // Force male voice in fallback
+        return fallbackToSpeechSynthesis(text, true);
       }
     } catch (error) {
       console.error('Error in speech synthesis:', error);
       setIsSpeaking(false);
-      return fallbackToSpeechSynthesis(text, true); // Force male voice in fallback
+      return fallbackToSpeechSynthesis(text, true);
     }
   }, [options.rate, options.pitch]);
   

@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useRef } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { VertexAIService } from '@/services/VertexAIService';
 
 interface SpeechRecognitionOptions {
   continuous?: boolean;
@@ -99,8 +99,8 @@ export const useSpeechRecognition = (options: SpeechRecognitionOptions = {}) => 
         console.error('Error starting speech recognition:', e);
       }
     } else {
-      // Fallback to Whisper API
-      startWhisperRecording();
+      // Fallback to Google Speech-to-Text via VertexAI
+      startGoogleSpeechRecording();
     }
   };
   
@@ -113,15 +113,15 @@ export const useSpeechRecognition = (options: SpeechRecognitionOptions = {}) => 
         // Ignore errors from stopping
       }
     } else if (mediaRecorderRef.current) {
-      // Stop Whisper recording
+      // Stop Google Speech recording
       mediaRecorderRef.current.stop();
     }
     
     setIsListening(false);
   };
   
-  // Fallback to WhisperAPI via Supabase Edge Function
-  const startWhisperRecording = async () => {
+  // Fallback to Google Speech-to-Text via VertexAI
+  const startGoogleSpeechRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       
@@ -133,7 +133,7 @@ export const useSpeechRecognition = (options: SpeechRecognitionOptions = {}) => 
       };
       
       mediaRecorderRef.current.onstop = async () => {
-        // Process recording with Whisper
+        // Process recording with Google Speech-to-Text
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
         const reader = new FileReader();
         
@@ -141,20 +141,13 @@ export const useSpeechRecognition = (options: SpeechRecognitionOptions = {}) => 
           const base64Audio = (reader.result as string).split(',')[1];
           
           try {
-            const { data, error } = await supabase.functions.invoke('google-stt', {
-              body: { audio: base64Audio }
-            });
+            const transcript = await VertexAIService.speechToText(base64Audio);
             
-            if (error) {
-              console.error('Error transcribing audio:', error);
-              return;
-            }
-            
-            if (data?.transcript) {
-              setTranscript(data.transcript);
+            if (transcript) {
+              setTranscript(transcript);
             }
           } catch (e) {
-            console.error('Error calling speech-to-text:', e);
+            console.error('Error calling Google speech-to-text:', e);
           }
         };
         

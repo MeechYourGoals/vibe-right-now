@@ -24,7 +24,7 @@ serve(async (req) => {
 
   try {
     console.log("Received request to vertex-ai function");
-    const { prompt, mode = 'default', context = [], model = MODELS.PRIMARY, action, text, options } = await req.json();
+    const { prompt, mode = 'default', context = [], model = MODELS.PRIMARY, action, text, audio, options, messages, query } = await req.json();
     
     // Handle text-to-speech requests
     if (action === 'text-to-speech' && text) {
@@ -69,17 +69,117 @@ serve(async (req) => {
     }
 
     // Handle speech-to-text requests
-    if (action === 'speech-to-text' && prompt) {
+    if (action === 'speech-to-text' && audio) {
       try {
         console.log('Speech-to-text request received');
         
-        // Mock implementation for now - would be replaced with actual Google Speech-to-Text API call
-        return new Response(JSON.stringify({ transcript: "Speech transcription with Google Speech-to-Text" }), {
+        // Call Google Speech-to-Text API
+        const sttResponse = await fetch(`https://speech.googleapis.com/v1/speech:recognize?key=${VERTEX_AI_API_KEY}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            config: {
+              encoding: 'WEBM_OPUS',
+              sampleRateHertz: 48000,
+              languageCode: 'en-US',
+              enableAutomaticPunctuation: true,
+              model: 'latest_long'
+            },
+            audio: {
+              content: audio
+            }
+          })
+        });
+        
+        if (!sttResponse.ok) {
+          throw new Error(`Google STT API error: ${sttResponse.status}`);
+        }
+        
+        const sttData = await sttResponse.json();
+        const transcript = sttData.results?.[0]?.alternatives?.[0]?.transcript || '';
+        
+        return new Response(JSON.stringify({ transcript }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       } catch (error) {
         console.error('Error in speech-to-text:', error);
         return new Response(JSON.stringify({ error: error.message, transcript: null }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    }
+
+    // Handle search requests (replacing Perplexity)
+    if (action === 'search' && (query || prompt)) {
+      try {
+        const searchQuery = query || prompt;
+        console.log('Search request:', searchQuery);
+        
+        // Use Gemini for search-enhanced responses
+        const searchPrompt = `
+          Please provide comprehensive, up-to-date information about "${searchQuery}".
+          Include specific details like:
+          - Names of venues, events, or places
+          - Addresses and locations when relevant
+          - Hours, prices, and availability if applicable
+          - Current and recent information
+          
+          Format your response clearly and provide actionable information.
+        `;
+        
+        const response = await callGeminiAPI(MODELS.PRIMARY, [{
+          role: 'user',
+          parts: [{ text: searchPrompt }]
+        }]);
+        
+        const searchResult = response.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        
+        return new Response(JSON.stringify({ 
+          text: searchResult,
+          relatedQuestions: [] // Placeholder for related questions
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      } catch (error) {
+        console.error('Error in search:', error);
+        return new Response(JSON.stringify({ error: error.message }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    }
+
+    // Handle OpenAI-style chat completion requests
+    if (action === 'chat' && messages) {
+      try {
+        console.log('Chat completion request with messages:', messages.length);
+        
+        // Convert OpenAI format to Gemini format
+        const geminiMessages = messages.map(msg => ({
+          role: msg.role === 'user' ? 'user' : 'model',
+          parts: [{ text: msg.content }]
+        }));
+        
+        const response = await callGeminiAPI(model || MODELS.PRIMARY, geminiMessages);
+        const generatedText = response.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        
+        // Return in OpenAI-compatible format
+        return new Response(JSON.stringify({
+          response: {
+            choices: [{
+              message: {
+                content: generatedText,
+                role: 'assistant'
+              }
+            }]
+          }
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      } catch (error) {
+        console.error('Error in chat completion:', error);
+        return new Response(JSON.stringify({ error: error.message }), {
           status: 500,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
@@ -96,41 +196,41 @@ serve(async (req) => {
       if (mode === 'venue') {
         systemPrompt = "You are Vernon, a venue analytics assistant powered by Google Gemini. Provide insightful business analysis and recommendations for venue owners.";
       } else if (mode === 'search') {
-        systemPrompt = "You are a search assistant powered by Google Gemini. Provide detailed information about places, events, and activities.";
+        systemPrompt = "You are a search assistant powered by Google Gemini. Provide detailed information about places, events, and activities with current, accurate information.";
       } else {
         systemPrompt = `You are Vernon, a helpful AI assistant powered by Google Gemini within the 'Vibe Right Now' app. Your primary goal is to help users discover great places to go and things to do.`;
       }
       
       // Prepare the messages for Gemini
-      let messages = [];
+      let geminiMessages = [];
       
       // Process context properly - ensure it's in the correct format
       if (context && context.length > 0) {
-        messages = context.map(msg => ({
+        geminiMessages = context.map(msg => ({
           role: msg.sender === 'user' ? 'user' : 'model',
           parts: [{ text: msg.text || msg.content || '' }]
         }));
       }
       
       // Add system prompt as a "model" message at the beginning if not already included
-      if (messages.length === 0 || messages[0].role !== 'model' || !messages[0].parts[0].text.includes(systemPrompt)) {
-        messages.unshift({
+      if (geminiMessages.length === 0 || geminiMessages[0].role !== 'model' || !geminiMessages[0].parts[0].text.includes(systemPrompt)) {
+        geminiMessages.unshift({
           role: 'model',
           parts: [{ text: systemPrompt }]
         });
       }
       
       // Add the new user message
-      messages.push({
+      geminiMessages.push({
         role: 'user',
         parts: [{ text: prompt }]
       });
       
-      console.log("Sending request to Gemini API with messages:", JSON.stringify(messages));
+      console.log("Sending request to Gemini API with messages:", JSON.stringify(geminiMessages));
 
       // Try with primary model first
       try {
-        const response = await callGeminiAPI(requestedModel, messages);
+        const response = await callGeminiAPI(requestedModel, geminiMessages);
         const generatedText = response.candidates?.[0]?.content?.parts?.[0]?.text || '';
         console.log('Generated response successfully:', generatedText.substring(0, 50) + '...');
         
@@ -143,7 +243,7 @@ serve(async (req) => {
           console.log(`Rate limit exceeded for ${MODELS.PRIMARY}, trying fallback model ${MODELS.FALLBACK}`);
           
           try {
-            const fallbackResponse = await callGeminiAPI(MODELS.FALLBACK, messages);
+            const fallbackResponse = await callGeminiAPI(MODELS.FALLBACK, geminiMessages);
             const fallbackText = fallbackResponse.candidates?.[0]?.content?.parts?.[0]?.text || '';
             console.log('Generated response with fallback model:', fallbackText.substring(0, 50) + '...');
             

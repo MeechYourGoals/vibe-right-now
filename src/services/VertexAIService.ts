@@ -14,10 +14,6 @@ export class VertexAIService {
   
   /**
    * Generate a response using Google Gemini model
-   * @param prompt The prompt to send to the model
-   * @param mode The mode to use (default, search, venue)
-   * @param context Optional conversation history
-   * @returns The generated response
    */
   static async generateResponse(
     prompt: string, 
@@ -57,98 +53,31 @@ export class VertexAIService {
       return data.text;
     } catch (error) {
       console.error('Error generating response with Vertex AI:', error);
-      
-      // Try with fallback model if we get a quota error
-      if (error.message?.includes('429') || error.message?.includes('quota')) {
-        try {
-          console.log('Rate limit exceeded, trying fallback model');
-          
-          const { data, error: fallbackError } = await supabase.functions.invoke('vertex-ai', {
-            body: { 
-              prompt,
-              mode,
-              context,
-              model: this.FALLBACK_MODEL
-            }
-          });
-          
-          if (fallbackError) {
-            throw fallbackError;
-          }
-          
-          if (data?.text) {
-            return data.text;
-          }
-        } catch (fallbackAttemptError) {
-          console.error('Fallback model also failed:', fallbackAttemptError);
-        }
-      }
-      
       return "I'm having trouble connecting to Google AI services right now. Please try again later.";
     }
   }
 
   /**
    * Search for information using Google Search and Vertex AI
-   * @param query The search query
-   * @param categories Optional categories to filter the search
-   * @returns The search results as text
    */
-  static async searchWithVertex(
-    query: string,
-    categories?: string[]
-  ): Promise<string> {
+  static async searchWithVertex(query: string, categories?: string[]): Promise<string> {
     try {
       console.log('Searching with Google Vertex AI:', query);
-      if (categories && categories.length > 0) {
-        console.log('With categories:', categories);
-      }
       
-      const searchPrompt = `
-        Please provide real information about "${query}".
-        ${categories && categories.length > 0 ? `Focusing on these categories: ${categories.join(', ')}` : ''}
-        Include:
-        - Names of specific places or events
-        - Actual addresses and locations if known
-        - Opening hours and pricing when available
-        - Any other helpful details
-        
-        Format your response in a clear, readable way.
-      `;
-      
-      // Try with primary model first
-      try {
-        return await this.generateResponse(searchPrompt, 'search');
-      } catch (primaryError) {
-        console.error('Error with primary model for search:', primaryError);
-        
-        // Try with fallback model
-        if (primaryError.message?.includes('429') || primaryError.message?.includes('quota')) {
-          try {
-            console.log('Using fallback model for search');
-            
-            const { data, error } = await supabase.functions.invoke('vertex-ai', {
-              body: { 
-                prompt: searchPrompt,
-                mode: 'search',
-                model: this.FALLBACK_MODEL
-              }
-            });
-            
-            if (error) {
-              throw error;
-            }
-            
-            if (data?.text) {
-              return data.text;
-            }
-          } catch (fallbackError) {
-            console.error('Fallback model also failed for search:', fallbackError);
-          }
+      const { data, error } = await supabase.functions.invoke('vertex-ai', {
+        body: { 
+          action: 'search',
+          query,
+          categories: categories || []
         }
-        
-        throw primaryError;
+      });
+      
+      if (error) {
+        console.error('Error with Vertex AI search:', error);
+        throw error;
       }
+      
+      return data?.text || `I couldn't find specific information about "${query}". Please try a different search.`;
     } catch (error) {
       console.error('Error in Vertex AI search:', error);
       return `I couldn't find specific information about "${query}". Please try a different search.`;
@@ -157,14 +86,8 @@ export class VertexAIService {
 
   /**
    * Convert text to speech using Google Text-to-Speech API
-   * @param text The text to convert to speech
-   * @param options Options for the text-to-speech conversion
-   * @returns The audio data as a base64 string
    */
-  static async textToSpeech(
-    text: string, 
-    options: { voice?: string; speakingRate?: number; pitch?: number } = {}
-  ): Promise<string> {
+  static async textToSpeech(text: string, options: { voice?: string; speakingRate?: number; pitch?: number } = {}): Promise<string> {
     try {
       const { data, error } = await supabase.functions.invoke('vertex-ai', {
         body: { 
@@ -196,15 +119,13 @@ export class VertexAIService {
 
   /**
    * Convert speech to text using Google Speech-to-Text API
-   * @param audioBase64 The audio data as a base64 string
-   * @returns The transcribed text
    */
   static async speechToText(audioBase64: string): Promise<string | null> {
     try {
       const { data, error } = await supabase.functions.invoke('vertex-ai', {
         body: { 
           action: 'speech-to-text',
-          prompt: audioBase64
+          audio: audioBase64
         }
       });
       
@@ -225,29 +146,26 @@ export class VertexAIService {
   }
 
   /**
-   * Analyze text using Google Natural Language API
-   * @param text The text to analyze
-   * @returns Analysis results including entities, sentiment, and categories
+   * Chat completion compatible with OpenAI format
    */
-  static async analyzeText(text: string): Promise<any> {
+  static async chatCompletion(messages: Array<{role: string; content: string}>): Promise<any> {
     try {
-      const { data, error } = await supabase.functions.invoke('google-nlp', {
+      const { data, error } = await supabase.functions.invoke('vertex-ai', {
         body: { 
-          text,
-          features: ['entities', 'sentiment', 'categories']
+          action: 'chat',
+          messages,
+          model: this.DEFAULT_MODEL
         }
       });
       
       if (error) {
-        console.error('Error calling Google NLP function:', error);
-        throw new Error(`Text analysis failed: ${error.message}`);
+        throw new Error(`Chat completion failed: ${error.message}`);
       }
       
       return data;
     } catch (error) {
-      console.error('Error in text analysis:', error);
-      toast.error('Text analysis failed');
-      return null;
+      console.error('Error in chat completion:', error);
+      throw error;
     }
   }
 }
