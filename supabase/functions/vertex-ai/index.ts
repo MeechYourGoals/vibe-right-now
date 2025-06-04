@@ -10,10 +10,10 @@ const corsHeaders = {
 // Use the provided API key
 const VERTEX_AI_API_KEY = "AIzaSyDHBe4hL8fQZdz9wSYi9srL0BGTnZ6XmyM";
 
-// Models to use with fallback logic
+// Available models with proper fallback logic
 const MODELS = {
-  PRIMARY: 'gemini-1.5-pro',
-  FALLBACK: 'gemini-1.0-pro',
+  PRIMARY: 'gemini-1.5-flash', // Use flash as primary (faster, less quota)
+  FALLBACK: 'gemini-1.5-pro', // Use pro as fallback if flash fails
 }
 
 serve(async (req) => {
@@ -110,7 +110,7 @@ serve(async (req) => {
       }
     }
 
-    // Handle search requests (replacing Perplexity)
+    // Handle search requests
     if (action === 'search' && (query || prompt)) {
       try {
         const searchQuery = query || prompt;
@@ -186,7 +186,7 @@ serve(async (req) => {
       }
     }
 
-    // Handle chat completion requests
+    // Handle regular chat completion requests
     if (prompt) {
       const requestedModel = model || MODELS.PRIMARY;
       console.log(`Processing ${requestedModel} request in ${mode} mode with prompt: ${prompt.substring(0, 50)}...`);
@@ -228,40 +228,42 @@ serve(async (req) => {
       
       console.log("Sending request to Gemini API with messages:", JSON.stringify(geminiMessages));
 
-      // Try with primary model first
+      // Try with primary model first, then fallback
+      let responseText = '';
+      let usedFallback = false;
+      
       try {
         const response = await callGeminiAPI(requestedModel, geminiMessages);
-        const generatedText = response.candidates?.[0]?.content?.parts?.[0]?.text || '';
-        console.log('Generated response successfully:', generatedText.substring(0, 50) + '...');
-        
-        return new Response(JSON.stringify({ text: generatedText }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
+        responseText = response.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        console.log('Generated response successfully:', responseText.substring(0, 50) + '...');
       } catch (error) {
-        // If we get a rate limit error and we're using the primary model, try fallback
-        if (error.message.includes('429') && requestedModel === MODELS.PRIMARY) {
-          console.log(`Rate limit exceeded for ${MODELS.PRIMARY}, trying fallback model ${MODELS.FALLBACK}`);
-          
+        console.error(`Error with ${requestedModel}:`, error);
+        
+        // If primary model fails, try fallback
+        if (requestedModel === MODELS.PRIMARY) {
+          console.log(`Trying fallback model ${MODELS.FALLBACK}`);
           try {
             const fallbackResponse = await callGeminiAPI(MODELS.FALLBACK, geminiMessages);
-            const fallbackText = fallbackResponse.candidates?.[0]?.content?.parts?.[0]?.text || '';
-            console.log('Generated response with fallback model:', fallbackText.substring(0, 50) + '...');
-            
-            return new Response(JSON.stringify({ 
-              text: fallbackText,
-              usedFallbackModel: true 
-            }), {
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            });
+            responseText = fallbackResponse.candidates?.[0]?.content?.parts?.[0]?.text || '';
+            usedFallback = true;
+            console.log('Generated response with fallback model:', responseText.substring(0, 50) + '...');
           } catch (fallbackError) {
             console.error('Error with fallback model:', fallbackError);
-            throw new Error(`Failed with both primary and fallback models: ${fallbackError.message}`);
+            // If both models fail, provide a helpful message
+            responseText = "I'm experiencing some connectivity issues right now. This might be due to high demand on Google's AI services. Please try again in a moment, or rephrase your question.";
           }
         } else {
-          // Rethrow if it's not a rate limit issue or we've already tried fallback
-          throw error;
+          // If fallback model fails, provide helpful message
+          responseText = "I'm experiencing some connectivity issues right now. This might be due to high demand on Google's AI services. Please try again in a moment, or rephrase your question.";
         }
       }
+      
+      return new Response(JSON.stringify({ 
+        text: responseText,
+        usedFallbackModel: usedFallback 
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     } else {
       throw new Error('Invalid request: missing prompt or action');
     }
@@ -269,7 +271,7 @@ serve(async (req) => {
     console.error('Error in vertex-ai function:', error);
     return new Response(JSON.stringify({ 
       error: error.message,
-      fallbackResponse: "I'm currently experiencing connection issues. Please try again shortly." 
+      fallbackResponse: "I'm currently experiencing connection issues with Google's AI services. This could be due to high demand or temporary service limitations. Please try again in a few minutes." 
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -277,9 +279,13 @@ serve(async (req) => {
   }
 });
 
-// Helper function to call Gemini API
+// Helper function to call Gemini API with better error handling
 async function callGeminiAPI(model, messages) {
-  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${VERTEX_AI_API_KEY}`, {
+  const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${VERTEX_AI_API_KEY}`;
+  
+  console.log(`Calling Gemini API with model: ${model}`);
+  
+  const response = await fetch(apiUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -290,15 +296,46 @@ async function callGeminiAPI(model, messages) {
         temperature: 0.7,
         topK: 40,
         topP: 0.95,
-        maxOutputTokens: 1024,
-      }
+        maxOutputTokens: 2048, // Increased token limit
+      },
+      safetySettings: [
+        {
+          category: "HARM_CATEGORY_HARASSMENT",
+          threshold: "BLOCK_MEDIUM_AND_ABOVE"
+        },
+        {
+          category: "HARM_CATEGORY_HATE_SPEECH",
+          threshold: "BLOCK_MEDIUM_AND_ABOVE"
+        },
+        {
+          category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+          threshold: "BLOCK_MEDIUM_AND_ABOVE"
+        },
+        {
+          category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+          threshold: "BLOCK_MEDIUM_AND_ABOVE"
+        }
+      ]
     }),
   });
   
   if (!response.ok) {
     const errorText = await response.text();
     console.error(`Google Gemini API error: ${response.status}:`, errorText);
-    throw new Error(`Google Gemini API error: ${response.status}: ${errorText}`);
+    
+    // Parse the error to provide better feedback
+    try {
+      const errorData = JSON.parse(errorText);
+      if (errorData.error?.code === 429) {
+        throw new Error(`Rate limit exceeded for ${model}. Please wait a moment before trying again.`);
+      } else if (errorData.error?.code === 404) {
+        throw new Error(`Model ${model} is not available. Please try again.`);
+      } else {
+        throw new Error(`Google Gemini API error: ${response.status}: ${errorData.error?.message || errorText}`);
+      }
+    } catch (parseError) {
+      throw new Error(`Google Gemini API error: ${response.status}: ${errorText}`);
+    }
   }
   
   return await response.json();

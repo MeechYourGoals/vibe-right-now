@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -7,9 +6,9 @@ import { toast } from 'sonner';
  * This is the central service for all Google AI functionality
  */
 export class VertexAIService {
-  // Default model settings
-  private static DEFAULT_MODEL = 'gemini-1.5-pro';
-  private static FALLBACK_MODEL = 'gemini-1.0-pro';
+  // Default model settings - using flash as primary for better quota management
+  private static DEFAULT_MODEL = 'gemini-1.5-flash';
+  private static FALLBACK_MODEL = 'gemini-1.5-pro';
   private static DEFAULT_VOICE = 'en-US-Neural2-D'; // Default male voice
   
   /**
@@ -40,20 +39,36 @@ export class VertexAIService {
       
       if (error) {
         console.error('Error calling Vertex AI function:', error);
-        throw new Error(`Failed to generate response: ${error.message}`);
+        
+        // Handle specific error types
+        if (error.message?.includes('429') || error.message?.includes('quota')) {
+          throw new Error('AI services are experiencing high demand. Please try again in a moment.');
+        } else if (error.message?.includes('404')) {
+          throw new Error('AI service temporarily unavailable. Please try again.');
+        } else {
+          throw new Error(`Failed to generate response: ${error.message}`);
+        }
       }
       
       if (!data || !data.text) {
         if (data?.fallbackResponse) {
           return data.fallbackResponse;
         }
-        throw new Error('No response text received from Vertex AI');
+        throw new Error('No response received from AI service');
       }
       
       return data.text;
     } catch (error) {
       console.error('Error generating response with Vertex AI:', error);
-      return "I'm having trouble connecting to Google AI services right now. Please try again later.";
+      
+      // Return user-friendly error messages
+      if (error.message?.includes('quota') || error.message?.includes('429')) {
+        return "I'm experiencing high demand right now. Please wait a moment and try again.";
+      } else if (error.message?.includes('404')) {
+        return "I'm temporarily unavailable due to service maintenance. Please try again shortly.";
+      } else {
+        return "I'm having trouble connecting to my AI services right now. Please try again later.";
+      }
     }
   }
 
@@ -74,10 +89,16 @@ export class VertexAIService {
       
       if (error) {
         console.error('Error with Vertex AI search:', error);
-        throw error;
+        
+        // Handle specific error types for search
+        if (error.message?.includes('429') || error.message?.includes('quota')) {
+          return `I'm experiencing high demand right now. Here's what I can tell you about "${query}" from my knowledge: Please try a more specific search in a moment.`;
+        } else {
+          throw error;
+        }
       }
       
-      return data?.text || `I couldn't find specific information about "${query}". Please try a different search.`;
+      return data?.text || `I couldn't find specific information about "${query}". Please try a different search or be more specific.`;
     } catch (error) {
       console.error('Error in Vertex AI search:', error);
       return `I couldn't find specific information about "${query}". Please try a different search.`;

@@ -1,7 +1,7 @@
 
 import { useState, useCallback } from 'react';
 import { Message, ChatMode } from '../types';
-import { supabase } from '@/integrations/supabase/client';
+import { VertexAIService } from '@/services/VertexAIService';
 
 export const useMessageProcessor = () => {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -13,41 +13,36 @@ export const useMessageProcessor = () => {
       setUsedFallback(false);
       
       try {
-        console.log("Calling perplexity-search function with:", query.substring(0, 50));
+        console.log("Processing message with VertexAI:", query.substring(0, 50));
         
-        // Use Perplexity for real-world search results
-        const { data, error } = await supabase.functions.invoke('perplexity-search', {
-          body: { 
-            query: query
-          }
-        });
+        // Convert previous messages to context format
+        const context = previousMessages.slice(-5).map(msg => ({
+          sender: msg.sender || (msg.direction === 'outgoing' ? 'user' : 'ai'),
+          text: msg.content || msg.text || ''
+        }));
         
-        if (error) {
-          console.error("Error calling perplexity-search function:", error);
-          throw new Error(error.message);
-        }
+        // Use VertexAI for all message processing
+        const response = await VertexAIService.generateResponse(
+          query, 
+          chatMode === 'venue' ? 'venue' : 'default',
+          context
+        );
         
-        if (!data) {
-          throw new Error("No response received from Perplexity");
-        }
-        
-        if (!data.text) {
-          throw new Error("No text in response from Perplexity");
-        }
-        
-        console.log("Received response from perplexity-search:", data.text.substring(0, 50) + "...");
-        return data.text;
+        console.log("Received response from VertexAI:", response.substring(0, 50) + "...");
+        return response;
       } catch (error) {
         console.error('Error processing message:', error);
         
         // Try to extract meaningful error message
-        let errorMessage = "I'm having trouble connecting to my search services right now. Please try again later.";
+        let errorMessage = "I'm having trouble connecting to my AI services right now. Please try again later.";
         
         // If we can identify specific errors, provide better messages
-        if (error.message?.includes('429') || error.message?.includes('quota')) {
-          errorMessage = "I've reached my usage limit for the moment. Please try again in a minute or two.";
+        if (error.message?.includes('429') || error.message?.includes('quota') || error.message?.includes('rate limit')) {
+          errorMessage = "I'm experiencing high demand right now. Please wait a moment and try again.";
         } else if (error.message?.includes('401') || error.message?.includes('403')) {
-          errorMessage = "I'm having authentication issues with my search services. Please try again later.";
+          errorMessage = "I'm having authentication issues with my AI services. Please try again later.";
+        } else if (error.message?.includes('404')) {
+          errorMessage = "There seems to be a temporary service issue. Please try again in a moment.";
         }
         
         return errorMessage;
