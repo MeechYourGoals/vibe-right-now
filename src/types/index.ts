@@ -1,4 +1,5 @@
 
+// If this file doesn't exist, we're creating it
 import { MockUserProfile } from "@/mock/users";
 
 export interface Location {
@@ -55,7 +56,6 @@ export interface Post {
   isVenuePost?: boolean;
   isPinned?: boolean;
   expiresAt?: string;
-  saved?: boolean;
 }
 
 export interface Comment {
@@ -70,6 +70,7 @@ export interface Comment {
   likes: number;
 }
 
+// Add User type for backward compatibility
 export interface User {
   id: string;
   username: string;
@@ -83,18 +84,7 @@ export interface User {
   posts?: number;
   isCelebrity?: boolean;
   isPrivate?: boolean;
-  subscription?: UserSubscriptionTier;
 }
-
-export interface DateRange {
-  from: Date | undefined;
-  to: Date | undefined;
-}
-
-// Export vibe tags
-export const vibeTags = [
-  'chill', 'energetic', 'romantic', 'casual', 'upscale', 'trendy', 'cozy', 'lively'
-];
 
 // VernonChat types
 export interface ChatMessage {
@@ -102,6 +92,7 @@ export interface ChatMessage {
   role: 'user' | 'assistant' | 'system' | 'error';
   content: string;
   timestamp: string;
+  // For compatibility with older format
   text?: string;
   sender?: 'user' | 'ai';
 }
@@ -144,6 +135,12 @@ export interface VenueInsights {
   discountRedemptions?: number;
 }
 
+export interface DateRange {
+  from: Date | undefined;
+  to: Date | undefined;
+}
+
+// Advertising Suite Types
 export interface AdFormat {
   id: string;
   name: string;
@@ -196,6 +193,7 @@ export interface CampaignPerformance {
   footTrafficLift: number;
 }
 
+// Sentiment Analysis Types
 export interface VenueSentimentAnalysis {
   id: string;
   venue_id: string;
@@ -237,53 +235,4 @@ export interface PlatformSentimentSummary {
   lastUpdated: string;
 }
 
-// User subscription tier types
-export type UserSubscriptionTier = 'free' | 'plus' | 'premium' | 'pro';
-
-export interface UserSubscription {
-  tier: UserSubscriptionTier;
-  status: 'active' | 'cancelled' | 'expired';
-  billingCycle: 'monthly' | 'yearly';
-  currentPeriodEnd: Date;
-  cancelAtPeriodEnd: boolean;
-}
-
-export interface SubscriptionPlan {
-  id: UserSubscriptionTier;
-  name: string;
-  price: number;
-  billingCycle: 'monthly' | 'yearly';
-  features: string[];
-  icon: string;
-  popular?: boolean;
-}
-
-export interface UserPreferences {
-  favoriteArtists: string[];
-  favoriteGenres: string[];
-  favoriteTeams: string[];
-  notificationsEnabled: boolean;
-  aiRecommendationsEnabled: boolean;
-}
-
-export interface UserWallet {
-  savedCards: SavedCard[];
-  defaultCardId?: string;
-  spendingLimits: {
-    daily?: number;
-    monthly?: number;
-    perTransaction?: number;
-  };
-}
-
-export interface SavedCard {
-  id: string;
-  lastFour: string;
-  brand: string;
-  expiryMonth: number;
-  expiryYear: number;
-  isDefault: boolean;
-}
-
-// Add subscription-related exports
-export * from './subscription';
+export * from "./index";

@@ -3,11 +3,9 @@ import { useState } from "react";
 import { Layout } from "@/components/Layout";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { useUserSubscription } from "@/hooks/useUserSubscription";
 
 import SettingsHeader from "@/components/settings/SettingsHeader";
 import SettingsTabs from "@/components/settings/SettingsTabs";
-import SubscriptionTab from "@/components/settings/SubscriptionTab";
 import PreferencesTab from "./settings/PreferencesTab";
 import PrivacyTab from "./settings/PrivacyTab";
 import TransportationTab from "./settings/TransportationTab";
@@ -16,13 +14,12 @@ import AccountTab from "./settings/AccountTab";
 import VenueManagementTab from "./settings/VenueManagementTab";
 import MarketingTab from "./settings/MarketingTab";
 import PaymentsTab from "./settings/PaymentsTab";
-import VenueSubmissionTab from "@/components/settings/VenueSubmissionTab";
 
 const Settings = () => {
   const { toast } = useToast();
-  const { subscription, upgradeTo } = useUserSubscription();
   const [activeTab, setActiveTab] = useState("preferences");
   const [isVenueMode, setIsVenueMode] = useState(false);
+  const [subscriptionTier, setSubscriptionTier] = useState<'standard' | 'plus' | 'premium' | 'pro'>('standard');
 
   const handleSaveSettings = () => {
     toast({
@@ -36,6 +33,7 @@ const Settings = () => {
       title: "Connecting to platform",
       description: `Initiating connection to ${platformId === 'other' ? "custom platform" : platformId}...`,
     });
+    // In a real app, this would trigger an OAuth flow or similar
   };
 
   const toggleMode = () => {
@@ -46,8 +44,9 @@ const Settings = () => {
     });
   };
 
-  const handleTierChange = (tier: 'free' | 'plus' | 'premium' | 'pro') => {
-    upgradeTo(tier);
+  // Helper function to upgrade subscription tier
+  const upgradeTier = (tier: 'standard' | 'plus' | 'premium' | 'pro') => {
+    setSubscriptionTier(tier);
     toast({
       title: `Upgraded to ${tier.charAt(0).toUpperCase() + tier.slice(1)}`,
       description: `Your subscription has been upgraded to ${tier}.`,
@@ -60,8 +59,8 @@ const Settings = () => {
         <SettingsHeader 
           isVenueMode={isVenueMode}
           onModeToggle={toggleMode}
-          subscriptionTier={!isVenueMode ? subscription.tier : undefined}
-          onTierChange={!isVenueMode ? handleTierChange : undefined}
+          subscriptionTier={subscriptionTier}
+          onTierChange={upgradeTier}
         />
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -71,19 +70,13 @@ const Settings = () => {
             <PreferencesTab 
               onSave={handleSaveSettings} 
               isVenueMode={isVenueMode} 
-              subscriptionTier={subscription.tier}
+              subscriptionTier={subscriptionTier}
             />
           </TabsContent>
           
           <TabsContent value="privacy" className="space-y-6">
             <PrivacyTab onSave={handleSaveSettings} isVenueMode={isVenueMode} />
           </TabsContent>
-
-          {!isVenueMode && (
-            <TabsContent value="subscription" className="space-y-6">
-              <SubscriptionTab />
-            </TabsContent>
-          )}
           
           {isVenueMode ? (
             <>
@@ -91,16 +84,12 @@ const Settings = () => {
                 <VenueManagementTab 
                   onSave={handleSaveSettings} 
                   isVenueMode={isVenueMode} 
-                  subscriptionTier="standard"
+                  subscriptionTier={subscriptionTier} 
                 />
               </TabsContent>
               
               <TabsContent value="marketing" className="space-y-6">
-                <MarketingTab subscriptionTier="standard" />
-              </TabsContent>
-              
-              <TabsContent value="submission" className="space-y-6">
-                <VenueSubmissionTab onSave={handleSaveSettings} />
+                <MarketingTab subscriptionTier={subscriptionTier} />
               </TabsContent>
             </>
           ) : (

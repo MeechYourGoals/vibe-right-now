@@ -1,3 +1,4 @@
+
 import { User } from "@/types";
 
 export const celebrityUsers: User[] = [
@@ -10,7 +11,6 @@ export const celebrityUsers: User[] = [
     verified: true,
     bio: "Reality TV star, entrepreneur, and fashion icon. Creating vibes everywhere. SKIMS & KKW Beauty founder.",
     isPrivate: false,
-    subscription: 'pro',
   },
   {
     id: "25",
@@ -21,7 +21,6 @@ export const celebrityUsers: User[] = [
     verified: true,
     bio: "Grammy-winning artist. OVO Sound. Discovering the best vibes across the globe.",
     isPrivate: false,
-    subscription: 'pro',
   },
   {
     id: "26",
@@ -32,7 +31,6 @@ export const celebrityUsers: User[] = [
     verified: true,
     bio: "Food critic extraordinaire. Helping you find the best food spots in every city.",
     isPrivate: false,
-    subscription: 'premium',
   },
   {
     id: "27",
@@ -43,7 +41,6 @@ export const celebrityUsers: User[] = [
     verified: true,
     bio: "Entertainer and content creator. Finding the most energetic vibes around the world!",
     isPrivate: false,
-    subscription: 'premium',
   },
   {
     id: "28",
@@ -54,6 +51,5 @@ export const celebrityUsers: User[] = [
     verified: true,
     bio: "Actress, producer, and adventure seeker. Euphoria & White Lotus star. Sharing my favorite places.",
     isPrivate: false,
-    subscription: 'pro',
   },
 ];

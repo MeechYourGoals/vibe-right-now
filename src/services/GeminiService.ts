@@ -1,31 +1,68 @@
 
-import { VertexAIService } from './VertexAIService';
+import { supabase } from '@/integrations/supabase/client';
+import { Message } from '@/components/VernonChat/types';
 
 /**
- * Gemini Service that proxies through VertexAIService
- * Maintains backward compatibility
+ * Service to interact with Google's Gemini API via Supabase Edge Functions
  */
 export const GeminiService = {
   /**
-   * Generate a text response using Gemini (via VertexAI)
+   * Generate a text response using Gemini
+   * @param prompt The user's prompt
+   * @param mode The chat mode ('venue' or default user)
+   * @param history Previous chat messages for context
+   * @returns The generated text response
    */
-  async generateResponse(prompt: string, mode: 'venue' | 'user' = 'user', history: any[] = []): Promise<string> {
+  async generateResponse(prompt: string, mode: 'venue' | 'user' = 'user', history: Message[] = []): Promise<string> {
     try {
-      console.log(`GeminiService proxy: Calling VertexAI with prompt: "${prompt.substring(0, 50)}..."`);
+      console.log(`Calling Gemini AI with prompt: "${prompt.substring(0, 50)}..."`);
       
-      const mappedMode = mode === 'venue' ? 'venue' : 'default';
-      return await VertexAIService.generateResponse(prompt, mappedMode, history);
+      const { data, error } = await supabase.functions.invoke('gemini-ai', {
+        body: { prompt, mode, history }
+      });
+      
+      if (error) {
+        console.error('Error calling Gemini AI function:', error);
+        throw new Error(`Failed to generate response: ${error.message}`);
+      }
+      
+      if (!data || !data.text) {
+        throw new Error('No response received from Gemini');
+      }
+      
+      return data.text;
     } catch (error) {
-      console.error('Error in GeminiService proxy:', error);
+      console.error('Error in GeminiService.generateResponse:', error);
       return "I'm having trouble connecting to my AI services right now. Please try again later.";
     }
   },
   
   /**
-   * Generate an image (not supported in current Google setup)
+   * Generate an image using Gemini's Imagen
+   * @param prompt The image description
+   * @returns Base64 encoded image data
    */
   async generateImage(prompt: string): Promise<string> {
-    console.warn('Image generation not implemented in Google proxy');
-    throw new Error('Image generation not available in current setup');
+    try {
+      console.log(`Generating image with prompt: "${prompt.substring(0, 50)}..."`);
+      
+      const { data, error } = await supabase.functions.invoke('gemini-imagen', {
+        body: { prompt }
+      });
+      
+      if (error) {
+        console.error('Error calling Gemini Imagen function:', error);
+        throw new Error(`Failed to generate image: ${error.message}`);
+      }
+      
+      if (!data || !data.imageData) {
+        throw new Error('No image data received from Imagen');
+      }
+      
+      return data.imageData;
+    } catch (error) {
+      console.error('Error in GeminiService.generateImage:', error);
+      throw error;
+    }
   }
 };

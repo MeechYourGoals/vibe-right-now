@@ -10,7 +10,7 @@ export const ComedySearchService = {
    * @param query The user's query about comedy shows
    * @returns Information about comedy shows in the area
    */
-  async searchComedy(query: string): Promise<string> {
+  async comedySearch(query: string): Promise<string> {
     try {
       console.log('Searching for comedy shows with query:', query);
       

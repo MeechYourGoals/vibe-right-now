@@ -1,23 +1,17 @@
 
-import { VertexAIService } from './VertexAIService';
+import { SearchService } from './search/SearchService';
 
 /**
- * Perplexity Service that proxies through Google Vertex AI
- * Maintains backward compatibility while using Google ecosystem
+ * Service to interact with search APIs and AI-assisted search
+ * This is kept for backward compatibility but delegates to the new SearchService
  */
 export const PerplexityService = {
   /**
-   * Search using Vertex AI (maintaining Perplexity interface)
+   * Search using multiple providers
    * @param query The search query
    * @returns The search results as text
    */
   async searchPerplexity(query: string): Promise<string> {
-    try {
-      console.log('Perplexity proxy: searching with Vertex AI:', query);
-      return await VertexAIService.searchWithVertex(query);
-    } catch (error) {
-      console.error('Error in Perplexity proxy service:', error);
-      return `I couldn't find specific information about "${query}". Please try a different search.`;
-    }
+    return SearchService.search(query);
   }
 };

@@ -133,6 +133,7 @@ const PostCard: React.FC<PostCardProps> = ({
                 
                 <PostFooter 
                   post={post} 
+                  comments={getComments(post.id)} 
                   isDetailView={false} 
                 />
               </div>
@@ -188,6 +189,7 @@ const PostCard: React.FC<PostCardProps> = ({
       
       <PostFooter 
         post={post} 
+        comments={comments} 
         isDetailView={isDetailView} 
       />
     </Card>

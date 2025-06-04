@@ -1,46 +1,75 @@
 
-import { useState } from "react";
-import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
+import SelectedTagsList from "./SelectedTagsList";
+import CustomTagInput from "./CustomTagInput";
+import CategoryTagSection from "./CategoryTagSection";
+import PreferenceTagSelection from "./PreferenceTagSelection";
+import FavoritesSection from "./FavoritesSection";
 
-const UserPreferences = () => {
-  const [notifications, setNotifications] = useState(true);
-  const [locationTracking, setLocationTracking] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
+interface UserPreferencesProps {
+  selectedTags: string[];
+  favorites: string[];
+  onTagSelect: (tag: string) => void;
+  onTagRemove: (tag: string) => void;
+  onAddCustomTag: (tag: string) => void;
+  onAddFavorite: (favorite: string) => void;
+  onRemoveFavorite: (favorite: string) => void;
+  preferenceCategories: {
+    name: string;
+    icon: React.ElementType;
+    id: string;
+  }[];
+  preferenceTags: string[];
+}
 
+const UserPreferences = ({
+  selectedTags,
+  favorites,
+  onTagSelect,
+  onTagRemove,
+  onAddCustomTag,
+  onAddFavorite,
+  onRemoveFavorite,
+  preferenceCategories,
+  preferenceTags
+}: UserPreferencesProps) => {
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <Label htmlFor="notifications">Enable Notifications</Label>
-        <Switch
-          id="notifications"
-          checked={notifications}
-          onCheckedChange={setNotifications}
+      <div className="space-y-2">
+        <h3 className="text-lg font-medium">My Preferences</h3>
+        <p className="text-sm text-muted-foreground">
+          Select tags that match your personal vibe preferences. These will help us recommend venues that match your style.
+        </p>
+        
+        <SelectedTagsList
+          selectedTags={selectedTags}
+          onTagRemove={onTagRemove}
+        />
+        
+        <CustomTagInput
+          onAddTag={onAddCustomTag}
+        />
+        
+        <FavoritesSection
+          favorites={favorites}
+          onAddFavorite={onAddFavorite}
+          onRemoveFavorite={onRemoveFavorite}
+        />
+        
+        <CategoryTagSection
+          categories={preferenceCategories}
+          tags={preferenceTags}
+          selectedTags={selectedTags}
+          onTagSelect={onTagSelect}
+        />
+        
+        <PreferenceTagSelection
+          selectedTags={selectedTags}
+          availableTags={preferenceTags}
+          onTagSelect={onTagSelect}
+          onTagRemove={onTagRemove}
         />
       </div>
-      
-      <div className="flex items-center justify-between">
-        <Label htmlFor="location">Location Tracking</Label>
-        <Switch
-          id="location"
-          checked={locationTracking}
-          onCheckedChange={setLocationTracking}
-        />
-      </div>
-      
-      <div className="flex items-center justify-between">
-        <Label htmlFor="dark-mode">Dark Mode</Label>
-        <Switch
-          id="dark-mode"
-          checked={darkMode}
-          onCheckedChange={setDarkMode}
-        />
-      </div>
-
-      <Button className="w-full mt-4">
-        Save Preferences
-      </Button>
     </div>
   );
 };

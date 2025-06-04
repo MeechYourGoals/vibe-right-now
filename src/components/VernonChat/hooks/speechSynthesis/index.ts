@@ -1,6 +1,6 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { ElevenLabsService } from '@/services/ElevenLabs';
+import { ElevenLabsService } from '@/services/ElevenLabsService';
 
 // Export the speech synthesis hooks
 export { useSpeechSynthesis } from '../useSpeechSynthesis';

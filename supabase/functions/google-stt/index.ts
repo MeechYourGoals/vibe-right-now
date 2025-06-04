@@ -2,8 +2,8 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 // Get API key from environment variable
-const GOOGLE_NLP_API_KEY = Deno.env.get('GOOGLE_VERTEX_API_KEY');
-const NLP_API_URL = "https://language.googleapis.com/v1/documents:analyzeEntities";
+const GOOGLE_VERTEX_API_KEY = Deno.env.get('GOOGLE_VERTEX_API_KEY');
+const STT_API_URL = "https://speech.googleapis.com/v1/speech:recognize";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -17,48 +17,58 @@ serve(async (req) => {
   }
 
   try {
-    const { text, features = ['entities'] } = await req.json();
+    const { audio } = await req.json();
     
-    if (!text) {
+    if (!audio) {
       return new Response(
-        JSON.stringify({ error: 'Text is required' }),
+        JSON.stringify({ error: 'Audio data is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
     
-    // Call Google Natural Language API
-    const response = await fetch(`${NLP_API_URL}?key=${GOOGLE_NLP_API_KEY}`, {
+    // Call Google Speech-to-Text API
+    const response = await fetch(`${STT_API_URL}?key=${GOOGLE_VERTEX_API_KEY}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        document: {
-          type: 'PLAIN_TEXT',
-          content: text
+        config: {
+          encoding: 'WEBM_OPUS',
+          sampleRateHertz: 48000,
+          languageCode: 'en-US',
+          model: 'latest_short',
+          enableAutomaticPunctuation: true
         },
-        encodingType: 'UTF8'
+        audio: {
+          content: audio
+        }
       })
     });
 
     if (!response.ok) {
       const errorData = await response.text();
-      console.error(`Google NLP API error: ${response.status}`, errorData);
+      console.error(`Google STT API error: ${response.status}`, errorData);
       return new Response(
-        JSON.stringify({ error: `Error calling Google NLP API: ${response.status}` }),
+        JSON.stringify({ error: `Error calling Google STT API: ${response.status}` }),
         { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     const data = await response.json();
-    console.log("Google NLP API response received");
+    console.log("Google STT API response received");
+    
+    let transcript = '';
+    if (data.results && data.results.length > 0) {
+      transcript = data.results[0].alternatives[0].transcript;
+    }
     
     return new Response(
-      JSON.stringify(data),
+      JSON.stringify({ transcript }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
-    console.error('Error in google-nlp function:', error);
+    console.error('Error in google-stt function:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

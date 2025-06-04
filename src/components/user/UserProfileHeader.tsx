@@ -3,9 +3,9 @@ import { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MapPin, Calendar, Users, Award, Share2, Sparkles, Crown, Brain } from "lucide-react";
+import { MapPin, Calendar, Users, Award, Share2 } from "lucide-react";
 import VerifiedIcon from "@/components/icons/VerifiedIcon";
-import { User, UserSubscriptionTier } from "@/types";
+import { User } from "@/types";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -134,24 +134,6 @@ const UserProfileHeader = ({ user, getUserBio }: UserProfileHeaderProps) => {
                   <Award className="h-3 w-3 mr-1" />
                   <span>Vibe Enthusiast</span>
                 </Badge>
-
-                {/* Subscription Tier Badge */}
-                {user.subscription && user.subscription !== 'free' && (
-                  <Badge
-                    variant="outline"
-                    className={cn(
-                      "font-semibold",
-                      user.subscription === 'plus' && "bg-sky-100 text-sky-700 border-sky-300 hover:bg-sky-200",
-                      user.subscription === 'premium' && "bg-purple-100 text-purple-700 border-purple-300 hover:bg-purple-200",
-                      user.subscription === 'pro' && "bg-red-100 text-red-700 border-red-300 hover:bg-red-200"
-                    )}
-                  >
-                    {user.subscription === 'plus' && <Sparkles className="h-3 w-3 mr-1.5" />}
-                    {user.subscription === 'premium' && <Crown className="h-3 w-3 mr-1.5" />}
-                    {user.subscription === 'pro' && <Brain className="h-3 w-3 mr-1.5" />}
-                    {user.subscription.charAt(0).toUpperCase() + user.subscription.slice(1)} Tier
-                  </Badge>
-                )}
               </div>
             </div>
             

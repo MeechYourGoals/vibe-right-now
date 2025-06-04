@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CreditCard } from "@/types/subscription";
+import { CreditCard } from "@/types";
 
 interface AddCardFormProps {
   onSubmit: (card: Omit<CreditCard, 'id' | 'isDefault'>) => void;

@@ -1,5 +1,5 @@
 
-import { ElevenLabsService } from '@/services/ElevenLabs';
+import { ElevenLabsService } from '@/services/ElevenLabsService';
 import { toast } from 'sonner';
 
 interface BookingDetails {

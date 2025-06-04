@@ -104,24 +104,51 @@ export class VertexAIService {
         console.log('With categories:', categories);
       }
       
-      const { data, error } = await supabase.functions.invoke('vertex-ai', {
-        body: { 
-          action: 'web-search',
-          prompt: query,
-          categories: categories || []
+      const searchPrompt = `
+        Please provide real information about "${query}".
+        ${categories && categories.length > 0 ? `Focusing on these categories: ${categories.join(', ')}` : ''}
+        Include:
+        - Names of specific places or events
+        - Actual addresses and locations if known
+        - Opening hours and pricing when available
+        - Any other helpful details
+        
+        Format your response in a clear, readable way.
+      `;
+      
+      // Try with primary model first
+      try {
+        return await this.generateResponse(searchPrompt, 'search');
+      } catch (primaryError) {
+        console.error('Error with primary model for search:', primaryError);
+        
+        // Try with fallback model
+        if (primaryError.message?.includes('429') || primaryError.message?.includes('quota')) {
+          try {
+            console.log('Using fallback model for search');
+            
+            const { data, error } = await supabase.functions.invoke('vertex-ai', {
+              body: { 
+                prompt: searchPrompt,
+                mode: 'search',
+                model: this.FALLBACK_MODEL
+              }
+            });
+            
+            if (error) {
+              throw error;
+            }
+            
+            if (data?.text) {
+              return data.text;
+            }
+          } catch (fallbackError) {
+            console.error('Fallback model also failed for search:', fallbackError);
+          }
         }
-      });
-      
-      if (error) {
-        console.error('Error with Vertex AI search:', error);
-        throw error;
+        
+        throw primaryError;
       }
-      
-      if (data?.text) {
-        return data.text;
-      }
-      
-      throw new Error('No search results received from Vertex AI');
     } catch (error) {
       console.error('Error in Vertex AI search:', error);
       return `I couldn't find specific information about "${query}". Please try a different search.`;
@@ -177,7 +204,7 @@ export class VertexAIService {
       const { data, error } = await supabase.functions.invoke('vertex-ai', {
         body: { 
           action: 'speech-to-text',
-          audio: audioBase64
+          prompt: audioBase64
         }
       });
       

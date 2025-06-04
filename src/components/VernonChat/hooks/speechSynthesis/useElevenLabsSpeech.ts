@@ -1,6 +1,6 @@
 
 import { useCallback } from 'react';
-import { ElevenLabsService } from '@/services/ElevenLabs';
+import { ElevenLabsService } from '@/services/ElevenLabsService';
 import { toast } from '@/hooks/use-toast';
 
 interface UseElevenLabsSpeechProps {

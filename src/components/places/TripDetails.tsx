@@ -10,7 +10,7 @@ import { TripHeader } from "./trip/TripHeader";
 import { TripPlaceCard } from "./trip/TripPlaceCard";
 import { AddPlaceDialog } from "./trip/AddPlaceDialog";
 import { EmptyPlaceState } from "./trip/EmptyPlaceState";
-import { TripCommunicationHub } from "./trip/TripCommunicationHub";
+import { TripCommentsWall } from "./trip/TripCommentsWall";
 import { useTripPlaces } from "./trip/useTripPlaces";
 
 // Mock colors for users
@@ -100,8 +100,8 @@ const TripDetails = () => {
           </div>
         )}
         
-        {/* Enhanced Trip Communication Hub */}
-        <TripCommunicationHub 
+        {/* Trip Comments Wall */}
+        <TripCommentsWall 
           tripId={tripId} 
           collaborators={trip.collaborators}
           userColors={userColors}
