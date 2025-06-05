@@ -26,14 +26,11 @@ const InfoWindowContent: React.FC<InfoWindowContentProps> = ({ location, onSelec
   const todaysHours = location.hours[dayOfWeek as keyof typeof location.hours];
   
   // Format hours for display
-  const formatHours = (hours: any): string => {
+  const formatHours = (hours: string | { open: string; close: string; }): string => {
     if (typeof hours === 'string') {
       return hours;
     }
-    if (hours && typeof hours === 'object' && hours.open && hours.close) {
-      return `${hours.open} - ${hours.close}`;
-    }
-    return 'Closed';
+    return `${hours.open} - ${hours.close}`;
   };
 
   const handleViewVenue = () => {
@@ -63,7 +60,7 @@ const InfoWindowContent: React.FC<InfoWindowContentProps> = ({ location, onSelec
         <span>{location.address}, {location.city}</span>
       </div>
       <div className="text-sm mb-2">
-        <span className="font-medium">Today:</span> {formatHours(todaysHours)}
+        <span className="font-medium">Today:</span> {formatHours(todaysHours || 'Closed')}
       </div>
       
       {/* Display wait time if available */}

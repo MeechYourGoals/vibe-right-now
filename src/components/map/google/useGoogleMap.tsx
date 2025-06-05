@@ -10,8 +10,7 @@ export const useGoogleMap = (
   userAddressLocation: [number, number] | null,
   locations: Location[],
   searchedCity: string,
-  selectedLocation: Location | null,
-  realPlaceCenter?: { lat: number; lng: number }
+  selectedLocation: Location | null
 ) => {
   const { isLoaded, loadError } = useJsApiLoader({
     id: 'google-map-script',
@@ -34,23 +33,18 @@ export const useGoogleMap = (
     setMap(null);
   }, []);
 
-  // Set map center based on locations and real place center
+  // Set map center based on locations
   useEffect(() => {
-    if (realPlaceCenter) {
-      setMapCenter(realPlaceCenter);
-      setMapZoom(15);
-    } else if (userLocation) {
+    if (userLocation) {
       setMapCenter({ 
         lat: userLocation.latitude, 
         lng: userLocation.longitude 
       });
-      setMapZoom(12);
     } else if (userAddressLocation) {
       setMapCenter({
         lat: userAddressLocation[1],
         lng: userAddressLocation[0]
       });
-      setMapZoom(12);
     } else if (locations.length > 0 && searchedCity) {
       setMapCenter({
         lat: locations[0].lat,
@@ -58,7 +52,7 @@ export const useGoogleMap = (
       });
       setMapZoom(12);
     }
-  }, [userLocation, userAddressLocation, locations, searchedCity, realPlaceCenter]);
+  }, [userLocation, userAddressLocation, locations, searchedCity]);
 
   // Keep selectedMarker in sync with selectedLocation
   useEffect(() => {
@@ -70,17 +64,14 @@ export const useGoogleMap = (
     if (map) {
       google.maps.event.trigger(map, "resize");
       
-      if (realPlaceCenter) {
-        map.setCenter(realPlaceCenter);
-        map.setZoom(15);
-      } else if (userLocation) {
+      if (userLocation) {
         map.setCenter({
           lat: userLocation.latitude,
           lng: userLocation.longitude
         });
       }
     }
-  }, [map, userLocation, realPlaceCenter]);
+  }, [map, userLocation]);
 
   // Expose resize method to window
   useEffect(() => {

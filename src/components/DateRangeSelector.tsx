@@ -7,11 +7,12 @@ import { CalendarIcon, X } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { DateRange as ReactDayPickerDateRange } from "react-day-picker";
+import { DateRange } from "@/types";
 
 export interface DateRangeSelectorProps {
-  dateRange: { from: Date | undefined; to: Date | undefined } | undefined;
-  onDateRangeChange: (range: { from: Date | undefined; to: Date | undefined } | undefined) => void;
-  onClear?: () => void;
+  dateRange: DateRange;
+  onDateRangeChange: (range: DateRange | undefined) => void;
+  onClear: () => void;
 }
 
 const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
@@ -23,14 +24,7 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
     if (range) {
       onDateRangeChange({ from: range.from, to: range.to });
     } else {
-      onDateRangeChange(undefined);
-    }
-  };
-
-  const handleClear = () => {
-    onDateRangeChange(undefined);
-    if (onClear) {
-      onClear();
+      onDateRangeChange({ from: undefined, to: undefined });
     }
   };
 
@@ -42,11 +36,11 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
             variant="outline"
             className={cn(
               "w-[280px] justify-start text-left font-normal",
-              !dateRange?.from && "text-muted-foreground"
+              !dateRange.from && "text-muted-foreground"
             )}
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
-            {dateRange?.from ? (
+            {dateRange.from ? (
               dateRange.to ? (
                 <>
                   {format(dateRange.from, "LLL dd, y")} -{" "}
@@ -64,7 +58,7 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
           <Calendar
             initialFocus
             mode="range"
-            defaultMonth={dateRange?.from}
+            defaultMonth={dateRange.from}
             selected={dateRange as ReactDayPickerDateRange}
             onSelect={handleDateRangeSelect}
             numberOfMonths={2}
@@ -73,8 +67,8 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
         </PopoverContent>
       </Popover>
       
-      {(dateRange?.from || dateRange?.to) && (
-        <Button variant="ghost" size="sm" onClick={handleClear}>
+      {(dateRange.from || dateRange.to) && (
+        <Button variant="ghost" size="sm" onClick={onClear}>
           <X className="h-4 w-4" />
         </Button>
       )}

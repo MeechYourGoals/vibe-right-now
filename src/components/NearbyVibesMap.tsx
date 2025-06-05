@@ -16,12 +16,7 @@ declare global {
   }
 }
 
-interface NearbyVibesMapProps {
-  selectedRealPlace?: Location | null;
-  onClearRealPlace?: () => void;
-}
-
-const NearbyVibesMap = ({ selectedRealPlace, onClearRealPlace }: NearbyVibesMapProps) => {
+const NearbyVibesMap = () => {
   const {
     userLocation,
     nearbyLocations,
@@ -34,18 +29,13 @@ const NearbyVibesMap = ({ selectedRealPlace, onClearRealPlace }: NearbyVibesMapP
   
   const [isMapExpanded, setIsMapExpanded] = useState(false);
   const [mapStyle, setMapStyle] = useState<"default" | "terrain" | "satellite">("terrain");
-  const [selectedLocation, setSelectedLocation] = useState<Location | null>(selectedRealPlace || null);
+  const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
   const [showDistances, setShowDistances] = useState(false);
   const [isAddressPopoverOpen, setIsAddressPopoverOpen] = useState(false);
   const [localLoading, setLocalLoading] = useState(false);
   
   const navigate = useNavigate();
   const location = useLocation();
-
-  // Update selected location when real place changes
-  useEffect(() => {
-    setSelectedLocation(selectedRealPlace || null);
-  }, [selectedRealPlace]);
   
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -81,13 +71,6 @@ const NearbyVibesMap = ({ selectedRealPlace, onClearRealPlace }: NearbyVibesMapP
 
   const handleLocationSelect = (location: Location) => {
     setSelectedLocation(location);
-  };
-
-  const handleCloseLocation = () => {
-    setSelectedLocation(null);
-    if (onClearRealPlace) {
-      onClearRealPlace();
-    }
   };
   
   const handleAddressSearch = async (address: string) => {
@@ -131,18 +114,11 @@ const NearbyVibesMap = ({ selectedRealPlace, onClearRealPlace }: NearbyVibesMapP
   
   // Determine the effective loading state (either from hook or local)
   const effectiveLoading = loading || localLoading;
-
-  // Combine nearby locations with selected real place
-  const allLocations = selectedRealPlace 
-    ? [selectedRealPlace, ...nearbyLocations]
-    : nearbyLocations;
   
   return (
     <div className={`space-y-4 ${isMapExpanded ? "fixed inset-0 z-50 bg-background p-4" : ""}`}>
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold">
-          {selectedRealPlace ? `${selectedRealPlace.name}` : "Nearby Vibes"}
-        </h2>
+        <h2 className="text-xl font-bold">Nearby Vibes</h2>
         <div className="flex gap-2">
           <MapControls 
             isExpanded={isMapExpanded}
@@ -168,23 +144,22 @@ const NearbyVibesMap = ({ selectedRealPlace, onClearRealPlace }: NearbyVibesMapP
         loading={effectiveLoading}
         isExpanded={isMapExpanded}
         userLocation={userLocation}
-        locations={allLocations}
+        locations={nearbyLocations}
         searchedCity={searchedCity}
         mapStyle={mapStyle}
         selectedLocation={selectedLocation}
         showDistances={showDistances}
         userAddressLocation={userAddressLocation}
         onLocationSelect={handleLocationSelect}
-        onCloseLocation={handleCloseLocation}
-        nearbyCount={allLocations.length}
+        onCloseLocation={() => setSelectedLocation(null)}
+        nearbyCount={nearbyLocations.length}
         onToggleDistances={() => setShowDistances(false)}
-        showAllCities={!searchedCity && !selectedRealPlace}
-        realPlaceCenter={selectedRealPlace ? { lat: selectedRealPlace.lat, lng: selectedRealPlace.lng } : undefined}
+        showAllCities={!searchedCity}
       />
       
       {!isMapExpanded && (
         <NearbyLocationsList
-          locations={allLocations}
+          locations={nearbyLocations}
           isExpanded={isMapExpanded}
           onViewMap={handleViewMap}
           onViewLocation={handleLocationClick}

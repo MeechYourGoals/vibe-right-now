@@ -8,7 +8,7 @@ import { isWithinThreeMonths } from "@/mock/time-utils";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { vibeTags } from "@/utils/explore/helpers/vibeTags";
+import { vibeTags } from "@/hooks/useUserProfile";
 import {
   Popover,
   PopoverContent,

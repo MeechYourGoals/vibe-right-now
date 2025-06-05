@@ -1,157 +1,223 @@
+import { useState, useEffect } from "react";
+import { User, Post, Location, Comment, Media } from "@/types";
+import { mockUsers, mockPosts, mockComments, mockLocations } from "@/mock/data";
+import { hashString, generateUserBio } from "@/mock/users";
 
-import { useState, useEffect } from 'react';
-import { mockUsers, MockUserProfile } from '@/mock/users';
+// List of vibe tags that can be assigned to posts
+export const vibeTags = [
+  "Cozy", "Upscale", "Trendy", "Casual", "Romantic", "Lively", "Intimate", 
+  "Family Friendly", "NightOwl", "Chill", "Energetic", "Artistic", "Sophisticated",
+  "Rustic", "Modern", "Nostalgic", "Peaceful", "Vibrant", "Adventurous"
+];
 
-// Simple hash function for deterministic user selection
-export const hashString = (str: string): number => {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // Convert to 32-bit integer
-  }
-  return Math.abs(hash);
+// Function to generate vibe tags for a post based on location and user
+const generateVibeTags = (locationId: string, username: string): string[] => {
+  const locationHash = parseInt(locationId) || hashString(locationId);
+  const userHash = hashString(username);
+  const seed = locationHash + userHash;
+  const tagCount = 1 + (seed % 4); // 1-4 tags per post
+  
+  const shuffledTags = [...vibeTags].sort(() => 0.5 - (seed * 0.0001));
+  return shuffledTags.slice(0, tagCount);
 };
 
-export const useUserProfile = (userId?: string) => {
-  const [userProfile, setUserProfile] = useState<MockUserProfile | null>(null);
-
-  useEffect(() => {
-    if (userId) {
-      // Convert string ID to number for hash calculation
-      const numericId = parseInt(userId) || hashString(userId);
-      const userIndex = numericId % mockUsers.length;
-      setUserProfile(mockUsers[userIndex]);
-    } else {
-      setUserProfile(null);
-    }
-  }, [userId]);
-
-  return { userProfile };
-};
-
-// Hook for getting venue profile
-export const useVenueProfile = (venueId?: string) => {
-  const [venueProfile, setVenueProfile] = useState<MockUserProfile | null>(null);
-
-  useEffect(() => {
-    if (venueId) {
-      // For venues, we use a different subset of users or create venue-specific profiles
-      const venueUsers = mockUsers.filter(user => user.type === 'venue');
-      if (venueUsers.length > 0) {
-        const numericId = parseInt(venueId) || hashString(venueId);
-        const venueIndex = numericId % venueUsers.length;
-        setVenueProfile(venueUsers[venueIndex]);
-      } else {
-        // Fallback to regular users if no venue users available
-        const numericId = parseInt(venueId) || hashString(venueId);
-        const userIndex = numericId % mockUsers.length;
-        setVenueProfile({
-          ...mockUsers[userIndex],
-          type: 'venue',
-          name: `${mockUsers[userIndex].name} Venue`,
-          bio: 'Amazing venue in the heart of the city'
-        });
-      }
-    } else {
-      setVenueProfile(null);
-    }
-  }, [venueId]);
-
-  return { venueProfile };
-};
-
-// Hook for getting multiple user profiles (for lists, etc.)
-export const useMultipleUserProfiles = (userIds: string[]) => {
-  const [userProfiles, setUserProfiles] = useState<MockUserProfile[]>([]);
-
-  useEffect(() => {
-    if (userIds.length > 0) {
-      const profiles = userIds.map(userId => {
-        const numericId = parseInt(userId) || hashString(userId);
-        const userIndex = numericId % mockUsers.length;
-        return mockUsers[userIndex];
-      });
-      setUserProfiles(profiles);
-    } else {
-      setUserProfiles([]);
-    }
-  }, [userIds]);
-
-  return { userProfiles };
-};
-
-// Hook for getting random user profiles (for suggestions, etc.)
-export const useRandomUserProfiles = (count: number, seed?: string) => {
-  const [randomProfiles, setRandomProfiles] = useState<MockUserProfile[]>([]);
-
-  useEffect(() => {
-    const seedValue = seed ? hashString(seed) : Date.now();
-    const profiles: MockUserProfile[] = [];
-    
-    for (let i = 0; i < count && i < mockUsers.length; i++) {
-      const index = (seedValue + i) % mockUsers.length;
-      profiles.push(mockUsers[index]);
+// Convert plain media strings to Media objects if needed
+const ensureMediaFormat = (media: any[]): Media[] => {
+  return media.map(item => {
+    if (typeof item === 'string') {
+      // Determine type based on extension
+      const isVideo = item.endsWith('.mp4') || item.endsWith('.mov') || item.endsWith('.avi');
+      return {
+        type: isVideo ? 'video' : 'image',
+        url: item
+      };
+    } else if (typeof item === 'object' && item !== null) {
+      // Already in correct format
+      return item;
     }
     
-    setRandomProfiles(profiles);
-  }, [count, seed]);
-
-  return { randomProfiles };
+    // Default fallback
+    return {
+      type: 'image',
+      url: 'https://via.placeholder.com/500'
+    };
+  });
 };
 
-// Hook for celebrity user profiles
-export const useCelebrityProfiles = () => {
-  const [celebrityProfiles, setCelebrityProfiles] = useState<MockUserProfile[]>([]);
-
+export const useUserProfile = (username: string | undefined) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [userPosts, setUserPosts] = useState<Post[]>([]);
+  const [followedVenues, setFollowedVenues] = useState<Location[]>([]);
+  const [visitedPlaces, setVisitedPlaces] = useState<Location[]>([]);
+  const [wantToVisitPlaces, setWantToVisitPlaces] = useState<Location[]>([]);
+  
   useEffect(() => {
-    const celebrities = mockUsers.filter(user => user.isCelebrity);
-    setCelebrityProfiles(celebrities);
-  }, []);
-
-  return { celebrityProfiles };
-};
-
-// Hook for getting a user profile by username
-export const useUserProfileByUsername = (username?: string) => {
-  const [userProfile, setUserProfile] = useState<MockUserProfile | null>(null);
-
-  useEffect(() => {
-    if (username) {
-      const foundUser = mockUsers.find(user => user.username === username);
-      if (foundUser) {
-        setUserProfile(foundUser);
-      } else {
-        // Fallback: generate a user based on username hash
-        const numericId = hashString(username);
-        const userIndex = numericId % mockUsers.length;
-        setUserProfile({
-          ...mockUsers[userIndex],
-          username: username
-        });
-      }
+    console.log("Looking for username:", username);
+    
+    // Find user by username or id (for backward compatibility)
+    const isUserId = username && !isNaN(Number(username));
+    
+    let foundUser: User | undefined;
+    
+    if (isUserId) {
+      // If it's an ID, look for a user with that ID
+      foundUser = mockUsers.find((user) => user.id === username);
     } else {
-      setUserProfile(null);
+      // Otherwise look for a user with that username
+      foundUser = mockUsers.find((user) => user.username === username);
+    }
+    
+    console.log("Found user:", foundUser);
+    
+    if (foundUser) {
+      // Ensure user has all required properties
+      const completeUser: User = {
+        ...foundUser,
+        verified: foundUser.verified || false,
+        isCelebrity: foundUser.isCelebrity || false
+      };
+      
+      setUser(completeUser);
+      
+      // Find posts by this user - use username for deterministic posts
+      const usernameHash = hashString(foundUser.username);
+      
+      // For our featured users, ensure they have more posts to showcase their profiles
+      const isFeaturedUser = ['sarah_vibes', 'jay_experiences', 'adventure_alex', 'marco_travels', 'local_explorer'].includes(foundUser.username);
+      const postCount = isFeaturedUser ? 8 + (usernameHash % 4) : 3 + (usernameHash % 5); // 8-12 posts for featured users, 3-8 for others
+      
+      // Find posts by this user with deterministic selection based on username
+      const allPosts = [...mockPosts];
+      const selectedPosts = [];
+      
+      // Generate specific post types based on user profile
+      let preferredLocationTypes: string[] = [];
+      
+      switch(foundUser.username) {
+        case 'sarah_vibes':
+          preferredLocationTypes = ['restaurant', 'bar', 'cafe'];
+          break;
+        case 'jay_experiences':
+          preferredLocationTypes = ['music_venue', 'cafe', 'concert_hall'];
+          break; 
+        case 'adventure_alex':
+          preferredLocationTypes = ['park', 'mountain', 'beach', 'hiking_trail'];
+          break;
+        case 'marco_travels':
+          preferredLocationTypes = ['landmark', 'museum', 'cultural_site'];
+          break;
+        case 'local_explorer':
+          preferredLocationTypes = ['speakeasy', 'gallery', 'boutique', 'hidden_gem'];
+          break;
+        default:
+          preferredLocationTypes = [];
+      }
+      
+      // If we have preference, start with those
+      const preferredLocations = preferredLocationTypes.length > 0 
+        ? allPosts.filter(post => preferredLocationTypes.includes(post.location.type || ''))
+        : [];
+      
+      // Fill with random posts if needed
+      const remainingPosts = allPosts.filter(post => !preferredLocations.includes(post));
+      const shuffledRemaining = [...remainingPosts].sort(() => 0.5 - Math.random());
+      
+      // Select posts, prioritizing preferred types
+      for (let i = 0; i < Math.min(postCount, preferredLocations.length); i++) {
+        const index = (usernameHash + i) % preferredLocations.length;
+        const post = {...preferredLocations[index]};
+        
+        // Ensure media is in the correct format
+        post.media = ensureMediaFormat(post.media);
+        
+        // Assign this user as the post creator
+        post.user = completeUser;
+        
+        selectedPosts.push(post);
+      }
+      
+      // Fill remaining posts if needed
+      const additionalNeeded = postCount - selectedPosts.length;
+      for (let i = 0; i < additionalNeeded; i++) {
+        const index = (usernameHash + i) % shuffledRemaining.length;
+        const post = {...shuffledRemaining[index]};
+        
+        // Ensure media is in the correct format
+        post.media = ensureMediaFormat(post.media);
+        
+        // Assign this user as the post creator
+        post.user = completeUser;
+        
+        selectedPosts.push(post);
+      }
+      
+      // Add vibe tags to each post if they don't already have them
+      const postsWithTags = selectedPosts.map(post => ({
+        ...post,
+        vibeTags: post.vibeTags || generateVibeTags(post.location.id, foundUser.username)
+      }));
+      
+      setUserPosts(postsWithTags);
+      
+      // Get deterministic venues as "followed venues" based on username
+      const usernameCharCode = foundUser.username.charCodeAt(0);
+      const venueCount = 3 + (usernameCharCode % 5); // 3-7 venues
+      
+      const filteredLocations = mockLocations.filter(location => !!location.type);
+      const followedVenuesList = [];
+      
+      for (let i = 0; i < venueCount; i++) {
+        const index = (usernameCharCode + i * 3) % filteredLocations.length;
+        followedVenuesList.push(filteredLocations[index]);
+      }
+      
+      setFollowedVenues(followedVenuesList);
+      
+      // Get deterministic venues for "visited" and "want to visit" sections
+      const visitedCount = 4 + (usernameCharCode % 4); // 4-7 visited places
+      const wantToVisitCount = 3 + (usernameCharCode % 5); // 3-7 want to visit places
+      
+      const visitedList = [];
+      const wantToVisitList = [];
+      
+      for (let i = 0; i < visitedCount; i++) {
+        const index = (usernameCharCode + i * 7) % filteredLocations.length;
+        visitedList.push(filteredLocations[index]);
+      }
+      
+      for (let i = 0; i < wantToVisitCount; i++) {
+        const index = (usernameCharCode + i * 11) % filteredLocations.length;
+        // Ensure no duplicates between visited and want to visit
+        if (!visitedList.some(loc => loc.id === filteredLocations[index].id)) {
+          wantToVisitList.push(filteredLocations[index]);
+        }
+      }
+      
+      setVisitedPlaces(visitedList);
+      setWantToVisitPlaces(wantToVisitList);
     }
   }, [username]);
 
-  return { userProfile };
-};
+  const getPostComments = (postId: string): Comment[] => {
+    return mockComments.filter(comment => comment.postId === postId);
+  };
 
-// Function to get user by username (direct function)
-export const getUserByUsername = (username: string): MockUserProfile | null => {
-  const foundUser = mockUsers.find(user => user.username === username);
-  if (foundUser) {
-    return foundUser;
-  }
+  const getUserBio = () => {
+    if (!user) return "";
+    return user.bio || generateUserBio(user.username);
+  };
+
+  // Determine if user profile is private (explicitly set or based on ID pattern)
+  const isPrivateProfile = user ? user.isPrivate || parseInt(user.id) % 5 === 0 : false;
   
-  // Fallback: generate a user based on username hash
-  const numericId = hashString(username);
-  const userIndex = numericId % mockUsers.length;
   return {
-    ...mockUsers[userIndex],
-    username: username
+    user,
+    userPosts,
+    followedVenues,
+    visitedPlaces,
+    wantToVisitPlaces,
+    getPostComments,
+    getUserBio,
+    isPrivateProfile
   };
 };
-
-export default useUserProfile;
