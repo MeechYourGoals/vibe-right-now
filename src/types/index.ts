@@ -95,6 +95,10 @@ export interface CreditCard {
   expiryMonth: number;
   expiryYear: number;
   isDefault: boolean;
+  expMonth?: number;
+  expYear?: number;
+  maxSpendLimit?: number;
+  vernonApproved?: boolean;
 }
 
 // VenueIdea interface for trip functionality

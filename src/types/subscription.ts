@@ -20,6 +20,7 @@ export interface UserSubscriptionFeatures {
   walletFeatures: boolean;
   influencerMarketplace: boolean;
   arXrGlasses: boolean;
+  vernonAgenticBooking: boolean;
 }
 
 export interface SubscriptionPlan {
@@ -59,7 +60,13 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
     name: 'Pro',
     price: 19.99,
     billingPeriod: 'month',
-    features: ['Vernon Chat access', 'Wallet features', 'Influencer Marketplace', 'AR/XR Google Glasses (coming soon)']
+    features: [
+      'Vernon Chat access', 
+      'Wallet features', 
+      'Influencer Marketplace', 
+      'Vernon AI Agent - Automatic ticket booking & reservations (powered by Google Project Mariner)',
+      'AR/XR Google Glasses (coming soon)'
+    ]
   }
 ];
 
@@ -75,7 +82,8 @@ export const TIER_FEATURES: Record<UserSubscriptionTier, UserSubscriptionFeature
     vernonChat: false,
     walletFeatures: false,
     influencerMarketplace: false,
-    arXrGlasses: false
+    arXrGlasses: false,
+    vernonAgenticBooking: false
   },
   plus: {
     basicExploration: true,
@@ -88,7 +96,8 @@ export const TIER_FEATURES: Record<UserSubscriptionTier, UserSubscriptionFeature
     vernonChat: false,
     walletFeatures: false,
     influencerMarketplace: false,
-    arXrGlasses: false
+    arXrGlasses: false,
+    vernonAgenticBooking: false
   },
   premium: {
     basicExploration: true,
@@ -101,7 +110,8 @@ export const TIER_FEATURES: Record<UserSubscriptionTier, UserSubscriptionFeature
     vernonChat: false,
     walletFeatures: false,
     influencerMarketplace: false,
-    arXrGlasses: false
+    arXrGlasses: false,
+    vernonAgenticBooking: false
   },
   pro: {
     basicExploration: true,
@@ -114,6 +124,7 @@ export const TIER_FEATURES: Record<UserSubscriptionTier, UserSubscriptionFeature
     vernonChat: true,
     walletFeatures: true,
     influencerMarketplace: true,
-    arXrGlasses: true
+    arXrGlasses: true,
+    vernonAgenticBooking: true
   }
 };

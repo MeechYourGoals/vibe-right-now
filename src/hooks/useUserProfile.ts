@@ -54,7 +54,7 @@ export const useUserProfile = (username: string | undefined) => {
     console.log("Looking for username:", username);
     
     // Find user by username or id (for backward compatibility)
-    const isUserId = username && !isNaN(Number(username));
+    const isUserId = username && !isNaN(parseInt(username));
     
     let foundUser: User | undefined;
     
