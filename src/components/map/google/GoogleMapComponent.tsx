@@ -1,8 +1,8 @@
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useCallback } from "react";
 import { GoogleMap } from '@react-google-maps/api';
 import { Location } from "@/types";
-import GoogleMapMarkers from './GoogleMapMarkers';
+import LiveMapMarkers from './LiveMapMarkers';
 import { getMapOptions } from './MapStyles';
 import MapLoadingStates from './MapLoadingStates';
 import useGoogleMap from './useGoogleMap';
@@ -53,11 +53,18 @@ const GoogleMapComponent = ({
     selectedLocation
   );
 
+  // Convert user location for distance calculations
+  const userLocationForDistance = userLocation 
+    ? { lat: userLocation.latitude, lng: userLocation.longitude }
+    : userAddressLocation 
+      ? { lat: userAddressLocation[1], lng: userAddressLocation[0] }
+      : undefined;
+
   // Main handler for marker clicks
-  const handleLocationSelect = (location: Location) => {
+  const handleLocationSelect = useCallback((location: Location) => {
     handleMarkerClick(location);
     onLocationSelect(location);
-  };
+  }, [handleMarkerClick, onLocationSelect]);
 
   // Loading and error states
   const loadingState = (
@@ -78,16 +85,30 @@ const GoogleMapComponent = ({
         onUnmount={onUnmount}
         options={getMapOptions(mapStyle)}
       >
-        <GoogleMapMarkers
+        <LiveMapMarkers
           locations={locations}
-          userLocation={userLocation}
-          userAddressLocation={userAddressLocation}
-          selectedMarker={selectedMarker}
-          showDistances={showDistances}
+          selectedLocation={selectedMarker}
           onMarkerClick={handleLocationSelect}
           onInfoWindowClose={() => setSelectedMarker(null)}
-          showAllCities={showAllCities}
+          showDistances={showDistances}
+          userLocation={userLocationForDistance}
         />
+
+        {/* User location marker */}
+        {userLocation && (
+          <div style={{
+            position: 'absolute',
+            left: '50%',
+            top: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '20px',
+            height: '20px',
+            backgroundColor: '#4285F4',
+            borderRadius: '50%',
+            border: '3px solid white',
+            boxShadow: '0 2px 6px rgba(0,0,0,0.3)'
+          }} />
+        )}
       </GoogleMap>
     </div>
   );
