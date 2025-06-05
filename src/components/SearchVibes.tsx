@@ -259,52 +259,21 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
   const handleUserSelect = (username: string) => {
     setSearchQuery(username);
     setShowUserSuggestions(false);
-    navigate(`/user/${username}`);
+    onSearch(username, selectedFilter, searchCategory);
   };
 
   const handlePlaceSelect = (placeName: string) => {
-    // Find the location in mockLocations
-    const location = mockLocations.find(loc => loc.name === placeName);
-    if (location) {
-      navigate(`/venue/${location.id}`);
-    } else {
-      setSearchQuery(placeName);
-      setShowPlaceSuggestions(false);
-      onSearch(placeName, selectedFilter, searchCategory);
-    }
+    setSearchQuery(placeName);
+    setShowPlaceSuggestions(false);
+    onSearch(placeName, selectedFilter, searchCategory);
   };
   
   const handleVibeSelect = (vibe: string) => {
     setSearchQuery(vibe);
     setShowVibeSuggestions(false);
-    
-    // Map vibes to category filters intelligently
-    const vibeToCategories: Record<string, string[]> = {
-      "Romantic": ["restaurant", "bar"],
-      "Family Friendly": ["restaurant", "attraction"],
-      "NightOwl": ["bar", "nightlife", "music"],
-      "Trendy": ["bar", "restaurant", "attraction"],
-      "Chill": ["bar", "attraction"],
-      "Upscale": ["restaurant", "bar"],
-      "Casual": ["restaurant", "bar", "attraction"],
-      "Lively": ["bar", "music", "nightlife", "sports"],
-      "Intimate": ["restaurant", "bar"],
-      "Cozy": ["restaurant", "bar"],
-      "Energetic": ["sports", "music", "nightlife"],
-      "Cultural": ["attraction", "event"]
-    };
-    
-    const suggestedCategories = vibeToCategories[vibe] || ["all"];
-    
-    // Set the first suggested category as active
-    if (suggestedCategories.length > 0 && suggestedCategories[0] !== "all") {
-      setSearchCategory(suggestedCategories[0]);
-      onSearch(vibe, selectedFilter, suggestedCategories[0]);
-    } else {
-      onSearch(vibe, selectedFilter, "vibes");
-    }
+    onSearch(vibe, selectedFilter, "vibes");
   };
-
+  
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchQuery(value);

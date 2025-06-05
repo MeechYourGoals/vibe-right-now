@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { User, Post, Location, Comment, Media } from "@/types";
 import { mockUsers, mockPosts, mockComments, mockLocations } from "@/mock/data";
@@ -54,7 +53,7 @@ export const useUserProfile = (username: string | undefined) => {
     console.log("Looking for username:", username);
     
     // Find user by username or id (for backward compatibility)
-    const isUserId = username && !isNaN(parseInt(username));
+    const isUserId = username && !isNaN(Number(username));
     
     let foundUser: User | undefined;
     
@@ -120,7 +119,7 @@ export const useUserProfile = (username: string | undefined) => {
       
       // If we have preference, start with those
       const preferredLocations = preferredLocationTypes.length > 0 
-        ? allPosts.filter(post => preferredLocationTypes.includes(post.location?.type || ''))
+        ? allPosts.filter(post => preferredLocationTypes.includes(post.location.type || ''))
         : [];
       
       // Fill with random posts if needed
@@ -159,7 +158,7 @@ export const useUserProfile = (username: string | undefined) => {
       // Add vibe tags to each post if they don't already have them
       const postsWithTags = selectedPosts.map(post => ({
         ...post,
-        vibeTags: post.vibeTags || generateVibeTags(post.location?.id || '', foundUser.username)
+        vibeTags: post.vibeTags || generateVibeTags(post.location.id, foundUser.username)
       }));
       
       setUserPosts(postsWithTags);
@@ -209,7 +208,7 @@ export const useUserProfile = (username: string | undefined) => {
 
   const getUserBio = () => {
     if (!user) return "";
-    return user.bio || generateUserBio(user.username);
+    return user.bio || generateUserBio(user);
   };
 
   // Determine if user profile is private (explicitly set or based on ID pattern)
