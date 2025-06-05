@@ -61,8 +61,8 @@ const PostCard: React.FC<PostCardProps> = ({
           <div className="flex items-center justify-between">
             <div className="flex-1">
               <div className="flex flex-col">
-                <Link to={`/venue/${firstPost.location?.id}`}>
-                  <h3 className="text-lg font-semibold hover:underline">{firstPost.location?.name}</h3>
+                <Link to={`/venue/${firstPost.location.id}`}>
+                  <h3 className="text-lg font-semibold hover:underline">{firstPost.location.name}</h3>
                 </Link>
                 <div className="flex items-center">
                   {locationPostCount !== undefined && (
@@ -72,7 +72,7 @@ const PostCard: React.FC<PostCardProps> = ({
                   )}
                   <div className="relative z-10">
                     <UserDropdown 
-                      userCount={getUserCount(firstPost.location?.id || "1")} 
+                      userCount={getUserCount(firstPost.location.id)} 
                       post={firstPost}
                     />
                   </div>
@@ -99,15 +99,15 @@ const PostCard: React.FC<PostCardProps> = ({
             </Button>
           </div>
           <p className="text-sm text-muted-foreground mt-1">
-            <Link to={`/venue/${firstPost.location?.id}`} className="hover:underline">
-              {firstPost.location?.city}, {firstPost.location?.state}
+            <Link to={`/venue/${firstPost.location.id}`} className="hover:underline">
+              {firstPost.location.city}, {firstPost.location.state}
             </Link>
           </p>
         </div>
         
         {posts.map(post => {
           // Determine if the post is from the venue itself
-          const isVenuePost = post.isVenuePost || post.location?.id === firstPost.location?.id;
+          const isVenuePost = post.isVenuePost || post.location?.id === firstPost.location.id;
           
           return (
             <div 
@@ -133,6 +133,7 @@ const PostCard: React.FC<PostCardProps> = ({
                 
                 <PostFooter 
                   post={post} 
+                  comments={getComments(post.id)} 
                   isDetailView={false} 
                 />
               </div>
@@ -177,7 +178,7 @@ const PostCard: React.FC<PostCardProps> = ({
       />
       
       <div className="px-4 py-2 flex justify-end">
-        <UserDropdown userCount={getUserCount(post.location?.id || "1")} post={post} />
+        <UserDropdown userCount={getUserCount(post.location.id)} post={post} />
       </div>
       
       <PostContent content={post.content} />
@@ -188,6 +189,7 @@ const PostCard: React.FC<PostCardProps> = ({
       
       <PostFooter 
         post={post} 
+        comments={comments} 
         isDetailView={isDetailView} 
       />
     </Card>

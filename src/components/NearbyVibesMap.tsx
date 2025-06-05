@@ -16,11 +16,7 @@ declare global {
   }
 }
 
-interface NearbyVibesMapProps {
-  centerLocation?: Location | null;
-}
-
-const NearbyVibesMap: React.FC<NearbyVibesMapProps> = ({ centerLocation }) => {
+const NearbyVibesMap = () => {
   const {
     userLocation,
     nearbyLocations,
@@ -53,14 +49,6 @@ const NearbyVibesMap: React.FC<NearbyVibesMapProps> = ({ centerLocation }) => {
     }
   }, [location, setSearchedCity]);
 
-  // Handle centerLocation prop to auto-select and center on a location
-  useEffect(() => {
-    if (centerLocation) {
-      setSelectedLocation(centerLocation);
-      console.log('Centering map on:', centerLocation);
-    }
-  }, [centerLocation]);
-
   const handleViewMap = () => {
     navigate("/explore");
   };
@@ -77,6 +65,7 @@ const NearbyVibesMap: React.FC<NearbyVibesMapProps> = ({ centerLocation }) => {
   };
 
   const handleLocationClick = (locationId: string) => {
+    // Navigate directly to the venue page
     navigate(`/venue/${locationId}`);
   };
 
@@ -126,16 +115,10 @@ const NearbyVibesMap: React.FC<NearbyVibesMapProps> = ({ centerLocation }) => {
   // Determine the effective loading state (either from hook or local)
   const effectiveLoading = loading || localLoading;
   
-  // Use center location if provided, otherwise use the usual location logic
-  const mapLocations = centerLocation ? [centerLocation, ...nearbyLocations] : nearbyLocations;
-  const mapSelectedLocation = centerLocation || selectedLocation;
-  
   return (
     <div className={`space-y-4 ${isMapExpanded ? "fixed inset-0 z-50 bg-background p-4" : ""}`}>
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold">
-          {centerLocation ? `${centerLocation.name}` : "Nearby Vibes"}
-        </h2>
+        <h2 className="text-xl font-bold">Nearby Vibes</h2>
         <div className="flex gap-2">
           <MapControls 
             isExpanded={isMapExpanded}
@@ -144,7 +127,7 @@ const NearbyVibesMap: React.FC<NearbyVibesMapProps> = ({ centerLocation }) => {
             onToggleExpand={toggleMapExpansion}
           />
           
-          {!isMapExpanded && !centerLocation && (
+          {!isMapExpanded && (
             <AddressSearchPopover
               isOpen={isAddressPopoverOpen}
               setIsOpen={setIsAddressPopoverOpen}
@@ -161,21 +144,20 @@ const NearbyVibesMap: React.FC<NearbyVibesMapProps> = ({ centerLocation }) => {
         loading={effectiveLoading}
         isExpanded={isMapExpanded}
         userLocation={userLocation}
-        locations={mapLocations}
-        searchedCity={centerLocation?.city || searchedCity}
+        locations={nearbyLocations}
+        searchedCity={searchedCity}
         mapStyle={mapStyle}
-        selectedLocation={mapSelectedLocation}
+        selectedLocation={selectedLocation}
         showDistances={showDistances}
         userAddressLocation={userAddressLocation}
         onLocationSelect={handleLocationSelect}
         onCloseLocation={() => setSelectedLocation(null)}
-        nearbyCount={mapLocations.length}
+        nearbyCount={nearbyLocations.length}
         onToggleDistances={() => setShowDistances(false)}
-        showAllCities={!searchedCity && !centerLocation}
-        centerLocation={centerLocation}
+        showAllCities={!searchedCity}
       />
       
-      {!isMapExpanded && !centerLocation && (
+      {!isMapExpanded && (
         <NearbyLocationsList
           locations={nearbyLocations}
           isExpanded={isMapExpanded}

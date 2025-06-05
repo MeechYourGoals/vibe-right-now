@@ -1,72 +1,147 @@
 
-import React from 'react';
-import { CreditCard } from '@/types';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { CreditCard as CardIcon, Check, Trash2, DollarSign, WalletCards } from "lucide-react";
+import { CreditCard } from "@/types";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { TooltipProvider, Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
-const mockCreditCards: CreditCard[] = [
-  {
-    id: '1',
-    last4: '4242',
-    brand: 'Visa',
-    expiryMonth: 12,
-    expiryYear: 2025,
-    isDefault: true,
-    maxSpendLimit: 500,
-    vernonApproved: true
-  },
-  {
-    id: '2',
-    last4: '5555',
-    brand: 'Mastercard',
-    expiryMonth: 8,
-    expiryYear: 2026,
-    isDefault: false,
-    maxSpendLimit: 300,
-    vernonApproved: false
-  }
-];
+interface SavedCardsSectionProps {
+  cards: CreditCard[];
+  onSetDefault: (cardId: string) => void;
+  onRemove: (cardId: string) => void;
+  onUpdateCard: (card: CreditCard) => void;
+}
 
-const SavedCardsSection: React.FC = () => {
+const SavedCardsSection = ({ cards, onSetDefault, onRemove, onUpdateCard }: SavedCardsSectionProps) => {
+  // Helper function to get card logo/icon based on brand
+  const getCardLogo = (brand: string) => {
+    // For a real app, you would use actual card brand logos
+    return <CardIcon className="h-8 w-8 text-primary" />;
+  };
+
+  // Helper function to format expiration date
+  const formatExpiration = (month: number, year: number) => {
+    return `${month.toString().padStart(2, '0')}/${year.toString().substring(2)}`;
+  };
+
+  // Helper function to handle spend limit change
+  const handleSpendLimitChange = (card: CreditCard, value: number[]) => {
+    onUpdateCard({
+      ...card,
+      maxSpendLimit: value[0]
+    });
+  };
+
+  // Helper function to handle Vernon approval toggle
+  const handleVernonApprovalChange = (card: CreditCard, approved: boolean) => {
+    onUpdateCard({
+      ...card,
+      vernonApproved: approved
+    });
+  };
+
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Saved Payment Methods</h3>
-        <Button variant="outline" size="sm">Add Card</Button>
-      </div>
-      
-      <div className="grid gap-4">
-        {mockCreditCards.map((card) => (
-          <Card key={card.id} className="p-4">
-            <div className="flex justify-between items-center">
+    <div className="space-y-3">
+      {cards.map((card) => (
+        <div 
+          key={card.id}
+          className={`p-3 rounded-md border ${
+            card.isDefault ? 'border-primary bg-primary/5' : ''
+          }`}
+        >
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-3">
+              {getCardLogo(card.brand)}
               <div>
-                <p className="font-medium">{card.brand} •••• {card.last4}</p>
-                <p className="text-sm text-muted-foreground">
-                  Expires {card.expiryMonth.toString().padStart(2, '0')}/{card.expiryYear}
-                </p>
-                {card.maxSpendLimit && (
-                  <p className="text-xs text-muted-foreground">
-                    Max spend: ${card.maxSpendLimit}
-                  </p>
-                )}
-              </div>
-              <div className="flex flex-col gap-2">
-                {card.isDefault && (
-                  <Badge variant="default" className="text-xs">
-                    Default
-                  </Badge>
-                )}
-                {card.vernonApproved && (
-                  <Badge variant="secondary" className="text-xs">
-                    Vernon Approved
-                  </Badge>
-                )}
+                <div className="font-medium">
+                  {card.brand.charAt(0).toUpperCase() + card.brand.slice(1)} •••• {card.last4}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  Expires {formatExpiration(card.expMonth, card.expYear)}
+                </div>
               </div>
             </div>
-          </Card>
-        ))}
-      </div>
+            
+            <div className="flex items-center gap-2">
+              {card.isDefault ? (
+                <Badge variant="outline" className="bg-primary/10 border-primary/20">
+                  <Check className="h-3 w-3 mr-1" /> Default
+                </Badge>
+              ) : (
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => onSetDefault(card.id)}
+                  className="text-xs h-8"
+                >
+                  Set as Default
+                </Button>
+              )}
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => onRemove(card.id)}
+                className="text-destructive h-8"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+          
+          <div className="space-y-4 pt-3 border-t">
+            {/* Max Spend Limit Setting */}
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <Label className="flex items-center gap-1">
+                  <DollarSign className="h-4 w-4" />
+                  Transaction Limit
+                </Label>
+                <span className="text-sm font-medium">
+                  ${card.maxSpendLimit || 0}
+                </span>
+              </div>
+              <Slider
+                value={[card.maxSpendLimit || 0]}
+                min={0}
+                max={1000}
+                step={10}
+                onValueChange={(value) => handleSpendLimitChange(card, value)}
+              />
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>$0</span>
+                <span>$500</span>
+                <span>$1000</span>
+              </div>
+            </div>
+            
+            {/* Vernon AI Approval Toggle */}
+            <div className="flex items-center justify-between space-x-2">
+              <Label htmlFor={`vernon-approval-${card.id}`} className="flex items-center gap-1">
+                <WalletCards className="h-4 w-4" />
+                <span>Approve for Vernon AI</span>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="ml-1 cursor-help text-muted-foreground text-xs">(?)</span>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      Allow Vernon AI to make purchases with this card within the transaction limit
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </Label>
+              <Switch
+                id={`vernon-approval-${card.id}`}
+                checked={card.vernonApproved || false}
+                onCheckedChange={(checked) => handleVernonApprovalChange(card, checked)}
+              />
+            </div>
+          </div>
+        </div>
+      ))}
     </div>
   );
 };

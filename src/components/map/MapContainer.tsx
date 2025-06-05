@@ -22,7 +22,6 @@ interface MapContainerProps {
   nearbyCount: number;
   onToggleDistances: () => void;
   showAllCities?: boolean;
-  centerLocation?: Location | null;
 }
 
 const MapContainer = ({
@@ -39,8 +38,7 @@ const MapContainer = ({
   onCloseLocation,
   nearbyCount,
   onToggleDistances,
-  showAllCities = true,
-  centerLocation
+  showAllCities = true
 }: MapContainerProps) => {
   const isMobile = useIsMobile();
   

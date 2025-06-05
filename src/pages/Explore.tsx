@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React from "react";
 import Header from "@/components/Header";
 import { Badge } from "@/components/ui/badge";
 import CameraButton from "@/components/CameraButton";
@@ -16,14 +16,11 @@ import LocationsGrid from "@/components/explore/LocationsGrid";
 import RecommendedForYou from "@/components/RecommendedForYou";
 import TrendingLocations from "@/components/TrendingLocations";
 import DiscountLocations from "@/components/DiscountLocations";
-import { Location } from "@/types";
 import { format } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const Explore = () => {
   const isMobile = useIsMobile();
-  const [mapCenterLocation, setMapCenterLocation] = useState<Location | null>(null);
-  
   const {
     activeTab,
     searchedCity,
@@ -51,10 +48,6 @@ const Explore = () => {
     setShowDateFilter
   } = useExploreState();
 
-  // Create a properly typed dateRange for the component
-  const typedDateRange: { from: Date | undefined; to: Date | undefined } | undefined = 
-    dateRange ? { from: dateRange.from, to: dateRange.to } : undefined;
-
   // Update the page title logic to handle empty cities
   const getDisplayTitle = () => {
     if (isNaturalLanguageSearch) {
@@ -63,16 +56,6 @@ const Explore = () => {
       return `Explore Vibes in ${searchedCity}${searchedState ? `, ${searchedState}` : ''}`;
     }
     return "Explore Vibes";
-  };
-
-  const handleLocationFound = (location: Location) => {
-    console.log('Location found:', location);
-    setMapCenterLocation(location);
-  };
-
-  const handleCenterMap = (location: Location) => {
-    console.log('Centering map on:', location);
-    setMapCenterLocation(location);
   };
 
   return (
@@ -87,17 +70,15 @@ const Explore = () => {
           
           <SearchSection 
             showDateFilter={showDateFilter}
-            dateRange={typedDateRange}
+            dateRange={dateRange}
             onSearch={handleSearch}
             onDateRangeChange={handleDateRangeChange}
             onClearDates={handleClearDates}
-            onLocationFound={handleLocationFound}
-            onCenterMap={handleCenterMap}
           />
           
           {/* Map centered below search bar */}
           <div className="w-full mb-6">
-            <NearbyVibesMap centerLocation={mapCenterLocation} />
+            <NearbyVibesMap />
           </div>
           
           <CategoryTabs 
@@ -122,7 +103,7 @@ const Explore = () => {
                   <MusicSection
                     musicEvents={musicEvents.length > 0 ? musicEvents : []}
                     searchedCity={searchedCity || ""}
-                    dateRange={typedDateRange}
+                    dateRange={dateRange}
                   />
                 )}
                 
@@ -130,7 +111,7 @@ const Explore = () => {
                   <ComedySection
                     comedyEvents={comedyEvents.length > 0 ? comedyEvents : []}
                     searchedCity={searchedCity || ""}
-                    dateRange={typedDateRange}
+                    dateRange={dateRange}
                   />
                 )}
                 
@@ -138,7 +119,7 @@ const Explore = () => {
                   <NightlifeSection
                     nightlifeVenues={nightlifeVenues.length > 0 ? nightlifeVenues : []}
                     searchedCity={searchedCity || ""}
-                    dateRange={typedDateRange}
+                    dateRange={dateRange}
                   />
                 )}
                 
@@ -146,10 +127,10 @@ const Explore = () => {
                   <div className="mb-6">
                     <h2 className="text-xl font-semibold mb-4 flex items-center">
                       Trending Sports Events
-                      {typedDateRange?.from && (
+                      {dateRange?.from && (
                         <Badge className="ml-2 bg-indigo-100 text-indigo-800">
-                          {format(typedDateRange.from, "MMM yyyy")}
-                          {typedDateRange.to && ` - ${format(typedDateRange.to, "MMM yyyy")}`}
+                          {format(dateRange.from, "MMM yyyy")}
+                          {dateRange.to && ` - ${format(dateRange.to, "MMM yyyy")}`}
                         </Badge>
                       )}
                     </h2>

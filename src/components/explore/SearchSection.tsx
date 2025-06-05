@@ -2,17 +2,12 @@
 import React from 'react';
 import SearchVibes from "@/components/SearchVibes";
 import DateRangeSelector from "@/components/DateRangeSelector";
-import RealPlacesSearch from "@/components/explore/RealPlacesSearch";
 import { Calendar } from "lucide-react";
+import { DateRange } from "react-day-picker";
 import { format } from "date-fns";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Location } from "@/types";
-
-interface DateRange {
-  from: Date | undefined;
-  to: Date | undefined;
-}
 
 interface SearchSectionProps {
   showDateFilter: boolean;
@@ -20,8 +15,6 @@ interface SearchSectionProps {
   onSearch: (query: string, filterType: string, category: string) => void;
   onDateRangeChange: (range: DateRange | undefined) => void;
   onClearDates: () => void;
-  onLocationFound?: (location: Location) => void;
-  onCenterMap?: (location: Location) => void;
 }
 
 const SearchSection: React.FC<SearchSectionProps> = ({
@@ -29,34 +22,13 @@ const SearchSection: React.FC<SearchSectionProps> = ({
   dateRange,
   onSearch,
   onDateRangeChange,
-  onClearDates,
-  onLocationFound,
-  onCenterMap
+  onClearDates
 }) => {
-  const [activeSearchMode, setActiveSearchMode] = React.useState<'real' | 'vibes'>('real');
-
   return (
     <div className="max-w-xl mx-auto mb-6">
-      {/* Search Mode Tabs */}
-      <Tabs value={activeSearchMode} onValueChange={(value) => setActiveSearchMode(value as 'real' | 'vibes')} className="w-full mb-4">
-        <TabsList className="grid grid-cols-2 w-full">
-          <TabsTrigger value="real">Real Places</TabsTrigger>
-          <TabsTrigger value="vibes">Vibes & Discovery</TabsTrigger>
-        </TabsList>
-      </Tabs>
-
-      {/* Conditional Search Component */}
-      {activeSearchMode === 'real' ? (
-        <RealPlacesSearch 
-          onLocationFound={onLocationFound}
-          onCenterMap={onCenterMap}
-        />
-      ) : (
-        <SearchVibes onSearch={onSearch} />
-      )}
+      <SearchVibes onSearch={onSearch} />
       
-      {/* Date Filter (only show for vibes mode) */}
-      {activeSearchMode === 'vibes' && showDateFilter && (
+      {showDateFilter && (
         <div className="p-3 bg-card border border-input rounded-lg max-w-xl mx-auto mt-4">
           <div className="flex justify-between items-center mb-2">
             <h3 className="text-sm font-medium flex items-center">
@@ -76,8 +48,7 @@ const SearchSection: React.FC<SearchSectionProps> = ({
           </div>
           <DateRangeSelector 
             dateRange={dateRange} 
-            onDateRangeChange={onDateRangeChange}
-            onClear={onClearDates}
+            onDateRangeChange={onDateRangeChange} 
           />
           {dateRange?.from && (
             <p className="text-xs text-foreground mt-2">

@@ -87,7 +87,7 @@ export interface User {
   isPrivate?: boolean;
 }
 
-// CreditCard interface - standardized
+// CreditCard interface
 export interface CreditCard {
   id: string;
   last4: string;
@@ -95,11 +95,13 @@ export interface CreditCard {
   expiryMonth: number;
   expiryYear: number;
   isDefault: boolean;
+  expMonth?: number;
+  expYear?: number;
   maxSpendLimit?: number;
   vernonApproved?: boolean;
 }
 
-// VenueIdea interface for trip functionality - with proper status typing
+// VenueIdea interface for trip functionality
 export interface VenueIdea {
   id: string;
   trip_id: string;
@@ -178,10 +180,9 @@ export interface VenueInsights {
   discountRedemptions?: number;
 }
 
-// Fixed DateRange interface - make both from and to required
 export interface DateRange {
-  from: Date;
-  to: Date;
+  from: Date | undefined;
+  to: Date | undefined;
 }
 
 // Advertising Suite Types

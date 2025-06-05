@@ -31,6 +31,7 @@ const CommentList = ({ postId, commentsCount }: CommentListProps) => {
     exampleComments.push({
       id: `example-${postId}-1`,
       postId: postId,
+      userId: mockUsers[Math.floor(Math.random() * mockUsers.length)].id,
       user: mockUsers[Math.floor(Math.random() * mockUsers.length)],
       content: "This place looks amazing! How's the crowd right now?",
       text: "This place looks amazing! How's the crowd right now?",
@@ -43,6 +44,7 @@ const CommentList = ({ postId, commentsCount }: CommentListProps) => {
     exampleComments.push({
       id: `example-${postId}-2`,
       postId: postId,
+      userId: mockUsers[Math.floor(Math.random() * mockUsers.length)].id,
       user: mockUsers[Math.floor(Math.random() * mockUsers.length)],
       content: "I was here yesterday and it was incredible! The line moves fast if you go around to the side entrance.",
       text: "I was here yesterday and it was incredible! The line moves fast if you go around to the side entrance.",
@@ -56,6 +58,7 @@ const CommentList = ({ postId, commentsCount }: CommentListProps) => {
       exampleComments.push({
         id: `example-${postId}-3`,
         postId: postId,
+        userId: mockUsers[Math.floor(Math.random() * mockUsers.length)].id,
         user: mockUsers[Math.floor(Math.random() * mockUsers.length)],
         content: "Heading there now! Anyone want to meet up?",
         text: "Heading there now! Anyone want to meet up?",
