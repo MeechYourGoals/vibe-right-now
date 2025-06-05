@@ -7,11 +7,10 @@ import { CalendarIcon, X } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { DateRange as ReactDayPickerDateRange } from "react-day-picker";
-import { DateRange } from "@/types";
 
 export interface DateRangeSelectorProps {
-  dateRange: DateRange;
-  onDateRangeChange: (range: DateRange | undefined) => void;
+  dateRange: { from: Date | undefined; to: Date | undefined };
+  onDateRangeChange: (range: { from: Date | undefined; to: Date | undefined }) => void;
   onClear: () => void;
 }
 

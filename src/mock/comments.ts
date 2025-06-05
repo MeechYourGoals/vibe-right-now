@@ -1,226 +1,249 @@
 
 import { Comment } from "@/types";
-import { mockUsers } from "./users";
+import { mockUsers } from "@/mock/users";
+import { getRecentTime } from "./time-utils";
 
 export const mockComments: Comment[] = [
   {
-    id: "comment-1",
+    id: "1",
     postId: "1",
-    user: mockUsers[0],
-    content: "This place has amazing vibes! The crowd is always energetic and the music is perfect.",
-    text: "This place has amazing vibes! The crowd is always energetic and the music is perfect.",
-    timestamp: "2024-01-15T14:30:00Z",
-    vibedHere: true,
-    likes: 12
-  },
-  {
-    id: "comment-2",
-    postId: "1",
-    user: mockUsers[1],
-    content: "Been here multiple times and it never disappoints. The atmosphere is unmatched!",
-    text: "Been here multiple times and it never disappoints. The atmosphere is unmatched!",
-    timestamp: "2024-01-15T15:45:00Z",
-    vibedHere: false,
-    likes: 8
-  },
-  {
-    id: "comment-3",
-    postId: "2",
-    user: mockUsers[2],
-    content: "Perfect spot for a night out with friends. The service is top-notch too.",
-    text: "Perfect spot for a night out with friends. The service is top-notch too.",
-    timestamp: "2024-01-14T20:15:00Z",
-    vibedHere: true,
-    likes: 15
-  },
-  {
-    id: "comment-4",
-    postId: "2",
-    user: mockUsers[3],
-    content: "Love the aesthetic here! Great for photos and the drinks are creative.",
-    text: "Love the aesthetic here! Great for photos and the drinks are creative.",
-    timestamp: "2024-01-14T21:30:00Z",
-    vibedHere: false,
-    likes: 6
-  },
-  {
-    id: "comment-5",
-    postId: "3",
-    user: mockUsers[4],
-    content: "Hidden gem! Not too crowded and has this cozy, intimate feeling.",
-    text: "Hidden gem! Not too crowded and has this cozy, intimate feeling.",
-    timestamp: "2024-01-13T19:20:00Z",
-    vibedHere: true,
-    likes: 9
-  },
-  {
-    id: "comment-6",
-    postId: "3",
+    userId: mockUsers[5].id,
     user: mockUsers[5],
-    content: "The live music here is incredible. Definitely coming back next weekend!",
-    text: "The live music here is incredible. Definitely coming back next weekend!",
-    timestamp: "2024-01-13T20:45:00Z",
+    content: "The view is amazing! What DJ is playing?",
+    text: "The view is amazing! What DJ is playing?",
+    timestamp: getRecentTime(0.5),
     vibedHere: false,
-    likes: 11
+    likes: 0
   },
   {
-    id: "comment-7",
-    postId: "4",
-    user: mockUsers[6],
-    content: "Best brunch spot in the city! The avocado toast is a must-try.",
-    text: "Best brunch spot in the city! The avocado toast is a must-try.",
-    timestamp: "2024-01-12T11:30:00Z",
-    vibedHere: true,
-    likes: 7
-  },
-  {
-    id: "comment-8",
-    postId: "4",
-    user: mockUsers[7],
-    content: "Great coffee and the staff is super friendly. Perfect work spot too!",
-    text: "Great coffee and the staff is super friendly. Perfect work spot too!",
-    timestamp: "2024-01-12T12:15:00Z",
-    vibedHere: false,
-    likes: 4
-  },
-  {
-    id: "comment-9",
-    postId: "5",
-    user: mockUsers[8],
-    content: "This rooftop view is insane! Sunset vibes hit different here.",
-    text: "This rooftop view is insane! Sunset vibes hit different here.",
-    timestamp: "2024-01-11T18:45:00Z",
-    vibedHere: true,
-    likes: 18
-  },
-  {
-    id: "comment-10",
-    postId: "5",
-    user: mockUsers[9],
-    content: "Came here for a date and it was perfect. Romantic and not too loud.",
-    text: "Came here for a date and it was perfect. Romantic and not too loud.",
-    timestamp: "2024-01-11T19:30:00Z",
-    vibedHere: false,
-    likes: 13
-  },
-  {
-    id: "comment-11",
-    postId: "6",
+    id: "2",
+    postId: "1",
+    userId: mockUsers[10].id,
     user: mockUsers[10],
-    content: "Dance floor was packed! The DJ really knows how to read the crowd.",
-    text: "Dance floor was packed! The DJ really knows how to read the crowd.",
-    timestamp: "2024-01-10T23:15:00Z",
+    content: "Just arrived! Where are you sitting?",
+    text: "Just arrived! Where are you sitting?",
+    timestamp: getRecentTime(0.2),
     vibedHere: true,
-    likes: 16
+    likes: 0
   },
   {
-    id: "comment-12",
-    postId: "6",
+    id: "3",
+    postId: "2",
+    userId: mockUsers[3].id,
+    user: mockUsers[3],
+    content: "Heading there now! Save me a chocolate one!",
+    text: "Heading there now! Save me a chocolate one!",
+    timestamp: getRecentTime(1.8),
+    vibedHere: true,
+    likes: 0
+  },
+  {
+    id: "4",
+    postId: "3",
+    userId: mockUsers[7].id,
+    user: mockUsers[7],
+    content: "Can't wait to see them! Looking for parking now.",
+    text: "Can't wait to see them! Looking for parking now.",
+    timestamp: getRecentTime(0.3),
+    vibedHere: false,
+    likes: 0
+  },
+  {
+    id: "5",
+    postId: "3",
+    userId: mockUsers[11].id,
     user: mockUsers[11],
-    content: "Energy was through the roof! Best night I've had in ages.",
-    text: "Energy was through the roof! Best night I've had in ages.",
-    timestamp: "2024-01-10T23:45:00Z",
-    vibedHere: false,
-    likes: 10
-  },
-  {
-    id: "comment-13",
-    postId: "7",
-    user: mockUsers[12],
-    content: "Quiet spot with amazing books and even better coffee. My new study haven!",
-    text: "Quiet spot with amazing books and even better coffee. My new study haven!",
-    timestamp: "2024-01-09T14:20:00Z",
+    content: "I'm near the front! It's not too crowded yet!",
+    text: "I'm near the front! It's not too crowded yet!",
+    timestamp: getRecentTime(0.1),
     vibedHere: true,
-    likes: 5
+    likes: 0
   },
   {
-    id: "comment-14",
-    postId: "7",
-    user: mockUsers[13],
-    content: "Love the book selection here. Staff gave great recommendations too!",
-    text: "Love the book selection here. Staff gave great recommendations too!",
-    timestamp: "2024-01-09T15:30:00Z",
+    id: "6",
+    postId: "6",
+    userId: mockUsers[2].id,
+    user: mockUsers[2],
+    content: "Who's winning right now? Stuck in traffic!",
+    text: "Who's winning right now? Stuck in traffic!",
+    timestamp: getRecentTime(0.2),
     vibedHere: false,
-    likes: 3
+    likes: 0
   },
   {
-    id: "comment-15",
-    postId: "8",
+    id: "7",
+    postId: "6",
+    userId: mockUsers[14].id,
     user: mockUsers[14],
-    content: "The workout classes here are intense but so worth it. Great community!",
-    text: "The workout classes here are intense but so worth it. Great community!",
-    timestamp: "2024-01-08T07:45:00Z",
+    content: "Just got here! The atmosphere is incredible!",
+    text: "Just got here! The atmosphere is incredible!",
+    timestamp: getRecentTime(0.1),
     vibedHere: true,
-    likes: 8
+    likes: 0
   },
   {
-    id: "comment-16",
-    postId: "8",
-    user: mockUsers[15],
-    content: "Equipment is top quality and the trainers are super knowledgeable.",
-    text: "Equipment is top quality and the trainers are super knowledgeable.",
-    timestamp: "2024-01-08T08:30:00Z",
-    vibedHere: false,
-    likes: 6
-  },
-  {
-    id: "comment-17",
-    postId: "9",
-    user: mockUsers[16],
-    content: "Beach vibes in the city! Love the sand volleyball courts.",
-    text: "Beach vibes in the city! Love the sand volleyball courts.",
-    timestamp: "2024-01-07T16:20:00Z",
+    id: "8",
+    postId: "7",
+    userId: mockUsers[12].id,
+    user: mockUsers[12],
+    content: "Which DJ is on right now? Coming over!",
+    text: "Which DJ is on right now? Coming over!",
+    timestamp: getRecentTime(0.1),
     vibedHere: true,
-    likes: 12
+    likes: 0
   },
   {
-    id: "comment-18",
-    postId: "9",
-    user: mockUsers[17],
-    content: "Perfect spot for a casual game with friends. Great atmosphere!",
-    text: "Perfect spot for a casual game with friends. Great atmosphere!",
-    timestamp: "2024-01-07T17:00:00Z",
-    vibedHere: false,
-    likes: 9
-  },
-  {
-    id: "comment-19",
+    id: "9",
     postId: "10",
-    user: mockUsers[18],
-    content: "Art exhibition was mind-blowing! The interactive pieces were my favorite.",
-    text: "Art exhibition was mind-blowing! The interactive pieces were my favorite.",
-    timestamp: "2024-01-06T13:15:00Z",
-    vibedHere: true,
-    likes: 14
-  },
-  {
-    id: "comment-20",
-    postId: "10",
-    user: mockUsers[19],
-    content: "Such a unique experience. The artists really pushed boundaries here.",
-    text: "Such a unique experience. The artists really pushed boundaries here.",
-    timestamp: "2024-01-06T14:30:00Z",
+    userId: mockUsers[8].id,
+    user: mockUsers[8],
+    content: "Best seats in the house! Jealous!",
+    text: "Best seats in the house! Jealous!",
+    timestamp: getRecentTime(0.05),
     vibedHere: false,
-    likes: 11
+    likes: 0
   },
   {
-    id: "comment-21",
-    postId: "11",
+    id: "10",
+    postId: "10",
+    userId: mockUsers[13].id,
+    user: mockUsers[13],
+    content: "I'm in section 115! Let's meet up!",
+    text: "I'm in section 115! Let's meet up!",
+    timestamp: getRecentTime(0.02),
+    vibedHere: true,
+    likes: 0
+  },
+  {
+    id: "11",
+    postId: "13",
+    userId: mockUsers[9].id,
+    user: mockUsers[9],
+    content: "Which event is on right now? The barrel racing?",
+    text: "Which event is on right now? The barrel racing?",
+    timestamp: getRecentTime(0.1),
+    vibedHere: false,
+    likes: 0
+  },
+  {
+    id: "12",
+    postId: "13",
+    userId: mockUsers[20].id,
     user: mockUsers[20],
-    content: "Arcade games brought back so many childhood memories! Plus great pizza.",
-    text: "Arcade games brought back so many childhood memories! Plus great pizza.",
-    timestamp: "2024-01-05T20:45:00Z",
+    content: "Just arrived! The bull riding is WILD!",
+    text: "Just arrived! The bull riding is WILD!",
+    timestamp: getRecentTime(0.05),
     vibedHere: true,
-    likes: 7
+    likes: 0
   },
   {
-    id: "comment-22",
-    postId: "11",
-    user: mockUsers[21],
-    content: "Perfect date spot! Competitive but fun, and the retro atmosphere is amazing.",
-    text: "Perfect date spot! Competitive but fun, and the retro atmosphere is amazing.",
-    timestamp: "2024-01-05T21:20:00Z",
+    id: "13",
+    postId: "21",
+    userId: mockUsers[17].id,
+    user: mockUsers[17],
+    content: "Who's the headliner tonight? Worth coming?",
+    text: "Who's the headliner tonight? Worth coming?",
+    timestamp: getRecentTime(0.05),
     vibedHere: false,
-    likes: 8
-  }
+    likes: 0
+  },
+  {
+    id: "14",
+    postId: "21",
+    userId: mockUsers[19].id,
+    user: mockUsers[19],
+    content: "I'm here too! Best comedy show I've seen all year!",
+    text: "I'm here too! Best comedy show I've seen all year!",
+    timestamp: getRecentTime(0.02),
+    vibedHere: true,
+    likes: 0
+  },
+  {
+    id: "15",
+    postId: "25",
+    userId: mockUsers[21].id,
+    user: mockUsers[21],
+    content: "Is the light show worth it? Thinking of heading over now!",
+    text: "Is the light show worth it? Thinking of heading over now!",
+    timestamp: getRecentTime(0.3),
+    vibedHere: false,
+    likes: 0
+  },
+  {
+    id: "16",
+    postId: "25",
+    userId: mockUsers[22].id,
+    user: mockUsers[22],
+    content: "Just arrived! The colors are magical tonight!",
+    text: "Just arrived! The colors are magical tonight!",
+    timestamp: getRecentTime(0.2),
+    vibedHere: true,
+    likes: 0
+  },
+  {
+    id: "17",
+    postId: "26",
+    userId: mockUsers[14].id,
+    user: mockUsers[14],
+    content: "Did you go to the top? How long is the wait?",
+    text: "Did you go to the top? How long is the wait?",
+    timestamp: getRecentTime(0.2),
+    vibedHere: false,
+    likes: 0
+  },
+  {
+    id: "18",
+    postId: "26",
+    userId: mockUsers[16].id,
+    user: mockUsers[16],
+    content: "Here now too! The view of Paris at night is unbeatable!",
+    text: "Here now too! The view of Paris at night is unbeatable!",
+    timestamp: getRecentTime(0.1),
+    vibedHere: true,
+    likes: 0
+  },
+  {
+    id: "19",
+    postId: "27",
+    userId: mockUsers[15].id,
+    user: mockUsers[15],
+    content: "Who was the surprise guest?? Stuck in traffic!",
+    text: "Who was the surprise guest?? Stuck in traffic!",
+    timestamp: getRecentTime(0.05),
+    vibedHere: false,
+    likes: 0
+  },
+  {
+    id: "20",
+    postId: "27",
+    userId: mockUsers[18].id,
+    user: mockUsers[18],
+    content: "Second stage is better right now! No crowds and amazing performance!",
+    text: "Second stage is better right now! No crowds and amazing performance!",
+    timestamp: getRecentTime(0.01),
+    vibedHere: true,
+    likes: 0
+  },
+  {
+    id: "21",
+    postId: "28",
+    userId: mockUsers[0].id,
+    user: mockUsers[0],
+    content: "Any exclusive items only available there?",
+    text: "Any exclusive items only available there?",
+    timestamp: getRecentTime(0.1),
+    vibedHere: false,
+    likes: 0
+  },
+  {
+    id: "22",
+    postId: "28",
+    userId: mockUsers[1].id,
+    user: mockUsers[1],
+    content: "Just arrived! The limited edition bags are stunning!",
+    text: "Just arrived! The limited edition bags are stunning!",
+    timestamp: getRecentTime(0.05),
+    vibedHere: true,
+    likes: 0
+  },
 ];
