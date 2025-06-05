@@ -1,5 +1,5 @@
 
-import { Location } from "@/types";
+import { Location, BusinessHours } from "@/types";
 
 export const getOpenCloseTime = (location: Location) => {
   if (!location.hours) return null;
@@ -31,6 +31,45 @@ export const getOpenCloseTime = (location: Location) => {
   }
   
   return null;
+};
+
+export const generateBusinessHours = (venue: Location): BusinessHours => {
+  // Generate realistic business hours based on venue type
+  const getHoursForType = (type: string) => {
+    switch (type) {
+      case "restaurant":
+        return { open: "11:00 AM", close: "10:00 PM" };
+      case "bar":
+        return { open: "5:00 PM", close: "2:00 AM" };
+      case "attraction":
+        return { open: "9:00 AM", close: "6:00 PM" };
+      case "sports":
+        return { open: "6:00 AM", close: "11:00 PM" };
+      default:
+        return { open: "9:00 AM", close: "5:00 PM" };
+    }
+  };
+
+  const defaultHours = getHoursForType(venue.type);
+  
+  return {
+    monday: defaultHours,
+    tuesday: defaultHours,
+    wednesday: defaultHours,
+    thursday: defaultHours,
+    friday: defaultHours,
+    saturday: defaultHours,
+    sunday: venue.type === "bar" ? defaultHours : { open: "10:00 AM", close: "9:00 PM" },
+    isOpenNow: "true",
+    timezone: "America/New_York",
+    isOpen24Hours: false
+  };
+};
+
+export const getTodaysHours = (venue: Location): string => {
+  const hours = getOpenCloseTime(venue);
+  if (!hours) return "Closed today";
+  return `${hours.open} - ${hours.close}`;
 };
 
 export const isCurrentlyOpen = (location: Location): boolean => {

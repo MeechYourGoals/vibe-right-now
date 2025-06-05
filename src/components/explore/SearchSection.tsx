@@ -8,8 +8,8 @@ import { Button } from "@/components/ui/button";
 
 // Update DateRange to match our fixed interface
 interface DateRange {
-  from: Date;
-  to: Date;
+  from: Date | undefined;
+  to: Date | undefined;
 }
 
 interface SearchSectionProps {
@@ -51,7 +51,8 @@ const SearchSection: React.FC<SearchSectionProps> = ({
           </div>
           <DateRangeSelector 
             dateRange={dateRange} 
-            onDateRangeChange={onDateRangeChange} 
+            onDateRangeChange={onDateRangeChange}
+            onClear={onClearDates}
           />
           {dateRange?.from && (
             <p className="text-xs text-foreground mt-2">
