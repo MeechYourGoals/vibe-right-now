@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Layout } from "@/components/Layout";
 import MapContainer from "@/components/map/MapContainer";
@@ -15,7 +16,7 @@ const convertToLocation = (venue: VenueWithDiscount): Location => {
   return {
     id: venue.id,
     name: venue.name,
-    type: venue.type as "restaurant" | "bar" | "event" | "attraction" | "sports" | "other",
+    type: venue.type,
     address: venue.address,
     city: venue.city,
     state: venue.state,
@@ -23,7 +24,8 @@ const convertToLocation = (venue: VenueWithDiscount): Location => {
     zip: venue.zip,
     lat: venue.lat,
     lng: venue.lng,
-    verified: venue.verified
+    verified: venue.verified,
+    description: venue.discount.description
   };
 };
 
