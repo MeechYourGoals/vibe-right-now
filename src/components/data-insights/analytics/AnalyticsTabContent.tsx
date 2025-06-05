@@ -2,11 +2,12 @@
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Upload, FileText, TrendingUp, Star, ChartBar } from "lucide-react";
+import { Upload, FileText, TrendingUp, Star, ChartBar, Square } from "lucide-react";
 import AnalyticsFileUpload from "../AnalyticsFileUpload";
 import OverviewPanel from "./OverviewPanel";
 import AudiencePanel from "./AudiencePanel";
 import TrendsPanel from "./TrendsPanel";
+import SquareAIIntegration from "./SquareAIIntegration";
 
 interface AnalyticsTabContentProps {
   isPremium: boolean;
@@ -26,7 +27,7 @@ const AnalyticsTabContent = ({ isPremium, isPro }: AnalyticsTabContentProps) => 
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-4 mb-8">
+          <TabsList className={`grid ${isPro ? 'grid-cols-6' : 'grid-cols-4'} mb-8`}>
             <TabsTrigger value="overview">
               <ChartBar className="mr-2 h-4 w-4" />
               Overview
@@ -39,6 +40,12 @@ const AnalyticsTabContent = ({ isPremium, isPro }: AnalyticsTabContentProps) => 
               <TrendingUp className="mr-2 h-4 w-4" />
               Trends
             </TabsTrigger>
+            {isPro && (
+              <TabsTrigger value="square-ai">
+                <Square className="mr-2 h-4 w-4" />
+                Square AI
+              </TabsTrigger>
+            )}
             {isPro && (
               <TabsTrigger value="upload">
                 <Upload className="mr-2 h-4 w-4" />
@@ -58,6 +65,12 @@ const AnalyticsTabContent = ({ isPremium, isPro }: AnalyticsTabContentProps) => 
           <TabsContent value="trends" className="space-y-6">
             <TrendsPanel />
           </TabsContent>
+          
+          {isPro && (
+            <TabsContent value="square-ai" className="space-y-6">
+              <SquareAIIntegration isPro={isPro} />
+            </TabsContent>
+          )}
           
           {isPro && (
             <TabsContent value="upload" className="space-y-6">
