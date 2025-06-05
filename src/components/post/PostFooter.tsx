@@ -1,113 +1,71 @@
 
-import React, { useState } from 'react';
-import { Button } from "@/components/ui/button";
-import { Heart, MessageCircle, Share, MapPin, Bookmark } from "lucide-react";
-import { Post } from "@/types";
+import React from 'react';
+import { Heart, MessageCircle, Share2, MoreHorizontal } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Post } from '@/types';
 
 export interface PostFooterProps {
   post: Post;
+  onLike?: (postId: string) => void;
+  onComment?: (postId: string) => void;
+  onShare?: (postId: string) => void;
   isDetailView?: boolean;
-  onComment?: () => void;
-  onLike?: () => void;
-  onShare?: () => void;
 }
 
-const PostFooter: React.FC<PostFooterProps> = ({ 
-  post, 
-  isDetailView = false,
-  onComment,
+const PostFooter: React.FC<PostFooterProps> = ({
+  post,
   onLike,
-  onShare
+  onComment,
+  onShare,
+  isDetailView = false
 }) => {
-  const [liked, setLiked] = useState(false);
-  const [bookmarked, setBookmarked] = useState(false);
-
-  const handleLike = () => {
-    setLiked(!liked);
-    onLike?.();
-  };
-
-  const handleComment = () => {
-    onComment?.();
-  };
-
-  const handleShare = () => {
-    onShare?.();
-  };
-
-  const handleBookmark = () => {
-    setBookmarked(!bookmarked);
-  };
-
   return (
-    <div className="px-4 py-2">
+    <div className="p-4 border-t space-y-3">
+      {/* Action buttons */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <Button
             variant="ghost"
             size="sm"
-            className={`flex items-center space-x-1 ${liked ? 'text-red-500' : ''}`}
-            onClick={handleLike}
+            className="flex items-center space-x-1 text-muted-foreground hover:text-red-500"
+            onClick={() => onLike?.(post.id)}
           >
-            <Heart className={`h-4 w-4 ${liked ? 'fill-current' : ''}`} />
-            <span className="text-sm">{post.likes + (liked ? 1 : 0)}</span>
+            <Heart className="h-4 w-4" />
+            <span>{post.likes}</span>
           </Button>
-
           <Button
             variant="ghost"
             size="sm"
-            className="flex items-center space-x-1"
-            onClick={handleComment}
+            className="flex items-center space-x-1 text-muted-foreground hover:text-blue-500"
+            onClick={() => onComment?.(post.id)}
           >
             <MessageCircle className="h-4 w-4" />
-            <span className="text-sm">{post.comments}</span>
+            <span>{post.comments}</span>
           </Button>
-
           <Button
             variant="ghost"
             size="sm"
-            className="flex items-center space-x-1"
-            onClick={handleShare}
+            className="flex items-center space-x-1 text-muted-foreground hover:text-green-500"
+            onClick={() => onShare?.(post.id)}
           >
-            <Share className="h-4 w-4" />
-            <span className="text-sm">{post.shares}</span>
+            <Share2 className="h-4 w-4" />
+            <span>{post.shares}</span>
           </Button>
         </div>
-
-        <div className="flex items-center space-x-2">
-          {post.location && (
-            <div className="flex items-center space-x-1 text-xs text-muted-foreground">
-              <MapPin className="h-3 w-3" />
-              <span>{post.location.name}</span>
-            </div>
-          )}
-          
-          <Button
-            variant="ghost"
-            size="sm"
-            className={bookmarked ? 'text-yellow-500' : ''}
-            onClick={handleBookmark}
-          >
-            <Bookmark className={`h-4 w-4 ${bookmarked ? 'fill-current' : ''}`} />
-          </Button>
-        </div>
+        <Button variant="ghost" size="sm">
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
       </div>
 
+      {/* Vibe tags */}
       {post.vibeTags && post.vibeTags.length > 0 && (
-        <div className="flex flex-wrap gap-1 mt-2">
-          {post.vibeTags.slice(0, 3).map((tag, index) => (
-            <span
-              key={index}
-              className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full"
-            >
-              #{tag}
-            </span>
+        <div className="flex flex-wrap gap-1">
+          {post.vibeTags.map((tag, index) => (
+            <Badge key={index} variant="outline" className="text-xs">
+              {tag}
+            </Badge>
           ))}
-          {post.vibeTags.length > 3 && (
-            <span className="text-xs text-muted-foreground">
-              +{post.vibeTags.length - 3} more
-            </span>
-          )}
         </div>
       )}
     </div>

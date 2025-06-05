@@ -1,3 +1,4 @@
+
 // If this file doesn't exist, we're creating it
 import { MockUserProfile } from "@/mock/users";
 
@@ -146,6 +147,8 @@ export interface CreditCard {
   expiryMonth: number;
   expiryYear: number;
   isDefault: boolean;
+  maxSpendLimit?: number;
+  vernonApproved?: boolean;
 }
 
 // Advertising Suite Types
