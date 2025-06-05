@@ -4,6 +4,7 @@ import { useSearchParams } from "./explore/useSearchParams";
 import { useLocationData } from "./explore/useLocationData";
 import { useQueryProcessing } from "./explore/useQueryProcessing";
 import { useFilterHandling } from "./explore/useFilterHandling";
+import { useEnhancedSearch } from "./explore/useEnhancedSearch";
 
 export const useExploreState = () => {
   const [activeTab, setActiveTab] = useState("all");
@@ -62,6 +63,9 @@ export const useExploreState = () => {
     handleSearch: filterHandleSearch,
     handleClearVibeFilter: filterHandleClearVibeFilter
   } = useFilterHandling();
+
+  // Enhanced search with Google Places integration
+  const { searchWithRealPlaces, isSearchingRealPlaces } = useEnhancedSearch();
   
   // Get active vibe filters for intelligent category filtering
   const getActiveVibeFilters = (): string[] => {
@@ -81,8 +85,23 @@ export const useExploreState = () => {
     return "Explore Vibes";
   };
   
-  // Wrapper functions to maintain the same API
-  const handleSearch = (query: string, filterType: string, category: string) => {
+  // Enhanced search function that uses Google Places API
+  const handleEnhancedSearch = async (query: string, filterType: string, category: string) => {
+    // Try enhanced search first
+    try {
+      const { locations, isRealData } = await searchWithRealPlaces(query, searchedCity, searchedState);
+      
+      if (isRealData && locations.length > 0) {
+        console.log('Using real Google Places data');
+        setFilteredLocations(locations);
+        setIsNaturalLanguageSearch(true);
+        return;
+      }
+    } catch (error) {
+      console.error('Enhanced search failed, falling back to regular search:', error);
+    }
+
+    // Fall back to regular search
     filterHandleSearch(
       query,
       filterType,
@@ -103,6 +122,11 @@ export const useExploreState = () => {
       processComplexQuery,
       setIsNaturalLanguageSearch
     );
+  };
+  
+  // Wrapper functions to maintain the same API
+  const handleSearch = (query: string, filterType: string, category: string) => {
+    handleEnhancedSearch(query, filterType, category);
   };
   
   const handleTabChange = (value: string) => {
@@ -139,7 +163,7 @@ export const useExploreState = () => {
     nightlifeVenues,
     vibeFilter,
     isNaturalLanguageSearch,
-    isLoadingResults,
+    isLoadingResults: isLoadingResults || isSearchingRealPlaces,
     dateRange,
     showDateFilter,
     activeSearchTab,

@@ -3,11 +3,14 @@ import React from 'react';
 import SearchVibes from "@/components/SearchVibes";
 import DateRangeSelector from "@/components/DateRangeSelector";
 import { Calendar } from "lucide-react";
-import { DateRange } from "react-day-picker";
 import { format } from "date-fns";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+// Update DateRange to match our fixed interface
+interface DateRange {
+  from: Date;
+  to: Date;
+}
 
 interface SearchSectionProps {
   showDateFilter: boolean;

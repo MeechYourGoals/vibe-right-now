@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { User, Post, Location, Comment, Media } from "@/types";
 import { mockUsers, mockPosts, mockComments, mockLocations } from "@/mock/data";
-import { hashString, generateUserBio } from "@/mock/users";
+import { MockUserProfile, generateUserBio } from "@/mock/users";
 
 // List of vibe tags that can be assigned to posts
 export const vibeTags = [
@@ -11,9 +11,22 @@ export const vibeTags = [
   "Rustic", "Modern", "Nostalgic", "Peaceful", "Vibrant", "Adventurous"
 ];
 
+// Fixed hash function to handle strings properly
+const hashString = (str: string): number => {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return Math.abs(hash);
+};
+
 // Function to generate vibe tags for a post based on location and user
 const generateVibeTags = (locationId: string, username: string): string[] => {
-  const seed = parseInt(locationId) + hashString(username);
+  const locationHash = hashString(locationId);
+  const usernameHash = hashString(username);
+  const seed = locationHash + usernameHash;
   const tagCount = 1 + (seed % 4); // 1-4 tags per post
   
   const shuffledTags = [...vibeTags].sort(() => 0.5 - (seed * 0.0001));
@@ -90,29 +103,23 @@ export const useUserProfile = (username: string | undefined) => {
       const selectedPosts = [];
       
       // Generate specific post types based on user profile
-      // Sarah - food and drinks
-      // Jay - music venues and coffee shops
-      // Alex - outdoors and adventure
-      // Marco - international and cultural
-      // Jamie - local hidden gems
-      
       let preferredLocationTypes: string[] = [];
       
       switch(foundUser.username) {
         case 'sarah_vibes':
-          preferredLocationTypes = ['restaurant', 'bar', 'cafe'];
+          preferredLocationTypes = ['restaurant', 'bar'];
           break;
         case 'jay_experiences':
-          preferredLocationTypes = ['music_venue', 'cafe', 'concert_hall'];
+          preferredLocationTypes = ['event', 'attraction'];
           break; 
         case 'adventure_alex':
-          preferredLocationTypes = ['park', 'mountain', 'beach', 'hiking_trail'];
+          preferredLocationTypes = ['sports', 'attraction'];
           break;
         case 'marco_travels':
-          preferredLocationTypes = ['landmark', 'museum', 'cultural_site'];
+          preferredLocationTypes = ['attraction', 'restaurant'];
           break;
         case 'local_explorer':
-          preferredLocationTypes = ['speakeasy', 'gallery', 'boutique', 'hidden_gem'];
+          preferredLocationTypes = ['bar', 'restaurant'];
           break;
         default:
           preferredLocationTypes = [];
@@ -165,7 +172,7 @@ export const useUserProfile = (username: string | undefined) => {
       setUserPosts(postsWithTags);
       
       // Get deterministic venues as "followed venues" based on username
-      const usernameCharCode = foundUser.username.charCodeAt(0);
+      const usernameCharCode = hashString(foundUser.username);
       const venueCount = 3 + (usernameCharCode % 5); // 3-7 venues
       
       const filteredLocations = mockLocations.filter(location => !!location.type);
@@ -213,7 +220,7 @@ export const useUserProfile = (username: string | undefined) => {
   };
 
   // Determine if user profile is private (explicitly set or based on ID pattern)
-  const isPrivateProfile = user ? user.isPrivate || parseInt(user.id) % 5 === 0 : false;
+  const isPrivateProfile = user ? user.isPrivate || hashString(user.id) % 5 === 0 : false;
   
   return {
     user,
