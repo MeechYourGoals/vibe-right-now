@@ -1,3 +1,4 @@
+
 export interface LocationItem {
   id: string;
   name: string;
@@ -38,6 +39,9 @@ export interface LocationItem {
   relatedLocations?: string[];
   isClosed?: boolean;
 }
+
+// Add Location type alias for compatibility
+export type Location = LocationItem;
 
 export type LocationCategory =
   | 'restaurant'
@@ -143,6 +147,27 @@ export interface User {
   avatar: string;
   verified?: boolean;
   followersCount?: number;
+  name?: string; // Add name property for compatibility
+}
+
+export interface Comment {
+  id: string;
+  postId: string;
+  userId: string;
+  username: string;
+  userAvatar: string;
+  content: string;
+  timestamp: string;
+  likes: number;
+  replies?: Comment[];
+}
+
+export interface Media {
+  id: string;
+  type: 'image' | 'video';
+  url: string;
+  thumbnail?: string;
+  caption?: string;
 }
 
 export interface Vibe {
@@ -199,4 +224,79 @@ export interface CreditCard {
   expiryMonth: number;
   expiryYear: number;
   isDefault: boolean;
+}
+
+export interface VenueInsights {
+  visitors: number;
+  visitorsChange: number;
+  posts: number;
+  postsChange: number;
+  likes: number;
+  likesChange: number;
+  mentions: number;
+  mentionsChange: number;
+  checkins: number;
+  checkinsChange: number;
+  reviews: number;
+  reviewsChange: number;
+  rating: number;
+  ratingChange: number;
+}
+
+export interface AdFormat {
+  id: string;
+  name: string;
+  description: string;
+  dimensions: string;
+  platforms: string[];
+}
+
+export interface TargetingOptions {
+  demographics: {
+    ageRange: { min: number; max: number };
+    gender: string[];
+    education: string[];
+    income: string[];
+  };
+  interests: string[];
+  behaviors: string[];
+  locations: {
+    countries: string[];
+    cities: string[];
+    radius: number;
+  };
+  customAudiences: string[];
+}
+
+export interface PlatformSentimentSummary {
+  platform: string;
+  totalReviews: number;
+  averageRating: number;
+  sentimentBreakdown: {
+    positive: number;
+    neutral: number;
+    negative: number;
+  };
+  trending: 'up' | 'down' | 'stable';
+}
+
+export interface SentimentTheme {
+  theme: string;
+  mentions: number;
+  sentiment: 'positive' | 'negative' | 'neutral';
+  examples: string[];
+}
+
+// Business Hours interface
+export interface BusinessHours {
+  [key: string]: string;
+  monday: string;
+  tuesday: string;
+  wednesday: string;
+  thursday: string;
+  friday: string;
+  saturday: string;
+  sunday: string;
+  isOpenNow: string;
+  timezone: string;
 }

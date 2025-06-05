@@ -1,14 +1,14 @@
 
-import { Location } from "@/types";
+import { Location, BusinessHours } from "@/types";
 
 // Mock function to generate random business hours for a location
-export const generateBusinessHours = (location: Location) => {
+export const generateBusinessHours = (location: Location): BusinessHours => {
   // Use location type to determine general business hours pattern
-  const isBar = location.type === 'bar' || location.type === 'nightclub';
+  const isBar = location.type === 'bar' || location.type === 'club';
   const isRestaurant = location.type === 'restaurant' || location.type === 'cafe';
-  const isAttraction = location.type === 'attraction' || location.type === 'museum';
+  const isAttraction = location.type === 'event' || location.type === 'other';
   
-  const hours = {
+  const hours: BusinessHours = {
     monday: isBar ? '16:00-02:00' : isRestaurant ? '11:00-22:00' : '10:00-18:00',
     tuesday: isBar ? '16:00-02:00' : isRestaurant ? '11:00-22:00' : '10:00-18:00',
     wednesday: isBar ? '16:00-02:00' : isRestaurant ? '11:00-22:00' : '10:00-18:00',

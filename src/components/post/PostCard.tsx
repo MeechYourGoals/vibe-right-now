@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { VerifiedIcon } from '@/components/icons/VerifiedIcon';
 import { Button } from '@/components/ui/button';
@@ -54,17 +55,6 @@ const PostCard = ({ post, isDetailView = false }: PostCardProps) => {
             Posted on {new Date(post.timestamp).toLocaleDateString()}
           </p>
         </CardFooter>
-      )}
-
-      {isDetailView && (
-        <PostFooter 
-          post={post}
-          isDetailView={isDetailView}
-          onLike={() => {}}
-          onComment={() => {}}
-          onShare={() => {}}
-          onSave={() => {}}
-        />
       )}
     </Card>
   );

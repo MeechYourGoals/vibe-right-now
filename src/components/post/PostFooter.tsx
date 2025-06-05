@@ -37,7 +37,7 @@ const PostFooter = ({
   };
 
   return (
-    <div className="flex items-center justify-between py-3">
+    <div className="flex items-center justify-between py-3 px-4">
       <div className="flex items-center space-x-4">
         <Button
           variant="ghost"
