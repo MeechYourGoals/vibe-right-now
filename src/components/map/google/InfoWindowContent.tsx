@@ -1,91 +1,102 @@
 
 import React from 'react';
 import { Location } from '@/types';
-import { MapPin, Share2, ExternalLink } from 'lucide-react';
+import { MapPin, Clock, Star, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useNavigate } from 'react-router-dom';
-import { generateBusinessHours } from '@/utils/businessHoursUtils';
-import WaitTimeDisplay from '@/components/venue/WaitTimeDisplay';
+import { Badge } from '@/components/ui/badge';
+import { formatBusinessHours } from '@/utils/businessHoursUtils';
 
 interface InfoWindowContentProps {
   location: Location;
-  onSelect: (location: Location) => void;
+  onLocationClick: (location: Location) => void;
 }
 
-const InfoWindowContent: React.FC<InfoWindowContentProps> = ({ location, onSelect }) => {
-  const navigate = useNavigate();
-
-  // Ensure we have business hours
-  if (!location.hours) {
-    location.hours = generateBusinessHours(location);
-  }
-  
-  // Get today's hours
-  const today = new Date();
-  const dayOfWeek = today.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
-  const todaysHours = location.hours[dayOfWeek as keyof typeof location.hours] || 'Closed';
-
-  const handleViewVenue = () => {
-    navigate(`/venue/${location.id}`);
+const InfoWindowContent: React.FC<InfoWindowContentProps> = ({ 
+  location, 
+  onLocationClick 
+}) => {
+  const handleViewDetails = () => {
+    onLocationClick(location);
   };
 
-  const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: `Check out ${location.name}`,
-        text: `I found this amazing spot in ${location.city}!`,
-        url: `${window.location.origin}/venue/${location.id}`
-      }).catch(err => console.error('Error sharing:', err));
-    } else {
-      // Fallback for browsers that don't support navigator.share
-      navigator.clipboard.writeText(`${window.location.origin}/venue/${location.id}`)
-        .then(() => alert('Link copied to clipboard!'))
-        .catch(err => console.error('Could not copy text: ', err));
+  const formatHours = (hours: any): string => {
+    if (!hours) return 'Hours not available';
+    
+    if (typeof hours === 'string') {
+      return hours;
     }
+    
+    if (typeof hours === 'object' && hours.open && hours.close) {
+      return `${hours.open} - ${hours.close}`;
+    }
+    
+    return 'Hours not available';
   };
 
   return (
-    <div className="w-64 p-2">
-      <div className="font-bold text-lg mb-1">{location.name}</div>
-      <div className="text-sm text-muted-foreground flex items-center mb-1">
-        <MapPin className="h-3 w-3 mr-1" />
-        <span>{location.address}, {location.city}</span>
+    <div className="min-w-[250px] max-w-[300px] p-3">
+      <div className="flex items-start justify-between mb-2">
+        <div className="flex-1 pr-2">
+          <h3 className="font-semibold text-sm leading-tight mb-1">
+            {location.name}
+          </h3>
+          <div className="flex items-center text-xs text-muted-foreground mb-2">
+            <MapPin className="h-3 w-3 mr-1 flex-shrink-0" />
+            <span className="truncate">{location.address}</span>
+          </div>
+        </div>
+        
+        {location.verified && (
+          <Badge variant="secondary" className="text-xs">
+            Verified
+          </Badge>
+        )}
       </div>
-      <div className="text-sm mb-2">
-        <span className="font-medium">Today:</span> {todaysHours}
+
+      <div className="space-y-2 mb-3">
+        {location.rating && (
+          <div className="flex items-center text-xs">
+            <Star className="h-3 w-3 mr-1 text-yellow-500 fill-yellow-500" />
+            <span>{location.rating}/5</span>
+          </div>
+        )}
+        
+        {location.hours && (
+          <div className="flex items-center text-xs text-muted-foreground">
+            <Clock className="h-3 w-3 mr-1 flex-shrink-0" />
+            <span>{formatHours(location.hours)}</span>
+          </div>
+        )}
+        
+        {location.type && (
+          <Badge variant="outline" className="text-xs">
+            {location.type}
+          </Badge>
+        )}
       </div>
-      
-      {/* Display wait time if available */}
-      <div className="mb-2">
-        <WaitTimeDisplay venueId={location.id} showLastUpdated={false} />
-      </div>
-      
-      <div className="text-sm mb-3">
-        <span className="inline-block px-2 py-1 bg-primary/10 rounded-full text-xs">
-          {location.type.charAt(0).toUpperCase() + location.type.slice(1)}
-        </span>
-        {location.vibes && location.vibes.map((vibe, i) => (
-          <span key={i} className="inline-block ml-1 px-2 py-1 bg-muted rounded-full text-xs">
-            {vibe}
-          </span>
-        ))}
-      </div>
+
       <div className="flex gap-2">
         <Button 
           size="sm" 
-          className="w-full bg-gradient-vibe"
-          onClick={handleViewVenue}
+          className="flex-1 text-xs h-8"
+          onClick={handleViewDetails}
         >
-          <ExternalLink className="h-3 w-3 mr-1" />
-          View Vibes
+          View Details
         </Button>
-        <Button 
-          size="sm" 
-          variant="outline" 
-          onClick={handleShare}
-        >
-          <Share2 className="h-3 w-3" />
-        </Button>
+        
+        {location.id.startsWith('ChIJ') && (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="text-xs h-8"
+            onClick={() => {
+              const url = `https://www.google.com/maps/place/?q=place_id:${location.id}`;
+              window.open(url, '_blank', 'noopener,noreferrer');
+            }}
+          >
+            <ExternalLink className="h-3 w-3" />
+          </Button>
+        )}
       </div>
     </div>
   );

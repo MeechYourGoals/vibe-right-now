@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -62,7 +61,7 @@ const TripIdeasSection: React.FC<TripIdeasSectionProps> = ({
     subscribeToVenueIdeas();
   }, [tripId]);
 
-  const fetchVenueIdeas = async () => {
+  const fetchVenueIdeas = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('trip_venue_ideas')
@@ -79,21 +78,20 @@ const TripIdeasSection: React.FC<TripIdeasSectionProps> = ({
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      
-      // Transform the data to match our interface
-      const transformedData = data?.map(item => ({
+
+      // Properly cast the status field and handle the data transformation
+      const transformedData = (data || []).map(item => ({
         ...item,
-        trip_venue_votes: item.trip_venue_votes || []
-      })) || [];
-      
+        status: (item.status as "pending" | "approved" | "rejected") || "pending",
+        notes: item.notes || "",
+        venue_rating: item.venue_rating || 0
+      }));
+
       setVenueIdeas(transformedData);
     } catch (error) {
       console.error('Error fetching venue ideas:', error);
-      toast.error('Failed to load venue ideas');
-    } finally {
-      setIsLoading(false);
     }
-  };
+  }, [tripId]);
 
   const subscribeToVenueIdeas = () => {
     const channel = supabase

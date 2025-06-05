@@ -1,6 +1,17 @@
-
 import { supabase } from "@/integrations/supabase/client";
-import { VenueSentimentAnalysis, PlatformSentimentSummary, SentimentTheme } from "@/types";
+
+export interface VenueSentimentAnalysis {
+  id: string;
+  venue_id: string;
+  platform: string;
+  overall_sentiment: number;
+  sentiment_summary: string;
+  themes: Record<string, number>;
+  review_count: number;
+  last_analyzed_at: string;
+  created_at: string;
+  updated_at: string;
+}
 
 export class SentimentAnalysisService {
   // Analyze reviews for a venue on a specific platform
@@ -32,23 +43,21 @@ export class SentimentAnalysisService {
 
   // Get sentiment analysis for a venue across all platforms
   static async getVenueSentimentAnalysis(venueId: string): Promise<VenueSentimentAnalysis[]> {
-    try {
-      const { data, error } = await supabase
-        .from('venue_sentiment_analysis')
-        .select('*')
-        .eq('venue_id', venueId)
-        .order('last_analyzed_at', { ascending: false });
+    const { data, error } = await supabase
+      .from('venue_sentiment_analysis')
+      .select('*')
+      .eq('venue_id', venueId)
+      .order('last_analyzed_at', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching sentiment analysis:', error);
-        return [];
-      }
-
-      return data || [];
-    } catch (error) {
-      console.error('Error in getVenueSentimentAnalysis:', error);
-      return [];
+    if (error) {
+      console.error('Error fetching sentiment analysis:', error);
+      throw error;
     }
+
+    return (data || []).map(item => ({
+      ...item,
+      themes: typeof item.themes === 'string' ? JSON.parse(item.themes) : item.themes || {}
+    })) as VenueSentimentAnalysis[];
   }
 
   // Get formatted platform summaries for display
@@ -123,3 +132,43 @@ export class SentimentAnalysisService {
     }
   }
 }
+
+export const getVenueSentimentAnalysis = async (venueId: string): Promise<VenueSentimentAnalysis[]> => {
+  const { data, error } = await supabase
+    .from('venue_sentiment_analysis')
+    .select('*')
+    .eq('venue_id', venueId)
+    .order('last_analyzed_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching sentiment analysis:', error);
+    throw error;
+  }
+
+  return (data || []).map(item => ({
+    ...item,
+    themes: typeof item.themes === 'string' ? JSON.parse(item.themes) : item.themes || {}
+  })) as VenueSentimentAnalysis[];
+};
+
+export const getSentimentAnalysis = async (venueId: string): Promise<VenueSentimentAnalysis | null> => {
+  const { data, error } = await supabase
+    .from('venue_sentiment_analysis')
+    .select('*')
+    .eq('venue_id', venueId)
+    .order('last_analyzed_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    console.error('Error fetching sentiment analysis:', error);
+    throw error;
+  }
+
+  if (!data) return null;
+
+  return {
+    ...data,
+    themes: typeof data.themes === 'string' ? JSON.parse(data.themes) : data.themes || {}
+  } as VenueSentimentAnalysis;
+};

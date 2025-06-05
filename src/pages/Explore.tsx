@@ -48,6 +48,10 @@ const Explore = () => {
     setShowDateFilter
   } = useExploreState();
 
+  // Create a properly typed dateRange for the component
+  const typedDateRange: { from: Date | undefined; to: Date | undefined } | undefined = 
+    dateRange ? { from: dateRange.from, to: dateRange.to } : undefined;
+
   // Update the page title logic to handle empty cities
   const getDisplayTitle = () => {
     if (isNaturalLanguageSearch) {
@@ -70,7 +74,7 @@ const Explore = () => {
           
           <SearchSection 
             showDateFilter={showDateFilter}
-            dateRange={dateRange}
+            dateRange={typedDateRange}
             onSearch={handleSearch}
             onDateRangeChange={handleDateRangeChange}
             onClearDates={handleClearDates}
@@ -103,7 +107,7 @@ const Explore = () => {
                   <MusicSection
                     musicEvents={musicEvents.length > 0 ? musicEvents : []}
                     searchedCity={searchedCity || ""}
-                    dateRange={dateRange}
+                    dateRange={typedDateRange}
                   />
                 )}
                 
@@ -111,7 +115,7 @@ const Explore = () => {
                   <ComedySection
                     comedyEvents={comedyEvents.length > 0 ? comedyEvents : []}
                     searchedCity={searchedCity || ""}
-                    dateRange={dateRange}
+                    dateRange={typedDateRange}
                   />
                 )}
                 
@@ -119,7 +123,7 @@ const Explore = () => {
                   <NightlifeSection
                     nightlifeVenues={nightlifeVenues.length > 0 ? nightlifeVenues : []}
                     searchedCity={searchedCity || ""}
-                    dateRange={dateRange}
+                    dateRange={typedDateRange}
                   />
                 )}
                 
@@ -127,10 +131,10 @@ const Explore = () => {
                   <div className="mb-6">
                     <h2 className="text-xl font-semibold mb-4 flex items-center">
                       Trending Sports Events
-                      {dateRange?.from && (
+                      {typedDateRange?.from && (
                         <Badge className="ml-2 bg-indigo-100 text-indigo-800">
-                          {format(dateRange.from, "MMM yyyy")}
-                          {dateRange.to && ` - ${format(dateRange.to, "MMM yyyy")}`}
+                          {format(typedDateRange.from, "MMM yyyy")}
+                          {typedDateRange.to && ` - ${format(typedDateRange.to, "MMM yyyy")}`}
                         </Badge>
                       )}
                     </h2>

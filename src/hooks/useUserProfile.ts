@@ -2,6 +2,13 @@
 import { useState, useEffect } from 'react';
 import { MockUserProfile, defaultUserProfiles } from '@/utils/locations/types';
 
+// Vibe tags for posts
+export const vibeTags = [
+  "Cozy", "Family Friendly", "NightOwl", "Trendy", "Chill", 
+  "Upscale", "Casual", "Romantic", "Lively", "Intimate",
+  "Energetic", "Cultural", "Artistic", "Sophisticated", "Fun"
+];
+
 // Simple hash function for consistent user selection
 const simpleHash = (str: string): number => {
   let hash = 0;

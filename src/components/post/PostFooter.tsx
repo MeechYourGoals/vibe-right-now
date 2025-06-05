@@ -1,68 +1,80 @@
 
-import React from 'react';
-import { Heart, MessageCircle, Share2, Bookmark } from "lucide-react";
+import React, { useState } from "react";
+import { Heart, MessageCircle, Share, Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Post } from "@/types";
 
 interface PostFooterProps {
   post: Post;
   isDetailView?: boolean;
-  onLike?: () => void;
-  onComment?: () => void;
-  onShare?: () => void;
-  onBookmark?: () => void;
 }
 
-const PostFooter: React.FC<PostFooterProps> = ({
-  post,
-  isDetailView = false,
-  onLike,
-  onComment,
-  onShare,
-  onBookmark
-}) => {
+const PostFooter: React.FC<PostFooterProps> = ({ post, isDetailView = false }) => {
+  const [liked, setLiked] = useState(false);
+  const [bookmarked, setBookmarked] = useState(false);
+  const [likes, setLikes] = useState(post.likes || Math.floor(Math.random() * 100) + 10);
+
+  const handleLike = () => {
+    setLiked(!liked);
+    setLikes(prev => liked ? prev - 1 : prev + 1);
+  };
+
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: `Check out this vibe at ${post.location?.name}`,
+        text: post.content,
+        url: window.location.href,
+      });
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+    }
+  };
+
   return (
-    <div className="flex items-center justify-between px-4 py-3 border-t border-border">
-      <div className="flex items-center space-x-4">
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="flex items-center space-x-1 hover:text-red-500"
-          onClick={onLike}
-        >
-          <Heart className="h-4 w-4" />
-          <span className="text-sm">{post.likes}</span>
-        </Button>
+    <div className="px-4 py-3 border-t">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleLike}
+            className={`flex items-center space-x-1 ${liked ? 'text-red-500' : 'text-muted-foreground'}`}
+          >
+            <Heart className={`h-4 w-4 ${liked ? 'fill-current' : ''}`} />
+            <span className="text-sm">{likes}</span>
+          </Button>
+          
+          <Button
+            variant="ghost"
+            size="sm"
+            className="flex items-center space-x-1 text-muted-foreground"
+          >
+            <MessageCircle className="h-4 w-4" />
+            <span className="text-sm">{post.comments || Math.floor(Math.random() * 20) + 1}</span>
+          </Button>
+        </div>
         
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="flex items-center space-x-1 hover:text-blue-500"
-          onClick={onComment}
-        >
-          <MessageCircle className="h-4 w-4" />
-          <span className="text-sm">{post.comments}</span>
-        </Button>
-        
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="flex items-center space-x-1 hover:text-green-500"
-          onClick={onShare}
-        >
-          <Share2 className="h-4 w-4" />
-          <span className="text-sm">{post.shares}</span>
-        </Button>
+        <div className="flex items-center space-x-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleShare}
+            className="text-muted-foreground"
+          >
+            <Share className="h-4 w-4" />
+          </Button>
+          
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setBookmarked(!bookmarked)}
+            className={`${bookmarked ? 'text-primary' : 'text-muted-foreground'}`}
+          >
+            <Bookmark className={`h-4 w-4 ${bookmarked ? 'fill-current' : ''}`} />
+          </Button>
+        </div>
       </div>
-      
-      <Button 
-        variant="ghost" 
-        size="sm" 
-        className="hover:text-yellow-500"
-        onClick={onBookmark}
-      >
-        <Bookmark className="h-4 w-4" />
-      </Button>
     </div>
   );
 };

@@ -2,9 +2,11 @@
 import React from 'react';
 import SearchVibes from "@/components/SearchVibes";
 import DateRangeSelector from "@/components/DateRangeSelector";
+import RealPlacesSearch from "@/components/explore/RealPlacesSearch";
 import { Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Update DateRange to match our fixed interface
 interface DateRange {
@@ -27,11 +29,27 @@ const SearchSection: React.FC<SearchSectionProps> = ({
   onDateRangeChange,
   onClearDates
 }) => {
+  const [activeSearchMode, setActiveSearchMode] = React.useState<'real' | 'vibes'>('real');
+
   return (
     <div className="max-w-xl mx-auto mb-6">
-      <SearchVibes onSearch={onSearch} />
+      {/* Search Mode Tabs */}
+      <Tabs value={activeSearchMode} onValueChange={(value) => setActiveSearchMode(value as 'real' | 'vibes')} className="w-full mb-4">
+        <TabsList className="grid grid-cols-2 w-full">
+          <TabsTrigger value="real">Real Places</TabsTrigger>
+          <TabsTrigger value="vibes">Vibes & Discovery</TabsTrigger>
+        </TabsList>
+      </Tabs>
+
+      {/* Conditional Search Component */}
+      {activeSearchMode === 'real' ? (
+        <RealPlacesSearch />
+      ) : (
+        <SearchVibes onSearch={onSearch} />
+      )}
       
-      {showDateFilter && (
+      {/* Date Filter (only show for vibes mode) */}
+      {activeSearchMode === 'vibes' && showDateFilter && (
         <div className="p-3 bg-card border border-input rounded-lg max-w-xl mx-auto mt-4">
           <div className="flex justify-between items-center mb-2">
             <h3 className="text-sm font-medium flex items-center">
