@@ -30,7 +30,10 @@ const InfoWindowContent: React.FC<InfoWindowContentProps> = ({ location, onSelec
     if (typeof hours === 'string') {
       return hours;
     }
-    return `${hours.open} - ${hours.close}`;
+    if (typeof hours === 'object' && hours.open && hours.close) {
+      return `${hours.open} - ${hours.close}`;
+    }
+    return 'Closed';
   };
 
   const handleViewVenue = () => {
