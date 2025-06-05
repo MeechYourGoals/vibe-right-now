@@ -20,27 +20,30 @@ const ensureMediaFormat = (media: any[]): Media[] => {
   
   return media.map(item => {
     if (typeof item === 'string') {
+      // Determine type based on extension
       const isVideo = item.endsWith('.mp4') || item.endsWith('.mov') || item.endsWith('.avi');
       return {
         type: isVideo ? 'video' : 'image',
         url: item
       };
     } else if (typeof item === 'object' && item !== null) {
+      // Already in correct format
       return item;
     }
     
+    // Default fallback
     return {
       type: 'image',
-      url: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=500&q=80&auto=format&fit=crop'
+      url: 'https://via.placeholder.com/500'
     };
   });
 };
 
 const PostGridItem = ({ post }: PostGridItemProps) => {
   const [liked, setLiked] = useState(false);
-  const [imageError, setImageError] = useState(false);
   const navigate = useNavigate();
   
+  // Ensure media is in the correct format
   const formattedMedia = ensureMediaFormat(post.media);
   
   const handleLike = (e: React.MouseEvent) => {
@@ -55,54 +58,33 @@ const PostGridItem = ({ post }: PostGridItemProps) => {
     navigate(`/user/${post.user.username}`);
   };
 
+  // Generate a semi-random user count based on post ID
   const getUserCount = () => {
     const seed = post.id.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
     return Math.floor((seed % 100) + 10);
-  };
-
-  const getFallbackImage = () => {
-    const typeImages = {
-      restaurant: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&q=80&auto=format&fit=crop",
-      bar: "https://images.unsplash.com/photo-1572116469696-31de0f17cc34?w=600&q=80&auto=format&fit=crop",
-      event: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&q=80&auto=format&fit=crop",
-      attraction: "https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?w=600&q=80&auto=format&fit=crop",
-      sports: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=600&q=80&auto=format&fit=crop",
-      other: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=600&q=80&auto=format&fit=crop"
-    };
-    
-    return typeImages[post.location.type as keyof typeof typeImages] || typeImages.other;
   };
 
   return (
     <div className="group relative block aspect-square overflow-hidden rounded-lg">
       {formattedMedia.length > 0 && formattedMedia[0].type === "image" ? (
         <img 
-          src={imageError ? getFallbackImage() : formattedMedia[0].url}
-          alt={`Post by ${post.user.username} at ${post.location.name}`}
+          src={formattedMedia[0].url}
+          alt={`Post by ${post.user.username}`}
           className="h-full w-full object-cover transition-transform group-hover:scale-105"
-          onError={() => setImageError(true)}
-          loading="lazy"
         />
       ) : formattedMedia.length > 0 && formattedMedia[0].type === "video" ? (
         <video
           src={formattedMedia[0].url}
           className="h-full w-full object-cover"
-          poster={getFallbackImage()}
-          onError={() => setImageError(true)}
+          poster="https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
         />
       ) : (
-        <div 
-          className="flex h-full w-full items-center justify-center bg-cover bg-center"
-          style={{ backgroundImage: `url(${getFallbackImage()})` }}
-        >
-          <div className="bg-black/60 rounded-lg p-2 text-center max-w-[80%]">
-            <p className="text-white text-sm line-clamp-3">
-              {post.content.slice(0, 100)}{post.content.length > 100 ? '...' : ''}
-            </p>
-          </div>
+        <div className="flex h-full w-full items-center justify-center bg-muted">
+          <p className="p-2 text-center text-sm">{post.content.slice(0, 100)}{post.content.length > 100 ? '...' : ''}</p>
         </div>
       )}
       
+      {/* Add user count dropdown */}
       <div className="absolute top-2 right-2 z-10">
         <UserDropdown userCount={getUserCount()} post={post} />
       </div>
