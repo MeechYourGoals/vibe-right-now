@@ -1,3 +1,4 @@
+
 import { useState, useMemo } from "react";
 import { mockPosts, mockComments, mockUsers } from "@/mock/data";
 import { PostCard } from "@/components/post";
@@ -7,7 +8,7 @@ import { isWithinThreeMonths } from "@/mock/time-utils";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { vibeTags } from "@/utils/explore/helpers/vibeTags";
+import { vibeTags } from "@/hooks/useUserProfile";
 import {
   Popover,
   PopoverContent,
@@ -79,9 +80,7 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
       }
       
       // Ensure media is in the correct format
-      if (post.media) {
-        post.media = ensureMediaFormat(post.media);
-      }
+      post.media = ensureMediaFormat(post.media);
       
       return post;
     });
@@ -230,16 +229,17 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
   };
 
   // Enhanced PostCard component with vibe tags
-  const EnhancedPostCard = ({ post, locationPostCount }: { post: Post, locationPostCount: number }) => {
+  const EnhancedPostCard = ({ posts, locationPostCount }: { posts: Post[], locationPostCount: number }) => {
     const postCard = (
       <PostCard 
-        post={post}
-        isDetailView={false}
+        posts={posts} 
+        locationPostCount={locationPostCount}
+        getComments={getPostComments}
       />
     );
     
-    // Check if post has vibe tags
-    const hasVibeTags = post.vibeTags && post.vibeTags.length > 0;
+    // Check if any post has vibe tags
+    const hasVibeTags = posts.some(post => post.vibeTags && post.vibeTags.length > 0);
     
     if (!hasVibeTags) return postCard;
     
@@ -248,7 +248,7 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
       <div className="space-y-2">
         {postCard}
         <div className="pl-4">
-          {renderVibeTags(post)}
+          {renderVibeTags(posts[0])}
         </div>
       </div>
     );
@@ -318,13 +318,11 @@ const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
       <div className="p-4 space-y-4">
         {Object.keys(postsGroupedByLocation).length > 0 ? (
           Object.entries(postsGroupedByLocation).map(([locationId, posts]) => (
-            posts.map(post => (
-              <EnhancedPostCard 
-                key={post.id} 
-                post={post}
-                locationPostCount={locationPostCounts[locationId]}
-              />
-            ))
+            <EnhancedPostCard 
+              key={locationId} 
+              posts={posts} 
+              locationPostCount={locationPostCounts[locationId]}
+            />
           ))
         ) : (
           <div className="text-center py-10">
