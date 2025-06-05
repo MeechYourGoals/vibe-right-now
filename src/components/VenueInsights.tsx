@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -12,6 +11,7 @@ import VernonVenueAssistant from "@/components/venue/VernonVenueAssistant";
 import CompetitorAnalysis from "@/components/venue/CompetitorAnalysis";
 import SocialMediaIntegration from "@/components/venue/SocialMediaIntegration";
 import { generateWeeklyData } from "@/utils/insightsData";
+import MetaAIAutoPromo from "@/components/advertising/MetaAIAutoPromo";
 
 const VenueInsights = () => {
   const [subscriptionTier, setSubscriptionTier] = useState<'standard' | 'plus' | 'premium' | 'pro'>('standard');
@@ -85,6 +85,18 @@ const VenueInsights = () => {
           <VernonVenueAssistant />
         </div>
       </div>
+      
+      {/* Meta AI Auto-Promo for Pro Users */}
+      {subscriptionTier === 'pro' && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Auto-Promo Marketing</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <MetaAIAutoPromo isPro={true} />
+          </CardContent>
+        </Card>
+      )}
       
       <CompetitorAnalysis />
     </div>
