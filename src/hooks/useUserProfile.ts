@@ -12,7 +12,9 @@ export const vibeTags = [
 
 // Function to generate vibe tags for a post based on location and user
 const generateVibeTags = (locationId: string, username: string): string[] => {
-  const seed = parseInt(locationId) + hashString(username);
+  const locationHash = parseInt(locationId) || hashString(locationId);
+  const userHash = hashString(username);
+  const seed = locationHash + userHash;
   const tagCount = 1 + (seed % 4); // 1-4 tags per post
   
   const shuffledTags = [...vibeTags].sort(() => 0.5 - (seed * 0.0001));
@@ -89,12 +91,6 @@ export const useUserProfile = (username: string | undefined) => {
       const selectedPosts = [];
       
       // Generate specific post types based on user profile
-      // Sarah - food and drinks
-      // Jay - music venues and coffee shops
-      // Alex - outdoors and adventure
-      // Marco - international and cultural
-      // Jamie - local hidden gems
-      
       let preferredLocationTypes: string[] = [];
       
       switch(foundUser.username) {
@@ -208,7 +204,7 @@ export const useUserProfile = (username: string | undefined) => {
 
   const getUserBio = () => {
     if (!user) return "";
-    return user.bio || generateUserBio(user);
+    return user.bio || generateUserBio(user.username);
   };
 
   // Determine if user profile is private (explicitly set or based on ID pattern)

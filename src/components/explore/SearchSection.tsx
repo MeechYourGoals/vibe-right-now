@@ -1,13 +1,11 @@
 
 import React from 'react';
-import SearchVibes from "@/components/SearchVibes";
+import EnhancedSearchVibes from "./EnhancedSearchVibes";
 import DateRangeSelector from "@/components/DateRangeSelector";
 import { Calendar } from "lucide-react";
-import { DateRange } from "react-day-picker";
 import { format } from "date-fns";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Location, DateRange } from "@/types";
 
 interface SearchSectionProps {
   showDateFilter: boolean;
@@ -15,6 +13,7 @@ interface SearchSectionProps {
   onSearch: (query: string, filterType: string, category: string) => void;
   onDateRangeChange: (range: DateRange | undefined) => void;
   onClearDates: () => void;
+  onRealPlaceSelect?: (location: Location) => void;
 }
 
 const SearchSection: React.FC<SearchSectionProps> = ({
@@ -22,11 +21,15 @@ const SearchSection: React.FC<SearchSectionProps> = ({
   dateRange,
   onSearch,
   onDateRangeChange,
-  onClearDates
+  onClearDates,
+  onRealPlaceSelect
 }) => {
   return (
     <div className="max-w-xl mx-auto mb-6">
-      <SearchVibes onSearch={onSearch} />
+      <EnhancedSearchVibes 
+        onSearch={onSearch}
+        onRealPlaceSelect={onRealPlaceSelect}
+      />
       
       {showDateFilter && (
         <div className="p-3 bg-card border border-input rounded-lg max-w-xl mx-auto mt-4">
@@ -47,8 +50,9 @@ const SearchSection: React.FC<SearchSectionProps> = ({
             )}
           </div>
           <DateRangeSelector 
-            dateRange={dateRange} 
-            onDateRangeChange={onDateRangeChange} 
+            dateRange={dateRange || { from: undefined, to: undefined }}
+            onDateRangeChange={onDateRangeChange}
+            onClear={onClearDates}
           />
           {dateRange?.from && (
             <p className="text-xs text-foreground mt-2">

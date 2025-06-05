@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import Header from "@/components/Header";
 import { Badge } from "@/components/ui/badge";
 import CameraButton from "@/components/CameraButton";
@@ -18,9 +18,12 @@ import TrendingLocations from "@/components/TrendingLocations";
 import DiscountLocations from "@/components/DiscountLocations";
 import { format } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Location } from "@/types";
 
 const Explore = () => {
   const isMobile = useIsMobile();
+  const [selectedRealPlace, setSelectedRealPlace] = useState<Location | null>(null);
+  
   const {
     activeTab,
     searchedCity,
@@ -47,8 +50,11 @@ const Explore = () => {
     setShowDateFilter
   } = useExploreState();
 
-  // Update the page title logic to handle empty cities
+  // Update the page title logic to handle real places
   const getDisplayTitle = () => {
+    if (selectedRealPlace) {
+      return `Real Place: ${selectedRealPlace.name}`;
+    }
     if (isNaturalLanguageSearch) {
       return "Smart Search Results";
     } else if (searchedCity && searchedCity.trim() !== "") {
@@ -56,6 +62,51 @@ const Explore = () => {
     }
     return "Explore Vibes";
   };
+
+  const handleRealPlaceSelect = (location: Location) => {
+    setSelectedRealPlace(location);
+  };
+
+  // Show real place details if one is selected
+  const showRealPlaceDetails = selectedRealPlace && (
+    <div className="mb-6 p-4 bg-card border rounded-lg">
+      <div className="flex justify-between items-start mb-4">
+        <div>
+          <h2 className="text-xl font-bold">{selectedRealPlace.name}</h2>
+          <p className="text-muted-foreground">{selectedRealPlace.address}</p>
+          {selectedRealPlace.rating && (
+            <p className="text-sm mt-1">
+              <span className="text-yellow-500">★</span> {selectedRealPlace.rating}
+            </p>
+          )}
+        </div>
+        <Badge variant="secondary">{selectedRealPlace.type}</Badge>
+      </div>
+      
+      {selectedRealPlace.vibes && selectedRealPlace.vibes.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-4">
+          {selectedRealPlace.vibes.map((vibe, index) => (
+            <Badge key={index} variant="outline">{vibe}</Badge>
+          ))}
+        </div>
+      )}
+      
+      <div className="flex gap-2">
+        <button 
+          className="text-sm bg-primary text-primary-foreground px-3 py-1 rounded"
+          onClick={() => window.open(`https://www.google.com/maps/place/${encodeURIComponent(selectedRealPlace.name + ' ' + selectedRealPlace.address)}`, '_blank')}
+        >
+          View on Google Maps
+        </button>
+        <button 
+          className="text-sm bg-secondary text-secondary-foreground px-3 py-1 rounded"
+          onClick={() => setSelectedRealPlace(null)}
+        >
+          Clear
+        </button>
+      </div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -73,7 +124,11 @@ const Explore = () => {
             onSearch={handleSearch}
             onDateRangeChange={handleDateRangeChange}
             onClearDates={handleClearDates}
+            onRealPlaceSelect={handleRealPlaceSelect}
           />
+          
+          {/* Show real place details if selected */}
+          {showRealPlaceDetails}
           
           {/* Map centered below search bar */}
           <div className="w-full mb-6">

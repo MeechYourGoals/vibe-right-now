@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Heart, MessageCircle, Share, MapPin, Bookmark } from "lucide-react";
-import { Post } from "@/types";
+import { Post, Comment } from "@/types";
 
 export interface PostFooterProps {
   post: Post;
@@ -10,6 +10,7 @@ export interface PostFooterProps {
   onComment?: () => void;
   onLike?: () => void;
   onShare?: () => void;
+  comments?: Comment[];
 }
 
 const PostFooter: React.FC<PostFooterProps> = ({ 
@@ -17,7 +18,8 @@ const PostFooter: React.FC<PostFooterProps> = ({
   isDetailView = false,
   onComment,
   onLike,
-  onShare
+  onShare,
+  comments
 }) => {
   const [liked, setLiked] = useState(false);
   const [bookmarked, setBookmarked] = useState(false);
