@@ -1,9 +1,15 @@
-
 export interface LocationItem {
   id: string;
   name: string;
   address: string;
   category: LocationCategory;
+  type: LocationCategory; // Add type property as alias for category
+  city: string; // Add city property
+  state?: string; // Add state property
+  country?: string; // Add country property
+  verified?: boolean; // Add verified property
+  tags?: string[]; // Add tags property
+  hours?: BusinessHours; // Add hours property
   coverImage: string;
   rating: number;
   reviews: number;
@@ -118,12 +124,15 @@ export interface Post {
   content: string;
   mediaType: 'image' | 'video' | 'none';
   mediaUrl?: string;
+  media?: Media[]; // Add media property
   timestamp: string;
-  location: string;
+  location: LocationItem; // Change from string to LocationItem
   category: LocationCategory;
   likes: number;
   comments: number;
   vibes: string[];
+  vibeTags?: string[]; // Add vibeTags property
+  user?: User; // Add user property
   vibe?: number;
   waitTime?: number;
   lastUpdated?: string;
@@ -156,9 +165,12 @@ export interface Comment {
   userId: string;
   username: string;
   userAvatar: string;
+  user?: User; // Add user property
   content: string;
+  text?: string; // Add text property as alias
   timestamp: string;
   likes: number;
+  vibedHere?: boolean; // Add vibedHere property
   replies?: Comment[];
 }
 
@@ -247,6 +259,7 @@ export interface AdFormat {
   id: string;
   name: string;
   description: string;
+  type?: string; // Add type property
   dimensions: string;
   platforms: string[];
 }
