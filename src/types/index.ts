@@ -1,238 +1,202 @@
-
-// If this file doesn't exist, we're creating it
-import { MockUserProfile } from "@/mock/users";
-
-export interface Location {
+export interface LocationItem {
   id: string;
   name: string;
   address: string;
-  city: string;
-  state?: string;
-  country: string;
-  zip?: string;
-  lat: number;
-  lng: number;
-  type: "restaurant" | "bar" | "event" | "attraction" | "sports" | "other";
-  verified: boolean;
-  hours?: BusinessHours;
-  vibes?: string[];
-  userProfile?: MockUserProfile;
-  rating?: number;
-  followers?: number;
-  checkins?: number;
-  tags?: string[];
+  category: LocationCategory;
+  coverImage: string;
+  rating: number;
+  reviews: number;
+  openingHours: string;
+  closingHours: string;
+  latitude: number;
+  longitude: number;
+  description: string;
+  website: string;
+  phone: string;
+  email: string;
+  vibes: string[];
+  priceRange: string;
+  amenities: string[];
+  ownerId: string;
+  ownerName: string;
+  ownerAvatar: string;
+  ownerVerified: boolean;
+  posts: number;
+  followers: number;
+  isFollowing: boolean;
+  isClaimed: boolean;
+  isFeatured: boolean;
+  isSponsored: boolean;
+  sponsoredUntil?: string;
+  lastUpdated?: string;
+  waitTime?: number;
+  deals?: Deal[];
+  events?: Event[];
+  menu?: MenuItem[];
+  gallery?: string[];
+  externalReviews?: ExternalReview[];
+  relatedLocations?: string[];
+  isClosed?: boolean;
 }
 
-export interface BusinessHours {
-  monday: { open: string; close: string; } | string;
-  tuesday: { open: string; close: string; } | string;
-  wednesday: { open: string; close: string; } | string;
-  thursday: { open: string; close: string; } | string;
-  friday: { open: string; close: string; } | string;
-  saturday: { open: string; close: string; } | string;
-  sunday: { open: string; close: string; } | string;
-  isOpenNow?: string;
-  timezone?: string;
-  isOpen24Hours?: boolean;
+export type LocationCategory =
+  | 'restaurant'
+  | 'bar'
+  | 'cafe'
+  | 'club'
+  | 'hotel'
+  | 'event'
+  | 'other';
+
+export interface Deal {
+  id: string;
+  title: string;
+  description: string;
+  image: string;
+  price: number;
+  discount: number;
+  expires: string;
 }
 
-export interface Media {
-  type: "image" | "video";
-  url: string;
-  thumbnail?: string;
+export interface Event {
+  id: string;
+  title: string;
+  description: string;
+  image: string;
+  date: string;
+  time: string;
+  location: string;
+  price: number;
+  ticketsAvailable: number;
+  category: EventCategory;
+}
+
+export type EventCategory =
+  | 'music'
+  | 'sports'
+  | 'theater'
+  | 'comedy'
+  | 'art'
+  | 'other';
+
+export interface MenuItem {
+  id: string;
+  name: string;
+  description: string;
+  image: string;
+  price: number;
+  category: MenuItemCategory;
+}
+
+export type MenuItemCategory =
+  | 'appetizer'
+  | 'entree'
+  | 'dessert'
+  | 'drink'
+  | 'other';
+
+export interface ExternalReview {
+  id: string;
+  platform: string;
+  rating: number;
+  text: string;
+  author: string;
+  date: string;
 }
 
 export interface Post {
   id: string;
-  user: MockUserProfile;
+  venueId: string;
+  userId: string;
+  username: string;
+  userAvatar: string;
+  userVerified?: boolean;
   content: string;
-  media: Media[];
+  mediaType: 'image' | 'video' | 'none';
+  mediaUrl?: string;
   timestamp: string;
+  location: string;
+  category: LocationCategory;
   likes: number;
   comments: number;
-  shares: number;
-  location?: Location;
-  vibeTags?: string[];
-  isVenuePost?: boolean;
-  isPinned?: boolean;
-  expiresAt?: string;
+  vibes: string[];
+  vibe?: number;
+  waitTime?: number;
+  lastUpdated?: string;
+  externalPost?: boolean;
+  platform?: 'yelp' | 'tripadvisor' | 'instagram' | 'foursquare' | 'google' | 'franki';
+  platformId?: string;
+  rating?: number;
+  reviewText?: string;
+  authorName?: string;
+  authorAvatar?: string;
+  authorReviewCount?: number;
+  isSponsored?: boolean;
+  sponsoredBy?: string;
+  impressions?: number;
+  saved?: boolean;
 }
 
-export interface Comment {
-  id: string;
-  postId: string;
-  userId: string;
-  user: MockUserProfile;
-  content: string;
-  text: string;
-  timestamp: string;
-  vibedHere: boolean;
-  likes: number;
-}
-
-// Add User type for backward compatibility
 export interface User {
   id: string;
   username: string;
   avatar: string;
-  bio?: string;
-  name: string;
-  type?: 'regular' | 'celebrity' | 'venue';
   verified?: boolean;
-  followers?: number;
-  following?: number;
-  posts?: number;
-  isCelebrity?: boolean;
-  isPrivate?: boolean;
+  followersCount?: number;
 }
 
-// VernonChat types
-export interface ChatMessage {
-  id: string;
-  role: 'user' | 'assistant' | 'system' | 'error';
-  content: string;
-  timestamp: string;
-  // For compatibility with older format
-  text?: string;
-  sender?: 'user' | 'ai';
-}
-
-export interface ChatState {
-  messages: ChatMessage[];
-  loading: boolean;
-  error: string | null;
-  isOpen?: boolean;
-  isMinimized?: boolean;
-  isLoading?: boolean;
-  isListening?: boolean;
-  isSpeaking?: boolean;
-  searchResults?: any[];
-  transcript?: string;
-  interimTranscript?: string;
-}
-
-export interface VenueInsights {
-  visitors: number;
-  visitorsChange: string;
-  posts: number;
-  postsChange: string;
-  shares: number;
-  sharesChange: string;
-  likes: number;
-  likesChange: string;
-  engagementRate: string;
-  followerGrowth: string;
-  clickThroughRate: string;
-  totalVisits: number;
-  revenueImpact: string;
-  totalReach: number;
-  impressions: number;
-  viewsPer: number;
-  viewsCount?: number;
-  visitorCount?: number;
-  checkInCount?: number;
-  receiptUploads?: number;
-  discountRedemptions?: number;
-}
-
-export interface DateRange {
-  from: Date | undefined;
-  to: Date | undefined;
-}
-
-// Advertising Suite Types
-export interface AdFormat {
+export interface Vibe {
   id: string;
   name: string;
   description: string;
-  type: 'MomentCard' | 'VibeOverlay' | 'SpawnPoint' | 'HeatRingTakeover';
-  duration?: string;
-  placement: string;
-  kpis: string[];
+  icon: string;
+  color: string;
 }
 
-export interface Campaign {
+export interface Category {
   id: string;
   name: string;
-  adFormat: AdFormat;
-  targeting: TargetingOptions;
-  budget: number;
-  status: 'active' | 'paused' | 'completed';
-  performance: CampaignPerformance;
+  description: string;
+  icon: string;
+  color: string;
 }
 
-export interface TargetingOptions {
-  demographics: {
-    ageRange: [number, number];
-    gender: string[];
-    location: string[];
-  };
-  behavioral: {
-    pastAttendance: string[];
-    clipHistory: string[];
-    tripsIntent: boolean;
-  };
-  contextual: {
-    vibeTags: string[];
-    venueTypes: string[];
-    daypart: string[];
-  };
-  momentScore: {
-    hypeLevel: number;
-    crowdDensity: number;
-  };
-}
-
-export interface CampaignPerformance {
+export interface AnalyticsData {
+  date: string;
   impressions: number;
   clicks: number;
-  ctr: number;
   conversions: number;
   spend: number;
-  roas: number;
-  footTrafficLift: number;
 }
 
-// Sentiment Analysis Types
-export interface VenueSentimentAnalysis {
+export interface SentimentData {
+  date: string;
+  positive: number;
+  negative: number;
+  neutral: number;
+}
+
+export interface SubscriptionPlan {
   id: string;
-  venue_id: string;
-  platform: string;
-  overall_sentiment: number; // -1.0 to 1.0
-  sentiment_summary: string;
-  themes: Record<string, number>; // e.g., {"ambience": 0.8, "service": 0.6}
-  review_count: number;
-  last_analyzed_at: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface ReviewSentimentCache {
-  id: string;
-  venue_id: string;
-  platform: string;
-  review_id: string;
-  review_text: string;
-  sentiment_score: number;
-  themes: Record<string, number>;
-  analyzed_at: string;
-  expires_at: string;
-}
-
-export interface SentimentTheme {
   name: string;
-  score: number;
-  mentions: number;
-  examples: string[];
+  description: string;
+  price: number;
+  features: string[];
 }
 
-export interface PlatformSentimentSummary {
-  platform: string;
-  overallSentiment: number;
-  summary: string;
-  themes: SentimentTheme[];
-  reviewCount: number;
-  lastUpdated: string;
+export interface PaymentMethod {
+  id: string;
+  type: string;
+  cardNumber: string;
+  expiryDate: string;
+  isDefault: boolean;
 }
 
-export * from "./index";
+export interface CreditCard {
+  id: string;
+  last4: string;
+  brand: string;
+  expiryMonth: number;
+  expiryYear: number;
+  isDefault: boolean;
+}
