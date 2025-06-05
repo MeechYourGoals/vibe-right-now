@@ -4,7 +4,6 @@ import { Location } from '@/types';
 import { MapPin, Clock, Star, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { formatBusinessHours } from '@/utils/businessHoursUtils';
 
 interface InfoWindowContentProps {
   location: Location;

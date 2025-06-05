@@ -3,12 +3,14 @@ import React from 'react';
 import RegularUserPayments from './RegularUserPayments';
 import VenuePayments from './VenuePayments';
 
-const PaymentsTabContent: React.FC = () => {
-  const userType = 'regular'; // This would come from user context in a real app
+interface PaymentsTabContentProps {
+  isVenueMode?: boolean;
+}
 
+const PaymentsTabContent: React.FC<PaymentsTabContentProps> = ({ isVenueMode = false }) => {
   return (
     <div className="space-y-6">
-      {userType === 'venue' ? (
+      {isVenueMode ? (
         <VenuePayments />
       ) : (
         <RegularUserPayments />

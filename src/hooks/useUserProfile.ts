@@ -1,6 +1,8 @@
 
 import { useState, useEffect } from 'react';
 import { MockUserProfile, defaultUserProfiles } from '@/utils/locations/types';
+import { mockUsers } from '@/mock/users';
+import { Post, Location, Comment } from '@/types';
 
 // Vibe tags for posts
 export const vibeTags = [
@@ -20,18 +22,41 @@ const simpleHash = (str: string): number => {
   return Math.abs(hash);
 };
 
-export const useUserProfile = (locationId: string): MockUserProfile => {
-  const [userProfile, setUserProfile] = useState<MockUserProfile>(() => {
-    const hash = simpleHash(locationId);
-    const index = hash % defaultUserProfiles.length;
-    return defaultUserProfiles[index];
-  });
+export const useUserProfile = (username?: string) => {
+  const [userProfile, setUserProfile] = useState<MockUserProfile | null>(null);
 
   useEffect(() => {
-    const hash = simpleHash(locationId);
-    const index = hash % defaultUserProfiles.length;
-    setUserProfile(defaultUserProfiles[index]);
-  }, [locationId]);
+    if (username) {
+      // Find user by username
+      const foundUser = mockUsers.find(user => user.username === username);
+      if (foundUser) {
+        setUserProfile(foundUser);
+      } else {
+        setUserProfile(null);
+      }
+    }
+  }, [username]);
 
-  return userProfile;
+  // Generate mock data for the user
+  const generateUserData = () => {
+    if (!userProfile) return {};
+
+    const userPosts: Post[] = [];
+    const followedVenues: Location[] = [];
+    const visitedPlaces: Location[] = [];
+    const wantToVisitPlaces: Location[] = [];
+
+    return {
+      user: userProfile,
+      userPosts,
+      followedVenues,
+      visitedPlaces,
+      wantToVisitPlaces,
+      getPostComments: (postId: string): Comment[] => [],
+      getUserBio: () => userProfile?.bio || '',
+      isPrivateProfile: userProfile?.isPrivate || false
+    };
+  };
+
+  return generateUserData();
 };
