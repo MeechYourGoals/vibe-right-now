@@ -1,136 +1,111 @@
 
 import { useState } from "react";
 import { Layout } from "@/components/Layout";
-import MapContainer from "@/components/map/MapContainer";
-import { Card, CardContent } from "@/components/ui/card";
-import { discountOffers } from "@/mock/discountOffers";
+import { DiscountLocations } from "@/components/DiscountLocations";
+import { DateRangeSelector } from "@/components/DateRangeSelector";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { ArrowRight, MapPin, Ticket } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { VenueWithDiscount } from "@/components/venue/events/types";
-import { Location } from "@/types";
-
-// Convert VenueWithDiscount to Location for MapContainer compatibility
-const convertToLocation = (venue: VenueWithDiscount): Location => {
-  return {
-    id: venue.id,
-    name: venue.name,
-    type: venue.type,
-    address: venue.address,
-    city: venue.city,
-    state: venue.state,
-    country: venue.country,
-    zip: venue.zip,
-    lat: venue.lat,
-    lng: venue.lng,
-    verified: venue.verified,
-    description: venue.discount.description
-  };
-};
+import { Percent, MapPin, Clock } from "lucide-react";
 
 const Discounts = () => {
-  const navigate = useNavigate();
-  const [selectedVenue, setSelectedVenue] = useState<VenueWithDiscount | null>(null);
-  const [mapExpanded, setMapExpanded] = useState(false);
+  const [selectedDateRange, setSelectedDateRange] = useState<{
+    from: Date;
+    to: Date;
+  } | null>(null);
 
-  const handleVenueSelect = (location: Location) => {
-    // Find the corresponding venue from discountOffers
-    const venue = discountOffers.find(v => v.id === location.id);
-    if (venue) {
-      setSelectedVenue(venue);
+  // Mock discount data with proper types
+  const featuredDiscounts = [
+    {
+      id: "1",
+      venueName: "Sunset Rooftop",
+      discountPercent: 25,
+      description: "Happy Hour Special",
+      validUntil: "2024-01-31",
+      location: "Downtown LA",
+      type: "bar" as const,
+      image: "https://images.unsplash.com/photo-1572116469696-31de0f17cc34?w=400&q=80&auto=format&fit=crop"
+    },
+    {
+      id: "2", 
+      venueName: "Marina Grill",
+      discountPercent: 20,
+      description: "Lunch Special",
+      validUntil: "2024-02-15",
+      location: "Santa Monica",
+      type: "restaurant" as const,
+      image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&q=80&auto=format&fit=crop"
+    },
+    {
+      id: "3",
+      venueName: "Art District Gallery",
+      discountPercent: 15,
+      description: "Student Discount",
+      validUntil: "2024-03-01",
+      location: "Arts District",
+      type: "attraction" as const,
+      image: "https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?w=400&q=80&auto=format&fit=crop"
     }
-  };
-
-  const handleCloseLocation = () => {
-    setSelectedVenue(null);
-  };
-
-  // Convert discount venues to Location type for map compatibility
-  const locationsForMap = discountOffers.map(convertToLocation);
+  ];
 
   return (
     <Layout>
-      <div className="container py-6">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-3xl font-bold vibe-gradient-text">
-              Nearby Discounts & Deals
+      <main className="container py-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold mb-2 vibe-gradient-text">
+              Special Offers & Discounts
             </h1>
-            <p className="text-muted-foreground mt-2">
-              Exclusive offers at venues near you
+            <p className="text-muted-foreground">
+              Discover amazing deals at your favorite venues
             </p>
           </div>
-        </div>
 
-        {/* Map Section */}
-        <div className="mb-8">
-          <MapContainer
-            loading={false}
-            isExpanded={mapExpanded}
-            userLocation={null}
-            locations={locationsForMap}
-            searchedCity=""
-            mapStyle="default"
-            selectedLocation={selectedVenue ? convertToLocation(selectedVenue) : null}
-            showDistances={true}
-            userAddressLocation={null}
-            onLocationSelect={handleVenueSelect}
-            onCloseLocation={handleCloseLocation}
-            nearbyCount={discountOffers.length}
-            onToggleDistances={() => {}}
-          />
-        </div>
+          <div className="mb-6">
+            <DateRangeSelector 
+              selectedRange={selectedDateRange}
+              onRangeChange={setSelectedDateRange}
+            />
+          </div>
 
-        {/* Discount List */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {discountOffers.map((venue) => (
-            <Card key={venue.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-              <CardContent className="p-4">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="font-semibold text-lg">{venue.name}</h3>
-                    <p className="text-sm text-muted-foreground flex items-center mt-1">
-                      <MapPin className="h-3 w-3 mr-1" />
-                      {venue.city}, {venue.state}
-                    </p>
-                  </div>
-                  <Badge variant={venue.discount.type === "percentOff" ? "secondary" : "default"}>
-                    <Ticket className="h-3 w-3 mr-1" />
-                    {venue.discount.type === "percentOff" 
-                      ? `${venue.discount.value}% OFF`
-                      : venue.discount.type.replace(/([A-Z])/g, ' $1').trim()}
-                  </Badge>
-                </div>
-                
-                <p className="mt-3 text-sm">{venue.discount.description}</p>
-                
-                {venue.discount.conditions && (
-                  <p className="mt-2 text-xs text-muted-foreground">
-                    {venue.discount.conditions}
-                  </p>
-                )}
-                
-                <div className="mt-4 flex justify-between items-center">
-                  {venue.discount.code && (
-                    <Badge variant="outline" className="text-xs">
-                      Code: {venue.discount.code}
+          {/* Featured Discounts */}
+          <div className="mb-8">
+            <h2 className="text-xl font-semibold mb-4">Featured Offers</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {featuredDiscounts.map((discount) => (
+                <Card key={discount.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                  <div className="relative h-48">
+                    <img 
+                      src={discount.image}
+                      alt={discount.venueName}
+                      className="w-full h-full object-cover"
+                    />
+                    <Badge className="absolute top-2 right-2 bg-green-500">
+                      <Percent className="h-3 w-3 mr-1" />
+                      {discount.discountPercent}% OFF
                     </Badge>
-                  )}
-                  <Button 
-                    size="sm" 
-                    className="ml-auto"
-                    onClick={() => navigate(`/venue/${venue.id}`)}
-                  >
-                    View Venue
-                    <ArrowRight className="h-4 w-4 ml-1" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                  </div>
+                  <CardHeader>
+                    <CardTitle className="text-lg">{discount.venueName}</CardTitle>
+                    <CardDescription>{discount.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center text-sm text-muted-foreground mb-2">
+                      <MapPin className="h-4 w-4 mr-1" />
+                      {discount.location}
+                    </div>
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <Clock className="h-4 w-4 mr-1" />
+                      Valid until {discount.validUntil}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+
+          <DiscountLocations selectedDateRange={selectedDateRange} />
         </div>
-      </div>
+      </main>
     </Layout>
   );
 };
