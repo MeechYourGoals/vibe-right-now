@@ -7,8 +7,8 @@ import { Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Location } from "@/types";
 
-// Update DateRange to match our fixed interface
 interface DateRange {
   from: Date | undefined;
   to: Date | undefined;
@@ -20,6 +20,8 @@ interface SearchSectionProps {
   onSearch: (query: string, filterType: string, category: string) => void;
   onDateRangeChange: (range: DateRange | undefined) => void;
   onClearDates: () => void;
+  onLocationFound?: (location: Location) => void;
+  onCenterMap?: (location: Location) => void;
 }
 
 const SearchSection: React.FC<SearchSectionProps> = ({
@@ -27,7 +29,9 @@ const SearchSection: React.FC<SearchSectionProps> = ({
   dateRange,
   onSearch,
   onDateRangeChange,
-  onClearDates
+  onClearDates,
+  onLocationFound,
+  onCenterMap
 }) => {
   const [activeSearchMode, setActiveSearchMode] = React.useState<'real' | 'vibes'>('real');
 
@@ -43,7 +47,10 @@ const SearchSection: React.FC<SearchSectionProps> = ({
 
       {/* Conditional Search Component */}
       {activeSearchMode === 'real' ? (
-        <RealPlacesSearch />
+        <RealPlacesSearch 
+          onLocationFound={onLocationFound}
+          onCenterMap={onCenterMap}
+        />
       ) : (
         <SearchVibes onSearch={onSearch} />
       )}

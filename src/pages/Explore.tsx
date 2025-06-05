@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import Header from "@/components/Header";
 import { Badge } from "@/components/ui/badge";
 import CameraButton from "@/components/CameraButton";
@@ -16,11 +16,14 @@ import LocationsGrid from "@/components/explore/LocationsGrid";
 import RecommendedForYou from "@/components/RecommendedForYou";
 import TrendingLocations from "@/components/TrendingLocations";
 import DiscountLocations from "@/components/DiscountLocations";
+import { Location } from "@/types";
 import { format } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const Explore = () => {
   const isMobile = useIsMobile();
+  const [mapCenterLocation, setMapCenterLocation] = useState<Location | null>(null);
+  
   const {
     activeTab,
     searchedCity,
@@ -62,6 +65,16 @@ const Explore = () => {
     return "Explore Vibes";
   };
 
+  const handleLocationFound = (location: Location) => {
+    console.log('Location found:', location);
+    setMapCenterLocation(location);
+  };
+
+  const handleCenterMap = (location: Location) => {
+    console.log('Centering map on:', location);
+    setMapCenterLocation(location);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -78,11 +91,13 @@ const Explore = () => {
             onSearch={handleSearch}
             onDateRangeChange={handleDateRangeChange}
             onClearDates={handleClearDates}
+            onLocationFound={handleLocationFound}
+            onCenterMap={handleCenterMap}
           />
           
           {/* Map centered below search bar */}
           <div className="w-full mb-6">
-            <NearbyVibesMap />
+            <NearbyVibesMap centerLocation={mapCenterLocation} />
           </div>
           
           <CategoryTabs 
