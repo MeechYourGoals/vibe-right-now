@@ -22,6 +22,7 @@ interface GoogleMapComponentProps {
   userAddressLocation?: [number, number] | null;
   selectedLocation?: Location | null;
   showAllCities?: boolean;
+  realPlaceCenter?: { lat: number; lng: number };
 }
 
 const GoogleMapComponent = ({ 
@@ -33,7 +34,8 @@ const GoogleMapComponent = ({
   showDistances = false,
   userAddressLocation = null,
   selectedLocation = null,
-  showAllCities = true
+  showAllCities = true,
+  realPlaceCenter
 }: GoogleMapComponentProps) => {
   const {
     isLoaded,
@@ -50,7 +52,8 @@ const GoogleMapComponent = ({
     userAddressLocation, 
     locations, 
     searchedCity, 
-    selectedLocation
+    selectedLocation,
+    realPlaceCenter
   );
 
   // Main handler for marker clicks

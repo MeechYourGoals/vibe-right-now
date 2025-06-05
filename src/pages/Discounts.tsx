@@ -16,7 +16,7 @@ const convertToLocation = (venue: VenueWithDiscount): Location => {
   return {
     id: venue.id,
     name: venue.name,
-    type: venue.type,
+    type: venue.type as Location['type'],
     address: venue.address,
     city: venue.city,
     state: venue.state,
@@ -24,8 +24,7 @@ const convertToLocation = (venue: VenueWithDiscount): Location => {
     zip: venue.zip,
     lat: venue.lat,
     lng: venue.lng,
-    verified: venue.verified,
-    description: venue.discount.description
+    verified: venue.verified
   };
 };
 

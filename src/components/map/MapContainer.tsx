@@ -22,6 +22,7 @@ interface MapContainerProps {
   nearbyCount: number;
   onToggleDistances: () => void;
   showAllCities?: boolean;
+  realPlaceCenter?: { lat: number; lng: number };
 }
 
 const MapContainer = ({
@@ -38,7 +39,8 @@ const MapContainer = ({
   onCloseLocation,
   nearbyCount,
   onToggleDistances,
-  showAllCities = true
+  showAllCities = true,
+  realPlaceCenter
 }: MapContainerProps) => {
   const isMobile = useIsMobile();
   
@@ -63,6 +65,8 @@ const MapContainer = ({
         onLocationSelect={onLocationSelect}
         showDistances={showDistances}
         userAddressLocation={userAddressLocation}
+        showAllCities={showAllCities}
+        realPlaceCenter={realPlaceCenter}
       />
       
       {isExpanded && selectedLocation && (
@@ -75,8 +79,8 @@ const MapContainer = ({
       
       <div className="absolute bottom-0 left-0 right-0 p-3 glass-effect bg-background/70 backdrop-blur-sm">
         <p className="text-sm">
-          {nearbyCount} Vibes within 10 miles of you
-          {showDistances && (
+          {realPlaceCenter ? "Real place from Google Maps" : `${nearbyCount} Vibes within 10 miles of you`}
+          {showDistances && !realPlaceCenter && (
             <Button 
               variant="link" 
               size="sm" 

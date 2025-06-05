@@ -1,4 +1,3 @@
-
 // If this file doesn't exist, we're creating it
 import { MockUserProfile } from "@/mock/users";
 
@@ -138,6 +137,15 @@ export interface VenueInsights {
 export interface DateRange {
   from: Date | undefined;
   to: Date | undefined;
+}
+
+export interface CreditCard {
+  id: string;
+  last4: string;
+  brand: string;
+  expiryMonth: number;
+  expiryYear: number;
+  isDefault: boolean;
 }
 
 // Advertising Suite Types

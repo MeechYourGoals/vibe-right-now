@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import Header from "@/components/Header";
 import { Badge } from "@/components/ui/badge";
 import CameraButton from "@/components/CameraButton";
@@ -18,9 +18,12 @@ import TrendingLocations from "@/components/TrendingLocations";
 import DiscountLocations from "@/components/DiscountLocations";
 import { format } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Location } from "@/types";
 
 const Explore = () => {
   const isMobile = useIsMobile();
+  const [selectedRealPlace, setSelectedRealPlace] = useState<Location | null>(null);
+  
   const {
     activeTab,
     searchedCity,
@@ -47,14 +50,21 @@ const Explore = () => {
     setShowDateFilter
   } = useExploreState();
 
-  // Update the page title logic to handle empty cities
+  // Update the page title logic to handle real places
   const getDisplayTitle = () => {
-    if (isNaturalLanguageSearch) {
+    if (selectedRealPlace) {
+      return `Explore: ${selectedRealPlace.name}`;
+    } else if (isNaturalLanguageSearch) {
       return "Smart Search Results";
     } else if (searchedCity && searchedCity.trim() !== "") {
       return `Explore Vibes in ${searchedCity}${searchedState ? `, ${searchedState}` : ''}`;
     }
     return "Explore Vibes";
+  };
+
+  const handleRealPlaceSelect = (place: Location) => {
+    setSelectedRealPlace(place);
+    console.log('Real place selected:', place);
   };
 
   return (
@@ -73,11 +83,15 @@ const Explore = () => {
             onSearch={handleSearch}
             onDateRangeChange={handleDateRangeChange}
             onClearDates={handleClearDates}
+            onRealPlaceSelect={handleRealPlaceSelect}
           />
           
           {/* Map centered below search bar */}
           <div className="w-full mb-6">
-            <NearbyVibesMap />
+            <NearbyVibesMap 
+              selectedRealPlace={selectedRealPlace}
+              onClearRealPlace={() => setSelectedRealPlace(null)}
+            />
           </div>
           
           <CategoryTabs 
