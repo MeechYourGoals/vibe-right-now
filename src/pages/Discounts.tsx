@@ -16,7 +16,7 @@ const convertToLocation = (venue: VenueWithDiscount): Location => {
   return {
     id: venue.id,
     name: venue.name,
-    type: venue.type,
+    type: venue.type as "restaurant" | "bar" | "event" | "attraction" | "sports" | "other",
     address: venue.address,
     city: venue.city,
     state: venue.state,

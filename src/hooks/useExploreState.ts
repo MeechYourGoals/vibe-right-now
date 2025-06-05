@@ -63,8 +63,13 @@ export const useExploreState = () => {
     handleClearVibeFilter: filterHandleClearVibeFilter
   } = useFilterHandling();
   
-  // Remove the auto-initialization to San Francisco
-  // Let it start empty until user searches
+  // Get active vibe filters for intelligent category filtering
+  const getActiveVibeFilters = (): string[] => {
+    if (vibeFilter) {
+      return [vibeFilter];
+    }
+    return [];
+  };
   
   // Get page title
   const getPageTitle = () => {
@@ -139,6 +144,7 @@ export const useExploreState = () => {
     showDateFilter,
     activeSearchTab,
     getPageTitle,
+    getActiveVibeFilters,
     handleSearch,
     handleTabChange,
     handleClearVibeFilter,

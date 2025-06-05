@@ -38,6 +38,7 @@ const Explore = () => {
     showDateFilter,
     activeSearchTab,
     getPageTitle,
+    getActiveVibeFilters,
     handleSearch,
     handleTabChange,
     handleClearVibeFilter,
@@ -83,6 +84,7 @@ const Explore = () => {
           <CategoryTabs 
             activeTab={activeTab}
             onTabChange={handleTabChange}
+            vibeFilters={getActiveVibeFilters()}
           />
         </div>
 

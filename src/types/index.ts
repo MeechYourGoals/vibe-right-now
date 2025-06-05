@@ -21,6 +21,7 @@ export interface Location {
   followers?: number;
   checkins?: number;
   tags?: string[];
+  description?: string;
 }
 
 export interface BusinessHours {
@@ -84,6 +85,46 @@ export interface User {
   posts?: number;
   isCelebrity?: boolean;
   isPrivate?: boolean;
+}
+
+// CreditCard interface
+export interface CreditCard {
+  id: string;
+  last4: string;
+  brand: string;
+  expiryMonth: number;
+  expiryYear: number;
+  isDefault: boolean;
+}
+
+// VenueIdea interface for trip functionality
+export interface VenueIdea {
+  id: string;
+  trip_id: string;
+  venue_id: string;
+  venue_name: string;
+  venue_address?: string;
+  venue_city?: string;
+  venue_image_url?: string;
+  venue_rating?: number;
+  proposed_by_id: string;
+  proposed_by_name: string;
+  proposed_by_avatar: string;
+  notes?: string;
+  status: "pending" | "approved" | "rejected";
+  created_at: string;
+  updated_at: string;
+  trip_venue_votes?: VenueVote[];
+}
+
+export interface VenueVote {
+  id: string;
+  venue_idea_id: string;
+  user_id: string;
+  user_name: string;
+  user_avatar: string;
+  vote_type: string;
+  created_at: string;
 }
 
 // VernonChat types
