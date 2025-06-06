@@ -7,7 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { TrendingUp, TrendingDown, MessageSquare, Star, RefreshCw, ExternalLink } from 'lucide-react';
-import { SentimentAnalysisService } from "@/services/sentimentAnalysisService";
+import { sentimentAnalysisService } from "@/services/sentimentAnalysisService";
 import { PlatformSentimentSummary, SentimentTheme } from "@/types";
 import { toast } from "sonner";
 
@@ -25,8 +25,8 @@ const SentimentAnalysisTab: React.FC<SentimentAnalysisTabProps> = ({ venueId, is
   const loadSentimentData = async () => {
     setLoading(true);
     try {
-      const summaries = await SentimentAnalysisService.getPlatformSentimentSummaries(venueId);
-      setPlatformSummaries(summaries);
+      const summaries = await sentimentAnalysisService.getVenueSentimentAnalysis(venueId);
+      setPlatformSummaries(summaries as any[]);
       if (summaries.length > 0) {
         setLastUpdated(new Date().toLocaleString());
       }
@@ -42,11 +42,19 @@ const SentimentAnalysisTab: React.FC<SentimentAnalysisTabProps> = ({ venueId, is
   const triggerAnalysis = async () => {
     setLoading(true);
     try {
-      await SentimentAnalysisService.triggerMockAnalysis(venueId);
+      await sentimentAnalysisService.createVenueSentimentAnalysis({
+        venue_id: venueId,
+        platform: 'demo',
+        overall_sentiment: 0.7,
+        sentiment_summary: 'Generally positive reviews',
+        themes: { service: 0.8, food: 0.6, atmosphere: 0.9 },
+        review_count: 50,
+        last_analyzed_at: new Date().toISOString()
+      });
       toast.success('Sentiment analysis started! Results will appear shortly.');
       setTimeout(() => {
         loadSentimentData();
-      }, 2000); // Wait for analysis to complete
+      }, 2000);
     } catch (error) {
       console.error('Error triggering analysis:', error);
       toast.error('Failed to start sentiment analysis');

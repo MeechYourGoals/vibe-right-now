@@ -9,12 +9,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import PostUsersList from '@/components/post/PostUsersList';
-import { MockUserProfile } from '@/mock/users';
+import { Post } from '@/types';
 
 interface UserDropdownProps {
-  users: MockUserProfile[];
-  setShowAllUsers: React.Dispatch<React.SetStateAction<boolean>>;
+  userCount: number;
+  post: Post;
   canDelete?: boolean;
   onDelete?: () => void;
   onReport?: () => void;
@@ -22,8 +21,8 @@ interface UserDropdownProps {
 }
 
 const UserDropdown: React.FC<UserDropdownProps> = ({
-  users,
-  setShowAllUsers,
+  userCount,
+  post,
   canDelete = false,
   onDelete,
   onReport,
@@ -31,11 +30,9 @@ const UserDropdown: React.FC<UserDropdownProps> = ({
 }) => {
   return (
     <div className="flex items-center justify-between">
-      <PostUsersList 
-        users={users}
-        maxVisible={3}
-        onUserClick={(userId) => console.log('User clicked:', userId)}
-      />
+      <div className="text-xs text-white bg-black/50 px-2 py-1 rounded">
+        {userCount} users
+      </div>
       
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -44,7 +41,7 @@ const UserDropdown: React.FC<UserDropdownProps> = ({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => setShowAllUsers(true)}>
+          <DropdownMenuItem onClick={() => console.log('View all users')}>
             View All Users
           </DropdownMenuItem>
           

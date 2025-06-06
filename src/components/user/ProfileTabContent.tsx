@@ -46,6 +46,8 @@ const ProfileTabContent = ({
         <UserPlacesContent
           visitedPlaces={visitedPlaces}
           wantToVisitPlaces={wantToVisitPlaces}
+          activeTab="visited"
+          setActiveTab={() => {}}
         />
       </TabsContent>
 

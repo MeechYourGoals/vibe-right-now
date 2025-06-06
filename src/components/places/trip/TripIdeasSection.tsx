@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -32,20 +33,25 @@ export interface VenueIdea {
 
 interface TripIdeasSectionProps {
   tripId: string;
-  currentUserId: string;
-  currentUserName: string;
-  currentUserAvatar: string;
+  collaborators: Array<{
+    id: string;
+    name: string;
+    avatar: string;
+  }>;
+  userColors: Array<{ id: string; color: string }>;
 }
 
 const TripIdeasSection: React.FC<TripIdeasSectionProps> = ({
   tripId,
-  currentUserId,
-  currentUserName,
-  currentUserAvatar
+  collaborators,
+  userColors
 }) => {
   const [venueIdeas, setVenueIdeas] = useState<VenueIdea[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddDialog, setShowAddDialog] = useState(false);
+
+  // Get current user info from collaborators (mock for now)
+  const currentUser = collaborators[0] || { id: 'user1', name: 'Current User', avatar: '/placeholder-avatar.jpg' };
 
   const fetchVenueIdeas = async () => {
     try {
@@ -69,12 +75,12 @@ const TripIdeasSection: React.FC<TripIdeasSectionProps> = ({
       }
 
       // Cast the status field properly and ensure it matches our enum
-      const processedData = data.map(item => ({
+      const processedData = data?.map(item => ({
         ...item,
         status: (['pending', 'approved', 'rejected'].includes(item.status) 
           ? item.status 
           : 'pending') as 'pending' | 'approved' | 'rejected'
-      }));
+      })) || [];
 
       setVenueIdeas(processedData);
     } catch (error) {
@@ -95,10 +101,10 @@ const TripIdeasSection: React.FC<TripIdeasSectionProps> = ({
         .from('trip_venue_votes')
         .select('*')
         .eq('trip_venue_idea_id', ideaId)
-        .eq('user_id', currentUserId)
+        .eq('user_id', currentUser.id)
         .single();
 
-      if (existingVoteError && existingVoteError.code !== '404') {
+      if (existingVoteError && existingVoteError.code !== 'PGRST116') {
         console.error('Error checking existing vote:', existingVoteError);
         return;
       }
@@ -120,9 +126,9 @@ const TripIdeasSection: React.FC<TripIdeasSectionProps> = ({
           .from('trip_venue_votes')
           .insert({
             trip_venue_idea_id: ideaId,
-            user_id: currentUserId,
-            user_name: currentUserName,
-            user_avatar: currentUserAvatar,
+            user_id: currentUser.id,
+            user_name: currentUser.name,
+            user_avatar: currentUser.avatar,
             vote_type: voteType
           });
 
@@ -212,9 +218,9 @@ const TripIdeasSection: React.FC<TripIdeasSectionProps> = ({
           setShowAddDialog(false);
           fetchVenueIdeas();
         }}
-        userId={currentUserId}
-        userName={currentUserName}
-        userAvatar={currentUserAvatar}
+        userId={currentUser.id}
+        userName={currentUser.name}
+        userAvatar={currentUser.avatar}
       />
     </div>
   );

@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { mockComments } from "@/mock/data";
@@ -11,6 +11,8 @@ import PrivateProfileContent from "@/components/user/PrivateProfileContent";
 
 const UserProfile = () => {
   const { userId } = useParams();
+  const [activeTab, setActiveTab] = useState("posts");
+  
   const {
     profile,
     stats,
@@ -77,7 +79,6 @@ const UserProfile = () => {
       <main className="container py-8">
         <UserProfileHeader
           user={profile}
-          stats={stats}
           onFollowToggle={toggleFollow}
           isOwnProfile={false}
           recentActivity={getRecentActivity()}
@@ -92,7 +93,10 @@ const UserProfile = () => {
           />
         ) : (
           <>
-            <ProfileTabs />
+            <ProfileTabs 
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+            />
             <ProfileTabContent
               userPosts={userPosts}
               followedVenues={followedVenues}
