@@ -1,15 +1,17 @@
 
 import { useState, useEffect } from "react";
+import { mockLocations } from "@/mock/locations";
 import { Location } from "@/types";
-import { usePlacesSearch } from "./usePlacesSearch";
-import { toast } from "sonner";
+import { cityCoordinates } from "@/utils/locations";
+import { getLocationsByCity, getNearbyLocations } from "@/mock/cityLocations";
 
+// Improved version that uses city data
 export const useNearbyLocations = () => {
   const [userLocation, setUserLocation] = useState<GeolocationCoordinates | null>(null);
-  const [searchedCity, setSearchedCity] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [searchedCity, setSearchedCity] = useState<string>("");
+  const [nearbyLocations, setNearbyLocations] = useState<Location[]>([]);
   const [userAddressLocation, setUserAddressLocation] = useState<[number, number] | null>(null);
-  
-  const { places, isLoading, searchPlaces, getNearbyPlaces, clearPlaces } = usePlacesSearch();
 
   // Get user's current location
   useEffect(() => {
@@ -17,55 +19,63 @@ export const useNearbyLocations = () => {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           setUserLocation(position.coords);
-          // Get nearby places when location is available
-          getNearbyPlaces(
-            { 
-              lat: position.coords.latitude, 
-              lng: position.coords.longitude 
-            },
-            10000 // 10km radius
-          );
+          setLoading(false);
         },
         (error) => {
           console.error("Error getting location:", error);
-          toast.error("Unable to get your location. Please enable location services.");
-        }
+          setLoading(false);
+        },
+        { enableHighAccuracy: true }
       );
+    } else {
+      setLoading(false);
     }
-  }, [getNearbyPlaces]);
+  }, []);
 
-  // Search for places when city changes
+  // Update locations when city search or user location changes
   useEffect(() => {
-    if (searchedCity && searchedCity.trim() !== "") {
-      searchPlaces({
-        query: searchedCity,
-        location: userLocation ? {
-          lat: userLocation.latitude,
-          lng: userLocation.longitude
-        } : undefined
-      });
-    } else if (!searchedCity) {
-      // If no city is searched, show nearby places
-      if (userLocation) {
-        getNearbyPlaces(
-          { 
-            lat: userLocation.latitude, 
-            lng: userLocation.longitude 
-          },
-          10000
-        );
+    if (searchedCity) {
+      // If we have a city search, prioritize that
+      const cityKey = Object.keys(cityCoordinates).find(
+        key => cityCoordinates[key].name.toLowerCase() === searchedCity.toLowerCase()
+      );
+      
+      if (cityKey) {
+        const cityData = cityCoordinates[cityKey];
+        // Get locations for the searched city
+        const cityLocations = getLocationsByCity(cityData.name);
+        setNearbyLocations(cityLocations);
+        setLoading(false);
+      } else {
+        // Fallback for cities not in our database
+        setNearbyLocations(mockLocations.slice(0, 10));
+        setLoading(false);
       }
+    } else if (userAddressLocation) {
+      // If we have a custom address location but no city search
+      const [lng, lat] = userAddressLocation;
+      const nearbyLocs = getNearbyLocations(lat, lng);
+      setNearbyLocations(nearbyLocs);
+      setLoading(false);
+    } else if (userLocation) {
+      // Use actual user location if available and no city search
+      const nearbyLocs = getNearbyLocations(userLocation.latitude, userLocation.longitude);
+      setNearbyLocations(nearbyLocs);
+      setLoading(false);
+    } else {
+      // Default to some sample locations if nothing else is available
+      setNearbyLocations(mockLocations.slice(0, 10));
+      setLoading(false);
     }
-  }, [searchedCity, userLocation, searchPlaces, getNearbyPlaces]);
+  }, [searchedCity, userLocation, userAddressLocation]);
 
   return {
     userLocation,
-    nearbyLocations: places,
-    loading: isLoading,
+    nearbyLocations,
+    loading,
     searchedCity,
     setSearchedCity,
     userAddressLocation,
-    setUserAddressLocation,
-    clearPlaces
+    setUserAddressLocation
   };
 };

@@ -18,7 +18,6 @@ import TrendingLocations from "@/components/TrendingLocations";
 import DiscountLocations from "@/components/DiscountLocations";
 import { format } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Location } from "@/types";
 
 const Explore = () => {
   const isMobile = useIsMobile();
@@ -58,12 +57,6 @@ const Explore = () => {
     return "Explore Vibes";
   };
 
-  const handlePlaceSelect = (location: Location) => {
-    // Handle place selection from Google Places
-    console.log('Selected place:', location);
-    // You can add additional logic here to update the map or search results
-  };
-
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -78,7 +71,6 @@ const Explore = () => {
             showDateFilter={showDateFilter}
             dateRange={dateRange}
             onSearch={handleSearch}
-            onPlaceSelect={handlePlaceSelect}
             onDateRangeChange={handleDateRangeChange}
             onClearDates={handleClearDates}
           />

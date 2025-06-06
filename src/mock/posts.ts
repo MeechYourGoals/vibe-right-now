@@ -1,564 +1,579 @@
-import { Post } from "@/types";
+import { Post, Media } from "@/types";
+import { regularUsers, celebrityUsers } from "./users";
+import { mockLocations } from "./locations";
+import { getRecentTime, getExpiryTime } from "./time-utils";
+
+const allUsers = [...regularUsers, ...celebrityUsers];
 
 export const mockPosts: Post[] = [
   {
     id: "1",
-    user: {
-      id: "1",
-      name: "Alex Chen",
-      username: "alexc",
-      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face"
-    },
-    content: "Just discovered this amazing rooftop bar in downtown! The sunset views are incredible and the cocktails are perfectly crafted. Definitely coming back here soon! 🌅🍸",
+    user: allUsers[0],
+    location: mockLocations[0],
+    content: "The sunset view here is incredible tonight! DJ is playing the best vibes 🎵",
     media: [
       {
-        id: "1",
-        url: "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=600&h=400&fit=crop",
         type: "image",
-        alt: "Rooftop bar sunset view"
-      }
+        url: "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
     ],
-    location: {
-      id: "1",
-      name: "Sky Lounge",
-      lat: 40.7589,
-      lng: -73.9851,
-      city: "New York",
-      state: "NY",
-      type: "bar"
-    },
-    timestamp: "2024-01-15T18:30:00Z",
+    timestamp: getRecentTime(1),
+    expiresAt: getExpiryTime(getRecentTime(1), true), // Pinned post (90 days)
     likes: 42,
-    comments: 8,
-    shares: 3,
-    liked: false,
+    comments: 7,
+    isPinned: true,
     saved: false,
-    tags: ["rooftop", "cocktails", "sunset"]
+    vibeTags: ["Lively", "Upscale", "NightOwl"]
   },
   {
     id: "2",
-    user: {
-      id: "2",
-      name: "Priya Sharma",
-      username: "priya_s",
-      avatar: "https://images.unsplash.com/photo-1544005313-94ddf02864ca?w=32&h=32&fit=crop&crop=face"
-    },
-    content: "Spent the afternoon exploring the new art exhibit at the museum. So many thought-provoking pieces! Highly recommend checking it out. 🎨🖼️",
+    user: allUsers[1],
+    location: mockLocations[1],
+    content: "They just put out fresh pastries! Get here quick, there's no line right now.",
     media: [
       {
-        id: "2",
-        url: "https://images.unsplash.com/photo-1551721434-849ddc17c143?w=600&h=400&fit=crop",
         type: "image",
-        alt: "Art exhibit"
-      }
+        url: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
     ],
-    location: {
-      id: "2",
-      name: "City Art Museum",
-      lat: 34.0522,
-      lng: -118.2437,
-      city: "Los Angeles",
-      state: "CA",
-      type: "attraction"
-    },
-    timestamp: "2024-01-15T14:00:00Z",
-    likes: 67,
-    comments: 12,
-    shares: 5,
-    liked: true,
-    saved: true,
-    tags: ["art", "museum", "exhibit"]
+    timestamp: getRecentTime(2),
+    expiresAt: getExpiryTime(getRecentTime(2)),
+    likes: 18,
+    comments: 3,
+    saved: false
   },
   {
     id: "3",
-    user: {
-      id: "3",
-      name: "Kenji Tanaka",
-      username: "kenji_t",
-      avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=32&h=32&fit=crop&crop=face"
-    },
-    content: "Great workout session at the new gym! Feeling energized and ready to tackle the week. 💪🏋️‍♂️",
-    location: {
-      id: "3",
-      name: "Fitness First Gym",
-      lat: 51.5074,
-      lng: 0.1278,
-      city: "London",
-      type: "sports"
-    },
-    timestamp: "2024-01-15T10:15:00Z",
-    likes: 53,
-    comments: 10,
-    shares: 2,
-    liked: false,
-    saved: false,
-    tags: ["gym", "workout", "fitness"]
+    user: allUsers[2],
+    location: mockLocations[2],
+    content: "The headline act is about to start! Crowd is energetic but not too packed yet.",
+    media: [
+      {
+        type: "video",
+        url: "https://www.w3schools.com/html/mov_bbb.mp4",
+      },
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
+    ],
+    timestamp: getRecentTime(0.5),
+    expiresAt: getExpiryTime(getRecentTime(0.5)),
+    likes: 104,
+    comments: 22,
+    saved: false
   },
   {
     id: "4",
-    user: {
-      id: "4",
-      name: "Sophie Dubois",
-      username: "sophie_d",
-      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=32&h=32&fit=crop&crop=face"
-    },
-    content: "Enjoying a delicious brunch at this cozy cafe. The avocado toast is a must-try! 🥑☕",
+    user: allUsers[3],
+    location: mockLocations[3],
+    content: "New exhibit just opened! Only a small crowd so far, perfect time to check it out.",
     media: [
       {
-        id: "3",
-        url: "https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=600&h=400&fit=crop",
         type: "image",
-        alt: "Avocado toast"
-      }
+        url: "https://images.unsplash.com/photo-1553877522-43269d4ea984?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
     ],
-    location: {
-      id: "4",
-      name: "The Corner Cafe",
-      lat: 48.8566,
-      lng: 2.3522,
-      city: "Paris",
-      type: "restaurant"
-    },
-    timestamp: "2024-01-14T12:45:00Z",
-    likes: 78,
-    comments: 15,
-    shares: 7,
-    liked: true,
-    saved: true,
-    tags: ["brunch", "cafe", "avocado toast"]
+    timestamp: getRecentTime(3),
+    expiresAt: getExpiryTime(getRecentTime(3)),
+    likes: 29,
+    comments: 5,
+    saved: false
   },
   {
     id: "5",
-    user: {
-      id: "5",
-      name: "Carlos Rodriguez",
-      username: "carlos_r",
-      avatar: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=32&h=32&fit=crop&crop=face"
-    },
-    content: "Caught an amazing sunset at the beach today. The colors were breathtaking! 🌅🌊",
+    user: allUsers[4],
+    location: mockLocations[4],
+    content: "Line is around the block tonight! But the view is worth the wait.",
     media: [
       {
-        id: "4",
-        url: "https://images.unsplash.com/photo-1501630834273-4b5604d2ee31?w=600&h=400&fit=crop",
         type: "image",
-        alt: "Beach sunset"
-      }
+        url: "https://images.unsplash.com/photo-1519214605650-76a613ee3245?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
     ],
-    location: {
-      id: "5",
-      name: "Santa Monica Beach",
-      lat: 34.0083,
-      lng: -118.4961,
-      city: "Santa Monica",
-      state: "CA",
-      type: "attraction"
-    },
-    timestamp: "2024-01-14T19:20:00Z",
-    likes: 92,
-    comments: 20,
-    shares: 10,
-    liked: false,
-    saved: true,
-    tags: ["sunset", "beach", "ocean"]
+    timestamp: getRecentTime(1.5),
+    expiresAt: getExpiryTime(getRecentTime(1.5)),
+    likes: 56,
+    comments: 11,
+    isPinned: true,
+    saved: false,
+    vibeTags: ["Lively", "Upscale", "NightOwl"]
   },
   {
     id: "6",
-    user: {
-      id: "6",
-      name: "Aisha Khan",
-      username: "aisha_k",
-      avatar: "https://images.unsplash.com/photo-1595152778345-643229633b2a?w=32&h=32&fit=crop&crop=face"
-    },
-    content: "Enjoying live music at this vibrant venue. The band is amazing! 🎶🎤",
-    location: {
-      id: "6",
-      name: "The Music Hall",
-      lat: 40.7128,
-      lng: -74.0060,
-      city: "New York",
-      type: "event"
-    },
-    timestamp: "2024-01-13T21:55:00Z",
-    likes: 60,
-    comments: 11,
-    shares: 4,
-    liked: true,
-    saved: false,
-    tags: ["live music", "venue", "band"]
+    user: allUsers[5],
+    location: mockLocations[5],
+    content: "Knicks vs Lakers game is 🔥! Court side seats are insane, can see all the action up close.",
+    media: [
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1504450758481-7efbbe195018?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
+    ],
+    timestamp: getRecentTime(0.3),
+    expiresAt: getExpiryTime(getRecentTime(0.3)),
+    likes: 87,
+    comments: 14,
+    saved: false
   },
   {
     id: "7",
-    user: {
-      id: "7",
-      name: "Liam O'Connell",
-      username: "liam_o",
-      avatar: "https://images.unsplash.com/photo-1580489944761-15a19d674x?w=32&h=32&fit=crop&crop=face"
-    },
-    content: "Exploring the beautiful hiking trails in the mountains. The views are stunning! ⛰️🌲",
+    user: allUsers[6],
+    location: mockLocations[6],
+    content: "Pool party is going crazy right now! DJs just switched and the energy is insane 🎉",
     media: [
       {
-        id: "5",
-        url: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8b00?w=600&h=400&fit=crop",
         type: "image",
-        alt: "Mountain hiking trail"
-      }
+        url: "https://images.unsplash.com/photo-1566737236500-c8ac43014a67?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
     ],
-    location: {
-      id: "7",
-      name: "Rocky Mountain National Park",
-      lat: 40.3428,
-      lng: -105.6836,
-      city: "Estes Park",
-      state: "CO",
-      type: "attraction"
-    },
-    timestamp: "2024-01-13T15:30:00Z",
-    likes: 85,
-    comments: 18,
-    shares: 9,
-    liked: false,
-    saved: true,
-    tags: ["hiking", "mountains", "nature"]
+    timestamp: getRecentTime(0.2),
+    expiresAt: getExpiryTime(getRecentTime(0.2)),
+    likes: 112,
+    comments: 19,
+    saved: false
   },
   {
     id: "8",
-    user: {
-      id: "8",
-      name: "Mei Lin",
-      username: "mei_l",
-      avatar: "https://images.unsplash.com/photo-1529626455594-4ff0294463c1?w=32&h=32&fit=crop&crop=face"
-    },
-    content: "Enjoying a peaceful evening at this serene park. Perfect for relaxation. 🌳🧘‍♀️",
-    location: {
-      id: "8",
-      name: "Central Park",
-      lat: 40.7829,
-      lng: -73.9654,
-      city: "New York",
-      type: "attraction"
-    },
-    timestamp: "2024-01-12T17:00:00Z",
-    likes: 70,
-    comments: 13,
-    shares: 6,
-    liked: true,
-    saved: false,
-    tags: ["park", "relaxation", "nature"]
+    user: allUsers[7],
+    location: mockLocations[7],
+    content: "The view from Christ the Redeemer is breathtaking! Clear skies today, you can see all of Rio!",
+    media: [
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1483729558449-99ef09a8c325?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
+    ],
+    timestamp: getRecentTime(1.1),
+    expiresAt: getExpiryTime(getRecentTime(1.1)),
+    likes: 203,
+    comments: 31,
+    saved: false
   },
   {
     id: "9",
-    user: {
-      id: "9",
-      name: "Raj Patel",
-      username: "raj_p",
-      avatar: "https://images.unsplash.com/photo-1557862921-378a74b75fc5?w=32&h=32&fit=crop&crop=face"
-    },
-    content: "Watching a thrilling basketball game at the arena. The atmosphere is electric! 🏀🔥",
-    location: {
-      id: "9",
-      name: "Staples Center",
-      lat: 34.0430,
-      lng: -118.2673,
-      city: "Los Angeles",
-      type: "sports"
-    },
-    timestamp: "2024-01-12T20:45:00Z",
-    likes: 88,
-    comments: 19,
-    shares: 8,
-    liked: false,
-    saved: true,
-    tags: ["basketball", "sports", "arena"]
+    user: allUsers[8],
+    location: mockLocations[8],
+    content: "Top of the mountain at Aspen Highlands! Fresh powder and no lines for the lift right now.",
+    media: [
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1551524559-8af4e6624178?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
+    ],
+    timestamp: getRecentTime(0.4),
+    expiresAt: getExpiryTime(getRecentTime(0.4)),
+    likes: 91,
+    comments: 12,
+    saved: false
   },
   {
     id: "10",
-    user: {
-      id: "10",
-      name: "Elena Ramirez",
-      username: "elena_r",
-      avatar: "https://images.unsplash.com/photo-1618044235564-44a1c81a6a49?w=32&h=32&fit=crop&crop=face"
-    },
-    content: "Enjoying a delicious dinner at this fancy restaurant. The food is exquisite! 🍽️🍷",
+    user: allUsers[9],
+    location: mockLocations[9],
+    content: "Super Bowl from a field suite! The energy is electric and halftime show setup looks epic.",
     media: [
       {
-        id: "6",
-        url: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&h=400&fit=crop",
         type: "image",
-        alt: "Fine dining restaurant"
-      }
+        url: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
     ],
-    location: {
-      id: "10",
-      name: "Le Gourmet Restaurant",
-      lat: 48.8647,
-      lng: 2.3489,
-      city: "Paris",
-      type: "restaurant"
-    },
-    timestamp: "2024-01-11T22:10:00Z",
-    likes: 95,
-    comments: 22,
-    shares: 11,
-    liked: true,
-    saved: true,
-    tags: ["fine dining", "restaurant", "food"]
+    timestamp: getRecentTime(0.1),
+    expiresAt: getExpiryTime(getRecentTime(0.1)),
+    likes: 256,
+    comments: 42,
+    isPinned: true,
+    saved: false,
+    vibeTags: ["Lively", "Upscale", "NightOwl"]
   },
   {
     id: "11",
-    user: {
-      id: "11",
-      name: "Omar Hassan",
-      username: "omar_h",
-      avatar: "https://images.unsplash.com/photo-1547425260-76bcbf4f434d?w=32&h=32&fit=crop&crop=face"
-    },
-    content: "Exploring the historic streets of this charming city. So much to see! 🚶‍♂️🏛️",
-    location: {
-      id: "11",
-      name: "Rome",
-      lat: 41.9028,
-      lng: 12.4964,
-      city: "Rome",
-      type: "attraction"
-    },
-    timestamp: "2024-01-11T14:00:00Z",
-    likes: 72,
-    comments: 14,
-    shares: 5,
-    liked: false,
-    saved: false,
-    tags: ["historic", "city", "travel"]
+    user: allUsers[10],
+    location: mockLocations[10],
+    content: "Dinner at Mama's Fish House with the sunset view is perfection. Got the last oceanfront table!",
+    media: [
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1545579133-99bb5ab189bd?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
+    ],
+    timestamp: getRecentTime(0.6),
+    expiresAt: getExpiryTime(getRecentTime(0.6)),
+    likes: 78,
+    comments: 9,
+    saved: false
   },
   {
     id: "12",
-    user: {
-      id: "12",
-      name: "Grace Kim",
-      username: "grace_k",
-      avatar: "https://images.unsplash.com/photo-1549078642-b2ba4bda0cdb?w=32&h=32&fit=crop&crop=face"
-    },
-    content: "Enjoying a relaxing spa day. Feeling refreshed and rejuvenated! 💆‍♀️🌿",
-    location: {
-      id: "12",
-      name: "Serenity Spa",
-      lat: 34.0522,
-      lng: -118.2437,
-      city: "Los Angeles",
-      type: "other"
-    },
-    timestamp: "2024-01-10T16:30:00Z",
-    likes: 80,
-    comments: 16,
-    shares: 7,
-    liked: true,
-    saved: true,
-    tags: ["spa", "relaxation", "self-care"]
+    user: allUsers[11],
+    location: mockLocations[11],
+    content: "Outdoor workout at Barry's today! Special beach class is killing it - spots still open for the 10am.",
+    media: [
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
+    ],
+    timestamp: getRecentTime(0.3),
+    expiresAt: getExpiryTime(getRecentTime(0.3)),
+    likes: 64,
+    comments: 8,
+    saved: false
   },
   {
     id: "13",
-    user: {
-      id: "13",
-      name: "Ben Williams",
-      username: "ben_w",
-      avatar: "https://images.unsplash.com/photo-1531427186534-6c19b56e80ce?w=32&h=32&fit=crop&crop=face"
-    },
-    content: "Watching a captivating theater performance. The actors were incredible! 🎭🎬",
-    location: {
-      id: "13",
-      name: "The Grand Theater",
-      lat: 51.5074,
-      lng: 0.1278,
-      city: "London",
-      type: "event"
-    },
-    timestamp: "2024-01-10T20:00:00Z",
-    likes: 85,
-    comments: 17,
-    shares: 8,
-    liked: false,
-    saved: true,
-    tags: ["theater", "performance", "arts"]
+    user: allUsers[12],
+    location: mockLocations[12],
+    content: "Houston Rodeo is wild tonight! Bull riding competition just started and the crowd is going crazy!",
+    media: [
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1560147307-7fef1854cd4a?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
+    ],
+    timestamp: getRecentTime(0.2),
+    expiresAt: getExpiryTime(getRecentTime(0.2)),
+    likes: 118,
+    comments: 21,
+    saved: false
   },
   {
     id: "14",
-    user: {
-      id: "14",
-      name: "Sakura Sato",
-      username: "sakura_s",
-      avatar: "https://images.unsplash.com/photo-1524250502761-1ac6f2e30d43?w=32&h=32&fit=crop&crop=face"
-    },
-    content: "Enjoying a traditional tea ceremony. A truly unique experience. 🍵🌸",
-    location: {
-      id: "14",
-      name: "Kyoto Tea House",
-      lat: 35.0116,
-      lng: 135.7681,
-      city: "Kyoto",
-      type: "restaurant"
-    },
-    timestamp: "2024-01-09T15:45:00Z",
-    likes: 78,
-    comments: 15,
-    shares: 6,
-    liked: true,
-    saved: false,
-    tags: ["tea ceremony", "traditional", "culture"]
+    user: allUsers[13],
+    location: mockLocations[1],
+    content: "New seasonal latte just dropped and it's incredible! Lavender honey flavor is perfect.",
+    media: [
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1517256064527-09c73fc73e38?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
+    ],
+    timestamp: getRecentTime(0.4),
+    expiresAt: getExpiryTime(getRecentTime(0.4)),
+    likes: 42,
+    comments: 7,
+    saved: false
   },
   {
     id: "15",
-    user: {
-      id: "15",
-      name: "David Lee",
-      username: "david_l",
-      avatar: "https://images.unsplash.com/photo-1560250097-0b93528f3d5a?w=32&h=32&fit=crop&crop=face"
-    },
-    content: "Exploring the vibrant street art scene. So much creativity! 🎨🏙️",
-    location: {
-      id: "15",
-      name: "Wynwood Walls",
-      lat: 25.8014,
-      lng: -80.1983,
-      city: "Miami",
-      type: "attraction"
-    },
-    timestamp: "2024-01-09T18:20:00Z",
-    likes: 90,
-    comments: 21,
-    shares: 10,
-    liked: false,
-    saved: true,
-    tags: ["street art", "art", "culture"]
+    user: allUsers[14],
+    location: mockLocations[1],
+    content: "The back corner by the bookshelf is empty and it's the best spot to work from! Great wifi today.",
+    media: [
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
+    ],
+    timestamp: getRecentTime(0.7),
+    expiresAt: getExpiryTime(getRecentTime(0.7)),
+    likes: 35,
+    comments: 5,
+    saved: false
   },
   {
     id: "16",
-    user: {
-      id: "16",
-      name: "Isabella Rossi",
-      username: "isabella_r",
-      avatar: "https://images.unsplash.com/photo-1599566150163-29194dca9539?w=32&h=32&fit=crop&crop=face"
-    },
-    content: "Enjoying a scenic bike ride along the coast. The ocean breeze is amazing! 🚴‍♀️🌊",
+    user: allUsers[0],
+    location: mockLocations[7],
+    content: "Made it to the top! The climb was worth it - barely any crowds this early in the morning.",
     media: [
       {
-        id: "7",
-        url: "https://images.unsplash.com/photo-1560762429-678c9fff3f94?w=600&h=400&fit=crop",
         type: "image",
-        alt: "Coastal bike ride"
-      }
+        url: "https://images.unsplash.com/photo-1572358337087-ab2addf09aa1?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
     ],
-    location: {
-      id: "16",
-      name: "Pacific Coast Highway",
-      lat: 34.0083,
-      lng: -118.4961,
-      city: "Santa Monica",
-      type: "attraction"
-    },
-    timestamp: "2024-01-08T14:50:00Z",
-    likes: 82,
-    comments: 17,
-    shares: 8,
-    liked: true,
-    saved: true,
-    tags: ["bike ride", "coast", "ocean"]
+    timestamp: getRecentTime(0.9),
+    expiresAt: getExpiryTime(getRecentTime(0.9)),
+    likes: 89,
+    comments: 12,
+    saved: false
   },
   {
     id: "17",
-    user: {
-      id: "17",
-      name: "Ethan Nguyen",
-      username: "ethan_n",
-      avatar: "https://images.unsplash.com/photo-1587613865763-bf3b5e651996?w=32&h=32&fit=crop&crop=face"
-    },
-    content: "Watching a thrilling soccer match at the stadium. The crowd is going wild! ⚽🏟️",
-    location: {
-      id: "17",
-      name: "Allianz Arena",
-      lat: 48.2188,
-      lng: 11.6247,
-      city: "Munich",
-      type: "sports"
-    },
-    timestamp: "2024-01-08T19:30:00Z",
-    likes: 88,
-    comments: 19,
-    shares: 9,
-    liked: false,
-    saved: false,
-    tags: ["soccer", "stadium", "sports"]
+    user: allUsers[1],
+    location: mockLocations[21], // Bitcoin Conference location
+    content: "Bitcoin Conference is packed today! Great keynotes happening on the main stage with minimal wait times for entry.",
+    media: [
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1639815188546-c43c240ff4df?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
+    ],
+    timestamp: getRecentTime(0.15),
+    expiresAt: getExpiryTime(getRecentTime(0.15)),
+    likes: 125,
+    comments: 18,
+    saved: false
   },
   {
     id: "18",
-    user: {
-      id: "18",
-      name: "Chloe Martin",
-      username: "chloe_m",
-      avatar: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=32&h=32&fit=crop&crop=face"
-    },
-    content: "Enjoying a cozy evening at this charming bookstore. Perfect for book lovers. 📚☕",
-    location: {
-      id: "18",
-      name: "Shakespeare and Company",
-      lat: 48.8534,
-      lng: 2.3476,
-      city: "Paris",
-      type: "other"
-    },
-    timestamp: "2024-01-07T17:15:00Z",
-    likes: 75,
-    comments: 14,
-    shares: 6,
-    liked: true,
-    saved: true,
-    tags: ["bookstore", "books", "cozy"]
+    user: allUsers[2],
+    location: mockLocations[22], // InvestFest location
+    content: "InvestFest workshops are incredible! The west wing has shorter lines for the top speakers right now.",
+    media: [
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1515187029135-18ee286d815b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
+    ],
+    timestamp: getRecentTime(0.2),
+    expiresAt: getExpiryTime(getRecentTime(0.2)),
+    likes: 72,
+    comments: 10,
+    saved: false
   },
   {
     id: "19",
-    user: {
-      id: "19",
-      name: "Javier Garcia",
-      username: "javier_g",
-      avatar: "https://images.unsplash.com/photo-1534528741702-a0cfae562c9c?w=32&h=32&fit=crop&crop=face"
-    },
-    content: "Exploring the ancient ruins of this historic site. So much history! 🏛️🌍",
-    location: {
-      id: "19",
-      name: "Machu Picchu",
-      lat: -13.1631,
-      lng: -72.5450,
-      city: "Machu Picchu",
-      type: "attraction"
-    },
-    timestamp: "2024-01-07T12:00:00Z",
-    likes: 88,
-    comments: 18,
-    shares: 9,
-    liked: false,
-    saved: true,
-    tags: ["ancient ruins", "history", "travel"]
+    user: allUsers[3],
+    location: mockLocations[9], // Keep one Allegiant Stadium post
+    content: "VIP entrance on south side has no wait right now! Regular entrances are packed.",
+    media: [
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1504215680853-026ed2a45def?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
+    ],
+    timestamp: getRecentTime(0.3),
+    expiresAt: getExpiryTime(getRecentTime(0.3)),
+    likes: 54,
+    comments: 8,
+    saved: false
   },
   {
     id: "20",
-    user: {
-      id: "20",
-      name: "Olivia Chen",
-      username: "olivia_c",
-      avatar: "https://images.unsplash.com/photo-1594744803329-e58b31c54f72?w=32&h=32&fit=crop&crop=face"
-    },
-    content: "Enjoying a relaxing yoga session at this peaceful studio. Feeling centered and calm. 🧘‍♀️🌿",
+    user: allUsers[4],
     location: {
-      id: "20",
-      name: "Zenith Yoga Studio",
-      lat: 34.0522,
-      lng: -118.2437,
-      city: "Los Angeles",
-      type: "other"
+      id: "29",
+      name: "CES Las Vegas",
+      address: "3150 Paradise Rd",
+      city: "Las Vegas",
+      state: "NV",
+      country: "USA",
+      zip: "89101", // Added zip code
+      lat: 36.1318,
+      lng: -115.1516,
+      type: "event",
+      verified: true,
     },
-    timestamp: "2024-01-06T16:45:00Z",
-    likes: 72,
-    comments: 13,
-    shares: 5,
-    liked: true,
-    saved: false,
-    tags: ["yoga", "relaxation", "wellness"]
-  }
+    content: "Just spotted the newest tech innovations at CES! North hall is less crowded if you want to see the automotive displays.",
+    media: [
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
+    ],
+    timestamp: getRecentTime(0.25),
+    expiresAt: getExpiryTime(getRecentTime(0.25)),
+    likes: 198,
+    comments: 34,
+    saved: false
+  },
+  {
+    id: "21",
+    user: allUsers[15],
+    location: mockLocations[13],
+    content: "Thanks for the free tix VRN! Can't believe I'm getting to see a comedy legend right now. The opening act just finished and everyone is crying laughing already!",
+    media: [
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
+    ],
+    timestamp: getRecentTime(0.1),
+    expiresAt: getExpiryTime(getRecentTime(0.1)),
+    likes: 78,
+    comments: 12,
+    saved: false
+  },
+  {
+    id: "22",
+    user: allUsers[16],
+    location: mockLocations[14],
+    content: "Day 2 on the Disney Wonder and it's magical! Character breakfast just ended and the kids are loving it. Almost no wait for the water slide right now!",
+    media: [
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1548574505-5e239809ee19?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
+    ],
+    timestamp: getRecentTime(0.3),
+    expiresAt: getExpiryTime(getRecentTime(0.3)),
+    likes: 91,
+    comments: 15,
+    saved: false
+  },
+  {
+    id: "23",
+    user: allUsers[17],
+    location: mockLocations[15],
+    content: "This new bakery in Des Moines is incredible! They just took out fresh croissants and they smell amazing. Get here before they sell out!",
+    media: [
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1555507036-ab1f4038808a?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
+    ],
+    timestamp: getRecentTime(0.4),
+    expiresAt: getExpiryTime(getRecentTime(0.4)),
+    likes: 54,
+    comments: 7,
+    saved: false
+  },
+  {
+    id: "24",
+    user: allUsers[18],
+    location: mockLocations[16],
+    content: "Sunset cocktails at the Waldorf Rooftop Bar are unmatched! Just got seated with no wait - seems like a hidden gem tonight. View of downtown LA is spectacular!",
+    media: [
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1534353436294-0dbd4bdac845?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
+    ],
+    timestamp: getRecentTime(0.2),
+    expiresAt: getExpiryTime(getRecentTime(0.2)),
+    likes: 112,
+    comments: 15,
+    saved: false
+  },
+  {
+    id: "25",
+    user: allUsers[19],
+    location: mockLocations[17],
+    content: "Sydney Opera House is absolutely stunning tonight! Special light show happening right now with barely any crowds.",
+    media: [
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1624138784614-87fd1b6528f8?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
+    ],
+    timestamp: getRecentTime(0.5),
+    expiresAt: getExpiryTime(getRecentTime(0.5)),
+    likes: 143,
+    comments: 23,
+    saved: false
+  },
+  {
+    id: "26",
+    user: allUsers[20],
+    location: mockLocations[18],
+    content: "Perfect evening at the Eiffel Tower! The lights just turned on and it's magical. Pro tip: south side entrance has almost no line right now.",
+    media: [
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
+    ],
+    timestamp: getRecentTime(0.3),
+    expiresAt: getExpiryTime(getRecentTime(0.3)),
+    likes: 278,
+    comments: 42,
+    saved: false
+  },
+  {
+    id: "27",
+    user: allUsers[22],
+    location: mockLocations[19],
+    content: "Coachella day 2 is UNREAL! Just caught the surprise guest performance - mind blown! Main stage area still has room if you hurry.",
+    media: [
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
+    ],
+    timestamp: getRecentTime(0.1),
+    expiresAt: getExpiryTime(getRecentTime(0.1)),
+    likes: 345,
+    comments: 67,
+    saved: false
+  },
+  {
+    id: "28",
+    user: allUsers[21],
+    location: mockLocations[20],
+    content: "Gucci pop-up on Rodeo Drive is a must-see! They're giving out free champagne and the limited collection just dropped. Still some pieces left!",
+    media: [
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
+    ],
+    timestamp: getRecentTime(0.2),
+    expiresAt: getExpiryTime(getRecentTime(0.2)),
+    likes: 167,
+    comments: 29,
+    saved: false
+  },
+  {
+    id: "29",
+    user: allUsers[8],
+    location: mockLocations[24],  // The Comedy Cellar (id: "25")
+    content: "Comedy Cellar is offering FREE TICKETS tonight! Just mention 'VRN' at the door. The 9pm show has plenty of seats but they're going fast!",
+    media: [
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1527224857830-43a7acc85260?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
+    ],
+    timestamp: getRecentTime(0.05),
+    expiresAt: getExpiryTime(getRecentTime(0.05)),
+    likes: 88,
+    comments: 15,
+    saved: false
+  },
+  {
+    id: "30",
+    user: allUsers[12],
+    location: mockLocations[25],  // Skyline Nightclub (id: "26")
+    content: "Skyline is offering FREE COVER until midnight! Just show this post at the door. DJ started at 10 and the dance floor is filling up!",
+    media: [
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1566737236500-c8ac43014a67?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
+    ],
+    timestamp: getRecentTime(0.1),
+    expiresAt: getExpiryTime(getRecentTime(0.1)),
+    likes: 132,
+    comments: 24,
+    saved: false
+  },
+  {
+    id: "31",
+    user: allUsers[15],
+    location: mockLocations[26],  // Sunrise Bakery (id: "27")
+    content: "New bakery alert! Sunrise is offering a FREE pastry with any large coffee purchase until noon. The chocolate croissants are incredible and still warm from the oven!",
+    media: [
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1517433367423-c7e5b0f35086?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
+    ],
+    timestamp: getRecentTime(0.3),
+    expiresAt: getExpiryTime(getRecentTime(0.3)),
+    likes: 67,
+    comments: 9,
+    saved: false
+  },
+  {
+    id: "32",
+    user: allUsers[19],
+    location: mockLocations[27],  // Coachella VIP Experience (id: "28")
+    content: "American Express Tent access included with VIP ticket purchase! Just picked up my credentials and the lounge has free drinks, charging stations and AC. Perfect escape from the heat!",
+    media: [
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1535086181678-5a5c4d23aa7d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      },
+    ],
+    timestamp: getRecentTime(0.15),
+    expiresAt: getExpiryTime(getRecentTime(0.15)),
+    likes: 215,
+    comments: 39,
+    saved: false
+  },
 ];
