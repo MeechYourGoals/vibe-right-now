@@ -1,14 +1,22 @@
 
 import React from "react";
+import { Location } from "@/types";
 
 interface PostContentProps {
   content: string;
+  location: Location;
 }
 
-const PostContent: React.FC<PostContentProps> = ({ content }) => {
+const PostContent = ({ content, location }: PostContentProps) => {
   return (
-    <div className="px-4 py-2">
-      <p className="text-sm whitespace-pre-wrap">{content}</p>
+    <div className="px-4 pb-4">
+      <p className="text-sm mb-2">{content}</p>
+      
+      {location.address && (
+        <p className="text-xs text-muted-foreground">
+          📍 {location.address}, {location.city}
+        </p>
+      )}
     </div>
   );
 };

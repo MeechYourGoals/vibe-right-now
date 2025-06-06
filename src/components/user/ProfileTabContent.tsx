@@ -1,162 +1,67 @@
 
-import React, { useState } from "react";
+import React from "react";
+import { TabsContent } from "@/components/ui/tabs";
 import { PostCard } from "@/components/post";
-import { Skeleton } from "@/components/ui/skeleton";
-import PostGridItem from "./PostGridItem";
-import { Post, Comment } from "@/types";
-import { Badge } from "@/components/ui/badge";
-import { Sparkles } from "lucide-react";
+import UserPlacesContent from "./UserPlacesContent";
+import FollowedVenuesSection from "./FollowedVenuesSection";
+import { Post, Comment, Location } from "@/types";
 
 interface ProfileTabContentProps {
-  activeTab: string;
-  viewMode: "list" | "grid";
   userPosts: Post[];
+  followedVenues: Location[];
+  visitedPlaces: Location[];
+  wantToVisitPlaces: Location[];
   getComments: (postId: string) => Comment[];
+  getUserBio: () => string;
 }
 
-const ProfileTabContent: React.FC<ProfileTabContentProps> = ({ 
-  activeTab, 
-  viewMode, 
-  userPosts, 
-  getComments 
-}) => {
-  const [isLoading, setIsLoading] = useState(false);
-
-  // Group posts by location
-  const postsGroupedByLocation = React.useMemo(() => {
-    const groupedPosts: Record<string, Post[]> = {};
-    
-    userPosts.forEach(post => {
-      const locationId = post.location.id;
-      if (!groupedPosts[locationId]) {
-        groupedPosts[locationId] = [];
-      }
-      groupedPosts[locationId].push(post);
-    });
-    
-    // Sort each location's posts by timestamp (most recent first)
-    Object.keys(groupedPosts).forEach(locationId => {
-      groupedPosts[locationId].sort((a, b) => 
-        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-      );
-    });
-    
-    return groupedPosts;
-  }, [userPosts]);
-
-  // Calculate the number of posts per location
-  const locationPostCounts = React.useMemo(() => {
-    const counts: Record<string, number> = {};
-    userPosts.forEach(post => {
-      const locationId = post.location.id;
-      counts[locationId] = (counts[locationId] || 0) + 1;
-    });
-    return counts;
-  }, [userPosts]);
-
-  // Render vibe tags for a post
-  const renderVibeTags = (post: Post) => {
-    if (!post.vibeTags || post.vibeTags.length === 0) return null;
-    
-    return (
-      <div className="flex flex-wrap gap-1 mt-2">
-        {post.vibeTags.map((tag, index) => (
-          <Badge key={index} variant="outline" className="bg-primary/10 text-primary text-xs">
-            <Sparkles className="h-3 w-3 mr-1" />
-            {tag}
-          </Badge>
-        ))}
-      </div>
-    );
-  };
-
-  // Enhanced PostCard component with vibe tags
-  const EnhancedPostCard = ({ posts, locationPostCount }: { posts: Post[], locationPostCount: number }) => {
-    const postCard = (
-      <PostCard 
-        posts={posts} 
-        locationPostCount={locationPostCount}
-        getComments={getComments}
-      />
-    );
-    
-    // Check if any post has vibe tags
-    const hasVibeTags = posts.some(post => post.vibeTags && post.vibeTags.length > 0);
-    
-    if (!hasVibeTags) return postCard;
-    
-    // Add vibe tags below the post card
-    return (
-      <div className="space-y-2">
-        {postCard}
-        <div className="pl-4">
-          {renderVibeTags(posts[0])}
-        </div>
-      </div>
-    );
-  };
-
+const ProfileTabContent = ({
+  userPosts,
+  followedVenues,
+  visitedPlaces,
+  wantToVisitPlaces,
+  getComments,
+  getUserBio
+}: ProfileTabContentProps) => {
   return (
-    <div className="space-y-4">
-      {isLoading ? (
-        <div className={viewMode === "list" ? "space-y-4" : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"}>
-          {Array.from({ length: 6 }).map((_, i) => (
-            viewMode === "list" ? (
-              <div key={i} className="flex items-center space-x-4">
-                <Skeleton className="h-12 w-12 rounded-full" />
-                <div className="space-y-2">
-                  <Skeleton className="h-4 w-[250px]" />
-                  <Skeleton className="h-4 w-[200px]" />
-                </div>
-              </div>
-            ) : (
-              <Skeleton key={i} className="w-full aspect-square rounded-lg" />
-            )
-          ))}
-        </div>
-      ) : (
-        <>
-          {Object.keys(postsGroupedByLocation).length > 0 ? (
-            viewMode === "list" ? (
-              Object.entries(postsGroupedByLocation).map(([locationId, posts]) => (
-                <EnhancedPostCard 
-                  key={locationId} 
-                  posts={posts} 
-                  locationPostCount={locationPostCounts[locationId]}
-                />
-              ))
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {Object.entries(postsGroupedByLocation).map(([locationId, posts]) => (
-                  posts.map(post => (
-                    <div key={post.id} className="space-y-2">
-                      <PostGridItem post={post} />
-                      {post.vibeTags && post.vibeTags.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-1">
-                          {post.vibeTags.map((tag, index) => (
-                            <Badge key={index} variant="outline" className="bg-primary/10 text-primary text-xs">
-                              <Sparkles className="h-3 w-3 mr-1" />
-                              {tag}
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))
-                ))}
-              </div>
-            )
+    <>
+      <TabsContent value="posts" className="mt-6">
+        <div className="space-y-4">
+          {userPosts.length > 0 ? (
+            userPosts.map(post => (
+              <PostCard 
+                key={post.id} 
+                post={post}
+              />
+            ))
           ) : (
-            <div className="text-center py-10">
-              <h3 className="text-xl font-semibold mb-2">No posts found</h3>
-              <p className="text-muted-foreground">
-                This user hasn't posted any vibes yet.
-              </p>
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">No posts yet</p>
             </div>
           )}
-        </>
-      )}
-    </div>
+        </div>
+      </TabsContent>
+
+      <TabsContent value="places" className="mt-6">
+        <UserPlacesContent
+          visitedPlaces={visitedPlaces}
+          wantToVisitPlaces={wantToVisitPlaces}
+        />
+      </TabsContent>
+
+      <TabsContent value="venues" className="mt-6">
+        <FollowedVenuesSection venues={followedVenues} />
+      </TabsContent>
+
+      <TabsContent value="about" className="mt-6">
+        <div className="bg-card rounded-lg p-6">
+          <h3 className="text-lg font-semibold mb-4">About</h3>
+          <p className="text-muted-foreground">
+            {getUserBio() || "No bio available"}
+          </p>
+        </div>
+      </TabsContent>
+    </>
   );
 };
 

@@ -1,42 +1,70 @@
 
-import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import React from "react";
+import { useParams } from "react-router-dom";
+import { useUserProfile } from "@/hooks/useUserProfile";
+import { mockComments } from "@/mock/data";
 import Header from "@/components/Header";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import UserProfileHeader from "@/components/user/UserProfileHeader";
 import ProfileTabs from "@/components/user/ProfileTabs";
-import { useUserProfile } from "@/hooks/useUserProfile";
+import ProfileTabContent from "@/components/user/ProfileTabContent";
 import PrivateProfileContent from "@/components/user/PrivateProfileContent";
-import UserPlacesContent from "@/components/user/UserPlacesContent";
-import FollowedVenuesSection from "@/components/user/FollowedVenuesSection";
 
 const UserProfile = () => {
-  const { username } = useParams<{ username: string }>();
-  const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("posts");
-  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
-  const [placesTabValue, setPlacesTabValue] = useState("visited");
-  
-  const { 
-    user, 
-    userPosts,
-    followedVenues,
-    visitedPlaces,
-    wantToVisitPlaces,
-    getPostComments,
-    getUserBio,
-    isPrivateProfile
-  } = useUserProfile(username);
+  const { userId } = useParams();
+  const {
+    profile,
+    stats,
+    isLoading,
+    error,
+    toggleFollow,
+    getUserPosts,
+    canViewProfile,
+    getRecentActivity,
+    getMutualConnections
+  } = useUserProfile(userId || "");
 
-  if (!user) {
+  // Get user posts
+  const userPosts = getUserPosts();
+  
+  // Get followed venues (mock data for now)
+  const followedVenues = [];
+  
+  // Get visited places (mock data for now)
+  const visitedPlaces = [];
+  
+  // Get want to visit places (mock data for now)
+  const wantToVisitPlaces = [];
+  
+  // Get post comments
+  const getPostComments = (postId: string) => {
+    return mockComments.filter(comment => comment.postId === postId);
+  };
+  
+  // Get user bio
+  const getUserBio = () => {
+    return profile?.bio || "";
+  };
+  
+  // Check if profile is private
+  const isPrivateProfile = !canViewProfile();
+
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <div className="container py-20 text-center">
-          <h1 className="text-2xl font-bold mb-4">User not found</h1>
-          <p className="text-muted-foreground">This user doesn't exist or has been removed.</p>
-          <Button className="mt-6" onClick={() => window.history.back()}>Go Back</Button>
+        <div className="container py-8">
+          <div className="text-center">Loading profile...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !profile) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container py-8">
+          <div className="text-center">User not found</div>
         </div>
       </div>
     );
@@ -45,48 +73,36 @@ const UserProfile = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="container py-6">
-        <div className="max-w-4xl mx-auto">
-          <UserProfileHeader user={user} getUserBio={getUserBio} />
-          
-          {isPrivateProfile ? (
-            <PrivateProfileContent user={user} />
-          ) : (
-            <div>
-              <Tabs defaultValue="content" className="mt-6">
-                <TabsList className="w-full max-w-md mx-auto">
-                  <TabsTrigger value="content">Content</TabsTrigger>
-                  <TabsTrigger value="places">Places</TabsTrigger>
-                  <TabsTrigger value="following">Following</TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="content" className="mt-4">
-                  <ProfileTabs 
-                    activeTab={activeTab}
-                    setActiveTab={setActiveTab}
-                    viewMode={viewMode}
-                    setViewMode={setViewMode}
-                    userPosts={userPosts}
-                    getComments={getPostComments}
-                  />
-                </TabsContent>
-                
-                <TabsContent value="places" className="mt-4">
-                  <UserPlacesContent 
-                    visitedPlaces={visitedPlaces} 
-                    wantToVisitPlaces={wantToVisitPlaces}
-                    activeTab={placesTabValue}
-                    setActiveTab={setPlacesTabValue}
-                  />
-                </TabsContent>
-                
-                <TabsContent value="following" className="mt-4">
-                  <FollowedVenuesSection venues={followedVenues} />
-                </TabsContent>
-              </Tabs>
-            </div>
-          )}
-        </div>
+      
+      <main className="container py-8">
+        <UserProfileHeader
+          user={profile}
+          stats={stats}
+          onFollowToggle={toggleFollow}
+          isOwnProfile={false}
+          recentActivity={getRecentActivity()}
+          mutualConnections={getMutualConnections()}
+        />
+        
+        {isPrivateProfile ? (
+          <PrivateProfileContent 
+            username={profile.username}
+            isFollowing={profile.isFollowing || false}
+            onFollow={toggleFollow}
+          />
+        ) : (
+          <>
+            <ProfileTabs />
+            <ProfileTabContent
+              userPosts={userPosts}
+              followedVenues={followedVenues}
+              visitedPlaces={visitedPlaces}
+              wantToVisitPlaces={wantToVisitPlaces}
+              getComments={getPostComments}
+              getUserBio={getUserBio}
+            />
+          </>
+        )}
       </main>
     </div>
   );

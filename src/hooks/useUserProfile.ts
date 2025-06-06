@@ -36,7 +36,17 @@ export const useUserProfile = (userId: string) => {
           return;
         }
 
-        setProfile(userProfile);
+        // Ensure the profile has all required properties
+        const enhancedProfile: MockUserProfile = {
+          ...userProfile,
+          name: userProfile.name || userProfile.username,
+          isFollowing: userProfile.verified || false,
+          isPrivate: false,
+          followers: userProfile.followers || 0,
+          following: userProfile.following || 0
+        };
+
+        setProfile(enhancedProfile);
 
         // Calculate stats from posts
         const userPosts = mockPosts.filter(post => post.user.id === userId);
@@ -45,8 +55,8 @@ export const useUserProfile = (userId: string) => {
 
         setStats({
           posts: userPosts.length,
-          followers: typeof userProfile.followers === 'number' ? userProfile.followers : 0,
-          following: typeof userProfile.following === 'number' ? userProfile.following : 0,
+          followers: typeof enhancedProfile.followers === 'number' ? enhancedProfile.followers : 0,
+          following: typeof enhancedProfile.following === 'number' ? enhancedProfile.following : 0,
           totalLikes,
           totalComments
         });

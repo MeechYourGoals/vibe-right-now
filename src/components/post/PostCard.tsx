@@ -5,7 +5,7 @@ import PostHeader from "./PostHeader";
 import PostContent from "./PostContent";
 import PostMedia from "./PostMedia";
 import PostFooter from "./PostFooter";
-import { Post, Comment } from "@/types";
+import { Post } from "@/types";
 
 interface PostCardProps {
   post: Post;
@@ -31,12 +31,17 @@ const PostCard = ({
   return (
     <Card className="overflow-hidden">
       <PostHeader 
-        post={post}
+        user={post.user}
+        location={post.location}
+        timestamp={post.timestamp}
         onUserClick={onUserClick}
         onLocationClick={onLocationClick}
       />
       
-      <PostContent post={post} />
+      <PostContent 
+        content={post.content}
+        location={post.location}
+      />
       
       {post.media && post.media.length > 0 && (
         <PostMedia media={post.media} />
