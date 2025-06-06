@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { useNearbyLocations } from "@/hooks/useNearbyLocations";
+import { usePlacesSearch } from "@/hooks/usePlacesSearch";
 import { geocodeAddress } from "@/utils/geocodingService";
 import MapControls from "./map/MapControls";
 import MapContainer from "./map/MapContainer";
@@ -16,7 +17,17 @@ declare global {
   }
 }
 
-const NearbyVibesMap = () => {
+interface NearbyVibesMapProps {
+  searchQuery?: string;
+  searchResults?: Location[];
+  onLocationSelect?: (location: Location) => void;
+}
+
+const NearbyVibesMap = ({ 
+  searchQuery, 
+  searchResults = [], 
+  onLocationSelect 
+}: NearbyVibesMapProps) => {
   const {
     userLocation,
     nearbyLocations,
@@ -27,15 +38,34 @@ const NearbyVibesMap = () => {
     setUserAddressLocation
   } = useNearbyLocations();
   
+  const { searchPlaces, isLoading: placesLoading } = usePlacesSearch();
+  
   const [isMapExpanded, setIsMapExpanded] = useState(false);
   const [mapStyle, setMapStyle] = useState<"default" | "terrain" | "satellite">("terrain");
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
   const [showDistances, setShowDistances] = useState(false);
   const [isAddressPopoverOpen, setIsAddressPopoverOpen] = useState(false);
   const [localLoading, setLocalLoading] = useState(false);
+  const [displayedLocations, setDisplayedLocations] = useState<Location[]>([]);
   
   const navigate = useNavigate();
   const location = useLocation();
+  
+  // Use search results if provided, otherwise use nearby locations
+  useEffect(() => {
+    if (searchResults && searchResults.length > 0) {
+      setDisplayedLocations(searchResults);
+    } else {
+      setDisplayedLocations(nearbyLocations);
+    }
+  }, [searchResults, nearbyLocations]);
+
+  // Handle search query changes
+  useEffect(() => {
+    if (searchQuery && searchQuery.trim()) {
+      handlePlacesSearch(searchQuery);
+    }
+  }, [searchQuery]);
   
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -44,10 +74,37 @@ const NearbyVibesMap = () => {
     if (q) {
       const city = q.split(',')[0].trim();
       setSearchedCity(city);
+      handlePlacesSearch(q);
     } else {
       setSearchedCity("");
     }
   }, [location, setSearchedCity]);
+
+  const handlePlacesSearch = async (query: string) => {
+    if (!query.trim()) return;
+    
+    setLocalLoading(true);
+    try {
+      const searchLocation = userLocation ? 
+        { lat: userLocation.latitude, lng: userLocation.longitude } : 
+        userAddressLocation ? 
+        { lat: userAddressLocation[1], lng: userAddressLocation[0] } : 
+        undefined;
+        
+      const results = await searchPlaces(query, searchLocation);
+      if (results.length > 0) {
+        setDisplayedLocations(results);
+        toast.success(`Found ${results.length} places for "${query}"`);
+      } else {
+        toast.error(`No places found for "${query}"`);
+      }
+    } catch (error) {
+      console.error('Search error:', error);
+      toast.error('Failed to search places');
+    } finally {
+      setLocalLoading(false);
+    }
+  };
 
   const handleViewMap = () => {
     navigate("/explore");
@@ -71,6 +128,7 @@ const NearbyVibesMap = () => {
 
   const handleLocationSelect = (location: Location) => {
     setSelectedLocation(location);
+    onLocationSelect?.(location);
   };
   
   const handleAddressSearch = async (address: string) => {
@@ -113,12 +171,14 @@ const NearbyVibesMap = () => {
   };
   
   // Determine the effective loading state (either from hook or local)
-  const effectiveLoading = loading || localLoading;
+  const effectiveLoading = loading || localLoading || placesLoading;
   
   return (
     <div className={`space-y-4 ${isMapExpanded ? "fixed inset-0 z-50 bg-background p-4" : ""}`}>
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold">Nearby Vibes</h2>
+        <h2 className="text-xl font-bold">
+          {searchQuery ? `Search Results for "${searchQuery}"` : "Nearby Vibes"}
+        </h2>
         <div className="flex gap-2">
           <MapControls 
             isExpanded={isMapExpanded}
@@ -144,7 +204,7 @@ const NearbyVibesMap = () => {
         loading={effectiveLoading}
         isExpanded={isMapExpanded}
         userLocation={userLocation}
-        locations={nearbyLocations}
+        locations={displayedLocations}
         searchedCity={searchedCity}
         mapStyle={mapStyle}
         selectedLocation={selectedLocation}
@@ -152,14 +212,14 @@ const NearbyVibesMap = () => {
         userAddressLocation={userAddressLocation}
         onLocationSelect={handleLocationSelect}
         onCloseLocation={() => setSelectedLocation(null)}
-        nearbyCount={nearbyLocations.length}
+        nearbyCount={displayedLocations.length}
         onToggleDistances={() => setShowDistances(false)}
-        showAllCities={!searchedCity}
+        showAllCities={!searchQuery && !searchResults.length}
       />
       
       {!isMapExpanded && (
         <NearbyLocationsList
-          locations={nearbyLocations}
+          locations={displayedLocations}
           isExpanded={isMapExpanded}
           onViewMap={handleViewMap}
           onViewLocation={handleLocationClick}

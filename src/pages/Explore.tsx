@@ -47,6 +47,14 @@ const Explore = () => {
     setShowDateFilter
   } = useExploreState();
 
+  // Create search query for map
+  const getSearchQuery = () => {
+    if (searchedCity && searchedCity.trim() !== "") {
+      return searchedCity;
+    }
+    return "";
+  };
+
   // Update the page title logic to handle empty cities
   const getDisplayTitle = () => {
     if (isNaturalLanguageSearch) {
@@ -75,9 +83,12 @@ const Explore = () => {
             onClearDates={handleClearDates}
           />
           
-          {/* Map centered below search bar */}
+          {/* Map centered below search bar with search integration */}
           <div className="w-full mb-6">
-            <NearbyVibesMap />
+            <NearbyVibesMap 
+              searchQuery={getSearchQuery()}
+              searchResults={filteredLocations}
+            />
           </div>
           
           <CategoryTabs 

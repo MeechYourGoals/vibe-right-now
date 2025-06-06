@@ -27,6 +27,7 @@ import { cityCoordinates } from "@/utils/cityLocations";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { googlePlacesService } from "@/services/GooglePlacesService";
 
 interface SearchVibesProps {
   onSearch: (query: string, filterType: string, category: string) => void;
@@ -50,6 +51,7 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
   const [isNaturalLanguageSearch, setIsNaturalLanguageSearch] = useState(false);
   const [nlpAnalysis, setNlpAnalysis] = useState<any>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [placeSuggestions, setPlaceSuggestions] = useState<Array<{ place_id: string; description: string }>>([]);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -274,7 +276,7 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
     onSearch(vibe, selectedFilter, "vibes");
   };
   
-  const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSearchInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchQuery(value);
     
@@ -283,12 +285,29 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
     }
     
     if (searchCategory === 'places' && value.length > 1) {
-      const filtered = allCities.filter(city => 
-        city.toLowerCase().includes(value.toLowerCase())
-      ).slice(0, 5);
-      
-      setCitySuggestions(filtered);
-      setShowCitySuggestions(filtered.length > 0);
+      try {
+        // Get Google Places autocomplete suggestions
+        const suggestions = await googlePlacesService.getPlaceAutocomplete(value);
+        setPlaceSuggestions(suggestions);
+        setShowPlaceSuggestions(suggestions.length > 0);
+        
+        // Also get city suggestions
+        const filtered = allCities.filter(city => 
+          city.toLowerCase().includes(value.toLowerCase())
+        ).slice(0, 3);
+        
+        setCitySuggestions(filtered);
+        setShowCitySuggestions(filtered.length > 0);
+      } catch (error) {
+        console.error('Error getting place suggestions:', error);
+        // Fallback to cities only
+        const filtered = allCities.filter(city => 
+          city.toLowerCase().includes(value.toLowerCase())
+        ).slice(0, 5);
+        
+        setCitySuggestions(filtered);
+        setShowCitySuggestions(filtered.length > 0);
+      }
     } else if (searchCategory === 'vibes' && value.length > 0) {
       const filtered = vibeSuggestions.filter(vibe => 
         vibe.toLowerCase().includes(value.toLowerCase())
@@ -301,6 +320,7 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
       setShowVibeSuggestions(true);
     } else {
       setShowCitySuggestions(false);
+      setShowPlaceSuggestions(false);
     }
   };
   
@@ -386,7 +406,7 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
               : searchCategory === "places"
                 ? isNaturalLanguageSearch 
                   ? "Try natural language: 'Upscale restaurants in Chicago for a family lunch...'" 
-                  : "Search cities, venues, events or use natural language..."
+                  : "Search venues, restaurants, bars, or cities..."
                 : searchCategory === "vibes"
                   ? "Search for vibes like Cozy, Trendy, NightOwl..."
                   : "Search venues, events, vibes, users or use natural language..."
@@ -394,7 +414,15 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
           value={searchQuery}
           onChange={handleSearchInputChange}
           onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-          onClick={handleInputClick}
+          onClick={() => {
+            if (searchCategory === "users") {
+              setShowUserSuggestions(true);
+            } else if (searchCategory === "places") {
+              setShowPlaceSuggestions(true);
+            } else if (searchCategory === "vibes") {
+              setShowVibeSuggestions(true);
+            }
+          }}
           className="pr-20"
         />
         <div className="absolute right-0 top-0 flex h-full">
@@ -521,6 +549,56 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
                   </Badge>
                 ))}
               </div>
+            </div>
+          </Card>
+        </CollapsibleContent>
+      </Collapsible>
+
+      <Collapsible open={showPlaceSuggestions && searchCategory === "places"} className="w-full">
+        <CollapsibleContent className="overflow-hidden">
+          <Card className="mt-1 w-full p-2 shadow-md border border-border">
+            <div className="space-y-1">
+              {placeSuggestions.length > 0 && (
+                <>
+                  <p className="text-xs text-muted-foreground px-2 py-1 flex items-center">
+                    Places <Star className="h-3 w-3 text-amber-500 ml-1 fill-amber-500" />
+                  </p>
+                  {placeSuggestions.map((place) => (
+                    <div 
+                      key={place.place_id} 
+                      className="flex items-center gap-2 p-2 hover:bg-muted rounded-md cursor-pointer bg-amber-500/5 border border-amber-500/20"
+                      onClick={() => handlePlaceSelect(place.description)}
+                    >
+                      <div className="h-8 w-8 flex items-center justify-center rounded-md bg-amber-500/20">
+                        <MapPin className="h-4 w-4 text-amber-500" />
+                      </div>
+                      <div className="flex flex-col flex-1">
+                        <span className="text-sm font-medium">{place.description}</span>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
+              
+              {citySuggestions.length > 0 && (
+                <>
+                  <p className="text-xs text-muted-foreground px-2 py-1">Cities</p>
+                  {citySuggestions.map((city, index) => (
+                    <div 
+                      key={index} 
+                      className="flex items-center gap-2 p-2 hover:bg-muted rounded-md cursor-pointer"
+                      onClick={() => handlePlaceSelect(city)}
+                    >
+                      <div className="h-8 w-8 flex items-center justify-center rounded-md bg-primary/10">
+                        <MapPin className="h-4 w-4 text-primary" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium">{city}</span>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
             </div>
           </Card>
         </CollapsibleContent>

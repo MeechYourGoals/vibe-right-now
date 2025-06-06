@@ -23,7 +23,7 @@ export const useGoogleMap = (
     lat: 39.8283,
     lng: -98.5795
   });
-  const [mapZoom, setMapZoom] = useState(searchedCity ? 12 : 4);
+  const [mapZoom, setMapZoom] = useState(4);
 
   const onLoad = useCallback((map: google.maps.Map) => {
     setMap(map);
@@ -33,24 +33,49 @@ export const useGoogleMap = (
     setMap(null);
   }, []);
 
-  // Set map center based on locations
+  // Set map center and zoom based on locations and search
   useEffect(() => {
-    if (userLocation) {
+    if (locations.length > 0) {
+      // If we have search results, center on them
+      if (locations.length === 1) {
+        // Single result - center on that location
+        setMapCenter({
+          lat: locations[0].lat,
+          lng: locations[0].lng
+        });
+        setMapZoom(15);
+      } else {
+        // Multiple results - center on the first result but zoom out to show more
+        setMapCenter({
+          lat: locations[0].lat,
+          lng: locations[0].lng
+        });
+        setMapZoom(12);
+      }
+    } else if (userLocation) {
+      // No search results but have user location
       setMapCenter({ 
         lat: userLocation.latitude, 
         lng: userLocation.longitude 
       });
+      setMapZoom(12);
     } else if (userAddressLocation) {
+      // Use address location
       setMapCenter({
         lat: userAddressLocation[1],
         lng: userAddressLocation[0]
       });
-    } else if (locations.length > 0 && searchedCity) {
-      setMapCenter({
-        lat: locations[0].lat,
-        lng: locations[0].lng
-      });
       setMapZoom(12);
+    } else if (searchedCity) {
+      // Keep existing zoom for city search without results
+      setMapZoom(12);
+    } else {
+      // Default view
+      setMapCenter({
+        lat: 39.8283,
+        lng: -98.5795
+      });
+      setMapZoom(4);
     }
   }, [userLocation, userAddressLocation, locations, searchedCity]);
 
@@ -64,14 +89,20 @@ export const useGoogleMap = (
     if (map) {
       google.maps.event.trigger(map, "resize");
       
-      if (userLocation) {
+      // Re-center based on current state
+      if (locations.length > 0) {
+        map.setCenter({
+          lat: locations[0].lat,
+          lng: locations[0].lng
+        });
+      } else if (userLocation) {
         map.setCenter({
           lat: userLocation.latitude,
           lng: userLocation.longitude
         });
       }
     }
-  }, [map, userLocation]);
+  }, [map, userLocation, locations]);
 
   // Expose resize method to window
   useEffect(() => {
