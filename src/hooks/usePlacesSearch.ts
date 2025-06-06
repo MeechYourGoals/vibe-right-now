@@ -19,7 +19,10 @@ export const usePlacesSearch = () => {
       lng: place.geometry.location.lng,
       type: place.types.includes('restaurant') ? 'restaurant' : 
             place.types.includes('bar') ? 'bar' :
-            place.types.includes('tourist_attraction') ? 'attraction' : 'other',
+            place.types.includes('tourist_attraction') ? 'attraction' : 
+            place.types.includes('cafe') ? 'cafe' :
+            place.types.includes('museum') ? 'museum' :
+            place.types.includes('night_club') ? 'nightclub' : 'other',
       verified: true,
       rating: place.rating,
       tags: place.types
@@ -36,9 +39,15 @@ export const usePlacesSearch = () => {
     setError(null);
 
     try {
+      console.log('usePlacesSearch: Searching for:', query);
       const results = await googlePlacesService.searchPlaces(query, location);
+      console.log('usePlacesSearch: Found', results.length, 'results');
+      
       setPlaces(results);
-      return results.map(convertGooglePlaceToLocation);
+      const convertedLocations = results.map(convertGooglePlaceToLocation);
+      console.log('usePlacesSearch: Converted to', convertedLocations.length, 'locations');
+      
+      return convertedLocations;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to search places';
       setError(errorMessage);

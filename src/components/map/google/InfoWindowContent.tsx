@@ -23,7 +23,18 @@ const InfoWindowContent: React.FC<InfoWindowContentProps> = ({ location, onSelec
   // Get today's hours
   const today = new Date();
   const dayOfWeek = today.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
-  const todaysHours = location.hours[dayOfWeek as keyof typeof location.hours] || 'Closed';
+  const todaysHours = location.hours[dayOfWeek as keyof typeof location.hours];
+  
+  // Format hours display
+  const formatHours = (hours: any) => {
+    if (typeof hours === 'string') {
+      return hours;
+    }
+    if (typeof hours === 'object' && hours.open && hours.close) {
+      return `${hours.open} - ${hours.close}`;
+    }
+    return 'Closed';
+  };
 
   const handleViewVenue = () => {
     navigate(`/venue/${location.id}`);
@@ -45,14 +56,14 @@ const InfoWindowContent: React.FC<InfoWindowContentProps> = ({ location, onSelec
   };
 
   return (
-    <div className="w-64 p-2">
-      <div className="font-bold text-lg mb-1">{location.name}</div>
+    <div className="w-64 p-2 bg-background text-foreground border border-border rounded-lg shadow-lg">
+      <div className="font-bold text-lg mb-1 text-foreground">{location.name}</div>
       <div className="text-sm text-muted-foreground flex items-center mb-1">
         <MapPin className="h-3 w-3 mr-1" />
         <span>{location.address}, {location.city}</span>
       </div>
-      <div className="text-sm mb-2">
-        <span className="font-medium">Today:</span> {todaysHours}
+      <div className="text-sm mb-2 text-foreground">
+        <span className="font-medium">Today:</span> {formatHours(todaysHours)}
       </div>
       
       {/* Display wait time if available */}
@@ -61,11 +72,11 @@ const InfoWindowContent: React.FC<InfoWindowContentProps> = ({ location, onSelec
       </div>
       
       <div className="text-sm mb-3">
-        <span className="inline-block px-2 py-1 bg-primary/10 rounded-full text-xs">
+        <span className="inline-block px-2 py-1 bg-primary/10 text-primary rounded-full text-xs">
           {location.type.charAt(0).toUpperCase() + location.type.slice(1)}
         </span>
         {location.vibes && location.vibes.map((vibe, i) => (
-          <span key={i} className="inline-block ml-1 px-2 py-1 bg-muted rounded-full text-xs">
+          <span key={i} className="inline-block ml-1 px-2 py-1 bg-muted text-muted-foreground rounded-full text-xs">
             {vibe}
           </span>
         ))}
@@ -73,7 +84,7 @@ const InfoWindowContent: React.FC<InfoWindowContentProps> = ({ location, onSelec
       <div className="flex gap-2">
         <Button 
           size="sm" 
-          className="w-full bg-gradient-vibe"
+          className="w-full bg-gradient-vibe hover:bg-gradient-vibe/80"
           onClick={handleViewVenue}
         >
           <ExternalLink className="h-3 w-3 mr-1" />
@@ -82,6 +93,7 @@ const InfoWindowContent: React.FC<InfoWindowContentProps> = ({ location, onSelec
         <Button 
           size="sm" 
           variant="outline" 
+          className="border-border hover:bg-muted"
           onClick={handleShare}
         >
           <Share2 className="h-3 w-3" />

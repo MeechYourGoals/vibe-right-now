@@ -45,20 +45,10 @@ export interface PlaceSearchResult {
 }
 
 class GooglePlacesService {
-  private async getApiKey(): Promise<string> {
-    const { data, error } = await supabase.functions.invoke('google-places', {
-      body: { action: 'get-api-key' }
-    });
-    
-    if (error || !data?.apiKey) {
-      throw new Error('Failed to get Google Places API key');
-    }
-    
-    return data.apiKey;
-  }
-
   async searchPlaces(query: string, location?: { lat: number; lng: number }, radius = 5000): Promise<GooglePlace[]> {
     try {
+      console.log('Searching places with query:', query, 'location:', location);
+      
       const { data, error } = await supabase.functions.invoke('google-places', {
         body: {
           action: 'search',
@@ -73,6 +63,7 @@ class GooglePlacesService {
         return [];
       }
 
+      console.log('Google Places search results:', data?.results?.length || 0, 'places found');
       return data?.results || [];
     } catch (error) {
       console.error('Error searching places:', error);
@@ -143,6 +134,20 @@ class GooglePlacesService {
     } catch (error) {
       console.error('Error getting autocomplete suggestions:', error);
       return [];
+    }
+  }
+
+  // New method to get place coordinates from description
+  async getPlaceFromDescription(description: string): Promise<{ lat: number; lng: number } | null> {
+    try {
+      const places = await this.searchPlaces(description);
+      if (places.length > 0) {
+        return places[0].geometry.location;
+      }
+      return null;
+    } catch (error) {
+      console.error('Error getting place coordinates:', error);
+      return null;
     }
   }
 }

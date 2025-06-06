@@ -1,9 +1,8 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import { useJsApiLoader } from '@react-google-maps/api';
 import { Location } from "@/types";
-
-// Google Maps API key
-const GOOGLE_MAPS_API_KEY = "AIzaSyAWm0vayRrQJHpMc6XcShcge52hGTt9BV4";
+import { supabase } from "@/integrations/supabase/client";
 
 export const useGoogleMap = (
   userLocation: GeolocationCoordinates | null, 
@@ -12,9 +11,32 @@ export const useGoogleMap = (
   searchedCity: string,
   selectedLocation: Location | null
 ) => {
+  const [apiKey, setApiKey] = useState<string>('');
+
+  // Fetch API key from Supabase secrets
+  useEffect(() => {
+    const fetchApiKey = async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke('google-places', {
+          body: { action: 'get-api-key' }
+        });
+        
+        if (!error && data?.apiKey) {
+          setApiKey(data.apiKey);
+        } else {
+          console.error('Failed to fetch Google Maps API key');
+        }
+      } catch (err) {
+        console.error('Error fetching API key:', err);
+      }
+    };
+
+    fetchApiKey();
+  }, []);
+
   const { isLoaded, loadError } = useJsApiLoader({
     id: 'google-map-script',
-    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ''
+    googleMapsApiKey: apiKey
   });
 
   const [map, setMap] = useState<google.maps.Map | null>(null);
@@ -125,7 +147,7 @@ export const useGoogleMap = (
   }, [map]);
 
   return {
-    isLoaded,
+    isLoaded: isLoaded && !!apiKey,
     loadError,
     map,
     mapCenter,

@@ -264,9 +264,22 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
     onSearch(username, selectedFilter, searchCategory);
   };
 
-  const handlePlaceSelect = (placeName: string) => {
+  const handlePlaceSelect = async (placeName: string) => {
+    console.log('Place selected:', placeName);
     setSearchQuery(placeName);
     setShowPlaceSuggestions(false);
+    setShowCitySuggestions(false);
+    
+    // Try to get coordinates for the place
+    try {
+      const coordinates = await googlePlacesService.getPlaceFromDescription(placeName);
+      if (coordinates) {
+        console.log('Got coordinates for place:', coordinates);
+      }
+    } catch (error) {
+      console.error('Error getting place coordinates:', error);
+    }
+    
     onSearch(placeName, selectedFilter, searchCategory);
   };
   
@@ -286,8 +299,10 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
     
     if (searchCategory === 'places' && value.length > 1) {
       try {
+        console.log('Getting autocomplete for:', value);
         // Get Google Places autocomplete suggestions
         const suggestions = await googlePlacesService.getPlaceAutocomplete(value);
+        console.log('Autocomplete suggestions:', suggestions);
         setPlaceSuggestions(suggestions);
         setShowPlaceSuggestions(suggestions.length > 0);
         
@@ -561,7 +576,7 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
               {placeSuggestions.length > 0 && (
                 <>
                   <p className="text-xs text-muted-foreground px-2 py-1 flex items-center">
-                    Places <Star className="h-3 w-3 text-amber-500 ml-1 fill-amber-500" />
+                    Google Places <Star className="h-3 w-3 text-amber-500 ml-1 fill-amber-500" />
                   </p>
                   {placeSuggestions.map((place) => (
                     <div 

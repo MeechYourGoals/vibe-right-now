@@ -1,3 +1,4 @@
+
 // If this file doesn't exist, we're creating it
 import { MockUserProfile } from "@/mock/users";
 
@@ -11,7 +12,7 @@ export interface Location {
   zip?: string;
   lat: number;
   lng: number;
-  type: "restaurant" | "bar" | "event" | "attraction" | "sports" | "other";
+  type: "restaurant" | "bar" | "event" | "attraction" | "sports" | "other" | "nightclub" | "cafe" | "museum";
   verified: boolean;
   hours?: BusinessHours;
   vibes?: string[];
@@ -54,6 +55,7 @@ export interface Post {
   isPinned?: boolean;
   saved: boolean;
   vibeTags?: string[];
+  isVenuePost?: boolean;
 }
 
 export interface Comment {
@@ -135,7 +137,7 @@ export interface VenueInsights {
 
 export interface DateRange {
   from: Date | undefined;
-  to: Date | undefined;
+  to?: Date | undefined;
 }
 
 // Advertising Suite Types

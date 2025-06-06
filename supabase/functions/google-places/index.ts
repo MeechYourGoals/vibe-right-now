@@ -27,6 +27,16 @@ serve(async (req) => {
       );
     }
 
+    // Handle special case for API key request
+    if (action === 'get-api-key') {
+      return new Response(
+        JSON.stringify({ apiKey }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+
     console.log(`Google Places API call - Action: ${action}`);
 
     let apiUrl = '';
