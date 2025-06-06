@@ -2,14 +2,13 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Lock } from "lucide-react";
+import { User } from "@/types";
 
 interface PrivateProfileContentProps {
-  username: string;
-  isFollowing: boolean;
-  onFollow: () => void;
+  user: User;
 }
 
-const PrivateProfileContent = ({ username, isFollowing, onFollow }: PrivateProfileContentProps) => {
+const PrivateProfileContent = ({ user }: PrivateProfileContentProps) => {
   return (
     <div className="text-center py-16 px-4">
       <div className="max-w-md mx-auto">
@@ -20,11 +19,11 @@ const PrivateProfileContent = ({ username, isFollowing, onFollow }: PrivateProfi
         </div>
         <h2 className="text-2xl font-bold mb-2">This profile is private</h2>
         <p className="text-muted-foreground mb-8">
-          @{username} has chosen to keep their profile private. 
+          @{user.username} has chosen to keep their profile private. 
           Follow them to request access to their content.
         </p>
-        <Button onClick={onFollow}>
-          {isFollowing ? "Following" : "Request to Follow"}
+        <Button>
+          Request to Follow
         </Button>
       </div>
     </div>

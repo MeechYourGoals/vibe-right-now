@@ -1,5 +1,5 @@
-import { Location, User } from "@/types";
-import { MockUserProfile } from "@/mock/users";
+
+import { Location } from "@/types";
 import { cityCoordinates } from "./cityDatabase";
 import { 
   createId, 
@@ -11,6 +11,7 @@ import {
   getFitnessClassName, 
   getAttractionName 
 } from "./venueGenerators";
+import { getRandomUserProfile } from "./types";
 
 // Generate mock business hours for a location
 const generateBusinessHours = (locationId: string) => {
@@ -142,7 +143,7 @@ export const generateCityLocations = (cityKey: string): Location[] => {
     verified: true,
     hours: generateBusinessHours(sportId),
     vibes: generateVibes(sportId, "sports"),
-    userProfile: generateLocationUser(sportId)
+    userProfile: getRandomUserProfile()
   });
   
   // 2. Nightclub/Lounge
@@ -162,7 +163,7 @@ export const generateCityLocations = (cityKey: string): Location[] => {
     verified: true,
     hours: generateBusinessHours(loungeId),
     vibes: generateVibes(loungeId, "bar"),
-    userProfile: generateLocationUser(loungeId)
+    userProfile: getRandomUserProfile()
   });
   
   // 3. Restaurant
@@ -182,7 +183,7 @@ export const generateCityLocations = (cityKey: string): Location[] => {
     verified: true,
     hours: generateBusinessHours(restaurantId),
     vibes: generateVibes(restaurantId, "restaurant"),
-    userProfile: generateLocationUser(restaurantId)
+    userProfile: getRandomUserProfile()
   });
   
   // 4. Event/Concert
@@ -202,7 +203,7 @@ export const generateCityLocations = (cityKey: string): Location[] => {
     verified: true,
     hours: generateBusinessHours(eventId),
     vibes: generateVibes(eventId, "event"),
-    userProfile: generateLocationUser(eventId)
+    userProfile: getRandomUserProfile()
   });
   
   // 5. Comedy Club
@@ -222,7 +223,7 @@ export const generateCityLocations = (cityKey: string): Location[] => {
     verified: true,
     hours: generateBusinessHours(comedyId),
     vibes: generateVibes(comedyId, "event"),
-    userProfile: generateLocationUser(comedyId)
+    userProfile: getRandomUserProfile()
   });
   
   // 6. Fitness/Workout Class
@@ -242,7 +243,7 @@ export const generateCityLocations = (cityKey: string): Location[] => {
     verified: true,
     hours: generateBusinessHours(fitnessId),
     vibes: generateVibes(fitnessId, "other"),
-    userProfile: generateLocationUser(fitnessId)
+    userProfile: getRandomUserProfile()
   });
   
   // 7. Attraction
@@ -262,7 +263,7 @@ export const generateCityLocations = (cityKey: string): Location[] => {
     verified: true,
     hours: generateBusinessHours(attractionId),
     vibes: generateVibes(attractionId, "attraction"),
-    userProfile: generateLocationUser(attractionId)
+    userProfile: getRandomUserProfile()
   });
   
   return locations;
@@ -278,76 +279,4 @@ export const generateAllCityLocations = (): Location[] => {
   });
   
   return allLocations;
-};
-
-export const generateLocationUser = (locationId: string, userType: 'regular' | 'celebrity' = 'regular'): User => {
-  const users: MockUserProfile[] = [
-    {
-      id: `user_${locationId}_1`,
-      username: "vibemaster",
-      avatar: "https://i.pravatar.cc/150?img=1",
-      bio: "Always looking for the next vibe ✨",
-      verified: true,
-      name: "Vibe Master"
-    },
-    {
-      id: `user_${locationId}_2`,
-      username: "cityhopper",
-      avatar: "https://i.pravatar.cc/150?img=2", 
-      bio: "Exploring one city at a time 🌃",
-      verified: false,
-      name: "City Hopper"
-    },
-    {
-      id: `user_${locationId}_3`,
-      username: "nightowl",
-      avatar: "https://i.pravatar.cc/150?img=3",
-      bio: "The night is when the real fun begins 🦉", 
-      verified: true,
-      name: "Night Owl"
-    },
-    {
-      id: `user_${locationId}_4`,
-      username: "foodiefinder",
-      avatar: "https://i.pravatar.cc/150?img=4",
-      bio: "Following my stomach to all the best spots 🍽️",
-      verified: false,
-      name: "Foodie Finder"
-    },
-    {
-      id: `user_${locationId}_5`,
-      username: "adventuretime",
-      avatar: "https://i.pravatar.cc/150?img=5",
-      bio: "Life is an adventure, and I'm here for it 🏄‍♂️",
-      verified: true,
-      name: "Adventure Time"
-    },
-    {
-      id: `user_${locationId}_6`,
-      username: "musiclover",
-      avatar: "https://i.pravatar.cc/150?img=6",
-      bio: "Music is my soul language 🎵",
-      verified: false,
-      name: "Music Lover"
-    },
-    {
-      id: `user_${locationId}_7`,
-      username: "artguru",
-      avatar: "https://i.pravatar.cc/150?img=7",
-      bio: "Art speaks where words fail 🎨",
-      verified: true,
-      name: "Art Guru"
-    }
-  ];
-
-  const randomIndex = Math.floor(Math.random() * users.length);
-  const selectedUser = users[randomIndex];
-  
-  return {
-    id: selectedUser.id,
-    username: selectedUser.username,
-    avatar: selectedUser.avatar,
-    verified: selectedUser.verified || false,
-    name: selectedUser.name
-  };
 };

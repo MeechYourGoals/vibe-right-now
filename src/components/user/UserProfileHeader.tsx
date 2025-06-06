@@ -11,19 +11,10 @@ import { cn } from "@/lib/utils";
 
 interface UserProfileHeaderProps {
   user: User;
-  onFollowToggle: () => void;
-  isOwnProfile: boolean;
-  recentActivity: any[];
-  mutualConnections: User[];
+  getUserBio: () => string;
 }
 
-const UserProfileHeader = ({ 
-  user, 
-  onFollowToggle, 
-  isOwnProfile, 
-  recentActivity, 
-  mutualConnections 
-}: UserProfileHeaderProps) => {
+const UserProfileHeader = ({ user, getUserBio }: UserProfileHeaderProps) => {
   const [isFollowing, setIsFollowing] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   
@@ -38,7 +29,6 @@ const UserProfileHeader = ({
 
   const handleFollowToggle = () => {
     setIsFollowing(!isFollowing);
-    onFollowToggle();
     
     if (isFollowing) {
       toast.success(`Unfollowed @${user?.username}`);
@@ -66,11 +56,6 @@ const UserProfileHeader = ({
         .then(() => toast.success("Profile link copied to clipboard!"))
         .catch(() => toast.error("Couldn't copy link. Please try again."));
     }
-  };
-
-  // Get user bio
-  const getUserBio = () => {
-    return user?.bio || "No bio available";
   };
 
   return (
@@ -152,32 +137,30 @@ const UserProfileHeader = ({
               </div>
             </div>
             
-            {!isOwnProfile && (
-              <div className="flex items-center gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="h-9 transition-all duration-300 hover:bg-accent/30"
-                  onClick={handleShareProfile}
-                >
-                  <Share2 className="h-4 w-4 mr-2" />
-                  Share
-                </Button>
-                <Button 
-                  variant={isFollowing ? "default" : "outline"}
-                  size="sm"
-                  className={cn(
-                    "h-9 transition-all duration-300",
-                    isFollowing 
-                      ? "bg-primary hover:bg-primary/90" 
-                      : "hover:bg-primary/20"
-                  )}
-                  onClick={handleFollowToggle}
-                >
-                  {isFollowing ? "Following" : "Follow"}
-                </Button>
-              </div>
-            )}
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="h-9 transition-all duration-300 hover:bg-accent/30"
+                onClick={handleShareProfile}
+              >
+                <Share2 className="h-4 w-4 mr-2" />
+                Share
+              </Button>
+              <Button 
+                variant={isFollowing ? "default" : "outline"}
+                size="sm"
+                className={cn(
+                  "h-9 transition-all duration-300",
+                  isFollowing 
+                    ? "bg-primary hover:bg-primary/90" 
+                    : "hover:bg-primary/20"
+                )}
+                onClick={handleFollowToggle}
+              >
+                {isFollowing ? "Following" : "Follow"}
+              </Button>
+            </div>
           </div>
           
           <p className="mt-4 text-sm transition-all duration-500 hover:text-foreground">

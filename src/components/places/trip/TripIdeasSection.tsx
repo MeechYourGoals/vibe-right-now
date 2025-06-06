@@ -1,35 +1,14 @@
 
 import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Plus, MapPin, ThumbsUp, ThumbsDown, MessageSquare } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { PlusCircle, MapPin, Star, ThumbsUp, ThumbsDown } from "lucide-react";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import AddVenueIdeaDialog from './AddVenueIdeaDialog';
-import { supabase } from '@/integrations/supabase/client';
-
-export interface VenueIdea {
-  id: string;
-  trip_id: string;
-  venue_id: string;
-  venue_name: string;
-  venue_address?: string;
-  venue_city?: string;
-  venue_rating?: number;
-  venue_image_url?: string;
-  proposed_by_id: string;
-  proposed_by_name: string;
-  proposed_by_avatar: string;
-  notes?: string;
-  status: 'pending' | 'approved' | 'rejected';
-  created_at: string;
-  updated_at: string;
-  trip_venue_votes?: Array<{
-    id: string;
-    vote_type: string;
-    user_name: string;
-    user_avatar: string;
-  }>;
-}
 
 interface TripIdeasSectionProps {
   tripId: string;
@@ -41,17 +20,47 @@ interface TripIdeasSectionProps {
   userColors: Array<{ id: string; color: string }>;
 }
 
+interface VenueIdea {
+  id: string;
+  venue_id: string;
+  venue_name: string;
+  venue_address: string;
+  venue_city: string;
+  venue_rating: number;
+  venue_image_url: string;
+  proposed_by_name: string;
+  proposed_by_avatar: string;
+  proposed_by_id: string;
+  notes: string | null;
+  status: 'pending' | 'approved' | 'rejected';
+  created_at: string;
+  trip_venue_votes?: Array<{
+    id: string;
+    vote_type: 'up' | 'down';
+    user_name: string;
+    user_avatar: string;
+  }>;
+}
+
 const TripIdeasSection: React.FC<TripIdeasSectionProps> = ({
   tripId,
   collaborators,
   userColors
 }) => {
   const [venueIdeas, setVenueIdeas] = useState<VenueIdea[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Get current user info from collaborators (mock for now)
-  const currentUser = collaborators[0] || { id: 'user1', name: 'Current User', avatar: '/placeholder-avatar.jpg' };
+  const currentUser = {
+    id: "current-user",
+    name: "Current User",
+    avatar: "/placeholder.svg"
+  };
+
+  useEffect(() => {
+    fetchVenueIdeas();
+    subscribeToVenueIdeas();
+  }, [tripId]);
 
   const fetchVenueIdeas = async () => {
     try {
@@ -69,138 +78,211 @@ const TripIdeasSection: React.FC<TripIdeasSectionProps> = ({
         .eq('trip_id', tripId)
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching venue ideas:', error);
-        return;
-      }
-
-      // Cast the status field properly and ensure it matches our enum
-      const processedData = data?.map(item => ({
+      if (error) throw error;
+      
+      // Transform the data to match our interface
+      const transformedData = data?.map(item => ({
         ...item,
-        status: (['pending', 'approved', 'rejected'].includes(item.status) 
-          ? item.status 
-          : 'pending') as 'pending' | 'approved' | 'rejected'
+        trip_venue_votes: item.trip_venue_votes || []
       })) || [];
-
-      setVenueIdeas(processedData);
+      
+      setVenueIdeas(transformedData);
     } catch (error) {
-      console.error('Error in fetchVenueIdeas:', error);
+      console.error('Error fetching venue ideas:', error);
+      toast.error('Failed to load venue ideas');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchVenueIdeas();
-  }, [tripId]);
+  const subscribeToVenueIdeas = () => {
+    const channel = supabase
+      .channel(`trip-venue-ideas-${tripId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'trip_venue_ideas',
+          filter: `trip_id=eq.${tripId}`
+        },
+        () => {
+          fetchVenueIdeas();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'trip_venue_votes'
+        },
+        () => {
+          fetchVenueIdeas();
+        }
+      )
+      .subscribe();
 
-  const handleVote = async (ideaId: string, voteType: 'up' | 'down') => {
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  };
+
+  const addVenueIdea = async (venueData: any) => {
     try {
-      // Check if the user has already voted on this idea
-      const { data: existingVote, error: existingVoteError } = await supabase
-        .from('trip_venue_votes')
-        .select('*')
-        .eq('trip_venue_idea_id', ideaId)
-        .eq('user_id', currentUser.id)
-        .single();
+      const { error } = await supabase
+        .from('trip_venue_ideas')
+        .insert({
+          trip_id: tripId,
+          venue_id: venueData.id,
+          venue_name: venueData.name,
+          venue_address: venueData.address,
+          venue_city: venueData.city,
+          venue_rating: venueData.rating,
+          venue_image_url: venueData.image_url,
+          proposed_by_id: currentUser.id,
+          proposed_by_name: currentUser.name,
+          proposed_by_avatar: currentUser.avatar,
+          notes: venueData.notes || '',
+          status: 'pending'
+        });
 
-      if (existingVoteError && existingVoteError.code !== 'PGRST116') {
-        console.error('Error checking existing vote:', existingVoteError);
-        return;
-      }
+      if (error) throw error;
+      toast.success('Venue idea added successfully!');
+      setIsDialogOpen(false);
+    } catch (error) {
+      console.error('Error adding venue idea:', error);
+      toast.error('Failed to add venue idea');
+    }
+  };
+
+  const voteOnVenue = async (venueIdeaId: string, voteType: 'up' | 'down') => {
+    try {
+      // Check if user already voted
+      const existingVote = venueIdeas
+        .find(idea => idea.id === venueIdeaId)
+        ?.trip_venue_votes?.find(vote => vote.user_name === currentUser.name);
 
       if (existingVote) {
-        // If the user has already voted, update the vote
-        const { error: updateError } = await supabase
-          .from('trip_venue_votes')
-          .update({ vote_type: voteType })
-          .eq('id', existingVote.id);
-
-        if (updateError) {
-          console.error('Error updating vote:', updateError);
-          return;
-        }
-      } else {
-        // If the user has not voted, create a new vote
-        const { error: insertError } = await supabase
-          .from('trip_venue_votes')
-          .insert({
-            trip_venue_idea_id: ideaId,
-            user_id: currentUser.id,
-            user_name: currentUser.name,
-            user_avatar: currentUser.avatar,
-            vote_type: voteType
-          });
-
-        if (insertError) {
-          console.error('Error inserting vote:', insertError);
-          return;
-        }
+        toast.error('You have already voted on this venue');
+        return;
       }
 
-      // Re-fetch venue ideas to update the vote counts
-      fetchVenueIdeas();
+      const { error } = await supabase
+        .from('trip_venue_votes')
+        .insert({
+          venue_idea_id: venueIdeaId,
+          vote_type: voteType,
+          user_id: currentUser.id,
+          user_name: currentUser.name,
+          user_avatar: currentUser.avatar
+        });
+
+      if (error) throw error;
+      toast.success('Vote recorded!');
     } catch (error) {
-      console.error('Error in handleVote:', error);
+      console.error('Error voting:', error);
+      toast.error('Failed to record vote');
     }
   };
 
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'approved': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      case 'rejected': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+      default: return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+    }
+  };
+
+  const getVoteCount = (votes: VenueIdea['trip_venue_votes'], type: 'up' | 'down') => {
+    return votes?.filter(vote => vote.vote_type === type).length || 0;
+  };
+
+  if (isLoading) {
+    return <div className="text-center py-4">Loading venue ideas...</div>;
+  }
+
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">Venue Ideas</h3>
-        <Button onClick={() => setShowAddDialog(true)} size="sm">
-          <Plus className="h-4 w-4 mr-2" />
-          Add Venue
-        </Button>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-semibold">Venue Ideas & Voting</h3>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="flex items-center gap-2">
+              <PlusCircle className="h-4 w-4" />
+              Propose Venue
+            </Button>
+          </DialogTrigger>
+          <AddVenueIdeaDialog 
+            onAddVenue={addVenueIdea}
+            onClose={() => setIsDialogOpen(false)}
+          />
+        </Dialog>
       </div>
 
-      {loading ? (
-        <div className="text-center py-8">
-          <p className="text-muted-foreground">Loading venue ideas...</p>
-        </div>
-      ) : venueIdeas.length === 0 ? (
-        <div className="text-center py-8">
-          <p className="text-muted-foreground">No venue ideas yet. Add the first one!</p>
-        </div>
+      {venueIdeas.length === 0 ? (
+        <Card>
+          <CardContent className="text-center py-8">
+            <p className="text-muted-foreground">No venue ideas yet. Be the first to propose a venue!</p>
+          </CardContent>
+        </Card>
       ) : (
-        <div className="grid gap-4">
-          {venueIdeas.map(idea => (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {venueIdeas.map((idea) => (
             <Card key={idea.id}>
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div>
-                    <CardTitle className="text-lg">{idea.venue_name}</CardTitle>
-                    <p className="text-sm text-muted-foreground flex items-center mt-1">
-                      <MapPin className="h-4 w-4 mr-1" />
-                      {idea.venue_address}, {idea.venue_city}
-                    </p>
-                  </div>
-                  <Badge variant={idea.status === 'approved' ? 'default' : idea.status === 'rejected' ? 'destructive' : 'secondary'}>
+              <CardHeader className="pb-3">
+                <div className="flex justify-between items-start">
+                  <CardTitle className="text-lg">{idea.venue_name}</CardTitle>
+                  <Badge className={getStatusColor(idea.status)}>
                     {idea.status}
                   </Badge>
                 </div>
-              </CardHeader>
-              <CardContent>
-                {idea.notes && (
-                  <p className="text-sm mb-4">{idea.notes}</p>
-                )}
-                <div className="flex items-center justify-between">
-                  <div className="text-xs text-muted-foreground">
-                    Proposed by {idea.proposed_by_name}
+                <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                  <MapPin className="h-4 w-4" />
+                  <span>{idea.venue_address}, {idea.venue_city}</span>
+                </div>
+                {idea.venue_rating && (
+                  <div className="flex items-center space-x-1">
+                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                    <span className="text-sm">{idea.venue_rating.toFixed(1)}</span>
                   </div>
+                )}
+              </CardHeader>
+              
+              <CardContent className="space-y-4">
+                {idea.notes && (
+                  <p className="text-sm text-muted-foreground">{idea.notes}</p>
+                )}
+                
+                <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <Button variant="ghost" size="sm" onClick={() => handleVote(idea.id, 'up')}>
-                      <ThumbsUp className="h-4 w-4" />
-                      <span className="ml-1">
-                        {idea.trip_venue_votes?.filter(v => v.vote_type === 'up').length || 0}
-                      </span>
+                    <Avatar className="h-6 w-6">
+                      <AvatarImage src={idea.proposed_by_avatar} alt={idea.proposed_by_name} />
+                      <AvatarFallback>{idea.proposed_by_name[0]}</AvatarFallback>
+                    </Avatar>
+                    <span className="text-xs text-muted-foreground">
+                      Proposed by {idea.proposed_by_name}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => voteOnVenue(idea.id, 'up')}
+                      className="flex items-center space-x-1"
+                    >
+                      <ThumbsUp className="h-3 w-3" />
+                      <span>{getVoteCount(idea.trip_venue_votes, 'up')}</span>
                     </Button>
-                    <Button variant="ghost" size="sm" onClick={() => handleVote(idea.id, 'down')}>
-                      <ThumbsDown className="h-4 w-4" />
-                      <span className="ml-1">
-                        {idea.trip_venue_votes?.filter(v => v.vote_type === 'down').length || 0}
-                      </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => voteOnVenue(idea.id, 'down')}
+                      className="flex items-center space-x-1"
+                    >
+                      <ThumbsDown className="h-3 w-3" />
+                      <span>{getVoteCount(idea.trip_venue_votes, 'down')}</span>
                     </Button>
                   </div>
                 </div>
@@ -209,19 +291,6 @@ const TripIdeasSection: React.FC<TripIdeasSectionProps> = ({
           ))}
         </div>
       )}
-
-      <AddVenueIdeaDialog
-        tripId={tripId}
-        isOpen={showAddDialog}
-        onClose={() => setShowAddDialog(false)}
-        onSuccess={() => {
-          setShowAddDialog(false);
-          fetchVenueIdeas();
-        }}
-        userId={currentUser.id}
-        userName={currentUser.name}
-        userAvatar={currentUser.avatar}
-      />
     </div>
   );
 };

@@ -1,158 +1,125 @@
+
 import { supabase } from "@/integrations/supabase/client";
+import { VenueSentimentAnalysis, PlatformSentimentSummary, SentimentTheme } from "@/types";
 
-export interface VenueSentimentAnalysis {
-  id: string;
-  venue_id: string;
-  platform: string;
-  overall_sentiment: number;
-  sentiment_summary: string;
-  themes: Record<string, number>;
-  review_count: number;
-  last_analyzed_at: string;
-  created_at: string;
-  updated_at: string;
-}
+export class SentimentAnalysisService {
+  // Analyze reviews for a venue on a specific platform
+  static async analyzeVenueReviews(
+    venueId: string, 
+    platform: string, 
+    reviews: Array<{ id: string; text: string; }>
+  ): Promise<VenueSentimentAnalysis | null> {
+    try {
+      const { data, error } = await supabase.functions.invoke('review-sentiment-analyzer', {
+        body: {
+          venue_id: venueId,
+          platform: platform,
+          reviews: reviews
+        }
+      });
 
-export interface ReviewSentimentCache {
-  id: string;
-  review_id: string;
-  platform: string;
-  venue_id: string;
-  review_text: string;
-  sentiment_score: number;
-  themes: Record<string, number>;
-  analyzed_at: string;
-  expires_at: string;
-}
+      if (error) {
+        console.error('Error calling sentiment analysis function:', error);
+        return null;
+      }
 
-export const sentimentAnalysisService = {
-  async getVenueSentimentAnalysis(venueId: string): Promise<VenueSentimentAnalysis[]> {
+      return data?.analysis || null;
+    } catch (error) {
+      console.error('Error in sentiment analysis service:', error);
+      return null;
+    }
+  }
+
+  // Get sentiment analysis for a venue across all platforms
+  static async getVenueSentimentAnalysis(venueId: string): Promise<VenueSentimentAnalysis[]> {
     try {
       const { data, error } = await supabase
         .from('venue_sentiment_analysis')
         .select('*')
-        .eq('venue_id', venueId);
+        .eq('venue_id', venueId)
+        .order('last_analyzed_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching venue sentiment analysis:', error);
+        console.error('Error fetching sentiment analysis:', error);
         return [];
       }
 
-      // Cast themes properly from Json to Record<string, number>
-      return data.map(item => ({
-        ...item,
-        themes: (item.themes as any) || {}
-      })) as VenueSentimentAnalysis[];
+      return data || [];
     } catch (error) {
       console.error('Error in getVenueSentimentAnalysis:', error);
       return [];
     }
-  },
+  }
 
-  async createVenueSentimentAnalysis(analysis: Omit<VenueSentimentAnalysis, 'id' | 'created_at' | 'updated_at'>): Promise<VenueSentimentAnalysis | null> {
+  // Get formatted platform summaries for display
+  static async getPlatformSentimentSummaries(venueId: string): Promise<PlatformSentimentSummary[]> {
+    const analyses = await this.getVenueSentimentAnalysis(venueId);
+    
+    return analyses.map(analysis => ({
+      platform: analysis.platform,
+      overallSentiment: analysis.overall_sentiment,
+      summary: analysis.sentiment_summary,
+      themes: this.formatThemes(analysis.themes),
+      reviewCount: analysis.review_count,
+      lastUpdated: analysis.last_analyzed_at
+    }));
+  }
+
+  // Format themes for display
+  private static formatThemes(themes: Record<string, number>): SentimentTheme[] {
+    return Object.entries(themes).map(([name, score]) => ({
+      name: name.charAt(0).toUpperCase() + name.slice(1),
+      score,
+      mentions: 1, // Simplified for now
+      examples: [] // Could be enhanced to include example phrases
+    }));
+  }
+
+  // Get sentiment summary for a specific platform
+  static async getPlatformSentiment(venueId: string, platform: string): Promise<VenueSentimentAnalysis | null> {
     try {
       const { data, error } = await supabase
         .from('venue_sentiment_analysis')
-        .insert([{
-          venue_id: analysis.venue_id,
-          platform: analysis.platform,
-          overall_sentiment: analysis.overall_sentiment,
-          sentiment_summary: analysis.sentiment_summary,
-          themes: analysis.themes,
-          review_count: analysis.review_count,
-          last_analyzed_at: analysis.last_analyzed_at
-        }])
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error creating venue sentiment analysis:', error);
-        return null;
-      }
-
-      // Cast themes properly from Json to Record<string, number>
-      return {
-        ...data,
-        themes: (data.themes as any) || {}
-      } as VenueSentimentAnalysis;
-    } catch (error) {
-      console.error('Error in createVenueSentimentAnalysis:', error);
-      return null;
-    }
-  },
-
-  async getReviewSentimentCache(reviewId: string, platform: string): Promise<ReviewSentimentCache | null> {
-    try {
-      const { data, error } = await supabase
-        .from('review_sentiment_cache')
         .select('*')
-        .eq('review_id', reviewId)
+        .eq('venue_id', venueId)
         .eq('platform', platform)
         .single();
 
-      if (error) {
-        // If no data is found, it's not an error, just return null
-        if (error.code === 'PGRST116') {
-          return null;
-        }
-        console.error('Error fetching review sentiment cache:', error);
+      if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
+        console.error('Error fetching platform sentiment:', error);
         return null;
       }
 
-      return data as ReviewSentimentCache;
+      return data || null;
     } catch (error) {
-      console.error('Error in getReviewSentimentCache:', error);
+      console.error('Error in getPlatformSentiment:', error);
       return null;
-    }
-  },
-
-  async cacheReviewSentiment(cacheData: Omit<ReviewSentimentCache, 'id' | 'analyzed_at' | 'expires_at'>): Promise<ReviewSentimentCache | null> {
-    try {
-      const now = new Date();
-      const expires_at = new Date(now.getTime() + (7 * 24 * 60 * 60 * 1000)); // Expires in 7 days
-
-      const { data, error } = await supabase
-        .from('review_sentiment_cache')
-        .insert([{
-          review_id: cacheData.review_id,
-          platform: cacheData.platform,
-          venue_id: cacheData.venue_id,
-          review_text: cacheData.review_text,
-          sentiment_score: cacheData.sentiment_score,
-          themes: cacheData.themes,
-          analyzed_at: now.toISOString(),
-          expires_at: expires_at.toISOString()
-        }])
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error caching review sentiment:', error);
-        return null;
-      }
-
-      return data as ReviewSentimentCache;
-    } catch (error) {
-      console.error('Error in cacheReviewSentiment:', error);
-      return null;
-    }
-  },
-
-  async clearExpiredCache(): Promise<void> {
-    try {
-      const now = new Date().toISOString();
-      const { error } = await supabase
-        .from('review_sentiment_cache')
-        .delete()
-        .lt('expires_at', now);
-
-      if (error) {
-        console.error('Error clearing expired review sentiment cache:', error);
-      } else {
-        console.log('Expired review sentiment cache cleared successfully.');
-      }
-    } catch (error) {
-      console.error('Error in clearExpiredCache:', error);
     }
   }
-};
+
+  // Trigger analysis for mock data (for demo purposes)
+  static async triggerMockAnalysis(venueId: string): Promise<void> {
+    const mockReviews = {
+      yelp: [
+        { id: 'yelp_1', text: 'Amazing ambience and great service! The food was incredible and the staff was so friendly.' },
+        { id: 'yelp_2', text: 'Love the atmosphere here but the music was too loud. Great cocktails though!' },
+        { id: 'yelp_3', text: 'Perfect spot for date night. Romantic lighting and excellent wine selection.' }
+      ],
+      facebook: [
+        { id: 'fb_1', text: 'Great place but very crowded. The ambience is nice but DJ was too loud for conversation.' },
+        { id: 'fb_2', text: 'Fantastic food and service. Love coming here for brunch!' },
+        { id: 'fb_3', text: 'Beautiful decor and atmosphere. Service could be faster but overall good experience.' }
+      ],
+      google: [
+        { id: 'g_1', text: 'Excellent food quality and beautiful interior design. Staff is professional and friendly.' },
+        { id: 'g_2', text: 'Great cocktails and nice atmosphere. Can get quite busy on weekends.' },
+        { id: 'g_3', text: 'Love the vibe here! Perfect for celebrations. Food is consistently good.' }
+      ]
+    };
+
+    // Trigger analysis for each platform
+    for (const [platform, reviews] of Object.entries(mockReviews)) {
+      await this.analyzeVenueReviews(venueId, platform, reviews);
+    }
+  }
+}

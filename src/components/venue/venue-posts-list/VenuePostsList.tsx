@@ -31,7 +31,11 @@ const VenuePostsListView: React.FC<VenuePostsListViewProps> = ({
         return (
           <PostCard 
             key={post.id} 
-            post={post}
+            post={post} 
+            comments={getComments(post.id)}
+            canDelete={canDelete && !isVenuePost} // Only allow deletion of user posts, not venue posts
+            venue={venue}
+            onPostDeleted={onPostDeleted}
           />
         );
       })}
