@@ -29,6 +29,26 @@ export const generateBusinessHours = (location: Location): BusinessHours => {
   };
 };
 
+export const getTodaysHours = (location: Location): string => {
+  if (!location.hours) {
+    location.hours = generateBusinessHours(location);
+  }
+  
+  const today = new Date();
+  const dayOfWeek = today.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+  const todaysHours = location.hours[dayOfWeek as keyof BusinessHours];
+  
+  if (typeof todaysHours === 'string') {
+    return todaysHours;
+  }
+  
+  if (typeof todaysHours === 'object' && todaysHours.open && todaysHours.close) {
+    return `${todaysHours.open} - ${todaysHours.close}`;
+  }
+  
+  return "Closed";
+};
+
 export const formatBusinessHours = (hours: BusinessHours): string => {
   const today = new Date();
   const dayOfWeek = today.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();

@@ -1,62 +1,34 @@
 
-import React from 'react';
+import React from "react";
 import SearchVibes from "@/components/SearchVibes";
-import DateRangeSelector from "@/components/DateRangeSelector";
-import { Calendar } from "lucide-react";
-import { DateRange } from "react-day-picker";
-import { format } from "date-fns";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import DateFilterSection from "./DateFilterSection";
+import { DateRange } from "@/types";
 
 interface SearchSectionProps {
   showDateFilter: boolean;
-  dateRange: DateRange | undefined;
-  onSearch: (query: string, filterType: string, category: string) => void;
-  onDateRangeChange: (range: DateRange | undefined) => void;
+  dateRange: DateRange;
+  onSearch: (query: string, category: "places" | "events", filters?: any) => void;
+  onDateRangeChange: (range: DateRange) => void;
   onClearDates: () => void;
 }
 
-const SearchSection: React.FC<SearchSectionProps> = ({
-  showDateFilter,
-  dateRange,
-  onSearch,
-  onDateRangeChange,
-  onClearDates
-}) => {
+const SearchSection = ({ 
+  showDateFilter, 
+  dateRange, 
+  onSearch, 
+  onDateRangeChange, 
+  onClearDates 
+}: SearchSectionProps) => {
   return (
-    <div className="max-w-xl mx-auto mb-6">
+    <div className="space-y-4">
       <SearchVibes onSearch={onSearch} />
-      
       {showDateFilter && (
-        <div className="p-3 bg-card border border-input rounded-lg max-w-xl mx-auto mt-4">
-          <div className="flex justify-between items-center mb-2">
-            <h3 className="text-sm font-medium flex items-center">
-              <Calendar className="h-4 w-4 mr-2 text-primary" />
-              Find Future Vibes
-            </h3>
-            {dateRange && (
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="h-7 text-xs" 
-                onClick={onClearDates}
-              >
-                Clear Dates
-              </Button>
-            )}
-          </div>
-          <DateRangeSelector 
-            dateRange={dateRange} 
-            onDateRangeChange={onDateRangeChange} 
+        <div className="flex justify-center">
+          <DateFilterSection
+            dateRange={dateRange}
+            onDateRangeChange={onDateRangeChange}
+            onClearDates={onClearDates}
           />
-          {dateRange?.from && (
-            <p className="text-xs text-foreground mt-2">
-              {dateRange.to 
-                ? `Showing events from ${format(dateRange.from, "MMM d, yyyy")} to ${format(dateRange.to, "MMM d, yyyy")}` 
-                : `Showing events from ${format(dateRange.from, "MMM d, yyyy")}`}
-            </p>
-          )}
         </div>
       )}
     </div>
