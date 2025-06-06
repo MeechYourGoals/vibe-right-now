@@ -14,7 +14,7 @@ export const useGoogleMap = (
 ) => {
   const { isLoaded, loadError } = useJsApiLoader({
     id: 'google-map-script',
-    googleMapsApiKey: GOOGLE_MAPS_API_KEY
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ''
   });
 
   const [map, setMap] = useState<google.maps.Map | null>(null);
@@ -35,42 +35,39 @@ export const useGoogleMap = (
 
   // Set map center and zoom based on locations and search
   useEffect(() => {
+    console.log('Map centering logic - locations:', locations.length, 'searchedCity:', searchedCity);
+    
     if (locations.length > 0) {
       // If we have search results, center on them
+      const firstLocation = locations[0];
+      console.log('Centering map on first location:', firstLocation.name, firstLocation.lat, firstLocation.lng);
+      
+      setMapCenter({
+        lat: firstLocation.lat,
+        lng: firstLocation.lng
+      });
+      
       if (locations.length === 1) {
-        // Single result - center on that location
-        setMapCenter({
-          lat: locations[0].lat,
-          lng: locations[0].lng
-        });
         setMapZoom(15);
       } else {
-        // Multiple results - center on the first result but zoom out to show more
-        setMapCenter({
-          lat: locations[0].lat,
-          lng: locations[0].lng
-        });
         setMapZoom(12);
       }
     } else if (userLocation) {
-      // No search results but have user location
+      console.log('Centering map on user location:', userLocation.latitude, userLocation.longitude);
       setMapCenter({ 
         lat: userLocation.latitude, 
         lng: userLocation.longitude 
       });
       setMapZoom(12);
     } else if (userAddressLocation) {
-      // Use address location
+      console.log('Centering map on address location:', userAddressLocation);
       setMapCenter({
         lat: userAddressLocation[1],
         lng: userAddressLocation[0]
       });
       setMapZoom(12);
-    } else if (searchedCity) {
-      // Keep existing zoom for city search without results
-      setMapZoom(12);
     } else {
-      // Default view
+      console.log('Using default map center');
       setMapCenter({
         lat: 39.8283,
         lng: -98.5795

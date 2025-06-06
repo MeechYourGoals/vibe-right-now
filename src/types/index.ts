@@ -1,4 +1,3 @@
-
 // If this file doesn't exist, we're creating it
 import { MockUserProfile } from "@/mock/users";
 
@@ -44,18 +43,17 @@ export interface Media {
 
 export interface Post {
   id: string;
-  user: MockUserProfile;
+  user: User;
+  location: Location;
   content: string;
-  media: Media[];
+  media?: Media[];
   timestamp: string;
+  expiresAt: string;
   likes: number;
   comments: number;
-  shares: number;
-  location?: Location;
-  vibeTags?: string[];
-  isVenuePost?: boolean;
   isPinned?: boolean;
-  expiresAt?: string;
+  saved: boolean;
+  vibeTags?: string[];
 }
 
 export interface Comment {
@@ -197,11 +195,11 @@ export interface CampaignPerformance {
 export interface VenueSentimentAnalysis {
   id: string;
   venue_id: string;
-  platform: string;
   overall_sentiment: number; // -1.0 to 1.0
   sentiment_summary: string;
-  themes: Record<string, number>; // e.g., {"ambience": 0.8, "service": 0.6}
   review_count: number;
+  platform: string;
+  themes: Record<string, number>; // e.g., {"ambience": 0.8, "service": 0.6}
   last_analyzed_at: string;
   created_at: string;
   updated_at: string;
@@ -233,6 +231,41 @@ export interface PlatformSentimentSummary {
   themes: SentimentTheme[];
   reviewCount: number;
   lastUpdated: string;
+}
+
+export interface CreditCard {
+  id: string;
+  last4: string;
+  brand: string;
+  expMonth: number;
+  expYear: number;
+  isDefault: boolean;
+  maxSpendLimit?: number;
+  vernonApproved?: boolean;
+}
+
+export interface VenueIdea {
+  id: string;
+  trip_id: string;
+  venue_id: string;
+  venue_name: string;
+  venue_address: string;
+  venue_city: string;
+  venue_state: string;
+  venue_type: string;
+  venue_rating?: number;
+  proposed_by_id: string;
+  proposed_by_name: string;
+  proposed_by_avatar: string;
+  notes?: string;
+  status: "pending" | "approved" | "rejected";
+  created_at: string;
+  trip_venue_votes: Array<{
+    id: string;
+    vote_type: string;
+    user_name: string;
+    user_avatar: string;
+  }>;
 }
 
 export * from "./index";

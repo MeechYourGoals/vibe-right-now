@@ -1,95 +1,114 @@
 
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-
-const GOOGLE_MAPS_API_KEY = Deno.env.get('GOOGLE_MAPS_API_KEY');
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+}
 
 serve(async (req) => {
-  // Handle CORS preflight
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { query, location, type, placeId, fields, radius, keyword } = await req.json();
+    const { action, query, location, radius, type, placeId, input } = await req.json();
+    const apiKey = Deno.env.get('GOOGLE_MAPS_API_KEY');
     
-    console.log('Google Places request received:', { 
-      query: query?.substring(0, 50), 
-      location, 
-      type, 
-      placeId, 
-      fields, 
-      radius, 
-      keyword 
-    });
+    if (!apiKey) {
+      console.error('Google Maps API key not found');
+      return new Response(
+        JSON.stringify({ error: 'Google Maps API key not configured' }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
 
-    let endpoint;
+    console.log(`Google Places API call - Action: ${action}`);
+
+    let apiUrl = '';
     let params = new URLSearchParams();
-    
-    // Set up API key
-    params.append('key', GOOGLE_MAPS_API_KEY || '');
-    
-    // Determine which API endpoint to use based on provided parameters
-    if (placeId) {
-      // Place Details request
-      endpoint = 'https://maps.googleapis.com/maps/api/place/details/json';
-      params.append('place_id', placeId);
-      
-      if (fields && Array.isArray(fields)) {
-        params.append('fields', fields.join(','));
-      }
-    } else if (location && typeof location === 'object') {
-      // Nearby Search request
-      endpoint = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json';
-      params.append('location', `${location.lat},${location.lng}`);
-      params.append('radius', radius?.toString() || '5000');
-      
-      if (type) params.append('type', type);
-      if (keyword) params.append('keyword', keyword);
-    } else {
-      // Text Search request
-      endpoint = 'https://maps.googleapis.com/maps/api/place/textsearch/json';
-      params.append('query', query);
-      
-      if (type) params.append('type', type);
-      if (location && typeof location === 'string') {
-        params.append('region', location);
-      }
+    params.append('key', apiKey);
+
+    switch (action) {
+      case 'search':
+        apiUrl = 'https://maps.googleapis.com/maps/api/place/textsearch/json';
+        params.append('query', query);
+        if (location) {
+          params.append('location', `${location.lat},${location.lng}`);
+          params.append('radius', radius?.toString() || '5000');
+        }
+        break;
+
+      case 'nearby':
+        apiUrl = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json';
+        params.append('location', `${location.lat},${location.lng}`);
+        params.append('radius', radius?.toString() || '5000');
+        if (type) {
+          params.append('type', type);
+        }
+        break;
+
+      case 'details':
+        apiUrl = 'https://maps.googleapis.com/maps/api/place/details/json';
+        params.append('place_id', placeId);
+        params.append('fields', 'name,formatted_address,geometry,rating,user_ratings_total,price_level,types,photos,opening_hours,business_status,formatted_phone_number,website,reviews');
+        break;
+
+      case 'autocomplete':
+        apiUrl = 'https://maps.googleapis.com/maps/api/place/autocomplete/json';
+        params.append('input', input);
+        if (location) {
+          params.append('location', `${location.lat},${location.lng}`);
+          params.append('radius', '50000');
+        }
+        params.append('types', 'establishment');
+        break;
+
+      default:
+        return new Response(
+          JSON.stringify({ error: 'Invalid action specified' }),
+          { 
+            status: 400, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        );
     }
-    
-    console.log('Calling Google Places API:', endpoint);
-    
-    // Make the request to Google Places API
-    const response = await fetch(`${endpoint}?${params.toString()}`);
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Google Places API error:', response.status, errorText);
-      throw new Error(`Google Places API error: ${response.status}`);
-    }
-    
+
+    const response = await fetch(`${apiUrl}?${params.toString()}`);
     const data = await response.json();
-    console.log('Google Places response status:', data.status);
+
+    console.log(`Google Places API response status: ${data.status}`);
     
-    if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
-      console.error('Google Places API status error:', data.status, data.error_message);
-      throw new Error(`Google Places API status: ${data.status}`);
+    if (data.status === 'OK' || data.status === 'ZERO_RESULTS') {
+      return new Response(
+        JSON.stringify(data),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    } else {
+      console.error('Google Places API error:', data);
+      return new Response(
+        JSON.stringify({ error: data.error_message || 'Google Places API error', status: data.status }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
     }
-    
-    // Return the places data
-    return new Response(
-      JSON.stringify(data), 
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+
   } catch (error) {
     console.error('Error in google-places function:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ error: 'Internal server error' }),
+      { 
+        status: 500, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      }
     );
   }
 });
