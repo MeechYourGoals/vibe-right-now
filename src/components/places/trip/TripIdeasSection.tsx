@@ -1,297 +1,228 @@
 
 import React, { useState, useEffect } from 'react';
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { PlusCircle, MapPin, Star, ThumbsUp, ThumbsDown } from "lucide-react";
-import { Dialog, DialogTrigger } from "@/components/ui/dialog";
-import { supabase } from "@/integrations/supabase/client";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { ThumbsUp, ThumbsDown, MapPin, Star, Plus } from "lucide-react";
 import { toast } from "sonner";
-import AddVenueIdeaDialog from './AddVenueIdeaDialog';
-
-interface TripIdeasSectionProps {
-  tripId: string;
-  collaborators: Array<{
-    id: string;
-    name: string;
-    avatar: string;
-  }>;
-  userColors: Array<{ id: string; color: string }>;
-}
 
 interface VenueIdea {
   id: string;
-  venue_id: string;
   venue_name: string;
   venue_address: string;
-  venue_city: string;
   venue_rating: number;
-  venue_image_url: string;
+  venue_price_level: number;
+  venue_type: string;
+  notes: string;
+  proposed_by_id: string;
   proposed_by_name: string;
   proposed_by_avatar: string;
-  proposed_by_id: string;
-  notes: string | null;
-  status: 'pending' | 'approved' | 'rejected';
+  status: "pending" | "approved" | "rejected";
+  votes: {
+    upvotes: number;
+    downvotes: number;
+  };
   created_at: string;
-  trip_venue_votes?: Array<{
-    id: string;
-    vote_type: 'up' | 'down';
-    user_name: string;
-    user_avatar: string;
-  }>;
 }
 
-const TripIdeasSection: React.FC<TripIdeasSectionProps> = ({
-  tripId,
-  collaborators,
-  userColors
-}) => {
-  const [venueIdeas, setVenueIdeas] = useState<VenueIdea[]>([]);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+interface TripIdeasSectionProps {
+  tripId: string;
+}
 
-  const currentUser = {
-    id: "current-user",
-    name: "Current User",
-    avatar: "/placeholder.svg"
-  };
+const TripIdeasSection: React.FC<TripIdeasSectionProps> = ({ tripId }) => {
+  const [ideas, setIdeas] = useState<VenueIdea[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchVenueIdeas();
-    subscribeToVenueIdeas();
+    fetchTripIdeas();
   }, [tripId]);
 
-  const fetchVenueIdeas = async () => {
+  const fetchTripIdeas = async () => {
     try {
-      const { data, error } = await supabase
-        .from('trip_venue_ideas')
-        .select(`
-          *,
-          trip_venue_votes (
-            id,
-            vote_type,
-            user_name,
-            user_avatar
-          )
-        `)
-        .eq('trip_id', tripId)
-        .order('created_at', { ascending: false });
+      setLoading(true);
+      
+      // Mock data for now - replace with actual API call
+      const mockIdeas: VenueIdea[] = [
+        {
+          id: '1',
+          venue_name: 'The Blue Door Tavern',
+          venue_address: '123 Main St, Downtown',
+          venue_rating: 4.5,
+          venue_price_level: 2,
+          venue_type: 'Bar',
+          notes: 'Great craft beer selection and live music on weekends!',
+          proposed_by_id: 'user1',
+          proposed_by_name: 'Sarah Johnson',
+          proposed_by_avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b4c0?w=150&h=150&fit=crop&crop=face',
+          status: 'pending' as const,
+          votes: { upvotes: 3, downvotes: 0 },
+          created_at: new Date().toISOString()
+        },
+        {
+          id: '2',
+          venue_name: 'Moonlight Restaurant',
+          venue_address: '456 Oak Ave, Midtown',
+          venue_rating: 4.8,
+          venue_price_level: 3,
+          venue_type: 'Restaurant',
+          notes: 'Amazing rooftop dining with city views',
+          proposed_by_id: 'user2',
+          proposed_by_name: 'Mike Chen',
+          proposed_by_avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
+          status: 'approved' as const,
+          votes: { upvotes: 5, downvotes: 1 },
+          created_at: new Date().toISOString()
+        }
+      ];
 
-      if (error) throw error;
-      
-      // Transform the data to match our interface
-      const transformedData = data?.map(item => ({
-        ...item,
-        trip_venue_votes: item.trip_venue_votes || []
-      })) || [];
-      
-      setVenueIdeas(transformedData);
+      setIdeas(mockIdeas);
     } catch (error) {
-      console.error('Error fetching venue ideas:', error);
+      console.error('Error fetching trip ideas:', error);
       toast.error('Failed to load venue ideas');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  const subscribeToVenueIdeas = () => {
-    const channel = supabase
-      .channel(`trip-venue-ideas-${tripId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'trip_venue_ideas',
-          filter: `trip_id=eq.${tripId}`
-        },
-        () => {
-          fetchVenueIdeas();
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'trip_venue_votes'
-        },
-        () => {
-          fetchVenueIdeas();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  };
-
-  const addVenueIdea = async (venueData: any) => {
+  const handleVote = async (ideaId: string, voteType: 'up' | 'down') => {
     try {
-      const { error } = await supabase
-        .from('trip_venue_ideas')
-        .insert({
-          trip_id: tripId,
-          venue_id: venueData.id,
-          venue_name: venueData.name,
-          venue_address: venueData.address,
-          venue_city: venueData.city,
-          venue_rating: venueData.rating,
-          venue_image_url: venueData.image_url,
-          proposed_by_id: currentUser.id,
-          proposed_by_name: currentUser.name,
-          proposed_by_avatar: currentUser.avatar,
-          notes: venueData.notes || '',
-          status: 'pending'
-        });
+      // Update local state optimistically
+      setIdeas(prev => prev.map(idea => {
+        if (idea.id === ideaId) {
+          const newVotes = { ...idea.votes };
+          if (voteType === 'up') {
+            newVotes.upvotes += 1;
+          } else {
+            newVotes.downvotes += 1;
+          }
+          return { ...idea, votes: newVotes };
+        }
+        return idea;
+      }));
 
-      if (error) throw error;
-      toast.success('Venue idea added successfully!');
-      setIsDialogOpen(false);
-    } catch (error) {
-      console.error('Error adding venue idea:', error);
-      toast.error('Failed to add venue idea');
-    }
-  };
-
-  const voteOnVenue = async (venueIdeaId: string, voteType: 'up' | 'down') => {
-    try {
-      // Check if user already voted
-      const existingVote = venueIdeas
-        .find(idea => idea.id === venueIdeaId)
-        ?.trip_venue_votes?.find(vote => vote.user_name === currentUser.name);
-
-      if (existingVote) {
-        toast.error('You have already voted on this venue');
-        return;
-      }
-
-      const { error } = await supabase
-        .from('trip_venue_votes')
-        .insert({
-          venue_idea_id: venueIdeaId,
-          vote_type: voteType,
-          user_id: currentUser.id,
-          user_name: currentUser.name,
-          user_avatar: currentUser.avatar
-        });
-
-      if (error) throw error;
       toast.success('Vote recorded!');
     } catch (error) {
-      console.error('Error voting:', error);
+      console.error('Error voting on idea:', error);
       toast.error('Failed to record vote');
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'approved': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-      case 'rejected': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
-      default: return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+      case 'approved': return 'bg-green-100 text-green-800';
+      case 'rejected': return 'bg-red-100 text-red-800';
+      default: return 'bg-yellow-100 text-yellow-800';
     }
   };
 
-  const getVoteCount = (votes: VenueIdea['trip_venue_votes'], type: 'up' | 'down') => {
-    return votes?.filter(vote => vote.vote_type === type).length || 0;
+  const getPriceLevelText = (level: number) => {
+    return '$'.repeat(level) + '·'.repeat(4 - level);
   };
 
-  if (isLoading) {
-    return <div className="text-center py-4">Loading venue ideas...</div>;
+  if (loading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Venue Ideas</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="animate-pulse space-y-4">
+            {[1, 2].map(i => (
+              <div key={i} className="h-24 bg-muted rounded-lg"></div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Venue Ideas & Voting</h3>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="flex items-center gap-2">
-              <PlusCircle className="h-4 w-4" />
-              Propose Venue
-            </Button>
-          </DialogTrigger>
-          <AddVenueIdeaDialog 
-            onAddVenue={addVenueIdea}
-            onClose={() => setIsDialogOpen(false)}
-          />
-        </Dialog>
-      </div>
-
-      {venueIdeas.length === 0 ? (
-        <Card>
-          <CardContent className="text-center py-8">
-            <p className="text-muted-foreground">No venue ideas yet. Be the first to propose a venue!</p>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {venueIdeas.map((idea) => (
-            <Card key={idea.id}>
-              <CardHeader className="pb-3">
-                <div className="flex justify-between items-start">
-                  <CardTitle className="text-lg">{idea.venue_name}</CardTitle>
-                  <Badge className={getStatusColor(idea.status)}>
-                    {idea.status}
-                  </Badge>
-                </div>
-                <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                  <MapPin className="h-4 w-4" />
-                  <span>{idea.venue_address}, {idea.venue_city}</span>
-                </div>
-                {idea.venue_rating && (
-                  <div className="flex items-center space-x-1">
-                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    <span className="text-sm">{idea.venue_rating.toFixed(1)}</span>
-                  </div>
-                )}
-              </CardHeader>
-              
-              <CardContent className="space-y-4">
-                {idea.notes && (
-                  <p className="text-sm text-muted-foreground">{idea.notes}</p>
-                )}
-                
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <Avatar className="h-6 w-6">
-                      <AvatarImage src={idea.proposed_by_avatar} alt={idea.proposed_by_name} />
-                      <AvatarFallback>{idea.proposed_by_name[0]}</AvatarFallback>
-                    </Avatar>
-                    <span className="text-xs text-muted-foreground">
-                      Proposed by {idea.proposed_by_name}
-                    </span>
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <CardTitle>Venue Ideas</CardTitle>
+        <Button size="sm">
+          <Plus className="h-4 w-4 mr-2" />
+          Suggest Venue
+        </Button>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          {ideas.map((idea) => (
+            <div key={idea.id} className="border rounded-lg p-4 space-y-3">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <h4 className="font-semibold">{idea.venue_name}</h4>
+                    <Badge className={`text-xs ${getStatusColor(idea.status)}`}>
+                      {idea.status}
+                    </Badge>
                   </div>
                   
-                  <div className="flex items-center space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => voteOnVenue(idea.id, 'up')}
-                      className="flex items-center space-x-1"
-                    >
-                      <ThumbsUp className="h-3 w-3" />
-                      <span>{getVoteCount(idea.trip_venue_votes, 'up')}</span>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => voteOnVenue(idea.id, 'down')}
-                      className="flex items-center space-x-1"
-                    >
-                      <ThumbsDown className="h-3 w-3" />
-                      <span>{getVoteCount(idea.trip_venue_votes, 'down')}</span>
-                    </Button>
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
+                    <div className="flex items-center gap-1">
+                      <MapPin className="h-3 w-3" />
+                      {idea.venue_address}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                      {idea.venue_rating}
+                    </div>
+                    <span>{getPriceLevelText(idea.venue_price_level)}</span>
+                    <Badge variant="outline" className="text-xs">
+                      {idea.venue_type}
+                    </Badge>
+                  </div>
+                  
+                  {idea.notes && (
+                    <p className="text-sm mb-3">{idea.notes}</p>
+                  )}
+                  
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Avatar className="h-6 w-6">
+                        <AvatarImage src={idea.proposed_by_avatar} alt={idea.proposed_by_name} />
+                        <AvatarFallback>{idea.proposed_by_name.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <span className="text-xs text-muted-foreground">
+                        Suggested by {idea.proposed_by_name}
+                      </span>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 px-2"
+                        onClick={() => handleVote(idea.id, 'up')}
+                      >
+                        <ThumbsUp className="h-3 w-3 mr-1" />
+                        {idea.votes.upvotes}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 px-2"
+                        onClick={() => handleVote(idea.id, 'down')}
+                      >
+                        <ThumbsDown className="h-3 w-3 mr-1" />
+                        {idea.votes.downvotes}
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           ))}
+          
+          {ideas.length === 0 && (
+            <div className="text-center py-8 text-muted-foreground">
+              <p>No venue ideas yet. Be the first to suggest a place!</p>
+            </div>
+          )}
         </div>
-      )}
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 

@@ -1,170 +1,44 @@
 
-import { useState, useEffect } from 'react';
+import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, TrendingUp } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Location } from "@/types";
+import { MapPin, TrendingUp, Users } from "lucide-react";
 import { mockLocations } from "@/mock/locations";
-import { getTrendingLocationsForCity } from "@/mock/cityLocations";
-import { toast } from "sonner";
-
-// Event bus for updating trending locations from VernonChat
-export const eventBus = {
-  listeners: new Map<string, Function[]>(),
-  
-  on(event: string, callback: Function) {
-    if (!this.listeners.has(event)) {
-      this.listeners.set(event, []);
-    }
-    this.listeners.get(event)?.push(callback);
-  },
-  
-  emit(event: string, data: any) {
-    if (this.listeners.has(event)) {
-      this.listeners.get(event)?.forEach(callback => callback(data));
-    }
-  }
-};
-
-// Export function for VernonChat to update trending locations
-export const updateTrendingLocations = (cityName: string, events: Location[]) => {
-  eventBus.emit('trending-locations-update', { cityName, events });
-};
 
 const TrendingLocations = () => {
-  // Default to some popular locations if no city is specified
-  const [trendingLocations, setTrendingLocations] = useState(mockLocations.slice(0, 3));
-  const [currentCity, setCurrentCity] = useState("Los Angeles");
-  const [geolocationAttempted, setGeolocationAttempted] = useState(false);
-  
-  // Use Google Maps to determine user's location
-  useEffect(() => {
-    if (!geolocationAttempted && navigator.geolocation) {
-      setGeolocationAttempted(true);
-      
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          try {
-            // Use Google's Geocoding API to get the city name from coordinates
-            const response = await fetch(
-              `https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.coords.latitude},${position.coords.longitude}&key=AIzaSyAWm0vayRrQJHpMc6XcShcge52hGTt9BV4`
-            );
-            
-            if (response.ok) {
-              const data = await response.json();
-              
-              if (data.results && data.results.length > 0) {
-                // Try to find the city component
-                const addressComponents = data.results[0].address_components;
-                const cityComponent = addressComponents.find(
-                  (component: any) => 
-                    component.types.includes('locality') || 
-                    component.types.includes('administrative_area_level_1')
-                );
-                
-                if (cityComponent) {
-                  const detectedCity = cityComponent.long_name;
-                  setCurrentCity(detectedCity);
-                  
-                  // Get trending locations for the detected city
-                  const cityTrending = getTrendingLocationsForCity(detectedCity);
-                  if (cityTrending.length > 0) {
-                    setTrendingLocations(cityTrending);
-                  }
-                }
-              }
-            }
-          } catch (error) {
-            console.error("Error getting city from coordinates:", error);
-            // Fall back to default trending locations
-            const defaultTrending = getTrendingLocationsForCity("Los Angeles");
-            if (defaultTrending.length > 0) {
-              setTrendingLocations(defaultTrending);
-            }
-          }
-        },
-        (error) => {
-          console.error("Error getting location:", error);
-          // Fall back to default trending locations
-          const defaultTrending = getTrendingLocationsForCity("Los Angeles");
-          if (defaultTrending.length > 0) {
-            setTrendingLocations(defaultTrending);
-          }
-        }
-      );
-    }
-  }, [geolocationAttempted]);
-  
-  // Initialize with trending locations for a default city if geolocation fails
-  useEffect(() => {
-    if (!geolocationAttempted) {
-      const defaultTrending = getTrendingLocationsForCity("Los Angeles");
-      if (defaultTrending.length > 0) {
-        setTrendingLocations(defaultTrending);
-      }
-    }
-  }, [geolocationAttempted]);
-  
-  useEffect(() => {
-    // Listen for updates from VernonChat
-    const handleUpdate = (data: { cityName: string, events: Location[] }) => {
-      const { cityName, events } = data;
-      
-      setCurrentCity(cityName);
-      
-      // Replace trending locations with the new events
-      if (events && events.length > 0) {
-        setTrendingLocations(events);
-        
-        // Show toast notification
-        toast.success(`Updated trending locations for ${cityName}`);
-      } else {
-        // If no events were provided, get trending locations for the city
-        const cityTrending = getTrendingLocationsForCity(cityName);
-        if (cityTrending.length > 0) {
-          setTrendingLocations(cityTrending);
-        }
-      }
-    };
-    
-    eventBus.on('trending-locations-update', handleUpdate);
-    
-    // Cleanup listener on unmount
-    return () => {
-      eventBus.listeners.delete('trending-locations-update');
-    };
-  }, []);
-  
   return (
     <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-xl flex items-center">
-          <TrendingUp className="h-5 w-5 mr-2" />
-          <span>Trending in {currentCity}</span>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <TrendingUp className="h-5 w-5" />
+          Trending Places
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {trendingLocations.map((location) => (
-            <div 
-              key={location.id} 
-              className="p-3 border rounded-lg flex justify-between items-center hover:bg-accent/10 transition-colors"
-            >
-              <div>
-                <div className="font-medium">{location.name}</div>
-                <div className="text-sm text-muted-foreground flex items-center gap-2">
-                  <span>{location.city}, {location.state || location.country}</span>
-                  <Badge variant="outline" className="text-xs">
-                    {location.type}
-                  </Badge>
+          {mockLocations.slice(0, 5).map((location) => (
+            <div key={location.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer">
+              <div className="flex items-center gap-3">
+                <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                  <MapPin className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-medium">{location.name}</h3>
+                  <p className="text-sm text-muted-foreground flex items-center gap-1">
+                    <MapPin className="h-3 w-3" />
+                    {location.city}, {location.country}
+                  </p>
                 </div>
               </div>
-              <Button variant="ghost" size="sm" className="h-8" asChild>
-                <a href={`/venue/${location.id}`}>
-                  <ArrowRight className="h-4 w-4" />
-                </a>
-              </Button>
+              <div className="text-right">
+                <Badge variant="secondary" className="mb-1">
+                  {location.type}
+                </Badge>
+                <p className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Users className="h-3 w-3" />
+                  {Math.floor(Math.random() * 100) + 20} vibes
+                </p>
+              </div>
             </div>
           ))}
         </div>

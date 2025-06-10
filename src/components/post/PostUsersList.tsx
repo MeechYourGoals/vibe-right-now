@@ -1,41 +1,42 @@
 
 import React from "react";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { MockUserProfile } from "@/mock/users";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { mockUsers } from "@/mock/users";
+import { Location } from "@/types";
 
 interface PostUsersListProps {
-  users: MockUserProfile[];
-  maxVisible?: number;
-  onUserClick?: (userId: string) => void;
+  venue: Location;
+  setShowAllUsers: (show: boolean) => void;
 }
 
-const PostUsersList = ({ users, maxVisible = 3, onUserClick }: PostUsersListProps) => {
-  const visibleUsers = users.slice(0, maxVisible);
-  const remainingCount = Math.max(0, users.length - maxVisible);
-
+const PostUsersList: React.FC<PostUsersListProps> = ({ venue, setShowAllUsers }) => {
   return (
-    <div className="flex items-center space-x-2">
-      <div className="flex -space-x-2">
-        {visibleUsers.map((user) => (
-          <Avatar
-            key={user.id}
-            className="h-6 w-6 border-2 border-background cursor-pointer hover:z-10 transition-transform hover:scale-110"
-            onClick={() => onUserClick?.(user.id)}
-          >
-            <AvatarImage src={user.avatar} alt={user.username} />
-            <AvatarFallback className="text-xs">
-              {user.username.charAt(0).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-        ))}
-      </div>
-      
-      {remainingCount > 0 && (
-        <span className="text-sm text-muted-foreground">
-          +{remainingCount} more
-        </span>
-      )}
-    </div>
+    <Dialog open={true} onOpenChange={() => setShowAllUsers(false)}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>People at {venue.name}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-3 max-h-96 overflow-y-auto">
+          {mockUsers.slice(0, 20).map((user) => (
+            <div key={user.id} className="flex items-center p-3 hover:bg-muted rounded-md">
+              <Avatar className="h-10 w-10 mr-3">
+                <AvatarImage src={user.avatar} alt={user.name} />
+                <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+              </Avatar>
+              <div className="flex-1">
+                <div className="font-medium">@{user.username}</div>
+                <div className="text-sm text-muted-foreground">{user.name}</div>
+              </div>
+              <Button variant="outline" size="sm">
+                Follow
+              </Button>
+            </div>
+          ))}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 

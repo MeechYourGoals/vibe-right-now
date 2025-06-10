@@ -1,37 +1,34 @@
 
-import { useState } from "react";
-import { Layout } from "@/components/Layout";
+import Layout from "@/components/Layout";
+import Header from "@/components/Header";
 import PostFeed from "@/components/PostFeed";
-import CameraButton from "@/components/CameraButton";
-import VernonNext from "@/components/VernonNext";
-import { useIsMobile } from "@/hooks/use-mobile";
+import TrendingLocations from "@/components/TrendingLocations";
+import LocationsNearby from "@/components/LocationsNearby";
+import RecommendedForYou from "@/components/RecommendedForYou";
+import DiscountLocations from "@/components/DiscountLocations";
 
 const Index = () => {
-  const featuredUsers = ['sarah_vibes', 'jay_experiences', 'adventure_alex', 'marco_travels', 'local_explorer'];
-  const isMobile = useIsMobile();
-
   return (
     <Layout>
-      <main className="container py-6">
-        <div className="flex flex-col gap-6">
-          {/* Main content area */}
-          <div className="flex flex-col gap-6">
-            <div className="flex items-center justify-between mb-2">
-              <h1 className={`${isMobile ? 'text-xl' : 'text-3xl'} font-bold vibe-gradient-text`}>
-                Discover the Vibe Right Now
-              </h1>
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="container mx-auto px-4 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Main Content */}
+            <div className="lg:col-span-2 space-y-8">
+              <PostFeed />
             </div>
-
-            {/* Posts feed layout */}
-            <div className="w-full">
-              <PostFeed celebrityFeatured={featuredUsers} />
+            
+            {/* Sidebar */}
+            <div className="space-y-6">
+              <TrendingLocations />
+              <LocationsNearby />
+              <RecommendedForYou />
+              <DiscountLocations />
             </div>
           </div>
-        </div>
-      </main>
-      
-      <CameraButton />
-      <VernonNext />
+        </main>
+      </div>
     </Layout>
   );
 };
