@@ -24,7 +24,7 @@ class SentimentAnalysisService {
   async getVenueSentiment(venueId: string): Promise<VenueSentimentAnalysis[]> {
     try {
       const { data, error } = await supabase
-        .from('review_sentiment_cache')
+        .from('venue_sentiment_analysis')
         .select('*')
         .eq('venue_id', venueId);
 
@@ -59,7 +59,7 @@ class SentimentAnalysisService {
       };
 
       const { data, error } = await supabase
-        .from('review_sentiment_cache')
+        .from('venue_sentiment_analysis')
         .upsert({
           ...mockAnalysis,
           themes: JSON.stringify(mockAnalysis.themes)

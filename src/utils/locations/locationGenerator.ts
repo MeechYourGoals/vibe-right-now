@@ -1,3 +1,4 @@
+
 import { Location } from "@/types";
 import { MockUserProfile, CityCoordinates } from "./types";
 
@@ -42,7 +43,6 @@ export const generateLocationsForCity = (cityName: string, count: number = 20): 
       verified: Math.random() > 0.7,
       rating: Math.round((Math.random() * 2 + 3) * 10) / 10, // 3.0 - 5.0
       tags: generateTags(type),
-      description: `A wonderful ${type} in ${cityName}`,
       hours: generateBusinessHours(),
       photos: generatePhotoUrls(type),
       amenities: generateAmenities(type)

@@ -16,6 +16,7 @@ import LocationsGrid from "@/components/explore/LocationsGrid";
 import RecommendedForYou from "@/components/RecommendedForYou";
 import TrendingLocations from "@/components/TrendingLocations";
 import DiscountLocations from "@/components/DiscountLocations";
+import LocationsNearby from "@/components/LocationsNearby";
 import { format } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -172,6 +173,7 @@ const Explore = () => {
           
           {!isMobile && (
             <div className="w-1/4 space-y-6">
+              <LocationsNearby />
               <RecommendedForYou featuredLocations={["5", "7", "10", "13", "20"]} />
               <TrendingLocations />
               <DiscountLocations />
@@ -181,6 +183,7 @@ const Explore = () => {
           {isMobile && (
             <div className="mt-8 space-y-6">
               <h2 className="text-xl font-bold mb-4 vibe-gradient-text">Around You</h2>
+              <LocationsNearby />
               <RecommendedForYou featuredLocations={["5", "7", "10", "13", "20"]} />
               <TrendingLocations />
               <DiscountLocations />
