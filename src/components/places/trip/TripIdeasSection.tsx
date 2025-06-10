@@ -6,9 +6,11 @@ import { Lightbulb, Plus } from 'lucide-react';
 
 export interface TripIdeasSectionProps {
   tripId: string;
+  collaborators?: { id: string; name: string; avatar: string; }[];
+  userColors?: { id: string; color: string; }[];
 }
 
-const TripIdeasSection = ({ tripId }: TripIdeasSectionProps) => {
+const TripIdeasSection = ({ tripId, collaborators, userColors }: TripIdeasSectionProps) => {
   const mockIdeas = [
     { id: '1', text: 'Visit the local food market for authentic cuisine', author: 'Sarah' },
     { id: '2', text: 'Take a sunset photo at the viewpoint', author: 'Mike' },

@@ -8,7 +8,7 @@ import MusicSection from "./MusicSection";
 import ComedySection from "./ComedySection";
 import NightlifeSection from "./NightlifeSection";
 import LocationsGrid from "./LocationsGrid";
-import { Location, DateRange } from "@/types";
+import { Location, AppDateRange } from "@/types";
 import { EventItem } from "@/components/venue/events/types";
 
 interface ExploreContentProps {
@@ -21,7 +21,7 @@ interface ExploreContentProps {
   comedyEvents: EventItem[];
   nightlifeVenues: Location[];
   searchedCity: string;
-  dateRange: DateRange;
+  dateRange: AppDateRange;
 }
 
 const ExploreContent = ({

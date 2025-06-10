@@ -1,28 +1,33 @@
 
 import React, { useState, useEffect } from "react";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { Sparkles, TrendingUp, Calendar, MapPin, Heart, MessageCircle, Share, Bookmark, Filter, RefreshCw } from "lucide-react";
-import PostCard from "@/components/post/PostCard";
+import { Sparkles, TrendingUp, Calendar, MapPin, Filter, RefreshCw } from "lucide-react";
+import VenuePostCard from "@/components/post/VenuePostCard";
 import { mockPosts } from "@/mock/posts";
-import { mockComments } from "@/mock/comments";
-import { Post, Comment } from "@/types";
+import { Post, Location } from "@/types";
+
+interface VenueGroup {
+  venue: Location;
+  posts: Post[];
+}
 
 const PostFeed = () => {
   const [activeTab, setActiveTab] = useState("for-you");
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [venueGroups, setVenueGroups] = useState<VenueGroup[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    loadPosts();
+    loadVenueGroups();
   }, [activeTab]);
 
-  const loadPosts = () => {
+  const loadVenueGroups = () => {
     setIsLoading(true);
     
     setTimeout(() => {
+      // Group posts by venue
+      const venueMap = new Map<string, VenueGroup>();
+      
       let filteredPosts = [...mockPosts];
       
       switch (activeTab) {
@@ -40,18 +45,35 @@ const PostFeed = () => {
         default:
           break;
       }
-      
-      setPosts(filteredPosts);
+
+      // Group posts by venue
+      filteredPosts.forEach(post => {
+        if (!post.location) return;
+        
+        const venueId = post.location.id;
+        if (!venueMap.has(venueId)) {
+          venueMap.set(venueId, {
+            venue: post.location,
+            posts: []
+          });
+        }
+        venueMap.get(venueId)!.posts.push(post);
+      });
+
+      // Convert to array and sort by venue activity (most recent post)
+      const groups = Array.from(venueMap.values()).sort((a, b) => {
+        const aLatest = Math.max(...a.posts.map(p => new Date(p.timestamp).getTime()));
+        const bLatest = Math.max(...b.posts.map(p => new Date(p.timestamp).getTime()));
+        return bLatest - aLatest;
+      });
+
+      setVenueGroups(groups);
       setIsLoading(false);
     }, 500);
   };
 
-  const getComments = (postId: string): Comment[] => {
-    return mockComments.filter(comment => comment.postId === postId);
-  };
-
   const handleRefresh = () => {
-    loadPosts();
+    loadVenueGroups();
   };
 
   if (isLoading) {
@@ -102,19 +124,23 @@ const PostFeed = () => {
         </TabsList>
 
         <TabsContent value={activeTab} className="mt-6">
-          <div className="space-y-6">
-            {posts.map((post) => (
-              <PostCard 
-                key={post.id}
-                post={post}
-                onUserClick={(userId) => console.log('User clicked:', userId)}
-                onLocationClick={(locationId) => console.log('Location clicked:', locationId)}
-                onLike={() => console.log('Like clicked')}
-                onComment={() => console.log('Comment clicked')}
-                onShare={() => console.log('Share clicked')}
-                onSave={() => console.log('Save clicked')}
-              />
-            ))}
+          <div className="space-y-0">
+            {venueGroups.length > 0 ? (
+              venueGroups.map((group) => (
+                <VenuePostCard 
+                  key={group.venue.id}
+                  venue={group.venue}
+                  posts={group.posts}
+                  onVenueClick={(venueId) => console.log('Venue clicked:', venueId)}
+                  onUserClick={(userId) => console.log('User clicked:', userId)}
+                  onLocationClick={(locationId) => console.log('Location clicked:', locationId)}
+                />
+              ))
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">No venues found for this filter.</p>
+              </div>
+            )}
           </div>
         </TabsContent>
       </Tabs>
