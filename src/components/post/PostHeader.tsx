@@ -19,39 +19,31 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { User, Location } from "@/types";
+import { Post } from "@/types";
 
 interface PostHeaderProps {
-  user: User;
-  timestamp: string;
-  location?: Location;
-  isPinned?: boolean;
-  isVenuePost?: boolean; // We'll keep this prop for backwards compatibility
-  canDelete?: boolean;
-  onDelete?: () => void;
+  post: Post;
+  onUserClick?: (userId: string) => void;
+  onLocationClick?: (locationId: string) => void;
 }
 
 const PostHeader: React.FC<PostHeaderProps> = ({
-  user,
-  timestamp,
-  location,
-  isPinned = false,
-  isVenuePost = false, // We'll ignore this prop in rendering
-  canDelete = false,
-  onDelete
+  post,
+  onUserClick,
+  onLocationClick
 }) => {
   // Format the timestamp as a relative time (e.g., "2 hours ago")
-  const timeAgo = formatDistanceToNow(new Date(timestamp), { addSuffix: true });
+  const timeAgo = formatDistanceToNow(new Date(post.timestamp), { addSuffix: true });
   
   // Format the timestamp as a date string
-  const dateStr = new Date(timestamp).toLocaleDateString('en-US', {
+  const dateStr = new Date(post.timestamp).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric'
   });
   
   // Format the timestamp as a time string
-  const timeStr = new Date(timestamp).toLocaleTimeString('en-US', {
+  const timeStr = new Date(post.timestamp).toLocaleTimeString('en-US', {
     hour: 'numeric',
     minute: '2-digit'
   });
@@ -59,22 +51,22 @@ const PostHeader: React.FC<PostHeaderProps> = ({
   return (
     <div className="p-4 flex justify-between items-start">
       <div className="flex gap-3">
-        <Link to={`/user/${user.username}`}>
+        <Link to={`/user/${post.user.username}`}>
           <Avatar>
-            <AvatarImage src={user.avatar} alt={user.name} />
-            <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+            <AvatarImage src={post.user.avatar} alt={post.user.name} />
+            <AvatarFallback>{post.user.name.charAt(0)}</AvatarFallback>
           </Avatar>
         </Link>
         
         <div>
           <div className="flex items-center gap-2">
-            <Link to={`/user/${user.username}`} className="font-semibold hover:underline">
-              {user.name}
+            <Link to={`/user/${post.user.username}`} className="font-semibold hover:underline">
+              {post.user.name}
             </Link>
-            {user.verified && (
+            {post.user.verified && (
               <VerifiedIcon className="h-4 w-4 text-blue-500" />
             )}
-            {isPinned && (
+            {post.isPinned && (
               <Badge variant="outline" className="text-xs bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800/60 flex items-center gap-1 ml-1">
                 <Pin className="h-3 w-3" />
                 Pinned
@@ -87,11 +79,11 @@ const PostHeader: React.FC<PostHeaderProps> = ({
             <span className="text-xs text-muted-foreground">• {dateStr} at {timeStr}</span>
           </div>
           
-          {location && (
+          {post.location && (
             <div className="flex items-center gap-1 mt-1">
               <MapPin className="h-3 w-3 text-muted-foreground" />
-              <Link to={`/venue/${location.id}`} className="text-xs text-muted-foreground hover:underline">
-                {location.name}, {location.city}
+              <Link to={`/venue/${post.location.id}`} className="text-xs text-muted-foreground hover:underline">
+                {post.location.name}, {post.location.city}
               </Link>
             </div>
           )}
@@ -99,17 +91,6 @@ const PostHeader: React.FC<PostHeaderProps> = ({
       </div>
       
       <div className="flex items-center">
-        {canDelete && onDelete && (
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
-            onClick={onDelete}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        )}
-        
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="h-8 w-8">
