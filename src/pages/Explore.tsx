@@ -7,6 +7,7 @@ import SearchSection from "@/components/explore/SearchSection";
 import CategoryTabs from "@/components/explore/CategoryTabs";
 import ExploreContent from "@/components/explore/ExploreContent";
 import ExploreSidebar from "@/components/explore/ExploreSidebar";
+import ExploreMap from "@/components/explore/ExploreMap";
 import { Location, AppDateRange } from "@/types";
 import { getMockLocations, getMockMusicEvents, getMockComedyEvents, getMockNightlifeVenues } from "@/utils/explore/mockGenerators";
 import { EventItem } from "@/components/venue/events/types";
@@ -52,10 +53,10 @@ const Explore = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-6">
               <SearchSection
-                searchedCity={searchedCity}
-                setSearchedCity={setSearchedCity}
-                searchCategory={searchCategory}
-                setSearchCategory={setSearchCategory}
+                city={searchedCity}
+                setCity={setSearchedCity}
+                category={searchCategory}
+                setCategory={setSearchCategory}
                 dateRange={dateRange}
                 setDateRange={setDateRange}
                 onSearch={handleSearch}
@@ -65,6 +66,11 @@ const Explore = () => {
               <CategoryTabs 
                 activeTab={activeTab}
                 onTabChange={setActiveTab}
+              />
+
+              <ExploreMap 
+                searchQuery={`${searchedCity}, ${searchCategory}`}
+                filteredLocations={filteredLocations}
               />
 
               <ExploreContent
@@ -83,7 +89,7 @@ const Explore = () => {
 
             <div className="lg:col-span-1">
               <ExploreSidebar 
-                filteredLocations={filteredLocations}
+                locations={filteredLocations}
               />
             </div>
           </div>

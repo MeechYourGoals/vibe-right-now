@@ -13,6 +13,7 @@ const ExploreMap = ({ searchQuery, filteredLocations }: ExploreMapProps) => {
     <div className="w-full mb-6">
       <NearbyVibesMap 
         searchQuery={searchQuery}
+        searchResults={filteredLocations}
       />
     </div>
   );

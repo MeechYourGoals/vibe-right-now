@@ -11,6 +11,19 @@ const cityCoordinates = {
   "Miami": { lat: 25.7617, lng: -80.1918 }
 };
 
+// Helper function to get random items from an array
+export const getRandomItems = <T>(array: T[], count: number): T[] => {
+  const shuffled = [...array].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, count);
+};
+
+// Helper function to get additional tags
+export const getAdditionalTags = (location: Location): string[] => {
+  const baseTags = location.tags || [];
+  const additionalTags = ["trendy", "popular", "cozy", "lively", "peaceful"];
+  return [...baseTags, ...getRandomItems(additionalTags, 2)];
+};
+
 export const getMockLocations = (city: string, category: string): Location[] => {
   const coords = cityCoordinates[city as keyof typeof cityCoordinates] || cityCoordinates["San Francisco"];
   
