@@ -7,9 +7,43 @@ import { supabase } from "@/integrations/supabase/client";
 // Static libraries array to prevent reinitialization warnings
 const GOOGLE_MAPS_LIBRARIES: ("maps")[] = ["maps"];
 
-// Global state to track if the API has been loaded
+// Global state to track API key and loading status
 let globalApiKey: string = '';
 let isApiKeyFetched = false;
+let apiKeyPromise: Promise<string> | null = null;
+
+// Function to fetch API key only once
+const fetchApiKeyOnce = async (): Promise<string> => {
+  if (isApiKeyFetched && globalApiKey) {
+    return globalApiKey;
+  }
+
+  if (apiKeyPromise) {
+    return apiKeyPromise;
+  }
+
+  apiKeyPromise = (async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('google-places', {
+        body: { action: 'get-api-key' }
+      });
+      
+      if (!error && data?.apiKey) {
+        globalApiKey = data.apiKey;
+        isApiKeyFetched = true;
+        return data.apiKey;
+      } else {
+        console.error('Failed to fetch Google Maps API key');
+        return '';
+      }
+    } catch (err) {
+      console.error('Error fetching API key:', err);
+      return '';
+    }
+  })();
+
+  return apiKeyPromise;
+};
 
 export const useGoogleMap = (
   userLocation: GeolocationCoordinates | null, 
@@ -19,40 +53,27 @@ export const useGoogleMap = (
   selectedLocation: Location | null
 ) => {
   const [apiKey, setApiKey] = useState<string>(globalApiKey);
+  const [isApiKeyReady, setIsApiKeyReady] = useState<boolean>(isApiKeyFetched);
 
-  // Fetch API key from Supabase secrets only once globally
+  // Fetch API key on component mount
   useEffect(() => {
-    const fetchApiKey = async () => {
-      if (isApiKeyFetched && globalApiKey) {
-        setApiKey(globalApiKey);
-        return;
-      }
-
-      try {
-        const { data, error } = await supabase.functions.invoke('google-places', {
-          body: { action: 'get-api-key' }
-        });
-        
-        if (!error && data?.apiKey) {
-          globalApiKey = data.apiKey;
-          isApiKeyFetched = true;
-          setApiKey(data.apiKey);
-        } else {
-          console.error('Failed to fetch Google Maps API key');
-        }
-      } catch (err) {
-        console.error('Error fetching API key:', err);
+    const loadApiKey = async () => {
+      if (!isApiKeyReady) {
+        const key = await fetchApiKeyOnce();
+        setApiKey(key);
+        setIsApiKeyReady(true);
       }
     };
 
-    fetchApiKey();
-  }, []);
+    loadApiKey();
+  }, [isApiKeyReady]);
 
-  // Only load the API if we have a valid API key
+  // Only load the API if we have a valid API key and it's ready
   const { isLoaded, loadError } = useJsApiLoader({
     id: 'google-map-script',
-    googleMapsApiKey: apiKey,
-    libraries: GOOGLE_MAPS_LIBRARIES
+    googleMapsApiKey: apiKey || '',
+    libraries: GOOGLE_MAPS_LIBRARIES,
+    preventGoogleFontsLoading: true
   });
 
   const [map, setMap] = useState<google.maps.Map | null>(null);
@@ -163,7 +184,7 @@ export const useGoogleMap = (
   }, [map]);
 
   return {
-    isLoaded: isLoaded && !!apiKey,
+    isLoaded: isLoaded && isApiKeyReady && !!apiKey,
     loadError,
     map,
     mapCenter,

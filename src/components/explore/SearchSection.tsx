@@ -2,35 +2,46 @@
 import React from "react";
 import SearchVibes from "@/components/SearchVibes";
 import DateFilterSection from "./DateFilterSection";
-import { DateRange } from "@/types";
+import { AppDateRange } from "@/types";
 
 interface SearchSectionProps {
-  showDateFilter: boolean;
-  dateRange: DateRange;
-  onSearch: (query: string, category: "places" | "events", filters?: any) => void;
-  onDateRangeChange: (range: DateRange) => void;
-  onClearDates: () => void;
+  city: string;
+  setCity: (city: string) => void;
+  category: string;
+  setCategory: (category: string) => void;
+  dateRange: AppDateRange;
+  setDateRange: (range: AppDateRange) => void;
+  onSearch: () => Promise<void>;
+  isLoading: boolean;
 }
 
 const SearchSection = ({ 
-  showDateFilter, 
+  city,
+  setCity,
+  category,
+  setCategory,
   dateRange, 
-  onSearch, 
-  onDateRangeChange, 
-  onClearDates 
+  setDateRange,
+  onSearch,
+  isLoading
 }: SearchSectionProps) => {
+  const handleSearch = (query: string, searchCategory: "places" | "events") => {
+    // Update the city and category based on the search
+    setCity(query.split(',')[0].trim() || city);
+    setCategory(searchCategory);
+    onSearch();
+  };
+
   return (
     <div className="space-y-4">
-      <SearchVibes onSearch={onSearch} />
-      {showDateFilter && (
-        <div className="flex justify-center">
-          <DateFilterSection
-            dateRange={dateRange}
-            onDateRangeChange={onDateRangeChange}
-            onClearDates={onClearDates}
-          />
-        </div>
-      )}
+      <SearchVibes onSearch={handleSearch} />
+      <div className="flex justify-center">
+        <DateFilterSection
+          dateRange={dateRange}
+          onDateRangeChange={setDateRange}
+          onClearDates={() => setDateRange({})}
+        />
+      </div>
     </div>
   );
 };

@@ -5,8 +5,13 @@ import RecommendedForYou from "@/components/RecommendedForYou";
 import TrendingLocations from "@/components/TrendingLocations";
 import DiscountLocations from "@/components/DiscountLocations";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Location } from "@/types";
 
-const ExploreSidebar = () => {
+interface ExploreSidebarProps {
+  locations: Location[];
+}
+
+const ExploreSidebar = ({ locations }: ExploreSidebarProps) => {
   const isMobile = useIsMobile();
   
   if (isMobile) {
@@ -22,7 +27,7 @@ const ExploreSidebar = () => {
   }
 
   return (
-    <div className="w-1/4 space-y-6">
+    <div className="w-full space-y-6">
       <LocationsNearby />
       <RecommendedForYou featuredLocations={["5", "7", "10", "13", "20"]} />
       <TrendingLocations />
