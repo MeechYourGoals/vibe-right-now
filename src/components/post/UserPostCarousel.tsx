@@ -8,19 +8,21 @@ interface UserPostCarouselProps {
   posts: Post[];
   onUserClick?: (userId: string) => void;
   onLocationClick?: (locationId: string) => void;
+  fullSize?: boolean;
 }
 
-const UserPostCarousel = ({ posts, onUserClick, onLocationClick }: UserPostCarouselProps) => {
+const UserPostCarousel = ({ posts, onUserClick, onLocationClick, fullSize = false }: UserPostCarouselProps) => {
   if (posts.length === 0) return null;
 
   // Show single post without carousel if only one post
   if (posts.length === 1) {
     return (
-      <div className="p-4">
+      <div className={fullSize ? "" : "p-4"}>
         <UserPostCarouselItem 
           post={posts[0]}
           onUserClick={onUserClick}
           onLocationClick={onLocationClick}
+          fullSize={fullSize}
         />
       </div>
     );
@@ -29,14 +31,15 @@ const UserPostCarousel = ({ posts, onUserClick, onLocationClick }: UserPostCarou
   return (
     <div className="relative">
       <Carousel className="w-full">
-        <CarouselContent className="-ml-2">
+        <CarouselContent className={fullSize ? "" : "-ml-2"}>
           {posts.map((post) => (
-            <CarouselItem key={post.id} className="pl-2 md:basis-1/2 lg:basis-1/3">
-              <div className="p-4">
+            <CarouselItem key={post.id} className={fullSize ? "" : "pl-2 md:basis-1/2 lg:basis-1/3"}>
+              <div className={fullSize ? "" : "p-4"}>
                 <UserPostCarouselItem 
                   post={post}
                   onUserClick={onUserClick}
                   onLocationClick={onLocationClick}
+                  fullSize={fullSize}
                 />
               </div>
             </CarouselItem>

@@ -1,111 +1,98 @@
-
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { Layout } from "@/components/Layout";
 import Header from "@/components/Header";
-import CameraButton from "@/components/CameraButton";
-import useExploreState from "@/hooks/useExploreState";
+import ExploreHeader from "@/components/explore/ExploreHeader";
 import SearchSection from "@/components/explore/SearchSection";
 import CategoryTabs from "@/components/explore/CategoryTabs";
-import ExploreHeader from "@/components/explore/ExploreHeader";
-import ExploreMap from "@/components/explore/ExploreMap";
 import ExploreContent from "@/components/explore/ExploreContent";
 import ExploreSidebar from "@/components/explore/ExploreSidebar";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { Location, AppDateRange } from "@/types";
+import { getMockLocations, getMockMusicEvents, getMockComedyEvents, getMockNightlifeVenues } from "@/utils/explore/mockGenerators";
+import { EventItem } from "@/components/venue/events/types";
 
 const Explore = () => {
-  const isMobile = useIsMobile();
-  const {
-    activeTab,
-    searchedCity,
-    searchedState,
-    searchCategory,
-    filteredLocations,
-    locationTags,
-    musicEvents,
-    comedyEvents,
-    nightlifeVenues,
-    vibeFilter,
-    isNaturalLanguageSearch,
-    isLoadingResults,
-    dateRange,
-    showDateFilter,
-    activeSearchTab,
-    getPageTitle,
-    handleSearch,
-    handleTabChange,
-    handleClearVibeFilter,
-    handleDateRangeChange,
-    handleClearDates,
-    handleSearchTabChange,
-    setShowDateFilter
-  } = useExploreState();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchedCity, setSearchedCity] = useState("San Francisco");
+  const [searchCategory, setSearchCategory] = useState("places");
+  const [activeTab, setActiveTab] = useState("all");
+  const [dateRange, setDateRange] = useState<AppDateRange>({});
+  const [filteredLocations, setFilteredLocations] = useState<Location[]>([]);
+  const [locationTags, setLocationTags] = useState<string[]>([]);
+  const [musicEvents, setMusicEvents] = useState<EventItem[]>([]);
+  const [comedyEvents, setComedyEvents] = useState<EventItem[]>([]);
+  const [nightlifeVenues, setNightlifeVenues] = useState<Location[]>([]);
+  const [isLoadingResults, setIsLoadingResults] = useState(false);
 
-  // Create search query for map
-  const getSearchQuery = () => {
-    if (searchedCity && searchedCity.trim() !== "") {
-      return searchedCity;
-    }
-    return "";
-  };
+  useEffect(() => {
+    handleSearch();
+  }, []);
 
-  // Update the page title logic to handle empty cities
-  const getDisplayTitle = () => {
-    if (isNaturalLanguageSearch) {
-      return "Smart Search Results";
-    } else if (searchedCity && searchedCity.trim() !== "") {
-      return `Explore Vibes in ${searchedCity}${searchedState ? `, ${searchedState}` : ''}`;
-    }
-    return "Explore Vibes";
+  const handleSearch = async () => {
+    setIsLoadingResults(true);
+
+    // Simulate API call
+    setTimeout(() => {
+      const mockLocations = getMockLocations(searchedCity, searchCategory);
+      setFilteredLocations(mockLocations);
+      setLocationTags(mockLocations.map(loc => loc.tags?.[0] || ""));
+      setMusicEvents(getMockMusicEvents(searchedCity, dateRange));
+      setComedyEvents(getMockComedyEvents(searchedCity, dateRange));
+      setNightlifeVenues(getMockNightlifeVenues(searchedCity, dateRange));
+      setIsLoadingResults(false);
+    }, 500);
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      
-      <main className="container py-6">
-        <div className="mb-6">
-          <ExploreHeader title={getDisplayTitle()} />
+    <Layout>
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="container mx-auto px-4 py-8">
+          <ExploreHeader title="Explore Vibes" />
           
-          <SearchSection 
-            showDateFilter={showDateFilter}
-            dateRange={dateRange}
-            onSearch={handleSearch}
-            onDateRangeChange={handleDateRangeChange}
-            onClearDates={handleClearDates}
-          />
-          
-          <ExploreMap 
-            searchQuery={getSearchQuery()}
-            filteredLocations={filteredLocations}
-          />
-          
-          <CategoryTabs 
-            activeTab={activeTab}
-            onTabChange={handleTabChange}
-          />
-        </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-6">
+              <SearchSection
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                searchedCity={searchedCity}
+                setSearchedCity={setSearchedCity}
+                searchCategory={searchCategory}
+                setSearchCategory={setSearchCategory}
+                dateRange={dateRange}
+                setDateRange={setDateRange}
+                onSearch={handleSearch}
+                isLoading={isLoadingResults}
+              />
 
-        <div className="flex flex-col md:flex-row gap-6">
-          <div className={`${isMobile ? 'w-full' : 'w-3/4'}`}>
-            <ExploreContent
-              activeTab={activeTab}
-              searchCategory={searchCategory}
-              isLoadingResults={isLoadingResults}
-              filteredLocations={filteredLocations}
-              locationTags={locationTags}
-              musicEvents={musicEvents}
-              comedyEvents={comedyEvents}
-              nightlifeVenues={nightlifeVenues}
-              searchedCity={searchedCity || ""}
-              dateRange={dateRange}
-            />
+              <CategoryTabs 
+                activeTab={activeTab}
+                onTabChange={setActiveTab}
+              />
+
+              <ExploreContent
+                activeTab={activeTab}
+                searchCategory={searchCategory}
+                isLoadingResults={isLoadingResults}
+                filteredLocations={filteredLocations}
+                locationTags={Array.isArray(locationTags) ? locationTags : []}
+                musicEvents={musicEvents}
+                comedyEvents={comedyEvents}
+                nightlifeVenues={nightlifeVenues}
+                searchedCity={searchedCity}
+                dateRange={dateRange}
+              />
+            </div>
+
+            <div className="lg:col-span-1">
+              <ExploreSidebar 
+                searchQuery={searchQuery}
+                filteredLocations={filteredLocations}
+              />
+            </div>
           </div>
-          
-          <ExploreSidebar />
-        </div>
-      </main>
-      
-      <CameraButton />
-    </div>
+        </main>
+      </div>
+    </Layout>
   );
 };
 

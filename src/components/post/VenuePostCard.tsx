@@ -28,80 +28,83 @@ const VenuePostCard = ({
 
   return (
     <Card className="overflow-hidden mb-4 border border-border/50">
-      {/* Compact Venue Header - Similar to original user header style */}
-      <div className="p-4 pb-3">
+      {/* Compact Venue Header - 1/3 smaller than before */}
+      <div className="p-3 pb-2">
         <div 
-          className="flex items-center gap-3 cursor-pointer hover:opacity-80"
+          className="flex items-center justify-between cursor-pointer hover:opacity-80"
           onClick={() => onVenueClick?.(venue.id)}
         >
-          {/* Venue Avatar/Image */}
-          <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center overflow-hidden flex-shrink-0">
-            {venue.photos?.[0] ? (
-              <img 
-                src={venue.photos[0]} 
-                alt={venue.name}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <MapPin className="h-6 w-6 text-primary" />
-            )}
-          </div>
-          
-          {/* Venue Info - Taking user name position */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
-              <h3 className="text-base font-semibold text-foreground truncate">
-                {venue.name}
-              </h3>
-              {venue.verified && (
-                <Badge variant="secondary" className="text-xs h-5 px-2">
-                  ✓
-                </Badge>
-              )}
-              {venue.rating && (
-                <span className="text-xs text-muted-foreground">⭐ {venue.rating}</span>
+          <div className="flex items-center gap-2">
+            {/* Venue Avatar/Image - smaller */}
+            <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center overflow-hidden flex-shrink-0">
+              {venue.photos?.[0] ? (
+                <img 
+                  src={venue.photos[0]} 
+                  alt={venue.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <MapPin className="h-4 w-4 text-primary" />
               )}
             </div>
             
-            {/* Location and activity info */}
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span className="truncate">{venue.city}, {venue.state}</span>
-              <span>•</span>
-              <span className="flex items-center gap-1">
-                <Users className="h-3 w-3" />
-                {posts.length} posts from {uniqueUsers} people recently
-              </span>
+            {/* Venue Info - Taking user name position, more compact */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1 mb-0.5">
+                <h3 className="text-sm font-semibold text-foreground truncate">
+                  {venue.name}
+                </h3>
+                {venue.verified && (
+                  <Badge variant="secondary" className="text-xs h-4 px-1">
+                    ✓
+                  </Badge>
+                )}
+                {venue.rating && (
+                  <span className="text-xs text-muted-foreground">⭐ {venue.rating}</span>
+                )}
+              </div>
+              
+              {/* Location and activity info - more compact */}
+              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                <span className="truncate">{venue.city}, {venue.state}</span>
+                <span>•</span>
+                <span className="flex items-center gap-1">
+                  <Users className="h-3 w-3" />
+                  {posts.length} posts from {uniqueUsers} people recently
+                </span>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Venue Tags - Compact */}
-        {venue.vibes && venue.vibes.length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-3">
-            {venue.vibes.slice(0, 3).map((vibe, index) => (
-              <Badge 
-                key={index} 
-                variant="outline" 
-                className="text-xs bg-primary/5 text-primary border-primary/20"
-              >
-                {vibe}
-              </Badge>
-            ))}
-            {venue.vibes.length > 3 && (
-              <Badge variant="outline" className="text-xs bg-muted/50">
-                +{venue.vibes.length - 3}
-              </Badge>
-            )}
-          </div>
-        )}
+          {/* Venue Tags - moved to upper right */}
+          {venue.vibes && venue.vibes.length > 0 && (
+            <div className="flex flex-wrap gap-1 flex-shrink-0 ml-2">
+              {venue.vibes.slice(0, 2).map((vibe, index) => (
+                <Badge 
+                  key={index} 
+                  variant="outline" 
+                  className="text-xs bg-primary/5 text-primary border-primary/20"
+                >
+                  {vibe}
+                </Badge>
+              ))}
+              {venue.vibes.length > 2 && (
+                <Badge variant="outline" className="text-xs bg-muted/50">
+                  +{venue.vibes.length - 2}
+                </Badge>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* User Posts Carousel - Main Content Focus */}
+      {/* User Posts Carousel - Full Size, Instagram-style swipable */}
       <div className="px-0">
         <UserPostCarousel 
           posts={posts}
           onUserClick={onUserClick}
           onLocationClick={onLocationClick}
+          fullSize={true}
         />
       </div>
 

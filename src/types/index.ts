@@ -135,6 +135,11 @@ export interface TargetingOptions {
     ageRange: [number, number];
     gender: 'all' | 'male' | 'female' | string[];
     interests: string[];
+    location?: {
+      radius: number;
+      coordinates: [number, number];
+      city?: string;
+    };
   };
   location: {
     radius: number;
@@ -144,6 +149,8 @@ export interface TargetingOptions {
   behavior: {
     visitFrequency: string;
     spendingHabits: string[];
+    pastAttendance?: string[];
+    tripsIntent?: string;
   };
   behavioral?: {
     visitFrequency: string;
@@ -154,10 +161,15 @@ export interface TargetingOptions {
     dayOfWeek: string[];
     weather: string[];
     events: string[];
+    vibeTags?: string[];
+    venueTypes?: string[];
+    daypart?: string[];
   };
   momentScore?: {
     threshold: number;
     factors: string[];
+    hypeLevel?: number;
+    crowdDensity?: number;
   };
 }
 
@@ -208,4 +220,26 @@ export interface VenueInsights {
   checkInCount?: number;
   receiptUploads?: number;
   discountRedemptions?: number;
+}
+
+export interface CreditCard {
+  id: string;
+  last4: string;
+  brand: string;
+  expiryMonth: number;
+  expiryYear: number;
+  isDefault: boolean;
+}
+
+export interface ReviewSummary {
+  id: string;
+  venueId: string;
+  platform: string;
+  overallSentiment: number;
+  sentimentSummary: string;
+  totalReviews: number;
+  averageRating: number;
+  themes: Record<string, number>;
+  lastUpdated: string;
+  reviewsAnalyzed: number;
 }

@@ -56,13 +56,19 @@ const ExploreContent = ({
     return acc;
   }, {} as Record<string, string[]>);
 
+  // Convert AppDateRange to format expected by sections
+  const convertedDateRange = dateRange.from && dateRange.to ? {
+    from: dateRange.from,
+    to: dateRange.to
+  } : undefined;
+
   return (
     <div>
       {activeTab === "music" && (
         <MusicSection
           musicEvents={musicEvents.length > 0 ? musicEvents : []}
           searchedCity={searchedCity || ""}
-          dateRange={dateRange}
+          dateRange={convertedDateRange}
         />
       )}
       
@@ -70,7 +76,7 @@ const ExploreContent = ({
         <ComedySection
           comedyEvents={comedyEvents.length > 0 ? comedyEvents : []}
           searchedCity={searchedCity || ""}
-          dateRange={dateRange}
+          dateRange={convertedDateRange}
         />
       )}
       
@@ -78,7 +84,7 @@ const ExploreContent = ({
         <NightlifeSection
           nightlifeVenues={nightlifeVenues.length > 0 ? nightlifeVenues : []}
           searchedCity={searchedCity || ""}
-          dateRange={dateRange}
+          dateRange={convertedDateRange}
         />
       )}
       
