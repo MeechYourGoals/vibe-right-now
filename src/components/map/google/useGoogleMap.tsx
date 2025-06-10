@@ -4,6 +4,9 @@ import { useJsApiLoader } from '@react-google-maps/api';
 import { Location } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 
+// Static libraries array to prevent reinitialization warnings
+const GOOGLE_MAPS_LIBRARIES: ("maps")[] = ["maps"];
+
 // Global state to track if the API has been loaded
 let globalApiKey: string = '';
 let isApiKeyFetched = false;
@@ -49,7 +52,7 @@ export const useGoogleMap = (
   const { isLoaded, loadError } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: apiKey,
-    libraries: ['maps']
+    libraries: GOOGLE_MAPS_LIBRARIES
   });
 
   const [map, setMap] = useState<google.maps.Map | null>(null);

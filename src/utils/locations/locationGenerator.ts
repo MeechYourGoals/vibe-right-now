@@ -44,7 +44,6 @@ export const generateLocationsForCity = (cityName: string, count: number = 20): 
       rating: Math.round((Math.random() * 2 + 3) * 10) / 10, // 3.0 - 5.0
       tags: generateTags(type),
       hours: generateBusinessHours(),
-      photos: generatePhotoUrls(type),
       amenities: generateAmenities(type)
     });
   }
@@ -133,17 +132,6 @@ const generateBusinessHours = () => {
   };
   
   return standardHours;
-};
-
-const generatePhotoUrls = (type: string): string[] => {
-  const photoCount = Math.floor(Math.random() * 5) + 1;
-  const photos: string[] = [];
-  
-  for (let i = 0; i < photoCount; i++) {
-    photos.push(`https://images.unsplash.com/photo-1${Math.floor(Math.random() * 900000000) + 500000000}-${Math.floor(Math.random() * 900000000) + 500000000}?w=400&h=300&fit=crop`);
-  }
-  
-  return photos;
 };
 
 const generateAmenities = (type: string): string[] => {
