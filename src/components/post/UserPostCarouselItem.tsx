@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Heart, MessageCircle, Share, Bookmark } from 'lucide-react';
 import { Post } from "@/types";
 import { formatDistanceToNow } from "date-fns";
+import { useNavigate } from "react-router-dom";
 
 interface UserPostCarouselItemProps {
   post: Post;
@@ -17,6 +18,16 @@ interface UserPostCarouselItemProps {
 
 const UserPostCarouselItem = ({ post, onUserClick, onLocationClick, fullSize = false }: UserPostCarouselItemProps) => {
   const timeAgo = formatDistanceToNow(new Date(post.timestamp), { addSuffix: true });
+  const navigate = useNavigate();
+
+  const handleUserClick = () => {
+    if (onUserClick) {
+      onUserClick(post.user.id);
+    } else {
+      // Navigate to user profile
+      navigate(`/profile/${post.user.username}`);
+    }
+  };
 
   if (fullSize) {
     return (
@@ -91,28 +102,30 @@ const UserPostCarouselItem = ({ post, onUserClick, onLocationClick, fullSize = f
             </div>
           </div>
 
-          {/* Very Minimal User Attribution - Priority 3: Least Prominent */}
+          {/* Slightly Larger User Attribution - Made more prominent */}
           <div 
-            className="flex items-center gap-2 cursor-pointer hover:opacity-80 text-xs text-muted-foreground"
-            onClick={() => onUserClick?.(post.user.id)}
+            className="flex items-center gap-3 cursor-pointer hover:opacity-80 text-sm text-muted-foreground p-2 rounded-lg hover:bg-muted/30"
+            onClick={handleUserClick}
           >
-            <Avatar className="h-5 w-5">
+            <Avatar className="h-7 w-7">
               <AvatarImage src={post.user.avatar} alt={post.user.name} />
               <AvatarFallback className="text-xs">{post.user.name.charAt(0)}</AvatarFallback>
             </Avatar>
-            <span>@{post.user.username}</span>
-            {post.user.verified && (
-              <Badge variant="secondary" className="text-xs h-3 px-1">✓</Badge>
-            )}
-            <span>•</span>
-            <span>{timeAgo}</span>
+            <div className="flex items-center gap-2">
+              <span className="font-medium">@{post.user.username}</span>
+              {post.user.verified && (
+                <Badge variant="secondary" className="text-xs h-4 px-1">✓</Badge>
+              )}
+              <span>•</span>
+              <span>{timeAgo}</span>
+            </div>
           </div>
         </div>
       </div>
     );
   }
 
-  // Original compact card layout
+  // Original compact card layout with larger user section
   return (
     <Card className="overflow-hidden bg-background border border-border/30">
       {/* Post Media - Priority 1: Content Focus */}
@@ -183,17 +196,17 @@ const UserPostCarouselItem = ({ post, onUserClick, onLocationClick, fullSize = f
 
         <div className="pt-3 border-t border-border/20 mt-3">
           <div 
-            className="flex items-center gap-2 cursor-pointer hover:opacity-80"
-            onClick={() => onUserClick?.(post.user.id)}
+            className="flex items-center gap-3 cursor-pointer hover:opacity-80 p-2 rounded-lg hover:bg-muted/30 transition-colors"
+            onClick={handleUserClick}
           >
-            <Avatar className="h-6 w-6">
+            <Avatar className="h-8 w-8">
               <AvatarImage src={post.user.avatar} alt={post.user.name} />
-              <AvatarFallback className="text-xs">{post.user.name.charAt(0)}</AvatarFallback>
+              <AvatarFallback className="text-sm">{post.user.name.charAt(0)}</AvatarFallback>
             </Avatar>
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <span>@{post.user.username}</span>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <span className="font-medium text-foreground">@{post.user.username}</span>
               {post.user.verified && (
-                <Badge variant="secondary" className="text-xs h-3 px-1">✓</Badge>
+                <Badge variant="secondary" className="text-xs h-4 px-1">✓</Badge>
               )}
               <span>•</span>
               <span>{timeAgo}</span>

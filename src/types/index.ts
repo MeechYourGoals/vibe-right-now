@@ -228,7 +228,11 @@ export interface CreditCard {
   brand: string;
   expiryMonth: number;
   expiryYear: number;
+  expMonth: number;
+  expYear: number;
   isDefault: boolean;
+  maxSpendLimit?: number;
+  vernonApproved?: boolean;
 }
 
 export interface ReviewSummary {

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Layout } from "@/components/Layout";
 import Header from "@/components/Header";
@@ -11,7 +12,6 @@ import { getMockLocations, getMockMusicEvents, getMockComedyEvents, getMockNight
 import { EventItem } from "@/components/venue/events/types";
 
 const Explore = () => {
-  const [searchQuery, setSearchQuery] = useState("");
   const [searchedCity, setSearchedCity] = useState("San Francisco");
   const [searchCategory, setSearchCategory] = useState("places");
   const [activeTab, setActiveTab] = useState("all");
@@ -52,8 +52,6 @@ const Explore = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-6">
               <SearchSection
-                searchQuery={searchQuery}
-                setSearchQuery={setSearchQuery}
                 searchedCity={searchedCity}
                 setSearchedCity={setSearchedCity}
                 searchCategory={searchCategory}
@@ -85,7 +83,6 @@ const Explore = () => {
 
             <div className="lg:col-span-1">
               <ExploreSidebar 
-                searchQuery={searchQuery}
                 filteredLocations={filteredLocations}
               />
             </div>
