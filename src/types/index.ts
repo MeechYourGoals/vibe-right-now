@@ -12,6 +12,7 @@ export interface MockUserProfile {
   posts?: number;
   isFollowing?: boolean;
   isPrivate?: boolean;
+  isCelebrity?: boolean;
 }
 
 // Rename to avoid conflict with react-day-picker
@@ -38,7 +39,7 @@ export interface Location {
   zip?: string;
   lat: number;
   lng: number;
-  type: 'restaurant' | 'bar' | 'cafe' | 'nightclub' | 'museum' | 'park' | 'attraction' | 'sports' | 'event';
+  type: 'restaurant' | 'bar' | 'cafe' | 'nightclub' | 'museum' | 'park' | 'attraction' | 'sports' | 'event' | 'other';
   verified?: boolean;
   rating?: number;
   tags?: string[];
@@ -68,7 +69,6 @@ export interface DayHours {
   closed: boolean;
 }
 
-// Add missing User interface
 export interface User {
   id: string;
   username: string;
@@ -82,16 +82,15 @@ export interface User {
   posts?: number;
   isFollowing?: boolean;
   isPrivate?: boolean;
+  isCelebrity?: boolean;
 }
 
-// Add missing Media interface
 export interface Media {
   type: "image" | "video";
   url: string;
   thumbnail?: string;
 }
 
-// Add missing Post interface
 export interface Post {
   id: string;
   user: User;
@@ -105,34 +104,36 @@ export interface Post {
   saved?: boolean;
   isPinned?: boolean;
   vibeTags?: string[];
+  isVenuePost?: boolean;
 }
 
-// Add missing Comment interface
 export interface Comment {
   id: string;
   postId: string;
   userId: string;
   user: User;
   content: string;
-  text?: string; // For backward compatibility
+  text?: string;
   timestamp: string;
   vibedHere?: boolean;
   likes?: number;
 }
 
-// Add missing advertising types
 export interface AdFormat {
   id: string;
   name: string;
   description: string;
   dimensions?: string;
-  type: 'image' | 'video' | 'carousel';
+  type: 'image' | 'video' | 'carousel' | 'MomentCard' | 'VibeOverlay' | 'SpawnPoint' | 'HeatRingTakeover';
+  duration?: number;
+  placement?: string;
+  kpis?: string[];
 }
 
 export interface TargetingOptions {
   demographics: {
     ageRange: [number, number];
-    gender: 'all' | 'male' | 'female';
+    gender: 'all' | 'male' | 'female' | string[];
     interests: string[];
   };
   location: {
@@ -144,18 +145,29 @@ export interface TargetingOptions {
     visitFrequency: string;
     spendingHabits: string[];
   };
+  behavioral?: {
+    visitFrequency: string;
+    spendingHabits: string[];
+  };
+  contextual?: {
+    timeOfDay: string[];
+    dayOfWeek: string[];
+    weather: string[];
+    events: string[];
+  };
+  momentScore?: {
+    threshold: number;
+    factors: string[];
+  };
 }
 
-// Re-export DateRange as AppDateRange to avoid conflicts
 export type DateRange = AppDateRange;
 
-// VernonChat types
 export interface ChatMessage {
   id: string;
   role: 'user' | 'assistant' | 'system' | 'error';
   content: string;
   timestamp: string;
-  // For compatibility with older format
   text?: string;
   sender?: 'user' | 'ai';
 }
@@ -192,4 +204,8 @@ export interface VenueInsights {
   impressions: number;
   viewsPer: number;
   viewsCount?: number;
+  visitorCount?: number;
+  checkInCount?: number;
+  receiptUploads?: number;
+  discountRedemptions?: number;
 }

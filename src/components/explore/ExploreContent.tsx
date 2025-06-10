@@ -47,6 +47,15 @@ const ExploreContent = ({
     );
   }
 
+  // Create a mapping of location tags for the grid
+  const locationTagsMapping = locationTags.reduce((acc, tag, index) => {
+    const locationId = filteredLocations[index]?.id;
+    if (locationId) {
+      acc[locationId] = [tag];
+    }
+    return acc;
+  }, {} as Record<string, string[]>);
+
   return (
     <div>
       {activeTab === "music" && (
@@ -104,7 +113,7 @@ const ExploreContent = ({
       {activeTab !== "music" && activeTab !== "comedy" && activeTab !== "nightlife" && (
         <LocationsGrid
           locations={filteredLocations}
-          locationTags={locationTags}
+          locationTags={locationTagsMapping}
         />
       )}
     </div>
