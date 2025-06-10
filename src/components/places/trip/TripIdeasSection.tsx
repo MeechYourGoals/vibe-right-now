@@ -1,19 +1,18 @@
 
-import React from "react";
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Lightbulb, Plus } from "lucide-react";
+import { Lightbulb, Plus } from 'lucide-react';
 
-interface TripIdeasSectionProps {
+export interface TripIdeasSectionProps {
   tripId: string;
 }
 
-const TripIdeasSection: React.FC<TripIdeasSectionProps> = ({ tripId }) => {
-  const ideas = [
-    "Visit the local farmer's market on Saturday morning",
-    "Try the sunset rooftop bar downtown",
-    "Take a walking food tour in the historic district",
-    "Check out the new art gallery opening next week"
+const TripIdeasSection = ({ tripId }: TripIdeasSectionProps) => {
+  const mockIdeas = [
+    { id: '1', text: 'Visit the local food market for authentic cuisine', author: 'Sarah' },
+    { id: '2', text: 'Take a sunset photo at the viewpoint', author: 'Mike' },
+    { id: '3', text: 'Try the famous ice cream shop downtown', author: 'Emma' }
   ];
 
   return (
@@ -26,21 +25,17 @@ const TripIdeasSection: React.FC<TripIdeasSectionProps> = ({ tripId }) => {
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
-          {ideas.map((idea, index) => (
-            <div key={index} className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
-              <div className="flex-1">
-                <p className="text-sm">{idea}</p>
-              </div>
-              <Button variant="ghost" size="sm">
-                <Plus className="h-4 w-4" />
-              </Button>
+          {mockIdeas.map((idea) => (
+            <div key={idea.id} className="p-3 bg-muted/50 rounded-lg">
+              <p className="text-sm">{idea.text}</p>
+              <p className="text-xs text-muted-foreground mt-1">Suggested by {idea.author}</p>
             </div>
           ))}
+          <Button variant="outline" size="sm" className="w-full">
+            <Plus className="h-4 w-4 mr-2" />
+            Add Idea
+          </Button>
         </div>
-        <Button variant="outline" className="w-full mt-4">
-          <Plus className="h-4 w-4 mr-2" />
-          Add Your Idea
-        </Button>
       </CardContent>
     </Card>
   );
