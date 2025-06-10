@@ -1,5 +1,5 @@
 
-import Layout from "@/components/Layout";
+import { Layout } from "@/components/Layout";
 import Header from "@/components/Header";
 import PostFeed from "@/components/PostFeed";
 import TrendingLocations from "@/components/TrendingLocations";

@@ -1,9 +1,8 @@
-
 import { Location } from "@/types";
-import { MockUserProfile } from "./types";
+import { MockUserProfile, CityCoordinates } from "./types";
 
 // Mock data for location generation
-const locationTypes = ['restaurant', 'bar', 'cafe', 'nightclub', 'museum', 'park', 'attraction'];
+const locationTypes: Array<Location['type']> = ['restaurant', 'bar', 'cafe', 'nightclub', 'museum', 'attraction'];
 const cities = ['New York', 'Los Angeles', 'Chicago', 'Miami', 'San Francisco', 'Austin', 'Portland', 'Seattle'];
 
 // Generate mock user profiles for locations
@@ -53,7 +52,23 @@ export const generateLocationsForCity = (cityName: string, count: number = 20): 
   return locations;
 };
 
-// Helper functions for generating location data
+// Generate locations for multiple cities
+export const generateCityLocations = (cities: string[], countPerCity: number = 10): Location[] => {
+  const allLocations: Location[] = [];
+  
+  cities.forEach(city => {
+    const cityLocations = generateLocationsForCity(city, countPerCity);
+    allLocations.push(...cityLocations);
+  });
+  
+  return allLocations;
+};
+
+// Generate all city locations with default cities
+export const generateAllCityLocations = (): Location[] => {
+  return generateCityLocations(cities, 5);
+};
+
 const generateLocationName = (type: string): string => {
   const prefixes = {
     restaurant: ['The', 'Chez', 'Casa', 'Bistro', 'Taverna'],

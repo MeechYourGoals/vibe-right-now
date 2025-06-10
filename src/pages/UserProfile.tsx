@@ -1,6 +1,6 @@
 
 import { useParams } from "react-router-dom";
-import Layout from "@/components/Layout";
+import { Layout } from "@/components/Layout";
 import Header from "@/components/Header";
 import UserProfileHeader from "@/components/user/UserProfileHeader";
 import ProfileTabs from "@/components/user/ProfileTabs";
@@ -63,7 +63,6 @@ const UserProfile = () => {
       <div className="container mx-auto px-4 py-8">
         <UserProfileHeader 
           user={user} 
-          stats={stats}
           onToggleFollow={toggleFollow}
           onUpdateProfile={updateProfile}
         />
@@ -73,7 +72,6 @@ const UserProfile = () => {
         ) : (
           <ProfileTabs 
             userPosts={userPosts}
-            followedVenues={followedVenues}
             visitedPlaces={visitedPlaces}
             wantToVisitPlaces={wantToVisitPlaces}
             getComments={getPostComments}

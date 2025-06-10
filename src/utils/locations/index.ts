@@ -1,5 +1,4 @@
 
-// Consolidated exports file for locations module
+export { generateLocationsForCity, generateCityLocations, generateAllCityLocations, featuredUsers } from './locationGenerator';
+export type { MockUserProfile, CityCoordinates } from './types';
 export { cityCoordinates } from './cityDatabase';
-export { generateCityLocations, generateAllCityLocations } from './locationGenerator';
-export type { CityCoordinates } from './types';

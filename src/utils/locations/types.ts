@@ -13,3 +13,11 @@ export interface MockUserProfile {
   isFollowing?: boolean;
   isPrivate?: boolean;
 }
+
+export interface CityCoordinates {
+  lat: number;
+  lng: number;
+  name: string;
+  state?: string;
+  country: string;
+}
