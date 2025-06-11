@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Map, X, ChevronDown, User, Building, Calendar, MapPin, Star, Sparkles } from "lucide-react";
+import { Search, Map, X, ChevronDown, User, Building, Calendar, MapPin, Star, Sparkles, TrendingUp, Clock, Navigation } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,9 +30,12 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface SearchVibesProps {
   onSearch: (query: string, filterType: string, category: string) => void;
+  onFeedTabChange?: (tab: string) => void;
+  currentFeedTab?: string;
+  isHomePage?: boolean;
 }
 
-const SearchVibes = ({ onSearch }: SearchVibesProps) => {
+const SearchVibes = ({ onSearch, onFeedTabChange, currentFeedTab = "for-you", isHomePage = false }: SearchVibesProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("All");
@@ -256,6 +259,12 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
     onSearch(searchQuery, selectedFilter, category);
   };
 
+  const handleFeedTabChange = (tab: string) => {
+    if (onFeedTabChange) {
+      onFeedTabChange(tab);
+    }
+  };
+
   const handleUserSelect = (username: string) => {
     setSearchQuery(username);
     setShowUserSuggestions(false);
@@ -352,53 +361,104 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
         </div>
       )}
 
-      {/* Updated Tab Design */}
+      {/* Tab Design - Different for Home Page vs Explore Page */}
       <div className="bg-muted/30 rounded-lg p-1 mb-3">
         <div className="grid grid-cols-4 gap-1">
-          <button
-            onClick={() => handleCategoryChange("all")}
-            className={`flex items-center justify-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all ${
-              searchCategory === "all" 
-                ? "bg-background text-foreground shadow-sm" 
-                : "text-muted-foreground hover:text-foreground hover:bg-background/50"
-            }`}
-          >
-            <Search className="h-3.5 w-3.5" />
-            <span>All</span>
-          </button>
-          <button
-            onClick={() => handleCategoryChange("places")}
-            className={`flex items-center justify-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all ${
-              searchCategory === "places" 
-                ? "bg-background text-foreground shadow-sm" 
-                : "text-muted-foreground hover:text-foreground hover:bg-background/50"
-            }`}
-          >
-            <Building className="h-3.5 w-3.5" />
-            <span>Places</span>
-          </button>
-          <button
-            onClick={() => handleCategoryChange("users")}
-            className={`flex items-center justify-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all ${
-              searchCategory === "users" 
-                ? "bg-background text-foreground shadow-sm" 
-                : "text-muted-foreground hover:text-foreground hover:bg-background/50"
-            }`}
-          >
-            <User className="h-3.5 w-3.5" />
-            <span>Users</span>
-          </button>
-          <button
-            onClick={() => handleCategoryChange("vibes")}
-            className={`flex items-center justify-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all ${
-              searchCategory === "vibes" 
-                ? "bg-background text-foreground shadow-sm" 
-                : "text-muted-foreground hover:text-foreground hover:bg-background/50"
-            }`}
-          >
-            <Sparkles className="h-3.5 w-3.5" />
-            <span>Vibes</span>
-          </button>
+          {isHomePage ? (
+            <>
+              <button
+                onClick={() => handleFeedTabChange("for-you")}
+                className={`flex items-center justify-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all ${
+                  currentFeedTab === "for-you" 
+                    ? "bg-background text-foreground shadow-sm" 
+                    : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                }`}
+              >
+                <User className="h-3.5 w-3.5" />
+                <span>For You</span>
+              </button>
+              <button
+                onClick={() => handleFeedTabChange("trending")}
+                className={`flex items-center justify-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all ${
+                  currentFeedTab === "trending" 
+                    ? "bg-background text-foreground shadow-sm" 
+                    : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                }`}
+              >
+                <TrendingUp className="h-3.5 w-3.5" />
+                <span>Trending</span>
+              </button>
+              <button
+                onClick={() => handleFeedTabChange("recent")}
+                className={`flex items-center justify-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all ${
+                  currentFeedTab === "recent" 
+                    ? "bg-background text-foreground shadow-sm" 
+                    : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                }`}
+              >
+                <Clock className="h-3.5 w-3.5" />
+                <span>Recent</span>
+              </button>
+              <button
+                onClick={() => handleFeedTabChange("nearby")}
+                className={`flex items-center justify-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all ${
+                  currentFeedTab === "nearby" 
+                    ? "bg-background text-foreground shadow-sm" 
+                    : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                }`}
+              >
+                <Navigation className="h-3.5 w-3.5" />
+                <span>Nearby</span>
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={() => handleCategoryChange("all")}
+                className={`flex items-center justify-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all ${
+                  searchCategory === "all" 
+                    ? "bg-background text-foreground shadow-sm" 
+                    : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                }`}
+              >
+                <Search className="h-3.5 w-3.5" />
+                <span>All</span>
+              </button>
+              <button
+                onClick={() => handleCategoryChange("places")}
+                className={`flex items-center justify-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all ${
+                  searchCategory === "places" 
+                    ? "bg-background text-foreground shadow-sm" 
+                    : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                }`}
+              >
+                <Building className="h-3.5 w-3.5" />
+                <span>Places</span>
+              </button>
+              <button
+                onClick={() => handleCategoryChange("users")}
+                className={`flex items-center justify-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all ${
+                  searchCategory === "users" 
+                    ? "bg-background text-foreground shadow-sm" 
+                    : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                }`}
+              >
+                <User className="h-3.5 w-3.5" />
+                <span>Users</span>
+              </button>
+              <button
+                onClick={() => handleCategoryChange("vibes")}
+                className={`flex items-center justify-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all ${
+                  searchCategory === "vibes" 
+                    ? "bg-background text-foreground shadow-sm" 
+                    : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                }`}
+              >
+                <Sparkles className="h-3.5 w-3.5" />
+                <span>Vibes</span>
+              </button>
+            </>
+          )}
         </div>
       </div>
 
@@ -406,15 +466,17 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
         <Input
           type="search"
           placeholder={
-            searchCategory === "users" 
-              ? "Search users by name or username..." 
-              : searchCategory === "places"
-                ? isNaturalLanguageSearch 
-                  ? "Try natural language: 'Upscale restaurants in Chicago for a family lunch...'" 
-                  : "Search cities, venues, events or use natural language..."
-                : searchCategory === "vibes"
-                  ? "Search for vibes like Cozy, Trendy, NightOwl..."
-                  : "Search venues, events, vibes, users or use natural language..."
+            isHomePage
+              ? "Search venues, events, vibes, users or use natural language..."
+              : searchCategory === "users" 
+                ? "Search users by name or username..." 
+                : searchCategory === "places"
+                  ? isNaturalLanguageSearch 
+                    ? "Try natural language: 'Upscale restaurants in Chicago for a family lunch...'" 
+                    : "Search cities, venues, events or use natural language..."
+                  : searchCategory === "vibes"
+                    ? "Search for vibes like Cozy, Trendy, NightOwl..."
+                    : "Search venues, events, vibes, users or use natural language..."
           }
           value={searchQuery}
           onChange={handleSearchInputChange}
