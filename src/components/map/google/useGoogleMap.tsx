@@ -1,49 +1,9 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { useJsApiLoader } from '@react-google-maps/api';
 import { Location } from "@/types";
-import { supabase } from "@/integrations/supabase/client";
 
-// Static libraries array to prevent reinitialization warnings
-const GOOGLE_MAPS_LIBRARIES: ("maps")[] = ["maps"];
-
-// Global state to track API key and loading status
-let globalApiKey: string = '';
-let isApiKeyFetched = false;
-let apiKeyPromise: Promise<string> | null = null;
-
-// Function to fetch API key only once
-const fetchApiKeyOnce = async (): Promise<string> => {
-  if (isApiKeyFetched && globalApiKey) {
-    return globalApiKey;
-  }
-
-  if (apiKeyPromise) {
-    return apiKeyPromise;
-  }
-
-  apiKeyPromise = (async () => {
-    try {
-      const { data, error } = await supabase.functions.invoke('google-places', {
-        body: { action: 'get-api-key' }
-      });
-      
-      if (!error && data?.apiKey) {
-        globalApiKey = data.apiKey;
-        isApiKeyFetched = true;
-        return data.apiKey;
-      } else {
-        console.error('Failed to fetch Google Maps API key');
-        return '';
-      }
-    } catch (err) {
-      console.error('Error fetching API key:', err);
-      return '';
-    }
-  })();
-
-  return apiKeyPromise;
-};
+// Google Maps API key
+const GOOGLE_MAPS_API_KEY = "AIzaSyAWm0vayRrQJHpMc6XcShcge52hGTt9BV4";
 
 export const useGoogleMap = (
   userLocation: GeolocationCoordinates | null, 
@@ -52,28 +12,9 @@ export const useGoogleMap = (
   searchedCity: string,
   selectedLocation: Location | null
 ) => {
-  const [apiKey, setApiKey] = useState<string>(globalApiKey);
-  const [isApiKeyReady, setIsApiKeyReady] = useState<boolean>(isApiKeyFetched);
-
-  // Fetch API key on component mount
-  useEffect(() => {
-    const loadApiKey = async () => {
-      if (!isApiKeyReady) {
-        const key = await fetchApiKeyOnce();
-        setApiKey(key);
-        setIsApiKeyReady(true);
-      }
-    };
-
-    loadApiKey();
-  }, [isApiKeyReady]);
-
-  // Only load the API if we have a valid API key and it's ready
   const { isLoaded, loadError } = useJsApiLoader({
     id: 'google-map-script',
-    googleMapsApiKey: apiKey || '',
-    libraries: GOOGLE_MAPS_LIBRARIES,
-    preventGoogleFontsLoading: true
+    googleMapsApiKey: GOOGLE_MAPS_API_KEY
   });
 
   const [map, setMap] = useState<google.maps.Map | null>(null);
@@ -82,7 +23,7 @@ export const useGoogleMap = (
     lat: 39.8283,
     lng: -98.5795
   });
-  const [mapZoom, setMapZoom] = useState(4);
+  const [mapZoom, setMapZoom] = useState(searchedCity ? 12 : 4);
 
   const onLoad = useCallback((map: google.maps.Map) => {
     setMap(map);
@@ -92,46 +33,24 @@ export const useGoogleMap = (
     setMap(null);
   }, []);
 
-  // Set map center and zoom based on locations and search
+  // Set map center based on locations
   useEffect(() => {
-    console.log('Map centering logic - locations:', locations.length, 'searchedCity:', searchedCity);
-    
-    if (locations.length > 0) {
-      // If we have search results, center on them
-      const firstLocation = locations[0];
-      console.log('Centering map on first location:', firstLocation.name, firstLocation.lat, firstLocation.lng);
-      
-      setMapCenter({
-        lat: firstLocation.lat,
-        lng: firstLocation.lng
-      });
-      
-      if (locations.length === 1) {
-        setMapZoom(15);
-      } else {
-        setMapZoom(12);
-      }
-    } else if (userLocation) {
-      console.log('Centering map on user location:', userLocation.latitude, userLocation.longitude);
+    if (userLocation) {
       setMapCenter({ 
         lat: userLocation.latitude, 
         lng: userLocation.longitude 
       });
-      setMapZoom(12);
     } else if (userAddressLocation) {
-      console.log('Centering map on address location:', userAddressLocation);
       setMapCenter({
         lat: userAddressLocation[1],
         lng: userAddressLocation[0]
       });
-      setMapZoom(12);
-    } else {
-      console.log('Using default map center');
+    } else if (locations.length > 0 && searchedCity) {
       setMapCenter({
-        lat: 39.8283,
-        lng: -98.5795
+        lat: locations[0].lat,
+        lng: locations[0].lng
       });
-      setMapZoom(4);
+      setMapZoom(12);
     }
   }, [userLocation, userAddressLocation, locations, searchedCity]);
 
@@ -145,20 +64,14 @@ export const useGoogleMap = (
     if (map) {
       google.maps.event.trigger(map, "resize");
       
-      // Re-center based on current state
-      if (locations.length > 0) {
-        map.setCenter({
-          lat: locations[0].lat,
-          lng: locations[0].lng
-        });
-      } else if (userLocation) {
+      if (userLocation) {
         map.setCenter({
           lat: userLocation.latitude,
           lng: userLocation.longitude
         });
       }
     }
-  }, [map, userLocation, locations]);
+  }, [map, userLocation]);
 
   // Expose resize method to window
   useEffect(() => {
@@ -184,7 +97,7 @@ export const useGoogleMap = (
   }, [map]);
 
   return {
-    isLoaded: isLoaded && isApiKeyReady && !!apiKey,
+    isLoaded,
     loadError,
     map,
     mapCenter,

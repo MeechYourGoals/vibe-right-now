@@ -1,15 +1,14 @@
 
 import React from "react";
-import { Post } from "@/types";
 
 interface PostContentProps {
-  post: Post;
+  content: string;
 }
 
-const PostContent: React.FC<PostContentProps> = ({ post }) => {
+const PostContent: React.FC<PostContentProps> = ({ content }) => {
   return (
     <div className="px-4 py-2">
-      <p className="text-sm whitespace-pre-wrap">{post.content}</p>
+      <p className="text-sm whitespace-pre-wrap">{content}</p>
     </div>
   );
 };

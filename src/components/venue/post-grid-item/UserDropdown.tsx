@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -80,7 +79,7 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ userCount, post }) => {
         {isOpen && (
           <div className="absolute top-full mt-1 right-0 z-40 w-64 bg-background shadow-lg rounded-md border border-border overflow-hidden">
             <div className="p-2">
-              <h4 className="text-sm font-semibold mb-2">People at {post.location?.name}</h4>
+              <h4 className="text-sm font-semibold mb-2">People at {post.location.name}</h4>
               <div className="space-y-2">
                 {sampleUsers.map((user) => (
                   <Link
@@ -113,8 +112,8 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ userCount, post }) => {
         )}
       </div>
 
-      {showAllUsers && post.location && (
-        <PostUsersList venue={post.location} setShowAllUsers={setShowAllUsers} />
+      {showAllUsers && (
+        <PostUsersList location={post.location} setShowAllUsers={setShowAllUsers} />
       )}
     </>
   );

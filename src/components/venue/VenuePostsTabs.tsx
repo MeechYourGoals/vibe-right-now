@@ -5,7 +5,6 @@ import { Post, Comment, Location } from "@/types";
 import VenuePostsTabsHeader from './tabs/VenuePostsTabsHeader';
 import VenuePostsTabsContent from './tabs/VenuePostsTabsContent';
 import AddVenuePostDialog from './AddVenuePostDialog';
-import ReviewSummaries from './ReviewSummaries';
 import { useVenueConnections } from '@/hooks/useVenueConnections';
 import { usePostDeletion } from '@/hooks/usePostDeletion';
 
@@ -52,13 +51,6 @@ const VenuePostsTabs: React.FC<VenuePostsTabsProps> = ({
   
   return (
     <>
-      {/* Review Summaries - Show for premium users with connected platforms */}
-      <ReviewSummaries 
-        venueId={venue.id}
-        connectedPlatforms={connectedPlatforms}
-        subscriptionTier={subscriptionTier}
-      />
-
       <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="mb-6">
         <VenuePostsTabsHeader 
           activeTab={activeTab}

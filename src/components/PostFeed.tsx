@@ -1,149 +1,338 @@
 
-import React, { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
+import { mockPosts, mockComments, mockUsers } from "@/mock/data";
+import { PostCard } from "@/components/post";
+import SearchVibes from "@/components/SearchVibes";
+import { Post, User, Media } from "@/types";
+import { isWithinThreeMonths } from "@/mock/time-utils";
+import { Badge } from "@/components/ui/badge";
+import { Sparkles, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Sparkles, TrendingUp, Calendar, MapPin, Filter, RefreshCw } from "lucide-react";
-import VenuePostCard from "@/components/post/VenuePostCard";
-import { mockPosts } from "@/mock/posts";
-import { Post, Location } from "@/types";
+import { vibeTags } from "@/hooks/useUserProfile";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
-interface VenueGroup {
-  venue: Location;
-  posts: Post[];
+interface PostFeedProps {
+  celebrityFeatured?: string[];
 }
 
-const PostFeed = () => {
-  const [activeTab, setActiveTab] = useState("for-you");
-  const [venueGroups, setVenueGroups] = useState<VenueGroup[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    loadVenueGroups();
-  }, [activeTab]);
-
-  const loadVenueGroups = () => {
-    setIsLoading(true);
+// Helper function to ensure media is in the correct format
+const ensureMediaFormat = (media: any[]): Media[] => {
+  return media.map(item => {
+    if (typeof item === 'string') {
+      // Determine type based on extension
+      const isVideo = item.endsWith('.mp4') || item.endsWith('.mov') || item.endsWith('.avi');
+      return {
+        type: isVideo ? 'video' : 'image',
+        url: item
+      };
+    } else if (typeof item === 'object' && item !== null) {
+      // Already in correct format
+      return item;
+    }
     
-    setTimeout(() => {
-      // Group posts by venue
-      const venueMap = new Map<string, VenueGroup>();
-      
-      let filteredPosts = [...mockPosts];
-      
-      switch (activeTab) {
-        case "trending":
-          filteredPosts = filteredPosts.sort((a, b) => (b.likes || 0) - (a.likes || 0));
-          break;
-        case "recent":
-          filteredPosts = filteredPosts.sort((a, b) => 
-            new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-          );
-          break;
-        case "nearby":
-          filteredPosts = filteredPosts.filter(post => post.location);
-          break;
-        default:
-          break;
-      }
+    // Default fallback
+    return {
+      type: 'image',
+      url: 'https://via.placeholder.com/500'
+    };
+  });
+};
 
-      // Group posts by venue
-      filteredPosts.forEach(post => {
-        if (!post.location) return;
+const PostFeed = ({ celebrityFeatured }: PostFeedProps) => {
+  const [filter, setFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedVibeTags, setSelectedVibeTags] = useState<string[]>([]);
+
+  const handleSearch = (query: string, filterType: string) => {
+    setSearchQuery(query);
+    if (filterType !== "All") {
+      setFilter(filterType.toLowerCase());
+    } else {
+      setFilter("all");
+    }
+  };
+
+  // Toggle vibe tag selection
+  const toggleVibeTag = (tag: string) => {
+    if (selectedVibeTags.includes(tag)) {
+      setSelectedVibeTags(selectedVibeTags.filter(t => t !== tag));
+    } else {
+      setSelectedVibeTags([...selectedVibeTags, tag]);
+    }
+  };
+
+  // Generate vibe tags for posts
+  const postsWithVibeTags = useMemo(() => {
+    return mockPosts.map(post => {
+      // Ensure post has vibe tags
+      if (!post.vibeTags || post.vibeTags.length === 0) {
+        // Generate 1-4 vibe tags per post
+        const seed = parseInt(post.id) || post.id.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
+        const tagCount = 1 + (seed % 4);
+        const shuffledTags = [...vibeTags].sort(() => 0.5 - (seed * 0.0001));
+        const postVibeTags = shuffledTags.slice(0, tagCount);
         
-        const venueId = post.location.id;
-        if (!venueMap.has(venueId)) {
-          venueMap.set(venueId, {
-            venue: post.location,
-            posts: []
-          });
-        }
-        venueMap.get(venueId)!.posts.push(post);
-      });
+        post.vibeTags = postVibeTags;
+      }
+      
+      // Ensure media is in the correct format
+      post.media = ensureMediaFormat(post.media);
+      
+      return post;
+    });
+  }, []);
 
-      // Convert to array and sort by venue activity (most recent post)
-      const groups = Array.from(venueMap.values()).sort((a, b) => {
-        const aLatest = Math.max(...a.posts.map(p => new Date(p.timestamp).getTime()));
-        const bLatest = Math.max(...b.posts.map(p => new Date(p.timestamp).getTime()));
-        return bLatest - aLatest;
-      });
+  // First, filter posts to only show those from the past 3 months
+  const recentPosts = useMemo(() => {
+    return postsWithVibeTags.filter(post => isWithinThreeMonths(post.timestamp));
+  }, [postsWithVibeTags]);
 
-      setVenueGroups(groups);
-      setIsLoading(false);
-    }, 500);
+  // Prioritize posts from featured users if provided
+  const prioritizedPosts = useMemo(() => {
+    if (!celebrityFeatured || celebrityFeatured.length === 0) {
+      return recentPosts;
+    }
+
+    // Create a map of usernames (lowercase) for case-insensitive comparison
+    const featuredUsernames = celebrityFeatured.map(username => username.toLowerCase());
+
+    // Find posts from featured users
+    const featuredUserPosts = recentPosts.filter(post => 
+      featuredUsernames.includes(post.user.username.toLowerCase())
+    );
+    
+    // Get the remaining posts
+    const otherPosts = recentPosts.filter(post => 
+      !featuredUsernames.includes(post.user.username.toLowerCase())
+    );
+    
+    // Combine them with featured posts first
+    return [...featuredUserPosts, ...otherPosts];
+  }, [recentPosts, celebrityFeatured]);
+
+  const filteredPosts = useMemo(() => {
+    return prioritizedPosts.filter((post) => {
+      // Filter by location type if specified
+      if (filter !== "all" && post.location.type !== filter) {
+        return false;
+      }
+      
+      // Filter by vibe tags if any are selected
+      if (selectedVibeTags.length > 0) {
+        // Check if post has any of the selected vibe tags (inclusive filtering)
+        const hasMatchingTag = post.vibeTags?.some(tag => selectedVibeTags.includes(tag));
+        if (!hasMatchingTag) return false;
+      }
+      
+      // Filter by search query if specified
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        return (
+          post.location.name.toLowerCase().includes(query) ||
+          post.location.city.toLowerCase().includes(query) ||
+          post.content.toLowerCase().includes(query) ||
+          post.vibeTags?.some(tag => tag.toLowerCase().includes(query))
+        );
+      }
+      
+      return true;
+    });
+  }, [prioritizedPosts, filter, searchQuery, selectedVibeTags]);
+
+  // Group posts by location
+  const postsGroupedByLocation = useMemo(() => {
+    const groupedPosts: Record<string, Post[]> = {};
+    
+    filteredPosts.forEach(post => {
+      const locationId = post.location.id;
+      if (!groupedPosts[locationId]) {
+        groupedPosts[locationId] = [];
+      }
+      groupedPosts[locationId].push(post);
+    });
+    
+    // Sort each location's posts by timestamp (most recent first)
+    Object.keys(groupedPosts).forEach(locationId => {
+      groupedPosts[locationId].sort((a, b) => 
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      );
+    });
+    
+    return groupedPosts;
+  }, [filteredPosts]);
+
+  // Calculate the number of posts per location
+  // For demo purposes, add variation to the counts
+  const locationPostCounts = (() => {
+    const counts: Record<string, number> = {};
+    
+    // Define specific counts for certain locations to ensure variety
+    const specificCounts: Record<string, number> = {
+      "1": 15, // Sunset Lounge
+      "2": 23, // Artisan Coffee House
+      "3": 8,  // Summer Music Festival
+      "4": 3,  // Modern Art Museum
+      "5": 42, // Skyline Rooftop Bar
+      "6": 67, // Madison Square Garden
+      "7": 89, // Encore Beach Club
+      "8": 35, // Christ the Redeemer
+      "9": 12, // Aspen Highlands
+      "10": 121, // Allegiant Stadium (Super Bowl)
+      "13": 78, // Houston Rodeo
+      "14": 19, // Laugh Factory
+      "18": 53, // Sydney Opera House
+      "19": 145, // Eiffel Tower
+      "20": 104, // Coachella Valley Music Festival
+      "21": 31, // Gucci Pop-Up
+    };
+    
+    // Apply the specific counts where defined, and calculate naturally for others
+    filteredPosts.forEach(post => {
+      const locationId = post.location.id;
+      if (locationId in specificCounts) {
+        counts[locationId] = specificCounts[locationId];
+      } else {
+        counts[locationId] = (counts[locationId] || 0) + Math.floor(Math.random() * 50) + 1;
+      }
+    });
+    
+    return counts;
+  })();
+
+  // Get post comments
+  const getPostComments = (postId: string) => {
+    return mockComments.filter(comment => comment.postId === postId);
   };
 
-  const handleRefresh = () => {
-    loadVenueGroups();
-  };
-
-  if (isLoading) {
+  // Render vibe tags for a post
+  const renderVibeTags = (post: Post) => {
+    if (!post.vibeTags || post.vibeTags.length === 0) return null;
+    
     return (
-      <div className="flex justify-center items-center py-12">
-        <div className="text-center">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent motion-reduce:animate-[spin_1.5s_linear_infinite] mb-4"></div>
-          <p className="text-muted-foreground">Loading vibes...</p>
+      <div className="flex flex-wrap gap-1 mt-2">
+        {post.vibeTags.map((tag, index) => (
+          <Badge 
+            key={index} 
+            variant="outline" 
+            className={`${selectedVibeTags.includes(tag) ? 'bg-primary text-white' : 'bg-primary/10 text-primary'} text-xs`}
+          >
+            <Sparkles className="h-3 w-3 mr-1" />
+            {tag}
+          </Badge>
+        ))}
+      </div>
+    );
+  };
+
+  // Enhanced PostCard component with vibe tags
+  const EnhancedPostCard = ({ posts, locationPostCount }: { posts: Post[], locationPostCount: number }) => {
+    const postCard = (
+      <PostCard 
+        posts={posts} 
+        locationPostCount={locationPostCount}
+        getComments={getPostComments}
+      />
+    );
+    
+    // Check if any post has vibe tags
+    const hasVibeTags = posts.some(post => post.vibeTags && post.vibeTags.length > 0);
+    
+    if (!hasVibeTags) return postCard;
+    
+    // Add vibe tags below the post card
+    return (
+      <div className="space-y-2">
+        {postCard}
+        <div className="pl-4">
+          {renderVibeTags(posts[0])}
         </div>
       </div>
     );
-  }
+  };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Your Feed</h2>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={handleRefresh}>
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Refresh
-          </Button>
-          <Button variant="outline" size="sm">
-            <Filter className="h-4 w-4 mr-2" />
-            Filter
-          </Button>
+    <div className="max-w-3xl mx-auto">
+      <div className="mb-4">
+        <SearchVibes onSearch={handleSearch} />
+        
+        <div className="mt-2 flex items-center space-x-2">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button 
+                variant={selectedVibeTags.length > 0 ? "default" : "outline"} 
+                size="sm" 
+                className="flex items-center gap-1"
+              >
+                <Filter className="h-4 w-4" />
+                Vibe Filters {selectedVibeTags.length > 0 && `(${selectedVibeTags.length})`}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-2" align="start">
+              <div className="grid grid-cols-2 gap-1 min-w-[280px]">
+                {vibeTags.map(tag => (
+                  <Badge 
+                    key={tag}
+                    variant={selectedVibeTags.includes(tag) ? "default" : "outline"}
+                    className="cursor-pointer justify-start"
+                    onClick={() => toggleVibeTag(tag)}
+                  >
+                    <Sparkles className="h-3 w-3 mr-1" />
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+              {selectedVibeTags.length > 0 && (
+                <Button 
+                  variant="link" 
+                  size="sm" 
+                  className="mt-2" 
+                  onClick={() => setSelectedVibeTags([])}
+                >
+                  Clear all filters
+                </Button>
+              )}
+            </PopoverContent>
+          </Popover>
+          
+          {selectedVibeTags.length > 0 && (
+            <div className="flex flex-wrap gap-1 items-center">
+              {selectedVibeTags.map(tag => (
+                <Badge 
+                  key={tag}
+                  variant="default"
+                  className="cursor-pointer"
+                  onClick={() => toggleVibeTag(tag)}
+                >
+                  {tag} ×
+                </Badge>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="for-you" className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4" />
-            For You
-          </TabsTrigger>
-          <TabsTrigger value="trending" className="flex items-center gap-2">
-            <TrendingUp className="h-4 w-4" />
-            Trending
-          </TabsTrigger>
-          <TabsTrigger value="recent" className="flex items-center gap-2">
-            <Calendar className="h-4 w-4" />
-            Recent
-          </TabsTrigger>
-          <TabsTrigger value="nearby" className="flex items-center gap-2">
-            <MapPin className="h-4 w-4" />
-            Nearby
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value={activeTab} className="mt-6">
-          <div className="space-y-0">
-            {venueGroups.length > 0 ? (
-              venueGroups.map((group) => (
-                <VenuePostCard 
-                  key={group.venue.id}
-                  venue={group.venue}
-                  posts={group.posts}
-                  onVenueClick={(venueId) => console.log('Venue clicked:', venueId)}
-                  onUserClick={(userId) => console.log('User clicked:', userId)}
-                  onLocationClick={(locationId) => console.log('Location clicked:', locationId)}
-                />
-              ))
-            ) : (
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">No venues found for this filter.</p>
-              </div>
-            )}
+      <div className="p-4 space-y-4">
+        {Object.keys(postsGroupedByLocation).length > 0 ? (
+          Object.entries(postsGroupedByLocation).map(([locationId, posts]) => (
+            <EnhancedPostCard 
+              key={locationId} 
+              posts={posts} 
+              locationPostCount={locationPostCounts[locationId]}
+            />
+          ))
+        ) : (
+          <div className="text-center py-10">
+            <h3 className="text-xl font-semibold mb-2">No vibes found</h3>
+            <p className="text-muted-foreground">
+              Try adjusting your filters or post your own vibe!
+            </p>
           </div>
-        </TabsContent>
-      </Tabs>
+        )}
+      </div>
     </div>
   );
 };

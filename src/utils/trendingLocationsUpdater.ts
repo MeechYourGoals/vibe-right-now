@@ -1,8 +1,16 @@
 
-import { mockLocations } from "@/mock/locations";
+import { updateTrendingLocations as updateTrendingLocationsComponent } from '@/components/TrendingLocations';
+import { Location } from '@/types';
+import { getTrendingLocationsForCity } from '@/mock/cityLocations';
 
-export const updateTrendingLocations = () => {
-  // Mock function to update trending locations
-  console.log('Updating trending locations...');
-  return mockLocations.slice(0, 5);
+// Function to update trending locations based on AI query results
+export const updateTrendingLocations = (cityName: string, events: Location[] | null = null) => {
+  // In a real implementation, this would update the global state or database
+  console.log(`Updating trending locations for ${cityName}`);
+  
+  // If events are not provided, get them from the city data
+  const locationsToUpdate = events || getTrendingLocationsForCity(cityName);
+  
+  // Call the function exported from TrendingLocations component
+  updateTrendingLocationsComponent(cityName, locationsToUpdate);
 };

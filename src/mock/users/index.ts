@@ -14,8 +14,6 @@ export interface MockUserProfile {
   followers?: number;
   following?: number;
   posts?: number;
-  isFollowing?: boolean;
-  isPrivate?: boolean;
 }
 
 // Mock user profile utility
@@ -27,9 +25,7 @@ export const getMockUserProfile = (type: 'regular' | 'celebrity' | 'venue'): Moc
     ...user,
     name: user.name || user.username, // Ensure name property exists
     type: type,
-    verified: type === 'venue' ? true : collection[randomIndex].verified,
-    isFollowing: Math.random() > 0.7,
-    isPrivate: Math.random() > 0.8
+    verified: type === 'venue' ? true : collection[randomIndex].verified
   };
 };
 

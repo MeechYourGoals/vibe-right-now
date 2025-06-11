@@ -32,12 +32,10 @@ const VenuePostsListView: React.FC<VenuePostsListViewProps> = ({
           <PostCard 
             key={post.id} 
             post={post} 
-            onUserClick={(userId) => console.log('User clicked:', userId)}
-            onLocationClick={(locationId) => console.log('Location clicked:', locationId)}
-            onLike={() => console.log('Like clicked')}
-            onComment={() => console.log('Comment clicked')}
-            onShare={() => console.log('Share clicked')}
-            onSave={() => console.log('Save clicked')}
+            comments={getComments(post.id)}
+            canDelete={canDelete && !isVenuePost} // Only allow deletion of user posts, not venue posts
+            venue={venue}
+            onPostDeleted={onPostDeleted}
           />
         );
       })}
