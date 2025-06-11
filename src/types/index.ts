@@ -56,6 +56,7 @@ export interface Post {
   isVenuePost?: boolean;
   isPinned?: boolean;
   expiresAt?: string;
+  saved: boolean;
 }
 
 export interface Comment {
@@ -84,6 +85,15 @@ export interface User {
   posts?: number;
   isCelebrity?: boolean;
   isPrivate?: boolean;
+}
+
+export interface CreditCard {
+  id: string;
+  last4: string;
+  brand: string;
+  expiryMonth: number;
+  expiryYear: number;
+  isDefault: boolean;
 }
 
 // VernonChat types

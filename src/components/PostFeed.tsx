@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Post, Comment } from "@/types";
 import { mockPosts } from "@/mock/posts";
@@ -24,12 +25,14 @@ const PostFeed = ({ celebrityFeatured = [], feedType = "for-you" }: PostFeedProp
     
     switch (type) {
       case "trending":
-        // Sort by engagement (likes + comments)
+        // Sort by engagement (likes + comments) with deterministic randomization
         return allPosts
           .sort((a, b) => {
-            const aEngagement = a.likes.length + getComments(a.id).length;
-            const bEngagement = b.likes.length + getComments(b.id).length;
-            return bEngagement - aEngagement;
+            const aEngagement = a.likes + getComments(a.id).length;
+            const bEngagement = b.likes + getComments(b.id).length;
+            // Add deterministic randomization for trending
+            const randomFactor = (parseInt(a.id) % 7) - (parseInt(b.id) % 7);
+            return bEngagement - aEngagement + randomFactor * 0.1;
           })
           .slice(0, 20);
           
@@ -40,9 +43,14 @@ const PostFeed = ({ celebrityFeatured = [], feedType = "for-you" }: PostFeedProp
           .slice(0, 20);
           
       case "nearby":
-        // Filter posts from nearby locations (mock implementation)
+        // Mock nearby sorting with different randomization seed
         return allPosts
-          .filter(post => post.location && Math.random() > 0.3) // Mock nearby filter
+          .sort((a, b) => {
+            // Mock distance calculation with deterministic randomization
+            const aDistance = (parseInt(a.id) % 13) + a.likes * 0.1;
+            const bDistance = (parseInt(b.id) % 13) + b.likes * 0.1;
+            return aDistance - bDistance;
+          })
           .slice(0, 20);
           
       case "for-you":
@@ -58,8 +66,8 @@ const PostFeed = ({ celebrityFeatured = [], feedType = "for-you" }: PostFeedProp
         // Combine and sort by engagement and recency
         return [...featuredPosts, ...otherPosts]
           .sort((a, b) => {
-            const aScore = a.likes.length * 0.7 + (Date.now() - new Date(a.timestamp).getTime()) / (1000 * 60 * 60) * 0.3;
-            const bScore = b.likes.length * 0.7 + (Date.now() - new Date(b.timestamp).getTime()) / (1000 * 60 * 60) * 0.3;
+            const aScore = a.likes * 0.7 + (Date.now() - new Date(a.timestamp).getTime()) / (1000 * 60 * 60) * 0.3;
+            const bScore = b.likes * 0.7 + (Date.now() - new Date(b.timestamp).getTime()) / (1000 * 60 * 60) * 0.3;
             return bScore - aScore;
           })
           .slice(0, 20);

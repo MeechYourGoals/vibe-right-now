@@ -17,7 +17,7 @@ const PostFooter: React.FC<PostFooterProps> = ({
 }) => {
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(post.saved);
-  const [likesCount, setLikesCount] = useState(post.likes.length);
+  const [likesCount, setLikesCount] = useState(post.likes);
 
   const handleLike = () => {
     setLiked(!liked);
