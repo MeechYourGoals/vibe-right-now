@@ -2,6 +2,49 @@
 // If this file doesn't exist, we're creating it
 import { MockUserProfile } from "@/mock/users";
 
+export interface User {
+  id: string;
+  name: string;
+  username: string;
+  avatar: string;
+  verified: boolean;
+  bio?: string;
+  followers?: number;
+  following?: number;
+  posts?: number;
+}
+
+export interface Media {
+  type: "image" | "video";
+  url: string;
+}
+
+export interface Post {
+  id: string;
+  user: User;
+  location: Location;
+  content: string;
+  media?: Media[];
+  timestamp: string;
+  expiresAt?: string;
+  likes: User[]; // Array of users who liked the post
+  comments: number;
+  isPinned?: boolean;
+  isVenuePost?: boolean;
+  saved: boolean; // Added missing property
+  vibeTags?: string[];
+}
+
+export interface Comment {
+  id: string;
+  postId: string;
+  user: User;
+  content: string;
+  timestamp: string;
+  likes: User[];
+  replies?: Comment[];
+}
+
 export interface Location {
   id: string;
   name: string;
@@ -20,6 +63,15 @@ export interface Location {
   rating?: number;
   followers?: number;
   checkins?: number;
+}
+
+export interface CreditCard {
+  id: string;
+  last4: string;
+  brand: string;
+  expiryMonth: number;
+  expiryYear: number;
+  isDefault: boolean;
 }
 
 // VernonChat types

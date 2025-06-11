@@ -1,113 +1,83 @@
 
-import React, { useState } from 'react';
+import React, { useState } from "react";
+import { Heart, MessageCircle, Share, Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Heart, MessageCircle, Share, MapPin, Bookmark } from "lucide-react";
 import { Post } from "@/types";
 
-export interface PostFooterProps {
+interface PostFooterProps {
   post: Post;
+  onComment: () => void;
   isDetailView?: boolean;
-  onComment?: () => void;
-  onLike?: () => void;
-  onShare?: () => void;
 }
 
-const PostFooter: React.FC<PostFooterProps> = ({ 
-  post, 
-  isDetailView = false,
+const PostFooter: React.FC<PostFooterProps> = ({
+  post,
   onComment,
-  onLike,
-  onShare
+  isDetailView = false
 }) => {
   const [liked, setLiked] = useState(false);
-  const [bookmarked, setBookmarked] = useState(false);
+  const [saved, setSaved] = useState(post.saved);
+  const [likesCount, setLikesCount] = useState(post.likes.length);
 
   const handleLike = () => {
     setLiked(!liked);
-    onLike?.();
+    setLikesCount(prev => liked ? prev - 1 : prev + 1);
   };
 
-  const handleComment = () => {
-    onComment?.();
-  };
-
-  const handleShare = () => {
-    onShare?.();
-  };
-
-  const handleBookmark = () => {
-    setBookmarked(!bookmarked);
+  const handleSave = () => {
+    setSaved(!saved);
   };
 
   return (
-    <div className="px-4 py-2">
+    <div className="px-4 py-3 border-t">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <Button
             variant="ghost"
             size="sm"
-            className={`flex items-center space-x-1 ${liked ? 'text-red-500' : ''}`}
             onClick={handleLike}
+            className={`flex items-center space-x-2 ${liked ? 'text-red-500' : ''}`}
           >
             <Heart className={`h-4 w-4 ${liked ? 'fill-current' : ''}`} />
-            <span className="text-sm">{post.likes + (liked ? 1 : 0)}</span>
+            <span>{likesCount}</span>
           </Button>
 
           <Button
             variant="ghost"
             size="sm"
-            className="flex items-center space-x-1"
-            onClick={handleComment}
+            onClick={onComment}
+            className="flex items-center space-x-2"
           >
             <MessageCircle className="h-4 w-4" />
-            <span className="text-sm">{post.comments}</span>
+            <span>{post.comments}</span>
           </Button>
 
-          <Button
-            variant="ghost"
-            size="sm"
-            className="flex items-center space-x-1"
-            onClick={handleShare}
-          >
+          <Button variant="ghost" size="sm" className="flex items-center space-x-2">
             <Share className="h-4 w-4" />
-            <span className="text-sm">{post.shares}</span>
+            <span>Share</span>
           </Button>
         </div>
 
-        <div className="flex items-center space-x-2">
-          {post.location && (
-            <div className="flex items-center space-x-1 text-xs text-muted-foreground">
-              <MapPin className="h-3 w-3" />
-              <span>{post.location.name}</span>
-            </div>
-          )}
-          
-          <Button
-            variant="ghost"
-            size="sm"
-            className={bookmarked ? 'text-yellow-500' : ''}
-            onClick={handleBookmark}
-          >
-            <Bookmark className={`h-4 w-4 ${bookmarked ? 'fill-current' : ''}`} />
-          </Button>
-        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleSave}
+          className={saved ? 'text-blue-500' : ''}
+        >
+          <Bookmark className={`h-4 w-4 ${saved ? 'fill-current' : ''}`} />
+        </Button>
       </div>
-
+      
       {post.vibeTags && post.vibeTags.length > 0 && (
-        <div className="flex flex-wrap gap-1 mt-2">
-          {post.vibeTags.slice(0, 3).map((tag, index) => (
+        <div className="flex flex-wrap gap-2 mt-3">
+          {post.vibeTags.map((tag, index) => (
             <span
               key={index}
-              className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full"
+              className="px-2 py-1 text-xs bg-primary/10 text-primary rounded-full"
             >
               #{tag}
             </span>
           ))}
-          {post.vibeTags.length > 3 && (
-            <span className="text-xs text-muted-foreground">
-              +{post.vibeTags.length - 3} more
-            </span>
-          )}
         </div>
       )}
     </div>

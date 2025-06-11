@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Post, Comment, Location } from "@/types";
 import { Card } from "@/components/ui/card";
-import PostHeader from "./PostHeader";
+import VenueFirstPostHeader from "./VenueFirstPostHeader";
 import PostContent from "./PostContent";
 import PostMedia from "./PostMedia";
 import PostFooter from "./PostFooter";
@@ -114,12 +114,11 @@ const PostCard: React.FC<PostCardProps> = ({
               key={post.id} 
               className={`border-t ${isVenuePost ? 'ring-2 ring-amber-500' : ''}`}
             >
-              <PostHeader 
+              <VenueFirstPostHeader 
                 user={post.user} 
                 timestamp={String(post.timestamp)}
                 location={post.location}
                 isPinned={post.isPinned}
-                isVenuePost={isVenuePost}
                 canDelete={canDelete}
                 onDelete={() => {}}
               />
@@ -133,7 +132,7 @@ const PostCard: React.FC<PostCardProps> = ({
                 
                 <PostFooter 
                   post={post} 
-                  comments={getComments(post.id)} 
+                  onComment={() => {}}
                   isDetailView={false} 
                 />
               </div>
@@ -167,18 +166,17 @@ const PostCard: React.FC<PostCardProps> = ({
 
   return (
     <Card className={`overflow-hidden ${isVenuePost ? 'ring-2 ring-amber-500' : ''} ${post.isPinned && !isVenuePost ? 'ring-2 ring-amber-300' : ''}`}>
-      <PostHeader 
+      <VenueFirstPostHeader 
         user={post.user} 
         timestamp={String(post.timestamp)} 
         location={post.location}
         isPinned={post.isPinned}
-        isVenuePost={isVenuePost}
         canDelete={canDelete && !isVenuePost}
         onDelete={handleDelete}
       />
       
       <div className="px-4 py-2 flex justify-end">
-        <UserDropdown userCount={getUserCount(post.location.id)} post={post} />
+        <UserDropdown userCount={getUserCount(post.location?.id || "1")} post={post} />
       </div>
       
       <PostContent content={post.content} />
@@ -189,7 +187,7 @@ const PostCard: React.FC<PostCardProps> = ({
       
       <PostFooter 
         post={post} 
-        comments={comments} 
+        onComment={() => {}}
         isDetailView={isDetailView} 
       />
     </Card>

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Post, Comment } from "@/types";
 import { mockPosts } from "@/mock/posts";
