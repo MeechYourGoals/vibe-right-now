@@ -352,30 +352,55 @@ const SearchVibes = ({ onSearch }: SearchVibesProps) => {
         </div>
       )}
 
-      <Tabs 
-        value={searchCategory} 
-        onValueChange={handleCategoryChange} 
-        className="w-full mb-3"
-      >
-        <TabsList className="grid grid-cols-4 w-full">
-          <TabsTrigger value="all" className="flex items-center gap-1">
+      {/* Updated Tab Design */}
+      <div className="bg-muted/30 rounded-lg p-1 mb-3">
+        <div className="grid grid-cols-4 gap-1">
+          <button
+            onClick={() => handleCategoryChange("all")}
+            className={`flex items-center justify-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all ${
+              searchCategory === "all" 
+                ? "bg-background text-foreground shadow-sm" 
+                : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+            }`}
+          >
             <Search className="h-3.5 w-3.5" />
             <span>All</span>
-          </TabsTrigger>
-          <TabsTrigger value="places" className="flex items-center gap-1">
+          </button>
+          <button
+            onClick={() => handleCategoryChange("places")}
+            className={`flex items-center justify-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all ${
+              searchCategory === "places" 
+                ? "bg-background text-foreground shadow-sm" 
+                : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+            }`}
+          >
             <Building className="h-3.5 w-3.5" />
             <span>Places</span>
-          </TabsTrigger>
-          <TabsTrigger value="users" className="flex items-center gap-1">
+          </button>
+          <button
+            onClick={() => handleCategoryChange("users")}
+            className={`flex items-center justify-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all ${
+              searchCategory === "users" 
+                ? "bg-background text-foreground shadow-sm" 
+                : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+            }`}
+          >
             <User className="h-3.5 w-3.5" />
             <span>Users</span>
-          </TabsTrigger>
-          <TabsTrigger value="vibes" className="flex items-center gap-1">
+          </button>
+          <button
+            onClick={() => handleCategoryChange("vibes")}
+            className={`flex items-center justify-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all ${
+              searchCategory === "vibes" 
+                ? "bg-background text-foreground shadow-sm" 
+                : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+            }`}
+          >
             <Sparkles className="h-3.5 w-3.5" />
             <span>Vibes</span>
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
+          </button>
+        </div>
+      </div>
 
       <div className="relative flex">
         <Input
