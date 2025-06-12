@@ -1,64 +1,67 @@
-
 import React from 'react';
-import SearchVibes from "@/components/SearchVibes";
-import DateRangeSelector from "@/components/DateRangeSelector";
-import { Calendar } from "lucide-react";
-import { DateRange } from "react-day-picker";
-import { format } from "date-fns";
-import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Search, MapPin, CalendarDays } from "lucide-react";
+import { CategorySelect } from "./CategorySelect";
+import DateFilterSection from "./DateFilterSection";
+import { DateRange } from "@/types";
 
 interface SearchSectionProps {
-  showDateFilter: boolean;
-  dateRange: DateRange | undefined;
-  onSearch: (query: string, filterType: string, category: string) => void;
-  onDateRangeChange: (range: DateRange | undefined) => void;
-  onClearDates: () => void;
+  searchQuery: string;
+  onSearchChange: (query: string) => void;
+  selectedCategory: string;
+  onCategoryChange: (category: string) => void;
+  selectedDateRange: DateRange | undefined;
+  onDateRangeChange: (dateRange: DateRange) => void;
+  className?: string;
 }
 
 const SearchSection: React.FC<SearchSectionProps> = ({
-  showDateFilter,
-  dateRange,
-  onSearch,
+  searchQuery,
+  onSearchChange,
+  selectedCategory,
+  onCategoryChange,
+  selectedDateRange,
   onDateRangeChange,
-  onClearDates
+  className
 }) => {
+  const handleDateRangeSelect = (range: DateRange | undefined) => {
+    if (range?.from && range?.to) {
+      onDateRangeChange({ from: range.from, to: range.to });
+    }
+  };
+
   return (
-    <div className="max-w-xl mx-auto mb-6">
-      <SearchVibes onSearch={onSearch} />
-      
-      {showDateFilter && (
-        <div className="p-3 bg-card border border-input rounded-lg max-w-xl mx-auto mt-4">
-          <div className="flex justify-between items-center mb-2">
-            <h3 className="text-sm font-medium flex items-center">
-              <Calendar className="h-4 w-4 mr-2 text-primary" />
-              Find Future Vibes
-            </h3>
-            {dateRange && (
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="h-7 text-xs" 
-                onClick={onClearDates}
-              >
-                Clear Dates
-              </Button>
-            )}
-          </div>
-          <DateRangeSelector 
-            dateRange={dateRange} 
-            onDateRangeChange={onDateRangeChange} 
-          />
-          {dateRange?.from && (
-            <p className="text-xs text-foreground mt-2">
-              {dateRange.to 
-                ? `Showing events from ${format(dateRange.from, "MMM d, yyyy")} to ${format(dateRange.to, "MMM d, yyyy")}` 
-                : `Showing events from ${format(dateRange.from, "MMM d, yyyy")}`}
-            </p>
-          )}
-        </div>
-      )}
+    <div className={`grid gap-4 md:grid-cols-search ${className}`}>
+      {/* Search Input */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+        <Input
+          type="search"
+          placeholder="Search for vibes, venues, events..."
+          value={searchQuery}
+          onChange={(e) => onSearchChange(e.target.value)}
+          className="pl-10"
+        />
+      </div>
+
+      {/* Category Select */}
+      <CategorySelect
+        selectedCategory={selectedCategory}
+        onCategoryChange={onCategoryChange}
+      />
+
+      {/* Date Filter */}
+      <DateFilterSection
+        selectedDateRange={selectedDateRange}
+        onDateRangeChange={onDateRangeChange}
+      />
+
+      {/* Search Button */}
+      <Button>
+        <Search className="mr-2 h-4 w-4" />
+        Search
+      </Button>
     </div>
   );
 };

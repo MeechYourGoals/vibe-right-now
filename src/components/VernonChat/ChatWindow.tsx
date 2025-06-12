@@ -1,6 +1,6 @@
 
 import React, { useEffect, useRef } from 'react';
-import { X, Send, Mic, MicOff, User, Bot, Trash2 } from 'lucide-react';
+import { X, Send, Mic, MicOff, User, Bot, Trash2, Volume2, VolumeX } from 'lucide-react';
 import { ChatWindowProps, Message } from './types';
 
 const ChatWindow: React.FC<ChatWindowProps> = ({
@@ -16,7 +16,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   isListening,
   toggleListening,
   isModelLoading,
-  transcript
+  transcript,
+  isSpeaking
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -81,21 +82,56 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
     );
   };
 
+  const getMicrophoneButtonStyle = () => {
+    if (isListening) {
+      return 'p-2 rounded-full bg-red-500 text-white animate-pulse';
+    }
+    if (isProcessing) {
+      return 'p-2 rounded-full bg-yellow-500 text-white';
+    }
+    return 'p-2 rounded-full bg-blue-500 text-white hover:bg-blue-600';
+  };
+
+  const getMicrophoneIcon = () => {
+    if (isListening) {
+      return <MicOff size={18} />;
+    }
+    return <Mic size={18} />;
+  };
+
+  const getMicrophoneTitle = () => {
+    if (isListening) {
+      return 'Stop listening (Conversational mode active)';
+    }
+    if (isProcessing) {
+      return 'Processing your message...';
+    }
+    return 'Start conversational listening';
+  };
+
   return (
     <div className="fixed right-6 bottom-6 w-96 h-[600px] max-h-[80vh] bg-background border rounded-lg shadow-lg flex flex-col z-50">
       {/* Header */}
       <div className="flex items-center justify-between p-3 border-b">
         <div className="flex items-center space-x-2">
           <Bot className="w-5 h-5 text-primary" />
-          <span className="font-medium">Vernon - Google AI Assistant</span>
+          <span className="font-medium">
+            Vernon AI {chatMode === 'venue' ? '(Venue Mode)' : '(User Mode)'}
+          </span>
+          {isSpeaking && (
+            <div className="flex items-center space-x-1 text-green-600">
+              <Volume2 className="w-4 h-4" />
+              <span className="text-xs">Speaking</span>
+            </div>
+          )}
         </div>
         <div className="flex items-center space-x-2">
           <button
             onClick={toggleMode}
-            className="p-1 rounded-md hover:bg-muted"
+            className="p-1 rounded-md hover:bg-muted text-xs"
             title={chatMode === 'user' ? 'Switch to venue mode' : 'Switch to user mode'}
           >
-            {chatMode === 'user' ? 'User Mode' : 'Venue Mode'}
+            {chatMode === 'user' ? 'User' : 'Venue'}
           </button>
           <button
             onClick={clearMessages}
@@ -132,9 +168,19 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       </div>
 
       {/* Transcript display */}
-      {isListening && transcript && (
-        <div className="px-3 py-2 bg-muted/50 text-sm text-foreground/80 italic border-t">
-          {transcript}
+      {(isListening || transcript) && (
+        <div className="px-3 py-2 bg-blue-50 dark:bg-blue-900/20 text-sm border-t">
+          <div className="flex items-center space-x-2">
+            <Mic className="w-3 h-3 text-blue-500" />
+            <span className="text-blue-600 dark:text-blue-400">
+              {isListening ? 'Listening...' : 'Processing speech...'}
+            </span>
+          </div>
+          {transcript && (
+            <p className="mt-1 text-blue-700 dark:text-blue-300 italic">
+              "{transcript}"
+            </p>
+          )}
         </div>
       )}
 
@@ -143,12 +189,11 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
         <button
           type="button"
           onClick={toggleListening}
-          className={`p-2 rounded-full ${
-            isListening ? 'bg-red-100 text-red-500' : 'bg-muted text-foreground'
-          }`}
-          title={isListening ? 'Stop listening' : 'Start listening'}
+          className={getMicrophoneButtonStyle()}
+          title={getMicrophoneTitle()}
+          disabled={isProcessing && !isListening}
         >
-          {isListening ? <MicOff size={18} /> : <Mic size={18} />}
+          {getMicrophoneIcon()}
         </button>
 
         <input
@@ -156,16 +201,16 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
           value={input}
           onChange={handleInputChange}
           ref={inputRef}
-          placeholder="Type your message..."
-          disabled={isProcessing || isModelLoading}
-          className="flex-1 p-2 bg-background border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
+          placeholder={isListening ? "Speak naturally..." : "Type your message..."}
+          disabled={isProcessing || isModelLoading || isListening}
+          className="flex-1 p-2 bg-background border rounded-md focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
         />
 
         <button
           type="submit"
-          disabled={!input || isProcessing}
+          disabled={!input || isProcessing || isListening}
           className={`p-2 rounded-full ${
-            !input || isProcessing
+            !input || isProcessing || isListening
               ? 'bg-muted text-muted-foreground'
               : 'bg-primary text-primary-foreground'
           }`}
