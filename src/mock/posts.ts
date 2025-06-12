@@ -1,3 +1,4 @@
+
 import { Post } from "@/types";
 import { mockUsers } from "./users";
 import { mockLocations } from "./locations";
@@ -10,8 +11,8 @@ export const mockPosts: Post[] = [
     content: "Just had the most amazing brunch at this hidden gem! 🥐✨ The avocado toast was perfection and the vibes were immaculate. Can't wait to come back with friends!",
     media: [
       {
-        type: "video",
-        url: "https://images.unsplash.com/photo-1551024601-bec78aea704b?w=400&h=300&fit=crop"
+        type: "image",
+        url: "https://images.unsplash.com/photo-1551024601-bec78aea704b?w=400&h=711&fit=crop&crop=center"
       }
     ],
     timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
@@ -29,7 +30,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1523895664952-72274d0a15aa?w=400&h=300&fit=crop"
+        url: "https://images.unsplash.com/photo-1523895664952-72274d0a15aa?w=400&h=711&fit=crop&crop=center"
       }
     ],
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
@@ -47,7 +48,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1475924156320-4960539725e2?w=400&h=300&fit=crop"
+        url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=711&fit=crop&crop=center"
       }
     ],
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(),
@@ -65,7 +66,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1517836357463-dcaaa63fd8a6?w=400&h=300&fit=crop"
+        url: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400&h=711&fit=crop&crop=center"
       }
     ],
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 8).toISOString(),
@@ -83,7 +84,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1485230811056-a661991fc611?w=400&h=300&fit=crop"
+        url: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=711&fit=crop&crop=center"
       }
     ],
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString(),
@@ -101,7 +102,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1560717475-a997934672b4?w=400&h=300&fit=crop"
+        url: "https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=400&h=711&fit=crop&crop=center"
       }
     ],
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 16).toISOString(),
@@ -119,7 +120,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1549213783-8284d0336c4f?w=400&h=300&fit=crop"
+        url: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=711&fit=crop&crop=center"
       }
     ],
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 20).toISOString(),
@@ -137,7 +138,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1554396439-1c5596279224?w=400&h=300&fit=crop"
+        url: "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=400&h=711&fit=crop&crop=center"
       }
     ],
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
@@ -155,7 +156,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=400&h=300&fit=crop"
+        url: "https://images.unsplash.com/photo-1464822759844-d150baec93c5?w=400&h=711&fit=crop&crop=center"
       }
     ],
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 28).toISOString(),
@@ -173,7 +174,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1568901342037-3d626e60f917?w=400&h=300&fit=crop"
+        url: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&h=711&fit=crop&crop=center"
       }
     ],
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 32).toISOString(),
