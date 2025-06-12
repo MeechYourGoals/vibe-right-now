@@ -1,105 +1,145 @@
 
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+
+const ELEVEN_LABS_API_KEY = Deno.env.get('ELEVEN_LABS_API_KEY') || '';
+const DEFAULT_VOICE_ID = "pNInz6obpgDQGcFmaJgB"; // Adam voice ID
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
-
-// Brian voice ID from ElevenLabs
-const BRIAN_VOICE_ID = 'nPczCjzI2devNBz1zQrb'
+};
 
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { text, voice_id, model_id } = await req.json()
+    // Validate API key
+    if (!ELEVEN_LABS_API_KEY) {
+      return new Response(
+        JSON.stringify({ error: 'ElevenLabs API key not configured' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Parse request body
+    const { text, voiceId = DEFAULT_VOICE_ID, model = "eleven_multilingual_v2" } = await req.json();
 
     if (!text) {
-      throw new Error('Text is required')
+      return new Response(
+        JSON.stringify({ error: 'Text is required' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    // Get ElevenLabs API key from environment
-    const apiKey = Deno.env.get('ELEVEN_LABS_API_KEY')
-    
-    if (!apiKey) {
-      throw new Error('ElevenLabs API key not configured')
-    }
+    // Reduce text length if it's too long to save credits
+    const reducedText = reduceLongText(text);
+    console.log(`Converting text to speech: "${reducedText.substring(0, 50)}..." with voice ${voiceId}`);
 
-    // Use Brian voice by default, allow override
-    const voiceId = voice_id || BRIAN_VOICE_ID
-    const modelId = model_id || 'eleven_multilingual_v2'
+    // Call Eleven Labs API
+    const elevenLabsResponse = await fetch(
+      `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
+      {
+        method: 'POST',
+        headers: {
+          'xi-api-key': ELEVEN_LABS_API_KEY,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text: reducedText,
+          model_id: model,
+          voice_settings: {
+            stability: 0.5,
+            similarity_boost: 0.75,
+          },
+        }),
+      }
+    );
 
-    console.log(`Converting text to speech with Brian voice (${voiceId})`)
-    console.log(`Text length: ${text.length} characters`)
-
-    // Call ElevenLabs TTS API
-    const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
-      method: 'POST',
-      headers: {
-        'Accept': 'audio/mpeg',
-        'Content-Type': 'application/json',
-        'xi-api-key': apiKey
-      },
-      body: JSON.stringify({
-        text: text,
-        model_id: modelId,
-        voice_settings: {
-          stability: 0.8,
-          similarity_boost: 0.75,
-          style: 0.5,
-          use_speaker_boost: true
-        }
-      })
-    })
-
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error('ElevenLabs API error:', errorText)
-      
-      // Check for quota exceeded
-      if (response.status === 429 || errorText.includes('quota')) {
-        return new Response(
-          JSON.stringify({ error: 'quota_exceeded', message: 'ElevenLabs quota exceeded' }),
-          { 
-            status: 429, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-          }
-        )
+    if (!elevenLabsResponse.ok) {
+      const errorText = await elevenLabsResponse.text();
+      let errorData;
+      try {
+        errorData = JSON.parse(errorText);
+      } catch (e) {
+        errorData = { detail: errorText };
       }
       
-      throw new Error(`ElevenLabs API error: ${response.status} - ${errorText}`)
+      // Special handling for quota exceeded errors
+      if (errorData?.detail?.status === 'quota_exceeded') {
+        console.log('ElevenLabs quota exceeded, returning error with specific code');
+        return new Response(
+          JSON.stringify({ 
+            error: 'quota_exceeded', 
+            message: 'ElevenLabs quota exceeded',
+            details: errorData?.detail
+          }),
+          { 
+            status: 429, 
+            headers: { 
+              ...corsHeaders, 
+              'Content-Type': 'application/json',
+              'X-Error-Type': 'quota_exceeded' 
+            } 
+          }
+        );
+      }
+      
+      console.error(`ElevenLabs API error: ${errorText}`);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Error calling ElevenLabs API', 
+          details: errorData || errorText,
+          status: elevenLabsResponse.status 
+        }),
+        { status: elevenLabsResponse.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    // Convert audio to base64
-    const audioBuffer = await response.arrayBuffer()
-    const base64Audio = btoa(
-      String.fromCharCode(...new Uint8Array(audioBuffer))
-    )
+    // Get audio as array buffer
+    const audioArrayBuffer = await elevenLabsResponse.arrayBuffer();
 
-    console.log(`Successfully generated audio with Brian voice`)
-
-    return new Response(
-      JSON.stringify({ audioContent: base64Audio }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    // Return the audio stream with appropriate content type
+    return new Response(audioArrayBuffer, {
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'audio/mpeg',
       },
-    )
+    });
   } catch (error) {
-    console.error('Error in TTS function:', error)
-    
+    console.error('Error in eleven-labs-tts function:', error);
     return new Response(
-      JSON.stringify({ 
-        error: 'tts_error', 
-        message: error.message || 'Failed to generate speech' 
-      }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      },
-    )
+      JSON.stringify({ error: error.message }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
   }
-})
+});
+
+// Helper function to reduce long text
+function reduceLongText(text: string): string {
+  // If text is less than 500 characters, return as is
+  if (text.length < 500) return text;
+  
+  // For longer text, truncate while trying to maintain complete sentences
+  const sentences = text.match(/[^.!?]+[.!?]+/g) || [];
+  let result = '';
+  let totalChars = 0;
+  const charLimit = 800;
+  
+  for (const sentence of sentences) {
+    if (totalChars + sentence.length > charLimit) {
+      break;
+    }
+    result += sentence;
+    totalChars += sentence.length;
+  }
+  
+  // Add an ellipsis if we truncated the text
+  if (result.length < text.length) {
+    result = result.trim() + '...';
+  }
+  
+  return result;
+}
