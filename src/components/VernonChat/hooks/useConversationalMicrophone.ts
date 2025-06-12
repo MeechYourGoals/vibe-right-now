@@ -12,12 +12,11 @@ export const useConversationalMicrophone = ({
 }: UseConversationalMicrophoneProps) => {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
-  const [interimTranscript, setInterimTranscript] = useState('');
   
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const finalTranscriptRef = useRef<string>('');
 
-  // Initialize speech recognition
   useEffect(() => {
     if (!isVoiceEnabled) return;
 
@@ -30,45 +29,40 @@ export const useConversationalMicrophone = ({
       recognition.lang = 'en-US';
       
       recognition.onresult = (event) => {
-        let interim = '';
-        let final = '';
+        let interimTranscript = '';
+        let finalTranscript = '';
         
         for (let i = event.resultIndex; i < event.results.length; i++) {
           const transcriptPart = event.results[i].transcript;
           if (event.results[i].isFinal) {
-            final += transcriptPart;
+            finalTranscript += transcriptPart;
           } else {
-            interim += transcriptPart;
+            interimTranscript += transcriptPart;
           }
         }
         
-        if (final) {
-          setTranscript(prev => prev + final);
-          setInterimTranscript('');
+        if (finalTranscript) {
+          finalTranscriptRef.current += finalTranscript;
+          setTranscript(finalTranscriptRef.current + interimTranscript);
           resetSilenceTimer();
         } else {
-          setInterimTranscript(interim);
+          setTranscript(finalTranscriptRef.current + interimTranscript);
           resetSilenceTimer();
         }
       };
       
       recognition.onend = () => {
         if (isListening) {
-          // Auto-restart if we're still supposed to be listening
-          try {
-            recognition.start();
-          } catch (error) {
-            console.log('Recognition restart failed:', error);
-            setIsListening(false);
+          if (finalTranscriptRef.current.trim()) {
+            handleTranscriptComplete();
           }
         }
+        setIsListening(false);
       };
       
       recognition.onerror = (event) => {
         console.error('Speech recognition error:', event.error);
-        if (event.error === 'not-allowed') {
-          setIsListening(false);
-        }
+        setIsListening(false);
       };
       
       recognitionRef.current = recognition;
@@ -89,21 +83,28 @@ export const useConversationalMicrophone = ({
       clearTimeout(silenceTimerRef.current);
     }
     
-    // Stop listening after 3 seconds of silence
     silenceTimerRef.current = setTimeout(() => {
-      if (transcript.trim()) {
-        stopListening();
-        onTranscriptComplete(transcript.trim());
-        setTranscript('');
+      if (finalTranscriptRef.current.trim()) {
+        handleTranscriptComplete();
       }
-    }, 3000);
-  }, [transcript, onTranscriptComplete]);
+    }, 2000);
+  }, []);
+
+  const handleTranscriptComplete = () => {
+    const finalText = finalTranscriptRef.current.trim();
+    if (finalText) {
+      onTranscriptComplete(finalText);
+      finalTranscriptRef.current = '';
+      setTranscript('');
+    }
+    stopListening();
+  };
 
   const startListening = useCallback(() => {
     if (!isVoiceEnabled || !recognitionRef.current) return;
     
+    finalTranscriptRef.current = '';
     setTranscript('');
-    setInterimTranscript('');
     setIsListening(true);
     
     try {
@@ -119,7 +120,6 @@ export const useConversationalMicrophone = ({
       recognitionRef.current.stop();
     }
     setIsListening(false);
-    setInterimTranscript('');
     
     if (silenceTimerRef.current) {
       clearTimeout(silenceTimerRef.current);
@@ -136,7 +136,7 @@ export const useConversationalMicrophone = ({
 
   return {
     isListening,
-    transcript: transcript + interimTranscript,
+    transcript,
     startListening,
     stopListening,
     toggleListening

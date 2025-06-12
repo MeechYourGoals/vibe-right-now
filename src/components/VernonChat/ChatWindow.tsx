@@ -21,12 +21,10 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Auto-scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Focus input field when component mounts
   useEffect(() => {
     if (!isModelLoading) {
       inputRef.current?.focus();
@@ -70,7 +68,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
           >
             <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
             
-            {/* Voice indicator for AI messages */}
             {isIncoming && (
               <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
                 <Volume2 size={12} className="text-white" />
@@ -90,7 +87,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
 
   return (
     <div className="fixed right-6 bottom-6 w-96 h-[600px] max-h-[80vh] bg-background border rounded-lg shadow-lg flex flex-col z-50">
-      {/* Header */}
       <div className="flex items-center justify-between p-3 border-b">
         <div className="flex items-center space-x-2">
           <Bot className="w-5 h-5 text-primary" />
@@ -127,7 +123,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
         </div>
       </div>
 
-      {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 flex flex-col">
         {messages.map(renderMessage)}
         {isProcessing && (
@@ -144,14 +139,12 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Transcript display */}
       {isListening && transcript && (
         <div className="px-3 py-2 bg-blue-50 dark:bg-blue-900/20 text-sm text-blue-700 dark:text-blue-300 italic border-t">
           Speaking: {transcript}
         </div>
       )}
 
-      {/* Input area */}
       <form onSubmit={handleSubmit} className="p-3 border-t flex items-center gap-2">
         <button
           type="button"

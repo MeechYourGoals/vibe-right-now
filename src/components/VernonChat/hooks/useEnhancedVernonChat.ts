@@ -35,7 +35,6 @@ export const useEnhancedVernonChat = () => {
   const handleSendMessage = useCallback(async (text: string) => {
     if (!text.trim()) return;
     
-    // Stop any current speech
     stopSpeaking();
     
     setInput('');
@@ -46,7 +45,6 @@ export const useEnhancedVernonChat = () => {
       const response = await processMessage(text, messages, chatMode);
       addMessage(response, 'incoming', true);
       
-      // Automatically speak the response
       await speak(response);
     } catch (error) {
       console.error('Error processing message:', error);
@@ -84,7 +82,6 @@ export const useEnhancedVernonChat = () => {
     stopSpeaking();
   }, [setMessages, stopSpeaking]);
 
-  // Add welcome message on first load if no messages exist
   const initializeWelcomeMessage = useCallback(() => {
     if (messages.length === 0) {
       const timestamp = new Date();

@@ -2,7 +2,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const ELEVEN_LABS_API_KEY = Deno.env.get('ELEVEN_LABS_API_KEY') || '';
-const BRIAN_VOICE_ID = "nPczCjzI2devNBz1zQrb"; // Brian voice ID
+const BRIAN_VOICE_ID = "nPczCjzI2devNBz1zQrb";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -10,13 +10,11 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // Validate API key
     if (!ELEVEN_LABS_API_KEY) {
       return new Response(
         JSON.stringify({ error: 'ElevenLabs API key not configured' }),
@@ -24,7 +22,6 @@ serve(async (req) => {
       );
     }
 
-    // Parse request body
     const { text, voiceId = BRIAN_VOICE_ID, model = "eleven_multilingual_v2" } = await req.json();
 
     if (!text) {
@@ -34,11 +31,9 @@ serve(async (req) => {
       );
     }
 
-    // Reduce text length if it's too long to save credits
     const reducedText = reduceLongText(text);
     console.log(`Converting text to speech with Brian voice: "${reducedText.substring(0, 50)}..."`);
 
-    // Call Eleven Labs API
     const elevenLabsResponse = await fetch(
       `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
       {
@@ -51,9 +46,9 @@ serve(async (req) => {
           text: reducedText,
           model_id: model,
           voice_settings: {
-            stability: 0.7,
-            similarity_boost: 0.8,
-            style: 0.0,
+            stability: 0.75,
+            similarity_boost: 0.85,
+            style: 0.2,
             use_speaker_boost: true
           },
         }),
@@ -62,48 +57,19 @@ serve(async (req) => {
 
     if (!elevenLabsResponse.ok) {
       const errorText = await elevenLabsResponse.text();
-      let errorData;
-      try {
-        errorData = JSON.parse(errorText);
-      } catch (e) {
-        errorData = { detail: errorText };
-      }
-      
-      // Special handling for quota exceeded errors
-      if (errorData?.detail?.status === 'quota_exceeded') {
-        console.log('ElevenLabs quota exceeded, returning error with specific code');
-        return new Response(
-          JSON.stringify({ 
-            error: 'quota_exceeded', 
-            message: 'ElevenLabs quota exceeded',
-            details: errorData?.detail
-          }),
-          { 
-            status: 429, 
-            headers: { 
-              ...corsHeaders, 
-              'Content-Type': 'application/json',
-              'X-Error-Type': 'quota_exceeded' 
-            } 
-          }
-        );
-      }
-      
       console.error(`ElevenLabs API error: ${errorText}`);
       return new Response(
         JSON.stringify({ 
           error: 'Error calling ElevenLabs API', 
-          details: errorData || errorText,
+          details: errorText,
           status: elevenLabsResponse.status 
         }),
         { status: elevenLabsResponse.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Get audio as array buffer
     const audioArrayBuffer = await elevenLabsResponse.arrayBuffer();
 
-    // Return the audio stream with appropriate content type
     return new Response(audioArrayBuffer, {
       headers: {
         ...corsHeaders,
@@ -119,12 +85,9 @@ serve(async (req) => {
   }
 });
 
-// Helper function to reduce long text
 function reduceLongText(text: string): string {
-  // If text is less than 500 characters, return as is
   if (text.length < 500) return text;
   
-  // For longer text, truncate while trying to maintain complete sentences
   const sentences = text.match(/[^.!?]+[.!?]+/g) || [];
   let result = '';
   let totalChars = 0;
@@ -138,7 +101,6 @@ function reduceLongText(text: string): string {
     totalChars += sentence.length;
   }
   
-  // Add an ellipsis if we truncated the text
   if (result.length < text.length) {
     result = result.trim() + '...';
   }

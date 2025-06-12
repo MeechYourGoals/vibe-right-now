@@ -1,3 +1,4 @@
+
 import { Post, Media } from "@/types";
 import { regularUsers, celebrityUsers } from "./users";
 import { mockLocations } from "./locations";
@@ -22,7 +23,7 @@ export const mockPosts: Post[] = [
       },
     ],
     timestamp: getRecentTime(1),
-    expiresAt: getExpiryTime(getRecentTime(1), true), // Pinned post (90 days)
+    expiresAt: getExpiryTime(getRecentTime(1), true),
     likes: 42,
     comments: 7,
     shares: 5,
@@ -579,3 +580,12 @@ export const mockPosts: Post[] = [
     saved: false
   },
 ];
+
+// Helper to add shares to existing posts
+const addSharesToPost = (post: any) => ({
+  ...post,
+  shares: Math.floor(Math.random() * 10) + 1
+});
+
+// Apply shares to all posts that don't have it
+export const mockPostsWithShares = mockPosts.map(addSharesToPost);

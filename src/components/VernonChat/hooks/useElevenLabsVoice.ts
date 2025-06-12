@@ -5,7 +5,6 @@ import { supabase } from '@/integrations/supabase/client';
 export const useElevenLabsVoice = () => {
   const [isElevenLabsReady, setIsElevenLabsReady] = useState<boolean>(true);
   
-  // Function to speak using ElevenLabs
   const speakWithElevenLabs = useCallback(async (text: string): Promise<boolean> => {
     try {
       console.log('Using ElevenLabs TTS with Brian voice for:', text.substring(0, 50) + '...');
@@ -13,7 +12,7 @@ export const useElevenLabsVoice = () => {
       const { data, error } = await supabase.functions.invoke('eleven-labs-tts', {
         body: { 
           text, 
-          voiceId: 'nPczCjzI2devNBz1zQrb', // Brian voice
+          voiceId: 'nPczCjzI2devNBz1zQrb',
           model: 'eleven_multilingual_v2' 
         }
       });
@@ -28,7 +27,6 @@ export const useElevenLabsVoice = () => {
         return false;
       }
 
-      // Create audio element and play
       const audio = new Audio();
       const blob = new Blob([data], { type: 'audio/mpeg' });
       const url = URL.createObjectURL(blob);

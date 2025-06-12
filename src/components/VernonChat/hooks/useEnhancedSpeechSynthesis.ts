@@ -10,7 +10,6 @@ export const useEnhancedSpeechSynthesis = () => {
   const speak = useCallback(async (text: string): Promise<void> => {
     if (!text.trim()) return;
     
-    // Stop any currently playing audio
     if (currentAudioRef.current) {
       currentAudioRef.current.pause();
       currentAudioRef.current = null;
@@ -19,11 +18,9 @@ export const useEnhancedSpeechSynthesis = () => {
     setIsSpeaking(true);
     
     try {
-      // Try ElevenLabs first
       const success = await speakWithElevenLabs(text);
       
       if (!success) {
-        // Fallback to browser speech synthesis
         console.log('Falling back to browser speech synthesis');
         await fallbackToSpeechSynthesis(text);
       }
@@ -44,7 +41,6 @@ export const useEnhancedSpeechSynthesis = () => {
       
       const utterance = new SpeechSynthesisUtterance(text);
       
-      // Try to find a male voice
       const voices = window.speechSynthesis.getVoices();
       const maleVoice = voices.find(voice => 
         voice.name.includes('Male') || 
@@ -69,13 +65,11 @@ export const useEnhancedSpeechSynthesis = () => {
   }, []);
   
   const stopSpeaking = useCallback(() => {
-    // Stop ElevenLabs audio
     if (currentAudioRef.current) {
       currentAudioRef.current.pause();
       currentAudioRef.current = null;
     }
     
-    // Stop browser speech synthesis
     if (window.speechSynthesis) {
       window.speechSynthesis.cancel();
     }
