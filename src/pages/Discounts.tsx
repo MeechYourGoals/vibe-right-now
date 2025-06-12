@@ -1,148 +1,137 @@
-import React from "react";
-import Header from "@/components/Header";
+
+import { useState } from "react";
+import { Layout } from "@/components/Layout";
+import MapContainer from "@/components/map/MapContainer";
+import { Card, CardContent } from "@/components/ui/card";
+import { discountOffers } from "@/mock/discountOffers";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Clock, MapPin, Percent, Gift } from "lucide-react";
+import { ArrowRight, MapPin, Ticket } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { VenueWithDiscount } from "@/components/venue/events/types";
-import { mockLocations } from "@/mock/locations";
+import { Location } from "@/types";
 
-// Transform mock locations to venues with discounts
-const venuesWithDiscounts: VenueWithDiscount[] = mockLocations.slice(0, 8).map((location, index) => ({
-  ...location,
-  type: location.type as "restaurant" | "bar" | "event" | "attraction" | "sports" | "other",
-  discount: {
-    id: `discount-${index}`,
-    type: index % 4 === 0 ? "freeItem" : index % 4 === 1 ? "percentOff" : index % 4 === 2 ? "freeEntry" : "vipAccess",
-    description: index % 4 === 0 ? "Free appetizer with any entree" : 
-                index % 4 === 1 ? "25% off your entire bill" :
-                index % 4 === 2 ? "Free entry before 10 PM" : "Skip the line + VIP seating",
-    expiresAt: new Date(Date.now() + (index + 1) * 24 * 60 * 60 * 1000).toISOString(),
-    conditions: index % 4 === 0 ? "Valid Monday-Thursday only" :
-               index % 4 === 1 ? "Cannot be combined with other offers" :
-               index % 4 === 2 ? "Valid until 10 PM only" : "Must mention 'VRN' at door",
-    code: `VRN${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
-    value: index % 4 === 1 ? 25 : undefined,
-    originalPrice: index % 4 === 2 ? "$15 cover charge" : undefined
-  },
-  distance: `${(Math.random() * 5).toFixed(1)} mi`
-}));
+// Convert VenueWithDiscount to Location for MapContainer compatibility
+const convertToLocation = (venue: VenueWithDiscount): Location => {
+  return {
+    id: venue.id,
+    name: venue.name,
+    type: venue.type,
+    address: venue.address,
+    city: venue.city,
+    state: venue.state,
+    country: venue.country,
+    zip: venue.zip,
+    lat: venue.lat,
+    lng: venue.lng,
+    verified: venue.verified,
+    description: venue.discount.description
+  };
+};
 
 const Discounts = () => {
-  const getDiscountIcon = (type: string) => {
-    switch (type) {
-      case "percentOff":
-        return <Percent className="h-5 w-5" />;
-      case "freeItem":
-      case "freeEntry":
-        return <Gift className="h-5 w-5" />;
-      case "vipAccess":
-        return <Clock className="h-5 w-5" />;
-      default:
-        return <Gift className="h-5 w-5" />;
+  const navigate = useNavigate();
+  const [selectedVenue, setSelectedVenue] = useState<VenueWithDiscount | null>(null);
+  const [mapExpanded, setMapExpanded] = useState(false);
+
+  const handleVenueSelect = (location: Location) => {
+    // Find the corresponding venue from discountOffers
+    const venue = discountOffers.find(v => v.id === location.id);
+    if (venue) {
+      setSelectedVenue(venue);
     }
   };
 
-  const getDiscountColor = (type: string) => {
-    switch (type) {
-      case "percentOff":
-        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
-      case "freeItem":
-        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
-      case "freeEntry":
-        return "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200";
-      case "vipAccess":
-        return "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200";
-      default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
-    }
+  const handleCloseLocation = () => {
+    setSelectedVenue(null);
   };
 
-  const formatTimeRemaining = (expiresAt: string) => {
-    const now = new Date();
-    const expiry = new Date(expiresAt);
-    const diff = expiry.getTime() - now.getTime();
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    
-    if (hours < 24) {
-      return `${hours}h remaining`;
-    } else {
-      const days = Math.floor(hours / 24);
-      return `${days}d remaining`;
-    }
-  };
+  // Convert discount venues to Location type for map compatibility
+  const locationsForMap = discountOffers.map(convertToLocation);
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      
-      <main className="container py-6">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-center mb-2 vibe-gradient-text">
-            Exclusive Deals & Discounts
-          </h1>
-          <p className="text-center text-muted-foreground">
-            Limited-time offers from your favorite venues
-          </p>
+    <Layout>
+      <div className="container py-6">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-3xl font-bold vibe-gradient-text">
+              Nearby Discounts & Deals
+            </h1>
+            <p className="text-muted-foreground mt-2">
+              Exclusive offers at venues near you
+            </p>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {venuesWithDiscounts.map((venue) => (
+        {/* Map Section */}
+        <div className="mb-8">
+          <MapContainer
+            loading={false}
+            isExpanded={mapExpanded}
+            userLocation={null}
+            locations={locationsForMap}
+            searchedCity=""
+            mapStyle="default"
+            selectedLocation={selectedVenue ? convertToLocation(selectedVenue) : null}
+            showDistances={true}
+            userAddressLocation={null}
+            onLocationSelect={handleVenueSelect}
+            onCloseLocation={handleCloseLocation}
+            nearbyCount={discountOffers.length}
+            onToggleDistances={() => {}}
+          />
+        </div>
+
+        {/* Discount List */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {discountOffers.map((venue) => (
             <Card key={venue.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-              <CardHeader className="pb-3">
+              <CardContent className="p-4">
                 <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <CardTitle className="text-lg font-semibold">{venue.name}</CardTitle>
-                    <CardDescription className="flex items-center mt-1">
-                      <MapPin className="h-4 w-4 mr-1" />
-                      {venue.city} • {venue.distance}
-                    </CardDescription>
+                  <div>
+                    <h3 className="font-semibold text-lg">{venue.name}</h3>
+                    <p className="text-sm text-muted-foreground flex items-center mt-1">
+                      <MapPin className="h-3 w-3 mr-1" />
+                      {venue.city}, {venue.state}
+                    </p>
                   </div>
-                  <Badge className={getDiscountColor(venue.discount.type)}>
-                    {getDiscountIcon(venue.discount.type)}
+                  <Badge variant={venue.discount.type === "percentOff" ? "secondary" : "default"}>
+                    <Ticket className="h-3 w-3 mr-1" />
+                    {venue.discount.type === "percentOff" 
+                      ? `${venue.discount.value}% OFF`
+                      : venue.discount.type.replace(/([A-Z])/g, ' $1').trim()}
                   </Badge>
                 </div>
-              </CardHeader>
-              
-              <CardContent className="space-y-4">
-                <div className="bg-muted rounded-lg p-4">
-                  <div className="flex items-start justify-between mb-2">
-                    <h4 className="font-medium text-primary">{venue.discount.description}</h4>
-                    {venue.discount.value && (
-                      <Badge variant="secondary">{venue.discount.value}% OFF</Badge>
-                    )}
-                  </div>
-                  
+                
+                <p className="mt-3 text-sm">{venue.discount.description}</p>
+                
+                {venue.discount.conditions && (
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    {venue.discount.conditions}
+                  </p>
+                )}
+                
+                <div className="mt-4 flex justify-between items-center">
                   {venue.discount.code && (
-                    <div className="flex items-center justify-between bg-background rounded px-3 py-2 mt-3">
-                      <span className="font-mono text-sm">{venue.discount.code}</span>
-                      <Button variant="outline" size="sm">Copy</Button>
-                    </div>
+                    <Badge variant="outline" className="text-xs">
+                      Code: {venue.discount.code}
+                    </Badge>
                   )}
+                  <Button 
+                    size="sm" 
+                    className="ml-auto"
+                    onClick={() => navigate(`/venue/${venue.id}`)}
+                  >
+                    View Venue
+                    <ArrowRight className="h-4 w-4 ml-1" />
+                  </Button>
                 </div>
-                
-                <div className="space-y-2 text-sm">
-                  {venue.discount.conditions && (
-                    <p className="text-muted-foreground">{venue.discount.conditions}</p>
-                  )}
-                  
-                  {venue.discount.expiresAt && (
-                    <div className="flex items-center text-orange-600 dark:text-orange-400">
-                      <Clock className="h-4 w-4 mr-1" />
-                      {formatTimeRemaining(venue.discount.expiresAt)}
-                    </div>
-                  )}
-                </div>
-                
-                <Button className="w-full">
-                  Claim Offer
-                </Button>
               </CardContent>
             </Card>
           ))}
         </div>
-      </main>
-    </div>
+      </div>
+    </Layout>
   );
 };
 

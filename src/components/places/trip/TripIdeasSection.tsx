@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,13 +26,13 @@ interface VenueIdea {
   venue_name: string;
   venue_address: string;
   venue_city: string;
-  venue_rating: number | null;
+  venue_rating: number;
   venue_image_url: string;
   proposed_by_name: string;
   proposed_by_avatar: string;
   proposed_by_id: string;
   notes: string | null;
-  status: string; // Allow any string from database
+  status: 'pending' | 'approved' | 'rejected';
   created_at: string;
   trip_venue_votes?: Array<{
     id: string;
@@ -80,9 +81,8 @@ const TripIdeasSection: React.FC<TripIdeasSectionProps> = ({
       if (error) throw error;
       
       // Transform the data to match our interface
-      const transformedData: VenueIdea[] = data?.map(item => ({
+      const transformedData = data?.map(item => ({
         ...item,
-        venue_rating: item.venue_rating || 0,
         trip_venue_votes: item.trip_venue_votes || []
       })) || [];
       
