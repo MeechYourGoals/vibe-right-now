@@ -1,57 +1,70 @@
 
-import React, { useMemo } from "react";
-import { Link } from "react-router-dom";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import React from 'react';
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Location } from "@/types";
-import { mockUsers } from "@/mock/users";
-import { hashString } from "@/mock/users";
+import { Badge } from "@/components/ui/badge";
+import { Verified } from "lucide-react";
+import { Post } from "@/types";
 
 interface PostUsersListProps {
-  location: Location;
-  setShowAllUsers: (show: boolean) => void;
+  posts: Post[];
+  title: string;
+  onUserClick?: (userId: string) => void;
 }
 
-const PostUsersList: React.FC<PostUsersListProps> = ({ location, setShowAllUsers }) => {
-  // Deterministically select users for each location based on location ID
-  const getLocationUsers = useMemo(() => {
-    const locationSeed = parseInt(location.id) || hashString(location.name);
-    
-    // Always include our 5 main profile users
-    const featuredUsernames = ['sarah_vibes', 'jay_experiences', 'adventure_alex', 'marco_travels', 'local_explorer'];
-    const featuredUsers = mockUsers.filter(user => featuredUsernames.includes(user.username));
-    
-    // Select additional random users based on location seed
-    const otherUsers = mockUsers.filter(user => !featuredUsernames.includes(user.username));
-    const shuffled = [...otherUsers].sort(() => 0.5 - (locationSeed * 0.0001));
-    const additionalUsers = shuffled.slice(0, 95); // Get 95 more for a total of 100
-    
-    return [...featuredUsers, ...additionalUsers];
-  }, [location.id, location.name]);
+const PostUsersList: React.FC<PostUsersListProps> = ({ posts, title, onUserClick }) => {
+  // Sort posts by engagement (likes + comments + shares)
+  const sortedPosts = [...posts].sort((a, b) => {
+    const aEngagement = Number(a.likes) + Number(a.comments) + Number(a.shares || 0);
+    const bEngagement = Number(b.likes) + Number(b.comments) + Number(b.shares || 0);
+    return bEngagement - aEngagement;
+  });
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowAllUsers(false)}>
-      <div className="bg-background rounded-lg max-w-md w-full max-h-[80vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
-        <div className="p-4 border-b flex justify-between items-center">
-          <h3 className="font-bold">People who visited {location.name}</h3>
-          <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setShowAllUsers(false)}>×</Button>
-        </div>
-        <div className="p-4 overflow-y-auto max-h-[calc(80vh-4rem)]">
-          <div className="grid gap-2">
-            {getLocationUsers.map((user, index) => (
-              <Link key={index} to={`/user/${user.username}`} className="flex items-center p-2 hover:bg-muted rounded-md">
-                <Avatar className="h-8 w-8 mr-2">
-                  <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+    <div className="space-y-4">
+      <h3 className="text-lg font-semibold">{title}</h3>
+      <div className="space-y-3">
+        {sortedPosts.slice(0, 10).map((post) => {
+          const totalEngagement = Number(post.likes) + Number(post.comments) + Number(post.shares || 0);
+          
+          return (
+            <div key={post.id} className="flex items-center justify-between p-3 rounded-lg border bg-card">
+              <div className="flex items-center space-x-3">
+                <Avatar className="h-10 w-10">
+                  <AvatarImage src={post.user.avatar} alt={post.user.username} />
+                  <AvatarFallback>{post.user.username[0]?.toUpperCase()}</AvatarFallback>
                 </Avatar>
-                <div>
-                  <div className="font-medium text-sm">@{user.username}</div>
-                  <div className="text-xs text-muted-foreground">{user.name}</div>
+                
+                <div className="flex-1">
+                  <div className="flex items-center space-x-2">
+                    <h4 className="font-medium text-sm">{post.user.username}</h4>
+                    {post.user.verified && (
+                      <Verified className="h-4 w-4 text-primary" />
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground truncate max-w-[200px]">
+                    {post.content}
+                  </p>
                 </div>
-              </Link>
-            ))}
-          </div>
-        </div>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <Badge variant="secondary" className="text-xs">
+                  {totalEngagement} interactions
+                </Badge>
+                {onUserClick && (
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => onUserClick(post.user.id)}
+                  >
+                    View
+                  </Button>
+                )}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

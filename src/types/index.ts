@@ -12,7 +12,7 @@ export interface Location {
   zip?: string;
   lat: number;
   lng: number;
-  type: "restaurant" | "bar" | "event" | "attraction" | "sports" | "other";
+  type: "restaurant" | "bar" | "event" | "attraction" | "sports" | "other" | "nightclub" | "cafe" | "museum";
   verified: boolean;
   hours?: BusinessHours;
   vibes?: string[];
@@ -94,6 +94,10 @@ export interface CreditCard {
   expiryMonth: number;
   expiryYear: number;
   isDefault: boolean;
+  expMonth: number;
+  expYear: number;
+  maxSpendLimit?: number;
+  vernonApproved?: boolean;
 }
 
 // VernonChat types

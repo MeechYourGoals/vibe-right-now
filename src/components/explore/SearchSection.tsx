@@ -5,24 +5,30 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import DateFilterSection from './DateFilterSection';
+import { DateRange } from '@/types';
 
 interface SearchSectionProps {
-  searchQuery: string;
-  onSearchChange: (query: string) => void;
-  selectedDates: { from: Date; to: Date } | null;
-  onDateChange: (dates: { from: Date; to: Date } | null) => void;
-  location: string;
-  onLocationChange: (location: string) => void;
+  showDateFilter: boolean;
+  dateRange: DateRange;
+  onSearch: (query: string, filterType: string, category: string) => void;
+  onDateRangeChange: (range: DateRange) => void;
+  onClearDates: () => void;
 }
 
 const SearchSection: React.FC<SearchSectionProps> = ({
-  searchQuery,
-  onSearchChange,
-  selectedDates,
-  onDateChange,
-  location,
-  onLocationChange
+  showDateFilter,
+  dateRange,
+  onSearch,
+  onDateRangeChange,
+  onClearDates
 }) => {
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const [location, setLocation] = React.useState('');
+
+  const handleSearchSubmit = () => {
+    onSearch(searchQuery, 'general', 'all');
+  };
+
   return (
     <div className="space-y-4">
       <Card>
@@ -38,8 +44,9 @@ const SearchSection: React.FC<SearchSectionProps> = ({
               <Input
                 placeholder="Search venues, events, vibes..."
                 value={searchQuery}
-                onChange={(e) => onSearchChange(e.target.value)}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
+                onKeyPress={(e) => e.key === 'Enter' && handleSearchSubmit()}
               />
             </div>
             
@@ -48,7 +55,7 @@ const SearchSection: React.FC<SearchSectionProps> = ({
               <Input
                 placeholder="Enter location..."
                 value={location}
-                onChange={(e) => onLocationChange(e.target.value)}
+                onChange={(e) => setLocation(e.target.value)}
                 className="pl-10"
               />
             </div>
@@ -56,10 +63,12 @@ const SearchSection: React.FC<SearchSectionProps> = ({
         </CardContent>
       </Card>
 
-      <DateFilterSection
-        selectedDates={selectedDates}
-        onDateChange={onDateChange}
-      />
+      {showDateFilter && (
+        <DateFilterSection
+          selectedDates={dateRange}
+          onDateChange={onDateRangeChange}
+        />
+      )}
     </div>
   );
 };

@@ -1,125 +1,123 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { VenueSentimentAnalysis, PlatformSentimentSummary, SentimentTheme } from "@/types";
+import { VenueSentimentAnalysis } from "@/types";
 
-export class SentimentAnalysisService {
-  // Analyze reviews for a venue on a specific platform
-  static async analyzeVenueReviews(
-    venueId: string, 
-    platform: string, 
-    reviews: Array<{ id: string; text: string; }>
-  ): Promise<VenueSentimentAnalysis | null> {
-    try {
-      const { data, error } = await supabase.functions.invoke('review-sentiment-analyzer', {
-        body: {
-          venue_id: venueId,
-          platform: platform,
-          reviews: reviews
-        }
-      });
+export const getSentimentAnalysis = async (venueId: string): Promise<VenueSentimentAnalysis[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('venue_sentiment_analysis')
+      .select('*')
+      .eq('venue_id', venueId);
 
-      if (error) {
-        console.error('Error calling sentiment analysis function:', error);
-        return null;
-      }
-
-      return data?.analysis || null;
-    } catch (error) {
-      console.error('Error in sentiment analysis service:', error);
-      return null;
+    if (error) {
+      console.error('Error fetching sentiment analysis:', error);
+      throw error;
     }
+
+    // Transform the data to match our interface, handling the Json type properly
+    const transformedData: VenueSentimentAnalysis[] = data?.map(item => ({
+      ...item,
+      themes: typeof item.themes === 'object' && item.themes !== null ? 
+        item.themes as Record<string, number> : {}
+    })) || [];
+
+    return transformedData;
+  } catch (error) {
+    console.error('Error in getSentimentAnalysis:', error);
+    throw error;
   }
+};
 
-  // Get sentiment analysis for a venue across all platforms
-  static async getVenueSentimentAnalysis(venueId: string): Promise<VenueSentimentAnalysis[]> {
-    try {
-      const { data, error } = await supabase
-        .from('venue_sentiment_analysis')
-        .select('*')
-        .eq('venue_id', venueId)
-        .order('last_analyzed_at', { ascending: false });
+export const createSentimentAnalysis = async (
+  venueId: string,
+  platform: string,
+  overallSentiment: number,
+  sentimentSummary: string,
+  themes: Record<string, number>,
+  reviewCount: number
+): Promise<VenueSentimentAnalysis> => {
+  try {
+    const { data, error } = await supabase
+      .from('venue_sentiment_analysis')
+      .insert({
+        venue_id: venueId,
+        platform,
+        overall_sentiment: overallSentiment,
+        sentiment_summary: sentimentSummary,
+        themes: themes as any, // Cast to any for Json type compatibility
+        review_count: reviewCount
+      })
+      .select()
+      .single();
 
-      if (error) {
-        console.error('Error fetching sentiment analysis:', error);
-        return [];
-      }
-
-      return data || [];
-    } catch (error) {
-      console.error('Error in getVenueSentimentAnalysis:', error);
-      return [];
+    if (error) {
+      console.error('Error creating sentiment analysis:', error);
+      throw error;
     }
-  }
 
-  // Get formatted platform summaries for display
-  static async getPlatformSentimentSummaries(venueId: string): Promise<PlatformSentimentSummary[]> {
-    const analyses = await this.getVenueSentimentAnalysis(venueId);
-    
-    return analyses.map(analysis => ({
-      platform: analysis.platform,
-      overallSentiment: analysis.overall_sentiment,
-      summary: analysis.sentiment_summary,
-      themes: this.formatThemes(analysis.themes),
-      reviewCount: analysis.review_count,
-      lastUpdated: analysis.last_analyzed_at
-    }));
-  }
-
-  // Format themes for display
-  private static formatThemes(themes: Record<string, number>): SentimentTheme[] {
-    return Object.entries(themes).map(([name, score]) => ({
-      name: name.charAt(0).toUpperCase() + name.slice(1),
-      score,
-      mentions: 1, // Simplified for now
-      examples: [] // Could be enhanced to include example phrases
-    }));
-  }
-
-  // Get sentiment summary for a specific platform
-  static async getPlatformSentiment(venueId: string, platform: string): Promise<VenueSentimentAnalysis | null> {
-    try {
-      const { data, error } = await supabase
-        .from('venue_sentiment_analysis')
-        .select('*')
-        .eq('venue_id', venueId)
-        .eq('platform', platform)
-        .single();
-
-      if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
-        console.error('Error fetching platform sentiment:', error);
-        return null;
-      }
-
-      return data || null;
-    } catch (error) {
-      console.error('Error in getPlatformSentiment:', error);
-      return null;
-    }
-  }
-
-  // Trigger analysis for mock data (for demo purposes)
-  static async triggerMockAnalysis(venueId: string): Promise<void> {
-    const mockReviews = {
-      yelp: [
-        { id: 'yelp_1', text: 'Amazing ambience and great service! The food was incredible and the staff was so friendly.' },
-        { id: 'yelp_2', text: 'Love the atmosphere here but the music was too loud. Great cocktails though!' },
-        { id: 'yelp_3', text: 'Perfect spot for date night. Romantic lighting and excellent wine selection.' }
-      ],
-      facebook: [
-        { id: 'fb_1', text: 'Great place but very crowded. The ambience is nice but DJ was too loud for conversation.' },
-        { id: 'fb_2', text: 'Fantastic food and service. Love coming here for brunch!' },
-        { id: 'fb_3', text: 'Beautiful decor and atmosphere. Service could be faster but overall good experience.' }
-      ],
-      google: [
-        { id: 'g_1', text: 'Excellent food quality and beautiful interior design. Staff is professional and friendly.' },
-        { id: 'g_2', text: 'Great cocktails and nice atmosphere. Can get quite busy on weekends.' },
-        { id: 'g_3', text: 'Love the vibe here! Perfect for celebrations. Food is consistently good.' }
-      ]
+    // Transform the returned data to match our interface
+    const transformedData: VenueSentimentAnalysis = {
+      ...data,
+      themes: typeof data.themes === 'object' && data.themes !== null ? 
+        data.themes as Record<string, number> : {}
     };
 
-    // Trigger analysis for each platform
-    for (const [platform, reviews] of Object.entries(mockReviews)) {
-      await this.analyzeVenueReviews(venueId, platform, reviews);
-    }
+    return transformedData;
+  } catch (error) {
+    console.error('Error in createSentimentAnalysis:', error);
+    throw error;
   }
-}
+};
+
+export const updateSentimentAnalysis = async (
+  id: string,
+  updates: Partial<Omit<VenueSentimentAnalysis, 'id' | 'created_at' | 'updated_at'>>
+): Promise<VenueSentimentAnalysis> => {
+  try {
+    const updateData = {
+      ...updates,
+      themes: updates.themes ? updates.themes as any : undefined // Cast themes for Json compatibility
+    };
+
+    const { data, error } = await supabase
+      .from('venue_sentiment_analysis')
+      .update(updateData)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error updating sentiment analysis:', error);
+      throw error;
+    }
+
+    // Transform the returned data to match our interface
+    const transformedData: VenueSentimentAnalysis = {
+      ...data,
+      themes: typeof data.themes === 'object' && data.themes !== null ? 
+        data.themes as Record<string, number> : {}
+    };
+
+    return transformedData;
+  } catch (error) {
+    console.error('Error in updateSentimentAnalysis:', error);
+    throw error;
+  }
+};
+
+export const deleteSentimentAnalysis = async (id: string): Promise<void> => {
+  try {
+    const { error } = await supabase
+      .from('venue_sentiment_analysis')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error deleting sentiment analysis:', error);
+      throw error;
+    }
+  } catch (error) {
+    console.error('Error in deleteSentimentAnalysis:', error);
+    throw error;
+  }
+};
