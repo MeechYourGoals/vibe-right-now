@@ -25,6 +25,7 @@ export const mockPosts: Post[] = [
     expiresAt: getExpiryTime(getRecentTime(1), true), // Pinned post (90 days)
     likes: 42,
     comments: 7,
+    shares: 5,
     isPinned: true,
     saved: false,
     vibeTags: ["Lively", "Upscale", "NightOwl"]
@@ -44,6 +45,7 @@ export const mockPosts: Post[] = [
     expiresAt: getExpiryTime(getRecentTime(2)),
     likes: 18,
     comments: 3,
+    shares: 2,
     saved: false
   },
   {

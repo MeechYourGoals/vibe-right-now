@@ -1,0 +1,91 @@
+
+import { useState, useCallback, useRef } from 'react';
+import { useElevenLabsVoice } from './useElevenLabsVoice';
+
+export const useEnhancedSpeechSynthesis = () => {
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const currentAudioRef = useRef<HTMLAudioElement | null>(null);
+  const { speakWithElevenLabs } = useElevenLabsVoice();
+  
+  const speak = useCallback(async (text: string): Promise<void> => {
+    if (!text.trim()) return;
+    
+    // Stop any currently playing audio
+    if (currentAudioRef.current) {
+      currentAudioRef.current.pause();
+      currentAudioRef.current = null;
+    }
+    
+    setIsSpeaking(true);
+    
+    try {
+      // Try ElevenLabs first
+      const success = await speakWithElevenLabs(text);
+      
+      if (!success) {
+        // Fallback to browser speech synthesis
+        console.log('Falling back to browser speech synthesis');
+        await fallbackToSpeechSynthesis(text);
+      }
+    } catch (error) {
+      console.error('Speech synthesis error:', error);
+      await fallbackToSpeechSynthesis(text);
+    } finally {
+      setIsSpeaking(false);
+    }
+  }, [speakWithElevenLabs]);
+  
+  const fallbackToSpeechSynthesis = useCallback(async (text: string): Promise<void> => {
+    return new Promise((resolve) => {
+      if (!window.speechSynthesis) {
+        resolve();
+        return;
+      }
+      
+      const utterance = new SpeechSynthesisUtterance(text);
+      
+      // Try to find a male voice
+      const voices = window.speechSynthesis.getVoices();
+      const maleVoice = voices.find(voice => 
+        voice.name.includes('Male') || 
+        voice.name.includes('David') || 
+        voice.name.includes('Daniel') ||
+        voice.name.includes('Google UK English Male')
+      );
+      
+      if (maleVoice) {
+        utterance.voice = maleVoice;
+      }
+      
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
+      utterance.volume = 1.0;
+      
+      utterance.onend = () => resolve();
+      utterance.onerror = () => resolve();
+      
+      window.speechSynthesis.speak(utterance);
+    });
+  }, []);
+  
+  const stopSpeaking = useCallback(() => {
+    // Stop ElevenLabs audio
+    if (currentAudioRef.current) {
+      currentAudioRef.current.pause();
+      currentAudioRef.current = null;
+    }
+    
+    // Stop browser speech synthesis
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+    
+    setIsSpeaking(false);
+  }, []);
+  
+  return {
+    speak,
+    stopSpeaking,
+    isSpeaking
+  };
+};

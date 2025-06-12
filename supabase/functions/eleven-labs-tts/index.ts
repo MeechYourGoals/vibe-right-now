@@ -2,7 +2,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const ELEVEN_LABS_API_KEY = Deno.env.get('ELEVEN_LABS_API_KEY') || '';
-const DEFAULT_VOICE_ID = "pNInz6obpgDQGcFmaJgB"; // Adam voice ID
+const BRIAN_VOICE_ID = "nPczCjzI2devNBz1zQrb"; // Brian voice ID
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -25,7 +25,7 @@ serve(async (req) => {
     }
 
     // Parse request body
-    const { text, voiceId = DEFAULT_VOICE_ID, model = "eleven_multilingual_v2" } = await req.json();
+    const { text, voiceId = BRIAN_VOICE_ID, model = "eleven_multilingual_v2" } = await req.json();
 
     if (!text) {
       return new Response(
@@ -36,7 +36,7 @@ serve(async (req) => {
 
     // Reduce text length if it's too long to save credits
     const reducedText = reduceLongText(text);
-    console.log(`Converting text to speech: "${reducedText.substring(0, 50)}..." with voice ${voiceId}`);
+    console.log(`Converting text to speech with Brian voice: "${reducedText.substring(0, 50)}..."`);
 
     // Call Eleven Labs API
     const elevenLabsResponse = await fetch(
@@ -51,8 +51,10 @@ serve(async (req) => {
           text: reducedText,
           model_id: model,
           voice_settings: {
-            stability: 0.5,
-            similarity_boost: 0.75,
+            stability: 0.7,
+            similarity_boost: 0.8,
+            style: 0.0,
+            use_speaker_boost: true
           },
         }),
       }

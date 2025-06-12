@@ -1,6 +1,6 @@
 
 import React, { useEffect, useRef } from 'react';
-import { X, Send, Mic, MicOff, User, Bot, Trash2 } from 'lucide-react';
+import { X, Send, Mic, MicOff, User, Bot, Trash2, Volume2 } from 'lucide-react';
 import { ChatWindowProps, Message } from './types';
 
 const ChatWindow: React.FC<ChatWindowProps> = ({
@@ -62,13 +62,20 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
           )}
 
           <div
-            className={`p-3 rounded-lg max-w-[80%] ${
+            className={`p-3 rounded-lg max-w-[80%] relative ${
               isIncoming
                 ? 'bg-muted text-foreground'
                 : 'bg-primary text-primary-foreground'
             }`}
           >
             <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
+            
+            {/* Voice indicator for AI messages */}
+            {isIncoming && (
+              <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                <Volume2 size={12} className="text-white" />
+              </div>
+            )}
           </div>
 
           {!isIncoming && (
@@ -87,15 +94,21 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       <div className="flex items-center justify-between p-3 border-b">
         <div className="flex items-center space-x-2">
           <Bot className="w-5 h-5 text-primary" />
-          <span className="font-medium">Vernon - Google AI Assistant</span>
+          <span className="font-medium">Vernon - Enhanced Voice AI</span>
+          {isListening && (
+            <div className="flex items-center space-x-1">
+              <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+              <span className="text-xs text-red-500">Listening</span>
+            </div>
+          )}
         </div>
         <div className="flex items-center space-x-2">
           <button
             onClick={toggleMode}
-            className="p-1 rounded-md hover:bg-muted"
+            className="p-1 rounded-md hover:bg-muted text-xs"
             title={chatMode === 'user' ? 'Switch to venue mode' : 'Switch to user mode'}
           >
-            {chatMode === 'user' ? 'User Mode' : 'Venue Mode'}
+            {chatMode === 'user' ? 'User' : 'Venue'}
           </button>
           <button
             onClick={clearMessages}
@@ -133,8 +146,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
 
       {/* Transcript display */}
       {isListening && transcript && (
-        <div className="px-3 py-2 bg-muted/50 text-sm text-foreground/80 italic border-t">
-          {transcript}
+        <div className="px-3 py-2 bg-blue-50 dark:bg-blue-900/20 text-sm text-blue-700 dark:text-blue-300 italic border-t">
+          Speaking: {transcript}
         </div>
       )}
 
@@ -143,10 +156,12 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
         <button
           type="button"
           onClick={toggleListening}
-          className={`p-2 rounded-full ${
-            isListening ? 'bg-red-100 text-red-500' : 'bg-muted text-foreground'
+          className={`p-2 rounded-full transition-all ${
+            isListening 
+              ? 'bg-red-100 text-red-500 animate-pulse' 
+              : 'bg-muted text-foreground hover:bg-blue-100 hover:text-blue-500'
           }`}
-          title={isListening ? 'Stop listening' : 'Start listening'}
+          title={isListening ? 'Stop conversation' : 'Start conversation'}
         >
           {isListening ? <MicOff size={18} /> : <Mic size={18} />}
         </button>
@@ -156,7 +171,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
           value={input}
           onChange={handleInputChange}
           ref={inputRef}
-          placeholder="Type your message..."
+          placeholder={isListening ? "Listening..." : "Type or speak your message..."}
           disabled={isProcessing || isModelLoading}
           className="flex-1 p-2 bg-background border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
         />
@@ -167,7 +182,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
           className={`p-2 rounded-full ${
             !input || isProcessing
               ? 'bg-muted text-muted-foreground'
-              : 'bg-primary text-primary-foreground'
+              : 'bg-primary text-primary-foreground hover:bg-primary/90'
           }`}
         >
           <Send size={18} />

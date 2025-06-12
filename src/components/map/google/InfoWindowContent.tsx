@@ -23,7 +23,15 @@ const InfoWindowContent: React.FC<InfoWindowContentProps> = ({ location, onSelec
   // Get today's hours
   const today = new Date();
   const dayOfWeek = today.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
-  const todaysHours = location.hours[dayOfWeek as keyof typeof location.hours] || 'Closed';
+  const todaysHours = location.hours[dayOfWeek as keyof typeof location.hours];
+  
+  // Format hours for display
+  const formatHours = (hours: string | true | { open: string; close: string; }) => {
+    if (hours === true) return 'Open 24/7';
+    if (typeof hours === 'string') return hours;
+    if (typeof hours === 'object') return `${hours.open} - ${hours.close}`;
+    return 'Closed';
+  };
 
   const handleViewVenue = () => {
     navigate(`/venue/${location.id}`);
@@ -52,7 +60,7 @@ const InfoWindowContent: React.FC<InfoWindowContentProps> = ({ location, onSelec
         <span>{location.address}, {location.city}</span>
       </div>
       <div className="text-sm mb-2">
-        <span className="font-medium">Today:</span> {todaysHours}
+        <span className="font-medium">Today:</span> {formatHours(todaysHours || 'Closed')}
       </div>
       
       {/* Display wait time if available */}
