@@ -15,7 +15,7 @@ serve(async (req) => {
   }
 
   try {
-    const { query, location, type, placeId, fields, radius, keyword, input, types, componentRestrictions } = await req.json();
+    const { query, location, type, placeId, fields, radius, keyword } = await req.json();
     
     console.log('Google Places request received:', { 
       query: query?.substring(0, 50), 
@@ -24,10 +24,7 @@ serve(async (req) => {
       placeId, 
       fields, 
       radius, 
-      keyword,
-      input: input?.substring(0, 50),
-      types,
-      componentRestrictions
+      keyword 
     });
 
     let endpoint;
@@ -44,18 +41,6 @@ serve(async (req) => {
       
       if (fields && Array.isArray(fields)) {
         params.append('fields', fields.join(','));
-      }
-    } else if (input) {
-      // Autocomplete request
-      endpoint = 'https://maps.googleapis.com/maps/api/place/autocomplete/json';
-      params.append('input', input);
-      
-      if (types && Array.isArray(types)) {
-        params.append('types', types.join('|'));
-      }
-      
-      if (componentRestrictions && componentRestrictions.country) {
-        params.append('components', `country:${componentRestrictions.country.join('|')}`);
       }
     } else if (location && typeof location === 'object') {
       // Nearby Search request

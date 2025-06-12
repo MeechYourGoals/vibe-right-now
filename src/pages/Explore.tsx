@@ -18,12 +18,9 @@ import TrendingLocations from "@/components/TrendingLocations";
 import DiscountLocations from "@/components/DiscountLocations";
 import { format } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useMapState } from "@/hooks/useMapState";
 
 const Explore = () => {
   const isMobile = useIsMobile();
-  const { mapState, updateMapCenter, updateLocations, selectLocation } = useMapState();
-  
   const {
     activeTab,
     searchedCity,
@@ -60,18 +57,6 @@ const Explore = () => {
     return "Explore Vibes";
   };
 
-  const handleVenuesFound = (venues: any[]) => {
-    updateLocations(venues);
-  };
-
-  const handleCitySelected = (city: string, placeId: string) => {
-    updateMapCenter(city, placeId);
-  };
-
-  const handleLocationSelect = (location: any) => {
-    selectLocation(location);
-  };
-
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -83,27 +68,16 @@ const Explore = () => {
           </h1>
           
           <SearchSection 
-            searchQuery=""
-            onSearchChange={(query) => handleSearch(query, "all", "places")}
-            selectedDates={dateRange ? { from: dateRange.from!, to: dateRange.to! } : null}
-            onDateChange={(dates) => handleDateRangeChange(dates ? { from: dates.from, to: dates.to } : undefined)}
-            location={searchedCity || ""}
-            onLocationChange={(location) => {
-              // This will be handled by the search state
-            }}
-            onVenuesFound={handleVenuesFound}
-            onCitySelected={handleCitySelected}
+            showDateFilter={showDateFilter}
+            dateRange={dateRange}
+            onSearch={handleSearch}
+            onDateRangeChange={handleDateRangeChange}
+            onClearDates={handleClearDates}
           />
           
-          {/* Enhanced Map with Google Places integration */}
+          {/* Map centered below search bar */}
           <div className="w-full mb-6">
-            <NearbyVibesMap 
-              mapCenter={mapState.center}
-              mapZoom={mapState.zoom}
-              locations={mapState.locations.length > 0 ? mapState.locations : []}
-              selectedLocation={mapState.selectedLocation}
-              onLocationSelect={handleLocationSelect}
-            />
+            <NearbyVibesMap />
           </div>
           
           <CategoryTabs 
@@ -147,9 +121,37 @@ const Explore = () => {
                   />
                 )}
                 
+                {searchCategory === "places" && activeTab === "sports" && (
+                  <div className="mb-6">
+                    <h2 className="text-xl font-semibold mb-4 flex items-center">
+                      Trending Sports Events
+                      {dateRange?.from && (
+                        <Badge className="ml-2 bg-indigo-100 text-indigo-800">
+                          {format(dateRange.from, "MMM yyyy")}
+                          {dateRange.to && ` - ${format(dateRange.to, "MMM yyyy")}`}
+                        </Badge>
+                      )}
+                    </h2>
+                    <div className="space-y-4">
+                      {filteredLocations
+                        .filter(loc => loc.type === "sports")
+                        .slice(0, 3)
+                        .map(location => (
+                          <VenuePost
+                            key={location.id}
+                            venue={location}
+                            content={getCitySpecificContent(location)}
+                            media={getMediaForLocation(location)}
+                            timestamp={new Date().toISOString()}
+                          />
+                        ))}
+                    </div>
+                  </div>
+                )}
+                
                 {activeTab !== "music" && activeTab !== "comedy" && activeTab !== "nightlife" && (
                   <LocationsGrid
-                    locations={mapState.locations.length > 0 ? mapState.locations : filteredLocations}
+                    locations={filteredLocations}
                     locationTags={locationTags}
                   />
                 )}
