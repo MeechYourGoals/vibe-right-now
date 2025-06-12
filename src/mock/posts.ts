@@ -1,4 +1,3 @@
-
 import { Post, Media } from "@/types";
 import { regularUsers, celebrityUsers } from "./users";
 import { mockLocations } from "./locations";
@@ -15,11 +14,11 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=711&q=60",
       },
       {
-        type: "image",
-        url: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        type: "image", 
+        url: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=711&q=60",
       },
     ],
     timestamp: getRecentTime(1),
@@ -39,7 +38,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=711&q=60",
       },
     ],
     timestamp: getRecentTime(2),
@@ -61,13 +60,14 @@ export const mockPosts: Post[] = [
       },
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=711&q=60",
       },
     ],
     timestamp: getRecentTime(0.5),
     expiresAt: getExpiryTime(getRecentTime(0.5)),
     likes: 104,
     comments: 22,
+    shares: 8,
     saved: false
   },
   {
@@ -78,13 +78,14 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1553877522-43269d4ea984?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1553877522-43269d4ea984?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=711&q=60",
       },
     ],
     timestamp: getRecentTime(3),
     expiresAt: getExpiryTime(getRecentTime(3)),
     likes: 29,
     comments: 5,
+    shares: 3,
     saved: false
   },
   {
@@ -95,13 +96,14 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1519214605650-76a613ee3245?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1519214605650-76a613ee3245?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=711&q=60",
       },
     ],
     timestamp: getRecentTime(1.5),
     expiresAt: getExpiryTime(getRecentTime(1.5)),
     likes: 56,
     comments: 11,
+    shares: 4,
     isPinned: true,
     saved: false,
     vibeTags: ["Lively", "Upscale", "NightOwl"]
@@ -114,13 +116,14 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1504450758481-7efbbe195018?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1504450758481-7efbbe195018?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=711&q=60",
       },
     ],
     timestamp: getRecentTime(0.3),
     expiresAt: getExpiryTime(getRecentTime(0.3)),
     likes: 87,
     comments: 14,
+    shares: 6,
     saved: false
   },
   {
@@ -131,13 +134,14 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1566737236500-c8ac43014a67?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1566737236500-c8ac43014a67?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=711&q=60",
       },
     ],
     timestamp: getRecentTime(0.2),
     expiresAt: getExpiryTime(getRecentTime(0.2)),
     likes: 112,
     comments: 19,
+    shares: 9,
     saved: false
   },
   {
@@ -148,13 +152,14 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1483729558449-99ef09a8c325?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1483729558449-99ef09a8c325?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=711&q=60",
       },
     ],
     timestamp: getRecentTime(1.1),
     expiresAt: getExpiryTime(getRecentTime(1.1)),
     likes: 203,
     comments: 31,
+    shares: 12,
     saved: false
   },
   {
@@ -165,13 +170,14 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1551524559-8af4e6624178?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1551524559-8af4e6624178?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=711&q=60",
       },
     ],
     timestamp: getRecentTime(0.4),
     expiresAt: getExpiryTime(getRecentTime(0.4)),
     likes: 91,
     comments: 12,
+    shares: 7,
     saved: false
   },
   {
@@ -182,13 +188,14 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=711&q=60",
       },
     ],
     timestamp: getRecentTime(0.1),
     expiresAt: getExpiryTime(getRecentTime(0.1)),
     likes: 256,
     comments: 42,
+    shares: 15,
     isPinned: true,
     saved: false,
     vibeTags: ["Lively", "Upscale", "NightOwl"]
@@ -201,13 +208,14 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1545579133-99bb5ab189bd?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1545579133-99bb5ab189bd?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=711&q=60",
       },
     ],
     timestamp: getRecentTime(0.6),
     expiresAt: getExpiryTime(getRecentTime(0.6)),
     likes: 78,
     comments: 9,
+    shares: 5,
     saved: false
   },
   {
@@ -218,13 +226,14 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=711&q=60",
       },
     ],
     timestamp: getRecentTime(0.3),
     expiresAt: getExpiryTime(getRecentTime(0.3)),
     likes: 64,
     comments: 8,
+    shares: 4,
     saved: false
   },
   {
@@ -235,13 +244,14 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1560147307-7fef1854cd4a?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1560147307-7fef1854cd4a?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=711&q=60",
       },
     ],
     timestamp: getRecentTime(0.2),
     expiresAt: getExpiryTime(getRecentTime(0.2)),
     likes: 118,
     comments: 21,
+    shares: 8,
     saved: false
   },
   {
@@ -252,13 +262,14 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1517256064527-09c73fc73e38?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1517256064527-09c73fc73e38?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=711&q=60",
       },
     ],
     timestamp: getRecentTime(0.4),
     expiresAt: getExpiryTime(getRecentTime(0.4)),
     likes: 42,
     comments: 7,
+    shares: 3,
     saved: false
   },
   {
@@ -269,13 +280,14 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=711&q=60",
       },
     ],
     timestamp: getRecentTime(0.7),
     expiresAt: getExpiryTime(getRecentTime(0.7)),
     likes: 35,
     comments: 5,
+    shares: 2,
     saved: false
   },
   {
@@ -286,64 +298,68 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1572358337087-ab2addf09aa1?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1572358337087-ab2addf09aa1?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=711&q=60",
       },
     ],
     timestamp: getRecentTime(0.9),
     expiresAt: getExpiryTime(getRecentTime(0.9)),
     likes: 89,
     comments: 12,
+    shares: 6,
     saved: false
   },
   {
     id: "17",
     user: allUsers[1],
-    location: mockLocations[21], // Bitcoin Conference location
+    location: mockLocations[21],
     content: "Bitcoin Conference is packed today! Great keynotes happening on the main stage with minimal wait times for entry.",
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1639815188546-c43c240ff4df?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1639815188546-c43c240ff4df?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=711&q=60",
       },
     ],
     timestamp: getRecentTime(0.15),
     expiresAt: getExpiryTime(getRecentTime(0.15)),
     likes: 125,
     comments: 18,
+    shares: 9,
     saved: false
   },
   {
     id: "18",
     user: allUsers[2],
-    location: mockLocations[22], // InvestFest location
+    location: mockLocations[22],
     content: "InvestFest workshops are incredible! The west wing has shorter lines for the top speakers right now.",
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1515187029135-18ee286d815b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1515187029135-18ee286d815b?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=711&q=60",
       },
     ],
     timestamp: getRecentTime(0.2),
     expiresAt: getExpiryTime(getRecentTime(0.2)),
     likes: 72,
     comments: 10,
+    shares: 4,
     saved: false
   },
   {
     id: "19",
     user: allUsers[3],
-    location: mockLocations[9], // Keep one Allegiant Stadium post
+    location: mockLocations[9],
     content: "VIP entrance on south side has no wait right now! Regular entrances are packed.",
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1504215680853-026ed2a45def?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1504215680853-026ed2a45def?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=711&q=60",
       },
     ],
     timestamp: getRecentTime(0.3),
     expiresAt: getExpiryTime(getRecentTime(0.3)),
     likes: 54,
     comments: 8,
+    shares: 3,
     saved: false
   },
   {
@@ -356,7 +372,7 @@ export const mockPosts: Post[] = [
       city: "Las Vegas",
       state: "NV",
       country: "USA",
-      zip: "89101", // Added zip code
+      zip: "89101",
       lat: 36.1318,
       lng: -115.1516,
       type: "event",
@@ -366,13 +382,14 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=711&q=60",
       },
     ],
     timestamp: getRecentTime(0.25),
     expiresAt: getExpiryTime(getRecentTime(0.25)),
     likes: 198,
     comments: 34,
+    shares: 12,
     saved: false
   },
   {
@@ -383,13 +400,14 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=711&q=60",
       },
     ],
     timestamp: getRecentTime(0.1),
     expiresAt: getExpiryTime(getRecentTime(0.1)),
     likes: 78,
     comments: 12,
+    shares: 5,
     saved: false
   },
   {
@@ -400,13 +418,14 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1548574505-5e239809ee19?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1548574505-5e239809ee19?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=711&q=60",
       },
     ],
     timestamp: getRecentTime(0.3),
     expiresAt: getExpiryTime(getRecentTime(0.3)),
     likes: 91,
     comments: 15,
+    shares: 6,
     saved: false
   },
   {
@@ -417,13 +436,14 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1555507036-ab1f4038808a?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1555507036-ab1f4038808a?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=711&q=60",
       },
     ],
     timestamp: getRecentTime(0.4),
     expiresAt: getExpiryTime(getRecentTime(0.4)),
     likes: 54,
     comments: 7,
+    shares: 3,
     saved: false
   },
   {
@@ -434,13 +454,14 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1534353436294-0dbd4bdac845?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1534353436294-0dbd4bdac845?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=711&q=60",
       },
     ],
     timestamp: getRecentTime(0.2),
     expiresAt: getExpiryTime(getRecentTime(0.2)),
     likes: 112,
     comments: 15,
+    shares: 8,
     saved: false
   },
   {
@@ -451,13 +472,14 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1624138784614-87fd1b6528f8?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1624138784614-87fd1b6528f8?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=711&q=60",
       },
     ],
     timestamp: getRecentTime(0.5),
     expiresAt: getExpiryTime(getRecentTime(0.5)),
     likes: 143,
     comments: 23,
+    shares: 10,
     saved: false
   },
   {
@@ -468,13 +490,14 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=711&q=60",
       },
     ],
     timestamp: getRecentTime(0.3),
     expiresAt: getExpiryTime(getRecentTime(0.3)),
     likes: 278,
     comments: 42,
+    shares: 18,
     saved: false
   },
   {
@@ -485,13 +508,14 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=711&q=60",
       },
     ],
     timestamp: getRecentTime(0.1),
     expiresAt: getExpiryTime(getRecentTime(0.1)),
     likes: 345,
     comments: 67,
+    shares: 25,
     saved: false
   },
   {
@@ -502,81 +526,86 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=711&q=60",
       },
     ],
     timestamp: getRecentTime(0.2),
     expiresAt: getExpiryTime(getRecentTime(0.2)),
     likes: 167,
     comments: 29,
+    shares: 12,
     saved: false
   },
   {
     id: "29",
     user: allUsers[8],
-    location: mockLocations[24],  // The Comedy Cellar (id: "25")
+    location: mockLocations[24],
     content: "Comedy Cellar is offering FREE TICKETS tonight! Just mention 'VRN' at the door. The 9pm show has plenty of seats but they're going fast!",
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1527224857830-43a7acc85260?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1527224857830-43a7acc85260?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=711&q=60",
       },
     ],
     timestamp: getRecentTime(0.05),
     expiresAt: getExpiryTime(getRecentTime(0.05)),
     likes: 88,
     comments: 15,
+    shares: 7,
     saved: false
   },
   {
     id: "30",
     user: allUsers[12],
-    location: mockLocations[25],  // Skyline Nightclub (id: "26")
+    location: mockLocations[25],
     content: "Skyline is offering FREE COVER until midnight! Just show this post at the door. DJ started at 10 and the dance floor is filling up!",
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1566737236500-c8ac43014a67?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1566737236500-c8ac43014a67?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=711&q=60",
       },
     ],
     timestamp: getRecentTime(0.1),
     expiresAt: getExpiryTime(getRecentTime(0.1)),
     likes: 132,
     comments: 24,
+    shares: 9,
     saved: false
   },
   {
     id: "31",
     user: allUsers[15],
-    location: mockLocations[26],  // Sunrise Bakery (id: "27")
+    location: mockLocations[26],
     content: "New bakery alert! Sunrise is offering a FREE pastry with any large coffee purchase until noon. The chocolate croissants are incredible and still warm from the oven!",
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1517433367423-c7e5b0f35086?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1517433367423-c7e5b0f35086?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=711&q=60",
       },
     ],
     timestamp: getRecentTime(0.3),
     expiresAt: getExpiryTime(getRecentTime(0.3)),
     likes: 67,
     comments: 9,
+    shares: 4,
     saved: false
   },
   {
     id: "32",
     user: allUsers[19],
-    location: mockLocations[27],  // Coachella VIP Experience (id: "28")
+    location: mockLocations[27],
     content: "American Express Tent access included with VIP ticket purchase! Just picked up my credentials and the lounge has free drinks, charging stations and AC. Perfect escape from the heat!",
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1535086181678-5a5c4d23aa7d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        url: "https://images.unsplash.com/photo-1535086181678-5a5c4d23aa7d?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=711&q=60",
       },
     ],
     timestamp: getRecentTime(0.15),
     expiresAt: getExpiryTime(getRecentTime(0.15)),
     likes: 215,
     comments: 39,
+    shares: 14,
     saved: false
   },
 ];
