@@ -4,9 +4,9 @@ import { Location } from "@/types";
 // Mock function to generate random business hours for a location
 export const generateBusinessHours = (location: Location) => {
   // Use location type to determine general business hours pattern
-  const isBar = location.type === 'bar' || location.type === 'nightclub';
-  const isRestaurant = location.type === 'restaurant' || location.type === 'cafe';
-  const isAttraction = location.type === 'attraction' || location.type === 'museum';
+  const isBar = location.type === 'bar';
+  const isRestaurant = location.type === 'restaurant';
+  const isAttraction = location.type === 'attraction';
   
   const hours = {
     monday: isBar ? '16:00-02:00' : isRestaurant ? '11:00-22:00' : '10:00-18:00',
@@ -46,7 +46,11 @@ export const getTodaysHours = (location: Location) => {
   // Check if open now
   const isOpenNow = location.hours.isOpenNow === "true" ? "Open now" : "Closed now"; // Use string comparison
   
-  return `${isOpenNow} · Today ${formatHoursRange(dayHours)}`;
+  if (typeof dayHours === 'string') {
+    return `${isOpenNow} · Today ${formatHoursRange(dayHours)}`;
+  }
+  
+  return `${isOpenNow} · Today ${formatHoursRange(`${dayHours.open}-${dayHours.close}`)}`;
 };
 
 // Format hours range for display

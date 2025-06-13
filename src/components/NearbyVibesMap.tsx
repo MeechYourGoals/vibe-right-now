@@ -5,9 +5,10 @@ import { toast } from "sonner";
 import { useNearbyLocations } from "@/hooks/useNearbyLocations";
 import { geocodeAddress } from "@/utils/geocodingService";
 import MapControls from "./map/MapControls";
-import MapContainer from "./map/MapContainer";
 import NearbyLocationsList from "./map/NearbyLocationsList";
 import AddressSearchPopover from "./map/AddressSearchPopover";
+import EnhancedGoogleMapComponent from "./map/google/EnhancedGoogleMapComponent";
+import { useMapSync } from "@/hooks/useMapSync";
 import { Location } from "@/types";
 
 declare global {
@@ -33,6 +34,8 @@ const NearbyVibesMap = () => {
   const [showDistances, setShowDistances] = useState(false);
   const [isAddressPopoverOpen, setIsAddressPopoverOpen] = useState(false);
   const [localLoading, setLocalLoading] = useState(false);
+  
+  const { mapState, setMapRef, updateMapCenter, updateRealPlaces, zoomToPlace } = useMapSync();
   
   const navigate = useNavigate();
   const location = useLocation();
@@ -65,12 +68,20 @@ const NearbyVibesMap = () => {
   };
 
   const handleLocationClick = (locationId: string) => {
-    // Navigate directly to the venue page
     navigate(`/venue/${locationId}`);
   };
 
   const handleLocationSelect = (location: Location) => {
     setSelectedLocation(location);
+  };
+
+  const handlePlaceSelect = (place: google.maps.places.PlaceResult) => {
+    zoomToPlace(place);
+    
+    // Navigate to venue details if it's a real place
+    if (place.place_id) {
+      toast.success(`Selected ${place.name}`);
+    }
   };
   
   const handleAddressSearch = async (address: string) => {
@@ -112,7 +123,6 @@ const NearbyVibesMap = () => {
     toast.success("Using your current location for distances");
   };
   
-  // Determine the effective loading state (either from hook or local)
   const effectiveLoading = loading || localLoading;
   
   return (
@@ -140,22 +150,24 @@ const NearbyVibesMap = () => {
         </div>
       </div>
       
-      <MapContainer
-        loading={effectiveLoading}
-        isExpanded={isMapExpanded}
-        userLocation={userLocation}
-        locations={nearbyLocations}
-        searchedCity={searchedCity}
-        mapStyle={mapStyle}
-        selectedLocation={selectedLocation}
-        showDistances={showDistances}
-        userAddressLocation={userAddressLocation}
-        onLocationSelect={handleLocationSelect}
-        onCloseLocation={() => setSelectedLocation(null)}
-        nearbyCount={nearbyLocations.length}
-        onToggleDistances={() => setShowDistances(false)}
-        showAllCities={!searchedCity}
-      />
+      <div className={`rounded-lg overflow-hidden ${isMapExpanded ? "h-[calc(100vh-8rem)]" : "h-96"}`}>
+        <EnhancedGoogleMapComponent
+          userLocation={userLocation}
+          locations={nearbyLocations}
+          realPlaces={mapState.realPlaces}
+          searchedCity={searchedCity}
+          mapStyle={mapStyle}
+          selectedLocation={selectedLocation}
+          selectedPlace={mapState.selectedPlace}
+          mapCenter={mapState.center}
+          mapZoom={mapState.zoom}
+          showDistances={showDistances}
+          userAddressLocation={userAddressLocation}
+          onLocationSelect={handleLocationSelect}
+          onPlaceSelect={handlePlaceSelect}
+          onMapReady={setMapRef}
+        />
+      </div>
       
       {!isMapExpanded && (
         <NearbyLocationsList

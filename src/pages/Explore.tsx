@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState, useCallback } from "react";
 import Header from "@/components/Header";
 import { Badge } from "@/components/ui/badge";
 import CameraButton from "@/components/CameraButton";
@@ -16,11 +16,17 @@ import LocationsGrid from "@/components/explore/LocationsGrid";
 import RecommendedForYou from "@/components/RecommendedForYou";
 import TrendingLocations from "@/components/TrendingLocations";
 import DiscountLocations from "@/components/DiscountLocations";
+import { useMapSync } from "@/hooks/useMapSync";
 import { format } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const Explore = () => {
   const isMobile = useIsMobile();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [location, setLocation] = useState("");
+  
+  const { updateMapCenter, updateRealPlaces } = useMapSync();
+  
   const {
     activeTab,
     searchedCity,
@@ -47,6 +53,36 @@ const Explore = () => {
     setShowDateFilter
   } = useExploreState();
 
+  const handlePlaceSelect = useCallback((place: google.maps.places.PlaceResult) => {
+    if (place.geometry?.location) {
+      updateMapCenter(place);
+      
+      // If this is a city selection, update the location field
+      if (place.types?.includes('locality') || place.types?.includes('administrative_area_level_1')) {
+        const cityName = place.name || place.formatted_address?.split(',')[0] || '';
+        setLocation(cityName);
+      }
+    }
+  }, [updateMapCenter]);
+
+  const handleVenueSelect = useCallback((place: google.maps.places.PlaceResult) => {
+    if (place.geometry?.location) {
+      updateMapCenter(place);
+      
+      // Auto-populate location if venue has address and location is empty
+      if (place.formatted_address && !location) {
+        const addressParts = place.formatted_address.split(',');
+        if (addressParts.length >= 2) {
+          const city = addressParts[addressParts.length - 2].trim();
+          setLocation(city);
+        }
+      }
+      
+      // Update real places list with this venue
+      updateRealPlaces([place]);
+    }
+  }, [updateMapCenter, updateRealPlaces, location]);
+
   // Update the page title logic to handle empty cities
   const getDisplayTitle = () => {
     if (isNaturalLanguageSearch) {
@@ -68,11 +104,14 @@ const Explore = () => {
           </h1>
           
           <SearchSection 
-            showDateFilter={showDateFilter}
-            dateRange={dateRange}
-            onSearch={handleSearch}
-            onDateRangeChange={handleDateRangeChange}
-            onClearDates={handleClearDates}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            selectedDates={dateRange ? { from: dateRange.from!, to: dateRange.to! } : null}
+            onDateChange={(dates) => handleDateRangeChange(dates ? { from: dates.from, to: dates.to } : null)}
+            location={location}
+            onLocationChange={setLocation}
+            onPlaceSelect={handlePlaceSelect}
+            onVenueSelect={handleVenueSelect}
           />
           
           {/* Map centered below search bar */}
