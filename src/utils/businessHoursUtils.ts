@@ -16,7 +16,7 @@ export const generateBusinessHours = (location: Location) => {
     friday: isBar ? '16:00-03:00' : isRestaurant ? '11:00-23:00' : '10:00-20:00',
     saturday: isBar ? '16:00-03:00' : isRestaurant ? '10:00-23:00' : '10:00-20:00',
     sunday: isBar ? '16:00-00:00' : isRestaurant ? '10:00-22:00' : '11:00-17:00',
-    isOpenNow: "true", // Convert boolean to string
+    isOpenNow: "true",
     timezone: 'America/New_York'
   };
   
@@ -30,7 +30,7 @@ export const getTodaysHours = (location: Location) => {
   }
   
   const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-  const today = new Date().getDay(); // 0 is Sunday, 1 is Monday, etc.
+  const today = new Date().getDay();
   
   const dayName = days[today];
   const dayHours = location.hours[dayName as keyof typeof location.hours];
@@ -44,13 +44,19 @@ export const getTodaysHours = (location: Location) => {
   }
   
   // Check if open now
-  const isOpenNow = location.hours.isOpenNow === "true" ? "Open now" : "Closed now"; // Use string comparison
+  const isOpenNow = location.hours.isOpenNow === "true" ? "Open now" : "Closed now";
   
   if (typeof dayHours === 'string') {
     return `${isOpenNow} · Today ${formatHoursRange(dayHours)}`;
   }
   
-  return `${isOpenNow} · Today ${formatHoursRange(`${dayHours.open}-${dayHours.close}`)}`;
+  // Handle object type with open/close properties
+  if (typeof dayHours === 'object' && dayHours !== null && 'open' in dayHours && 'close' in dayHours) {
+    const hours = dayHours as { open: string; close: string };
+    return `${isOpenNow} · Today ${formatHoursRange(`${hours.open}-${hours.close}`)}`;
+  }
+  
+  return `${isOpenNow} · Today ${formatHoursRange(String(dayHours))}`;
 };
 
 // Format hours range for display

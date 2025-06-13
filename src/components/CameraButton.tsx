@@ -17,6 +17,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
+import SmartCameraButton from "./mobile/SmartCameraButton";
 
 const CameraButton = () => {
   const { toast } = useToast();
@@ -63,12 +64,7 @@ const CameraButton = () => {
 
   return (
     <>
-      <Button 
-        onClick={handleCameraClick}
-        className="fixed bottom-6 right-6 w-16 h-16 rounded-full shadow-lg bg-gradient-to-r from-primary to-secondary flex items-center justify-center p-0 z-10 animate-pulse-gradient"
-      >
-        <Camera className="h-7 w-7" />
-      </Button>
+      <SmartCameraButton onClick={handleCameraClick} />
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="glass-effect max-w-md">
