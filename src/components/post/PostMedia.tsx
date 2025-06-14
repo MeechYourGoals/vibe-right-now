@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import { Media } from "@/types";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import ImageWithFallback from "@/components/ui/ImageWithFallback";
 
 interface PostMediaProps {
   media: Media[];
@@ -22,14 +21,12 @@ const PostMedia: React.FC<PostMediaProps> = ({ media }) => {
   };
 
   const currentMedia = media[currentIndex];
-  const fallbackImage = "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600&q=80&auto=format&fit=crop";
 
   return (
     <div className="relative mb-2">
       {currentMedia.type === "image" ? (
-        <ImageWithFallback
+        <img
           src={currentMedia.url}
-          fallbackSrc={fallbackImage}
           alt="Post media"
           className="w-full object-cover max-h-[500px]"
         />
@@ -38,7 +35,7 @@ const PostMedia: React.FC<PostMediaProps> = ({ media }) => {
           src={currentMedia.url}
           controls
           className="w-full max-h-[500px]"
-          poster={currentMedia.thumbnail || fallbackImage}
+          poster={currentMedia.thumbnail}
         />
       )}
 
