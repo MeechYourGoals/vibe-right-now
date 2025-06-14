@@ -53,7 +53,7 @@ const VenueFirstPostHeader: React.FC<VenueFirstPostHeaderProps> = ({
   return (
     <div className="p-4 flex justify-between items-start">
       <div className="flex gap-3">
-        {/* Venue Avatar - Primary */}
+        {/* Venue Avatar - Primary - Only show if location exists */}
         {location && (
           <Link to={`/venue/${location.id}`}>
             <Avatar className="h-10 w-10">
@@ -67,7 +67,7 @@ const VenueFirstPostHeader: React.FC<VenueFirstPostHeaderProps> = ({
         )}
         
         <div>
-          {/* Venue Name - Primary Header */}
+          {/* Venue Name - Primary Header - Only show if location exists */}
           {location && (
             <div className="flex items-center gap-2 mb-1">
               <Link to={`/venue/${location.id}`} className="text-lg font-bold hover:underline">
@@ -85,7 +85,7 @@ const VenueFirstPostHeader: React.FC<VenueFirstPostHeaderProps> = ({
             </div>
           )}
           
-          {/* Venue Location */}
+          {/* Venue Location - Only show if location exists */}
           {location && (
             <div className="text-sm text-muted-foreground mb-2">
               {location.city}, {location.state}
