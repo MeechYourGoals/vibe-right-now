@@ -142,14 +142,28 @@ const SubscriptionTab = () => {
                   <td className="text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
                 </tr>
                 <tr className="border-b border-border">
-                  <td className="py-2 text-foreground">Enhanced Preferences</td>
-                  <td className="text-center text-muted-foreground">-</td>
+                  <td className="py-2 text-foreground">Save Preferences for Recommendations</td>
+                  <td className="text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
+                  <td className="text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
+                  <td className="text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
+                  <td className="text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
+                </tr>
+                <tr className="border-b border-border">
+                  <td className="py-2 text-foreground">Group Trips</td>
+                  <td className="text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
                   <td className="text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
                   <td className="text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
                   <td className="text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
                 </tr>
                 <tr className="border-b border-border">
                   <td className="py-2 text-foreground">AI Recommendations</td>
+                  <td className="text-center text-muted-foreground">-</td>
+                  <td className="text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
+                  <td className="text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
+                  <td className="text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
+                </tr>
+                <tr className="border-b border-border">
+                  <td className="py-2 text-foreground">Review Sentiment Analysis</td>
                   <td className="text-center text-muted-foreground">-</td>
                   <td className="text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
                   <td className="text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
@@ -163,7 +177,21 @@ const SubscriptionTab = () => {
                   <td className="text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
                 </tr>
                 <tr className="border-b border-border">
-                  <td className="py-2 text-foreground">Vernon Chat</td>
+                  <td className="py-2 text-foreground">Vernon Concierge</td>
+                  <td className="text-center text-muted-foreground">-</td>
+                  <td className="text-center text-muted-foreground">-</td>
+                  <td className="text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
+                  <td className="text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
+                </tr>
+                <tr className="border-b border-border">
+                  <td className="py-2 text-foreground">Enhanced Vernon Chat</td>
+                  <td className="text-center text-muted-foreground">-</td>
+                  <td className="text-center text-muted-foreground">-</td>
+                  <td className="text-center text-muted-foreground">-</td>
+                  <td className="text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
+                </tr>
+                <tr className="border-b border-border">
+                  <td className="py-2 text-foreground">Vernon Agentic Booking</td>
                   <td className="text-center text-muted-foreground">-</td>
                   <td className="text-center text-muted-foreground">-</td>
                   <td className="text-center text-muted-foreground">-</td>

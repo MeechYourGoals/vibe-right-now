@@ -10,16 +10,18 @@ export interface UserSubscription {
 
 export interface UserSubscriptionFeatures {
   basicExploration: boolean;
-  enhancedPreferences: boolean;
+  savePreferences: boolean;
+  groupTrips: boolean;
   aiRecommendations: boolean;
-  notifications: boolean;
+  reviewSentimentAnalysis: boolean;
+  periodicBonusPoints: boolean;
   vibeWithMe: boolean;
-  ticketingAccounts: boolean;
-  transportationOptions: boolean;
-  vernonChat: boolean;
-  walletFeatures: boolean;
+  linkTicketingTransportation: boolean;
+  vernonConcierge: boolean;
+  enhancedVernonChat: boolean;
+  vernonAgenticBooking: boolean;
   influencerMarketplace: boolean;
-  arXrGlasses: boolean;
+  earlyAccessARXR: boolean;
 }
 
 export interface SubscriptionPlan {
@@ -37,14 +39,14 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
     name: 'Free',
     price: 0,
     billingPeriod: 'month',
-    features: ['Basic exploration and browsing', 'Standard venue search', 'Basic user profile']
+    features: ['Basic exploration and browsing', 'Standard venue search', 'Save Preferences for better Recommendations', 'Group Trips']
   },
   {
     tier: 'plus',
     name: 'Plus',
     price: 9.99,
     billingPeriod: 'month',
-    features: ['Enhanced preferences', 'AI recommendations', 'Push notifications', 'Priority support'],
+    features: ['AI recommendations', 'Review Sentiment Analysis', 'Periodic Bonus Points', 'Priority support'],
     isPopular: true
   },
   {
@@ -52,68 +54,76 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
     name: 'Premium',
     price: 14.99,
     billingPeriod: 'month',
-    features: ['Vibe With Me mode', 'Ticketing accounts', 'Transportation options', 'Advanced filters']
+    features: ['Vibe With Me mode', 'Link Ticketing and Transportation accounts', 'Access to Vernon Concierge']
   },
   {
     tier: 'pro',
     name: 'Pro',
     price: 19.99,
     billingPeriod: 'month',
-    features: ['Vernon Chat access', 'Wallet features', 'Influencer Marketplace', 'AR/XR Google Glasses (coming soon)']
+    features: ['Enhanced Vernon Chat with Preference Memory', 'Vernon Agentic Booking w/ Wallet Vault', 'Influencer Marketplace', 'Early Access when AR/XR Glasses features become available']
   }
 ];
 
 export const TIER_FEATURES: Record<UserSubscriptionTier, UserSubscriptionFeatures> = {
   free: {
     basicExploration: true,
-    enhancedPreferences: false,
+    savePreferences: true,
+    groupTrips: true,
     aiRecommendations: false,
-    notifications: false,
+    reviewSentimentAnalysis: false,
+    periodicBonusPoints: false,
     vibeWithMe: false,
-    ticketingAccounts: false,
-    transportationOptions: false,
-    vernonChat: false,
-    walletFeatures: false,
+    linkTicketingTransportation: false,
+    vernonConcierge: false,
+    enhancedVernonChat: false,
+    vernonAgenticBooking: false,
     influencerMarketplace: false,
-    arXrGlasses: false
+    earlyAccessARXR: false
   },
   plus: {
     basicExploration: true,
-    enhancedPreferences: true,
+    savePreferences: true,
+    groupTrips: true,
     aiRecommendations: true,
-    notifications: true,
+    reviewSentimentAnalysis: true,
+    periodicBonusPoints: true,
     vibeWithMe: false,
-    ticketingAccounts: false,
-    transportationOptions: false,
-    vernonChat: false,
-    walletFeatures: false,
+    linkTicketingTransportation: false,
+    vernonConcierge: false,
+    enhancedVernonChat: false,
+    vernonAgenticBooking: false,
     influencerMarketplace: false,
-    arXrGlasses: false
+    earlyAccessARXR: false
   },
   premium: {
     basicExploration: true,
-    enhancedPreferences: true,
+    savePreferences: true,
+    groupTrips: true,
     aiRecommendations: true,
-    notifications: true,
+    reviewSentimentAnalysis: true,
+    periodicBonusPoints: true,
     vibeWithMe: true,
-    ticketingAccounts: true,
-    transportationOptions: true,
-    vernonChat: false,
-    walletFeatures: false,
+    linkTicketingTransportation: true,
+    vernonConcierge: true,
+    enhancedVernonChat: false,
+    vernonAgenticBooking: false,
     influencerMarketplace: false,
-    arXrGlasses: false
+    earlyAccessARXR: false
   },
   pro: {
     basicExploration: true,
-    enhancedPreferences: true,
+    savePreferences: true,
+    groupTrips: true,
     aiRecommendations: true,
-    notifications: true,
+    reviewSentimentAnalysis: true,
+    periodicBonusPoints: true,
     vibeWithMe: true,
-    ticketingAccounts: true,
-    transportationOptions: true,
-    vernonChat: true,
-    walletFeatures: true,
+    linkTicketingTransportation: true,
+    vernonConcierge: true,
+    enhancedVernonChat: true,
+    vernonAgenticBooking: true,
     influencerMarketplace: true,
-    arXrGlasses: true
+    earlyAccessARXR: true
   }
 };
