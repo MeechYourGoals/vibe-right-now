@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
@@ -164,7 +163,7 @@ const NearbyVibesMap = () => {
           showDistances={showDistances}
           userAddressLocation={userAddressLocation}
           onLocationSelect={handleLocationSelect}
-          onPlaceSelect={handlePlaceSelect}
+          onPlaceSelect={handlePlaceSelect} // <-- this will set selectedPlace in useMapSync, which is used for info window
           onMapReady={setMapRef}
         />
       </div>
