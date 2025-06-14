@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Send, settings, bell } from "lucide-react";
+import { Send, Settings, Bell } from "lucide-react";
 import { useUserSubscription } from '@/hooks/useUserSubscription';
 import { mockVenueConversations, MockVenueConversation, VenueMessage } from './mockVenueData';
 import MessageTypeBadge from './MessageTypeBadge';
@@ -104,7 +104,7 @@ const VenueMessaging: React.FC = () => {
               <Dialog>
                 <DialogTrigger asChild>
                   <Button variant="ghost" size="sm">
-                    <bell className="h-4 w-4" />
+                    <Bell className="h-4 w-4" />
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-2xl">
@@ -119,7 +119,7 @@ const VenueMessaging: React.FC = () => {
               <Dialog>
                 <DialogTrigger asChild>
                   <Button variant="ghost" size="sm">
-                    <settings className="h-4 w-4" />
+                    <Settings className="h-4 w-4" />
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-2xl">
