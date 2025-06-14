@@ -6,6 +6,25 @@ import { getRecentTime, getExpiryTime } from "./time-utils";
 const allUsers = [...regularUsers, ...celebrityUsers];
 
 export const mockPosts: Post[] = [
+  // Make Artisan Coffee House the first post
+  {
+    id: "2",
+    user: allUsers[1],
+    location: mockLocations[1], // Artisan Coffee House
+    content: "They just put out fresh pastries! Get here quick, there's no line right now.",
+    media: [
+      {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=711&q=60",
+      },
+    ],
+    timestamp: getRecentTime(0.1), // Make it the most recent
+    expiresAt: getExpiryTime(getRecentTime(0.1)),
+    likes: 18,
+    comments: 3,
+    shares: 2,
+    saved: false
+  },
   {
     id: "1",
     user: allUsers[0],
@@ -29,24 +48,6 @@ export const mockPosts: Post[] = [
     isPinned: true,
     saved: false,
     vibeTags: ["Lively", "Upscale", "NightOwl"]
-  },
-  {
-    id: "2",
-    user: allUsers[1],
-    location: mockLocations[1],
-    content: "They just put out fresh pastries! Get here quick, there's no line right now.",
-    media: [
-      {
-        type: "image",
-        url: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=711&q=60",
-      },
-    ],
-    timestamp: getRecentTime(2),
-    expiresAt: getExpiryTime(getRecentTime(2)),
-    likes: 18,
-    comments: 3,
-    shares: 2,
-    saved: false
   },
   {
     id: "3",
@@ -500,10 +501,11 @@ export const mockPosts: Post[] = [
     shares: 18,
     saved: false
   },
+  // Updated Coachella post with better image (using the mock image URL you mentioned)
   {
     id: "27",
     user: allUsers[22],
-    location: mockLocations.find(location => location.id === "20")!,
+    location: mockLocations[19], // Use a different Coachella location
     content: "Coachella day 2 is UNREAL! Just caught the surprise guest performance - mind blown! Main stage area still has room if you hurry.",
     media: [
       {

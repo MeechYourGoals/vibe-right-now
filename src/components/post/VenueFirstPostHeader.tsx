@@ -50,12 +50,6 @@ const VenueFirstPostHeader: React.FC<VenueFirstPostHeaderProps> = ({
     minute: '2-digit'
   });
   
-  // Add debugging for venue links in headers
-  if (location) {
-    console.log("VenueFirstPostHeader: Location:", location);
-    console.log("VenueFirstPostHeader: Venue link will be:", `/venue/${location.id}`);
-  }
-  
   return (
     <div className="p-4 flex justify-between items-start">
       <div className="flex gap-3">
@@ -67,7 +61,7 @@ const VenueFirstPostHeader: React.FC<VenueFirstPostHeaderProps> = ({
                 src={`https://source.unsplash.com/100x100/?${location.type},venue,${location.name}`} 
                 alt={location.name} 
               />
-              <AvatarFallback>{location.name.charAt(0)}</AvatarFallback>
+              <AvatarFallback>{location.name?.charAt(0) || '?'}</AvatarFallback>
             </Avatar>
           </Link>
         )}

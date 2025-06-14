@@ -55,10 +55,6 @@ const PostCard: React.FC<PostCardProps> = ({
   if (posts && posts.length > 0 && getComments) {
     const firstPost = posts[0];
     
-    // Add debugging for venue links
-    console.log("PostCard: First post location:", firstPost.location);
-    console.log("PostCard: Venue link will be:", `/venue/${firstPost.location.id}`);
-    
     return (
       <Card className="overflow-hidden">
         <div className="p-4">
@@ -167,12 +163,6 @@ const PostCard: React.FC<PostCardProps> = ({
   };
 
   const isVenuePost = post.isVenuePost || post.location?.id === venue?.id;
-
-  // Add debugging for single post venue links
-  console.log("PostCard single: Post location:", post.location);
-  if (post.location) {
-    console.log("PostCard single: Venue link will be:", `/venue/${post.location.id}`);
-  }
 
   return (
     <Card className={`overflow-hidden ${isVenuePost ? 'ring-2 ring-amber-500' : ''} ${post.isPinned && !isVenuePost ? 'ring-2 ring-amber-300' : ''}`}>
