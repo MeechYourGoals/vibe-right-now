@@ -6,7 +6,7 @@ import NearbyVibesMap from "@/components/NearbyVibesMap";
 import VenuePost from "@/components/VenuePost";
 import useExploreState from "@/hooks/useExploreState";
 import { getCitySpecificContent, getMediaForLocation } from "@/utils/explore/mockGenerators";
-import SearchSection from "@/components/explore/SearchSection";
+import EnhancedSearchSection from "@/components/explore/EnhancedSearchSection";
 import CategoryTabs from "@/components/explore/CategoryTabs";
 import MusicSection from "@/components/explore/MusicSection";
 import ComedySection from "@/components/explore/ComedySection";
@@ -16,6 +16,7 @@ import RecommendedForYou from "@/components/RecommendedForYou";
 import TrendingLocations from "@/components/TrendingLocations";
 import DiscountLocations from "@/components/DiscountLocations";
 import { useMapSync } from "@/hooks/useMapSync";
+import { EnhancedPlace } from "@/hooks/useEnhancedGooglePlaces";
 import { format } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -24,7 +25,7 @@ const Explore = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [location, setLocation] = useState("");
   
-  const { updateMapCenter, updateRealPlaces, zoomToPlace } = useMapSync();
+  const { mapState, updateMapCenter, updateRealPlaces, zoomToPlace } = useMapSync();
   
   const {
     activeTab,
@@ -52,29 +53,28 @@ const Explore = () => {
     setShowDateFilter
   } = useExploreState();
 
-  // Patch: When user selects a city/place from the location search bar.
-  const handlePlaceSelect = useCallback((place: google.maps.places.PlaceResult) => {
+  // Enhanced place selection handlers
+  const handlePlaceSelect = useCallback((place: EnhancedPlace) => {
     if (place.geometry?.location) {
       updateMapCenter(place);
 
-      // If this is a city selection, update the location field (as before)
+      // If this is a city selection, update the location field
       if (place.types?.includes('locality') || place.types?.includes('administrative_area_level_1')) {
         const cityName = place.name || place.formatted_address?.split(',')[0] || '';
         setLocation(cityName);
       }
-      // Show this place in realPlaces so a marker/infoWindow appears
+      
+      // Show this place in realPlaces
       updateRealPlaces([place]);
-      // Also zoom to it for maximal user feedback
       zoomToPlace(place);
     }
   }, [updateMapCenter, updateRealPlaces, setLocation, zoomToPlace]);
 
-  // Patch: When user selects a venue result from autocomplete/bar.
-  const handleVenueSelect = useCallback((place: google.maps.places.PlaceResult) => {
+  const handleVenueSelect = useCallback((place: EnhancedPlace) => {
     if (place.geometry?.location) {
       updateMapCenter(place);
 
-      // Try to populate city as before (only if empty), for consistent search UI.
+      // Try to populate city for context
       if (place.formatted_address && !location) {
         const addressParts = place.formatted_address.split(',');
         if (addressParts.length >= 2) {
@@ -82,9 +82,9 @@ const Explore = () => {
           setLocation(city);
         }
       }
-      // Always SHOW this place (only) on the map
+      
+      // Always show this place on the map
       updateRealPlaces([place]);
-      // Center and popup
       zoomToPlace(place);
     }
   }, [updateMapCenter, updateRealPlaces, location, setLocation, zoomToPlace]);
@@ -109,7 +109,7 @@ const Explore = () => {
             {getDisplayTitle()}
           </h1>
           
-          <SearchSection 
+          <EnhancedSearchSection 
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
             selectedDates={dateRange ? { from: dateRange.from!, to: dateRange.to! } : null}
@@ -120,7 +120,7 @@ const Explore = () => {
             onVenueSelect={handleVenueSelect}
           />
           
-          {/* Map centered below search bar */}
+          {/* Enhanced Map */}
           <div className="w-full mb-6">
             <NearbyVibesMap />
           </div>
