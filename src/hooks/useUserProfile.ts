@@ -1,7 +1,9 @@
 
 import { useState, useEffect } from 'react';
-import { User } from '@/types';
+import { User, Post, Location, Comment } from '@/types';
 import { mockUsers } from '@/mock/users';
+import { mockPosts } from '@/mock/posts';
+import { mockLocations } from '@/mock/locations';
 
 interface UserProfile extends User {
   totalPosts: number;
@@ -32,9 +34,9 @@ export const useUserProfile = (username: string) => {
         }
 
         // Convert string values to numbers for calculations
-        const followers = typeof user.followers === 'number' ? user.followers : parseInt(user.followers as string) || 0;
-        const following = typeof user.following === 'number' ? user.following : parseInt(user.following as string) || 0;
-        const posts = typeof user.posts === 'number' ? user.posts : parseInt(user.posts as string) || 0;
+        const followers = typeof user.followers === 'number' ? user.followers : parseInt(String(user.followers)) || 0;
+        const following = typeof user.following === 'number' ? user.following : parseInt(String(user.following)) || 0;
+        const posts = typeof user.posts === 'number' ? user.posts : parseInt(String(user.posts)) || 0;
 
         // Generate enhanced profile data
         const enhancedProfile: UserProfile = {
@@ -70,6 +72,18 @@ export const useUserProfile = (username: string) => {
       loadProfile();
     }
   }, [username]);
+
+  // Mock user posts - filter posts by user
+  const userPosts = mockPosts.filter(post => post.user.username === username);
+  
+  // Mock followed venues
+  const followedVenues = mockLocations.slice(0, 5);
+  
+  // Mock visited places
+  const visitedPlaces = mockLocations.slice(0, 8);
+  
+  // Mock want to visit places
+  const wantToVisitPlaces = mockLocations.slice(8, 15);
 
   const followUser = async (userToFollow: string) => {
     if (!profile) return;
@@ -163,7 +177,7 @@ export const useUserProfile = (username: string) => {
 
   const getUserPosts = (userId: string) => {
     // In a real app, this would fetch user's posts
-    return [];
+    return userPosts;
   };
 
   const getUserStats = (userId: string) => {
@@ -180,19 +194,49 @@ export const useUserProfile = (username: string) => {
     };
   };
 
+  const getPostComments = (postId: string): Comment[] => {
+    // Mock comments for posts
+    return [];
+  };
+
+  const getUserBio = (userId: string): string => {
+    return profile?.bio || '';
+  };
+
+  const isPrivateProfile = false; // Mock - in real app this would be based on user settings
+
   return {
+    // Main profile data (renamed from 'user' to 'profile' for consistency)
     profile,
+    user: profile, // Keep 'user' for backward compatibility
     loading,
     error,
+    
+    // User content
+    userPosts,
+    followedVenues,
+    visitedPlaces,
+    wantToVisitPlaces,
+    
+    // User actions
     followUser,
     unfollowUser,
     updateBio,
     blockUser,
     reportUser,
+    
+    // User relationships
     getFollowStatus,
     getMutualFollowers,
+    
+    // User data getters
     getUserPosts,
-    getUserStats
+    getUserStats,
+    getPostComments,
+    getUserBio,
+    
+    // User settings
+    isPrivateProfile
   };
 };
 

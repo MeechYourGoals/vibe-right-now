@@ -83,7 +83,10 @@ const TripIdeasSection: React.FC<TripIdeasSectionProps> = ({
       const transformedData: VenueIdea[] = data?.map(item => ({
         ...item,
         status: item.status as 'pending' | 'approved' | 'rejected',
-        trip_venue_votes: item.trip_venue_votes || []
+        trip_venue_votes: item.trip_venue_votes?.map((vote: any) => ({
+          ...vote,
+          vote_type: vote.vote_type as 'up' | 'down'
+        })) || []
       })) || [];
       
       setVenueIdeas(transformedData);

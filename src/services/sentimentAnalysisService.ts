@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import { VenueSentimentAnalysis, ReviewSentimentCache, PlatformSentimentSummary } from "@/types";
+import { VenueSentimentAnalysis, ReviewSentimentCache, PlatformSentimentSummary, SentimentTheme } from "@/types";
 
 export class SentimentAnalysisService {
   private static readonly CACHE_DURATION_DAYS = 30;
@@ -17,7 +17,7 @@ export class SentimentAnalysisService {
       // Transform data with proper type casting
       const transformedData: VenueSentimentAnalysis[] = data?.map(item => ({
         ...item,
-        themes: typeof item.themes === 'string' ? JSON.parse(item.themes) : (item.themes as Record<string, number>)
+        themes: this.parseThemes(item.themes)
       })) || [];
 
       return this.transformToSummary(transformedData);
@@ -25,6 +25,20 @@ export class SentimentAnalysisService {
       console.error('Error fetching venue sentiment:', error);
       return this.getMockSentimentData(venueId);
     }
+  }
+
+  private static parseThemes(themes: any): Record<string, number> {
+    if (typeof themes === 'string') {
+      try {
+        return JSON.parse(themes);
+      } catch {
+        return {};
+      }
+    }
+    if (typeof themes === 'object' && themes !== null) {
+      return themes as Record<string, number>;
+    }
+    return {};
   }
 
   static async updateVenueSentiment(
@@ -52,7 +66,7 @@ export class SentimentAnalysisService {
       // Transform data with proper type casting
       const transformedData: VenueSentimentAnalysis = {
         ...data,
-        themes: typeof data.themes === 'string' ? JSON.parse(data.themes) : (data.themes as Record<string, number>)
+        themes: this.parseThemes(data.themes)
       };
 
       return transformedData;
@@ -103,7 +117,11 @@ export class SentimentAnalysisService {
         return [];
       }
 
-      return data || [];
+      // Transform data with proper type casting
+      return data?.map(item => ({
+        ...item,
+        themes: this.parseThemes(item.themes)
+      })) || [];
     } catch (error) {
       console.error('Error in getVenueSentimentAnalysis:', error);
       return [];
@@ -129,8 +147,8 @@ export class SentimentAnalysisService {
     return Object.entries(themes).map(([name, score]) => ({
       name: name.charAt(0).toUpperCase() + name.slice(1),
       score,
-      mentions: 1, // Simplified for now
-      examples: [] // Could be enhanced to include example phrases
+      mentions: 1,
+      examples: []
     }));
   }
 
@@ -144,12 +162,17 @@ export class SentimentAnalysisService {
         .eq('platform', platform)
         .single();
 
-      if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
+      if (error && error.code !== 'PGRST116') {
         console.error('Error fetching platform sentiment:', error);
         return null;
       }
 
-      return data || null;
+      if (!data) return null;
+
+      return {
+        ...data,
+        themes: this.parseThemes(data.themes)
+      };
     } catch (error) {
       console.error('Error in getPlatformSentiment:', error);
       return null;
@@ -176,7 +199,6 @@ export class SentimentAnalysisService {
       ]
     };
 
-    // Trigger analysis for each platform
     for (const [platform, reviews] of Object.entries(mockReviews)) {
       await this.analyzeVenueReviews(venueId, platform, reviews);
     }
@@ -190,7 +212,7 @@ export class SentimentAnalysisService {
       themes: Object.entries(item.themes).map(([name, score]) => ({
         name,
         score,
-        mentions: Math.floor(score * 10), // Mock mentions based on score
+        mentions: Math.floor(score * 10),
         examples: [`Sample review about ${name}`]
       })),
       reviewCount: item.review_count,
@@ -203,7 +225,7 @@ export class SentimentAnalysisService {
     
     return platforms.map(platform => ({
       platform,
-      overallSentiment: Math.random() * 2 - 1, // Random between -1 and 1
+      overallSentiment: Math.random() * 2 - 1,
       summary: `Overall positive sentiment for ${platform} reviews`,
       themes: [
         { name: 'Ambience', score: 0.8, mentions: 45, examples: ['Great atmosphere', 'Love the vibe'] },
@@ -259,7 +281,11 @@ export class SentimentAnalysisService {
         .single();
 
       if (error) return null;
-      return data;
+      
+      return {
+        ...data,
+        themes: this.parseThemes(data.themes)
+      };
     } catch (error) {
       console.error('Error fetching cached sentiment:', error);
       return null;
