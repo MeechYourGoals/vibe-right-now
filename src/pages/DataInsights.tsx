@@ -5,17 +5,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import VenueInsights from "@/components/VenueInsights";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Crown, FileLock, Upload, ChartBar, MessageSquare } from "lucide-react";
+import { Crown, FileLock, Upload, ChartBar, MessageSquare, Sparkles } from "lucide-react";
 import PremiumBanner from "@/components/data-insights/PremiumBanner";
 import AnalyticsTab from "@/components/data-insights/AnalyticsTab";
 import AdvertisingTab from "@/components/data-insights/marketing/AdvertisingTab";
 import SentimentAnalysisTab from "@/components/data-insights/SentimentAnalysisTab";
+import EnhancedSentimentTab from "@/components/data-insights/EnhancedSentimentTab";
 
 // Subscription tier types
 type SubscriptionTier = 'standard' | 'plus' | 'premium' | 'pro';
 
 const DataInsights = () => {
-  const [subscriptionTier, setSubscriptionTier] = useState<SubscriptionTier>('standard');
+  const [subscriptionTier, setSubscriptionTier] = useState<SubscriptionTier>('premium'); // Set to premium for demo
   const isPremium = subscriptionTier === 'premium' || subscriptionTier === 'pro';
   
   const handleUpgrade = (tier: SubscriptionTier) => {
@@ -132,7 +133,20 @@ const DataInsights = () => {
               >
                 <div className="flex items-center">
                   <MessageSquare className="mr-2 h-4 w-4" />
-                  Sentiment Analysis
+                  Basic Sentiment
+                  {(subscriptionTier === 'standard' || subscriptionTier === 'plus') && (
+                    <FileLock className="ml-2 h-3 w-3" />
+                  )}
+                </div>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="enhanced-sentiment" 
+                disabled={subscriptionTier === 'standard' || subscriptionTier === 'plus'}
+                className="data-[state=active]:bg-muted data-[state=active]:text-foreground"
+              >
+                <div className="flex items-center">
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  Enhanced Review Analysis
                   {(subscriptionTier === 'standard' || subscriptionTier === 'plus') && (
                     <FileLock className="ml-2 h-3 w-3" />
                   )}
@@ -168,6 +182,13 @@ const DataInsights = () => {
             
             <TabsContent value="sentiment" className="mt-0">
               <SentimentAnalysisTab 
+                venueId="venue-1" 
+                isPremium={isPremium} 
+              />
+            </TabsContent>
+            
+            <TabsContent value="enhanced-sentiment" className="mt-0">
+              <EnhancedSentimentTab 
                 venueId="venue-1" 
                 isPremium={isPremium} 
               />

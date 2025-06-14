@@ -20,6 +20,7 @@ import VenueMap from "@/components/venue/VenueMap";
 import VenuePostsContent from "@/components/venue/VenuePostsContent";
 import WaitTimeDisplay from "@/components/venue/WaitTimeDisplay";
 import WaitTimeUpdater from "@/components/venue/WaitTimeUpdater";
+import ExternalReviewAnalysis from "@/components/venue/ExternalReviewAnalysis";
 import { useAuth0 } from "@auth0/auth0-react";
 
 // Define an extended Post type that includes venue-specific properties
@@ -37,6 +38,7 @@ const VenueProfile = () => {
   const [selectedDays, setSelectedDays] = useState<number[]>([]);
   const [isVenueOwner, setIsVenueOwner] = useState(false);
   const [subscriptionTier, setSubscriptionTier] = useState<'standard' | 'plus' | 'premium' | 'pro'>('standard');
+  const [isUserPremium, setIsUserPremium] = useState(false);
   
   const { user, isAuthenticated } = useAuth0();
   
@@ -54,6 +56,10 @@ const VenueProfile = () => {
         // Simulating subscription tier check - in production would fetch from database
         setSubscriptionTier('pro');
       }
+      
+      // Simulate checking user's premium status
+      // In production, this would check the user's subscription from the database
+      setIsUserPremium(true); // Set to true for demo purposes
     }
   }, [isAuthenticated, user, venue]);
   
@@ -191,6 +197,13 @@ const VenueProfile = () => {
               </div>
             )}
           </div>
+          
+          {/* External Review Analysis for Premium Users */}
+          <ExternalReviewAnalysis 
+            venueId={venue.id}
+            venueName={venue.name}
+            isUserPremium={isUserPremium}
+          />
           
           <DayOfWeekFilter 
             selectedDays={selectedDays} 
