@@ -503,7 +503,7 @@ export const mockPosts: Post[] = [
   {
     id: "27",
     user: allUsers[22],
-    location: mockLocations[19],
+    location: mockLocations.find(location => location.id === "20")!,
     content: "Coachella day 2 is UNREAL! Just caught the surprise guest performance - mind blown! Main stage area still has room if you hurry.",
     media: [
       {
