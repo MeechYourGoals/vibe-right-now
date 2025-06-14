@@ -42,28 +42,28 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
       
       <TabsContent value="posts" className="mt-6">
         <ProfileTabContent 
-          items={posts}
+          posts={posts}
           user={user}
         />
       </TabsContent>
       
       <TabsContent value="venues" className="mt-6">
         <ProfileTabContent 
-          items={followedVenues}
+          locations={followedVenues}
           user={user}
         />
       </TabsContent>
       
       <TabsContent value="visited" className="mt-6">
         <ProfileTabContent 
-          items={visitedPlaces}
+          locations={visitedPlaces}
           user={user}
         />
       </TabsContent>
       
       <TabsContent value="wishlist" className="mt-6">
         <ProfileTabContent 
-          items={wantToVisitPlaces}
+          locations={wantToVisitPlaces}
           user={user}
         />
       </TabsContent>

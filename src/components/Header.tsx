@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { User, Bookmark, MapPin, Award, UserCircle, LogIn, Settings, BarChart, Headphones, Megaphone } from "lucide-react";
+import { User, Bookmark, MapPin, Award, UserCircle, LogIn, Settings, BarChart, Headphones, Megaphone, MessageSquare } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AuthDialog } from "@/components/AuthDialog";
 import VernonConciergeDialog from "./VernonConcierge/VernonConciergeDialog";
@@ -85,7 +85,7 @@ const Header = () => {
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="flex items-center gap-1">
                       <UserCircle className="h-4 w-4 mr-1" />
-                      My Profile
+                      My VRN
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56 bg-background border z-50">
@@ -102,13 +102,19 @@ const Header = () => {
                     <DropdownMenuItem asChild>
                       <Link to="/profile">
                         <User className="mr-2 h-4 w-4" />
-                        <span>Bio</span>
+                        <span>My Profile</span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link to="/my-places">
                         <MapPin className="mr-2 h-4 w-4" />
                         <span>My Places</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/messages">
+                        <MessageSquare className="mr-2 h-4 w-4" />
+                        <span>Messages</span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>

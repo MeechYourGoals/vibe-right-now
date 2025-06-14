@@ -32,14 +32,14 @@ const MobileProfileMenu: React.FC<MobileProfileMenuProps> = ({
   children 
 }) => {
   const menuItems = [
-    { icon: User, label: 'Profile Bio', href: '/profile-bio' },
+    { icon: User, label: 'My Profile', href: '/profile' },
     { icon: MapPin, label: 'My Places', href: '/my-places' },
+    { icon: MessageSquare, label: 'Messages', href: '/messages' },
     { icon: Heart, label: 'Pinned Vibes', href: '/pinned-vibes' },
     { icon: Star, label: 'Points', href: '/user-points' },
     { icon: Settings, label: 'Settings', href: '/settings' },
     { icon: BarChart3, label: 'Data Insights', href: '/data-insights' },
     { icon: Megaphone, label: 'Advertiser Hub', href: '/advertiser-hub' },
-    { icon: MessageSquare, label: 'Vernon Concierge', href: '/settings?tab=vernon-concierge' },
   ];
 
   return (
@@ -50,7 +50,7 @@ const MobileProfileMenu: React.FC<MobileProfileMenuProps> = ({
       <SheetContent side="bottom" className="h-[60vh] rounded-t-2xl">
         <SheetHeader className="mb-6">
           <SheetTitle className="text-xl font-bold vibe-gradient-text">
-            Profile Menu
+            My VRN
           </SheetTitle>
         </SheetHeader>
         
