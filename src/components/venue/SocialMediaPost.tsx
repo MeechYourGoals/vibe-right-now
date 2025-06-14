@@ -1,11 +1,11 @@
-
 import React from 'react';
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLink, Heart, MessageSquare, Star } from "lucide-react";
+import { ExternalLink, Heart, MessageSquare, Star, User } from "lucide-react";
 import { SocialMediaPost as SocialMediaPostType } from '@/services/SocialMediaService';
 import { formatDistanceToNow } from 'date-fns';
+import ImageWithFallback from '../ui/ImageWithFallback';
 
 interface SocialMediaPostProps {
   post: SocialMediaPostType;
@@ -64,14 +64,18 @@ const SocialMediaPost: React.FC<SocialMediaPostProps> = ({ post, showExternalLin
     );
   };
 
+  const fallbackUserAvatar = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLXVzZXItcm91bmQiPjxyZWN0IHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgeD0iMyIgeT0iMyIgcng9IjEwMCIvPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTAiIHI9IjMiLz48cGF0aCBkPSJtMjAuMyA1LjkgMi40IDIuMy0yLjQgMi40TTMgMTYuMiAxOS44IDdoLTQuNEwxMiAxMS43IDguNiA3SDQuMloiLz48L3N2Zz4=";
+  const fallbackMedia = "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600&q=80&auto=format&fit=crop";
+
   return (
     <Card className="overflow-hidden">
       <CardHeader className="p-3 pb-1">
         <div className="flex justify-between items-start">
           <div className="flex gap-2 items-center">
             <div className="w-8 h-8 rounded-full overflow-hidden bg-muted">
-              <img 
-                src={post.userAvatar} 
+              <ImageWithFallback
+                src={post.userAvatar}
+                fallbackSrc={fallbackUserAvatar}
                 alt={post.username} 
                 className="w-full h-full object-cover"
               />
@@ -101,8 +105,9 @@ const SocialMediaPost: React.FC<SocialMediaPostProps> = ({ post, showExternalLin
         {post.mediaUrl && (
           <div className="mt-3 rounded-md overflow-hidden">
             {post.mediaType === 'image' ? (
-              <img 
-                src={post.mediaUrl} 
+              <ImageWithFallback 
+                src={post.mediaUrl}
+                fallbackSrc={fallbackMedia}
                 alt="Post content" 
                 className="w-full object-cover rounded"
                 style={{ maxHeight: '300px' }}
@@ -113,6 +118,7 @@ const SocialMediaPost: React.FC<SocialMediaPostProps> = ({ post, showExternalLin
                 controls
                 className="w-full rounded"
                 style={{ maxHeight: '300px' }}
+                poster={fallbackMedia}
               />
             )}
           </div>

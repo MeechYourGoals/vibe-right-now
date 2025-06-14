@@ -153,7 +153,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1483729558449-99ef09a8c325?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=711&q=60",
+        url: "https://images.unsplash.com/photo-1596542461322-14e5748067c4?q=80&w=800&auto=format&fit=crop",
       },
     ],
     timestamp: getRecentTime(1.1),
@@ -299,7 +299,7 @@ export const mockPosts: Post[] = [
     media: [
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1572358337087-ab2addf09aa1?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=711&q=60",
+        url: "https://images.unsplash.com/photo-1583274233720-3945932570be?q=80&w=800&auto=format&fit=crop",
       },
     ],
     timestamp: getRecentTime(0.9),
