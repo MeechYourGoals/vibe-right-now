@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useUserSubscription } from '@/hooks/useUserSubscription';
 
 const VenueMessagingSettings: React.FC = () => {
@@ -16,6 +17,9 @@ const VenueMessagingSettings: React.FC = () => {
     notificationSound: true,
     emailNotifications: false
   });
+
+  const [venueMessagingPreference, setVenueMessagingPreference] = useState<'opt-in' | 'opt-out'>('opt-in');
+  const [notificationSettings, setNotificationSettings] = useState<'all' | 'important-only' | 'none'>('all');
 
   const canUseVenueMessaging = hasFeature('venueMessaging');
 
@@ -44,17 +48,23 @@ const VenueMessagingSettings: React.FC = () => {
           <CardTitle>Venue Messaging Preferences</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h4 className="font-medium">Enable Venue Messaging</h4>
-              <p className="text-sm text-muted-foreground">
-                Allow venues to send you direct messages
-              </p>
-            </div>
-            <Switch
-              checked={settings.enableVenueMessaging}
-              onCheckedChange={(value) => updateSetting('enableVenueMessaging', value)}
-            />
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Venue Messages</label>
+            <Select 
+              value={venueMessagingPreference} 
+              onValueChange={(value: 'opt-in' | 'opt-out') => setVenueMessagingPreference(value)}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="opt-in">Opt in to venue messages</SelectItem>
+                <SelectItem value="opt-out">Opt out of venue messages</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              Choose whether venues can send you direct messages
+            </p>
           </div>
 
           <div className="flex items-center justify-between">
@@ -67,7 +77,7 @@ const VenueMessagingSettings: React.FC = () => {
             <Switch
               checked={settings.allowPromotionalMessages}
               onCheckedChange={(value) => updateSetting('allowPromotionalMessages', value)}
-              disabled={!settings.enableVenueMessaging}
+              disabled={venueMessagingPreference === 'opt-out'}
             />
           </div>
 
@@ -81,7 +91,7 @@ const VenueMessagingSettings: React.FC = () => {
             <Switch
               checked={settings.allowReservationMessages}
               onCheckedChange={(value) => updateSetting('allowReservationMessages', value)}
-              disabled={!settings.enableVenueMessaging}
+              disabled={venueMessagingPreference === 'opt-out'}
             />
           </div>
 
@@ -95,7 +105,7 @@ const VenueMessagingSettings: React.FC = () => {
             <Switch
               checked={settings.allowGeneralInquiries}
               onCheckedChange={(value) => updateSetting('allowGeneralInquiries', value)}
-              disabled={!settings.enableVenueMessaging}
+              disabled={venueMessagingPreference === 'opt-out'}
             />
           </div>
         </CardContent>
@@ -106,6 +116,26 @@ const VenueMessagingSettings: React.FC = () => {
           <CardTitle>Notification Settings</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Enable notifications for messages</label>
+            <Select 
+              value={notificationSettings} 
+              onValueChange={(value: 'all' | 'important-only' | 'none') => setNotificationSettings(value)}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All messages</SelectItem>
+                <SelectItem value="important-only">Important messages only</SelectItem>
+                <SelectItem value="none">No notifications</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              Choose when you want to be notified about new messages
+            </p>
+          </div>
+
           <div className="flex items-center justify-between">
             <div>
               <h4 className="font-medium">Sound Notifications</h4>
@@ -116,6 +146,7 @@ const VenueMessagingSettings: React.FC = () => {
             <Switch
               checked={settings.notificationSound}
               onCheckedChange={(value) => updateSetting('notificationSound', value)}
+              disabled={notificationSettings === 'none'}
             />
           </div>
 
@@ -129,6 +160,7 @@ const VenueMessagingSettings: React.FC = () => {
             <Switch
               checked={settings.emailNotifications}
               onCheckedChange={(value) => updateSetting('emailNotifications', value)}
+              disabled={notificationSettings === 'none'}
             />
           </div>
         </CardContent>
