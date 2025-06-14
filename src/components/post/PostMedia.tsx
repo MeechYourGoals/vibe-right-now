@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Media } from "@/types";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import ImageWithFallback from "@/components/ui/ImageWithFallback";
 
 interface PostMediaProps {
   media: Media[];
@@ -25,7 +26,7 @@ const PostMedia: React.FC<PostMediaProps> = ({ media }) => {
   return (
     <div className="relative mb-2">
       {currentMedia.type === "image" ? (
-        <img
+        <ImageWithFallback
           src={currentMedia.url}
           alt="Post media"
           className="w-full object-cover max-h-[500px]"

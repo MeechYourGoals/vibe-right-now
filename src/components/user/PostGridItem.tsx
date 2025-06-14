@@ -7,6 +7,7 @@ import { Heart } from "lucide-react";
 import { Post, Media } from "@/types";
 import { formatDistanceToNow } from "date-fns";
 import UserDropdown from "@/components/venue/post-grid-item/UserDropdown";
+import ImageWithFallback from "@/components/ui/ImageWithFallback";
 
 interface PostGridItemProps {
   post: Post;
@@ -34,7 +35,7 @@ const ensureMediaFormat = (media: any[]): Media[] => {
     // Default fallback
     return {
       type: 'image',
-      url: 'https://via.placeholder.com/500'
+      url: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=500&q=80&auto=format&fit=crop'
     };
   });
 };
@@ -67,7 +68,7 @@ const PostGridItem = ({ post }: PostGridItemProps) => {
   return (
     <div className="group relative block aspect-square overflow-hidden rounded-lg">
       {formattedMedia.length > 0 && formattedMedia[0].type === "image" ? (
-        <img 
+        <ImageWithFallback
           src={formattedMedia[0].url}
           alt={`Post by ${post.user.username}`}
           className="h-full w-full object-cover transition-transform group-hover:scale-105"
@@ -76,7 +77,7 @@ const PostGridItem = ({ post }: PostGridItemProps) => {
         <video
           src={formattedMedia[0].url}
           className="h-full w-full object-cover"
-          poster="https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
+          poster="https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?w=500&q=80&auto=format&fit=crop"
         />
       ) : (
         <div className="flex h-full w-full items-center justify-center bg-muted">

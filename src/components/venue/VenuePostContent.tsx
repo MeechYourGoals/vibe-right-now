@@ -2,6 +2,7 @@
 import React from 'react';
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
+import ImageWithFallback from "@/components/ui/ImageWithFallback";
 
 interface VenuePostContentProps {
   content: string;
@@ -28,7 +29,7 @@ const VenuePostContent: React.FC<VenuePostContentProps> = ({
       <p className="mb-3">{displayContent}</p>
       <div className="rounded-lg overflow-hidden">
         {media.type === "image" ? (
-          <img
+          <ImageWithFallback
             src={media.url}
             alt={`Media content`}
             className="w-full h-auto object-cover"

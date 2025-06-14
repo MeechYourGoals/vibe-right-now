@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { ExternalLink, Heart, MessageSquare, Star } from "lucide-react";
 import { SocialMediaPost as SocialMediaPostType } from '@/services/SocialMediaService';
 import { formatDistanceToNow } from 'date-fns';
+import ImageWithFallback from "@/components/ui/ImageWithFallback";
 
 interface SocialMediaPostProps {
   post: SocialMediaPostType;
@@ -70,7 +71,7 @@ const SocialMediaPost: React.FC<SocialMediaPostProps> = ({ post, showExternalLin
         <div className="flex justify-between items-start">
           <div className="flex gap-2 items-center">
             <div className="w-8 h-8 rounded-full overflow-hidden bg-muted">
-              <img 
+              <ImageWithFallback
                 src={post.userAvatar} 
                 alt={post.username} 
                 className="w-full h-full object-cover"
@@ -101,7 +102,7 @@ const SocialMediaPost: React.FC<SocialMediaPostProps> = ({ post, showExternalLin
         {post.mediaUrl && (
           <div className="mt-3 rounded-md overflow-hidden">
             {post.mediaType === 'image' ? (
-              <img 
+              <ImageWithFallback
                 src={post.mediaUrl} 
                 alt="Post content" 
                 className="w-full object-cover rounded"

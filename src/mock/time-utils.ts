@@ -1,3 +1,4 @@
+
 // Helper functions for generating timestamps and expiration times
 
 // Get a recent timestamp (n hours ago)
@@ -124,10 +125,54 @@ export const getDaySpecificContent = (venueType: string, dayOfWeek: number): str
   return typeContents[dayOfWeek];
 };
 
+// Curated static image URLs for reliable loading
+const getReliableImageUrl = (venueType: string, dayOfWeek: number): string => {
+  const imageUrls = {
+    restaurant: [
+      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80&auto=format&fit=crop", // Sunday brunch
+      "https://images.unsplash.com/photo-1544148103-0773bf10d330?w=800&q=80&auto=format&fit=crop", // Monday dinner
+      "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=800&q=80&auto=format&fit=crop", // Tuesday tacos
+      "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=800&q=80&auto=format&fit=crop", // Wednesday wine
+      "https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=800&q=80&auto=format&fit=crop", // Thursday special
+      "https://images.unsplash.com/photo-1558030006-450675393462?w=800&q=80&auto=format&fit=crop", // Friday steak
+      "https://images.unsplash.com/photo-1551218808-94e220e084d2?w=800&q=80&auto=format&fit=crop"  // Saturday date night
+    ],
+    bar: [
+      "https://images.unsplash.com/photo-1572116469696-31de0f17cc34?w=800&q=80&auto=format&fit=crop", // Sunday funday
+      "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=800&q=80&auto=format&fit=crop", // Monday football
+      "https://images.unsplash.com/photo-1541532713592-79a0317b6b77?w=800&q=80&auto=format&fit=crop", // Tuesday trivia
+      "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&q=80&auto=format&fit=crop", // Wednesday karaoke
+      "https://images.unsplash.com/photo-1566737236500-c8ac43014a67?w=800&q=80&auto=format&fit=crop", // Thursday ladies night
+      "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=800&q=80&auto=format&fit=crop", // Friday live band
+      "https://images.unsplash.com/photo-1571266028243-d220c6e40644?w=800&q=80&auto=format&fit=crop"  // Saturday dance party
+    ],
+    entertainment: [
+      "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800&q=80&auto=format&fit=crop", // Sunday jazz
+      "https://images.unsplash.com/photo-1527224857830-43a7acc85260?w=800&q=80&auto=format&fit=crop", // Monday comedy
+      "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&q=80&auto=format&fit=crop", // Tuesday acoustic
+      "https://images.unsplash.com/photo-1489599858701-6d4c4e6973b4?w=800&q=80&auto=format&fit=crop", // Wednesday film
+      "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&q=80&auto=format&fit=crop", // Thursday poetry
+      "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=80&auto=format&fit=crop", // Friday showcase
+      "https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=800&q=80&auto=format&fit=crop"  // Saturday headliner
+    ],
+    default: [
+      "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&q=80&auto=format&fit=crop", // Default fallback
+      "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&q=80&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=800&q=80&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1523712999610-f77fbcfc3843?w=800&q=80&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1500673922987-e212871fec22?w=800&q=80&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=800&q=80&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1472396961693-142e6e269027?w=800&q=80&auto=format&fit=crop"
+    ]
+  };
+  
+  const typeImages = imageUrls[venueType as keyof typeof imageUrls] || imageUrls.default;
+  return typeImages[dayOfWeek] || imageUrls.default[0];
+};
+
 // Generate image URL specific to a day of the week for a venue type
 export const getDaySpecificImageUrl = (venueType: string, dayOfWeek: number): string => {
-  // Using placeholder images with different parameters to simulate different images
-  return `https://source.unsplash.com/random/800x600?${venueType},${dayOfWeek}`;
+  return getReliableImageUrl(venueType, dayOfWeek);
 };
 
 // Check if a post is from a specific day of the week
@@ -184,7 +229,7 @@ export function createDaySpecificVenuePosts(venueId: string, venueType: string =
         id: `venue-admin-${venueId}`,
         name: "Venue Admin",
         username: `venue${venueId}admin`,
-        avatar: `https://source.unsplash.com/random/100x100/?profile,${venueId}`
+        avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&q=80&auto=format&fit=crop"
       },
       location: {
         id: venueId,
@@ -194,7 +239,7 @@ export function createDaySpecificVenuePosts(venueId: string, venueType: string =
       media: [
         {
           type: "image",
-          url: `https://source.unsplash.com/random/800x800/?${venueType || 'venue'},${day.toLowerCase()}`
+          url: getReliableImageUrl(venueType || 'venue', index)
         }
       ],
       timestamp,
