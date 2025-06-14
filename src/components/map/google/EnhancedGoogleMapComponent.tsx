@@ -1,3 +1,4 @@
+
 import React, { useCallback, useEffect } from 'react';
 import { GoogleMap } from '@react-google-maps/api';
 import GoogleMapMarkers from './GoogleMapMarkers';
@@ -107,15 +108,6 @@ const EnhancedGoogleMapComponent: React.FC<EnhancedGoogleMapComponentProps> = ({
           onInfoWindowClose={() => setSelectedMarker(null)}
           showAllCities={true}
         />
-        {/* Render Google Place markers for realPlaces (from Google Places API). */}
-        {realPlaces.map((place, idx) =>
-          place.geometry?.location && (
-            <marker
-              key={place.place_id || idx}
-              // We'll handle marker rendering in GoogleMapMarkers so just ensure they're always present in that prop.
-            />
-          )
-        )}
       </GoogleMap>
     </div>
   );

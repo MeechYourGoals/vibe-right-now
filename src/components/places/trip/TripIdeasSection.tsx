@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -80,9 +79,10 @@ const TripIdeasSection: React.FC<TripIdeasSectionProps> = ({
 
       if (error) throw error;
       
-      // Transform the data to match our interface
-      const transformedData = data?.map(item => ({
+      // Transform the data to match our interface with proper type casting
+      const transformedData: VenueIdea[] = data?.map(item => ({
         ...item,
+        status: item.status as 'pending' | 'approved' | 'rejected',
         trip_venue_votes: item.trip_venue_votes || []
       })) || [];
       
