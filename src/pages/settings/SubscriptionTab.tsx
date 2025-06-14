@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -163,7 +162,21 @@ const SubscriptionTab = () => {
                   <td className="text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
                 </tr>
                 <tr className="border-b border-border">
-                  <td className="py-2 text-foreground">Review Sentiment Analysis</td>
+                  <td className="py-2 text-foreground">External Reviews AI Summaries</td>
+                  <td className="text-center text-muted-foreground">-</td>
+                  <td className="text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
+                  <td className="text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
+                  <td className="text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
+                </tr>
+                <tr className="border-b border-border">
+                  <td className="py-2 text-foreground">Venue Messaging</td>
+                  <td className="text-center text-muted-foreground">-</td>
+                  <td className="text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
+                  <td className="text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
+                  <td className="text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
+                </tr>
+                <tr className="border-b border-border">
+                  <td className="py-2 text-foreground">Periodic Bonus Points</td>
                   <td className="text-center text-muted-foreground">-</td>
                   <td className="text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
                   <td className="text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
@@ -171,6 +184,20 @@ const SubscriptionTab = () => {
                 </tr>
                 <tr className="border-b border-border">
                   <td className="py-2 text-foreground">Vibe With Me Mode</td>
+                  <td className="text-center text-muted-foreground">-</td>
+                  <td className="text-center text-muted-foreground">-</td>
+                  <td className="text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
+                  <td className="text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
+                </tr>
+                <tr className="border-b border-border">
+                  <td className="py-2 text-foreground">Link Ticketing and Transportation</td>
+                  <td className="text-center text-muted-foreground">-</td>
+                  <td className="text-center text-muted-foreground">-</td>
+                  <td className="text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
+                  <td className="text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
+                </tr>
+                <tr className="border-b border-border">
+                  <td className="py-2 text-foreground">Basic Vernon Chat</td>
                   <td className="text-center text-muted-foreground">-</td>
                   <td className="text-center text-muted-foreground">-</td>
                   <td className="text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
@@ -199,6 +226,13 @@ const SubscriptionTab = () => {
                 </tr>
                 <tr className="border-b border-border">
                   <td className="py-2 text-foreground">Influencer Marketplace</td>
+                  <td className="text-center text-muted-foreground">-</td>
+                  <td className="text-center text-muted-foreground">-</td>
+                  <td className="text-center text-muted-foreground">-</td>
+                  <td className="text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
+                </tr>
+                <tr className="border-b border-border">
+                  <td className="py-2 text-foreground">Early Access AR/XR Features</td>
                   <td className="text-center text-muted-foreground">-</td>
                   <td className="text-center text-muted-foreground">-</td>
                   <td className="text-center text-muted-foreground">-</td>

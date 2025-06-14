@@ -1,98 +1,74 @@
 
-import { Button } from "@/components/ui/button";
+import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MessageSquare, Heart, Award, Grid2X2, ListIcon } from "lucide-react";
-import ProfileTabContent from "@/components/user/ProfileTabContent";
-import { Post, Comment } from "@/types";
+import { User, Post, Location } from '@/types';
+import ProfileTabContent from './ProfileTabContent';
 
 interface ProfileTabsProps {
-  activeTab: string;
-  setActiveTab: (value: string) => void;
-  viewMode: "list" | "grid";
-  setViewMode: (mode: "list" | "grid") => void;
-  userPosts: Post[];
-  getComments: (postId: string) => Comment[];
+  user: User;
+  posts?: Post[];
+  followedVenues?: Location[];
+  visitedPlaces?: Location[];
+  wantToVisitPlaces?: Location[];
+  isPrivate?: boolean;
 }
 
-const ProfileTabs = ({ 
-  activeTab, 
-  setActiveTab, 
-  viewMode, 
-  setViewMode, 
-  userPosts, 
-  getComments 
-}: ProfileTabsProps) => {
-  return (
-    <Tabs 
-      defaultValue="posts" 
-      value={activeTab} 
-      onValueChange={setActiveTab} 
-      className="mb-6"
-    >
-      <div className="flex justify-between items-center mb-2">
-        <TabsList className="grid grid-cols-3 w-full max-w-md">
-          <TabsTrigger value="posts">
-            <div className="flex items-center">
-              <MessageSquare className="h-4 w-4 mr-2" />
-              <span>Posts</span>
-            </div>
-          </TabsTrigger>
-          <TabsTrigger value="liked">
-            <div className="flex items-center">
-              <Heart className="h-4 w-4 mr-2" />
-              <span>Liked</span>
-            </div>
-          </TabsTrigger>
-          <TabsTrigger value="saved">
-            <div className="flex items-center">
-              <Award className="h-4 w-4 mr-2" />
-              <span>Popular</span>
-            </div>
-          </TabsTrigger>
-        </TabsList>
-        
-        <div className="flex gap-2">
-          <Button 
-            variant={viewMode === "list" ? "default" : "outline"} 
-            size="sm"
-            onClick={() => setViewMode("list")}
-          >
-            <ListIcon className="h-4 w-4" />
-          </Button>
-          <Button 
-            variant={viewMode === "grid" ? "default" : "outline"} 
-            size="sm"
-            onClick={() => setViewMode("grid")}
-          >
-            <Grid2X2 className="h-4 w-4" />
-          </Button>
-        </div>
+const ProfileTabs: React.FC<ProfileTabsProps> = ({
+  user,
+  posts = [],
+  followedVenues = [],
+  visitedPlaces = [],
+  wantToVisitPlaces = [],
+  isPrivate = false
+}) => {
+  const [activeTab, setActiveTab] = useState('posts');
+
+  if (isPrivate) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-muted-foreground">This account is private</p>
       </div>
+    );
+  }
+
+  return (
+    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <TabsList className="grid w-full grid-cols-4">
+        <TabsTrigger value="posts">Posts</TabsTrigger>
+        <TabsTrigger value="venues">Venues</TabsTrigger>
+        <TabsTrigger value="visited">Visited</TabsTrigger>
+        <TabsTrigger value="wishlist">Wishlist</TabsTrigger>
+      </TabsList>
       
-      <TabsContent value="posts" className="mt-4 space-y-4">
+      <TabsContent value="posts" className="mt-6">
         <ProfileTabContent 
-          activeTab="posts"
-          viewMode={viewMode}
-          userPosts={userPosts}
-          getComments={getComments}
+          type="posts" 
+          items={posts}
+          user={user}
         />
       </TabsContent>
       
-      <TabsContent value="liked" className="mt-4 space-y-4">
+      <TabsContent value="venues" className="mt-6">
         <ProfileTabContent 
-          activeTab="liked"
-          viewMode={viewMode}
-          userPosts={[]}
-          getComments={getComments}
+          type="venues" 
+          items={followedVenues}
+          user={user}
         />
       </TabsContent>
       
-      <TabsContent value="saved" className="mt-4 space-y-4">
+      <TabsContent value="visited" className="mt-6">
         <ProfileTabContent 
-          activeTab="saved"
-          viewMode={viewMode}
-          userPosts={[]}
-          getComments={getComments}
+          type="visited" 
+          items={visitedPlaces}
+          user={user}
+        />
+      </TabsContent>
+      
+      <TabsContent value="wishlist" className="mt-6">
+        <ProfileTabContent 
+          type="wishlist" 
+          items={wantToVisitPlaces}
+          user={user}
         />
       </TabsContent>
     </Tabs>

@@ -2,18 +2,22 @@
 import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { User } from '@/types';
+import { User, Location } from '@/types';
 
 interface PostUsersListProps {
-  users: User[];
+  users?: User[];
+  location?: Location;
   maxVisible?: number;
   showBadges?: boolean;
+  setShowAllUsers?: (show: boolean) => void;
 }
 
 const PostUsersList: React.FC<PostUsersListProps> = ({
   users = [],
+  location,
   maxVisible = 3,
-  showBadges = true
+  showBadges = true,
+  setShowAllUsers
 }) => {
   const visibleUsers = users.slice(0, maxVisible);
   const remainingCount = Math.max(0, users.length - maxVisible);
@@ -40,6 +44,15 @@ const PostUsersList: React.FC<PostUsersListProps> = ({
         <span className="text-sm text-muted-foreground">
           +{remainingCount} more
         </span>
+      )}
+      
+      {location && setShowAllUsers && (
+        <button 
+          onClick={() => setShowAllUsers(false)}
+          className="text-sm text-blue-500 hover:underline"
+        >
+          View at {location.name}
+        </button>
       )}
     </div>
   );

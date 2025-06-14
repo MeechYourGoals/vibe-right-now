@@ -13,10 +13,12 @@ export interface UserSubscriptionFeatures {
   savePreferences: boolean;
   groupTrips: boolean;
   aiRecommendations: boolean;
-  reviewSentimentAnalysis: boolean;
+  externalReviewsAISummaries: boolean;
+  venueMessaging: boolean;
   periodicBonusPoints: boolean;
   vibeWithMe: boolean;
   linkTicketingTransportation: boolean;
+  basicVernonChat: boolean;
   vernonConcierge: boolean;
   enhancedVernonChat: boolean;
   vernonAgenticBooking: boolean;
@@ -46,7 +48,7 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
     name: 'Plus',
     price: 9.99,
     billingPeriod: 'month',
-    features: ['AI recommendations', 'Review Sentiment Analysis', 'Periodic Bonus Points', 'Priority support'],
+    features: ['AI recommendations', 'External Reviews AI Summaries', 'Venue Messaging', 'Periodic Bonus Points'],
     isPopular: true
   },
   {
@@ -54,7 +56,7 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
     name: 'Premium',
     price: 14.99,
     billingPeriod: 'month',
-    features: ['Vibe With Me mode', 'Link Ticketing and Transportation accounts', 'Access to Vernon Concierge']
+    features: ['Vibe With Me mode', 'Link Ticketing and Transportation accounts', 'Basic Vernon Chat', 'Access to Vernon Concierge']
   },
   {
     tier: 'pro',
@@ -71,10 +73,12 @@ export const TIER_FEATURES: Record<UserSubscriptionTier, UserSubscriptionFeature
     savePreferences: true,
     groupTrips: true,
     aiRecommendations: false,
-    reviewSentimentAnalysis: false,
+    externalReviewsAISummaries: false,
+    venueMessaging: false,
     periodicBonusPoints: false,
     vibeWithMe: false,
     linkTicketingTransportation: false,
+    basicVernonChat: false,
     vernonConcierge: false,
     enhancedVernonChat: false,
     vernonAgenticBooking: false,
@@ -86,10 +90,12 @@ export const TIER_FEATURES: Record<UserSubscriptionTier, UserSubscriptionFeature
     savePreferences: true,
     groupTrips: true,
     aiRecommendations: true,
-    reviewSentimentAnalysis: true,
+    externalReviewsAISummaries: true,
+    venueMessaging: true,
     periodicBonusPoints: true,
     vibeWithMe: false,
     linkTicketingTransportation: false,
+    basicVernonChat: false,
     vernonConcierge: false,
     enhancedVernonChat: false,
     vernonAgenticBooking: false,
@@ -101,10 +107,12 @@ export const TIER_FEATURES: Record<UserSubscriptionTier, UserSubscriptionFeature
     savePreferences: true,
     groupTrips: true,
     aiRecommendations: true,
-    reviewSentimentAnalysis: true,
+    externalReviewsAISummaries: true,
+    venueMessaging: true,
     periodicBonusPoints: true,
     vibeWithMe: true,
     linkTicketingTransportation: true,
+    basicVernonChat: true,
     vernonConcierge: true,
     enhancedVernonChat: false,
     vernonAgenticBooking: false,
@@ -116,10 +124,12 @@ export const TIER_FEATURES: Record<UserSubscriptionTier, UserSubscriptionFeature
     savePreferences: true,
     groupTrips: true,
     aiRecommendations: true,
-    reviewSentimentAnalysis: true,
+    externalReviewsAISummaries: true,
+    venueMessaging: true,
     periodicBonusPoints: true,
     vibeWithMe: true,
     linkTicketingTransportation: true,
+    basicVernonChat: true,
     vernonConcierge: true,
     enhancedVernonChat: true,
     vernonAgenticBooking: true,
