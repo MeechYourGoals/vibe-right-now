@@ -50,6 +50,12 @@ const VenueFirstPostHeader: React.FC<VenueFirstPostHeaderProps> = ({
     minute: '2-digit'
   });
   
+  // Add debugging for venue links in headers
+  if (location) {
+    console.log("VenueFirstPostHeader: Location:", location);
+    console.log("VenueFirstPostHeader: Venue link will be:", `/venue/${location.id}`);
+  }
+  
   return (
     <div className="p-4 flex justify-between items-start">
       <div className="flex gap-3">

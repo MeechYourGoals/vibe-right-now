@@ -42,7 +42,13 @@ const VenueProfile = () => {
   
   const { user, isAuthenticated } = useAuth0();
   
+  // Add debugging
+  console.log("VenueProfile: Requested venue ID:", id);
+  console.log("VenueProfile: Available venue IDs:", mockLocations.map(loc => loc.id));
+  
   const venue = mockLocations.find(location => location.id === id);
+  
+  console.log("VenueProfile: Found venue:", venue);
   
   useEffect(() => {
     // Check if the user is authenticated and is the owner of the venue
@@ -138,12 +144,21 @@ const VenueProfile = () => {
   };
 
   if (!venue) {
+    console.error("VenueProfile: Venue not found for ID:", id);
+    console.log("VenueProfile: Available venues:", mockLocations.map(loc => ({ id: loc.id, name: loc.name })));
+    
     return (
       <div className="min-h-screen bg-background">
         <Header />
         <div className="container py-20 text-center">
           <h1 className="text-2xl font-bold mb-4">Venue not found</h1>
-          <p className="text-muted-foreground">This venue doesn't exist or has been removed.</p>
+          <p className="text-muted-foreground">
+            This venue doesn't exist or has been removed. 
+            <br />
+            Requested ID: {id}
+            <br />
+            Available IDs: {mockLocations.map(loc => loc.id).join(", ")}
+          </p>
           <Button className="mt-6" onClick={() => window.history.back()}>Go Back</Button>
         </div>
       </div>
