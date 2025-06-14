@@ -42,6 +42,7 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
       
       <TabsContent value="posts" className="mt-6">
         <ProfileTabContent 
+          type="posts"
           items={posts}
           user={user}
         />
@@ -49,6 +50,7 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
       
       <TabsContent value="venues" className="mt-6">
         <ProfileTabContent 
+          type="venues"
           items={followedVenues}
           user={user}
         />
@@ -56,6 +58,7 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
       
       <TabsContent value="visited" className="mt-6">
         <ProfileTabContent 
+          type="visited"
           items={visitedPlaces}
           user={user}
         />
@@ -63,6 +66,7 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
       
       <TabsContent value="wishlist" className="mt-6">
         <ProfileTabContent 
+          type="wishlist"
           items={wantToVisitPlaces}
           user={user}
         />
