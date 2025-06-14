@@ -12,8 +12,8 @@ import { Upload, Edit, Camera } from "lucide-react";
 const ProfileBio = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState({
-    name: "Alex Johnson",
-    username: "@vibechecker",
+    name: "Christian Amechi",
+    username: "@ChiefVibeOfficer",
     bio: "Exploring the best vibes around the world. Always on the lookout for hidden gems and exciting experiences.",
     location: "Los Angeles, CA",
     joinedDate: "January 2023"
@@ -37,7 +37,7 @@ const ProfileBio = () => {
             <div className="absolute -bottom-12 left-8">
               <div className="relative">
                 <Avatar className="h-24 w-24 border-4 border-background">
-                  <AvatarImage src="https://images.unsplash.com/photo-1639149888905-fb39731f2e6c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&h=300&q=80" alt={profileData.name} />
+                  <AvatarImage src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&h=300&q=80" alt={profileData.name} />
                   <AvatarFallback>{profileData.name.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <Button variant="outline" size="icon" className="absolute bottom-0 right-0 rounded-full bg-background">
