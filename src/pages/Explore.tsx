@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback } from "react";
 import Header from "@/components/Header";
 import { Badge } from "@/components/ui/badge";
@@ -16,7 +17,8 @@ import RecommendedForYou from "@/components/RecommendedForYou";
 import TrendingLocations from "@/components/TrendingLocations";
 import DiscountLocations from "@/components/DiscountLocations";
 import { useMapSync } from "@/hooks/useMapSync";
-import { EnhancedPlace } from "@/hooks/useEnhancedGooglePlaces";
+import { Location } from "@/types/location";
+import { findCityByName } from "@/data/mockCities";
 import { format } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -54,33 +56,36 @@ const Explore = () => {
   } = useExploreState();
 
   // Enhanced place selection handlers
-  const handlePlaceSelect = useCallback((place: EnhancedPlace) => {
-    if (place.geometry?.location) {
+  const handlePlaceSelect = useCallback((place: Location) => {
+    if (place.lat && place.lng) {
       updateMapCenter(place);
 
-      // If this is a city selection, update the location field
-      if (place.types?.includes('locality') || place.types?.includes('administrative_area_level_1')) {
-        const cityName = place.name || place.formatted_address?.split(',')[0] || '';
+      // If this is a city selection, update the location field and show venues
+      if (place.type === 'city') {
+        const cityName = place.name || '';
         setLocation(cityName);
+        
+        // Find and show venues for this city
+        const cityData = findCityByName(cityName);
+        if (cityData) {
+          updateRealPlaces(cityData.venues);
+        }
+      } else {
+        // Show this specific venue
+        updateRealPlaces([place]);
       }
       
-      // Show this place in realPlaces
-      updateRealPlaces([place]);
       zoomToPlace(place);
     }
   }, [updateMapCenter, updateRealPlaces, setLocation, zoomToPlace]);
 
-  const handleVenueSelect = useCallback((place: EnhancedPlace) => {
-    if (place.geometry?.location) {
+  const handleVenueSelect = useCallback((place: Location) => {
+    if (place.lat && place.lng) {
       updateMapCenter(place);
 
       // Try to populate city for context
-      if (place.formatted_address && !location) {
-        const addressParts = place.formatted_address.split(',');
-        if (addressParts.length >= 2) {
-          const city = addressParts[addressParts.length - 2].trim();
-          setLocation(city);
-        }
+      if (place.city && !location) {
+        setLocation(place.city);
       }
       
       // Always show this place on the map

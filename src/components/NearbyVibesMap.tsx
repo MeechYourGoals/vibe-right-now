@@ -1,5 +1,6 @@
+
 import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation as useRouterLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { useNearbyLocations } from "@/hooks/useNearbyLocations";
 import { geocodeAddress } from "@/utils/geocodingService";
@@ -8,7 +9,7 @@ import NearbyLocationsList from "./map/NearbyLocationsList";
 import AddressSearchPopover from "./map/AddressSearchPopover";
 import EnhancedGoogleMapComponent from "./map/google/EnhancedGoogleMapComponent";
 import { useMapSync } from "@/hooks/useMapSync";
-import { Location } from "@/types";
+import { Location } from "@/types/location";
 
 declare global {
   interface Window {
@@ -37,7 +38,7 @@ const NearbyVibesMap = () => {
   const { mapState, setMapRef, updateMapCenter, updateRealPlaces, zoomToPlace } = useMapSync();
   
   const navigate = useNavigate();
-  const location = useLocation();
+  const location = useRouterLocation();
   
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -74,11 +75,12 @@ const NearbyVibesMap = () => {
     setSelectedLocation(location);
   };
 
-  const handlePlaceSelect = (place: google.maps.places.PlaceResult) => {
+  const handlePlaceSelect = (place: Location) => {
+    updateMapCenter(place);
+    updateRealPlaces([place]);
     zoomToPlace(place);
     
-    // Navigate to venue details if it's a real place
-    if (place.place_id) {
+    if (place.id) {
       toast.success(`Selected ${place.name}`);
     }
   };
@@ -163,7 +165,7 @@ const NearbyVibesMap = () => {
           showDistances={showDistances}
           userAddressLocation={userAddressLocation}
           onLocationSelect={handleLocationSelect}
-          onPlaceSelect={handlePlaceSelect} // <-- this will set selectedPlace in useMapSync, which is used for info window
+          onPlaceSelect={handlePlaceSelect}
           onMapReady={setMapRef}
         />
       </div>

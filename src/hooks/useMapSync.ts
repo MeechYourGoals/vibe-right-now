@@ -1,12 +1,12 @@
 
 import { useState, useCallback, useRef } from 'react';
-import { Location } from '@/types';
+import { Location } from '@/types/location';
 
 interface MapSyncState {
   center: { lat: number; lng: number };
   zoom: number;
-  selectedPlace: google.maps.places.PlaceResult | null;
-  realPlaces: google.maps.places.PlaceResult[];
+  selectedPlace: Location | null;
+  realPlaces: Location[];
 }
 
 export const useMapSync = () => {
@@ -23,50 +23,50 @@ export const useMapSync = () => {
     mapRef.current = map;
   }, []);
 
-  const updateMapCenter = useCallback((place: google.maps.places.PlaceResult) => {
-    if (!place.geometry?.location) return;
+  const updateMapCenter = useCallback((place: Location) => {
+    if (!place.lat || !place.lng) return;
 
     const newCenter = {
-      lat: place.geometry.location.lat(),
-      lng: place.geometry.location.lng()
+      lat: place.lat,
+      lng: place.lng
     };
 
     setMapState(prev => ({
       ...prev,
       center: newCenter,
-      zoom: place.types?.includes('locality') ? 12 : 15,
+      zoom: place.type === 'city' ? 12 : 15,
       selectedPlace: place
     }));
 
     // Update actual map if ref exists
     if (mapRef.current) {
       mapRef.current.setCenter(newCenter);
-      mapRef.current.setZoom(place.types?.includes('locality') ? 12 : 15);
+      mapRef.current.setZoom(place.type === 'city' ? 12 : 15);
     }
   }, []);
 
-  const updateRealPlaces = useCallback((places: google.maps.places.PlaceResult[]) => {
+  const updateRealPlaces = useCallback((places: Location[]) => {
     setMapState(prev => ({
       ...prev,
       realPlaces: places
     }));
   }, []);
 
-  const zoomToPlace = useCallback((place: google.maps.places.PlaceResult) => {
-    if (!place.geometry?.location || !mapRef.current) return;
+  const zoomToPlace = useCallback((place: Location) => {
+    if (!place.lat || !place.lng || !mapRef.current) return;
 
     const bounds = new google.maps.LatLngBounds();
-    bounds.extend(place.geometry.location);
+    bounds.extend({ lat: place.lat, lng: place.lng });
     
     // Add some padding around the place
     const offset = 0.01;
     bounds.extend({
-      lat: place.geometry.location.lat() + offset,
-      lng: place.geometry.location.lng() + offset
+      lat: place.lat + offset,
+      lng: place.lng + offset
     });
     bounds.extend({
-      lat: place.geometry.location.lat() - offset,
-      lng: place.geometry.location.lng() - offset
+      lat: place.lat - offset,
+      lng: place.lng - offset
     });
 
     mapRef.current.fitBounds(bounds);

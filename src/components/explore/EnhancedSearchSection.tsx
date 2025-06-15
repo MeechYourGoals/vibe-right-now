@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { DatePickerWithRange } from '@/components/ui/date-picker-with-range';
 import { format } from 'date-fns';
-import { useEnhancedGooglePlaces, EnhancedPlace } from '@/hooks/useEnhancedGooglePlaces';
+import { Location } from '@/types/location';
+import { findCityByName, searchVenues } from '@/data/mockCities';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
@@ -17,8 +18,8 @@ interface EnhancedSearchSectionProps {
   onDateChange: (dates: { from: Date; to: Date } | null) => void;
   location: string;
   onLocationChange: (location: string) => void;
-  onPlaceSelect: (place: EnhancedPlace) => void;
-  onVenueSelect: (place: EnhancedPlace) => void;
+  onPlaceSelect: (place: Location) => void;
+  onVenueSelect: (place: Location) => void;
 }
 
 const EnhancedSearchSection: React.FC<EnhancedSearchSectionProps> = ({
@@ -35,24 +36,8 @@ const EnhancedSearchSection: React.FC<EnhancedSearchSectionProps> = ({
   const [showVenueSuggestions, setShowVenueSuggestions] = useState(false);
   const [locationInput, setLocationInput] = useState(location);
   const [venueInput, setVenueInput] = useState(searchQuery);
-
-  const {
-    searchResults: locationResults,
-    loading: locationLoading,
-    error: locationError,
-    spellingSuggestions: locationSpelling,
-    searchCities,
-    clearResults: clearLocationResults
-  } = useEnhancedGooglePlaces();
-
-  const {
-    searchResults: venueResults,
-    loading: venueLoading,
-    error: venueError,
-    spellingSuggestions: venueSpelling,
-    searchVenues,
-    clearResults: clearVenueResults
-  } = useEnhancedGooglePlaces();
+  const [locationResults, setLocationResults] = useState<any[]>([]);
+  const [venueResults, setVenueResults] = useState<Location[]>([]);
 
   // Debounced search function
   const debounce = useCallback((func: Function, wait: number) => {
@@ -71,22 +56,32 @@ const EnhancedSearchSection: React.FC<EnhancedSearchSectionProps> = ({
   const debouncedLocationSearch = useCallback(
     debounce((query: string) => {
       if (query.trim() && query !== location) {
-        searchCities(query);
+        const city = findCityByName(query);
+        if (city) {
+          setLocationResults([{
+            name: city.name,
+            formatted_address: `${city.name}${city.state ? `, ${city.state}` : ''}, ${city.country}`,
+            ...city
+          }]);
+        } else {
+          setLocationResults([]);
+        }
         setShowLocationSuggestions(true);
       }
     }, 300),
-    [searchCities, location]
+    [location]
   );
 
   // Debounced venue search
   const debouncedVenueSearch = useCallback(
-    debounce((query: string, locationCoords?: { lat: number, lng: number }) => {
+    debounce((query: string) => {
       if (query.trim() && query !== searchQuery) {
-        searchVenues(query, locationCoords);
+        const venues = searchVenues(query, location);
+        setVenueResults(venues);
         setShowVenueSuggestions(true);
       }
     }, 300),
-    [searchVenues, searchQuery]
+    [searchQuery, location]
   );
 
   // Handle location input changes
@@ -94,43 +89,52 @@ const EnhancedSearchSection: React.FC<EnhancedSearchSectionProps> = ({
     if (locationInput.trim() && locationInput !== location) {
       debouncedLocationSearch(locationInput);
     } else {
-      clearLocationResults();
+      setLocationResults([]);
       setShowLocationSuggestions(false);
     }
-  }, [locationInput, debouncedLocationSearch, clearLocationResults, location]);
+  }, [locationInput, debouncedLocationSearch, location]);
 
   // Handle venue input changes
   useEffect(() => {
     if (venueInput.trim() && venueInput !== searchQuery) {
-      // Try to get coordinates from current location for better venue search
-      let locationCoords: { lat: number, lng: number } | undefined;
-      
-      // If we have a location, we might want to search venues near it
-      // For now, we'll search without location constraints
-      debouncedVenueSearch(venueInput, locationCoords);
+      debouncedVenueSearch(venueInput);
     } else {
-      clearVenueResults();
+      setVenueResults([]);
       setShowVenueSuggestions(false);
     }
-  }, [venueInput, debouncedVenueSearch, clearVenueResults, searchQuery]);
+  }, [venueInput, debouncedVenueSearch, searchQuery]);
 
-  const handleLocationSelect = (place: EnhancedPlace) => {
-    const placeName = place.name || place.formatted_address?.split(',')[0] || '';
+  const handleLocationSelect = (cityData: any) => {
+    const placeName = cityData.name;
     setLocationInput(placeName);
     onLocationChange(placeName);
-    onPlaceSelect(place);
+    
+    // Create a location object for the city center
+    const cityLocation: Location = {
+      id: `city-${cityData.name.toLowerCase()}`,
+      name: cityData.name,
+      address: cityData.formatted_address,
+      city: cityData.name,
+      state: cityData.state,
+      country: cityData.country,
+      lat: cityData.lat,
+      lng: cityData.lng,
+      type: 'city'
+    };
+    
+    onPlaceSelect(cityLocation);
     setShowLocationSuggestions(false);
-    clearLocationResults();
+    setLocationResults([]);
     toast.success(`Location set to ${placeName}`);
   };
 
-  const handleVenueSelect = (place: EnhancedPlace) => {
-    const venueName = place.name || '';
+  const handleVenueSelect = (venue: Location) => {
+    const venueName = venue.name || '';
     setVenueInput(venueName);
     onSearchChange(venueName);
-    onVenueSelect(place);
+    onVenueSelect(venue);
     setShowVenueSuggestions(false);
-    clearVenueResults();
+    setVenueResults([]);
     toast.success(`Found ${venueName}`);
   };
 
@@ -147,14 +151,6 @@ const EnhancedSearchSection: React.FC<EnhancedSearchSectionProps> = ({
     onSearchChange(value);
     if (!value.trim()) {
       setShowVenueSuggestions(false);
-    }
-  };
-
-  const handleSpellingSuggestion = (suggestion: string, isVenue: boolean) => {
-    if (isVenue) {
-      handleVenueInputChange(suggestion);
-    } else {
-      handleLocationInputChange(suggestion);
     }
   };
 
@@ -183,78 +179,51 @@ const EnhancedSearchSection: React.FC<EnhancedSearchSectionProps> = ({
                 setTimeout(() => setShowVenueSuggestions(false), 200);
               }}
             />
-            {venueLoading && (
-              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-r-transparent" />
-              </div>
-            )}
           </div>
 
           {/* Enhanced Venue Suggestions */}
-          {showVenueSuggestions && (venueResults.length > 0 || venueSpelling.length > 0 || venueError) && (
+          {showVenueSuggestions && venueResults.length > 0 && (
             <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-background border border-border rounded-md shadow-lg max-h-80 overflow-y-auto">
-              {venueSpelling.length > 0 && (
-                <div className="p-3 border-b border-border">
-                  <p className="text-sm text-muted-foreground mb-2">Did you mean:</p>
-                  <div className="flex gap-2 flex-wrap">
-                    {venueSpelling.map((suggestion, idx) => (
-                      <Button
-                        key={idx}
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleSpellingSuggestion(suggestion, true)}
-                        className="text-xs"
-                      >
-                        {suggestion}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              {venueError && (
-                <div className="p-3 text-sm text-destructive border-b border-border">
-                  {venueError}
-                </div>
-              )}
-              
-              {venueResults.map((place, index) => (
+              {venueResults.map((venue, index) => (
                 <button
                   key={index}
                   className="w-full text-left p-3 hover:bg-muted border-b border-border last:border-b-0 transition-colors"
-                  onClick={() => handleVenueSelect(place)}
+                  onClick={() => handleVenueSelect(venue)}
                 >
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
-                      <div className="font-medium">{place.name}</div>
-                      {place.formatted_address && (
-                        <div className="text-sm text-muted-foreground">{place.formatted_address}</div>
+                      <div className="font-medium">{venue.name}</div>
+                      {venue.address && (
+                        <div className="text-sm text-muted-foreground">{venue.address}</div>
                       )}
                       <div className="flex items-center gap-2 mt-1">
-                        {place.rating && (
+                        {venue.rating && (
                           <Badge variant="secondary" className="text-xs">
-                            ⭐ {place.rating}
+                            ⭐ {venue.rating}
                           </Badge>
                         )}
-                        {place.business_status === 'OPERATIONAL' && (
+                        {venue.business_status === 'OPERATIONAL' && (
                           <Badge variant="outline" className="text-xs text-green-600">
                             Open
                           </Badge>
                         )}
-                        {place.types && place.types.slice(0, 2).map((type, idx) => (
-                          <Badge key={idx} variant="secondary" className="text-xs">
-                            {type.replace(/_/g, ' ')}
+                        <Badge variant="secondary" className="text-xs">
+                          {venue.type.replace(/_/g, ' ')}
+                        </Badge>
+                        {venue.vibes && venue.vibes.slice(0, 2).map((vibe, idx) => (
+                          <Badge key={idx} variant="outline" className="text-xs">
+                            {vibe}
                           </Badge>
                         ))}
                       </div>
                     </div>
-                    {place.google_maps_url && (
+                    {venue.google_maps_url && (
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={(e) => {
                           e.stopPropagation();
-                          openInGoogleMaps(place.google_maps_url!);
+                          openInGoogleMaps(venue.google_maps_url!);
                         }}
                         className="ml-2"
                       >
@@ -286,50 +255,20 @@ const EnhancedSearchSection: React.FC<EnhancedSearchSectionProps> = ({
                 setTimeout(() => setShowLocationSuggestions(false), 200);
               }}
             />
-            {locationLoading && (
-              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-r-transparent" />
-              </div>
-            )}
           </div>
 
           {/* Enhanced Location Suggestions */}
-          {showLocationSuggestions && (locationResults.length > 0 || locationSpelling.length > 0 || locationError) && (
+          {showLocationSuggestions && locationResults.length > 0 && (
             <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-background border border-border rounded-md shadow-lg max-h-60 overflow-y-auto">
-              {locationSpelling.length > 0 && (
-                <div className="p-3 border-b border-border">
-                  <p className="text-sm text-muted-foreground mb-2">Did you mean:</p>
-                  <div className="flex gap-2 flex-wrap">
-                    {locationSpelling.map((suggestion, idx) => (
-                      <Button
-                        key={idx}
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleSpellingSuggestion(suggestion, false)}
-                        className="text-xs"
-                      >
-                        {suggestion}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              {locationError && (
-                <div className="p-3 text-sm text-destructive border-b border-border">
-                  {locationError}
-                </div>
-              )}
-              
-              {locationResults.map((place, index) => (
+              {locationResults.map((cityData, index) => (
                 <button
                   key={index}
                   className="w-full text-left p-3 hover:bg-muted border-b border-border last:border-b-0 transition-colors"
-                  onClick={() => handleLocationSelect(place)}
+                  onClick={() => handleLocationSelect(cityData)}
                 >
-                  <div className="font-medium">{place.name}</div>
-                  {place.formatted_address && (
-                    <div className="text-sm text-muted-foreground">{place.formatted_address}</div>
+                  <div className="font-medium">{cityData.name}</div>
+                  {cityData.formatted_address && (
+                    <div className="text-sm text-muted-foreground">{cityData.formatted_address}</div>
                   )}
                 </button>
               ))}
