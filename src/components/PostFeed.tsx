@@ -1,8 +1,8 @@
 
 import { useState, useEffect } from "react";
 import { Post, Comment } from "@/types";
-import { mockPosts } from "@/mock/posts";
-import { mockComments } from "@/mock/comments";
+// Use centralized mock data imports
+import { mockPosts, mockComments } from "@/mock";
 import PostCard from "./post/PostCard";
 import { useToast } from "@/components/ui/use-toast";
 
