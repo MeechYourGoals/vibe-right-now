@@ -1,6 +1,9 @@
+import { CityData, Location } from '@/types/location';
 
-import { CityData } from '@/types/location';
+// The "type" field for every Location must be exactly as allowed in src/types/location.ts
+type VenueType = "restaurant" | "bar" | "event" | "attraction" | "sports" | "other" | "nightclub" | "mall" | "cafe";
 
+// Listed mock cities and their venues, conforming to required Location type
 export const mockCitiesData: CityData[] = [
   // US Cities
   {
