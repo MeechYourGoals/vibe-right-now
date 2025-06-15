@@ -1,5 +1,7 @@
+
 import { MessageProcessorService, messageProcessorService } from './messageProcessor';
-import { Message } from '../types';
+import { Message, MessageContext } from '../types';
+import { createUserMessage, createErrorMessage } from './messageFactory';
 
 export interface ProcessMessageOptions {
   isVenueMode: boolean;
@@ -7,6 +9,20 @@ export interface ProcessMessageOptions {
   updatePaginationState: (params: Record<string, number>) => Record<string, number>;
   setIsTyping: (isTyping: boolean) => void;
   setIsSearching: (isSearching: boolean) => void;
+}
+
+// Helper function to extract pagination parameters from query
+function extractPaginationParams(query: string): Record<string, number> {
+  const params: Record<string, number> = {};
+  
+  // Look for pagination indicators in the query
+  const pageMatch = query.match(/page\s*(\d+)/i);
+  const limitMatch = query.match(/(?:show|limit|display)\s*(\d+)/i);
+  
+  if (pageMatch) params.page = parseInt(pageMatch[1]);
+  if (limitMatch) params.limit = parseInt(limitMatch[1]);
+  
+  return params;
 }
 
 export class MessageProcessorCore {
