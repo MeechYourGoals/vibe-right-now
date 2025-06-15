@@ -1,24 +1,27 @@
-import { CityData, Location } from '@/types/location';
 
-// Gather all cities from their individual files
-import nyc from "./mockCities/nyc";
-import la from "./mockCities/la";
-import london from "./mockCities/london";
+import { CityData } from '@/types/location';
+
+import nyc from './mockCities/nyc';
+import la from './mockCities/la';
+import phoenix from './mockCities/phoenix';
+import london from './mockCities/london';
 // IMPORT NEW CITIES HERE as you add them...
 
 export const mockCitiesData: CityData[] = [
   nyc,
   la,
+  phoenix,
   london,
   // ADD NEW CITIES HERE as you add them...
 ];
 
-// Utility/type helpers and search logic remain
-// Define VenueType strictly according to the Location interface
-type VenueType = "restaurant" | "bar" | "event" | "attraction" | "sports" | "other" | "nightclub" | "mall" | "cafe";
+// Export utility/type helpers as before
 
-// Helper function to ensure only valid VenueType values are allowed
-function asVenueType(type: string): VenueType {
+// Define VenueType strictly for code completion elsewhere
+export type VenueType = "restaurant" | "bar" | "event" | "attraction" | "sports" | "other" | "nightclub" | "mall" | "cafe";
+
+// Utility/Type helpers
+export function asVenueType(type: string): VenueType {
   const allowed: VenueType[] = [
     "restaurant", "bar", "event", "attraction", "sports", "other", "nightclub", "mall", "cafe"
   ];
@@ -26,48 +29,42 @@ function asVenueType(type: string): VenueType {
   return "other";
 }
 
-// Function to find city by name with fuzzy matching
+// Find city by name
 export const findCityByName = (searchTerm: string): CityData | null => {
   const normalizedSearch = searchTerm.toLowerCase().trim();
-  
   return mockCitiesData.find(city => {
     const cityName = city.name.toLowerCase();
     const fullName = `${city.name}${city.state ? `, ${city.state}` : ''}, ${city.country}`.toLowerCase();
-    
     return cityName.includes(normalizedSearch) || 
-           fullName.includes(normalizedSearch) ||
-           normalizedSearch.includes(cityName);
+      fullName.includes(normalizedSearch) ||
+      normalizedSearch.includes(cityName);
   }) || null;
 };
 
-// Function to search venues across all cities
-export const searchVenues = (searchTerm: string, cityName?: string): Location[] => {
+// Search venues in all cities
+export const searchVenues = (searchTerm: string, cityName?: string) => {
   const normalizedSearch = searchTerm.toLowerCase().trim();
-  
   let citiesToSearch = mockCitiesData;
-  
   if (cityName) {
     const targetCity = findCityByName(cityName);
     if (targetCity) {
       citiesToSearch = [targetCity];
     }
   }
-  
-  const results: Location[] = [];
-  
+  let results: any[] = [];
   citiesToSearch.forEach(city => {
     city.venues.forEach(venue => {
       const venueName = venue.name.toLowerCase();
-      const venueType = venue.type.toLowerCase();
-      const venueVibes = venue.vibes?.join(' ').toLowerCase() || '';
-      
-      if (venueName.includes(normalizedSearch) ||
-          venueType.includes(normalizedSearch) ||
-          venueVibes.includes(normalizedSearch)) {
+      const venueType = (venue.type as string).toLowerCase();
+      const venueVibes = (venue.vibes?.join(' ') || '').toLowerCase();
+      if (
+        venueName.includes(normalizedSearch) ||
+        venueType.includes(normalizedSearch) ||
+        venueVibes.includes(normalizedSearch)
+      ) {
         results.push(venue);
       }
     });
   });
-  
-  return results.slice(0, 10); // Limit results
+  return results.slice(0, 10);
 };
