@@ -1,6 +1,7 @@
 
 import { MessageProcessorService, messageProcessorService } from './messageProcessor';
-import { Message, MessageContext } from '../types';
+import { MessageContext } from './messageProcessor/types';
+import { Message } from '../types';
 import { createUserMessage, createErrorMessage } from './messageFactory';
 
 export interface ProcessMessageOptions {
