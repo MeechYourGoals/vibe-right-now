@@ -1,3 +1,18 @@
+// Re-export all types from a centralized location
+export * from './core/base';
+export * from './core/api';
+
+export * from './entities/user';
+export * from './entities/venue';
+export * from './entities/content';
+export * from './entities/messaging';
+export * from './entities/events';
+
+export * from './features/chat';
+export * from './features/search';
+export * from './features/analytics';
+
+// Legacy compatibility - keep existing types that are still used
 import { MockUserProfile } from "@/mock/users";
 
 export interface Location {
@@ -171,99 +186,4 @@ export interface VenueInsights {
 export interface DateRange {
   from: Date | undefined;
   to: Date | undefined;
-}
-
-// Advertising Suite Types
-export interface AdFormat {
-  id: string;
-  name: string;
-  description: string;
-  type: 'MomentCard' | 'VibeOverlay' | 'SpawnPoint' | 'HeatRingTakeover';
-  duration?: string;
-  placement: string;
-  kpis: string[];
-}
-
-export interface Campaign {
-  id: string;
-  name: string;
-  adFormat: AdFormat;
-  targeting: TargetingOptions;
-  budget: number;
-  status: 'active' | 'paused' | 'completed';
-  performance: CampaignPerformance;
-}
-
-export interface TargetingOptions {
-  demographics: {
-    ageRange: [number, number];
-    gender: string[];
-    location: string[];
-  };
-  behavioral: {
-    pastAttendance: string[];
-    clipHistory: string[];
-    tripsIntent: boolean;
-  };
-  contextual: {
-    vibeTags: string[];
-    venueTypes: string[];
-    daypart: string[];
-  };
-  momentScore: {
-    hypeLevel: number;
-    crowdDensity: number;
-  };
-}
-
-export interface CampaignPerformance {
-  impressions: number;
-  clicks: number;
-  ctr: number;
-  conversions: number;
-  spend: number;
-  roas: number;
-  footTrafficLift: number;
-}
-
-// Sentiment Analysis Types
-export interface VenueSentimentAnalysis {
-  id: string;
-  venue_id: string;
-  platform: string;
-  overall_sentiment: number; // -1.0 to 1.0
-  sentiment_summary: string;
-  themes: Record<string, number>; // e.g., {"ambience": 0.8, "service": 0.6}
-  review_count: number;
-  last_analyzed_at: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface ReviewSentimentCache {
-  id: string;
-  venue_id: string;
-  platform: string;
-  review_id: string;
-  review_text: string;
-  sentiment_score: number;
-  themes: Record<string, number>;
-  analyzed_at: string;
-  expires_at: string;
-}
-
-export interface SentimentTheme {
-  name: string;
-  score: number;
-  mentions: number;
-  examples: string[];
-}
-
-export interface PlatformSentimentSummary {
-  platform: string;
-  overallSentiment: number;
-  summary: string;
-  themes: SentimentTheme[];
-  reviewCount: number;
-  lastUpdated: string;
 }

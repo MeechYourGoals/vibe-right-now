@@ -1,6 +1,8 @@
+
 import { StateCreator } from 'zustand';
 import { AppStore, ChatSlice } from './types';
 import { Message, ChatMode } from '@/components/VernonChat/types';
+import { useAppStore } from './appStore';
 
 export const createChatSlice: StateCreator<
   AppStore,

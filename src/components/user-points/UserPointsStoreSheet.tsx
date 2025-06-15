@@ -39,7 +39,7 @@ const UserPointsStoreSheet = () => {
       addNotification({
         type: 'success',
         title: 'Reward Redeemed!',
-        message: `You've successfully redeemed ${redeemingReward.title} for ${redeemingReward.points} points.`
+        message: `You've successfully redeemed ${redeemingReward.description} for ${redeemingReward.points} points.`
       });
       
       setRedeemingReward(null);

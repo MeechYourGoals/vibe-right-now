@@ -1,6 +1,7 @@
 
 import { StateCreator } from 'zustand';
 import { AppStore, VenueSlice, Venue } from './types';
+import { useAppStore } from './appStore';
 
 export const createVenueSlice: StateCreator<
   AppStore,
