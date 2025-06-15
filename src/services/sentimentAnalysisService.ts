@@ -1,44 +1,25 @@
+
+import { db } from '@/services/database';
+import { VenueSentimentAnalysis, PlatformSentimentSummary, SentimentTheme } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
-import { VenueSentimentAnalysis, ReviewSentimentCache, PlatformSentimentSummary, SentimentTheme } from "@/types";
 
 export class SentimentAnalysisService {
   private static readonly CACHE_DURATION_DAYS = 30;
-  private static readonly PLATFORMS = ['google', 'yelp', 'tripadvisor'] as const;
 
   static async getVenueSentiment(venueId: string): Promise<PlatformSentimentSummary[]> {
     try {
-      const { data, error } = await supabase
-        .from('venue_sentiment_analysis')
-        .select('*')
-        .eq('venue_id', venueId);
-
-      if (error) throw error;
-
-      // Transform data with proper type casting
-      const transformedData: VenueSentimentAnalysis[] = data?.map(item => ({
-        ...item,
-        themes: this.parseThemes(item.themes)
-      })) || [];
-
-      return this.transformToSummary(transformedData);
+      const result = await db.sentiment.getVenueSentimentAnalysis(venueId);
+      
+      if (result.success && result.data) {
+        return this.transformToSummary(result.data);
+      }
+      
+      console.error('Error fetching venue sentiment:', result.error);
+      return this.getMockSentimentData(venueId);
     } catch (error) {
       console.error('Error fetching venue sentiment:', error);
       return this.getMockSentimentData(venueId);
     }
-  }
-
-  private static parseThemes(themes: any): Record<string, number> {
-    if (typeof themes === 'string') {
-      try {
-        return JSON.parse(themes);
-      } catch {
-        return {};
-      }
-    }
-    if (typeof themes === 'object' && themes !== null) {
-      return themes as Record<string, number>;
-    }
-    return {};
   }
 
   static async updateVenueSentiment(
@@ -47,29 +28,8 @@ export class SentimentAnalysisService {
     sentimentData: Partial<VenueSentimentAnalysis>
   ): Promise<VenueSentimentAnalysis | null> {
     try {
-      const { data, error } = await supabase
-        .from('venue_sentiment_analysis')
-        .upsert({
-          venue_id: venueId,
-          platform,
-          overall_sentiment: sentimentData.overall_sentiment || 0,
-          sentiment_summary: sentimentData.sentiment_summary || '',
-          themes: sentimentData.themes || {},
-          review_count: sentimentData.review_count || 0,
-          last_analyzed_at: new Date().toISOString()
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      // Transform data with proper type casting
-      const transformedData: VenueSentimentAnalysis = {
-        ...data,
-        themes: this.parseThemes(data.themes)
-      };
-
-      return transformedData;
+      const result = await db.sentiment.upsertVenueSentiment(venueId, platform, sentimentData);
+      return result.success ? result.data : null;
     } catch (error) {
       console.error('Error updating venue sentiment:', error);
       return null;
@@ -106,22 +66,8 @@ export class SentimentAnalysisService {
   // Get sentiment analysis for a venue across all platforms
   static async getVenueSentimentAnalysis(venueId: string): Promise<VenueSentimentAnalysis[]> {
     try {
-      const { data, error } = await supabase
-        .from('venue_sentiment_analysis')
-        .select('*')
-        .eq('venue_id', venueId)
-        .order('last_analyzed_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching sentiment analysis:', error);
-        return [];
-      }
-
-      // Transform data with proper type casting
-      return data?.map(item => ({
-        ...item,
-        themes: this.parseThemes(item.themes)
-      })) || [];
+      const result = await db.sentiment.getVenueSentimentAnalysis(venueId);
+      return result.success && result.data ? result.data : [];
     } catch (error) {
       console.error('Error in getVenueSentimentAnalysis:', error);
       return [];
@@ -155,24 +101,8 @@ export class SentimentAnalysisService {
   // Get sentiment summary for a specific platform
   static async getPlatformSentiment(venueId: string, platform: string): Promise<VenueSentimentAnalysis | null> {
     try {
-      const { data, error } = await supabase
-        .from('venue_sentiment_analysis')
-        .select('*')
-        .eq('venue_id', venueId)
-        .eq('platform', platform)
-        .single();
-
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching platform sentiment:', error);
-        return null;
-      }
-
-      if (!data) return null;
-
-      return {
-        ...data,
-        themes: this.parseThemes(data.themes)
-      };
+      const result = await db.sentiment.getPlatformSentiment(venueId, platform);
+      return result.success ? result.data : null;
     } catch (error) {
       console.error('Error in getPlatformSentiment:', error);
       return null;
@@ -246,20 +176,14 @@ export class SentimentAnalysisService {
     themes: Record<string, number>
   ): Promise<void> {
     try {
-      const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + this.CACHE_DURATION_DAYS);
-
-      await supabase
-        .from('review_sentiment_cache')
-        .upsert({
-          venue_id: venueId,
-          platform,
-          review_id: reviewId,
-          review_text: reviewText,
-          sentiment_score: sentimentScore,
-          themes,
-          expires_at: expiresAt.toISOString()
-        });
+      await db.sentiment.cacheReviewSentiment(
+        venueId,
+        platform,
+        reviewId,
+        reviewText,
+        sentimentScore,
+        themes
+      );
     } catch (error) {
       console.error('Error caching review sentiment:', error);
     }
@@ -269,23 +193,10 @@ export class SentimentAnalysisService {
     venueId: string,
     platform: string,
     reviewId: string
-  ): Promise<ReviewSentimentCache | null> {
+  ) {
     try {
-      const { data, error } = await supabase
-        .from('review_sentiment_cache')
-        .select('*')
-        .eq('venue_id', venueId)
-        .eq('platform', platform)
-        .eq('review_id', reviewId)
-        .gt('expires_at', new Date().toISOString())
-        .single();
-
-      if (error) return null;
-      
-      return {
-        ...data,
-        themes: this.parseThemes(data.themes)
-      };
+      const result = await db.sentiment.getCachedReviewSentiment(venueId, platform, reviewId);
+      return result.success ? result.data : null;
     } catch (error) {
       console.error('Error fetching cached sentiment:', error);
       return null;
@@ -294,7 +205,7 @@ export class SentimentAnalysisService {
 
   static async cleanupExpiredCache(): Promise<void> {
     try {
-      await supabase.rpc('cleanup_expired_reviews');
+      await db.sentiment.cleanupExpiredCache();
     } catch (error) {
       console.error('Error cleaning up expired cache:', error);
     }

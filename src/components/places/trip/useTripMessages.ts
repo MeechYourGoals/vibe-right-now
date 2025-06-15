@@ -1,18 +1,9 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from "@/integrations/supabase/client";
+import { db } from '@/services/database';
+import { TripMessage } from '@/services/database/repositories/TripRepository';
 import { toast } from "sonner";
-
-interface TripMessage {
-  id: string;
-  content: string;
-  user_name: string;
-  user_avatar: string;
-  user_id: string;
-  created_at: string;
-  message_type: string;
-  trip_id: string;
-}
+import { supabase } from "@/integrations/supabase/client";
 
 export const useTripMessages = (tripId: string) => {
   const [messages, setMessages] = useState<TripMessage[]>([]);
@@ -25,14 +16,13 @@ export const useTripMessages = (tripId: string) => {
 
   const fetchMessages = async () => {
     try {
-      const { data, error } = await supabase
-        .from('trip_messages')
-        .select('*')
-        .eq('trip_id', tripId)
-        .order('created_at', { ascending: true });
-
-      if (error) throw error;
-      setMessages(data || []);
+      const result = await db.trips.getMessages(tripId);
+      if (result.success && result.data) {
+        setMessages(result.data);
+      } else if (result.error) {
+        console.error('Error fetching messages:', result.error);
+        toast.error('Failed to load messages');
+      }
     } catch (error) {
       console.error('Error fetching messages:', error);
       toast.error('Failed to load messages');
@@ -65,18 +55,18 @@ export const useTripMessages = (tripId: string) => {
 
   const sendMessage = async (content: string, userId: string, userName: string, userAvatar: string) => {
     try {
-      const { error } = await supabase
-        .from('trip_messages')
-        .insert({
-          trip_id: tripId,
-          content,
-          user_id: userId,
-          user_name: userName,
-          user_avatar: userAvatar,
-          message_type: 'text'
-        });
+      const result = await db.trips.sendMessage({
+        trip_id: tripId,
+        content,
+        user_id: userId,
+        user_name: userName,
+        user_avatar: userAvatar,
+        message_type: 'text'
+      });
 
-      if (error) throw error;
+      if (!result.success) {
+        throw result.error || new Error('Failed to send message');
+      }
     } catch (error) {
       console.error('Error sending message:', error);
       toast.error('Failed to send message');

@@ -5,9 +5,11 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PlusCircle, MapPin, Star, ThumbsUp, ThumbsDown } from "lucide-react";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from '@/services/database';
+import { TripVenueIdea } from '@/services/database/repositories/TripRepository';
 import { toast } from "sonner";
 import AddVenueIdeaDialog from './AddVenueIdeaDialog';
+import { supabase } from "@/integrations/supabase/client";
 
 interface TripIdeasSectionProps {
   tripId: string;
@@ -19,20 +21,7 @@ interface TripIdeasSectionProps {
   userColors: Array<{ id: string; color: string }>;
 }
 
-interface VenueIdea {
-  id: string;
-  venue_id: string;
-  venue_name: string;
-  venue_address: string;
-  venue_city: string;
-  venue_rating: number;
-  venue_image_url: string;
-  proposed_by_name: string;
-  proposed_by_avatar: string;
-  proposed_by_id: string;
-  notes: string | null;
-  status: 'pending' | 'approved' | 'rejected';
-  created_at: string;
+interface VenueIdea extends TripVenueIdea {
   trip_venue_votes?: Array<{
     id: string;
     vote_type: 'up' | 'down';
@@ -63,33 +52,13 @@ const TripIdeasSection: React.FC<TripIdeasSectionProps> = ({
 
   const fetchVenueIdeas = async () => {
     try {
-      const { data, error } = await supabase
-        .from('trip_venue_ideas')
-        .select(`
-          *,
-          trip_venue_votes (
-            id,
-            vote_type,
-            user_name,
-            user_avatar
-          )
-        `)
-        .eq('trip_id', tripId)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      
-      // Transform the data to match our interface with proper type casting
-      const transformedData: VenueIdea[] = data?.map(item => ({
-        ...item,
-        status: item.status as 'pending' | 'approved' | 'rejected',
-        trip_venue_votes: item.trip_venue_votes?.map((vote: any) => ({
-          ...vote,
-          vote_type: vote.vote_type as 'up' | 'down'
-        })) || []
-      })) || [];
-      
-      setVenueIdeas(transformedData);
+      const result = await db.trips.getVenueIdeas(tripId);
+      if (result.success && result.data) {
+        setVenueIdeas(result.data as VenueIdea[]);
+      } else if (result.error) {
+        console.error('Error fetching venue ideas:', result.error);
+        toast.error('Failed to load venue ideas');
+      }
     } catch (error) {
       console.error('Error fetching venue ideas:', error);
       toast.error('Failed to load venue ideas');
@@ -133,26 +102,27 @@ const TripIdeasSection: React.FC<TripIdeasSectionProps> = ({
 
   const addVenueIdea = async (venueData: any) => {
     try {
-      const { error } = await supabase
-        .from('trip_venue_ideas')
-        .insert({
-          trip_id: tripId,
-          venue_id: venueData.id,
-          venue_name: venueData.name,
-          venue_address: venueData.address,
-          venue_city: venueData.city,
-          venue_rating: venueData.rating,
-          venue_image_url: venueData.image_url,
-          proposed_by_id: currentUser.id,
-          proposed_by_name: currentUser.name,
-          proposed_by_avatar: currentUser.avatar,
-          notes: venueData.notes || '',
-          status: 'pending'
-        });
+      const result = await db.trips.addVenueIdea({
+        trip_id: tripId,
+        venue_id: venueData.id,
+        venue_name: venueData.name,
+        venue_address: venueData.address,
+        venue_city: venueData.city,
+        venue_rating: venueData.rating,
+        venue_image_url: venueData.image_url,
+        proposed_by_id: currentUser.id,
+        proposed_by_name: currentUser.name,
+        proposed_by_avatar: currentUser.avatar,
+        notes: venueData.notes || '',
+        status: 'pending'
+      });
 
-      if (error) throw error;
-      toast.success('Venue idea added successfully!');
-      setIsDialogOpen(false);
+      if (result.success) {
+        toast.success('Venue idea added successfully!');
+        setIsDialogOpen(false);
+      } else {
+        throw result.error || new Error('Failed to add venue idea');
+      }
     } catch (error) {
       console.error('Error adding venue idea:', error);
       toast.error('Failed to add venue idea');
@@ -171,18 +141,19 @@ const TripIdeasSection: React.FC<TripIdeasSectionProps> = ({
         return;
       }
 
-      const { error } = await supabase
-        .from('trip_venue_votes')
-        .insert({
-          venue_idea_id: venueIdeaId,
-          vote_type: voteType,
-          user_id: currentUser.id,
-          user_name: currentUser.name,
-          user_avatar: currentUser.avatar
-        });
+      const result = await db.trips.voteOnVenue({
+        venue_idea_id: venueIdeaId,
+        vote_type: voteType,
+        user_id: currentUser.id,
+        user_name: currentUser.name,
+        user_avatar: currentUser.avatar
+      });
 
-      if (error) throw error;
-      toast.success('Vote recorded!');
+      if (result.success) {
+        toast.success('Vote recorded!');
+      } else {
+        throw result.error || new Error('Failed to record vote');
+      }
     } catch (error) {
       console.error('Error voting:', error);
       toast.error('Failed to record vote');
