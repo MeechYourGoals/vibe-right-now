@@ -5,14 +5,24 @@ import nyc from './mockCities/nyc';
 import la from './mockCities/la';
 import phoenix from './mockCities/phoenix';
 import london from './mockCities/london';
-// IMPORT NEW CITIES HERE as you add them...
+import chicago from './mockCities/chicago';
+import miami from './mockCities/miami';
+import vegas from './mockCities/vegas';
+import sanfrancisco from './mockCities/sanfrancisco';
+import paris from './mockCities/paris';
+import tokyo from './mockCities/tokyo';
 
 export const mockCitiesData: CityData[] = [
   nyc,
   la,
   phoenix,
   london,
-  // ADD NEW CITIES HERE as you add them...
+  chicago,
+  miami,
+  vegas,
+  sanfrancisco,
+  paris,
+  tokyo,
 ];
 
 // Export utility/type helpers as before

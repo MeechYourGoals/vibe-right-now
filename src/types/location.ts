@@ -9,7 +9,7 @@ export interface Location {
   zip?: string;
   lat: number;
   lng: number;
-  type: string;
+  type: "restaurant" | "bar" | "event" | "attraction" | "sports" | "other" | "nightclub" | "mall" | "cafe";
   verified?: boolean;
   vibes?: string[];
   rating?: number;
