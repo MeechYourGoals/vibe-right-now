@@ -1,23 +1,20 @@
 
-import { SearchCoordinator } from './search';
+import { SearchCoordinator } from './handlers/search';
 import { extractCategories } from '@/services/VertexAI/analysis';
 import { SearchService } from '@/services/search/SearchService';
 import { VertexAIService } from '@/services/VertexAIService';
 
 /**
  * Handle general search queries and location-based queries
- * Now powered by Vertex AI / Gemini
  */
 export const handleSearchQuery = async (
   inputValue: string,
   paginationState: Record<string, number>
 ): Promise<string> => {
   try {
-    // Extract categories using Cloud Natural Language API
     const categories = await extractCategories(inputValue);
     console.log('Extracted categories from query:', categories);
     
-    // Store categories in session for later use
     if (categories.length > 0) {
       try {
         sessionStorage.setItem('nlpCategories', JSON.stringify(categories));
@@ -26,11 +23,10 @@ export const handleSearchQuery = async (
       }
     }
     
-    // Use the SearchCoordinator to manage different search strategies
     try {
       console.log('Using SearchCoordinator for intelligent search');
       const result = await SearchCoordinator.search(inputValue, {
-        priorityStrategy: 'google', // Prefer Google's AI
+        priorityStrategy: 'google',
         includeCategories: categories
       });
       
@@ -41,7 +37,6 @@ export const handleSearchQuery = async (
       console.error('Error using SearchCoordinator:', searchError);
     }
     
-    // Direct fallback to Vertex AI
     try {
       console.log('Attempting direct search with Vertex AI');
       const vertexResult = await VertexAIService.searchWithVertex(inputValue, categories);
@@ -53,7 +48,6 @@ export const handleSearchQuery = async (
       console.error('Error using Vertex AI for search:', vertexError);
     }
     
-    // Final fallback to SearchService
     console.log('All AI search methods failed, falling back to SearchService');
     try {
       return await SearchService.search(inputValue);
@@ -63,7 +57,6 @@ export const handleSearchQuery = async (
     }
   } catch (error) {
     console.error('Error in search query handler with NLP:', error);
-    // Ultimate fallback without any NLP categories
     return SearchService.search(inputValue);
   }
 };

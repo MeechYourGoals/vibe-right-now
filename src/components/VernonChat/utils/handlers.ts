@@ -1,19 +1,16 @@
 
-import { AgentService } from "../services/agentService";
-import { MessageFactory } from "../messageFactory";
+import { AgentService } from "./services/agentService";
+import { MessageFactory } from "./messageFactory";
 
 export class AgentHandler {
   static async handleAgentQuery(query: string, setMessages: any, isVenueMode = false): Promise<boolean> {
     console.log("Handling agent query:", query, "Venue mode:", isVenueMode);
     
     try {
-      // Add user message to chat
       setMessages((prev: any) => [...prev, MessageFactory.createUserMessage(query)]);
       
-      // Simulate processing time
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Add assistant response
       setMessages((prev: any) => [
         ...prev, 
         MessageFactory.createAssistantMessage("I'm processing your query about: " + query)
@@ -31,7 +28,6 @@ export class AgentHandler {
   }
   
   static shouldUseAgent(query: string): boolean {
-    // Simple logic to determine if query should be handled by agent
     const agentTriggers = [
       "find", "search", "locate", "show me", "where is", "when is",
       "events", "what's happening", "nearby", "restaurant", "bar", "cafe"
@@ -53,3 +49,19 @@ export class AgentHandler {
     );
   }
 }
+
+export const handleBookingQuery = async (
+  inputValue: string,
+  setMessages: React.Dispatch<React.SetStateAction<any[]>>
+): Promise<boolean> => {
+  // Implementation moved to BookingProcessor
+  return false;
+};
+
+export const handleVenueQuery = async (
+  inputValue: string, 
+  isProPlan: boolean
+): Promise<string> => {
+  const { processVenueQuery } = await import('./venueQueryProcessor');
+  return await processVenueQuery(inputValue, isProPlan);
+};
