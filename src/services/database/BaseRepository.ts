@@ -45,7 +45,7 @@ export abstract class BaseRepository {
       const { data, error } = await queryFn();
       return this.handleResult(data, error);
     } catch (err) {
-      return this.handleResult(null, err as Error);
+      return this.handleResult(null, err as PostgrestError);
     }
   }
 }
