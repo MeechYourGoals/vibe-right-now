@@ -1,11 +1,9 @@
 
-import { useState, useCallback, useRef, useEffect } from 'react';
-import { ElevenLabsService } from '@/services/ElevenLabsService';
+// Export the main optimized hook
+export { useOptimizedSpeechSynthesis } from './useOptimizedSpeechSynthesis';
 
-// Export the speech synthesis hooks
+// Export legacy hooks for backward compatibility
 export { useSpeechSynthesis } from '../useSpeechSynthesis';
-
-// Export component hooks from their respective files
 export { useSpeechSynthesisCore } from './useSpeechSynthesisCore';
 export { useSpeakResponse } from './useSpeakResponse';
 export { useElevenLabsKeyManager } from './useElevenLabsKeyManager';
@@ -15,4 +13,11 @@ export { useBrowserSpeechSynthesis } from './useBrowserSpeechSynthesis';
 export { useElevenLabsSpeech } from './useElevenLabsSpeech';
 
 // Export utility functions
-export { createAudioElement, speakSentenceBySequence, setupSpeechSynthesis } from './speechSynthesisUtils';
+export { 
+  configureSpeechSynthesis,
+  createUtterance,
+  createAudioElement, 
+  speakSentenceBySequence, 
+  setupSpeechSynthesis,
+  handleSynthesisError
+} from './speechSynthesisUtils';

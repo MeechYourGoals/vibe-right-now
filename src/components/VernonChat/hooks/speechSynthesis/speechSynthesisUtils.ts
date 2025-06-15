@@ -28,6 +28,40 @@ export const createUtterance = (text: string): SpeechSynthesisUtterance => {
   return utterance;
 };
 
+export const createAudioElement = (
+  onStart: () => void,
+  onEnd: () => void,
+  onError: () => void
+): HTMLAudioElement => {
+  const audio = new Audio();
+  audio.onplay = onStart;
+  audio.onended = onEnd;
+  audio.onerror = onError;
+  return audio;
+};
+
+export const setupSpeechSynthesis = (): SpeechSynthesis | null => {
+  return configureSpeechSynthesis();
+};
+
+export const speakSentenceBySequence = async (
+  sentences: string[],
+  utteranceConfig: Partial<SpeechSynthesisUtterance> = {}
+): Promise<void> => {
+  if (!window.speechSynthesis) return;
+  
+  for (const sentence of sentences) {
+    const utterance = createUtterance(sentence.trim());
+    Object.assign(utterance, utteranceConfig);
+    
+    await new Promise<void>((resolve) => {
+      utterance.onend = () => resolve();
+      utterance.onerror = () => resolve();
+      window.speechSynthesis.speak(utterance);
+    });
+  }
+};
+
 export const handleSynthesisError = (error: string): void => {
   console.error('Speech synthesis error:', error);
   toast.error('Error with speech synthesis');

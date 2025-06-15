@@ -47,7 +47,7 @@ export const useSpeechSynthesisCore = () => {
   }, []);
   
   // Get browser speech synthesis functionality
-  const { speakWithBrowser } = useBrowserSpeechSynthesis();
+  const { speak, stop } = useBrowserSpeechSynthesis();
   
   return {
     isSpeaking,
@@ -57,6 +57,6 @@ export const useSpeechSynthesisCore = () => {
     introHasPlayed,
     voices,
     stopSpeaking,
-    speakWithBrowser
+    speakWithBrowser: speak
   };
 };

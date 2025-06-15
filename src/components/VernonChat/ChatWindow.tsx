@@ -31,6 +31,13 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
     }
   }, [isModelLoading]);
 
+  // Update input field with transcript
+  useEffect(() => {
+    if (transcript && setInput) {
+      setInput(transcript);
+    }
+  }, [transcript, setInput]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (input && !isProcessing) {
@@ -42,6 +49,14 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
     if (setInput) {
       setInput(e.target.value);
     }
+  };
+
+  const handleMicClick = () => {
+    // Clear input when starting to listen
+    if (!isListening && setInput) {
+      setInput('');
+    }
+    toggleListening();
   };
 
   const renderMessage = (message: Message) => {
@@ -148,13 +163,13 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       <form onSubmit={handleSubmit} className="p-3 border-t flex items-center gap-2">
         <button
           type="button"
-          onClick={toggleListening}
+          onClick={handleMicClick}
           className={`p-2 rounded-full transition-all ${
             isListening 
               ? 'bg-red-100 text-red-500 animate-pulse' 
               : 'bg-muted text-foreground hover:bg-blue-100 hover:text-blue-500'
           }`}
-          title={isListening ? 'Stop conversation' : 'Start conversation'}
+          title={isListening ? 'Stop listening' : 'Start voice input'}
         >
           {isListening ? <MicOff size={18} /> : <Mic size={18} />}
         </button>
