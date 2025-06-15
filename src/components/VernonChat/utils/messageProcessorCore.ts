@@ -1,9 +1,5 @@
-
+import { MessageProcessorService, messageProcessorService } from './messageProcessor';
 import { Message } from '../types';
-import { createUserMessage, createErrorMessage } from './messageFactory';
-import { extractPaginationParams } from './paginationUtils';
-import { messageProcessorService } from './messageProcessor';
-import { MessageContext } from './messageProcessor/types';
 
 export interface ProcessMessageOptions {
   isVenueMode: boolean;
@@ -65,3 +61,6 @@ export class MessageProcessorCore {
 
 const messageProcessor = new MessageProcessorCore();
 export default messageProcessor;
+
+export { MessageProcessorService, messageProcessorService };
+export type { Message };

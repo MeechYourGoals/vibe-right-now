@@ -1,89 +1,64 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { withErrorHandling } from "../_shared/request-handler.ts";
+import { createValidationErrorResponse } from "../_shared/response.ts";
+import { validateRequired } from "../_shared/validation.ts";
+import { getApiKey } from "../_shared/auth.ts";
+import { logInfo, logError } from "../_shared/logging.ts";
+import { corsHeaders } from "../_shared/cors.ts";
 
-const ELEVEN_LABS_API_KEY = Deno.env.get('ELEVEN_LABS_API_KEY') || '';
 const BRIAN_VOICE_ID = "nPczCjzI2devNBz1zQrb";
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
-
-serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+const handler = withErrorHandling(async (req: Request): Promise<Response> => {
+  const ELEVEN_LABS_API_KEY = Deno.env.get('ELEVEN_LABS_API_KEY') || '';
+  
+  if (!ELEVEN_LABS_API_KEY) {
+    return createValidationErrorResponse('ElevenLabs API key not configured');
   }
 
-  try {
-    if (!ELEVEN_LABS_API_KEY) {
-      return new Response(
-        JSON.stringify({ error: 'ElevenLabs API key not configured' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
+  const { text, voiceId = BRIAN_VOICE_ID, model = "eleven_multilingual_v2" } = await req.json();
 
-    const { text, voiceId = BRIAN_VOICE_ID, model = "eleven_multilingual_v2" } = await req.json();
+  validateRequired(text, 'text');
 
-    if (!text) {
-      return new Response(
-        JSON.stringify({ error: 'Text is required' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
+  const reducedText = reduceLongText(text);
+  logInfo(`Converting text to speech with Brian voice`, { textLength: reducedText.length });
 
-    const reducedText = reduceLongText(text);
-    console.log(`Converting text to speech with Brian voice: "${reducedText.substring(0, 50)}..."`);
-
-    const elevenLabsResponse = await fetch(
-      `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
-      {
-        method: 'POST',
-        headers: {
-          'xi-api-key': ELEVEN_LABS_API_KEY,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          text: reducedText,
-          model_id: model,
-          voice_settings: {
-            stability: 0.75,
-            similarity_boost: 0.85,
-            style: 0.2,
-            use_speaker_boost: true
-          },
-        }),
-      }
-    );
-
-    if (!elevenLabsResponse.ok) {
-      const errorText = await elevenLabsResponse.text();
-      console.error(`ElevenLabs API error: ${errorText}`);
-      return new Response(
-        JSON.stringify({ 
-          error: 'Error calling ElevenLabs API', 
-          details: errorText,
-          status: elevenLabsResponse.status 
-        }),
-        { status: elevenLabsResponse.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    const audioArrayBuffer = await elevenLabsResponse.arrayBuffer();
-
-    return new Response(audioArrayBuffer, {
+  const elevenLabsResponse = await fetch(
+    `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
+    {
+      method: 'POST',
       headers: {
-        ...corsHeaders,
-        'Content-Type': 'audio/mpeg',
+        'xi-api-key': ELEVEN_LABS_API_KEY,
+        'Content-Type': 'application/json',
       },
-    });
-  } catch (error) {
-    console.error('Error in eleven-labs-tts function:', error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+      body: JSON.stringify({
+        text: reducedText,
+        model_id: model,
+        voice_settings: {
+          stability: 0.75,
+          similarity_boost: 0.85,
+          style: 0.2,
+          use_speaker_boost: true
+        },
+      }),
+    }
+  );
+
+  if (!elevenLabsResponse.ok) {
+    const errorText = await elevenLabsResponse.text();
+    logError(`ElevenLabs API error: ${errorText}`, { status: elevenLabsResponse.status });
+    throw new Error('Error calling ElevenLabs API');
   }
-});
+
+  const audioArrayBuffer = await elevenLabsResponse.arrayBuffer();
+
+  return new Response(audioArrayBuffer, {
+    headers: {
+      ...corsHeaders,
+      'Content-Type': 'audio/mpeg',
+    },
+  });
+}, 'eleven-labs-tts');
 
 function reduceLongText(text: string): string {
   if (text.length < 500) return text;
@@ -107,3 +82,5 @@ function reduceLongText(text: string): string {
   
   return result;
 }
+
+serve(handler);

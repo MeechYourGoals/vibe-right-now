@@ -1,5 +1,6 @@
-
-import { MessageContext, MessageProcessor } from './messageProcessorCore';
+import { MessageContext, MessageProcessor } from './messageProcessor/types';
+import { PerplexityService } from '@/services/PerplexityService';
+import { GeminiService } from '@/services/GeminiService';
 import { Message } from '../types';
 import { AgentHandler } from './handlers';
 import { BookingAgent } from './bookingAgent';
