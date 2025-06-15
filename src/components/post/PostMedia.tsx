@@ -5,9 +5,6 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ImageWithFallback from "@/components/ui/ImageWithFallback";
 
-// Enforce 4:5 aspect ratio for all post media
-const ASPECT_RATIO = "aspect-[4/5]";
-
 interface PostMediaProps {
   media: Media[];
 }
@@ -27,18 +24,18 @@ const PostMedia: React.FC<PostMediaProps> = ({ media }) => {
   const currentMedia = media[currentIndex];
 
   return (
-    <div className={`relative mb-2 w-full ${ASPECT_RATIO} bg-muted rounded-lg overflow-hidden`}>
+    <div className="relative mb-2">
       {currentMedia.type === "image" ? (
         <ImageWithFallback
           src={currentMedia.url}
           alt="Post media"
-          className="w-full h-full object-cover"
+          className="w-full object-cover max-h-[500px]"
         />
       ) : (
         <video
           src={currentMedia.url}
           controls
-          className="w-full h-full object-cover"
+          className="w-full max-h-[500px]"
           poster={currentMedia.thumbnail}
         />
       )}
@@ -65,7 +62,9 @@ const PostMedia: React.FC<PostMediaProps> = ({ media }) => {
             {media.map((_, index) => (
               <div
                 key={index}
-                className={`h-1.5 rounded-full ${index === currentIndex ? "w-4 bg-white" : "w-1.5 bg-white/50"}`}
+                className={`h-1.5 rounded-full ${
+                  index === currentIndex ? "w-4 bg-white" : "w-1.5 bg-white/50"
+                }`}
               />
             ))}
           </div>

@@ -1,46 +1,15 @@
+
 import { useState, useEffect } from "react";
 import { Post, Comment } from "@/types";
 import { mockPosts } from "@/mock/posts";
 import { mockComments } from "@/mock/comments";
 import PostCard from "./post/PostCard";
 import { useToast } from "@/components/ui/use-toast";
-import MultiUserVenuePostCard from "@/components/post/MultiUserVenuePostCard";
-import UserPostGridItem from "@/components/user/PostGridItem";
 
 interface PostFeedProps {
   celebrityFeatured?: string[];
   feedType?: string;
 }
-
-const groupPostsByVenue = (posts: Post[], numGroups: number = 2): {multiUserGrouped: Post[][], other: Post[]} => {
-  // Map venues to array of their posts
-  const venueMap: Map<string, Post[]> = new Map();
-  posts.forEach(post => {
-    if (post.location && post.location.id) {
-      const venuePosts = venueMap.get(post.location.id) || [];
-      venuePosts.push(post);
-      venueMap.set(post.location.id, venuePosts);
-    }
-  });
-
-  // Only use venues with 2+ posts as multi-user
-  const candidates = Array.from(venueMap.values()).filter(arr => arr.length > 1);
-  // Randomly pick up to numGroups
-  const selectedGroups: Post[][] = [];
-  const usedVenueIds = new Set<string>();
-  while (selectedGroups.length < numGroups && candidates.length > 0) {
-    const idx = Math.floor(Math.random() * candidates.length);
-    const group = candidates.splice(idx, 1)[0];
-    if (!usedVenueIds.has(group[0].location!.id)) {
-      usedVenueIds.add(group[0].location!.id);
-      selectedGroups.push(group);
-    }
-  }
-  // Remove grouped posts from others
-  const groupedPostIds = new Set(selectedGroups.flat().map(p => p.id));
-  const rest = posts.filter(p => !groupedPostIds.has(p.id));
-  return { multiUserGrouped: selectedGroups, other: rest };
-};
 
 const PostFeed = ({ celebrityFeatured = [], feedType = "for-you" }: PostFeedProps) => {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -107,7 +76,7 @@ const PostFeed = ({ celebrityFeatured = [], feedType = "for-you" }: PostFeedProp
 
   useEffect(() => {
     setLoading(true);
-
+    
     // Simulate loading delay
     const timer = setTimeout(() => {
       const filteredPosts = getFilteredPosts(feedType);
@@ -148,32 +117,18 @@ const PostFeed = ({ celebrityFeatured = [], feedType = "for-you" }: PostFeedProp
     );
   }
 
-  // Inject up to 2 multi-user venue posts in feed
-  const { multiUserGrouped, other } = groupPostsByVenue(posts, 2);
-
-  // For performance, alternate multi-user and other posts at start of feed
-  const allPosts: Array<{ type: "multi" | "single"; data: any }> = [];
-  let i = 0,
-    j = 0;
-  while (i < multiUserGrouped.length || j < other.length) {
-    if (i < multiUserGrouped.length) {
-      allPosts.push({ type: "multi", data: multiUserGrouped[i++] });
-    }
-    if (j < other.length) {
-      allPosts.push({ type: "single", data: other[j++] });
-    }
-  }
-
   return (
     <div className="space-y-6">
-      {allPosts.map((item, idx) =>
-        item.type === "multi" ? (
-          <MultiUserVenuePostCard key={`multi-${idx}`} posts={item.data} />
-        ) : (
-          <UserPostGridItem key={item.data.id} post={item.data} />
-        )
-      )}
-
+      {posts.map((post) => (
+        <PostCard
+          key={post.id}
+          post={post}
+          comments={getComments(post.id)}
+          canDelete={false}
+          onPostDeleted={handlePostDeleted}
+        />
+      ))}
+      
       {posts.length === 0 && (
         <div className="text-center py-12">
           <p className="text-muted-foreground">No posts found for this feed.</p>

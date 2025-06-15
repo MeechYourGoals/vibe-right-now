@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -8,8 +9,9 @@ import { formatDistanceToNow } from "date-fns";
 import UserDropdown from "@/components/venue/post-grid-item/UserDropdown";
 import ImageWithFallback from "@/components/ui/ImageWithFallback";
 
-// Enforce 4:5 aspect ratio for all post images/videos
-const ASPECT_RATIO = "aspect-[4/5]";
+interface PostGridItemProps {
+  post: Post;
+}
 
 // Helper function to ensure media is in the correct format
 const ensureMediaFormat = (media: any[]): Media[] => {
@@ -38,11 +40,13 @@ const ensureMediaFormat = (media: any[]): Media[] => {
   });
 };
 
-const PostGridItem = ({ post }: { post: Post }) => {
+const PostGridItem = ({ post }: PostGridItemProps) => {
   const [liked, setLiked] = useState(false);
   const navigate = useNavigate();
+  
+  // Ensure media is in the correct format
   const formattedMedia = ensureMediaFormat(post.media);
-
+  
   const handleLike = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -62,17 +66,17 @@ const PostGridItem = ({ post }: { post: Post }) => {
   };
 
   return (
-    <div className={`group relative block overflow-hidden rounded-lg bg-muted w-full ${ASPECT_RATIO}`}>
+    <div className="group relative block aspect-square overflow-hidden rounded-lg">
       {formattedMedia.length > 0 && formattedMedia[0].type === "image" ? (
         <ImageWithFallback
           src={formattedMedia[0].url}
           alt={`Post by ${post.user.username}`}
-          className="w-full h-full object-cover transition-transform group-hover:scale-105"
+          className="h-full w-full object-cover transition-transform group-hover:scale-105"
         />
       ) : formattedMedia.length > 0 && formattedMedia[0].type === "video" ? (
         <video
           src={formattedMedia[0].url}
-          className="w-full h-full object-cover"
+          className="h-full w-full object-cover"
           poster="https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?w=500&q=80&auto=format&fit=crop"
         />
       ) : (
