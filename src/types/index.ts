@@ -5,12 +5,68 @@ export * from './core/api';
 export * from './entities/user';
 export * from './entities/venue';
 export * from './entities/content';
-export * from './entities/messaging';
-export * from './entities/events';
+
+// Explicitly handle conflicting exports
+export type { ActionType as MessagingActionType } from './entities/messaging';
+export type { EventCategory as EventsEventCategory } from './entities/events';
+
+// Import the rest without conflicts
+export type { 
+  Message, 
+  Conversation, 
+  MessageStatus, 
+  ConversationParticipant,
+  MessageReaction,
+  MessageAttachment,
+  ConversationSettings,
+  NotificationSettings as MessagingNotificationSettings,
+  MessageThread,
+  VenueInquiry,
+  InquiryStatus,
+  AutoReplyRule,
+  MessageTemplate,
+  MessageAnalytics,
+  ResponseTime,
+  ChatBot,
+  BotCapability,
+  BotResponse,
+  BotTrigger,
+  BookingRequest,
+  BookingStatus,
+  PaymentInfo,
+  Location as MessagingLocation
+} from './entities/messaging';
+
+export type {
+  Event,
+  EventType,
+  EventStatus,
+  EventParticipant,
+  ParticipantRole,
+  ParticipantStatus,
+  EventLocation,
+  EventPricing,
+  TicketTier,
+  EventMedia,
+  EventPromotion,
+  PromotionType,
+  EventAnalytics,
+  EventFeedback,
+  EventSeries,
+  RecurrencePattern,
+  EventNotification,
+  NotificationType as EventNotificationType,
+  VenueEvent,
+  EventBooking,
+  BookingDetails,
+  TicketTransfer
+} from './entities/events';
 
 export * from './features/chat';
 export * from './features/search';
 export * from './features/analytics';
+export * from './features/advertising';
+export * from './features/sentiment';
 
 // Legacy compatibility - keep existing types that are still used
 import { MockUserProfile } from "@/mock/users";

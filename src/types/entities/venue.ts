@@ -1,6 +1,37 @@
-
 import { BaseEntity, Address, MediaItem, Timestamps, EntityStatus } from '../core/base';
 import { UserProfile } from './user';
+
+// Business hours interface
+export interface BusinessHours {
+  monday: DayHours;
+  tuesday: DayHours;
+  wednesday: DayHours;
+  thursday: DayHours;
+  friday: DayHours;
+  saturday: DayHours;
+  sunday: DayHours;
+  timezone: string;
+  specialHours?: SpecialHours[];
+}
+
+export interface DayHours {
+  isOpen: boolean;
+  openTime?: string; // HH:mm format
+  closeTime?: string; // HH:mm format
+  is24Hours?: boolean;
+  breaks?: TimeSlot[];
+}
+
+export interface TimeSlot {
+  startTime: string;
+  endTime: string;
+}
+
+export interface SpecialHours {
+  date: Date;
+  hours: DayHours;
+  reason?: string;
+}
 
 // Venue-related types
 export interface Venue extends BaseEntity, Timestamps {
@@ -49,37 +80,6 @@ export interface VenueSocialMedia {
   tiktok?: string;
   yelp?: string;
   google?: string;
-}
-
-export interface BusinessHours {
-  monday: DayHours;
-  tuesday: DayHours;
-  wednesday: DayHours;
-  thursday: DayHours;
-  friday: DayHours;
-  saturday: DayHours;
-  sunday: DayHours;
-  timezone: string;
-  specialHours?: SpecialHours[];
-}
-
-export interface DayHours {
-  isOpen: boolean;
-  openTime?: string; // HH:mm format
-  closeTime?: string; // HH:mm format
-  is24Hours?: boolean;
-  breaks?: TimeSlot[];
-}
-
-export interface TimeSlot {
-  startTime: string;
-  endTime: string;
-}
-
-export interface SpecialHours {
-  date: Date;
-  hours: DayHours;
-  reason?: string;
 }
 
 export interface VenueAmenities {

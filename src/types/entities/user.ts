@@ -1,8 +1,11 @@
 
-import { BaseEntity, UserProfile, Timestamps } from '../core/base';
+import { BaseEntity, UserProfile as BaseUserProfile, GeoCoordinates, Address, Timestamps } from '../core/base';
+
+// Re-export UserProfile from base
+export { UserProfile } from '../core/base';
 
 // User-related types
-export interface User extends BaseEntity, UserProfile, Timestamps {
+export interface User extends BaseEntity, BaseUserProfile, Timestamps {
   email: string;
   phone?: string;
   subscription: UserSubscription;

@@ -6,11 +6,13 @@ import VenueFirstPostHeader from "./VenueFirstPostHeader";
 import PostContent from "./PostContent";
 import PostMedia from "./PostMedia";
 import PostFooter from "./PostFooter";
+import VibeTagsDisplay from "./VibeTagsDisplay";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { UserPlus, UserCheck } from "lucide-react";
 import { deletePost } from "@/utils/venue/postManagementUtils";
 import UserDropdown from "@/components/venue/post-grid-item/UserDropdown";
+import { generateVibeTags } from "@/utils/vibeTagsGenerator";
 
 interface PostCardProps {
   post?: Post;
@@ -109,6 +111,12 @@ const PostCard: React.FC<PostCardProps> = ({
           // Determine if the post is from the venue itself
           const isVenuePost = post.isVenuePost || post.location?.id === firstPost.location.id;
           
+          // Generate vibe tags for this post
+          const vibeTags = generateVibeTags({
+            content: post.content,
+            location: post.location
+          });
+          
           return (
             <div 
               key={post.id} 
@@ -124,6 +132,9 @@ const PostCard: React.FC<PostCardProps> = ({
               />
               
               <div className="px-4">
+                {/* Add vibe tags below header, above content */}
+                <VibeTagsDisplay tags={vibeTags} />
+                
                 <PostContent content={post.content} />
                 
                 {post.media && post.media.length > 0 && (
@@ -145,7 +156,7 @@ const PostCard: React.FC<PostCardProps> = ({
   
   // Single post mode
   if (!post) {
-    return null; // Don't render if no post is provided
+    return null;
   }
   
   // Don't render if the post has been deleted
@@ -163,6 +174,12 @@ const PostCard: React.FC<PostCardProps> = ({
   };
 
   const isVenuePost = post.isVenuePost || post.location?.id === venue?.id;
+  
+  // Generate vibe tags for this post
+  const vibeTags = generateVibeTags({
+    content: post.content,
+    location: post.location
+  });
 
   return (
     <Card className={`overflow-hidden ${isVenuePost ? 'ring-2 ring-amber-500' : ''} ${post.isPinned && !isVenuePost ? 'ring-2 ring-amber-300' : ''}`}>
@@ -177,6 +194,11 @@ const PostCard: React.FC<PostCardProps> = ({
       
       <div className="px-4 py-2 flex justify-end">
         <UserDropdown userCount={getUserCount(post.location?.id || "1")} post={post} />
+      </div>
+      
+      <div className="px-4">
+        {/* Add vibe tags below header, above content */}
+        <VibeTagsDisplay tags={vibeTags} />
       </div>
       
       <PostContent content={post.content} />
