@@ -66,17 +66,17 @@ const PostGridItem = ({ post }: PostGridItemProps) => {
   };
 
   return (
-    <div className="group relative block aspect-square overflow-hidden rounded-lg">
+    <div className="group relative block aspect-square overflow-hidden rounded-lg bg-muted">
       {formattedMedia.length > 0 && formattedMedia[0].type === "image" ? (
         <ImageWithFallback
           src={formattedMedia[0].url}
           alt={`Post by ${post.user.username}`}
-          className="h-full w-full object-cover transition-transform group-hover:scale-105"
+          className="h-full w-full object-contain transition-transform group-hover:scale-105"
         />
       ) : formattedMedia.length > 0 && formattedMedia[0].type === "video" ? (
         <video
           src={formattedMedia[0].url}
-          className="h-full w-full object-cover"
+          className="h-full w-full object-contain"
           poster="https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?w=500&q=80&auto=format&fit=crop"
         />
       ) : (

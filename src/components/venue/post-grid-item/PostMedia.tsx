@@ -23,7 +23,7 @@ const PostMedia: React.FC<PostMediaProps> = ({ post }) => {
       <ImageWithFallback
         src={post.media[0].url}
         alt={`Post by ${post.user.username}`}
-        className="h-full w-full object-cover transition-transform group-hover:scale-105"
+        className="h-full w-full object-contain bg-muted transition-transform group-hover:scale-105"
       />
     );
   }
@@ -31,7 +31,7 @@ const PostMedia: React.FC<PostMediaProps> = ({ post }) => {
   return (
     <video
       src={post.media[0].url}
-      className="h-full w-full object-cover"
+      className="h-full w-full object-contain bg-muted"
       poster="https://images.unsplash.com/photo-1473091534298-04dcbce3278c?w=500&q=80&auto=format&fit=crop"
     />
   );

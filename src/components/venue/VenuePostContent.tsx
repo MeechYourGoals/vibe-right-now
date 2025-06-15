@@ -27,18 +27,18 @@ const VenuePostContent: React.FC<VenuePostContentProps> = ({
   return (
     <>
       <p className="mb-3">{displayContent}</p>
-      <div className="rounded-lg overflow-hidden">
+      <div className="rounded-lg overflow-hidden bg-muted">
         {media.type === "image" ? (
           <ImageWithFallback
             src={media.url}
             alt={`Media content`}
-            className="w-full h-auto object-cover"
+            className="w-full h-auto object-contain max-h-[300px] mx-auto"
           />
         ) : (
           <video
             src={media.url}
             controls
-            className="w-full h-auto"
+            className="w-full h-auto max-h-[300px]"
             poster="https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
           />
         )}

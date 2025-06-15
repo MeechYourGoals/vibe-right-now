@@ -29,13 +29,13 @@ const PostMedia: React.FC<PostMediaProps> = ({ media }) => {
         <ImageWithFallback
           src={currentMedia.url}
           alt="Post media"
-          className="w-full object-cover max-h-[500px]"
+          className="w-full object-contain bg-muted rounded-lg max-h-[400px]"
         />
       ) : (
         <video
           src={currentMedia.url}
           controls
-          className="w-full max-h-[500px]"
+          className="w-full max-h-[400px] rounded-lg"
           poster={currentMedia.thumbnail}
         />
       )}
