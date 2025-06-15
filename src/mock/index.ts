@@ -4,7 +4,7 @@ export { mockPosts } from './posts';
 export { mockComments } from './comments';
 export { mockLocations } from './locations';
 export { mockUsers, celebrityUsers, regularUsers } from './users';
-export { mockDiscountOffers } from './discountOffers';
+export { discountOffers as mockDiscountOffers } from './discountOffers';
 export { cityLocations } from './cityLocations';
 
 // Re-export city data
@@ -34,6 +34,34 @@ export { default as tokyoData } from '../data/mockCities/tokyo';
 export { default as torontoData } from '../data/mockCities/toronto';
 export { default as vegasData } from '../data/mockCities/vegas';
 export { default as romeData } from '../data/mockCities/rome';
+
+// Import all city data for the collection
+import amsterdamData from '../data/mockCities/amsterdam';
+import bangkokData from '../data/mockCities/bangkok';
+import barcelonaData from '../data/mockCities/barcelona';
+import berlinData from '../data/mockCities/berlin';
+import chicagoData from '../data/mockCities/chicago';
+import dubaiData from '../data/mockCities/dubai';
+import istanbulData from '../data/mockCities/istanbul';
+import laData from '../data/mockCities/la';
+import londonData from '../data/mockCities/london';
+import melbourneData from '../data/mockCities/melbourne';
+import miamiData from '../data/mockCities/miami';
+import moscowData from '../data/mockCities/moscow';
+import mumbaiData from '../data/mockCities/mumbai';
+import nycData from '../data/mockCities/nyc';
+import parisData from '../data/mockCities/paris';
+import phoenixData from '../data/mockCities/phoenix';
+import rioData from '../data/mockCities/riodejaneiro';
+import sanFranciscoData from '../data/mockCities/sanfrancisco';
+import saoPauloData from '../data/mockCities/saopaulo';
+import seoulData from '../data/mockCities/seoul';
+import singaporeData from '../data/mockCities/singapore';
+import sydneyData from '../data/mockCities/sydney';
+import tokyoData from '../data/mockCities/tokyo';
+import torontoData from '../data/mockCities/toronto';
+import vegasData from '../data/mockCities/vegas';
+import romeData from '../data/mockCities/rome';
 
 // City data collection
 export const allCityData = [
