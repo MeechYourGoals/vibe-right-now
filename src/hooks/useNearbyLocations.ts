@@ -1,11 +1,8 @@
-
 import { useState, useEffect } from "react";
-import { mockLocations } from "@/mock/locations";
+import { mockCitiesData, findCityByName } from "@/data/mockCities";
 import { Location } from "@/types";
-import { cityCoordinates } from "@/utils/locations";
-import { getLocationsByCity, getNearbyLocations } from "@/mock/cityLocations";
 
-// Improved version that uses city data
+// Hook to display venues based on city search or user location
 export const useNearbyLocations = () => {
   const [userLocation, setUserLocation] = useState<GeolocationCoordinates | null>(null);
   const [loading, setLoading] = useState(true);
@@ -32,41 +29,49 @@ export const useNearbyLocations = () => {
     }
   }, []);
 
-  // Update locations when city search or user location changes
+  // Update venues to show based on searched city or location/address
   useEffect(() => {
-    if (searchedCity) {
-      // If we have a city search, prioritize that
-      const cityKey = Object.keys(cityCoordinates).find(
-        key => cityCoordinates[key].name.toLowerCase() === searchedCity.toLowerCase()
-      );
-      
-      if (cityKey) {
-        const cityData = cityCoordinates[cityKey];
-        // Get locations for the searched city
-        const cityLocations = getLocationsByCity(cityData.name);
-        setNearbyLocations(cityLocations);
+    setLoading(true);
+
+    // If city search is present, show venues for that city
+    if (searchedCity?.trim()) {
+      // Try to find a matching city (case insensitive)
+      const cityData = findCityByName(searchedCity.trim());
+      if (cityData && cityData.venues.length > 0) {
+        setNearbyLocations(cityData.venues);
         setLoading(false);
-      } else {
-        // Fallback for cities not in our database
-        setNearbyLocations(mockLocations.slice(0, 10));
-        setLoading(false);
+        return;
       }
-    } else if (userAddressLocation) {
-      // If we have a custom address location but no city search
-      const [lng, lat] = userAddressLocation;
-      const nearbyLocs = getNearbyLocations(lat, lng);
-      setNearbyLocations(nearbyLocs);
-      setLoading(false);
-    } else if (userLocation) {
-      // Use actual user location if available and no city search
-      const nearbyLocs = getNearbyLocations(userLocation.latitude, userLocation.longitude);
-      setNearbyLocations(nearbyLocs);
-      setLoading(false);
-    } else {
-      // Default to some sample locations if nothing else is available
-      setNearbyLocations(mockLocations.slice(0, 10));
-      setLoading(false);
     }
+
+    // If user typed in a lat/lng address, could add geocoding support here
+    if (userAddressLocation) {
+      // Just show all venues sorted by distance (optional future)
+      const locations: Location[] = [];
+      mockCitiesData.forEach((city) => {
+        locations.push(...city.venues);
+      });
+      setNearbyLocations(locations.slice(0, 10));
+      setLoading(false);
+      return;
+    }
+
+    // If using actual geolocation, show all venues (default)
+    if (userLocation) {
+      const locations: Location[] = [];
+      mockCitiesData.forEach((city) => {
+        locations.push(...city.venues);
+      });
+      setNearbyLocations(locations.slice(0, 10));
+      setLoading(false);
+      return;
+    }
+
+    // Fallback: show first 10 venues in data set
+    const fallbackVenues: Location[] = [];
+    mockCitiesData.forEach((city) => fallbackVenues.push(...city.venues));
+    setNearbyLocations(fallbackVenues.slice(0, 10));
+    setLoading(false);
   }, [searchedCity, userLocation, userAddressLocation]);
 
   return {
