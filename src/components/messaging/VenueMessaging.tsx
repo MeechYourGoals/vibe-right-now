@@ -5,34 +5,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Send, Settings, Search } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Send, Settings, Bell } from "lucide-react";
 import { useUserSubscription } from '@/hooks/useUserSubscription';
-
-interface Message {
-  id: string;
-  content: string;
-  timestamp: string;
-  senderId: string;
-  senderName: string;
-  senderAvatar: string;
-  senderType: 'user' | 'venue';
-}
-
-interface Conversation {
-  id: string;
-  venueId: string;
-  venueName: string;
-  venueAvatar: string;
-  lastMessage?: Message;
-  unreadCount: number;
-  isActive: boolean;
-}
+import { mockVenueConversations, MockVenueConversation, VenueMessage } from './mockVenueData';
+import MessageTypeBadge from './MessageTypeBadge';
+import VenueMessagingSettings from './VenueMessagingSettings';
 
 const VenueMessaging: React.FC = () => {
   const { hasFeature } = useUserSubscription();
-  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [conversations, setConversations] = useState<MockVenueConversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<VenueMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [messagingEnabled, setMessagingEnabled] = useState(true);
@@ -45,50 +29,55 @@ const VenueMessaging: React.FC = () => {
     }
   }, [canUseVenueMessaging]);
 
-  const loadConversations = () => {
-    // Mock data - in real app this would come from API
-    const mockConversations: Conversation[] = [
-      {
-        id: '1',
-        venueId: 'venue-1',
-        venueName: 'The Rooftop Bar',
-        venueAvatar: '/placeholder.svg',
-        lastMessage: {
-          id: '1',
-          content: 'Thanks for your inquiry! We have availability for tonight.',
-          timestamp: new Date().toISOString(),
-          senderId: 'venue-1',
-          senderName: 'The Rooftop Bar',
-          senderAvatar: '/placeholder.svg',
-          senderType: 'venue'
-        },
-        unreadCount: 1,
-        isActive: true
+  useEffect(() => {
+    if (selectedConversation) {
+      const conversation = conversations.find(c => c.id === selectedConversation);
+      if (conversation) {
+        setMessages(conversation.messages);
+        // Mark as read
+        setConversations(prev => prev.map(c =>
+          c.id === selectedConversation ? { ...c, unreadCount: 0 } : c
+        ));
       }
-    ];
-    setConversations(mockConversations);
+    }
+  }, [selectedConversation, conversations]);
+
+  const loadConversations = () => {
+    setConversations(mockVenueConversations);
+    if (mockVenueConversations.length > 0) {
+      setSelectedConversation(mockVenueConversations[0].id);
+    }
   };
 
   const sendMessage = () => {
     if (!newMessage.trim() || !selectedConversation) return;
 
-    const message: Message = {
+    const message: VenueMessage = {
       id: Date.now().toString(),
       content: newMessage,
       timestamp: new Date().toISOString(),
       senderId: 'current-user',
       senderName: 'You',
-      senderAvatar: '/placeholder.svg',
+      senderAvatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&auto=format',
       senderType: 'user'
     };
 
     setMessages(prev => [...prev, message]);
     setNewMessage('');
+
+    // Update the conversation's last message
+    setConversations(prev => prev.map(c =>
+      c.id === selectedConversation
+        ? { ...c, lastMessage: message, messages: [...c.messages, message] }
+        : c
+    ));
   };
 
-  const toggleMessaging = () => {
-    setMessagingEnabled(!messagingEnabled);
-  };
+  const filteredConversations = conversations.filter(conversation =>
+    conversation.venueName.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const selectedConv = conversations.find(c => c.id === selectedConversation);
 
   if (!canUseVenueMessaging) {
     return (
@@ -111,22 +100,50 @@ const VenueMessaging: React.FC = () => {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Messages</CardTitle>
-            <Button variant="ghost" size="sm" onClick={toggleMessaging}>
-              <Settings className="h-4 w-4" />
-            </Button>
+            <div className="flex items-center gap-2">
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="ghost" size="sm">
+                    <Bell className="h-4 w-4" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>Notification Settings</DialogTitle>
+                  </DialogHeader>
+                  <div className="mt-4">
+                    <VenueMessagingSettings />
+                  </div>
+                </DialogContent>
+              </Dialog>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="ghost" size="sm">
+                    <Settings className="h-4 w-4" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>Messaging Settings</DialogTitle>
+                  </DialogHeader>
+                  <div className="mt-4">
+                    <VenueMessagingSettings />
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
           </div>
           <div className="relative">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search venues..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9"
+              className="w-full"
             />
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          {conversations.map((conversation) => (
+          {filteredConversations.map((conversation) => (
             <div
               key={conversation.id}
               className={`p-4 border-b cursor-pointer hover:bg-muted/50 ${
@@ -135,24 +152,35 @@ const VenueMessaging: React.FC = () => {
               onClick={() => setSelectedConversation(conversation.id)}
             >
               <div className="flex items-center gap-3">
-                <Avatar className="h-10 w-10">
+                <Avatar className="h-12 w-12">
                   <AvatarImage src={conversation.venueAvatar} alt={conversation.venueName} />
                   <AvatarFallback>{conversation.venueName.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
-                    <h4 className="font-medium truncate">{conversation.venueName}</h4>
-                    {conversation.unreadCount > 0 && (
-                      <Badge variant="destructive" className="h-5 w-5 p-0 text-xs">
-                        {conversation.unreadCount}
-                      </Badge>
-                    )}
+                    <div className="flex items-center gap-2">
+                      <h4 className="font-medium truncate">{conversation.venueName}</h4>
+                      {conversation.unreadCount > 0 && (
+                        <Badge variant="destructive" className="h-5 w-5 p-0 text-xs flex items-center justify-center">
+                          {conversation.unreadCount}
+                        </Badge>
+                      )}
+                    </div>
+                    <Badge variant="outline" className="text-xs">
+                      {conversation.venueType}
+                    </Badge>
                   </div>
                   {conversation.lastMessage && (
-                    <p className="text-sm text-muted-foreground truncate">
-                      {conversation.lastMessage.content}
-                    </p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <MessageTypeBadge type={conversation.lastMessage.messageType} />
+                      <p className="text-sm text-muted-foreground truncate flex-1">
+                        {conversation.lastMessage.content}
+                      </p>
+                    </div>
                   )}
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {conversation.responseTime}
+                  </p>
                 </div>
               </div>
             </div>
@@ -162,17 +190,22 @@ const VenueMessaging: React.FC = () => {
 
       {/* Chat Window */}
       <Card className="flex-1 flex flex-col">
-        {selectedConversation ? (
+        {selectedConv ? (
           <>
             <CardHeader className="border-b">
               <div className="flex items-center gap-3">
                 <Avatar className="h-10 w-10">
-                  <AvatarImage src="/placeholder.svg" alt="Venue" />
-                  <AvatarFallback>V</AvatarFallback>
+                  <AvatarImage src={selectedConv.venueAvatar} alt={selectedConv.venueName} />
+                  <AvatarFallback>{selectedConv.venueName.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div>
-                  <h3 className="font-semibold">The Rooftop Bar</h3>
-                  <p className="text-sm text-muted-foreground">Usually responds within an hour</p>
+                  <h3 className="font-semibold">{selectedConv.venueName}</h3>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-xs">
+                      {selectedConv.venueType}
+                    </Badge>
+                    <p className="text-sm text-muted-foreground">{selectedConv.responseTime}</p>
+                  </div>
                 </div>
               </div>
             </CardHeader>
@@ -184,17 +217,36 @@ const VenueMessaging: React.FC = () => {
                     key={message.id}
                     className={`flex ${message.senderType === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
-                    <div
-                      className={`max-w-xs px-3 py-2 rounded-lg ${
-                        message.senderType === 'user'
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted text-foreground'
-                      }`}
-                    >
-                      <p className="text-sm">{message.content}</p>
-                      <p className="text-xs opacity-70 mt-1">
-                        {new Date(message.timestamp).toLocaleTimeString()}
-                      </p>
+                    <div className="flex items-start gap-2 max-w-[80%]">
+                      {message.senderType === 'venue' && (
+                        <Avatar className="h-8 w-8 mt-1">
+                          <AvatarImage src={message.senderAvatar} alt={message.senderName} />
+                          <AvatarFallback>{message.senderName.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                      )}
+                      <div
+                        className={`px-3 py-2 rounded-lg ${
+                          message.senderType === 'user'
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-muted text-foreground'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 mb-1">
+                          {message.messageType && (
+                            <MessageTypeBadge type={message.messageType} />
+                          )}
+                        </div>
+                        <p className="text-sm">{message.content}</p>
+                        <p className="text-xs opacity-70 mt-1">
+                          {new Date(message.timestamp).toLocaleTimeString()}
+                        </p>
+                      </div>
+                      {message.senderType === 'user' && (
+                        <Avatar className="h-8 w-8 mt-1">
+                          <AvatarImage src={message.senderAvatar} alt={message.senderName} />
+                          <AvatarFallback>{message.senderName.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                      )}
                     </div>
                   </div>
                 ))}
