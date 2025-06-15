@@ -4,7 +4,11 @@
 export interface AdFormat {
   id: string;
   name: string;
-  type: 'image' | 'video' | 'carousel' | 'text';
+  type: 'image' | 'video' | 'carousel' | 'text' | 'MomentCard' | 'VibeOverlay' | 'SpawnPoint' | 'HeatRingTakeover';
+  description?: string;
+  duration?: string;
+  placement?: string;
+  kpis?: string[];
   dimensions?: {
     width: number;
     height: number;
@@ -19,6 +23,7 @@ export interface TargetingOptions {
     gender?: 'all' | 'male' | 'female' | 'other';
     interests?: string[];
     behaviors?: string[];
+    location?: string[];
   };
   geographic: {
     countries?: string[];
@@ -40,6 +45,20 @@ export interface TargetingOptions {
     totalBudget?: number;
     bidStrategy?: 'automatic' | 'manual';
     maxCpc?: number;
+  };
+  behavioral: {
+    pastAttendance?: string[];
+    clipHistory?: string[];
+    tripsIntent?: boolean;
+  };
+  contextual: {
+    vibeTags?: string[];
+    venueTypes?: string[];
+    daypart?: string[];
+  };
+  momentScore: {
+    hypeLevel?: number;
+    crowdDensity?: number;
   };
 }
 

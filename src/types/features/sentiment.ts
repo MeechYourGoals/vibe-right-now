@@ -2,18 +2,23 @@
 // Sentiment analysis types
 
 export interface SentimentTheme {
+  name: string;
   theme: string;
   sentiment: 'positive' | 'negative' | 'neutral';
   confidence: number;
   mentions: number;
   keywords: string[];
   examples: string[];
+  score: number;
 }
 
 export interface PlatformSentimentSummary {
   platform: string;
   totalReviews: number;
+  reviewCount: number;
   averageSentiment: number;
+  overallSentiment: number;
+  summary: string;
   sentimentDistribution: {
     positive: number;
     negative: number;

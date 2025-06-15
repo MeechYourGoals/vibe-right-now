@@ -1,3 +1,4 @@
+
 // Mock Sentiment Analysis Service
 // This is a placeholder for a real sentiment analysis service.
 // In a production environment, you would use a service like Google Cloud Natural Language API,
@@ -14,20 +15,24 @@ export const analyzeSentiment = async (text: string): Promise<SentimentAnalysisR
   // Mock themes
   const themes: SentimentTheme[] = [
     {
+      name: 'Mock Theme 1',
       theme: 'Mock Theme 1',
       sentiment: score > 0 ? 'positive' : score < 0 ? 'negative' : 'neutral',
       confidence: Math.random(),
       mentions: Math.floor(Math.random() * 5),
       keywords: ['mock', 'theme', 'keyword'],
       examples: ['example 1', 'example 2'],
+      score: score,
     },
     {
+      name: 'Mock Theme 2',
       theme: 'Mock Theme 2',
       sentiment: score > 0 ? 'positive' : score < 0 ? 'negative' : 'neutral',
       confidence: Math.random(),
       mentions: Math.floor(Math.random() * 5),
       keywords: ['mock', 'theme', 'keyword'],
       examples: ['example 1', 'example 2'],
+      score: score,
     },
   ];
 
@@ -53,7 +58,10 @@ export const analyzeVenueSentiment = async (venueId: string): Promise<VenueSenti
     {
       platform: 'Mock Platform 1',
       totalReviews: Math.floor(Math.random() * 500),
+      reviewCount: Math.floor(Math.random() * 500),
       averageSentiment: Math.random() * 2 - 1,
+      overallSentiment: Math.random() * 2 - 1,
+      summary: 'Mock platform summary with sentiment analysis',
       sentimentDistribution: {
         positive: Math.random(),
         negative: Math.random(),
@@ -61,12 +69,14 @@ export const analyzeVenueSentiment = async (venueId: string): Promise<VenueSenti
       },
       themes: [
         {
+          name: 'Mock Theme 1',
           theme: 'Mock Theme 1',
           sentiment: overallSentiment > 0 ? 'positive' : overallSentiment < 0 ? 'negative' : 'neutral',
           confidence: Math.random(),
           mentions: Math.floor(Math.random() * 5),
           keywords: ['mock', 'theme', 'keyword'],
           examples: ['example 1', 'example 2'],
+          score: overallSentiment,
         },
       ],
       lastUpdated: new Date(),
@@ -82,12 +92,14 @@ export const analyzeVenueSentiment = async (venueId: string): Promise<VenueSenti
   // Mock top themes
   const topThemes: SentimentTheme[] = [
     {
+      name: 'Mock Theme 1',
       theme: 'Mock Theme 1',
       sentiment: overallSentiment > 0 ? 'positive' : overallSentiment < 0 ? 'negative' : 'neutral',
       confidence: Math.random(),
       mentions: Math.floor(Math.random() * 5),
       keywords: ['mock', 'theme', 'keyword'],
       examples: ['example 1', 'example 2'],
+      score: overallSentiment,
     },
   ];
 
@@ -135,22 +147,40 @@ export const extractThemes = async (text: string): Promise<SentimentTheme[]> => 
   // Simulate theme extraction
   const themes: SentimentTheme[] = [
     {
+      name: 'Mock Theme 1',
       theme: 'Mock Theme 1',
       sentiment: 'neutral',
       confidence: Math.random(),
       mentions: Math.floor(Math.random() * 5),
       keywords: ['mock', 'theme', 'keyword'],
       examples: ['example 1', 'example 2'],
+      score: 0,
     },
     {
+      name: 'Mock Theme 2',
       theme: 'Mock Theme 2',
       sentiment: 'neutral',
       confidence: Math.random(),
       mentions: Math.floor(Math.random() * 5),
       keywords: ['mock', 'theme', 'keyword'],
       examples: ['example 1', 'example 2'],
+      score: 0,
     },
   ];
 
   return themes;
+};
+
+// Mock service class that components expect
+export const SentimentAnalysisService = {
+  getPlatformSentimentSummaries: async (venueId: string): Promise<PlatformSentimentSummary[]> => {
+    const analysis = await analyzeVenueSentiment(venueId);
+    return analysis.platformSummaries;
+  },
+  
+  triggerMockAnalysis: async (venueId: string): Promise<void> => {
+    // Simulate triggering analysis
+    console.log(`Triggering mock sentiment analysis for venue ${venueId}`);
+    return Promise.resolve();
+  }
 };
