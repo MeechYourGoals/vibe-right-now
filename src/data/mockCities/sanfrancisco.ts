@@ -1,5 +1,5 @@
 
-import { CityData } from '@/types/location';
+import { CityData } from '@/types';
 
 const sanfrancisco: CityData = {
   name: "San Francisco",

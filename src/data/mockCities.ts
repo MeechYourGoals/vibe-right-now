@@ -1,5 +1,4 @@
-
-import { CityData } from '@/types/location';
+import { CityData, Location } from '@/types';
 
 import nyc from './mockCities/nyc';
 import la from './mockCities/la';
@@ -52,7 +51,7 @@ export const findCityByName = (searchTerm: string): CityData | null => {
 };
 
 // Search venues in all cities
-export const searchVenues = (searchTerm: string, cityName?: string) => {
+export const searchVenues = (searchTerm: string, cityName?: string): Location[] => {
   const normalizedSearch = searchTerm.toLowerCase().trim();
   let citiesToSearch = mockCitiesData;
   if (cityName) {
@@ -61,7 +60,7 @@ export const searchVenues = (searchTerm: string, cityName?: string) => {
       citiesToSearch = [targetCity];
     }
   }
-  let results: any[] = [];
+  let results: Location[] = [];
   citiesToSearch.forEach(city => {
     city.venues.forEach(venue => {
       const venueName = venue.name.toLowerCase();

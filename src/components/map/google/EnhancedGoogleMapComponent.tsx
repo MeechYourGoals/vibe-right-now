@@ -1,7 +1,7 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { GoogleMap, Marker, InfoWindow } from '@react-google-maps/api';
-import { Location } from "@/types/location";
+import { Location } from "@/types";
 import { getMapOptions } from './MapStyles';
 import MapLoadingStates from './MapLoadingStates';
 import useGoogleMap from './useGoogleMap';

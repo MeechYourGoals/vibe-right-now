@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Maximize, MapPin } from "lucide-react";
-import { Location } from "@/types/location";
+import { Location } from "@/types";
 import GoogleMapComponent from "@/components/map/google/GoogleMapComponent";
 import WaitTimeDisplay from "@/components/venue/WaitTimeDisplay";
 

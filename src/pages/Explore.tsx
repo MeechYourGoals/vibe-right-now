@@ -17,7 +17,7 @@ import RecommendedForYou from "@/components/RecommendedForYou";
 import TrendingLocations from "@/components/TrendingLocations";
 import DiscountLocations from "@/components/DiscountLocations";
 import { useMapSync } from "@/hooks/useMapSync";
-import { Location } from "@/types/location";
+import { Location } from "@/types";
 import { findCityByName } from "@/data/mockCities";
 import { format } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";

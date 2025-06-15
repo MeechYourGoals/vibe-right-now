@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { DatePickerWithRange } from '@/components/ui/date-picker-with-range';
 import { format } from 'date-fns';
-import { Location } from '@/types/location';
+import { Location } from '@/types';
 import { findCityByName, searchVenues } from '@/data/mockCities';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';

@@ -1,6 +1,6 @@
 
 import { useState, useCallback, useRef } from 'react';
-import { Location } from '@/types/location';
+import { Location } from '@/types';
 
 interface MapSyncState {
   center: { lat: number; lng: number };
