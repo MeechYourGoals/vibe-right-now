@@ -1,3 +1,4 @@
+
 import { CityData, Location } from '@/types';
 
 import nyc from './mockCities/nyc';
@@ -10,18 +11,59 @@ import vegas from './mockCities/vegas';
 import sanfrancisco from './mockCities/sanfrancisco';
 import paris from './mockCities/paris';
 import tokyo from './mockCities/tokyo';
+import berlin from './mockCities/berlin';
+import sydney from './mockCities/sydney';
+import amsterdam from './mockCities/amsterdam';
+import barcelona from './mockCities/barcelona';
+import rome from './mockCities/rome';
+import istanbul from './mockCities/istanbul';
+import dubai from './mockCities/dubai';
+import singapore from './mockCities/singapore';
+import mumbai from './mockCities/mumbai';
+import bangkok from './mockCities/bangkok';
+import seoul from './mockCities/seoul';
+import moscow from './mockCities/moscow';
+import saopaulo from './mockCities/saopaulo';
+import melbourne from './mockCities/melbourne';
+import toronto from './mockCities/toronto';
+import riodejaneiro from './mockCities/riodejaneiro';
 
 export const mockCitiesData: CityData[] = [
+  // North America
   nyc,
   la,
   phoenix,
-  london,
   chicago,
   miami,
   vegas,
   sanfrancisco,
+  toronto,
+  
+  // Europe
+  london,
   paris,
+  berlin,
+  amsterdam,
+  barcelona,
+  rome,
+  istanbul,
+  moscow,
+  
+  // Asia
   tokyo,
+  dubai,
+  singapore,
+  mumbai,
+  bangkok,
+  seoul,
+  
+  // Oceania
+  sydney,
+  melbourne,
+  
+  // South America
+  saopaulo,
+  riodejaneiro,
 ];
 
 // Export utility/type helpers as before
