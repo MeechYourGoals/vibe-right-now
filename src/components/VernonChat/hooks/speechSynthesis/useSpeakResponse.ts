@@ -1,156 +1,73 @@
 
-import { useCallback } from 'react';
-import { playAudioBase64 } from '@/components/VernonChat/utils/speech/synthesis';
-import { toast } from "sonner";
-import { VertexAIHub, DEFAULT_MALE_VOICE } from '@/services/VertexAI';
-import { OpenRouterService } from '@/services/OpenRouterService';
+import { useState, useCallback } from 'react';
+import { toast } from 'sonner';
+import { getGoogleTTS, playAudioBase64, processTextForNaturalSpeech } from '../../utils/speechUtils';
 
-interface UseSpeakResponseProps {
-  isSpeaking: boolean;
-  currentlyPlayingText: React.MutableRefObject<string | null>;
-  stopSpeaking: () => void;
-  speakWithBrowser: (text: string, voices: SpeechSynthesisVoice[]) => Promise<boolean>;
-  introHasPlayed: React.MutableRefObject<boolean>;
-  voices: SpeechSynthesisVoice[];
-}
+export const useSpeakResponse = () => {
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
 
-export const useSpeakResponse = ({
-  isSpeaking,
-  currentlyPlayingText,
-  stopSpeaking,
-  speakWithBrowser,
-  introHasPlayed,
-  voices
-}: UseSpeakResponseProps) => {
-  
-  const speakResponse = useCallback(async (text: string): Promise<void> => {
-    // Avoid speaking empty text
-    if (!text || text.trim() === '') {
-      console.log('Empty text provided, not speaking');
-      return;
-    }
-    
-    // Don't repeat the same text if it's already playing
-    if (isSpeaking && currentlyPlayingText.current === text) {
-      console.log('This text is already being spoken, skipping duplicate');
-      return;
-    }
-    
-    // Always stop any ongoing speech first to prevent overlapping voices
-    stopSpeaking();
-    
-    // Set the current text being spoken
-    currentlyPlayingText.current = text;
-    
-    // Try OpenRouter TTS first
-    let speechSuccess = false;
-    
+  const speakResponse = useCallback(async (text: string, useGoogleTTS: boolean = true) => {
+    if (!text || text.trim() === '') return;
+
+    setIsSpeaking(true);
+
     try {
-      console.log('Attempting to use OpenRouter for TTS...');
-      
-      const audioBase64 = await OpenRouterService.textToSpeech({
-        text: text,
-        voice: 'male'
-      });
-      
-      if (audioBase64) {
-        console.log('OpenRouter TTS successful, playing audio');
-        const audioElement = playAudioBase64(audioBase64);
-        if (audioElement) {
-          speechSuccess = true;
-          
-          // Mark intro as played if this is the first message
-          if (!introHasPlayed.current && text.includes("I'm VeRNon")) {
-            introHasPlayed.current = true;
-          }
-          return;
-        } else {
-          console.warn('Audio element creation failed, falling back');
-        }
-      } else {
-        console.warn('OpenRouter TTS returned null, falling back');
-      }
-    } catch (error) {
-      console.error('OpenRouter TTS failed, falling back:', error);
-    }
-    
-    // If OpenRouter failed, try Vertex AI TTS
-    if (!speechSuccess) {
-      try {
-        console.log('Attempting to use Google Vertex AI TTS...');
-        console.log(`Using voice: ${DEFAULT_MALE_VOICE}`);
-        
-        const audioBase64 = await VertexAIHub.textToSpeech(text, {
-          voice: DEFAULT_MALE_VOICE,
-          speakingRate: 1.0,
-          pitch: 0
-        });
+      if (useGoogleTTS) {
+        const processedText = processTextForNaturalSpeech(text);
+        const audioBase64 = await getGoogleTTS(processedText);
         
         if (audioBase64) {
-          console.log('Google TTS successful, playing audio');
-          const audioElement = playAudioBase64(audioBase64);
-          if (audioElement) {
-            speechSuccess = true;
-            
-            // Mark intro as played if this is the first message
-            if (!introHasPlayed.current && text.includes("I'm VeRNon")) {
-              introHasPlayed.current = true;
-            }
+          const audio = playAudioBase64(audioBase64);
+          if (audio) {
+            setCurrentAudio(audio);
+            audio.onended = () => {
+              setIsSpeaking(false);
+              setCurrentAudio(null);
+            };
             return;
-          } else {
-            console.warn('Audio element creation failed, falling back to browser TTS');
           }
-        } else {
-          console.warn('Google TTS returned null, falling back to browser TTS');
         }
-      } catch (error) {
-        console.error('Google TTS failed, falling back to browser TTS:', error);
       }
-    }
-    
-    // If both failed, fall back to browser's speech synthesis
-    try {
-      if (!speechSuccess) {
-        console.log('Attempting to use browser speech synthesis...');
+
+      // Fallback to browser TTS
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.onend = () => setIsSpeaking(false);
+        utterance.onerror = () => {
+          setIsSpeaking(false);
+          toast.error('Error with speech synthesis');
+        };
         
-        // Try to find a male voice in the browser
-        const maleVoice = voices.find(voice => 
-          voice.name.includes('Male') || 
-          voice.name.includes('David') || 
-          voice.name.includes('James') ||
-          voice.name.includes('Thomas')
-        );
-        
-        // If we found a male voice, use it specifically
-        if (maleVoice) {
-          console.log('Using browser male voice:', maleVoice.name);
-          // Create a speech synthesis utterance with the selected voice
-          speechSuccess = await speakWithBrowser(text, [maleVoice]);
-        } else {
-          // Otherwise use default browser voice selection
-          speechSuccess = await speakWithBrowser(text, voices);
-        }
-        
-        // Mark intro as played if this is the first message (even if using browser speech)
-        if (speechSuccess && !introHasPlayed.current && text.includes("I'm VeRNon")) {
-          introHasPlayed.current = true;
-        }
+        window.speechSynthesis.speak(utterance);
+      } else {
+        setIsSpeaking(false);
+        toast.error('Speech synthesis not supported');
       }
     } catch (error) {
-      console.error('Browser speech synthesis failed:', error);
-      toast.error("Voice synthesis unavailable. Please try again later.");
-      // Even if speech fails completely, we continue with the app's functionality
+      console.error('Error in speakResponse:', error);
+      setIsSpeaking(false);
+      toast.error('Error generating speech');
+    }
+  }, []);
+
+  const stopSpeaking = useCallback(() => {
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+      setCurrentAudio(null);
     }
     
-    // The function completes regardless of speech success to ensure conversation flow continues
-  }, [
-    isSpeaking, 
-    currentlyPlayingText, 
-    stopSpeaking, 
-    speakWithBrowser,
-    introHasPlayed,
-    voices
-  ]);
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+    
+    setIsSpeaking(false);
+  }, [currentAudio]);
 
-  return { speakResponse };
+  return {
+    speakResponse,
+    stopSpeaking,
+    isSpeaking
+  };
 };

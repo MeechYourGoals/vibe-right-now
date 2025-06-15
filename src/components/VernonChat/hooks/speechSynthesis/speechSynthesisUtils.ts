@@ -1,96 +1,34 @@
 
-import { 
-  getPreferredVoice, 
-  processTextForNaturalSpeech, 
-  configureUtteranceForNaturalSpeech,
-  initializeSpeechSynthesis 
-} from '../../utils/speech';
+import { toast } from 'sonner';
 
-export interface SpeechState {
-  isSpeaking: boolean;
-  setIsSpeaking: (value: boolean) => void;
-  currentlyPlayingText: React.MutableRefObject<string | null>;
-}
-
-// Function to speak sentences one by one for more natural cadence
-export const speakSentenceBySequence = (
-  sentences: string[], 
-  index: number,
-  speechSynthesis: SpeechSynthesis,
-  voices: SpeechSynthesisVoice[],
-  speechState: SpeechState
-): void => {
-  if (!speechSynthesis || index >= sentences.length) {
-    return;
+// Local speech synthesis utilities specific to hooks
+export const configureSpeechSynthesis = (): SpeechSynthesis | null => {
+  if ('speechSynthesis' in window) {
+    const synth = window.speechSynthesis;
+    synth.getVoices();
+    
+    if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+      const silentUtterance = new SpeechSynthesisUtterance('');
+      silentUtterance.volume = 0;
+      synth.speak(silentUtterance);
+    }
+    
+    return synth;
   }
   
-  const { isSpeaking, setIsSpeaking, currentlyPlayingText } = speechState;
-  const sentence = sentences[index];
-  const utterance = new SpeechSynthesisUtterance(sentence);
-  
-  // Select voice
-  const preferredVoice = getPreferredVoice(voices.length > 0 ? voices : speechSynthesis.getVoices());
-  if (preferredVoice) {
-    utterance.voice = preferredVoice;
-  }
-  
-  // Configure utterance properties
-  configureUtteranceForNaturalSpeech(utterance, sentence);
-  
-  // Handle events
-  utterance.onstart = () => {
-    if (index === 0) {
-      setIsSpeaking(true);
-    }
-  };
-  
-  utterance.onend = () => {
-    // Move to next sentence
-    if (index < sentences.length - 1) {
-      speakSentenceBySequence(sentences, index + 1, speechSynthesis, voices, speechState);
-    } else {
-      setIsSpeaking(false);
-      currentlyPlayingText.current = null;
-    }
-  };
-  
-  utterance.onerror = (event) => {
-    console.error('Speech synthesis error:', event);
-    setIsSpeaking(false);
-    currentlyPlayingText.current = null;
-  };
-  
-  // Speak the current sentence
-  speechSynthesis.speak(utterance);
+  console.error('Speech synthesis not supported');
+  return null;
 };
 
-// Initialize audio element for playback
-export const createAudioElement = (
-  onPlay: () => void,
-  onEnded: () => void,
-  onError: () => void
-): HTMLAudioElement => {
-  const audio = new Audio();
-  
-  // Set up event handlers
-  audio.onplay = onPlay;
-  audio.onended = onEnded;
-  audio.onerror = onError;
-  
-  return audio;
+export const createUtterance = (text: string): SpeechSynthesisUtterance => {
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.rate = 1.0;
+  utterance.pitch = 1.0;
+  utterance.volume = 1.0;
+  return utterance;
 };
 
-// Initialize speech synthesis
-export const setupSpeechSynthesis = (): {
-  speechSynthesis: SpeechSynthesis | null;
-  audioElement: HTMLAudioElement;
-} => {
-  const speechSynthesis = initializeSpeechSynthesis();
-  
-  const audioElement = new Audio();
-  
-  return {
-    speechSynthesis,
-    audioElement
-  };
+export const handleSynthesisError = (error: string): void => {
+  console.error('Speech synthesis error:', error);
+  toast.error('Error with speech synthesis');
 };

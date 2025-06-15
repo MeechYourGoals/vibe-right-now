@@ -1,12 +1,12 @@
 
 import { SearchCoordinator } from './SearchCoordinator';
+import { SearchStrategyFactory } from './SearchStrategyFactory';
 
-export * from './searchTypes';
-export { SearchCoordinator };
+export * from './types';
+export { SearchCoordinator, SearchStrategyFactory };
 
-// Re-export search strategies for convenience
-export * from './comedySearchStrategy';
-export * from './complexQueryStrategy';
-export * from './fallbackSearchStrategy';
-export * from './localDataStrategy';
-export * from './locationSearchStrategy';
+// Re-export strategies for convenience
+export * from './strategies/LocationSearchStrategy';
+export * from './strategies/ComedySearchStrategy';
+export * from './strategies/ComplexQueryStrategy';
+export * from './strategies/FallbackSearchStrategy';
