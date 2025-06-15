@@ -1,97 +1,68 @@
 
-import { supabaseApiClient } from './api';
-import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { Message } from '@/components/VernonChat/types';
 
 /**
- * Service for interacting with Google Gemini API via Supabase Edge Functions
- * Now uses the unified API client architecture
+ * Service to interact with Google's Gemini API via Supabase Edge Functions
  */
-export class GeminiService {
+export const GeminiService = {
   /**
-   * Generate a response using Google Gemini model
+   * Generate a text response using Gemini
+   * @param prompt The user's prompt
+   * @param mode The chat mode ('venue' or default user)
+   * @param history Previous chat messages for context
+   * @returns The generated text response
    */
-  static async generateResponse(
-    prompt: string, 
-    mode: 'default' | 'search' | 'venue' = 'default', 
-    context: any[] = []
-  ): Promise<string> {
+  async generateResponse(prompt: string, mode: 'venue' | 'user' = 'user', history: Message[] = []): Promise<string> {
     try {
-      console.log(`Generating Gemini response with mode: ${mode}`);
+      console.log(`Calling Gemini AI with prompt: "${prompt.substring(0, 50)}..."`);
       
-      // Ensure context is in the correct format
-      const formattedContext = context.map(msg => ({
-        sender: msg.sender || (msg.role === 'user' || msg.direction === 'outgoing' ? 'user' : 'ai'),
-        text: msg.text || msg.content || ''
-      }));
+      const { data, error } = await supabase.functions.invoke('gemini-ai', {
+        body: { prompt, mode, history }
+      });
       
-      const response = await supabaseApiClient.callGeminiAI(prompt, mode, formattedContext);
-      return response;
-    } catch (error) {
-      console.error('Error generating response with Gemini:', error);
-      
-      // Return user-friendly error messages
-      if (error.message?.includes('quota') || error.message?.includes('429')) {
-        return "I'm experiencing high demand right now. Please wait a moment and try again.";
-      } else if (error.message?.includes('404')) {
-        return "I'm temporarily unavailable due to service maintenance. Please try again shortly.";
-      } else {
-        return "I'm having trouble connecting to my AI services right now. Please try again later.";
+      if (error) {
+        console.error('Error calling Gemini AI function:', error);
+        throw new Error(`Failed to generate response: ${error.message}`);
       }
-    }
-  }
-
-  /**
-   * Search for information using Google Search and Gemini AI
-   */
-  static async searchWithGemini(query: string, categories?: string[]): Promise<string> {
-    try {
-      console.log('Searching with Google Gemini:', query);
       
-      const searchPrompt = `
-        Please provide comprehensive, up-to-date information about "${query}".
-        Include specific details like:
-        - Names of venues, events, or places
-        - Addresses and locations when relevant
-        - Hours, prices, and availability if applicable
-        - Current and recent information
-        
-        Format your response clearly and provide actionable information.
-      `;
+      if (!data || !data.text) {
+        throw new Error('No response received from Gemini');
+      }
       
-      const response = await this.generateResponse(searchPrompt, 'search');
-      return response;
+      return data.text;
     } catch (error) {
-      console.error('Error in Gemini search:', error);
-      return `I couldn't find specific information about "${query}". Please try a different search.`;
+      console.error('Error in GeminiService.generateResponse:', error);
+      return "I'm having trouble connecting to my AI services right now. Please try again later.";
     }
-  }
-
+  },
+  
   /**
-   * Chat completion compatible with OpenAI format
+   * Generate an image using Gemini's Imagen
+   * @param prompt The image description
+   * @returns Base64 encoded image data
    */
-  static async chatCompletion(messages: Array<{role: string; content: string}>): Promise<any> {
+  async generateImage(prompt: string): Promise<string> {
     try {
-      // Convert to Gemini format and call
-      const lastMessage = messages[messages.length - 1];
-      const history = messages.slice(0, -1);
+      console.log(`Generating image with prompt: "${prompt.substring(0, 50)}..."`);
       
-      const response = await this.generateResponse(
-        lastMessage.content,
-        'default',
-        history
-      );
+      const { data, error } = await supabase.functions.invoke('gemini-imagen', {
+        body: { prompt }
+      });
       
-      return {
-        choices: [{
-          message: {
-            content: response,
-            role: 'assistant'
-          }
-        }]
-      };
+      if (error) {
+        console.error('Error calling Gemini Imagen function:', error);
+        throw new Error(`Failed to generate image: ${error.message}`);
+      }
+      
+      if (!data || !data.imageData) {
+        throw new Error('No image data received from Imagen');
+      }
+      
+      return data.imageData;
     } catch (error) {
-      console.error('Error in Gemini chat completion:', error);
+      console.error('Error in GeminiService.generateImage:', error);
       throw error;
     }
   }
-}
+};

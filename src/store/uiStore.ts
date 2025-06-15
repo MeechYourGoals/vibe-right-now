@@ -1,7 +1,5 @@
-
 import { StateCreator } from 'zustand';
 import { AppStore, UISlice, Notification } from './types';
-import { useAppStore } from './appStore';
 
 export const createUISlice: StateCreator<
   AppStore,

@@ -1,88 +1,96 @@
 
-import { supabaseApiClient } from './api';
-import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
-/**
- * Service for interacting with OpenAI API via Supabase Edge Functions
- * Now uses the unified API client architecture
- */
 export class OpenAIService {
   /**
-   * Generate a chat completion using OpenAI models
+   * Send a chat request to the OpenAI API (now with OpenRouter support)
    */
-  static async chatCompletion(
-    messages: Array<{role: string; content: string}>,
-    options: {
-      model?: string;
-      context?: 'user' | 'venue';
+  static async sendChatRequest(
+    messages: { role: string; content: string }[],
+    options: { 
+      model?: string; 
+      context?: string;
       stream?: boolean;
+      maxTokens?: number;
       useOpenRouter?: boolean;
     } = {}
-  ): Promise<any> {
+  ) {
     try {
-      console.log('Generating OpenAI chat completion');
-      
-      const response = await supabaseApiClient.callOpenAI(messages, {
-        model: options.model || 'anthropic/claude-3-haiku',
-        context: options.context || 'user',
-        stream: options.stream || false,
-        useOpenRouter: options.useOpenRouter !== false
+      const {
+        model = 'anthropic/claude-3-haiku',
+        context = 'user',
+        stream = false,
+        maxTokens = 1000,
+        useOpenRouter = true
+      } = options;
+
+      const { data, error } = await supabase.functions.invoke('openai-chat', {
+        body: {
+          messages,
+          model,
+          context,
+          stream,
+          useOpenRouter
+        }
       });
-      
-      return response;
+
+      if (error) {
+        console.error('Error calling chat function:', error);
+        throw new Error(`Failed to call chat function: ${error.message}`);
+      }
+
+      return stream ? data : data?.response?.choices?.[0]?.message?.content || '';
     } catch (error) {
-      console.error('Error in OpenAI chat completion:', error);
+      console.error('Error in chat service:', error);
       throw error;
     }
   }
 
   /**
-   * Generate text using OpenAI with conversation context
+   * Convert speech to text using OpenAI's Whisper API
    */
-  static async generateResponse(
-    prompt: string,
-    context: any[] = [],
-    mode: 'user' | 'venue' = 'user'
-  ): Promise<string> {
+  static async speechToText(audioBase64: string) {
     try {
-      // Convert context to OpenAI message format
-      const messages = context.map(msg => ({
-        role: msg.sender === 'user' ? 'user' : 'assistant',
-        content: msg.text || msg.content || ''
-      }));
-      
-      // Add the new prompt
-      messages.push({
-        role: 'user',
-        content: prompt
+      const { data, error } = await supabase.functions.invoke('openai-speech', {
+        body: {
+          action: 'speech-to-text',
+          audio: audioBase64
+        }
       });
-      
-      const response = await this.chatCompletion(messages, { context: mode });
-      return response.response?.choices?.[0]?.message?.content || 'No response generated';
+
+      if (error) {
+        console.error('Error calling speech-to-text function:', error);
+        throw new Error(`Failed to convert speech to text: ${error.message}`);
+      }
+
+      return data?.text || '';
     } catch (error) {
-      console.error('Error generating OpenAI response:', error);
-      return 'I apologize, but I encountered an error while processing your request. Please try again.';
+      console.error('Error in speech-to-text service:', error);
+      throw error;
     }
   }
 
   /**
-   * Search using OpenAI with web context
+   * Convert text to speech using OpenAI's TTS API
    */
-  static async searchWithOpenAI(query: string): Promise<string> {
+  static async textToSpeech(text: string) {
     try {
-      console.log('Searching with OpenAI:', query);
-      
-      const searchPrompt = `
-        Please provide comprehensive information about "${query}".
-        Include specific details like venues, events, locations, hours, and current information.
-        Format your response clearly and provide actionable information.
-      `;
-      
-      const response = await this.generateResponse(searchPrompt);
-      return response;
+      const { data, error } = await supabase.functions.invoke('openai-speech', {
+        body: {
+          action: 'text-to-speech',
+          text
+        }
+      });
+
+      if (error) {
+        console.error('Error calling text-to-speech function:', error);
+        throw new Error(`Failed to convert text to speech: ${error.message}`);
+      }
+
+      return data?.audio || '';
     } catch (error) {
-      console.error('Error in OpenAI search:', error);
-      return `I couldn't find specific information about "${query}". Please try a different search.`;
+      console.error('Error in text-to-speech service:', error);
+      throw error;
     }
   }
 }

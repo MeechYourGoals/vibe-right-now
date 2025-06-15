@@ -1,7 +1,6 @@
 
 import { StateCreator } from 'zustand';
 import { AppStore, UserSlice, User } from './types';
-import { useAppStore } from './appStore';
 
 export const createUserSlice: StateCreator<
   AppStore,
