@@ -15,7 +15,6 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card } from "@/components/ui/card";
 import SmartCameraButton from "./mobile/SmartCameraButton";
 import { useCameraAccess } from "@/hooks/useCameraAccess";
 import { Loader2 } from "lucide-react";

@@ -1,4 +1,3 @@
-
 // Base types for the entire application
 export interface BaseEntity {
   id: string;
@@ -49,3 +48,11 @@ export interface Timestamps {
 export type EntityStatus = 'active' | 'inactive' | 'pending' | 'archived';
 export type VisibilityLevel = 'public' | 'private' | 'friends' | 'followers';
 export type ContentType = 'text' | 'image' | 'video' | 'audio' | 'location' | 'event';
+
+export interface BusinessHours {
+  [key: string]: {
+    open: string;
+    close: string;
+    closed?: boolean;
+  };
+}
