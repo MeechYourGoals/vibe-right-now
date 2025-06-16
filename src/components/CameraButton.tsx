@@ -10,7 +10,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -18,18 +17,60 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import SmartCameraButton from "./mobile/SmartCameraButton";
+import { useCameraAccess } from "@/hooks/useCameraAccess";
+import { Loader2 } from "lucide-react";
 
 const CameraButton = () => {
   const { toast } = useToast();
+  const { takePhoto, selectFromGallery, isCapacitorNative, isLoading } = useCameraAccess();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [availableToPin, setAvailableToPin] = useState(false);
   const [activeTab, setActiveTab] = useState("camera");
   const [location, setLocation] = useState("");
   const [isCheckingLocation, setIsCheckingLocation] = useState(false);
   const [locationVerified, setLocationVerified] = useState(false);
+  const [capturedPhoto, setCapturedPhoto] = useState<string | null>(null);
 
   const handleCameraClick = () => {
     setIsDialogOpen(true);
+  };
+
+  const handleCameraCapture = async () => {
+    if (isCapacitorNative) {
+      const photo = await takePhoto();
+      if (photo?.webPath) {
+        setCapturedPhoto(photo.webPath);
+        toast({
+          title: "Photo Captured",
+          description: "Your photo has been captured successfully!",
+        });
+      }
+    } else {
+      // Fallback for web - show mock camera interface
+      toast({
+        title: "Camera Not Available",
+        description: "Camera access is only available on mobile devices. Please use the gallery option.",
+      });
+    }
+  };
+
+  const handleGallerySelect = async () => {
+    if (isCapacitorNative) {
+      const photo = await selectFromGallery();
+      if (photo?.webPath) {
+        setCapturedPhoto(photo.webPath);
+        toast({
+          title: "Photo Selected",
+          description: "Your photo has been selected from gallery!",
+        });
+      }
+    } else {
+      // Fallback for web - mock gallery selection
+      toast({
+        title: "Gallery Not Available",
+        description: "Gallery access is only available on mobile devices.",
+      });
+    }
   };
 
   const handleSubmit = () => {
@@ -40,9 +81,15 @@ const CameraButton = () => {
     toast({
       title: "Vibe Posted",
       description: availableToPin 
-        ? `Your vibe has been posted and is available for venues to pin for up to 90 days! (${pointsEarned}x points)` 
+        ? `Your vibe has been posted and is available for venues to pin for longer than 90 days! (${pointsEarned}x points)` 
         : `Your vibe has been posted and will be visible for 1 week! (${pointsEarned}x points)`,
     });
+    
+    // Reset form
+    setCapturedPhoto(null);
+    setLocation("");
+    setLocationVerified(false);
+    setAvailableToPin(false);
   };
 
   const verifyLocation = () => {
@@ -82,27 +129,74 @@ const CameraButton = () => {
             </TabsList>
             
             <TabsContent value="camera" className="space-y-4">
-              <div className="bg-muted/30 rounded-lg p-2 aspect-video flex items-center justify-center">
-                <Camera className="h-12 w-12 opacity-50" />
-                <span className="ml-2 text-sm text-muted-foreground">Camera Preview</span>
+              <div className="bg-muted/30 rounded-lg p-2 aspect-video flex items-center justify-center relative">
+                {capturedPhoto ? (
+                  <img src={capturedPhoto} alt="Captured" className="w-full h-full object-cover rounded" />
+                ) : (
+                  <>
+                    <Camera className="h-12 w-12 opacity-50" />
+                    <span className="ml-2 text-sm text-muted-foreground">
+                      {isCapacitorNative ? "Tap to capture" : "Camera Preview"}
+                    </span>
+                  </>
+                )}
+                {isCapacitorNative && !capturedPhoto && (
+                  <Button
+                    onClick={handleCameraCapture}
+                    disabled={isLoading}
+                    className="absolute inset-0 bg-transparent hover:bg-black/10 border-0"
+                  >
+                    {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+                  </Button>
+                )}
               </div>
+              {isCapacitorNative && !capturedPhoto && (
+                <Button onClick={handleCameraCapture} disabled={isLoading} className="w-full">
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Capturing...
+                    </>
+                  ) : (
+                    <>
+                      <Camera className="h-4 w-4 mr-2" />
+                      Take Photo
+                    </>
+                  )}
+                </Button>
+              )}
             </TabsContent>
             
             <TabsContent value="gallery" className="space-y-4">
-              <div className="grid grid-cols-3 gap-2">
-                {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <Card key={i} className="aspect-square relative overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary transition-all">
-                    <img 
-                      src={`https://source.unsplash.com/random/200x200?sig=${i}`} 
-                      alt="Gallery item" 
-                      className="w-full h-full object-cover"
-                    />
-                  </Card>
-                ))}
+              <div className="bg-muted/30 rounded-lg p-4 aspect-video flex items-center justify-center">
+                {capturedPhoto ? (
+                  <img src={capturedPhoto} alt="Selected" className="w-full h-full object-cover rounded" />
+                ) : (
+                  <div className="text-center">
+                    <Camera className="h-12 w-12 opacity-50 mx-auto mb-2" />
+                    <span className="text-sm text-muted-foreground">
+                      {isCapacitorNative ? "Select from gallery" : "Gallery access on mobile only"}
+                    </span>
+                  </div>
+                )}
               </div>
-              <p className="text-xs text-muted-foreground text-center">
-                Gallery uploads earn 1x points
-              </p>
+              {isCapacitorNative && (
+                <Button onClick={handleGallerySelect} disabled={isLoading} className="w-full">
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Selecting...
+                    </>
+                  ) : (
+                    "Select from Gallery"
+                  )}
+                </Button>
+              )}
+              {!isCapacitorNative && (
+                <p className="text-xs text-muted-foreground text-center">
+                  Gallery uploads available on mobile app
+                </p>
+              )}
             </TabsContent>
           </Tabs>
           
@@ -161,7 +255,7 @@ const CameraButton = () => {
                   <span className="ml-2 reward-badge">3x Points</span>
                 </Label>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Make your vibe available for venues to pin for up to 90 days
+                  Make your posts available for longer than 90 days, Eligible for more points and Rewards if a Venue pins your post to their feed
                 </p>
               </div>
             </div>

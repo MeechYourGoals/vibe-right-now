@@ -1,210 +1,290 @@
 
-import { BaseEntity, MediaItem, Timestamps } from '../core/base';
-import { User } from './user';
-import { Venue } from './venue';
+import { BaseEntity, Timestamps, GeoCoordinates, BusinessHours } from '../core/base';
+import { UserProfile } from './user';
 
-// Messaging types
-export interface Conversation extends BaseEntity, Timestamps {
-  type: ConversationType;
-  participants: ConversationParticipant[];
-  lastMessage?: Message;
-  metadata: ConversationMetadata;
-  settings: ConversationSettings;
-  status: ConversationStatus;
+export type ActionType = 'send' | 'receive' | 'read' | 'typing' | 'delete';
+
+export interface Message extends BaseEntity, Timestamps {
+  content: string;
+  senderId: string;
+  conversationId: string;
+  status: MessageStatus;
+  type: MessageType;
+  metadata?: MessageMetadata;
+  reactions?: MessageReaction[];
+  attachments?: MessageAttachment[];
+  threadId?: string;
+  replyToId?: string;
 }
 
-export type ConversationType = 'direct' | 'group' | 'venue' | 'support' | 'automated';
-export type ConversationStatus = 'active' | 'archived' | 'muted' | 'blocked' | 'deleted';
+export type MessageStatus = 'sent' | 'delivered' | 'read' | 'failed';
+export type MessageType = 'text' | 'image' | 'video' | 'audio' | 'file' | 'location' | 'system';
+
+export interface MessageMetadata {
+  edited?: boolean;
+  editedAt?: Date;
+  priority?: 'low' | 'normal' | 'high' | 'urgent';
+  expiresAt?: Date;
+}
+
+export interface MessageReaction {
+  id: string;
+  userId: string;
+  messageId: string;
+  emoji: string;
+  createdAt: Date;
+}
+
+export interface MessageAttachment {
+  id: string;
+  type: 'image' | 'video' | 'audio' | 'document';
+  url: string;
+  filename: string;
+  size: number;
+  mimeType: string;
+  thumbnail?: string;
+}
+
+export interface Conversation extends BaseEntity, Timestamps {
+  participants: ConversationParticipant[];
+  lastMessageId?: string;
+  lastMessageAt?: Date;
+  settings: ConversationSettings;
+  type: ConversationType;
+  metadata?: ConversationMetadata;
+}
+
+export type ConversationType = 'direct' | 'group' | 'venue_inquiry' | 'support';
 
 export interface ConversationParticipant {
+  id: string;
   userId: string;
   role: ParticipantRole;
   joinedAt: Date;
   lastReadAt?: Date;
-  status: ParticipantStatus;
-  permissions: ParticipantPermissions;
+  settings: ParticipantSettings;
 }
 
-export type ParticipantRole = 'owner' | 'admin' | 'moderator' | 'member' | 'guest';
-export type ParticipantStatus = 'active' | 'left' | 'removed' | 'banned';
+export type ParticipantRole = 'owner' | 'admin' | 'member' | 'guest';
 
-export interface ParticipantPermissions {
-  canSendMessages: boolean;
-  canSendMedia: boolean;
-  canAddMembers: boolean;
-  canRemoveMembers: boolean;
-  canEditSettings: boolean;
-}
-
-export interface ConversationMetadata {
-  title?: string;
-  description?: string;
-  avatar?: MediaItem;
-  venueId?: string;
-  messageCount: number;
-  unreadCount: Record<string, number>; // userId -> unread count
-  tags: string[];
+export interface ParticipantSettings {
+  muted: boolean;
+  notifications: boolean;
+  nickname?: string;
 }
 
 export interface ConversationSettings {
-  isPublic: boolean;
-  allowInvites: boolean;
-  requireApproval: boolean;
-  allowMedia: boolean;
-  allowLinks: boolean;
-  autoDeleteDays?: number;
-  moderationLevel: ModerationLevel;
+  allowNewMembers: boolean;
+  messageRetention: number; // days
+  autoDelete: boolean;
+  readReceipts: boolean;
 }
 
-export type ModerationLevel = 'none' | 'basic' | 'strict' | 'custom';
-
-export interface Message extends BaseEntity, Timestamps {
-  conversationId: string;
-  senderId: string;
-  content: MessageContent;
-  replyTo?: string;
-  reactions: MessageReaction[];
-  delivery: MessageDelivery;
-  metadata: MessageMetadata;
-  status: MessageStatus;
-}
-
-export interface MessageContent {
-  type: MessageContentType;
-  text?: string;
-  media?: MediaItem[];
-  location?: MessageLocation;
-  system?: SystemMessageData;
-  rich?: RichMessageData;
-}
-
-export type MessageContentType = 
-  | 'text' 
-  | 'media' 
-  | 'location' 
-  | 'system' 
-  | 'rich' 
-  | 'sticker' 
-  | 'voice' 
-  | 'file';
-
-export interface MessageLocation {
-  coordinates: GeoCoordinates;
-  address?: string;
-  venueName?: string;
-  venueId?: string;
-}
-
-export interface SystemMessageData {
-  type: SystemMessageType;
-  data: Record<string, any>;
-}
-
-export type SystemMessageType = 
-  | 'user_joined' 
-  | 'user_left' 
-  | 'user_added' 
-  | 'user_removed' 
-  | 'settings_changed' 
-  | 'conversation_created';
-
-export interface RichMessageData {
-  type: RichMessageType;
-  title?: string;
+export interface ConversationMetadata {
+  name?: string;
   description?: string;
-  thumbnail?: MediaItem;
-  url?: string;
-  actions?: MessageAction[];
-}
-
-export type RichMessageType = 'link' | 'venue' | 'event' | 'post' | 'booking' | 'payment';
-
-export interface MessageAction {
-  id: string;
-  label: string;
-  type: ActionType;
-  data: Record<string, any>;
-}
-
-export type ActionType = 'url' | 'callback' | 'share' | 'save' | 'book' | 'pay';
-
-export interface MessageReaction {
-  userId: string;
-  emoji: string;
-  timestamp: Date;
-}
-
-export interface MessageDelivery {
-  sent: boolean;
-  delivered: boolean;
-  read: boolean;
-  sentAt?: Date;
-  deliveredAt?: Date;
-  readAt?: Date;
-  readBy: Record<string, Date>; // userId -> readAt
-}
-
-export interface MessageMetadata {
-  isEdited: boolean;
-  editHistory: MessageEdit[];
-  isForwarded: boolean;
-  forwardedFrom?: string;
-  mentions: string[];
-  isAutomated: boolean;
-  botId?: string;
-}
-
-export interface MessageEdit {
-  timestamp: Date;
-  originalContent: string;
-  reason?: string;
-}
-
-export type MessageStatus = 'sending' | 'sent' | 'delivered' | 'read' | 'failed' | 'deleted';
-
-// Automated messaging types
-export interface ChatBot extends BaseEntity, Timestamps {
-  name: string;
-  description: string;
-  avatar?: MediaItem;
+  image?: string;
+  tags?: string[];
   venueId?: string;
-  configuration: BotConfiguration;
+}
+
+export interface NotificationSettings {
+  enabled: boolean;
+  sound: boolean;
+  vibration: boolean;
+  preview: boolean;
+  quietHours: {
+    enabled: boolean;
+    start: string;
+    end: string;
+  };
+}
+
+export interface MessageThread {
+  id: string;
+  parentMessageId: string;
+  participantIds: string[];
+  messageCount: number;
+  lastActivity: Date;
+}
+
+export interface VenueInquiry extends BaseEntity, Timestamps {
+  venueId: string;
+  customerId: string;
+  subject: string;
+  status: InquiryStatus;
+  priority: InquiryPriority;
+  assignedTo?: string;
+  conversationId: string;
+  metadata?: InquiryMetadata;
+}
+
+export type InquiryStatus = 'open' | 'in_progress' | 'resolved' | 'closed';
+export type InquiryPriority = 'low' | 'normal' | 'high' | 'urgent';
+
+export interface InquiryMetadata {
+  category?: string;
+  tags?: string[];
+  customFields?: Record<string, any>;
+}
+
+export interface AutoReplyRule {
+  id: string;
+  venueId: string;
+  trigger: AutoReplyTrigger;
+  response: string;
+  conditions: AutoReplyCondition[];
+  isActive: boolean;
+  priority: number;
+}
+
+export interface AutoReplyTrigger {
+  type: 'keyword' | 'time' | 'user_type' | 'message_type';
+  value: string | string[];
+}
+
+export interface AutoReplyCondition {
+  field: string;
+  operator: 'equals' | 'contains' | 'starts_with' | 'ends_with';
+  value: string;
+}
+
+export interface MessageTemplate {
+  id: string;
+  venueId: string;
+  name: string;
+  content: string;
+  category: string;
+  variables: string[];
+  usage: number;
+  isActive: boolean;
+}
+
+export interface MessageAnalytics {
+  venueId: string;
+  period: AnalyticsPeriod;
+  totalMessages: number;
+  responseTime: ResponseTime;
+  satisfactionScore: number;
+  conversionRate: number;
+  metrics: MessageMetric[];
+}
+
+export type AnalyticsPeriod = 'day' | 'week' | 'month' | 'quarter' | 'year';
+
+export interface ResponseTime {
+  average: number; // minutes
+  median: number;
+  percentile95: number;
+  byHour: number[];
+}
+
+export interface MessageMetric {
+  date: Date;
+  sent: number;
+  received: number;
+  responseTime: number;
+  satisfaction: number;
+}
+
+export interface ChatBot {
+  id: string;
+  venueId: string;
+  name: string;
   capabilities: BotCapability[];
-  status: BotStatus;
+  isActive: boolean;
+  settings: BotSettings;
   analytics: BotAnalytics;
 }
 
-export interface BotConfiguration {
-  language: string;
-  personality: string;
-  responseTime: number;
-  workingHours?: BusinessHours;
-  fallbackToHuman: boolean;
-  trainingData: string[];
-}
-
 export interface BotCapability {
-  type: BotCapabilityType;
+  type: CapabilityType;
+  confidence: number;
   enabled: boolean;
-  configuration: Record<string, any>;
 }
 
-export type BotCapabilityType = 
-  | 'greeting' 
-  | 'booking' 
-  | 'faq' 
-  | 'menu' 
-  | 'directions' 
-  | 'hours' 
-  | 'recommendations';
+export type CapabilityType = 'faq' | 'booking' | 'recommendations' | 'hours' | 'directions';
 
-export type BotStatus = 'active' | 'inactive' | 'training' | 'error';
+export interface BotSettings {
+  fallbackToHuman: boolean;
+  confidenceThreshold: number;
+  greeting: string;
+  language: string;
+}
 
 export interface BotAnalytics {
-  totalConversations: number;
-  totalMessages: number;
-  averageResponseTime: number;
-  satisfactionScore: number;
-  handoffRate: number;
-  resolutionRate: number;
+  totalInteractions: number;
+  successRate: number;
+  fallbackRate: number;
+  averageConfidence: number;
+}
+
+export interface BotResponse {
+  content: string;
+  confidence: number;
+  capabilities: string[];
+  fallback: boolean;
+  suggestions?: string[];
+}
+
+export interface BotTrigger {
+  id: string;
+  pattern: string;
+  response: string;
+  confidence: number;
+  metadata?: Record<string, any>;
+}
+
+export interface BookingRequest {
+  id: string;
+  venueId: string;
+  customerId: string;
+  details: BookingDetails;
+  status: BookingStatus;
+  paymentInfo?: PaymentInfo;
+  conversationId: string;
+}
+
+export interface BookingDetails {
+  date: Date;
+  time: string;
+  partySize: number;
+  specialRequests?: string;
+  contactInfo: ContactInfo;
+}
+
+export type BookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed';
+
+export interface PaymentInfo {
+  method: PaymentMethod;
+  amount: number;
+  currency: string;
+  status: PaymentStatus;
+  transactionId?: string;
+}
+
+export type PaymentMethod = 'card' | 'cash' | 'digital_wallet';
+export type PaymentStatus = 'pending' | 'completed' | 'failed' | 'refunded';
+
+export interface ContactInfo {
+  phone?: string;
+  email?: string;
+  name: string;
+}
+
+export interface Location {
+  id: string;
+  name: string;
+  coordinates: GeoCoordinates;
+  address: string;
+  type: LocationType;
+  metadata?: LocationMetadata;
+}
+
+export type LocationType = 'venue' | 'landmark' | 'address' | 'poi';
+
+export interface LocationMetadata {
+  accuracy?: number;
+  timestamp?: Date;
+  source?: string;
 }

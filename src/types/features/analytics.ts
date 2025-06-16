@@ -1,520 +1,324 @@
 
-import { BaseEntity, Timestamps } from '../core/base';
+import { GeoCoordinates } from '../core/base';
 
-// Analytics and insights types
-export interface AnalyticsEvent extends BaseEntity, Timestamps {
-  type: EventType;
-  category: EventCategory;
-  action: string;
-  label?: string;
-  value?: number;
-  userId?: string;
-  sessionId?: string;
-  properties: EventProperties;
-  context: AnalyticsContext;
+// Analytics and reporting types
+export interface AnalyticsData {
+  timeframe: TimeFrame;
+  metrics: Metric[];
+  dimensions: Dimension[];
+  filters: Filter[];
 }
 
-export type EventType = 
-  | 'page_view' 
-  | 'user_action' 
-  | 'business_metric' 
-  | 'error' 
-  | 'performance';
-
-export type EventCategory = 
-  | 'navigation' 
-  | 'engagement' 
-  | 'conversion' 
-  | 'social' 
-  | 'search' 
-  | 'booking' 
-  | 'payment'
-  | 'chat'
-  | 'venue'
-  | 'content';
-
-export interface EventProperties {
-  page?: string;
-  component?: string;
-  feature?: string;
-  duration?: number;
-  location?: string;
-  venueId?: string;
-  eventId?: string;
-  amount?: number;
-  currency?: string;
-  custom?: Record<string, any>;
+export interface TimeFrame {
+  start: Date;
+  end: Date;
+  granularity: 'hour' | 'day' | 'week' | 'month' | 'year';
 }
 
-export interface AnalyticsContext {
-  userAgent: string;
-  platform: string;
-  device: DeviceInfo;
-  location: LocationContext;
-  referrer?: string;
-  utm?: UTMParameters;
-  session: SessionContext;
-}
-
-export interface DeviceInfo {
-  type: 'desktop' | 'mobile' | 'tablet';
-  os: string;
-  browser: string;
-  screenSize: string;
-  viewport: string;
-  touchCapable: boolean;
-}
-
-export interface LocationContext {
-  country?: string;
-  region?: string;
-  city?: string;
-  timezone: string;
-  coordinates?: GeoCoordinates;
-  ipAddress?: string;
-}
-
-export interface UTMParameters {
-  source?: string;
-  medium?: string;
-  campaign?: string;
-  term?: string;
-  content?: string;
-}
-
-export interface SessionContext {
-  sessionId: string;
-  isNewSession: boolean;
-  sessionStart: Date;
-  sessionDuration: number;
-  pageViews: number;
-  isAuthenticated: boolean;
-  userId?: string;
-}
-
-// Metrics and KPIs
-export interface MetricDefinition {
-  id: string;
+export interface Metric {
   name: string;
-  description: string;
-  type: MetricType;
-  category: MetricCategory;
-  calculation: MetricCalculation;
-  dimensions: string[];
-  filters?: MetricFilter[];
-  format: MetricFormat;
-}
-
-export type MetricType = 'count' | 'sum' | 'average' | 'percentage' | 'ratio' | 'unique_count';
-export type MetricCategory = 'traffic' | 'engagement' | 'conversion' | 'revenue' | 'retention';
-
-export interface MetricCalculation {
-  numerator: string;
-  denominator?: string;
-  aggregation: AggregationType;
-  timeWindow?: string;
-  filters?: string[];
-}
-
-export type AggregationType = 'sum' | 'count' | 'avg' | 'min' | 'max' | 'distinct';
-
-export interface MetricFilter {
-  field: string;
-  operator: FilterOperator;
-  value: any;
-}
-
-export type FilterOperator = 'eq' | 'ne' | 'gt' | 'gte' | 'lt' | 'lte' | 'in' | 'nin' | 'contains';
-
-export interface MetricFormat {
-  type: 'number' | 'percentage' | 'currency' | 'duration';
-  decimals?: number;
-  prefix?: string;
-  suffix?: string;
-  currency?: string;
-}
-
-export interface MetricValue {
-  metric: string;
   value: number;
-  formatted: string;
-  timestamp: Date;
-  dimensions?: Record<string, string>;
-  change?: MetricChange;
-  trend?: TrendData;
+  change?: number;
+  changeType?: 'increase' | 'decrease' | 'stable';
+  format: 'number' | 'percentage' | 'currency' | 'duration';
 }
 
-export interface MetricChange {
-  absolute: number;
-  percentage: number;
-  direction: 'up' | 'down' | 'flat';
-  period: string;
-  significance: 'low' | 'medium' | 'high';
-}
-
-export interface TrendData {
-  points: TrendPoint[];
-  direction: 'up' | 'down' | 'flat';
-  strength: number;
-  seasonality?: SeasonalityPattern;
-}
-
-export interface TrendPoint {
-  timestamp: Date;
-  value: number;
-}
-
-export interface SeasonalityPattern {
-  type: 'daily' | 'weekly' | 'monthly' | 'yearly';
-  pattern: number[];
-  confidence: number;
-}
-
-// Dashboards and reports
-export interface Dashboard {
-  id: string;
+export interface Dimension {
   name: string;
-  description?: string;
-  owner: string;
-  widgets: DashboardWidget[];
-  layout: DashboardLayout;
-  filters: DashboardFilter[];
-  sharing: SharingSettings;
-  schedule?: ReportSchedule;
-  metadata: DashboardMetadata;
+  values: DimensionValue[];
 }
 
-export interface DashboardWidget {
-  id: string;
-  type: WidgetType;
-  title: string;
-  description?: string;
-  metrics: string[];
-  visualization: VisualizationConfig;
-  filters?: DashboardFilter[];
-  position: WidgetPosition;
-  size: WidgetSize;
-  settings: WidgetSettings;
-}
-
-export type WidgetType = 
-  | 'metric' 
-  | 'chart' 
-  | 'table' 
-  | 'map' 
-  | 'funnel' 
-  | 'cohort' 
-  | 'text'
-  | 'goal';
-
-export interface VisualizationConfig {
-  chartType: ChartType;
-  axes?: AxisConfig[];
-  series?: SeriesConfig[];
-  colors?: string[];
-  formatting?: VisualizationFormatting;
-  interactions?: InteractionConfig;
-}
-
-export type ChartType = 
-  | 'line' 
-  | 'bar' 
-  | 'pie' 
-  | 'scatter' 
-  | 'area' 
-  | 'heatmap' 
-  | 'funnel'
-  | 'gauge'
-  | 'histogram';
-
-export interface AxisConfig {
-  dimension: string;
-  label?: string;
-  scale?: 'linear' | 'log' | 'time';
-  format?: MetricFormat;
-}
-
-export interface SeriesConfig {
-  metric: string;
-  label?: string;
-  type?: ChartType;
-  color?: string;
-  yAxis?: number;
-}
-
-export interface VisualizationFormatting {
-  showLegend: boolean;
-  showTooltips: boolean;
-  showDataLabels: boolean;
-  animation: boolean;
-  responsive: boolean;
-}
-
-export interface InteractionConfig {
-  zoom: boolean;
-  drill: boolean;
-  filter: boolean;
-  export: boolean;
-}
-
-export interface WidgetPosition {
-  x: number;
-  y: number;
-  z: number;
-}
-
-export interface WidgetSize {
-  width: number;
-  height: number;
-  minWidth?: number;
-  minHeight?: number;
-}
-
-export interface WidgetSettings {
-  refreshInterval?: number;
-  autoRefresh: boolean;
-  cacheDuration: number;
-  showTitle: boolean;
-  showBorder: boolean;
-  theme?: WidgetTheme;
-}
-
-export interface WidgetTheme {
-  background?: string;
-  text?: string;
-  accent?: string;
-  border?: string;
-}
-
-export interface DashboardLayout {
-  type: 'grid' | 'free' | 'flow';
-  columns: number;
-  rowHeight: number;
-  margin: number;
-  responsive: boolean;
-}
-
-export interface DashboardFilter {
-  id: string;
-  name: string;
-  type: FilterType;
-  field: string;
-  values: any[];
-  defaultValue?: any;
-  required: boolean;
-  cascading?: string[]; // dependent filters
-}
-
-export type FilterType = 
-  | 'date_range' 
-  | 'select' 
-  | 'multi_select' 
-  | 'text' 
-  | 'number_range'
-  | 'location';
-
-export interface SharingSettings {
-  isPublic: boolean;
-  allowEmbed: boolean;
-  allowExport: boolean;
-  password?: string;
-  expiration?: Date;
-  permissions: SharePermission[];
-}
-
-export interface SharePermission {
-  userId: string;
-  role: 'viewer' | 'editor' | 'owner';
-  grantedAt: Date;
-  grantedBy: string;
-}
-
-export interface ReportSchedule {
-  enabled: boolean;
-  frequency: ScheduleFrequency;
-  time?: string; // HH:mm
-  timezone: string;
-  recipients: string[];
-  format: ReportFormat;
-  filters?: DashboardFilter[];
-}
-
-export type ScheduleFrequency = 'daily' | 'weekly' | 'monthly' | 'quarterly';
-export type ReportFormat = 'pdf' | 'excel' | 'csv' | 'email' | 'slack';
-
-export interface DashboardMetadata {
-  createdAt: Date;
-  updatedAt: Date;
-  lastViewed?: Date;
-  viewCount: number;
-  tags: string[];
-  version: number;
-  isTemplate: boolean;
-  category?: string;
-}
-
-// A/B testing and experiments
-export interface Experiment extends BaseEntity, Timestamps {
-  name: string;
-  description: string;
-  hypothesis: string;
-  status: ExperimentStatus;
-  variants: ExperimentVariant[];
-  targeting: ExperimentTargeting;
-  metrics: ExperimentMetric[];
-  duration: ExperimentDuration;
-  results?: ExperimentResults;
-  settings: ExperimentSettings;
-}
-
-export type ExperimentStatus = 
-  | 'draft' 
-  | 'running' 
-  | 'paused' 
-  | 'completed' 
-  | 'cancelled';
-
-export interface ExperimentVariant {
-  id: string;
-  name: string;
-  description?: string;
-  allocation: number; // percentage
-  configuration: Record<string, any>;
-  isControl: boolean;
-}
-
-export interface ExperimentTargeting {
-  audience: AudienceDefinition;
-  allocation: number; // percentage of total traffic
-  filters: ExperimentFilter[];
-  exclusions?: ExperimentFilter[];
-}
-
-export interface AudienceDefinition {
-  type: 'all' | 'segment' | 'custom';
-  segmentId?: string;
-  criteria?: AudienceCriteria[];
-}
-
-export interface AudienceCriteria {
-  field: string;
-  operator: FilterOperator;
-  value: any;
-  type: 'user' | 'session' | 'event';
-}
-
-export interface ExperimentFilter {
-  field: string;
-  operator: FilterOperator;
-  value: any;
-}
-
-export interface ExperimentMetric {
-  id: string;
-  name: string;
-  type: 'primary' | 'secondary' | 'guardrail';
-  definition: MetricDefinition;
-  target?: MetricTarget;
-}
-
-export interface MetricTarget {
-  type: 'increase' | 'decrease' | 'change';
-  threshold: number;
-  unit: 'absolute' | 'percentage';
-}
-
-export interface ExperimentDuration {
-  type: 'time' | 'sample_size' | 'conversions';
-  value: number;
-  minimumDuration?: number;
-  maximumDuration?: number;
-}
-
-export interface ExperimentResults {
-  status: ResultStatus;
-  winner?: string;
-  confidence: number;
-  significance: number;
-  variants: VariantResults[];
-  metrics: MetricResults[];
-  summary: ResultSummary;
-}
-
-export type ResultStatus = 'no_winner' | 'winner_found' | 'inconclusive' | 'early_stop';
-
-export interface VariantResults {
-  variantId: string;
-  sampleSize: number;
-  conversionRate: number;
-  revenue?: number;
+export interface DimensionValue {
+  key: string;
+  value: string | number;
   metrics: Record<string, number>;
-  confidence: ConfidenceInterval;
 }
 
-export interface ConfidenceInterval {
-  lower: number;
-  upper: number;
-  level: number; // e.g., 95 for 95% confidence
+export interface Filter {
+  dimension: string;
+  operator: 'equals' | 'not_equals' | 'contains' | 'greater_than' | 'less_than' | 'between';
+  value: any;
 }
 
-export interface MetricResults {
-  metricId: string;
-  baseline: number;
-  variants: Record<string, number>;
-  lift: Record<string, number>;
-  significance: Record<string, number>;
-  pValue: Record<string, number>;
+// Venue analytics
+export interface VenueAnalytics {
+  venueId: string;
+  period: AnalyticsPeriod;
+  overview: VenueOverview;
+  visitors: VisitorAnalytics;
+  content: ContentAnalytics;
+  engagement: EngagementAnalytics;
+  revenue: RevenueAnalytics;
+  comparisons: ComparisonData[];
 }
 
-export interface ResultSummary {
-  recommendation: 'implement' | 'iterate' | 'stop';
-  reasoning: string;
-  impact: ImpactEstimate;
-  risks: string[];
-  nextSteps: string[];
+export type AnalyticsPeriod = 'day' | 'week' | 'month' | 'quarter' | 'year';
+
+export interface VenueOverview {
+  totalVisitors: number;
+  uniqueVisitors: number;
+  averageVisitDuration: number;
+  bounceRate: number;
+  conversionRate: number;
+  satisfaction: number;
 }
 
-export interface ImpactEstimate {
-  metric: string;
-  expectedLift: number;
-  potentialRevenue?: number;
-  confidenceLevel: number;
-  timeToImpact: number; // days
+export interface VisitorAnalytics {
+  demographics: VisitorDemographics;
+  behavior: VisitorBehavior;
+  acquisition: VisitorAcquisition;
+  retention: VisitorRetention;
 }
 
-export interface ExperimentSettings {
-  allowOverride: boolean;
-  persistAssignment: boolean;
-  trackingLevel: 'basic' | 'detailed' | 'full';
-  qualityAssurance: QualityAssuranceSettings;
-  alerts: ExperimentAlert[];
+export interface VisitorDemographics {
+  ageGroups: Record<string, number>;
+  genders: Record<string, number>;
+  locations: LocationData[];
+  interests: Record<string, number>;
 }
 
-export interface QualityAssuranceSettings {
-  sampleRatioMismatch: boolean;
-  trafficSplitValidation: boolean;
-  metricValidation: boolean;
-  fraudDetection: boolean;
+export interface LocationData {
+  coordinates: GeoCoordinates;
+  count: number;
+  city?: string;
+  region?: string;
+  country?: string;
 }
 
-export interface ExperimentAlert {
-  type: AlertType;
-  condition: AlertCondition;
-  threshold: number;
-  recipients: string[];
-  enabled: boolean;
+export interface VisitorBehavior {
+  peakHours: number[];
+  averageStayTime: number;
+  repeatVisitRate: number;
+  pathAnalysis: PathData[];
 }
 
-export type AlertType = 
-  | 'ssd' // sample size degradation
-  | 'metric_degradation' 
-  | 'traffic_imbalance' 
-  | 'significance_reached'
-  | 'duration_exceeded';
+export interface PathData {
+  from: string;
+  to: string;
+  count: number;
+  conversionRate: number;
+}
 
-export interface AlertCondition {
-  metric?: string;
-  operator: FilterOperator;
+export interface VisitorAcquisition {
+  sources: SourceData[];
+  campaigns: CampaignData[];
+  referrals: ReferralData[];
+}
+
+export interface SourceData {
+  source: string;
+  visitors: number;
+  conversions: number;
+  cost?: number;
+}
+
+export interface CampaignData {
+  name: string;
+  type: string;
+  reach: number;
+  engagement: number;
+  cost: number;
+  roi: number;
+}
+
+export interface ReferralData {
+  referrer: string;
+  visits: number;
+  quality: number;
+}
+
+export interface VisitorRetention {
+  returnRate: number;
+  frequency: FrequencyData[];
+  loyalty: LoyaltySegment[];
+}
+
+export interface FrequencyData {
+  visits: number;
+  userCount: number;
+  percentage: number;
+}
+
+export interface LoyaltySegment {
+  segment: string;
+  userCount: number;
   value: number;
-  duration?: number; // minutes
+  characteristics: string[];
+}
+
+export interface ContentAnalytics {
+  posts: PostAnalytics[];
+  media: MediaAnalytics;
+  engagement: ContentEngagementAnalytics;
+}
+
+export interface PostAnalytics {
+  postId: string;
+  views: number;
+  likes: number;
+  shares: number;
+  comments: number;
+  engagement: number;
+  reach: number;
+}
+
+export interface MediaAnalytics {
+  images: MediaMetrics;
+  videos: MediaMetrics;
+  totalStorage: number;
+  bandwidthUsage: number;
+}
+
+export interface MediaMetrics {
+  count: number;
+  views: number;
+  downloads: number;
+  averageEngagement: number;
+}
+
+export interface ContentEngagementAnalytics {
+  totalEngagement: number;
+  engagementRate: number;
+  topContent: TopContentItem[];
+  viralContent: ViralContentItem[];
+}
+
+export interface TopContentItem {
+  contentId: string;
+  title: string;
+  type: string;
+  engagement: number;
+  reach: number;
+}
+
+export interface ViralContentItem {
+  contentId: string;
+  viralScore: number;
+  shareVelocity: number;
+  peakReach: number;
+}
+
+export interface EngagementAnalytics {
+  overall: OverallEngagement;
+  byType: Record<string, EngagementMetrics>;
+  trends: EngagementTrend[];
+  sentiment: SentimentAnalytics;
+}
+
+export interface OverallEngagement {
+  rate: number;
+  total: number;
+  averagePerUser: number;
+  growthRate: number;
+}
+
+export interface EngagementMetrics {
+  likes: number;
+  comments: number;
+  shares: number;
+  saves: number;
+  clicks: number;
+}
+
+export interface EngagementTrend {
+  date: Date;
+  engagement: number;
+  reach: number;
+  impressions: number;
+}
+
+export interface SentimentAnalytics {
+  overall: number; // -1 to 1
+  distribution: SentimentDistribution;
+  trends: SentimentTrend[];
+  topics: SentimentTopic[];
+}
+
+export interface SentimentDistribution {
+  positive: number;
+  neutral: number;
+  negative: number;
+}
+
+export interface SentimentTrend {
+  date: Date;
+  sentiment: number;
+  volume: number;
+}
+
+export interface SentimentTopic {
+  topic: string;
+  sentiment: number;
+  mentions: number;
+  keywords: string[];
+}
+
+export interface RevenueAnalytics {
+  total: number;
+  bySource: RevenueSource[];
+  trends: RevenueTrend[];
+  forecasts: RevenueForecast[];
+}
+
+export interface RevenueSource {
+  source: string;
+  amount: number;
+  percentage: number;
+  growth: number;
+}
+
+export interface RevenueTrend {
+  date: Date;
+  revenue: number;
+  orders: number;
+  averageOrderValue: number;
+}
+
+export interface RevenueForecast {
+  date: Date;
+  predicted: number;
+  confidence: number;
+  factors: string[];
+}
+
+export interface ComparisonData {
+  metric: string;
+  current: number;
+  previous: number;
+  change: number;
+  benchmark?: number;
+}
+
+// Real-time analytics
+export interface RealTimeAnalytics {
+  timestamp: Date;
+  activeUsers: number;
+  currentEvents: LiveEvent[];
+  alerts: AnalyticsAlert[];
+  performance: PerformanceMetrics;
+}
+
+export interface LiveEvent {
+  type: string;
+  count: number;
+  trend: 'up' | 'down' | 'stable';
+  velocity: number;
+}
+
+export interface AnalyticsAlert {
+  id: string;
+  type: 'threshold' | 'anomaly' | 'trend';
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  message: string;
+  metric: string;
+  value: number;
+  threshold?: number;
+  triggeredAt: Date;
+}
+
+export interface PerformanceMetrics {
+  pageLoadTime: number;
+  serverResponseTime: number;
+  errorRate: number;
+  uptime: number;
 }

@@ -1,133 +1,119 @@
 
-import { BaseEntity, Address, MediaItem, Timestamps, EntityStatus } from '../core/base';
-import { User } from './user';
-import { Venue } from './venue';
+import { BaseEntity, Timestamps, GeoCoordinates, Address, MediaItem } from '../core/base';
+import { UserProfile } from './user';
 
-// Event-related types
+export type EventCategory = 'concert' | 'sports' | 'theater' | 'conference' | 'social' | 'cultural' | 'educational' | 'other';
+
 export interface Event extends BaseEntity, Timestamps {
   title: string;
-  description: string;
-  category: EventCategory;
-  subcategory?: string;
-  venue: Venue;
-  organizer: EventOrganizer;
-  schedule: EventSchedule;
-  ticketing: EventTicketing;
-  media: EventMedia;
-  attendees: EventAttendance;
-  promotion: EventPromotion;
-  settings: EventSettings;
-  status: EventStatus;
-  tags: string[];
-  vibes: string[];
-}
-
-export type EventCategory = 
-  | 'music' 
-  | 'comedy' 
-  | 'sports' 
-  | 'theater' 
-  | 'festival' 
-  | 'conference' 
-  | 'workshop' 
-  | 'nightlife' 
-  | 'food' 
-  | 'art' 
-  | 'culture' 
-  | 'other';
-
-export interface EventOrganizer {
-  type: 'user' | 'venue' | 'company';
-  id: string;
-  name: string;
-  avatar?: MediaItem;
-  contact: EventOrganizerContact;
-  verified: boolean;
-}
-
-export interface EventOrganizerContact {
-  email?: string;
-  phone?: string;
-  website?: string;
-  socialMedia?: Record<string, string>;
-}
-
-export interface EventSchedule {
-  startDate: Date;
-  endDate: Date;
-  timezone: string;
-  duration?: number; // in minutes
-  sessions?: EventSession[];
-  isRecurring: boolean;
-  recurrence?: EventRecurrence;
-  doors?: Date;
-  ageRestriction?: AgeRestriction;
-}
-
-export interface EventSession {
-  id: string;
-  title: string;
   description?: string;
+  category: EventCategory;
+  type: EventType;
+  status: EventStatus;
+  venueId?: string;
+  location: EventLocation;
   startTime: Date;
   endTime: Date;
-  location?: string; // specific location within venue
-  speakers?: EventSpeaker[];
-  capacity?: number;
+  pricing: EventPricing;
+  media: EventMedia;
+  participants: EventParticipant[];
+  maxCapacity?: number;
+  currentCapacity: number;
+  tags: string[];
+  promotions: EventPromotion[];
+  series?: EventSeries;
+  analytics: EventAnalytics;
+  organizer: UserProfile;
+  feedback: EventFeedback[];
+  notifications: EventNotification[];
 }
 
-export interface EventSpeaker {
+export interface EventType {
   id: string;
   name: string;
-  title?: string;
-  bio?: string;
-  avatar?: MediaItem;
-  socialMedia?: Record<string, string>;
+  category: EventCategory;
+  defaultDuration: number; // minutes
+  requiresTickets: boolean;
 }
 
-export interface EventRecurrence {
-  pattern: RecurrencePattern;
-  interval: number;
-  daysOfWeek?: number[];
-  endDate?: Date;
-  occurrences?: number;
-  exceptions?: Date[];
+export type EventStatus = 'draft' | 'published' | 'active' | 'completed' | 'cancelled' | 'postponed';
+
+export interface EventParticipant {
+  id: string;
+  userId: string;
+  eventId: string;
+  role: ParticipantRole;
+  status: ParticipantStatus;
+  registeredAt: Date;
+  ticketId?: string;
+  metadata?: ParticipantMetadata;
 }
 
-export type RecurrencePattern = 'daily' | 'weekly' | 'monthly' | 'yearly';
-export type AgeRestriction = 'all_ages' | '18+' | '21+' | 'custom';
+export type ParticipantRole = 'organizer' | 'performer' | 'staff' | 'attendee' | 'vip';
+export type ParticipantStatus = 'registered' | 'confirmed' | 'attended' | 'no_show' | 'cancelled';
 
-export interface EventTicketing {
-  isTicketed: boolean;
-  isFree: boolean;
-  tickets: TicketType[];
-  salesStart?: Date;
-  salesEnd?: Date;
-  maxTicketsPerPerson?: number;
-  refundPolicy?: string;
-  terms?: string;
-  provider?: TicketProvider;
+export interface ParticipantMetadata {
+  dietary?: string[];
+  accessibility?: string[];
+  preferences?: Record<string, any>;
 }
 
-export interface TicketType {
+export interface EventLocation {
+  venue?: {
+    id: string;
+    name: string;
+  };
+  address: Address;
+  coordinates: GeoCoordinates;
+  room?: string;
+  capacity?: number;
+  layout?: string;
+}
+
+export interface EventPricing {
+  currency: string;
+  tiers: TicketTier[];
+  fees: PricingFee[];
+  discounts: PricingDiscount[];
+  refundPolicy: RefundPolicy;
+}
+
+export interface TicketTier {
   id: string;
   name: string;
   description?: string;
   price: number;
-  currency: string;
   quantity: number;
   sold: number;
-  maxPerPerson?: number;
-  salesStart?: Date;
-  salesEnd?: Date;
-  benefits?: string[];
-  restrictions?: string[];
+  benefits: string[];
+  saleStart?: Date;
+  saleEnd?: Date;
 }
 
-export interface TicketProvider {
+export type TicketType = 'general' | 'vip' | 'early_bird' | 'group' | 'student' | 'senior';
+
+export interface PricingFee {
   name: string;
-  url?: string;
-  apiKey?: string;
-  configuration?: Record<string, any>;
+  type: 'fixed' | 'percentage';
+  amount: number;
+  description?: string;
+}
+
+export interface PricingDiscount {
+  code: string;
+  type: 'fixed' | 'percentage';
+  amount: number;
+  minQuantity?: number;
+  maxUses?: number;
+  validFrom?: Date;
+  validTo?: Date;
+}
+
+export interface RefundPolicy {
+  allowed: boolean;
+  cutoffHours: number;
+  feePercentage: number;
+  conditions: string[];
 }
 
 export interface EventMedia {
@@ -138,141 +124,211 @@ export interface EventMedia {
 }
 
 export interface LivestreamInfo {
-  isLive: boolean;
-  url?: string;
-  platform?: string;
+  url: string;
+  platform: string;
+  isActive: boolean;
   viewerCount?: number;
-  chatEnabled: boolean;
-  recordingEnabled: boolean;
 }
-
-export interface EventAttendance {
-  capacity?: number;
-  registered: number;
-  attending: number;
-  interested: number;
-  declined: number;
-  waitlist: number;
-  checkIns: number;
-  attendees: EventAttendee[];
-}
-
-export interface EventAttendee {
-  userId: string;
-  status: AttendeeStatus;
-  registeredAt: Date;
-  checkedInAt?: Date;
-  ticketId?: string;
-  metadata?: Record<string, any>;
-}
-
-export type AttendeeStatus = 
-  | 'registered' 
-  | 'attending' 
-  | 'interested' 
-  | 'declined' 
-  | 'waitlist' 
-  | 'checked_in' 
-  | 'no_show';
 
 export interface EventPromotion {
-  featured: boolean;
-  featuredUntil?: Date;
-  promoted: boolean;
-  promotionBudget?: number;
-  discounts: EventDiscount[];
-  affiliates: EventAffiliate[];
-  socialMedia: EventSocialPromotion;
+  id: string;
+  type: PromotionType;
+  title: string;
+  description: string;
+  startDate: Date;
+  endDate: Date;
+  conditions: PromotionCondition[];
+  usage: PromotionUsage;
+  isActive: boolean;
 }
 
-export interface EventDiscount {
-  id: string;
-  code: string;
-  type: 'percentage' | 'fixed' | 'bogo';
-  value: number;
+export type PromotionType = 'discount' | 'bundle' | 'early_bird' | 'group' | 'referral';
+
+export interface PromotionCondition {
+  field: string;
+  operator: string;
+  value: any;
+}
+
+export interface PromotionUsage {
   maxUses?: number;
-  used: number;
-  validFrom: Date;
-  validTo: Date;
-  applicableTickets: string[];
+  currentUses: number;
+  maxPerUser?: number;
+}
+
+export interface EventAnalytics {
+  views: number;
+  registrations: number;
+  attendance: number;
+  revenue: number;
+  conversionRate: number;
+  demographics: EventDemographics;
+  engagement: EngagementMetrics;
+  feedback: FeedbackSummary;
+}
+
+export interface EventDemographics {
+  ageGroups: Record<string, number>;
+  locations: Record<string, number>;
+  sources: Record<string, number>;
+}
+
+export interface EngagementMetrics {
+  pageViews: number;
+  timeOnPage: number;
+  shareCount: number;
+  commentCount: number;
+}
+
+export interface FeedbackSummary {
+  averageRating: number;
+  totalResponses: number;
+  categoryScores: Record<string, number>;
+}
+
+export interface EventFeedback {
+  id: string;
+  eventId: string;
+  userId: string;
+  rating: number;
+  comments?: string;
+  categories: Record<string, number>;
+  submittedAt: Date;
+  verified: boolean;
+}
+
+export interface EventSeries {
+  id: string;
+  name: string;
   description?: string;
+  pattern: RecurrencePattern;
+  events: string[]; // Event IDs
+  totalEvents: number;
+  isActive: boolean;
 }
 
-export interface EventAffiliate {
+export interface RecurrencePattern {
+  type: 'daily' | 'weekly' | 'monthly' | 'yearly' | 'custom';
+  interval: number;
+  endType: 'never' | 'date' | 'count';
+  endDate?: Date;
+  endCount?: number;
+  daysOfWeek?: number[];
+  monthlyType?: 'date' | 'day';
+}
+
+export interface EventNotification {
   id: string;
-  name: string;
-  commissionRate: number;
-  trackingCode: string;
-  sales: number;
-  earnings: number;
-  status: 'active' | 'inactive' | 'suspended';
+  eventId: string;
+  type: NotificationType;
+  recipients: NotificationRecipient[];
+  template: NotificationTemplate;
+  scheduledFor?: Date;
+  sentAt?: Date;
+  status: NotificationStatus;
 }
 
-export interface EventSocialPromotion {
-  autoPost: boolean;
-  platforms: string[];
-  hashtags: string[];
-  mentions: string[];
-  scheduledPosts: ScheduledPost[];
+export type NotificationType = 'reminder' | 'update' | 'cancellation' | 'confirmation' | 'feedback_request';
+
+export interface NotificationRecipient {
+  userId: string;
+  method: 'email' | 'sms' | 'push' | 'in_app';
+  status: 'pending' | 'sent' | 'delivered' | 'failed';
 }
 
-export interface ScheduledPost {
-  id: string;
-  platform: string;
+export interface NotificationTemplate {
+  subject: string;
   content: string;
-  media?: MediaItem[];
-  scheduledFor: Date;
-  posted: boolean;
-  postedAt?: Date;
+  variables: Record<string, string>;
 }
 
-export interface EventSettings {
-  visibility: EventVisibility;
-  registration: RegistrationSettings;
-  communication: CommunicationSettings;
-  analytics: EventAnalyticsSettings;
+export type NotificationStatus = 'draft' | 'scheduled' | 'sending' | 'sent' | 'failed';
+
+export interface VenueEvent {
+  eventId: string;
+  venueId: string;
+  setupTime: Date;
+  teardownTime: Date;
+  requirements: VenueRequirement[];
+  contact: EventContact;
+  status: VenueEventStatus;
 }
 
-export type EventVisibility = 'public' | 'private' | 'invite_only' | 'unlisted';
+export type VenueEventStatus = 'pending' | 'confirmed' | 'setup' | 'active' | 'teardown' | 'complete';
 
-export interface RegistrationSettings {
-  requireApproval: boolean;
-  allowWaitlist: boolean;
-  collectCustomFields: boolean;
-  customFields: RegistrationField[];
-  confirmationEmail: boolean;
-  reminderEmails: boolean;
+export interface VenueRequirement {
+  type: 'equipment' | 'staffing' | 'setup' | 'catering';
+  description: string;
+  quantity?: number;
+  notes?: string;
 }
 
-export interface RegistrationField {
-  id: string;
+export interface EventContact {
   name: string;
-  type: 'text' | 'email' | 'phone' | 'select' | 'checkbox' | 'textarea';
-  required: boolean;
-  options?: string[];
-  placeholder?: string;
+  role: string;
+  phone: string;
+  email: string;
 }
 
-export interface CommunicationSettings {
-  enableChat: boolean;
-  allowQuestions: boolean;
-  moderateQuestions: boolean;
-  enableUpdates: boolean;
-  allowFeedback: boolean;
+export interface EventBooking {
+  id: string;
+  eventId: string;
+  userId: string;
+  tickets: TicketBooking[];
+  totalAmount: number;
+  currency: string;
+  status: BookingStatus;
+  paymentMethod: string;
+  bookedAt: Date;
+  confirmationCode: string;
+  specialRequests?: string;
 }
 
-export interface EventAnalyticsSettings {
-  trackAttendance: boolean;
-  trackEngagement: boolean;
-  shareWithPartners: boolean;
-  generateReports: boolean;
+export type BookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'refunded' | 'checked_in';
+
+export interface TicketBooking {
+  tierId: string;
+  quantity: number;
+  unitPrice: number;
+  personalizations?: Record<string, string>;
 }
 
-export type EventStatus = 
-  | 'draft' 
-  | 'published' 
-  | 'live' 
-  | 'completed' 
-  | 'cancelled' 
-  | 'postponed' 
-  | 'sold_out';
+export interface BookingDetails {
+  attendees: AttendeeInfo[];
+  contactInfo: ContactInfo;
+  emergencyContact?: ContactInfo;
+  accessibility?: AccessibilityRequest[];
+}
+
+export interface AttendeeInfo {
+  name: string;
+  email?: string;
+  phone?: string;
+  dietaryRestrictions?: string[];
+  ticketType: string;
+}
+
+export interface ContactInfo {
+  name: string;
+  email: string;
+  phone: string;
+}
+
+export interface AccessibilityRequest {
+  type: string;
+  description: string;
+  priority: 'low' | 'medium' | 'high';
+}
+
+export interface TicketTransfer {
+  id: string;
+  originalBookingId: string;
+  fromUserId: string;
+  toUserId: string;
+  ticketIds: string[];
+  transferredAt: Date;
+  status: TransferStatus;
+  reason?: string;
+}
+
+export type TransferStatus = 'pending' | 'completed' | 'cancelled' | 'expired';

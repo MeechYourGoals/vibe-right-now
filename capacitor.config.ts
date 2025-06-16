@@ -20,6 +20,13 @@ const config: CapacitorConfig = {
     backgroundColor: '#121212'
   },
   plugins: {
+    // Camera plugin configuration
+    Camera: {
+      permissions: [
+        'camera',
+        'photos'
+      ]
+    },
     // Add this configuration for Auth0 redirects
     CapacitorCustomTabs: {
       allowsThirdPartyCookies: true

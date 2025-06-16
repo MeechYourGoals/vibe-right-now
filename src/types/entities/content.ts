@@ -1,165 +1,192 @@
 
-import { BaseEntity, MediaItem, Timestamps, ContentType, VisibilityLevel } from '../core/base';
-import { User } from './user';
-import { Venue } from './venue';
+import { BaseEntity, Timestamps, MediaItem, GeoCoordinates, VisibilityLevel, ContentType } from '../core/base';
+import { UserProfile } from './user';
 
-// Content-related types
-export interface Post extends BaseEntity, Timestamps {
-  content: string;
-  contentType: ContentType;
-  author: User;
-  venue?: Venue;
-  location?: PostLocation;
-  media: MediaItem[];
+export interface Content extends BaseEntity, Timestamps {
+  title?: string;
+  body: string;
+  type: ContentType;
+  author: UserProfile;
   visibility: VisibilityLevel;
-  engagement: PostEngagement;
-  metadata: PostMetadata;
+  status: ContentStatus;
+  media: MediaItem[];
   tags: string[];
-  vibes: string[];
-  status: PostStatus;
+  categories: string[];
+  location?: ContentLocation;
+  engagement: ContentEngagement;
+  moderation: ContentModeration;
+  metadata: ContentMetadata;
 }
 
-export interface PostLocation {
-  venueId?: string;
-  venueName?: string;
+export type ContentStatus = 'draft' | 'published' | 'archived' | 'deleted' | 'pending_review';
+
+export interface ContentLocation {
   coordinates?: GeoCoordinates;
+  venueId?: string;
   address?: string;
-  checkedIn: boolean;
+  city?: string;
+  country?: string;
 }
 
-export interface PostEngagement {
-  likes: number;
-  comments: number;
-  shares: number;
-  saves: number;
+export interface ContentEngagement {
   views: number;
-  vibeScore: number;
-  interactions: PostInteraction[];
+  likes: number;
+  shares: number;
+  comments: number;
+  saves: number;
+  reactions: ContentReaction[];
 }
 
-export interface PostInteraction {
+export interface ContentReaction {
+  id: string;
   userId: string;
-  type: InteractionType;
-  timestamp: Date;
-  metadata?: Record<string, any>;
+  type: ReactionType;
+  createdAt: Date;
 }
 
-export type InteractionType = 'like' | 'comment' | 'share' | 'save' | 'view' | 'vibe';
-export type PostStatus = 'draft' | 'published' | 'archived' | 'deleted' | 'flagged';
+export type ReactionType = 'like' | 'love' | 'laugh' | 'wow' | 'sad' | 'angry';
 
-export interface PostMetadata {
-  isSponsored: boolean;
-  isPinned: boolean;
-  isVenuePost: boolean;
-  expiresAt?: Date;
-  editHistory: PostEdit[];
-  moderationStatus: ModerationStatus;
-  analytics?: PostAnalytics;
+export interface ContentModeration {
+  status: ModerationStatus;
+  flags: ModerationFlag[];
+  reviewedBy?: string;
+  reviewedAt?: Date;
+  notes?: string;
 }
 
-export interface PostEdit {
-  timestamp: Date;
-  userId: string;
-  changes: string;
+export type ModerationStatus = 'pending' | 'approved' | 'rejected' | 'flagged';
+
+export interface ModerationFlag {
+  type: FlagType;
+  reason: string;
+  reportedBy: string;
+  reportedAt: Date;
+  severity: FlagSeverity;
+}
+
+export type FlagType = 'spam' | 'harassment' | 'inappropriate' | 'misinformation' | 'copyright' | 'other';
+export type FlagSeverity = 'low' | 'medium' | 'high' | 'critical';
+
+export interface ContentMetadata {
+  featured: boolean;
+  pinned: boolean;
+  trending: boolean;
+  sponsored: boolean;
+  originalSource?: string;
+  editHistory: ContentEdit[];
+  seo?: SEOMetadata;
+}
+
+export interface ContentEdit {
+  editedBy: string;
+  editedAt: Date;
+  changes: string[];
   reason?: string;
 }
 
-export type ModerationStatus = 'pending' | 'approved' | 'rejected' | 'flagged' | 'reviewed';
-
-export interface PostAnalytics {
-  impressions: number;
-  reach: number;
-  clickThrough: number;
-  engagementRate: number;
-  demographics: Record<string, number>;
-  devices: Record<string, number>;
-  sources: Record<string, number>;
+export interface SEOMetadata {
+  metaTitle?: string;
+  metaDescription?: string;
+  keywords: string[];
+  canonicalUrl?: string;
 }
 
+// Comment system
 export interface Comment extends BaseEntity, Timestamps {
-  postId: string;
-  author: User;
-  content: string;
-  parentCommentId?: string;
-  replies: Comment[];
-  engagement: CommentEngagement;
+  contentId: string;
+  parentId?: string; // For nested comments
+  author: UserProfile;
+  body: string;
   status: CommentStatus;
-  metadata: CommentMetadata;
+  engagement: CommentEngagement;
+  moderation: ContentModeration;
 }
+
+export type CommentStatus = 'published' | 'pending' | 'hidden' | 'deleted';
 
 export interface CommentEngagement {
   likes: number;
   replies: number;
-  reports: number;
+  reactions: ContentReaction[];
 }
 
-export type CommentStatus = 'published' | 'deleted' | 'flagged' | 'hidden';
-
-export interface CommentMetadata {
-  isEdited: boolean;
-  editHistory: CommentEdit[];
-  moderationStatus: ModerationStatus;
-  mentionedUsers: string[];
+// Content collections
+export interface Collection extends BaseEntity, Timestamps {
+  name: string;
+  description?: string;
+  owner: UserProfile;
+  visibility: VisibilityLevel;
+  contentIds: string[];
+  tags: string[];
+  featured: boolean;
+  collaborators: CollectionCollaborator[];
 }
 
-export interface CommentEdit {
-  timestamp: Date;
-  originalContent: string;
-  reason?: string;
-}
-
-// Story types (temporary content)
-export interface Story extends BaseEntity, Timestamps {
-  author: User;
-  content: StoryContent;
-  venue?: Venue;
-  location?: PostLocation;
-  engagement: StoryEngagement;
-  metadata: StoryMetadata;
-  status: StoryStatus;
-}
-
-export interface StoryContent {
-  type: 'image' | 'video' | 'text';
-  media?: MediaItem;
-  text?: string;
-  backgroundColor?: string;
-  stickers?: StorySticker[];
-  duration: number; // in seconds
-}
-
-export interface StorySticker {
-  type: 'location' | 'mention' | 'poll' | 'question' | 'music';
-  position: { x: number; y: number };
-  data: Record<string, any>;
-}
-
-export interface StoryEngagement {
-  views: number;
-  reactions: StoryReaction[];
-  replies: number;
-}
-
-export interface StoryReaction {
+export interface CollectionCollaborator {
   userId: string;
-  type: string; // emoji or reaction type
-  timestamp: Date;
+  role: CollaboratorRole;
+  permissions: CollaboratorPermission[];
+  addedAt: Date;
 }
 
-export type StoryStatus = 'active' | 'expired' | 'archived' | 'deleted';
+export type CollaboratorRole = 'editor' | 'contributor' | 'viewer';
+export type CollaboratorPermission = 'read' | 'write' | 'delete' | 'share' | 'moderate';
 
-export interface StoryMetadata {
-  expiresAt: Date;
-  isHighlight: boolean;
-  highlightId?: string;
-  viewedBy: string[];
-  analytics?: StoryAnalytics;
+// Content scheduling
+export interface ContentSchedule {
+  id: string;
+  contentId: string;
+  publishAt: Date;
+  unpublishAt?: Date;
+  timezone: string;
+  status: ScheduleStatus;
+  createdBy: string;
 }
 
-export interface StoryAnalytics {
+export type ScheduleStatus = 'scheduled' | 'published' | 'failed' | 'cancelled';
+
+// Content analytics
+export interface ContentAnalytics {
+  contentId: string;
+  period: AnalyticsPeriod;
+  metrics: ContentMetrics;
+  demographics: ContentDemographics;
+  performance: ContentPerformance;
+}
+
+export type AnalyticsPeriod = 'hour' | 'day' | 'week' | 'month' | 'year';
+
+export interface ContentMetrics {
   impressions: number;
   reach: number;
-  completionRate: number;
-  exitRate: number;
-  replayRate: number;
+  engagement: number;
+  clickThrough: number;
+  conversionRate: number;
+  averageTimeSpent: number;
+}
+
+export interface ContentDemographics {
+  ageGroups: Record<string, number>;
+  genders: Record<string, number>;
+  locations: Record<string, number>;
+  devices: Record<string, number>;
+}
+
+export interface ContentPerformance {
+  hourlyViews: number[];
+  dailyViews: number[];
+  topReferrers: ReferrerData[];
+  searchTerms: SearchTermData[];
+}
+
+export interface ReferrerData {
+  source: string;
+  visits: number;
+  percentage: number;
+}
+
+export interface SearchTermData {
+  term: string;
+  count: number;
+  ranking: number;
 }
