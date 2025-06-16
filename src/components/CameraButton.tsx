@@ -1,7 +1,5 @@
 
 import { useState } from "react";
-import { Camera } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
@@ -12,12 +10,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SmartCameraButton from "./mobile/SmartCameraButton";
 import { useCameraAccess } from "@/hooks/useCameraAccess";
-import { Loader2 } from "lucide-react";
+import CameraTab from "./camera/CameraTab";
+import GalleryTab from "./camera/GalleryTab";
+import LocationInput from "./camera/LocationInput";
+import PinRewardsSection from "./camera/PinRewardsSection";
 
 const CameraButton = () => {
   const { toast } = useToast();
@@ -45,7 +45,6 @@ const CameraButton = () => {
         });
       }
     } else {
-      // Fallback for web - show mock camera interface
       toast({
         title: "Camera Not Available",
         description: "Camera access is only available on mobile devices. Please use the gallery option.",
@@ -64,7 +63,6 @@ const CameraButton = () => {
         });
       }
     } else {
-      // Fallback for web - mock gallery selection
       toast({
         title: "Gallery Not Available",
         description: "Gallery access is only available on mobile devices.",
@@ -108,6 +106,11 @@ const CameraButton = () => {
     }, 1500);
   };
 
+  const handleLocationChange = (value: string) => {
+    setLocation(value);
+    setLocationVerified(false);
+  };
+
   return (
     <>
       <SmartCameraButton onClick={handleCameraClick} />
@@ -127,137 +130,39 @@ const CameraButton = () => {
               <TabsTrigger value="gallery">Gallery</TabsTrigger>
             </TabsList>
             
-            <TabsContent value="camera" className="space-y-4">
-              <div className="bg-muted/30 rounded-lg p-2 aspect-video flex items-center justify-center relative">
-                {capturedPhoto ? (
-                  <img src={capturedPhoto} alt="Captured" className="w-full h-full object-cover rounded" />
-                ) : (
-                  <>
-                    <Camera className="h-12 w-12 opacity-50" />
-                    <span className="ml-2 text-sm text-muted-foreground">
-                      {isCapacitorNative ? "Tap to capture" : "Camera Preview"}
-                    </span>
-                  </>
-                )}
-                {isCapacitorNative && !capturedPhoto && (
-                  <Button
-                    onClick={handleCameraCapture}
-                    disabled={isLoading}
-                    className="absolute inset-0 bg-transparent hover:bg-black/10 border-0"
-                  >
-                    {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-                  </Button>
-                )}
-              </div>
-              {isCapacitorNative && !capturedPhoto && (
-                <Button onClick={handleCameraCapture} disabled={isLoading} className="w-full">
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Capturing...
-                    </>
-                  ) : (
-                    <>
-                      <Camera className="h-4 w-4 mr-2" />
-                      Take Photo
-                    </>
-                  )}
-                </Button>
-              )}
-            </TabsContent>
+            <CameraTab
+              capturedPhoto={capturedPhoto}
+              isCapacitorNative={isCapacitorNative}
+              isLoading={isLoading}
+              onCameraCapture={handleCameraCapture}
+            />
             
-            <TabsContent value="gallery" className="space-y-4">
-              <div className="bg-muted/30 rounded-lg p-4 aspect-video flex items-center justify-center">
-                {capturedPhoto ? (
-                  <img src={capturedPhoto} alt="Selected" className="w-full h-full object-cover rounded" />
-                ) : (
-                  <div className="text-center">
-                    <Camera className="h-12 w-12 opacity-50 mx-auto mb-2" />
-                    <span className="text-sm text-muted-foreground">
-                      {isCapacitorNative ? "Select from gallery" : "Gallery access on mobile only"}
-                    </span>
-                  </div>
-                )}
-              </div>
-              {isCapacitorNative && (
-                <Button onClick={handleGallerySelect} disabled={isLoading} className="w-full">
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Selecting...
-                    </>
-                  ) : (
-                    "Select from Gallery"
-                  )}
-                </Button>
-              )}
-              {!isCapacitorNative && (
-                <p className="text-xs text-muted-foreground text-center">
-                  Gallery uploads available on mobile app
-                </p>
-              )}
-            </TabsContent>
+            <GalleryTab
+              capturedPhoto={capturedPhoto}
+              isCapacitorNative={isCapacitorNative}
+              isLoading={isLoading}
+              onGallerySelect={handleGallerySelect}
+            />
           </Tabs>
           
           <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="location">Location</Label>
-              <div className="flex gap-2">
-                <Input 
-                  id="location"
-                  placeholder="Search for a venue..."
-                  className="bg-background/50"
-                  value={location}
-                  onChange={(e) => {
-                    setLocation(e.target.value);
-                    setLocationVerified(false);
-                  }}
-                />
-                <Button 
-                  variant="outline"
-                  disabled={!location.trim() || isCheckingLocation}
-                  onClick={verifyLocation}
-                  className={isCheckingLocation ? "opacity-50" : ""}
-                >
-                  {isCheckingLocation ? "Checking..." : "Verify"}
-                </Button>
-              </div>
-              {locationVerified && (
-                <p className="text-xs text-green-500 flex items-center">
-                  <span className="bg-green-500 h-2 w-2 rounded-full mr-1"></span>
-                  Location verified - You're within range!
-                </p>
-              )}
-            </div>
+            <LocationInput
+              location={location}
+              isCheckingLocation={isCheckingLocation}
+              locationVerified={locationVerified}
+              onLocationChange={handleLocationChange}
+              onVerifyLocation={verifyLocation}
+            />
             
             <Input 
               placeholder="Add a caption (optional)"
               className="bg-background/50"
             />
             
-            <div className="flex items-start space-x-2">
-              <Checkbox 
-                id="pinForRewards" 
-                checked={availableToPin} 
-                onCheckedChange={(checked) => {
-                  if (typeof checked === 'boolean') {
-                    setAvailableToPin(checked);
-                  }
-                }}
-              />
-              <div>
-                <Label 
-                  htmlFor="pinForRewards" 
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center"
-                >
-                  Pin for Rewards 
-                  <span className="ml-2 reward-badge">3x Points</span>
-                </Label>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Make your posts available for longer than 90 days, Eligible for more points and Rewards if a Venue pins your post to their feed
-                </p>
-              </div>
-            </div>
+            <PinRewardsSection
+              availableToPin={availableToPin}
+              onAvailableToPinChange={setAvailableToPin}
+            />
           </div>
           
           <DialogFooter className="flex-col sm:flex-row gap-2">

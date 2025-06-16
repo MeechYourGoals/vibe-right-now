@@ -1,4 +1,3 @@
-
 import { GeoCoordinates } from '../core/base';
 
 // Advertising and marketing types
@@ -49,6 +48,7 @@ export interface TargetingOptions {
     min: number;
     max: number;
     weight: number;
+    hypeLevel?: number; // Added for compatibility
   };
 }
 
@@ -173,6 +173,11 @@ export interface AdFormat {
   id: string;
   name: string;
   platform: Platform;
+  type?: string; // Added for compatibility
+  description?: string; // Added for compatibility
+  placement?: string; // Added for compatibility
+  duration?: number; // Added for compatibility
+  kpis?: string[]; // Added for compatibility
   dimensions: AdDimensions[];
   specifications: FormatSpecifications;
   bestPractices: string[];

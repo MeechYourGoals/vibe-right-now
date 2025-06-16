@@ -16,6 +16,9 @@ export * from './features/analytics';
 export * from './features/advertising';
 export * from './features/sentiment';
 
+// Re-export specific types for compatibility
+export type { Post, Location, User } from './core/base';
+
 // Chat types (with selective exports to avoid conflicts)
 export type {
   ChatSession,

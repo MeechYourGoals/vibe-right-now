@@ -5,8 +5,10 @@ import { UserProfile } from './user';
 export interface Content extends BaseEntity, Timestamps {
   title?: string;
   body: string;
+  content?: string; // Added for compatibility
   type: ContentType;
   author: UserProfile;
+  user?: UserProfile; // Added for compatibility
   visibility: VisibilityLevel;
   status: ContentStatus;
   media: MediaItem[];
@@ -91,12 +93,17 @@ export interface SEOMetadata {
   canonicalUrl?: string;
 }
 
-// Comment system
+// Comment system with all required compatibility properties
 export interface Comment extends BaseEntity, Timestamps {
   contentId: string;
+  postId?: string; // Added for compatibility
   parentId?: string; // For nested comments
   author: UserProfile;
+  user?: UserProfile; // Added for compatibility
   body: string;
+  content?: string; // Added for compatibility
+  timestamp?: Date; // Added for compatibility
+  vibedHere?: boolean; // Added for compatibility
   status: CommentStatus;
   engagement: CommentEngagement;
   moderation: ContentModeration;
