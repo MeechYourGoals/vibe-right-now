@@ -51,12 +51,16 @@ const BusinessHours = ({ venue }: BusinessHoursProps) => {
       
       {isExpanded && venue.hours && (
         <div className="mt-2 text-sm grid grid-cols-2 gap-1">
-          {Object.entries(venue.hours).filter(([key]) => key !== 'isOpenNow' && key !== 'timezone').map(([day, hours]) => (
-            <div key={day} className="flex justify-between pr-2">
-              <span className="text-muted-foreground capitalize">{day}:</span>
-              <span>{formatHours(hours)}</span>
-            </div>
-          ))}
+          {Object.entries(venue.hours).filter(([key]) => key !== 'isOpenNow' && key !== 'timezone').map(([day, hours]) => {
+            // Handle both string and object formats
+            const hourDisplay = typeof hours === 'string' ? hours : formatHours(hours);
+            return (
+              <div key={day} className="flex justify-between pr-2">
+                <span className="text-muted-foreground capitalize">{day}:</span>
+                <span>{hourDisplay}</span>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

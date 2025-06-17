@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Play, Pause, Download, Volume2, Clock } from 'lucide-react';
+import { Play, Pause, Download, Volume2, Clock, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import { useUserSubscription } from "@/hooks/useUserSubscription";
 
@@ -20,11 +20,9 @@ interface AudioOverviewCardProps {
 const getMockAudioData = (venueId: string, venueName: string) => {
   const mockData = {
     "1": {
-      audioUrl: "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav", // Placeholder - will use ElevenLabs
       scriptText: `Welcome to ${venueName}, the iconic desert music festival that transforms the California desert into a musical paradise. From electronic beats that pulse through the night to indie rock that energizes the afternoon crowds, this festival offers an unparalleled experience. Attendees consistently praise the incredible artist lineup and the magical desert atmosphere, though many suggest arriving early to secure better parking and bringing extra shade for those sunny California days. Check VRN for live vibes and real-time crowd updates!`
     },
     "3": {
-      audioUrl: "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav", // Placeholder - will use ElevenLabs
       scriptText: `Welcome to ${venueName}, where artisan coffee meets community in the heart of the city. This local favorite consistently delivers exceptional single-origin brews and expert latte art that'll make your Instagram pop. Coffee enthusiasts rave about the knowledgeable baristas and cozy atmosphere, though some note that seating fills up fast during morning rush. Whether you're a coffee connoisseur or just need your daily caffeine fix, this spot delivers quality in every cup. Check VRN for live vibes and current crowd levels!`
     }
   };
@@ -53,7 +51,6 @@ const AudioOverviewCard: React.FC<AudioOverviewCardProps> = ({
   const showMockData = isPremium && isDemoVenue;
 
   useEffect(() => {
-    // Listen for subscription changes
     const handleSubscriptionChange = () => {
       setMockAudioUrl(null);
       setIsPlaying(false);
@@ -94,34 +91,29 @@ const AudioOverviewCard: React.FC<AudioOverviewCardProps> = ({
     
     if (mockData) {
       try {
-        // Use ElevenLabs to generate real audio
-        const response = await fetch('/api/generate-audio', {
+        const response = await fetch('/supabase/functions/v1/generate-audio', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
             text: mockData.scriptText,
-            voice: 'Sarah' // Use a pleasant voice for venue summaries
+            voice: 'Sarah'
           })
         });
 
         if (response.ok) {
           const data = await response.json();
-          // Create audio URL from base64
           const audioBlob = new Blob([Uint8Array.from(atob(data.audioContent), c => c.charCodeAt(0))], { type: 'audio/mpeg' });
           const url = URL.createObjectURL(audioBlob);
           setMockAudioUrl(url);
           toast.success('Audio summary generated!');
         } else {
-          // Fallback to mock URL if ElevenLabs fails
-          setMockAudioUrl(mockData.audioUrl);
-          toast.success('Audio summary loaded!');
+          toast.error('Audio generation failed, showing placeholder');
         }
       } catch (error) {
         console.error('Audio generation failed:', error);
-        setMockAudioUrl(mockData.audioUrl);
-        toast.success('Audio summary loaded!');
+        toast.error('Audio generation failed, showing placeholder');
       }
     }
     
@@ -140,14 +132,6 @@ const AudioOverviewCard: React.FC<AudioOverviewCardProps> = ({
       } else {
         await audio.play();
         setIsPlaying(true);
-        
-        // Analytics event
-        if (typeof gtag !== 'undefined') {
-          gtag('event', 'audio_overview_play', {
-            venue_id: venueId,
-            venue_name: venueName
-          });
-        }
       }
     } catch (error) {
       console.error('Audio playback error:', error);
@@ -177,23 +161,26 @@ const AudioOverviewCard: React.FC<AudioOverviewCardProps> = ({
 
   if (!isPremium) {
     return (
-      <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20">
+      <Card className="bg-zinc-900 border-zinc-800 text-white h-full">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Volume2 className="h-5 w-5 text-purple-600" />
-            AI Audio Overview
-            <Badge variant="outline" className="bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300">
+            <Volume2 className="h-5 w-5 text-purple-400" />
+            Audio Overviews
+            <Badge variant="outline" className="bg-purple-900 text-purple-300 border-purple-700">
               Premium Feature
             </Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground mb-4">
-            Get AI-powered audio summaries of venue reviews and vibes. Perfect for discovering places on-the-go.
-          </p>
-          <Button disabled className="w-full">
-            Upgrade to Premium to Access Audio Summaries
-          </Button>
+          <div className="text-center py-6">
+            <Lock className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+            <p className="text-zinc-400 mb-4">
+              Upgrade to premium to access audio summaries
+            </p>
+            <Button disabled className="w-full">
+              Upgrade to Premium
+            </Button>
+          </div>
         </CardContent>
       </Card>
     );
@@ -201,23 +188,25 @@ const AudioOverviewCard: React.FC<AudioOverviewCardProps> = ({
 
   if (!isDemoVenue) {
     return (
-      <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20">
+      <Card className="bg-zinc-900 border-zinc-800 text-white h-full">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Volume2 className="h-5 w-5 text-purple-600" />
-            AI Audio Overview
-            <Badge variant="outline" className="bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300">
+            <Volume2 className="h-5 w-5 text-purple-400" />
+            Audio Overviews
+            <Badge variant="outline" className="bg-purple-900 text-purple-300 border-purple-700">
               Premium
             </Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground mb-4">
-            Premium feature available for select venues
-          </p>
-          <Button disabled className="w-full">
-            Coming Soon
-          </Button>
+          <div className="text-center py-6">
+            <p className="text-zinc-400 mb-4">
+              Premium feature available for select venues
+            </p>
+            <Button disabled className="w-full">
+              Coming Soon
+            </Button>
+          </div>
         </CardContent>
       </Card>
     );
@@ -226,12 +215,12 @@ const AudioOverviewCard: React.FC<AudioOverviewCardProps> = ({
   const audioSrc = mockAudioUrl || audioUrl;
 
   return (
-    <Card className="bg-zinc-900 border-zinc-800 text-white">
+    <Card className="bg-zinc-900 border-zinc-800 text-white h-full">
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Volume2 className="h-5 w-5 text-purple-400" />
-            AI Audio Overview
+            Audio Overviews
             <Badge variant="outline" className="bg-purple-900 text-purple-300 border-purple-700">
               Premium
             </Badge>
@@ -246,14 +235,14 @@ const AudioOverviewCard: React.FC<AudioOverviewCardProps> = ({
       </CardHeader>
       <CardContent className="space-y-4">
         {!audioSrc ? (
-          <div className="text-center py-4">
+          <div className="text-center py-6">
             <p className="text-zinc-400 mb-4">
               Audio coming soon – summarising reviews now 🌀
             </p>
             <Button 
               onClick={generateMockAudio} 
               disabled={isLoading}
-              className="bg-purple-600 hover:bg-purple-700"
+              className="bg-purple-600 hover:bg-purple-700 w-full"
             >
               {isLoading ? 'Generating...' : 'Generate Audio Summary'}
             </Button>

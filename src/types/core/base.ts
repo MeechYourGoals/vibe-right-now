@@ -1,3 +1,4 @@
+
 // Base types for the entire application
 export interface BaseEntity {
   id: string;
@@ -56,7 +57,9 @@ export interface BusinessHours {
     open: string;
     close: string;
     closed?: boolean;
-  };
+  } | string;
+  isOpenNow?: boolean;
+  timezone?: string;
 }
 
 // Location interface with all required properties
@@ -78,6 +81,9 @@ export interface Location extends BaseEntity {
   business_status?: string; // Added for compatibility
   vibes?: string[]; // Added for compatibility
   google_maps_url?: string; // Added for compatibility
+  price_level?: number; // Added for compatibility
+  phone?: string; // Added for compatibility
+  website?: string; // Added for compatibility
 }
 
 export interface LocationMetadata {
@@ -132,4 +138,9 @@ export interface VenueInsights {
     period: string;
     growth: number;
   }[];
+  visitorCount?: number;
+  visitors?: number;
+  checkInCount?: number;
+  receiptUploads?: number;
+  discountRedemptions?: number;
 }

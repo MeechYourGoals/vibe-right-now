@@ -18,16 +18,12 @@ const CommentList = ({ postId, commentsCount }: CommentListProps) => {
   const [newComment, setNewComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Filter comments for this specific post
   let postComments = mockComments.filter(comment => comment.postId === postId);
   
-  // If no comments found in mock data, generate example comments
   if (postComments.length === 0 && commentsCount > 0) {
-    // Generate 2-3 example comments
     const commentCount = Math.min(commentsCount, Math.floor(Math.random() * 2) + 2);
     const exampleComments: Comment[] = [];
     
-    // Regular comment
     exampleComments.push({
       id: `example-${postId}-1`,
       contentId: postId,
@@ -47,7 +43,6 @@ const CommentList = ({ postId, commentsCount }: CommentListProps) => {
       moderation: { status: 'approved' as const, flags: [] }
     });
     
-    // "Vibed Here" comment
     exampleComments.push({
       id: `example-${postId}-2`,
       contentId: postId,
@@ -67,7 +62,6 @@ const CommentList = ({ postId, commentsCount }: CommentListProps) => {
       moderation: { status: 'approved' as const, flags: [] }
     });
     
-    // Add a third comment if needed
     if (commentCount > 2) {
       exampleComments.push({
         id: `example-${postId}-3`,
@@ -97,11 +91,9 @@ const CommentList = ({ postId, commentsCount }: CommentListProps) => {
     
     setIsSubmitting(true);
     
-    // Simulate API call
     setTimeout(() => {
       setNewComment("");
       setIsSubmitting(false);
-      // In a real app, we would add the new comment to the list
     }, 500);
   };
 

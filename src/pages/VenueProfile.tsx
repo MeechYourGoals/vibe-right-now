@@ -1,3 +1,4 @@
+
 import { useState, useMemo, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Minimize } from "lucide-react";
@@ -5,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { mockLocations, mockPosts, mockComments } from "@/mock/data";
 import CameraButton from "@/components/CameraButton";
 import Header from "@/components/Header";
-import { Comment, Post, Location as VenueLocation } from "@/types"; // Import as VenueLocation to avoid conflicts
+import { Comment, Post, Location as VenueLocation } from "@/types";
 import GoogleMapComponent from "@/components/map/google/GoogleMap";
 import { generateBusinessHours } from "@/utils/businessHoursUtils";
 import { 
@@ -20,10 +21,8 @@ import VenueMap from "@/components/venue/VenueMap";
 import VenuePostsContent from "@/components/venue/VenuePostsContent";
 import WaitTimeDisplay from "@/components/venue/WaitTimeDisplay";
 import WaitTimeUpdater from "@/components/venue/WaitTimeUpdater";
-import ExternalReviewAnalysis from "@/components/venue/ExternalReviewAnalysis";
+import PremiumFeaturesContainer from "@/components/venue/PremiumFeaturesContainer";
 import { useAuth0 } from "@auth0/auth0-react";
-import AudioOverviewCard from "@/components/venue/AudioOverviewCard";
-import { AudioSummaryService } from "@/services/audioSummaryService";
 import { useUserSubscription } from "@/hooks/useUserSubscription";
 
 // Define an extended Post type that includes venue-specific properties
@@ -41,33 +40,18 @@ const VenueProfile = () => {
   const [selectedDays, setSelectedDays] = useState<number[]>([]);
   const [isVenueOwner, setIsVenueOwner] = useState(false);
   const [subscriptionTier, setSubscriptionTier] = useState<'standard' | 'plus' | 'premium' | 'pro'>('standard');
-  const [audioSummary, setAudioSummary] = useState(null);
-  const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
   
   const { user, isAuthenticated } = useAuth0();
   const { canAccessFeature } = useUserSubscription();
   
   const venue = mockLocations.find(location => location.id === id);
   
-  // Check if user has premium features
-  const isUserPremium = canAccessFeature('premium');
-  
   useEffect(() => {
-    // Check if the user is authenticated and is the owner of the venue
-    // This would normally be a server-side check
     if (isAuthenticated && user && venue) {
-      // Simulating a check - in production this would compare venue owner email with user email
-      // or check a venues_owners table in the database
       if (user.email === 'owner@example.com') {
         setIsVenueOwner(true);
-        
-        // Simulating subscription tier check - in production would fetch from database
         setSubscriptionTier('pro');
       }
-      
-      // Simulate checking user's premium status
-      // In production, this would check the user's subscription from the database
-      setIsUserPremium(true); // Set to true for demo purposes
     }
   }, [isAuthenticated, user, venue]);
   
@@ -82,10 +66,8 @@ const VenueProfile = () => {
     );
   }, [id]);
 
-  // Generate venue-specific posts for each day of the week
   const generatedVenuePosts = useMemo(() => {
     if (!venue) return [];
-    // Create posts and cast the result to Post[]
     return createDaySpecificVenuePosts(venue.id, venue.type) as unknown as Post[];
   }, [venue]);
 
@@ -102,14 +84,12 @@ const VenueProfile = () => {
   const allPosts = useMemo(() => {
     if (!venue) return [];
     
-    // Filter venue-specific posts by selected days
     const filteredVenuePosts = selectedDays.length === 0 
       ? generatedVenuePosts 
       : generatedVenuePosts.filter(post => 
           selectedDays.includes(new Date(post.timestamp).getDay())
         );
     
-    // Combine and sort all posts by timestamp
     const combined = [...filteredPosts, ...filteredVenuePosts].sort((a, b) => 
       new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     );
@@ -143,50 +123,6 @@ const VenueProfile = () => {
   
   const clearDayFilters = () => {
     setSelectedDays([]);
-  };
-
-  useEffect(() => {
-    // Load audio summary for premium users
-    if (isUserPremium && venue) {
-      loadAudioSummary();
-    }
-  }, [venue, isUserPremium]);
-
-  const loadAudioSummary = async () => {
-    if (!venue) return;
-    
-    try {
-      const summary = await AudioSummaryService.getAudioSummary(venue.id);
-      setAudioSummary(summary);
-    } catch (error) {
-      console.error('Error loading audio summary:', error);
-    }
-  };
-
-  const handleGenerateAudio = async () => {
-    if (!venue) return;
-    
-    setIsGeneratingAudio(true);
-    try {
-      // Get sentiment summary for context
-      const sentimentText = "Mixed positive reviews"; // This would come from your sentiment analysis
-      const reviewsText = "Sample review content"; // This would come from aggregated reviews
-      
-      const summary = await AudioSummaryService.generateAudioSummary(
-        venue.id, 
-        venue.name, 
-        reviewsText, 
-        sentimentText
-      );
-      
-      if (summary) {
-        setAudioSummary(summary);
-      }
-    } catch (error) {
-      console.error('Error generating audio:', error);
-    } finally {
-      setIsGeneratingAudio(false);
-    }
   };
 
   if (!venue) {
@@ -236,12 +172,10 @@ const VenueProfile = () => {
           <div className="glass-effect p-6 rounded-xl mb-6">
             <VenueProfileHeader venue={venue} onMapExpand={toggleMapExpansion} />
             
-            {/* Display wait time info if available */}
             <WaitTimeDisplay venueId={venue.id} className="mb-4" />
             
             <VenueMap venue={venue} onExpand={toggleMapExpansion} />
             
-            {/* Show wait time updater for venue owners with pro subscription */}
             {isVenueOwner && (
               <div className="mt-4">
                 <WaitTimeUpdater 
@@ -252,23 +186,10 @@ const VenueProfile = () => {
             )}
           </div>
           
-          {/* External Review Analysis for Premium Users */}
-          <ExternalReviewAnalysis 
+          <PremiumFeaturesContainer 
             venueId={venue.id}
             venueName={venue.name}
           />
-          
-          {/* AI Audio Overview - Premium Feature */}
-          <div className="mb-6">
-            <AudioOverviewCard
-              venueId={venue.id}
-              venueName={venue.name}
-              audioUrl={audioSummary?.audio_url}
-              scriptText={audioSummary?.script_text}
-              generatedAt={audioSummary?.generated_at}
-              onGenerateAudio={handleGenerateAudio}
-            />
-          </div>
           
           <DayOfWeekFilter 
             selectedDays={selectedDays} 
