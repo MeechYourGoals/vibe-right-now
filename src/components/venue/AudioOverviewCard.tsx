@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Play, Pause, Download, Volume2, Clock } from 'lucide-react';
 import { toast } from 'sonner';
+import { useUserSubscription } from "@/hooks/useUserSubscription";
 
 interface AudioOverviewCardProps {
   venueId: string;
@@ -12,9 +13,24 @@ interface AudioOverviewCardProps {
   audioUrl?: string;
   scriptText?: string;
   generatedAt?: string;
-  isUserPremium: boolean;
   onGenerateAudio?: () => void;
 }
+
+// Mock audio and script data for demo venues
+const getMockAudioData = (venueId: string, venueName: string) => {
+  const mockData = {
+    "1": {
+      audioUrl: "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav", // Placeholder - will use ElevenLabs
+      scriptText: `Welcome to ${venueName}, the iconic desert music festival that transforms the California desert into a musical paradise. From electronic beats that pulse through the night to indie rock that energizes the afternoon crowds, this festival offers an unparalleled experience. Attendees consistently praise the incredible artist lineup and the magical desert atmosphere, though many suggest arriving early to secure better parking and bringing extra shade for those sunny California days. Check VRN for live vibes and real-time crowd updates!`
+    },
+    "3": {
+      audioUrl: "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav", // Placeholder - will use ElevenLabs
+      scriptText: `Welcome to ${venueName}, where artisan coffee meets community in the heart of the city. This local favorite consistently delivers exceptional single-origin brews and expert latte art that'll make your Instagram pop. Coffee enthusiasts rave about the knowledgeable baristas and cozy atmosphere, though some note that seating fills up fast during morning rush. Whether you're a coffee connoisseur or just need your daily caffeine fix, this spot delivers quality in every cup. Check VRN for live vibes and current crowd levels!`
+    }
+  };
+  
+  return mockData[venueId] || null;
+};
 
 const AudioOverviewCard: React.FC<AudioOverviewCardProps> = ({
   venueId,
@@ -22,14 +38,31 @@ const AudioOverviewCard: React.FC<AudioOverviewCardProps> = ({
   audioUrl,
   scriptText,
   generatedAt,
-  isUserPremium,
   onGenerateAudio
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [mockAudioUrl, setMockAudioUrl] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const { canAccessFeature } = useUserSubscription();
+  
+  const isPremium = canAccessFeature('premium');
+  const isDemoVenue = venueId === "1" || venueId === "3";
+  const showMockData = isPremium && isDemoVenue;
+
+  useEffect(() => {
+    // Listen for subscription changes
+    const handleSubscriptionChange = () => {
+      setMockAudioUrl(null);
+      setIsPlaying(false);
+      setCurrentTime(0);
+    };
+
+    window.addEventListener('subscriptionTierChanged', handleSubscriptionChange);
+    return () => window.removeEventListener('subscriptionTierChanged', handleSubscriptionChange);
+  }, []);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -51,11 +84,54 @@ const AudioOverviewCard: React.FC<AudioOverviewCardProps> = ({
       audio.removeEventListener('loadedmetadata', updateDuration);
       audio.removeEventListener('ended', handleEnded);
     };
-  }, [audioUrl]);
+  }, [mockAudioUrl]);
+
+  const generateMockAudio = async () => {
+    if (!showMockData) return;
+    
+    setIsLoading(true);
+    const mockData = getMockAudioData(venueId, venueName);
+    
+    if (mockData) {
+      try {
+        // Use ElevenLabs to generate real audio
+        const response = await fetch('/api/generate-audio', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            text: mockData.scriptText,
+            voice: 'Sarah' // Use a pleasant voice for venue summaries
+          })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          // Create audio URL from base64
+          const audioBlob = new Blob([Uint8Array.from(atob(data.audioContent), c => c.charCodeAt(0))], { type: 'audio/mpeg' });
+          const url = URL.createObjectURL(audioBlob);
+          setMockAudioUrl(url);
+          toast.success('Audio summary generated!');
+        } else {
+          // Fallback to mock URL if ElevenLabs fails
+          setMockAudioUrl(mockData.audioUrl);
+          toast.success('Audio summary loaded!');
+        }
+      } catch (error) {
+        console.error('Audio generation failed:', error);
+        setMockAudioUrl(mockData.audioUrl);
+        toast.success('Audio summary loaded!');
+      }
+    }
+    
+    setIsLoading(false);
+  };
 
   const handlePlayPause = async () => {
     const audio = audioRef.current;
-    if (!audio || !audioUrl) return;
+    const audioSrc = mockAudioUrl || audioUrl;
+    if (!audio || !audioSrc) return;
 
     try {
       if (isPlaying) {
@@ -80,10 +156,11 @@ const AudioOverviewCard: React.FC<AudioOverviewCardProps> = ({
   };
 
   const handleDownload = () => {
-    if (!audioUrl || !isUserPremium) return;
+    const audioSrc = mockAudioUrl || audioUrl;
+    if (!audioSrc || !isPremium) return;
     
     const link = document.createElement('a');
-    link.href = audioUrl;
+    link.href = audioSrc;
     link.download = `${venueName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_audio_summary.mp3`;
     document.body.appendChild(link);
     link.click();
@@ -98,7 +175,7 @@ const AudioOverviewCard: React.FC<AudioOverviewCardProps> = ({
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  if (!isUserPremium) {
+  if (!isPremium) {
     return (
       <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20">
         <CardHeader>
@@ -122,6 +199,32 @@ const AudioOverviewCard: React.FC<AudioOverviewCardProps> = ({
     );
   }
 
+  if (!isDemoVenue) {
+    return (
+      <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Volume2 className="h-5 w-5 text-purple-600" />
+            AI Audio Overview
+            <Badge variant="outline" className="bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300">
+              Premium
+            </Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground mb-4">
+            Premium feature available for select venues
+          </p>
+          <Button disabled className="w-full">
+            Coming Soon
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const audioSrc = mockAudioUrl || audioUrl;
+
   return (
     <Card className="bg-zinc-900 border-zinc-800 text-white">
       <CardHeader>
@@ -142,20 +245,18 @@ const AudioOverviewCard: React.FC<AudioOverviewCardProps> = ({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {!audioUrl ? (
+        {!audioSrc ? (
           <div className="text-center py-4">
             <p className="text-zinc-400 mb-4">
               Audio coming soon – summarising reviews now 🌀
             </p>
-            {onGenerateAudio && (
-              <Button 
-                onClick={onGenerateAudio} 
-                disabled={isLoading}
-                className="bg-purple-600 hover:bg-purple-700"
-              >
-                {isLoading ? 'Generating...' : 'Generate Audio Summary'}
-              </Button>
-            )}
+            <Button 
+              onClick={generateMockAudio} 
+              disabled={isLoading}
+              className="bg-purple-600 hover:bg-purple-700"
+            >
+              {isLoading ? 'Generating...' : 'Generate Audio Summary'}
+            </Button>
           </div>
         ) : (
           <>
@@ -185,10 +286,10 @@ const AudioOverviewCard: React.FC<AudioOverviewCardProps> = ({
               </div>
             </div>
 
-            {audioUrl && (
+            {audioSrc && (
               <audio
                 ref={audioRef}
-                src={audioUrl}
+                src={audioSrc}
                 className="w-full"
                 preload="metadata"
               />

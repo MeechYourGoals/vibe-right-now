@@ -1,4 +1,3 @@
-
 // Base types for the entire application
 export interface BaseEntity {
   id: string;
@@ -103,6 +102,9 @@ export interface Post extends BaseEntity {
   visibility: VisibilityLevel;
   likes?: number; // Added for compatibility
   timestamp?: Date; // Added for compatibility
+  isVenuePost?: boolean; // Added for venue posts
+  isPinned?: boolean; // Added for pinned posts
+  isExternalPost?: boolean; // Added for external posts
 }
 
 // User interface

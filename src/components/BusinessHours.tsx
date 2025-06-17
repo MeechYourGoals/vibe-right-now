@@ -51,34 +51,12 @@ const BusinessHours = ({ venue }: BusinessHoursProps) => {
       
       {isExpanded && venue.hours && (
         <div className="mt-2 text-sm grid grid-cols-2 gap-1">
-          <div className="flex justify-between pr-2">
-            <span className="text-muted-foreground">Monday:</span>
-            <span>{formatHours(venue.hours.monday)}</span>
-          </div>
-          <div className="flex justify-between pr-2">
-            <span className="text-muted-foreground">Tuesday:</span>
-            <span>{formatHours(venue.hours.tuesday)}</span>
-          </div>
-          <div className="flex justify-between pr-2">
-            <span className="text-muted-foreground">Wednesday:</span>
-            <span>{formatHours(venue.hours.wednesday)}</span>
-          </div>
-          <div className="flex justify-between pr-2">
-            <span className="text-muted-foreground">Thursday:</span>
-            <span>{formatHours(venue.hours.thursday)}</span>
-          </div>
-          <div className="flex justify-between pr-2">
-            <span className="text-muted-foreground">Friday:</span>
-            <span>{formatHours(venue.hours.friday)}</span>
-          </div>
-          <div className="flex justify-between pr-2">
-            <span className="text-muted-foreground">Saturday:</span>
-            <span>{formatHours(venue.hours.saturday)}</span>
-          </div>
-          <div className="flex justify-between pr-2">
-            <span className="text-muted-foreground">Sunday:</span>
-            <span>{formatHours(venue.hours.sunday)}</span>
-          </div>
+          {Object.entries(venue.hours).filter(([key]) => key !== 'isOpenNow' && key !== 'timezone').map(([day, hours]) => (
+            <div key={day} className="flex justify-between pr-2">
+              <span className="text-muted-foreground capitalize">{day}:</span>
+              <span>{formatHours(hours)}</span>
+            </div>
+          ))}
         </div>
       )}
     </div>

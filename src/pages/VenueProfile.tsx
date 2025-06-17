@@ -24,6 +24,7 @@ import ExternalReviewAnalysis from "@/components/venue/ExternalReviewAnalysis";
 import { useAuth0 } from "@auth0/auth0-react";
 import AudioOverviewCard from "@/components/venue/AudioOverviewCard";
 import { AudioSummaryService } from "@/services/audioSummaryService";
+import { useUserSubscription } from "@/hooks/useUserSubscription";
 
 // Define an extended Post type that includes venue-specific properties
 interface ExtendedPost extends Post {
@@ -40,13 +41,16 @@ const VenueProfile = () => {
   const [selectedDays, setSelectedDays] = useState<number[]>([]);
   const [isVenueOwner, setIsVenueOwner] = useState(false);
   const [subscriptionTier, setSubscriptionTier] = useState<'standard' | 'plus' | 'premium' | 'pro'>('standard');
-  const [isUserPremium, setIsUserPremium] = useState(false);
   const [audioSummary, setAudioSummary] = useState(null);
   const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
   
   const { user, isAuthenticated } = useAuth0();
+  const { canAccessFeature } = useUserSubscription();
   
   const venue = mockLocations.find(location => location.id === id);
+  
+  // Check if user has premium features
+  const isUserPremium = canAccessFeature('premium');
   
   useEffect(() => {
     // Check if the user is authenticated and is the owner of the venue
@@ -252,7 +256,6 @@ const VenueProfile = () => {
           <ExternalReviewAnalysis 
             venueId={venue.id}
             venueName={venue.name}
-            isUserPremium={isUserPremium}
           />
           
           {/* AI Audio Overview - Premium Feature */}
@@ -263,7 +266,6 @@ const VenueProfile = () => {
               audioUrl={audioSummary?.audio_url}
               scriptText={audioSummary?.script_text}
               generatedAt={audioSummary?.generated_at}
-              isUserPremium={isUserPremium}
               onGenerateAudio={handleGenerateAudio}
             />
           </div>

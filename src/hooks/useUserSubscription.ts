@@ -31,6 +31,11 @@ export const useUserSubscription = () => {
 
     setSubscription(updatedSubscription);
     localStorage.setItem('userSubscription', JSON.stringify(updatedSubscription));
+    
+    // Trigger a custom event to notify other components
+    window.dispatchEvent(new CustomEvent('subscriptionTierChanged', { 
+      detail: { tier: newTier } 
+    }));
   };
 
   const hasFeature = (featureName: keyof typeof TIER_FEATURES.free): boolean => {

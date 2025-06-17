@@ -1,42 +1,69 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ExternalLink, Lock, Sparkles } from "lucide-react";
-import { useAuth0 } from "@auth0/auth0-react";
+import { useUserSubscription } from "@/hooks/useUserSubscription";
 
 interface ExternalReviewAnalysisProps {
   venueId: string;
   venueName: string;
-  isUserPremium?: boolean;
 }
+
+// Mock data for demo venues
+const getMockAnalysis = (venueId: string, venueName: string) => {
+  const mockAnalyses = {
+    "1": `Based on reviews across multiple platforms, ${venueName} receives consistently positive feedback for its atmosphere and world-class music lineup, with customers frequently praising the "incredible desert vibes" and "unforgettable performances." 
+
+Service quality appears strong during the festival, with staff described as "helpful" and "well-organized" in 89% of recent reviews. However, some attendees note challenges with food vendor wait times and parking logistics.
+
+The most commonly mentioned positives include: exceptional artist lineup, stunning desert backdrop, and vibrant festival atmosphere. Areas for improvement based on customer feedback include: faster food service, improved parking solutions, and more shade areas during peak sun hours.`,
+    
+    "3": `Based on reviews across multiple platforms, ${venueName} receives consistently positive feedback for its atmosphere and coffee quality, with customers frequently praising the "cozy artisan vibe" and "perfect blend profiles." 
+
+Service quality appears to be a strong point, with staff described as "knowledgeable" and "passionate about coffee" in 92% of recent reviews. However, some customers note that seating can be limited during peak morning hours.
+
+The most commonly mentioned positives include: exceptional single-origin coffee, skilled baristas, and Instagram-worthy latte art. Areas for improvement based on customer feedback include: expanded seating area, faster service during rush hours, and more pastry options.`
+  };
+  
+  return mockAnalyses[venueId] || null;
+};
 
 const ExternalReviewAnalysis: React.FC<ExternalReviewAnalysisProps> = ({
   venueId,
-  venueName,
-  isUserPremium = false
+  venueName
 }) => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState<string | null>(null);
-  const { isAuthenticated } = useAuth0();
+  const { canAccessFeature, tier } = useUserSubscription();
+  const isPremium = canAccessFeature('premium');
+
+  // Check if this is a demo venue (Coachella Valley or Artisan Coffee House)
+  const isDemoVenue = venueId === "1" || venueId === "3";
+  const showMockData = isPremium && isDemoVenue;
+
+  useEffect(() => {
+    // Listen for subscription changes
+    const handleSubscriptionChange = () => {
+      setAnalysis(null); // Reset analysis when subscription changes
+    };
+
+    window.addEventListener('subscriptionTierChanged', handleSubscriptionChange);
+    return () => window.removeEventListener('subscriptionTierChanged', handleSubscriptionChange);
+  }, []);
 
   const handleAnalyzeReviews = async () => {
-    if (!isUserPremium || !isAuthenticated) return;
+    if (!showMockData) return;
     
     setIsAnalyzing(true);
     
-    // Simulate analysis - in production this would call your backend
+    // Simulate analysis delay
     setTimeout(() => {
-      setAnalysis(`
-        Based on reviews across multiple platforms, ${venueName} receives consistently positive feedback for its atmosphere and ambiance, with customers frequently praising the "cozy vibe" and "perfect lighting for dates." 
-
-        Service quality appears to be a strong point, with staff described as "friendly" and "attentive" in 87% of recent reviews. However, some customers note that service can be slower during peak hours on weekends.
-
-        The most commonly mentioned positives include: exceptional coffee quality, Instagram-worthy interior design, and comfortable seating areas. Areas for improvement based on customer feedback include: faster service during busy periods and expanded food menu options.
-      `);
+      const mockAnalysis = getMockAnalysis(venueId, venueName);
+      setAnalysis(mockAnalysis);
       setIsAnalyzing(false);
-    }, 3000);
+    }, 2000);
   };
 
   return (
@@ -46,7 +73,7 @@ const ExternalReviewAnalysis: React.FC<ExternalReviewAnalysisProps> = ({
           <CardTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-purple-500" />
             External Review Analysis
-            {isUserPremium ? (
+            {isPremium ? (
               <Badge variant="outline" className="bg-purple-100 text-purple-700">
                 Premium
               </Badge>
@@ -59,25 +86,25 @@ const ExternalReviewAnalysis: React.FC<ExternalReviewAnalysisProps> = ({
         </div>
       </CardHeader>
       <CardContent>
-        {!isAuthenticated ? (
+        {!isPremium ? (
           <div className="text-center py-6">
             <Lock className="mx-auto h-12 w-12 text-gray-400 mb-4" />
             <p className="text-muted-foreground mb-4">
-              Sign in to access AI-powered review analysis
+              Upgrade to premium to chat with Review Summaries
             </p>
             <Button disabled>
-              Sign In Required
+              Upgrade to Premium
             </Button>
           </div>
-        ) : !isUserPremium ? (
+        ) : !isDemoVenue ? (
           <div className="text-center py-6">
-            <Lock className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+            <Sparkles className="mx-auto h-12 w-12 text-purple-500 mb-4" />
             <p className="text-muted-foreground mb-4">
-              Get AI-powered analysis of reviews from Yelp, Google, TripAdvisor and more
+              Premium feature available for select venues
             </p>
             <Button disabled className="bg-gray-400">
               <Lock className="mr-2 h-4 w-4" />
-              Upgrade to Premium
+              Coming Soon
             </Button>
           </div>
         ) : (
