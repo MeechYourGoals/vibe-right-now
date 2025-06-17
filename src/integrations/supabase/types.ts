@@ -280,6 +280,39 @@ export type Database = {
           },
         ]
       }
+      venue_audio_summaries: {
+        Row: {
+          audio_url: string
+          duration_seconds: number | null
+          file_size_bytes: number | null
+          generated_at: string
+          id: string
+          script_text: string
+          updated_at: string
+          venue_id: string
+        }
+        Insert: {
+          audio_url: string
+          duration_seconds?: number | null
+          file_size_bytes?: number | null
+          generated_at?: string
+          id?: string
+          script_text: string
+          updated_at?: string
+          venue_id: string
+        }
+        Update: {
+          audio_url?: string
+          duration_seconds?: number | null
+          file_size_bytes?: number | null
+          generated_at?: string
+          id?: string
+          script_text?: string
+          updated_at?: string
+          venue_id?: string
+        }
+        Relationships: []
+      }
       venue_sentiment_analysis: {
         Row: {
           created_at: string

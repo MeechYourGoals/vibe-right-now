@@ -1,435 +1,341 @@
+
 import { GeoCoordinates } from '../core/base';
 
-// Advertising and marketing types
-export interface Campaign {
+// Core advertising types
+export interface AdCampaign {
   id: string;
   name: string;
-  type: CampaignType;
+  description?: string;
   status: CampaignStatus;
   budget: CampaignBudget;
-  targeting: TargetingOptions;
-  creative: CreativeAssets;
   schedule: CampaignSchedule;
-  performance: CampaignPerformance;
-  analytics: CampaignAnalytics;
+  targeting: TargetingOptions;
+  creatives: AdCreative[];
+  metrics: CampaignMetrics;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-export type CampaignType = 'brand_awareness' | 'engagement' | 'traffic' | 'conversions' | 'app_installs';
 export type CampaignStatus = 'draft' | 'active' | 'paused' | 'completed' | 'archived';
 
 export interface CampaignBudget {
-  type: 'daily' | 'lifetime';
-  amount: number;
+  total: number;
+  daily?: number;
   currency: string;
-  spent: number;
-  remaining: number;
+  bidStrategy: 'automatic' | 'manual';
+  maxCpc?: number;
 }
-
-export interface TargetingOptions {
-  demographics: {
-    gender: 'male' | 'female' | 'all' | 'other';
-    ageRange?: [number, number];
-    interests?: string[];
-    behaviors?: string[];
-    location?: string[];
-  };
-  geographic: {
-    countries?: string[];
-    regions?: string[];
-    cities?: string[];
-    radius?: number;
-    coordinates?: GeoCoordinates;
-  };
-  interests: string[];
-  behaviors: string[];
-  customAudiences: string[];
-  lookalikes: LookalikeAudience[];
-  momentScore: {
-    min: number;
-    max: number;
-    weight: number;
-    hypeLevel?: number; // Added for compatibility
-  };
-}
-
-export interface LookalikeAudience {
-  id: string;
-  name: string;
-  sourceAudience: string;
-  similarity: number;
-  size: number;
-}
-
-export interface CreativeAssets {
-  primary: CreativeAsset;
-  variants: CreativeAsset[];
-  adCopy: AdCopy[];
-  callToAction: CallToAction;
-}
-
-export interface CreativeAsset {
-  id: string;
-  type: 'image' | 'video' | 'carousel' | 'collection';
-  url: string;
-  dimensions: {
-    width: number;
-    height: number;
-  };
-  duration?: number;
-  fileSize: number;
-}
-
-export interface AdCopy {
-  headline: string;
-  description: string;
-  displayUrl?: string;
-  variants: string[];
-}
-
-export interface CallToAction {
-  type: CTAType;
-  text: string;
-  url?: string;
-  deepLink?: string;
-}
-
-export type CTAType = 'learn_more' | 'shop_now' | 'sign_up' | 'download' | 'book_now' | 'call_now' | 'get_directions';
 
 export interface CampaignSchedule {
   startDate: Date;
   endDate?: Date;
   timezone: string;
   dayParting?: DayPartingRule[];
-  frequencyCap?: FrequencyCap;
 }
 
 export interface DayPartingRule {
-  days: number[];
-  startHour: number;
-  endHour: number;
-  bidModifier: number;
+  days: number[]; // 0-6 (Sunday-Saturday)
+  startHour: number; // 0-23
+  endHour: number; // 0-23
+  bidModifier?: number; // Percentage modifier
 }
 
-export interface FrequencyCap {
-  impressions: number;
-  timeWindow: 'hour' | 'day' | 'week';
+// Targeting system
+export interface TargetingOptions {
+  demographics: Demographics;
+  geographic: GeographicTargeting;
+  behaviors: BehavioralTargeting;
+  interests: InterestTargeting;
+  contextual: ContextualTargeting;
+  momentScore: MomentScoring;
 }
 
-export interface CampaignPerformance {
-  impressions: number;
-  clicks: number;
-  conversions: number;
-  spend: number;
-  ctr: number;
-  cpc: number;
-  cpm: number;
-  cpa: number;
-  roas: number;
+export interface Demographics {
+  gender: 'all' | 'male' | 'female' | 'other';
+  ageRange?: [number, number];
+  interests?: string[];
+  behaviors?: string[];
+  location?: string[];
 }
 
-export interface CampaignAnalytics {
-  reach: number;
-  frequency: number;
-  engagement: EngagementMetrics;
-  demographics: DemographicBreakdown;
-  placements: PlacementPerformance[];
-  timeline: TimelineMetrics[];
+export interface GeographicTargeting {
+  countries?: string[];
+  regions?: string[];
+  cities?: string[];
+  radius?: number; // km
+  coordinates?: GeoCoordinates;
 }
 
-export interface EngagementMetrics {
-  likes: number;
-  shares: number;
-  comments: number;
-  saves: number;
-  videoViews: number;
-  videoCompletions: number;
+export interface BehavioralTargeting {
+  venueTypes: string[];
+  visitFrequency: 'high' | 'medium' | 'low';
+  spendingHabits: 'premium' | 'moderate' | 'budget';
+  socialActivity: 'high' | 'medium' | 'low';
+  timePreferences: string[];
 }
 
-export interface DemographicBreakdown {
-  age: Record<string, number>;
-  gender: Record<string, number>;
-  location: Record<string, number>;
-  interests: Record<string, number>;
+export interface InterestTargeting {
+  categories: string[];
+  keywords: string[];
+  competitors?: string[];
+  lookalike?: LookalikeAudience;
 }
 
-export interface PlacementPerformance {
-  placement: string;
-  impressions: number;
-  clicks: number;
-  spend: number;
-  performance: number;
+export interface ContextualTargeting {
+  venueCategories: string[];
+  eventTypes: string[];
+  weatherConditions?: string[];
+  timeOfDay?: string[];
+  dayOfWeek?: string[];
 }
 
-export interface TimelineMetrics {
-  date: Date;
-  impressions: number;
-  clicks: number;
-  spend: number;
-  conversions: number;
+export interface LookalikeAudience {
+  sourceVenueId: string;
+  similarity: number; // 1-10
+  size: 'narrow' | 'balanced' | 'broad';
 }
 
-// Ad formats and specifications
+// Moment-based targeting
+export interface MomentScoring {
+  min: number;
+  max: number;
+  weight: number;
+  hypeLevel?: number;
+}
+
+// Creative management
+export interface AdCreative {
+  id: string;
+  name: string;
+  format: AdFormat;
+  assets: CreativeAsset[];
+  copy: AdCopy;
+  callToAction: CallToAction;
+  status: CreativeStatus;
+  performance: CreativePerformance;
+}
+
 export interface AdFormat {
   id: string;
   name: string;
-  platform: Platform;
-  type?: string; // Added for compatibility
-  description?: string; // Added for compatibility
-  placement?: string; // Added for compatibility
-  duration?: number; // Added for compatibility
-  kpis?: string[]; // Added for compatibility
-  dimensions: AdDimensions[];
-  specifications: FormatSpecifications;
-  bestPractices: string[];
-}
-
-export type Platform = 'facebook' | 'instagram' | 'google' | 'tiktok' | 'twitter' | 'linkedin' | 'pinterest';
-
-export interface AdDimensions {
-  width: number;
-  height: number;
-  aspectRatio: string;
-  recommended: boolean;
-}
-
-export interface FormatSpecifications {
-  fileTypes: string[];
-  maxFileSize: number;
-  maxDuration?: number;
-  textLimits: TextLimits;
-  audioRequired?: boolean;
-}
-
-export interface TextLimits {
-  headline?: number;
-  description?: number;
-  displayUrl?: number;
-}
-
-// Audience management
-export interface Audience {
-  id: string;
-  name: string;
-  type: AudienceType;
-  size: number;
-  criteria: AudienceCriteria;
-  performance: AudiencePerformance;
-  lastUpdated: Date;
-}
-
-export type AudienceType = 'saved' | 'custom' | 'lookalike' | 'retargeting' | 'behavioral';
-
-export interface AudienceCriteria {
-  demographics: TargetingOptions['demographics'];
-  interests: string[];
-  behaviors: string[];
-  locations: LocationCriteria[];
-  devices: DeviceCriteria[];
-  connections: ConnectionCriteria[];
-}
-
-export interface LocationCriteria {
-  type: 'country' | 'region' | 'city' | 'postal_code' | 'radius';
-  value: string;
-  radius?: number;
-  include: boolean;
-}
-
-export interface DeviceCriteria {
-  platforms: ('mobile' | 'desktop' | 'tablet')[];
-  operatingSystems: string[];
-  browsers: string[];
-  connectionTypes: ('wifi' | 'cellular')[];
-}
-
-export interface ConnectionCriteria {
-  type: 'fans' | 'friends_of_fans' | 'exclude_fans';
-  pageIds: string[];
-}
-
-export interface AudiencePerformance {
-  reach: number;
-  engagement: number;
-  conversionRate: number;
-  averageCost: number;
-  qualityScore: number;
-}
-
-// Bid management
-export interface BidStrategy {
-  type: BidType;
-  amount?: number;
-  target?: BidTarget;
-  constraints?: BidConstraints;
-  optimization: OptimizationGoal;
-}
-
-export type BidType = 'manual' | 'automatic' | 'target_cost' | 'target_roas' | 'maximum_delivery';
-
-export interface BidTarget {
-  metric: 'cpc' | 'cpm' | 'cpa' | 'roas';
-  value: number;
-}
-
-export interface BidConstraints {
-  minBid?: number;
-  maxBid?: number;
-  budgetPacing?: 'standard' | 'accelerated';
-}
-
-export type OptimizationGoal = 'impressions' | 'clicks' | 'conversions' | 'reach' | 'engagement';
-
-// Attribution and tracking
-export interface AttributionModel {
-  id: string;
-  name: string;
-  type: AttributionType;
-  lookbackWindow: LookbackWindow;
-  weightingRules: WeightingRule[];
-}
-
-export type AttributionType = 'last_click' | 'first_click' | 'linear' | 'time_decay' | 'position_based' | 'data_driven';
-
-export interface LookbackWindow {
-  click: number;
-  view: number;
-  unit: 'hours' | 'days';
-}
-
-export interface WeightingRule {
-  position: 'first' | 'middle' | 'last';
-  weight: number;
-  conditions?: string[];
-}
-
-export interface ConversionTracking {
-  pixelId: string;
-  events: TrackedEvent[];
-  attribution: AttributionModel;
-  deduplication: DeduplicationSettings;
-}
-
-export interface TrackedEvent {
-  name: string;
-  type: EventType;
-  value?: number;
-  currency?: string;
-  parameters: Record<string, any>;
-}
-
-export type EventType = 'page_view' | 'purchase' | 'add_to_cart' | 'lead' | 'sign_up' | 'custom';
-
-export interface DeduplicationSettings {
-  enabled: boolean;
-  window: number;
-  method: 'last_click' | 'highest_value';
-}
-
-// Creative optimization
-export interface CreativeTest {
-  id: string;
-  name: string;
-  status: TestStatus;
-  type: TestType;
-  variants: CreativeVariant[];
-  allocation: TrafficAllocation;
-  results: TestResults;
-  duration: TestDuration;
-}
-
-export type TestStatus = 'draft' | 'running' | 'paused' | 'completed' | 'failed';
-export type TestType = 'ab' | 'multivariate' | 'dynamic' | 'sequential';
-
-export interface CreativeVariant {
-  id: string;
-  name: string;
-  assets: CreativeAssets;
-  weight: number;
-  performance: VariantPerformance;
-}
-
-export interface TrafficAllocation {
-  method: 'equal' | 'weighted' | 'performance_based';
-  rampUp: boolean;
-  minTraffic: number;
-}
-
-export interface TestResults {
-  winner?: string;
-  confidence: number;
-  significance: number;
-  improvement: number;
-  metrics: TestMetrics;
-}
-
-export interface TestMetrics {
-  [variantId: string]: {
-    impressions: number;
-    clicks: number;
-    conversions: number;
-    cost: number;
+  description: string;
+  type: string;
+  placement: string;
+  platform: string;
+  dimensions: {
+    width: number;
+    height: number;
   };
+  specifications: FormatSpecification[];
+  bestPractices: string[];
+  kpis: string[];
 }
 
-export interface TestDuration {
-  startDate: Date;
-  endDate?: Date;
-  minRunTime: number;
-  maxRunTime?: number;
-  earlyStop: boolean;
+export interface FormatSpecification {
+  property: string;
+  requirement: string;
+  value?: string | number;
 }
 
-export interface VariantPerformance {
+export interface CreativeAsset {
+  id: string;
+  type: 'image' | 'video' | 'audio' | 'text';
+  url: string;
+  metadata: AssetMetadata;
+}
+
+export interface AssetMetadata {
+  filename: string;
+  size: number;
+  dimensions?: {
+    width: number;
+    height: number;
+  };
+  duration?: number; // for video/audio
+  format: string;
+  alt?: string;
+}
+
+export interface AdCopy {
+  headline: string;
+  description: string;
+  disclaimer?: string;
+  localizations?: Record<string, Partial<AdCopy>>;
+}
+
+export interface CallToAction {
+  text: string;
+  action: CTAAction;
+  url?: string;
+  trackingParams?: Record<string, string>;
+}
+
+export type CTAAction = 
+  | 'visit_venue'
+  | 'book_table'
+  | 'view_menu'
+  | 'get_directions'
+  | 'call_venue'
+  | 'learn_more'
+  | 'download_app'
+  | 'sign_up';
+
+export type CreativeStatus = 'draft' | 'pending_review' | 'approved' | 'rejected' | 'active' | 'paused';
+
+// Performance tracking
+export interface CampaignMetrics {
   impressions: number;
   clicks: number;
   conversions: number;
-  ctr: number;
-  conversionRate: number;
-  cost: number;
+  spend: number;
+  revenue?: number;
+  ctr: number; // Click-through rate
+  cpc: number; // Cost per click
+  cpa: number; // Cost per acquisition
+  roas?: number; // Return on ad spend
+  frequency: number;
+  reach: number;
 }
 
-// Budget and pacing
-export interface BudgetPlan {
-  total: number;
-  daily: number;
-  currency: string;
-  pacing: PacingStrategy;
-  adjustments: BudgetAdjustment[];
-  forecasts: BudgetForecast[];
+export interface CreativePerformance extends CampaignMetrics {
+  engagementRate: number;
+  viewRate?: number; // for video
+  completionRate?: number; // for video
 }
 
-export interface PacingStrategy {
-  type: 'standard' | 'accelerated' | 'custom';
-  rules: PacingRule[];
-  optimization: PacingOptimization;
+// Advanced features
+export interface DynamicAdContent {
+  template: string;
+  dataSource: DataSource;
+  rules: ContentRule[];
+  fallbacks: FallbackContent[];
 }
 
-export interface PacingRule {
-  timeOfDay: {
-    start: string;
-    end: string;
-  };
-  dayOfWeek: number[];
-  multiplier: number;
+export interface DataSource {
+  type: 'venue_feed' | 'event_feed' | 'menu_items' | 'reviews';
+  endpoint?: string;
+  refreshInterval: number; // minutes
+  filters?: Record<string, any>;
+}
+
+export interface ContentRule {
+  condition: string;
+  template: string;
   priority: number;
 }
 
-export interface PacingOptimization {
-  goal: 'even_delivery' | 'performance_based' | 'cost_efficiency';
-  aggressiveness: number;
-  constraints: string[];
+export interface FallbackContent {
+  condition: string;
+  content: AdCopy;
+  priority: number;
 }
 
-export interface BudgetAdjustment {
-  date: Date;
-  amount: number;
-  reason: string;
-  automatic: boolean;
+// Attribution and conversion tracking
+export interface ConversionEvent {
+  id: string;
+  campaignId: string;
+  creativeId: string;
+  eventType: ConversionType;
+  value?: number;
+  currency?: string;
+  timestamp: Date;
+  attributionWindow: number; // hours
+  touchpoints: AttributionTouchpoint[];
 }
 
-export interface BudgetForecast {
-  date: Date;
-  projected: number;
+export type ConversionType = 
+  | 'reservation'
+  | 'purchase'
+  | 'signup'
+  | 'app_install'
+  | 'venue_visit'
+  | 'menu_view'
+  | 'review_submission';
+
+export interface AttributionTouchpoint {
+  campaignId: string;
+  creativeId: string;
+  timestamp: Date;
+  platform: string;
+  contribution: number; // percentage
+}
+
+// A/B testing
+export interface AdExperiment {
+  id: string;
+  name: string;
+  description: string;
+  status: ExperimentStatus;
+  variants: ExperimentVariant[];
+  trafficSplit: Record<string, number>;
+  metrics: ExperimentMetrics;
+  duration: number; // days
+  confidenceLevel: number;
+  startDate: Date;
+  endDate?: Date;
+}
+
+export type ExperimentStatus = 'draft' | 'running' | 'completed' | 'cancelled';
+
+export interface ExperimentVariant {
+  id: string;
+  name: string;
+  creative: AdCreative;
+  targeting?: Partial<TargetingOptions>;
+  weight: number; // percentage of traffic
+}
+
+export interface ExperimentMetrics {
+  variants: Record<string, VariantMetrics>;
+  winner?: string;
   confidence: number;
-  factors: string[];
+  significance: number;
+}
+
+export interface VariantMetrics extends CampaignMetrics {
+  conversionRate: number;
+  improvement?: number; // percentage vs control
+  confidenceInterval: [number, number];
+}
+
+// Platform integrations
+export interface PlatformIntegration {
+  platform: AdPlatform;
+  status: IntegrationStatus;
+  credentials: PlatformCredentials;
+  capabilities: PlatformCapability[];
+  lastSync: Date;
+  syncErrors?: SyncError[];
+}
+
+export type AdPlatform = 
+  | 'google_ads'
+  | 'facebook_ads'
+  | 'instagram_ads'
+  | 'tiktok_ads'
+  | 'snapchat_ads'
+  | 'twitter_ads'
+  | 'linkedin_ads';
+
+export type IntegrationStatus = 'connected' | 'disconnected' | 'error' | 'syncing';
+
+export interface PlatformCredentials {
+  accountId: string;
+  accessToken?: string;
+  refreshToken?: string;
+  expiresAt?: Date;
+  scope?: string[];
+}
+
+export interface PlatformCapability {
+  feature: string;
+  supported: boolean;
+  limitations?: string[];
+}
+
+export interface SyncError {
+  timestamp: Date;
+  error: string;
+  severity: 'warning' | 'error' | 'critical';
+  resolved: boolean;
 }

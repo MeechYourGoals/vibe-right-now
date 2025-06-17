@@ -30,41 +30,65 @@ const CommentList = ({ postId, commentsCount }: CommentListProps) => {
     // Regular comment
     exampleComments.push({
       id: `example-${postId}-1`,
+      contentId: postId,
       postId: postId,
+      parentId: undefined,
       userId: mockUsers[Math.floor(Math.random() * mockUsers.length)].id,
       user: mockUsers[Math.floor(Math.random() * mockUsers.length)],
+      author: mockUsers[Math.floor(Math.random() * mockUsers.length)],
+      body: "This place looks amazing! How's the crowd right now?",
       content: "This place looks amazing! How's the crowd right now?",
-      text: "This place looks amazing! How's the crowd right now?",
-      timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
+      createdAt: new Date(Date.now() - 1000 * 60 * 30),
+      updatedAt: new Date(Date.now() - 1000 * 60 * 30),
+      timestamp: new Date(Date.now() - 1000 * 60 * 30),
       vibedHere: false,
-      likes: 0
+      likes: 0,
+      status: 'published' as const,
+      engagement: { likes: 0, replies: 0, reactions: [] },
+      moderation: { status: 'approved' as const, flags: [] }
     });
     
     // "Vibed Here" comment
     exampleComments.push({
       id: `example-${postId}-2`,
+      contentId: postId,
       postId: postId,
+      parentId: undefined,
       userId: mockUsers[Math.floor(Math.random() * mockUsers.length)].id,
       user: mockUsers[Math.floor(Math.random() * mockUsers.length)],
+      author: mockUsers[Math.floor(Math.random() * mockUsers.length)],
+      body: "I was here yesterday and it was incredible! The line moves fast if you go around to the side entrance.",
       content: "I was here yesterday and it was incredible! The line moves fast if you go around to the side entrance.",
-      text: "I was here yesterday and it was incredible! The line moves fast if you go around to the side entrance.",
-      timestamp: new Date(Date.now() - 1000 * 60 * 120).toISOString(),
+      createdAt: new Date(Date.now() - 1000 * 60 * 120),
+      updatedAt: new Date(Date.now() - 1000 * 60 * 120),
+      timestamp: new Date(Date.now() - 1000 * 60 * 120),
       vibedHere: true,
-      likes: 0
+      likes: 0,
+      status: 'published' as const,
+      engagement: { likes: 0, replies: 0, reactions: [] },
+      moderation: { status: 'approved' as const, flags: [] }
     });
     
     // Add a third comment if needed
     if (commentCount > 2) {
       exampleComments.push({
         id: `example-${postId}-3`,
+        contentId: postId,
         postId: postId,
+        parentId: undefined,
         userId: mockUsers[Math.floor(Math.random() * mockUsers.length)].id,
         user: mockUsers[Math.floor(Math.random() * mockUsers.length)],
+        author: mockUsers[Math.floor(Math.random() * mockUsers.length)],
+        body: "Heading there now! Anyone want to meet up?",
         content: "Heading there now! Anyone want to meet up?",
-        text: "Heading there now! Anyone want to meet up?",
-        timestamp: new Date(Date.now() - 1000 * 60 * 10).toISOString(),
+        createdAt: new Date(Date.now() - 1000 * 60 * 10),
+        updatedAt: new Date(Date.now() - 1000 * 60 * 10),
+        timestamp: new Date(Date.now() - 1000 * 60 * 10),
         vibedHere: Math.random() > 0.5,
-        likes: 0
+        likes: 0,
+        status: 'published' as const,
+        engagement: { likes: 0, replies: 0, reactions: [] },
+        moderation: { status: 'approved' as const, flags: [] }
       });
     }
     

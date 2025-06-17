@@ -68,11 +68,17 @@ export interface Location extends BaseEntity {
   state?: string;
   country: string;
   coordinates: GeoCoordinates;
+  lat?: number; // Added for compatibility
+  lng?: number; // Added for compatibility
   type: LocationType;
   verified?: boolean;
   tags?: string[];
   hours?: BusinessHours;
   metadata?: LocationMetadata;
+  rating?: number; // Added for compatibility
+  business_status?: string; // Added for compatibility
+  vibes?: string[]; // Added for compatibility
+  google_maps_url?: string; // Added for compatibility
 }
 
 export interface LocationMetadata {
@@ -85,15 +91,18 @@ export interface LocationMetadata {
   amenities?: string[];
 }
 
-// Post interface
+// Post interface with additional properties for compatibility
 export interface Post extends BaseEntity {
   title?: string;
   content: string;
   author: UserProfile;
+  user?: UserProfile; // Added for compatibility
   location?: Location;
   media?: MediaItem[];
   tags?: string[];
   visibility: VisibilityLevel;
+  likes?: number; // Added for compatibility
+  timestamp?: Date; // Added for compatibility
 }
 
 // User interface
@@ -104,4 +113,21 @@ export interface User extends BaseEntity {
   email: string;
   avatar?: string;
   verified: boolean;
+}
+
+// Venue insights interface
+export interface VenueInsights {
+  id: string;
+  venueId: string;
+  totalVisits: number;
+  averageRating: number;
+  peakHours: string[];
+  demographics: {
+    ageGroups: Record<string, number>;
+    genders: Record<string, number>;
+  };
+  trends: {
+    period: string;
+    growth: number;
+  }[];
 }

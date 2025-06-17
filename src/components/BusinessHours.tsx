@@ -19,9 +19,12 @@ const BusinessHours = ({ venue }: BusinessHoursProps) => {
   
   const todaysHours = getTodaysHours(venue);
   
-  const formatHours = (hours: { open: string; close: string; } | string) => {
+  const formatHours = (hours: { open: string; close: string; closed?: boolean; } | string) => {
     if (typeof hours === 'string') {
       return hours;
+    }
+    if (hours.closed) {
+      return 'Closed';
     }
     return `${hours.open} - ${hours.close}`;
   };
@@ -46,7 +49,7 @@ const BusinessHours = ({ venue }: BusinessHoursProps) => {
         </Button>
       </div>
       
-      {isExpanded && (
+      {isExpanded && venue.hours && (
         <div className="mt-2 text-sm grid grid-cols-2 gap-1">
           <div className="flex justify-between pr-2">
             <span className="text-muted-foreground">Monday:</span>

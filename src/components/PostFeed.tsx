@@ -28,8 +28,10 @@ const PostFeed = ({ celebrityFeatured = [], feedType = "for-you" }: PostFeedProp
         // Sort by engagement (likes + comments) with deterministic randomization
         return allPosts
           .sort((a, b) => {
-            const aEngagement = a.likes + getComments(a.id).length;
-            const bEngagement = b.likes + getComments(b.id).length;
+            const aLikes = a.likes || 0;
+            const bLikes = b.likes || 0;
+            const aEngagement = aLikes + getComments(a.id).length;
+            const bEngagement = bLikes + getComments(b.id).length;
             // Add deterministic randomization for trending
             const randomFactor = (parseInt(a.id) % 7) - (parseInt(b.id) % 7);
             return bEngagement - aEngagement + randomFactor * 0.1;
@@ -39,16 +41,22 @@ const PostFeed = ({ celebrityFeatured = [], feedType = "for-you" }: PostFeedProp
       case "recent":
         // Sort by timestamp (most recent first)
         return allPosts
-          .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+          .sort((a, b) => {
+            const aTime = a.timestamp ? new Date(a.timestamp).getTime() : new Date(a.createdAt).getTime();
+            const bTime = b.timestamp ? new Date(b.timestamp).getTime() : new Date(b.createdAt).getTime();
+            return bTime - aTime;
+          })
           .slice(0, 20);
           
       case "nearby":
         // Mock nearby sorting with different randomization seed
         return allPosts
           .sort((a, b) => {
+            const aLikes = a.likes || 0;
+            const bLikes = b.likes || 0;
             // Mock distance calculation with deterministic randomization
-            const aDistance = (parseInt(a.id) % 13) + a.likes * 0.1;
-            const bDistance = (parseInt(b.id) % 13) + b.likes * 0.1;
+            const aDistance = (parseInt(a.id) % 13) + aLikes * 0.1;
+            const bDistance = (parseInt(b.id) % 13) + bLikes * 0.1;
             return aDistance - bDistance;
           })
           .slice(0, 20);
@@ -56,18 +64,24 @@ const PostFeed = ({ celebrityFeatured = [], feedType = "for-you" }: PostFeedProp
       case "for-you":
       default:
         // Mix of trending and recent with featured users
-        const featuredPosts = allPosts.filter(post => 
-          celebrityFeatured.includes(post.user.username)
-        );
-        const otherPosts = allPosts.filter(post => 
-          !celebrityFeatured.includes(post.user.username)
-        );
+        const featuredPosts = allPosts.filter(post => {
+          const username = post.user?.username || post.author?.username;
+          return username && celebrityFeatured.includes(username);
+        });
+        const otherPosts = allPosts.filter(post => {
+          const username = post.user?.username || post.author?.username;
+          return !username || !celebrityFeatured.includes(username);
+        });
         
         // Combine and sort by engagement and recency
         return [...featuredPosts, ...otherPosts]
           .sort((a, b) => {
-            const aScore = a.likes * 0.7 + (Date.now() - new Date(a.timestamp).getTime()) / (1000 * 60 * 60) * 0.3;
-            const bScore = b.likes * 0.7 + (Date.now() - new Date(b.timestamp).getTime()) / (1000 * 60 * 60) * 0.3;
+            const aLikes = a.likes || 0;
+            const bLikes = b.likes || 0;
+            const aTime = a.timestamp ? new Date(a.timestamp).getTime() : new Date(a.createdAt).getTime();
+            const bTime = b.timestamp ? new Date(b.timestamp).getTime() : new Date(b.createdAt).getTime();
+            const aScore = aLikes * 0.7 + (Date.now() - aTime) / (1000 * 60 * 60) * 0.3;
+            const bScore = bLikes * 0.7 + (Date.now() - bTime) / (1000 * 60 * 60) * 0.3;
             return bScore - aScore;
           })
           .slice(0, 20);
