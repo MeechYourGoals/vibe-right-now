@@ -1,4 +1,3 @@
-
 import { useState, useMemo, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Minimize } from "lucide-react";
@@ -23,6 +22,8 @@ import WaitTimeDisplay from "@/components/venue/WaitTimeDisplay";
 import WaitTimeUpdater from "@/components/venue/WaitTimeUpdater";
 import ExternalReviewAnalysis from "@/components/venue/ExternalReviewAnalysis";
 import { useAuth0 } from "@auth0/auth0-react";
+import AudioOverviewCard from "@/components/venue/AudioOverviewCard";
+import { AudioSummaryService } from "@/services/audioSummaryService";
 
 // Define an extended Post type that includes venue-specific properties
 interface ExtendedPost extends Post {
@@ -40,6 +41,8 @@ const VenueProfile = () => {
   const [isVenueOwner, setIsVenueOwner] = useState(false);
   const [subscriptionTier, setSubscriptionTier] = useState<'standard' | 'plus' | 'premium' | 'pro'>('standard');
   const [isUserPremium, setIsUserPremium] = useState(false);
+  const [audioSummary, setAudioSummary] = useState(null);
+  const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
   
   const { user, isAuthenticated } = useAuth0();
   
@@ -138,6 +141,50 @@ const VenueProfile = () => {
     setSelectedDays([]);
   };
 
+  useEffect(() => {
+    // Load audio summary for premium users
+    if (isUserPremium && venue) {
+      loadAudioSummary();
+    }
+  }, [venue, isUserPremium]);
+
+  const loadAudioSummary = async () => {
+    if (!venue) return;
+    
+    try {
+      const summary = await AudioSummaryService.getAudioSummary(venue.id);
+      setAudioSummary(summary);
+    } catch (error) {
+      console.error('Error loading audio summary:', error);
+    }
+  };
+
+  const handleGenerateAudio = async () => {
+    if (!venue) return;
+    
+    setIsGeneratingAudio(true);
+    try {
+      // Get sentiment summary for context
+      const sentimentText = "Mixed positive reviews"; // This would come from your sentiment analysis
+      const reviewsText = "Sample review content"; // This would come from aggregated reviews
+      
+      const summary = await AudioSummaryService.generateAudioSummary(
+        venue.id, 
+        venue.name, 
+        reviewsText, 
+        sentimentText
+      );
+      
+      if (summary) {
+        setAudioSummary(summary);
+      }
+    } catch (error) {
+      console.error('Error generating audio:', error);
+    } finally {
+      setIsGeneratingAudio(false);
+    }
+  };
+
   if (!venue) {
     return (
       <div className="min-h-screen bg-background">
@@ -207,6 +254,19 @@ const VenueProfile = () => {
             venueName={venue.name}
             isUserPremium={isUserPremium}
           />
+          
+          {/* AI Audio Overview - Premium Feature */}
+          <div className="mb-6">
+            <AudioOverviewCard
+              venueId={venue.id}
+              venueName={venue.name}
+              audioUrl={audioSummary?.audio_url}
+              scriptText={audioSummary?.script_text}
+              generatedAt={audioSummary?.generated_at}
+              isUserPremium={isUserPremium}
+              onGenerateAudio={handleGenerateAudio}
+            />
+          </div>
           
           <DayOfWeekFilter 
             selectedDays={selectedDays} 
