@@ -1,4 +1,3 @@
-
 // Base types for the entire application
 export interface BaseEntity {
   id: string;
@@ -259,6 +258,23 @@ export interface Comment extends BaseEntity {
     status: 'approved' | 'pending' | 'rejected';
     flags: string[];
   };
+}
+
+// Sentiment analysis types
+export interface PlatformSentimentSummary {
+  platform: string;
+  positiveCount: number;
+  negativeCount: number;
+  neutralCount: number;
+  averageSentiment: number;
+  totalReviews: number;
+}
+
+export interface SentimentTheme {
+  theme: string;
+  sentiment: 'positive' | 'negative' | 'neutral';
+  frequency: number;
+  examples: string[];
 }
 
 // Export all from subscription types

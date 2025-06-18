@@ -19,11 +19,26 @@ const PostCard = ({ post, showComments = false, compact = false }: PostCardProps
   const [isSaved, setIsSaved] = useState(post.saved || false);
   const [showCommentsSection, setShowCommentsSection] = useState(showComments);
 
-  // Convert UserProfile to User with required timestamps
+  // Safely handle author data with proper fallbacks
+  const author = post.author || post.user;
+  if (!author) {
+    console.warn('Post missing author data:', post.id);
+    return null; // Don't render if no author data
+  }
+
+  // Convert UserProfile to User with required timestamps and safe property access
   const userAsUser: User = {
-    ...post.author,
-    name: post.author.name || post.author.displayName,
-    email: post.author.email || `${post.author.username}@example.com`,
+    id: author.id || 'unknown',
+    username: author.username || 'unknown',
+    displayName: author.displayName || author.name || author.username || 'Unknown User',
+    name: author.name || author.displayName || author.username || 'Unknown User',
+    email: author.email || `${author.username || 'unknown'}@example.com`,
+    avatar: author.avatar,
+    bio: author.bio,
+    verified: author.verified || false,
+    posts: author.posts,
+    followers: author.followers,
+    following: author.following,
     createdAt: new Date(),
     updatedAt: new Date()
   };
@@ -53,7 +68,7 @@ const PostCard = ({ post, showComments = false, compact = false }: PostCardProps
           <div className="flex items-center space-x-3">
             <Avatar className="h-10 w-10">
               <AvatarImage src={userAsUser.avatar} alt={userAsUser.username} />
-              <AvatarFallback>{userAsUser.username[0].toUpperCase()}</AvatarFallback>
+              <AvatarFallback>{userAsUser.username[0]?.toUpperCase() || 'U'}</AvatarFallback>
             </Avatar>
             <div>
               <div className="flex items-center space-x-2">

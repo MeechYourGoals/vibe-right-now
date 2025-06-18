@@ -1,98 +1,84 @@
 
-import React from 'react';
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState } from 'react';
+import { Card } from "@/components/ui/card";
 import { Post } from "@/types";
-import { deletePost } from "@/utils/venue/postManagementUtils";
-import { 
-  PostBadges,
-  DeleteButton,
-  PostMedia,
-  PostOverlay
-} from './post-grid-item';
-import UserDropdown from './post-grid-item/UserDropdown';
+import PostMedia from "./post-grid-item/PostMedia";
+import PostOverlay from "./post-grid-item/PostOverlay";
+import UserDropdown from "./post-grid-item/UserDropdown";
+import DeleteButton from "./post-grid-item/DeleteButton";
+import PostBadges from "./post-grid-item/PostBadges";
 
 interface PostGridItemProps {
   post: Post;
   isVenuePost?: boolean;
-  timeAgo?: string;
-  isDetailView?: boolean;
   canDelete?: boolean;
-  venue?: { id: string; name: string };
-  onPostDeleted?: (postId: string) => void;
+  onDelete?: (postId: string) => void;
+  onUserProfileClick?: () => void;
+  isDetailView?: boolean;
 }
 
-const PostGridItem: React.FC<PostGridItemProps> = ({ 
+const PostGridItem = ({ 
   post, 
   isVenuePost = false, 
-  timeAgo,
-  isDetailView = false,
-  canDelete = false,
-  venue,
-  onPostDeleted
-}) => {
-  const navigate = useNavigate();
-  
+  canDelete = false, 
+  onDelete,
+  onUserProfileClick,
+  isDetailView = false
+}: PostGridItemProps) => {
+  const [isLiked, setIsLiked] = useState(false);
+
   const handleLike = (e: React.MouseEvent) => {
-    e.preventDefault();
-    // Like functionality is handled in the PostOverlay component
-  };
-  
-  const navigateToUserProfile = (e: React.MouseEvent) => {
-    e.preventDefault();
     e.stopPropagation();
-    navigate(`/user/${post.user.username}`);
+    setIsLiked(!isLiked);
   };
 
-  const handleDeletePost = (e: React.MouseEvent) => {
-    e.preventDefault();
+  const handleUserProfileClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    onUserProfileClick?.();
+  };
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onDelete?.(post.id);
+  };
+
+  const formatTimeAgo = (date: Date) => {
+    const now = new Date();
+    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / 60000);
     
-    if (venue && deletePost(post.id, venue)) {
-      if (onPostDeleted) {
-        onPostDeleted(post.id);
-      }
-    }
+    if (diffInMinutes < 60) return `${diffInMinutes}m`;
+    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h`;
+    return `${Math.floor(diffInMinutes / 1440)}d`;
   };
 
-  // Generate a semi-random user count based on post ID
-  const getUserCount = () => {
-    const seed = post.id.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
-    return Math.floor((seed % 100) + 10);
-  };
+  const timeAgo = post.timestamp ? formatTimeAgo(post.timestamp) : '';
 
   return (
-    <Link 
-      to={`/post/${post.id}`} 
-      className={`group relative block aspect-square overflow-hidden rounded-lg ${
-        isVenuePost ? 'ring-2 ring-amber-500' : ''
-      } ${post.isPinned && !isVenuePost ? 'ring-2 ring-amber-300' : ''}`}
-    >
+    <Card className="relative overflow-hidden aspect-square group cursor-pointer hover:scale-105 transition-transform duration-200">
+      {/* Background Media */}
       <PostMedia post={post} />
-      
-      {/* Show pinned badge if applicable */}
-      {post.isPinned && (
-        <PostBadges post={post} isVenuePost={false} />
-      )}
-      
-      {/* Show delete button if applicable */}
-      {canDelete && !isVenuePost && (
-        <DeleteButton onDelete={handleDeletePost} />
-      )}
-      
-      {/* Add user count dropdown */}
-      <div className="absolute top-2 right-2 z-10">
-        <UserDropdown userCount={getUserCount()} post={post} />
+
+      {/* Top Badges */}
+      <PostBadges post={post} isVenuePost={isVenuePost} />
+
+      {/* Top Right Controls */}
+      <div className="absolute top-2 right-2 flex space-x-2">
+        {onUserProfileClick && (
+          <UserDropdown 
+            user={post.author} 
+            onProfileClick={handleUserProfileClick}
+          />
+        )}
+        {canDelete && onDelete && (
+          <DeleteButton onDelete={handleDelete} />
+        )}
       </div>
-      
-      <PostOverlay
+
+      {/* Post Overlay - removing isVenuePost prop */}
+      <PostOverlay 
         post={post}
-        isVenuePost={false} // Don't show venue badge in overlay
-        timeAgo={timeAgo}
-        isDetailView={isDetailView}
-        onUserProfileClick={navigateToUserProfile}
-        onLike={handleLike}
       />
-    </Link>
+    </Card>
   );
 };
 
