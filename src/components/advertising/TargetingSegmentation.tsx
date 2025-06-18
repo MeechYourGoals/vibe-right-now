@@ -1,310 +1,313 @@
 
-import React, { useState } from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
-import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Users, MapPin, Clock, TrendingUp, Brain } from "lucide-react";
-import { TargetingOptions } from "@/types";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Slider } from "@/components/ui/slider";
+import { Badge } from "@/components/ui/badge";
+import { TargetingOptions, GenderTargeting } from "@/types";
 
 const TargetingSegmentation = () => {
   const [targeting, setTargeting] = useState<TargetingOptions>({
     demographics: {
-      ageRange: [18, 35],
-      gender: ["all"],
+      gender: 'all' as GenderTargeting,
+      ageRange: [18, 65],
+      interests: [],
+      behaviors: [],
       location: []
     },
-    behavioral: {
-      pastAttendance: [],
-      clipHistory: [],
-      tripsIntent: false
+    geographic: {
+      radius: 5,
+      cities: [],
+      excludeLocations: []
+    },
+    behaviors: {
+      visitFrequency: [],
+      spendingHabits: [],
+      deviceUsage: []
+    },
+    interests: {
+      categories: [],
+      brands: [],
+      keywords: []
     },
     contextual: {
+      timeOfDay: [],
+      dayOfWeek: [],
+      weather: [],
+      eventTypes: [],
       vibeTags: [],
       venueTypes: [],
       daypart: []
     },
     momentScore: {
-      hypeLevel: 50,
-      crowdDensity: 50
+      vibeScore: 0.7,
+      crowdLevel: 0.6,
+      engagement: 0.8,
+      crowdDensity: "moderate"
     }
   });
 
-  const vibeTagOptions = [
-    "Trendy", "Popular", "Local Favorite", "Hidden Gem", "Romantic", 
-    "Outdoor Seating", "Live Music", "Craft Beer", "Cocktails", "Sports Bar"
-  ];
+  const handleGenderChange = (gender: GenderTargeting) => {
+    setTargeting(prev => ({
+      ...prev,
+      demographics: {
+        ...prev.demographics,
+        gender
+      }
+    }));
+  };
 
-  const venueTypeOptions = [
-    "Restaurant", "Bar", "Club", "Event", "Attraction", "Sports"
-  ];
+  const handleBehaviorToggle = (behavior: string) => {
+    setTargeting(prev => ({
+      ...prev,
+      behaviors: {
+        ...prev.behaviors,
+        visitFrequency: prev.behaviors.visitFrequency.includes(behavior)
+          ? prev.behaviors.visitFrequency.filter(b => b !== behavior)
+          : [...prev.behaviors.visitFrequency, behavior]
+      }
+    }));
+  };
 
-  const daypartOptions = [
-    "Morning", "Afternoon", "Evening", "Late Night", "Weekend", "Weekday"
-  ];
+  const handleMomentScoreChange = (field: keyof typeof targeting.momentScore, value: number) => {
+    setTargeting(prev => ({
+      ...prev,
+      momentScore: {
+        ...prev.momentScore,
+        [field]: value
+      }
+    }));
+  };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      {/* Demographics */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5" />
-            Demographics
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div>
-            <label className="text-sm font-medium mb-2 block">
-              Age Range: {targeting.demographics.ageRange[0]} - {targeting.demographics.ageRange[1]}
-            </label>
-            <Slider
-              value={targeting.demographics.ageRange}
-              onValueChange={(value) => 
-                setTargeting(prev => ({
-                  ...prev,
-                  demographics: { ...prev.demographics, ageRange: value as [number, number] }
-                }))
-              }
-              min={13}
-              max={65}
-              step={1}
-              className="w-full"
-            />
-          </div>
-
-          <div>
-            <label className="text-sm font-medium mb-2 block">Gender</label>
-            <div className="flex gap-2">
-              {["All", "Male", "Female", "Non-binary"].map((gender) => (
-                <Badge
-                  key={gender}
-                  variant={targeting.demographics.gender.includes(gender.toLowerCase()) ? "default" : "outline"}
-                  className="cursor-pointer"
-                  onClick={() => {
-                    const genderValue = gender.toLowerCase();
-                    setTargeting(prev => ({
-                      ...prev,
-                      demographics: {
-                        ...prev.demographics,
-                        gender: genderValue === "all" ? ["all"] : [genderValue]
-                      }
-                    }));
-                  }}
-                >
-                  {gender}
-                </Badge>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <label className="text-sm font-medium mb-2 block">Location</label>
-            <Input placeholder="Enter cities, states, or zip codes" />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Behavioral Targeting */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5" />
-            Behavioral Targeting
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="flex items-center justify-between">
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        {/* Demographics */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Demographics</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
             <div>
-              <p className="font-medium">Trips Intent</p>
-              <p className="text-sm text-muted-foreground">Users planning venue visits</p>
+              <Label>Gender</Label>
+              <Select value={targeting.demographics.gender} onValueChange={handleGenderChange}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Genders</SelectItem>
+                  <SelectItem value="male">Male</SelectItem>
+                  <SelectItem value="female">Female</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <Switch
-              checked={targeting.behavioral.tripsIntent}
-              onCheckedChange={(checked) =>
-                setTargeting(prev => ({
-                  ...prev,
-                  behavioral: { ...prev.behavioral, tripsIntent: checked }
-                }))
-              }
-            />
-          </div>
 
-          <div>
-            <label className="text-sm font-medium mb-2 block">Past Attendance History</label>
-            <div className="flex flex-wrap gap-2">
-              {["Concerts", "Sports Events", "Restaurants", "Bars", "Clubs"].map((type) => (
-                <Badge key={type} variant="outline" className="cursor-pointer">
-                  {type}
-                </Badge>
-              ))}
+            <div>
+              <Label>Age Range: {targeting.demographics.ageRange?.[0]} - {targeting.demographics.ageRange?.[1]}</Label>
+              <Slider
+                value={targeting.demographics.ageRange || [18, 65]}
+                onValueChange={(value) => 
+                  setTargeting(prev => ({
+                    ...prev,
+                    demographics: { ...prev.demographics, ageRange: value as [number, number] }
+                  }))
+                }
+                min={16}
+                max={80}
+                step={1}
+                className="mt-2"
+              />
             </div>
-          </div>
+          </CardContent>
+        </Card>
 
-          <div>
-            <label className="text-sm font-medium mb-2 block">Clip History Preferences</label>
-            <div className="flex flex-wrap gap-2">
-              {["Food Content", "Nightlife", "Music", "Sports", "Art"].map((type) => (
-                <Badge key={type} variant="outline" className="cursor-pointer">
-                  {type}
-                </Badge>
-              ))}
+        {/* Behavioral */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Behavioral</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label>Visit Frequency</Label>
+              <div className="grid grid-cols-2 gap-2 mt-2">
+                {['frequent', 'occasional', 'first-time', 'returning'].map(behavior => (
+                  <div key={behavior} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={behavior}
+                      checked={targeting.behaviors.visitFrequency.includes(behavior)}
+                      onCheckedChange={() => handleBehaviorToggle(behavior)}
+                    />
+                    <Label htmlFor={behavior} className="text-sm capitalize">
+                      {behavior.replace('-', ' ')}
+                    </Label>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      {/* Contextual Targeting */}
+        {/* Geographic */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Geographic</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label>Radius (miles): {targeting.geographic.radius}</Label>
+              <Slider
+                value={[targeting.geographic.radius]}
+                onValueChange={(value) =>
+                  setTargeting(prev => ({
+                    ...prev,
+                    geographic: { ...prev.geographic, radius: value[0] }
+                  }))
+                }
+                min={1}
+                max={50}
+                step={1}
+                className="mt-2"
+              />
+            </div>
+            
+            <div>
+              <Label>Target Cities</Label>
+              <Input
+                placeholder="Add cities..."
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    const value = e.currentTarget.value.trim();
+                    if (value && !targeting.geographic.cities.includes(value)) {
+                      setTargeting(prev => ({
+                        ...prev,
+                        geographic: {
+                          ...prev.geographic,
+                          cities: [...prev.geographic.cities, value]
+                        }
+                      }));
+                      e.currentTarget.value = '';
+                    }
+                  }
+                }}
+              />
+              <div className="flex flex-wrap gap-2 mt-2">
+                {targeting.geographic.cities.map(city => (
+                  <Badge key={city} variant="outline">
+                    {city}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Moment Scoring */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Moment Scoring</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label>Vibe Score: {targeting.momentScore.vibeScore}</Label>
+              <Slider
+                value={[targeting.momentScore.vibeScore]}
+                onValueChange={(value) => handleMomentScoreChange('vibeScore', value[0])}
+                min={0}
+                max={1}
+                step={0.1}
+                className="mt-2"
+              />
+            </div>
+            
+            <div>
+              <Label>Crowd Level: {targeting.momentScore.crowdLevel}</Label>
+              <Slider
+                value={[targeting.momentScore.crowdLevel]}
+                onValueChange={(value) => handleMomentScoreChange('crowdLevel', value[0])}
+                min={0}
+                max={1}
+                step={0.1}
+                className="mt-2"
+              />
+            </div>
+
+            <div>
+              <Label>Engagement: {targeting.momentScore.engagement}</Label>
+              <Slider
+                value={[targeting.momentScore.engagement]}
+                onValueChange={(value) => handleMomentScoreChange('engagement', value[0])}
+                min={0}
+                max={1}
+                step={0.1}
+                className="mt-2"
+              />
+            </div>
+
+            <div>
+              <Label>Crowd Density</Label>
+              <Select 
+                value={targeting.momentScore.crowdDensity || "moderate"} 
+                onValueChange={(value) => 
+                  setTargeting(prev => ({
+                    ...prev,
+                    momentScore: { ...prev.momentScore, crowdDensity: value }
+                  }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">Low</SelectItem>
+                  <SelectItem value="moderate">Moderate</SelectItem>
+                  <SelectItem value="high">High</SelectItem>
+                  <SelectItem value="packed">Packed</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Targeting Summary */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MapPin className="h-5 w-5" />
-            Contextual Targeting
-          </CardTitle>
+          <CardTitle>Targeting Summary</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <div>
-            <label className="text-sm font-medium mb-2 block">Vibe Tags</label>
-            <div className="flex flex-wrap gap-2">
-              {vibeTagOptions.map((tag) => (
-                <Badge
-                  key={tag}
-                  variant={targeting.contextual.vibeTags.includes(tag) ? "default" : "outline"}
-                  className="cursor-pointer"
-                  onClick={() => {
-                    setTargeting(prev => ({
-                      ...prev,
-                      contextual: {
-                        ...prev.contextual,
-                        vibeTags: prev.contextual.vibeTags.includes(tag)
-                          ? prev.contextual.vibeTags.filter(t => t !== tag)
-                          : [...prev.contextual.vibeTags, tag]
-                      }
-                    }));
-                  }}
-                >
-                  {tag}
-                </Badge>
-              ))}
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+            <div>
+              <span className="font-medium">Demographics:</span>
+              <p className="text-muted-foreground">
+                {targeting.demographics.gender} • Ages {targeting.demographics.ageRange?.[0]}-{targeting.demographics.ageRange?.[1]}
+              </p>
             </div>
-          </div>
-
-          <div>
-            <label className="text-sm font-medium mb-2 block">Venue Types</label>
-            <div className="flex flex-wrap gap-2">
-              {venueTypeOptions.map((type) => (
-                <Badge
-                  key={type}
-                  variant={targeting.contextual.venueTypes.includes(type) ? "default" : "outline"}
-                  className="cursor-pointer"
-                  onClick={() => {
-                    setTargeting(prev => ({
-                      ...prev,
-                      contextual: {
-                        ...prev.contextual,
-                        venueTypes: prev.contextual.venueTypes.includes(type)
-                          ? prev.contextual.venueTypes.filter(t => t !== type)
-                          : [...prev.contextual.venueTypes, type]
-                      }
-                    }));
-                  }}
-                >
-                  {type}
-                </Badge>
-              ))}
+            <div>
+              <span className="font-medium">Geographic:</span>
+              <p className="text-muted-foreground">
+                {targeting.geographic.radius} mile radius • {targeting.geographic.cities.length} cities
+              </p>
             </div>
-          </div>
-
-          <div>
-            <label className="text-sm font-medium mb-2 block">Daypart</label>
-            <div className="flex flex-wrap gap-2">
-              {daypartOptions.map((time) => (
-                <Badge
-                  key={time}
-                  variant={targeting.contextual.daypart.includes(time) ? "default" : "outline"}
-                  className="cursor-pointer"
-                  onClick={() => {
-                    setTargeting(prev => ({
-                      ...prev,
-                      contextual: {
-                        ...prev.contextual,
-                        daypart: prev.contextual.daypart.includes(time)
-                          ? prev.contextual.daypart.filter(t => t !== time)
-                          : [...prev.contextual.daypart, time]
-                      }
-                    }));
-                  }}
-                >
-                  {time}
-                </Badge>
-              ))}
+            <div>
+              <span className="font-medium">Moment Score:</span>
+              <p className="text-muted-foreground">
+                Vibe: {targeting.momentScore.vibeScore} • Crowd: {targeting.momentScore.crowdLevel}
+              </p>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Moment Score Targeting */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Clock className="h-5 w-5" />
-            Moment Score Targeting
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div>
-            <label className="text-sm font-medium mb-2 block">
-              Hype Level: {targeting.momentScore.hypeLevel}%
-            </label>
-            <Slider
-              value={[targeting.momentScore.hypeLevel]}
-              onValueChange={(value) =>
-                setTargeting(prev => ({
-                  ...prev,
-                  momentScore: { ...prev.momentScore, hypeLevel: value[0] }
-                }))
-              }
-              min={0}
-              max={100}
-              step={5}
-              className="w-full"
-            />
-          </div>
-
-          <div>
-            <label className="text-sm font-medium mb-2 block">
-              Crowd Density: {targeting.momentScore.crowdDensity}%
-            </label>
-            <Slider
-              value={[targeting.momentScore.crowdDensity]}
-              onValueChange={(value) =>
-                setTargeting(prev => ({
-                  ...prev,
-                  momentScore: { ...prev.momentScore, crowdDensity: value[0] }
-                }))
-              }
-              min={0}
-              max={100}
-              step={5}
-              className="w-full"
-            />
-          </div>
-
-          <div className="p-4 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-lg">
-            <div className="flex items-center gap-2 mb-2">
-              <Brain className="h-4 w-4 text-blue-400" />
-              <span className="text-sm font-medium">AI Audience Insights</span>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Based on your targeting criteria, this campaign will reach approximately 
-              <span className="font-semibold text-foreground"> 2.4M users</span> with 
-              high engagement probability.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="flex justify-end space-x-4">
+        <Button variant="outline">Save Targeting</Button>
+        <Button>Create Campaign</Button>
+      </div>
     </div>
   );
 };
