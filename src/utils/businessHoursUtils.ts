@@ -60,11 +60,9 @@ export const getTodaysHours = (location: Location): string => {
     location.hours = generateBusinessHours(location);
   }
 
-  const today = new Date().toLocaleLowerCase().slice(0, 3);
-  const dayNames = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
-  const fullDayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-  
+  // Get the current day of the week (0 = Sunday, 1 = Monday, etc.)
   const dayIndex = new Date().getDay();
+  const fullDayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
   const dayName = fullDayNames[dayIndex];
   
   const todaysHours = location.hours[dayName];
