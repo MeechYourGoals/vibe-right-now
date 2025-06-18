@@ -15,12 +15,13 @@ export interface User {
   displayName?: string;
   isPrivate?: boolean;
   email?: string;
+  isCelebrity?: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface Media {
-  id: string;
+  id?: string;
   type: "image" | "video" | "audio";
   url: string;
   thumbnail?: string;
@@ -96,6 +97,11 @@ export interface Location {
   updatedAt: string;
 }
 
+export interface Coordinates {
+  lat: number;
+  lng: number;
+}
+
 export interface CreditCard {
   id: string;
   last4: string;
@@ -151,12 +157,6 @@ export interface VenueInsights {
   checkInCount?: number;
   receiptUploads?: number;
   discountRedemptions?: number;
-}
-
-// Coordinates interface for map components
-export interface Coordinates {
-  lat: number;
-  lng: number;
 }
 
 // Google Places types

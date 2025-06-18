@@ -11,14 +11,22 @@ const createMedia = (type: "image" | "video" | "audio", url: string, thumbnail?:
   thumbnail
 });
 
-// Helper function to get location with fallback
+// Helper function to get location with fallback and add required fields
 const getLocationById = (id: string) => {
   const location = mockLocations.find(loc => loc.id === id);
   if (!location) {
     console.warn(`Location with ID ${id} not found`);
-    return mockLocations[0]; // fallback to first location
+    return {
+      ...mockLocations[0],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
   }
-  return location;
+  return {
+    ...location,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
 };
 
 export const mockPosts: Post[] = [
@@ -27,7 +35,7 @@ export const mockPosts: Post[] = [
     user: mockUsers[0],
     location: getLocationById("8"), // Christ the Redeemer
     content: "Standing before this iconic statue in Rio! The view from up here is absolutely breathtaking. The journey to get here was worth every step 🙏✨",
-    media: [createMedia("image", "https://images.unsplash.com/photo-1544378796-8b5ad8e3e13e?w=600&q=80&auto=format&fit=crop")],
+    media: [createMedia("image", "/lovable-uploads/d7af47d3-90bc-49b0-8a9c-faf6e01c78b0.png")],
     timestamp: new Date(Date.now() - 1000 * 60 * 30),
     likes: 24,
     comments: 8,
@@ -58,7 +66,7 @@ export const mockPosts: Post[] = [
     user: mockUsers[2],
     location: getLocationById("23"), // InvestFest
     content: "InvestFest Atlanta was incredible! So much knowledge shared about building wealth and financial literacy. The energy in the room was electric! 💰📈",
-    media: [createMedia("image", "https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=600&q=80&auto=format&fit=crop")],
+    media: [createMedia("image", "/lovable-uploads/d2e0af4e-9fb3-4e3c-9e91-3ce0e8e25e9f.png")],
     timestamp: new Date(Date.now() - 1000 * 60 * 60),
     likes: 45,
     comments: 12,
@@ -71,7 +79,7 @@ export const mockPosts: Post[] = [
     user: mockUsers[3],
     location: getLocationById("18"), // Sydney Opera House
     content: "Finally made it to the Sydney Opera House! The architecture is even more stunning in person. Caught an amazing performance tonight 🎭🏛️",
-    media: [createMedia("image", "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80&auto=format&fit=crop")],
+    media: [createMedia("image", "/lovable-uploads/f3f4d0fa-5c4e-4a3a-8b7a-1e2b0c4d5e6f.png")],
     timestamp: new Date(Date.now() - 1000 * 60 * 90),
     likes: 67,
     comments: 15,
@@ -84,7 +92,7 @@ export const mockPosts: Post[] = [
     user: mockUsers[4],
     location: getLocationById("19"), // Eiffel Tower
     content: "Paris at sunset from the Eiffel Tower - no words can describe this magic! The city of lights truly lives up to its name ✨🇫🇷",
-    media: [createMedia("image", "https://images.unsplash.com/photo-1502602898536-47ad22581b52?w=600&q=80&auto=format&fit=crop")],
+    media: [createMedia("image", "/lovable-uploads/a1b2c3d4-e5f6-4c8e-9b7a-0f1e2d3c4b5a.png")],
     timestamp: new Date(Date.now() - 1000 * 60 * 45),
     likes: 156,
     comments: 34,
@@ -110,7 +118,7 @@ export const mockPosts: Post[] = [
     user: mockUsers[6],
     location: getLocationById("6"), // Madison Square Garden
     content: "The Garden never disappoints! What an incredible show tonight. NYC always brings that special energy 🗽🎤",
-    media: [createMedia("image", "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600&q=80&auto=format&fit=crop")],
+    media: [createMedia("image", "/lovable-uploads/e4f5g6h7-i8j9-4d3e-a1b2-c5d6e7f8g9h0.png")],
     timestamp: new Date(Date.now() - 1000 * 60 * 200),
     likes: 92,
     comments: 27,
@@ -162,7 +170,7 @@ export const mockPosts: Post[] = [
     user: mockUsers[10],
     location: getLocationById("7"), // Encore Beach Club
     content: "Vegas pool party vibes at Encore Beach Club! The sun, the music, the energy - this is what summer dreams are made of ☀️🏊‍♀️",
-    media: [createMedia("image", "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=600&q=80&auto=format&fit=crop")],
+    media: [createMedia("image", "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=600&q=80&auto=format&fit=crop")],
     timestamp: new Date(Date.now() - 1000 * 60 * 360),
     likes: 89,
     comments: 24,
@@ -175,7 +183,7 @@ export const mockPosts: Post[] = [
     user: mockUsers[11],
     location: getLocationById("25"), // The Comedy Cellar Austin
     content: "Laughed until my sides hurt at The Comedy Cellar! Austin's comedy scene is absolutely phenomenal. Such talented performers 😂🎭",
-    media: [createMedia("image", "https://images.unsplash.com/photo-1577848915194-9596ddb85ad3?w=600&q=80&auto=format&fit=crop")],
+    media: [createMedia("image", "https://images.unsplash.com/photo-1502602898536-47ad22581b52?w=600&q=80&auto=format&fit=crop")],
     timestamp: new Date(Date.now() - 1000 * 60 * 420),
     likes: 56,
     comments: 13,

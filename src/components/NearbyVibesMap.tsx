@@ -9,7 +9,7 @@ import NearbyLocationsList from "./map/NearbyLocationsList";
 import AddressSearchPopover from "./map/AddressSearchPopover";
 import EnhancedGoogleMapComponent from "./map/google/EnhancedGoogleMapComponent";
 import { useMapSync } from "@/hooks/useMapSync";
-import { Location } from "@/types";
+import { Location, Coordinates } from "@/types";
 
 declare global {
   interface Window {
