@@ -23,7 +23,7 @@ const createDiscountVenue = (postId: string, discount: DiscountOffer): VenueWith
 };
 
 export const discountOffers: VenueWithDiscount[] = [
-  createDiscountVenue("29", {
+  createDiscountVenue("1", {
     id: "disc1",
     type: "freeEntry",
     description: "Free Entry before 11PM",
@@ -31,7 +31,7 @@ export const discountOffers: VenueWithDiscount[] = [
     conditions: "Valid with RSVP",
     code: "VRNFREE"
   }),
-  createDiscountVenue("30", {
+  createDiscountVenue("2", {
     id: "disc2",
     type: "freeItem",
     description: "Free welcome drink",
@@ -39,7 +39,7 @@ export const discountOffers: VenueWithDiscount[] = [
     conditions: "One per customer",
     code: "VRNDRINK"
   }),
-  createDiscountVenue("31", {
+  createDiscountVenue("3", {
     id: "disc3",
     type: "percentOff",
     description: "25% off your entire bill",
@@ -47,7 +47,7 @@ export const discountOffers: VenueWithDiscount[] = [
     expiresAt: "2025-05-10",
     code: "VRN25"
   }),
-  createDiscountVenue("32", {
+  createDiscountVenue("4", {
     id: "disc4",
     type: "vipAccess",
     description: "VIP Table Access",
@@ -56,6 +56,5 @@ export const discountOffers: VenueWithDiscount[] = [
     expiresAt: "2025-05-20",
     conditions: "Minimum spend applies",
     code: "VRNVIP"
-  }),
-  // Add more mock discounts as needed
+  })
 ];
