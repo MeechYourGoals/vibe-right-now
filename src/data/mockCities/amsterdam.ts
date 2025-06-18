@@ -1,67 +1,60 @@
 
-import { CityData } from "@/types";
+import { CityData } from '@/types';
 
-export const amsterdamData: CityData = {
+const amsterdam: CityData = {
   name: "Amsterdam",
   country: "Netherlands",
   lat: 52.3676,
   lng: 4.9041,
   venues: [
     {
-      id: "amsterdam-1",
-      name: "Paradiso",
-      address: "Weteringschans 6-8",
+      id: "ams-1",
+      name: "De School",
+      address: "Doctor Jan van Breemenstraat 1",
       city: "Amsterdam",
       country: "Netherlands",
-      coordinates: { lat: 52.3626, lng: 4.8839 },
-      lat: 52.3626,
-      lng: 4.8839,
-      type: "nightclub",
-      rating: 4.4,
-      price_level: 2,
+      lat: 52.3567,
+      lng: 4.8634,
+      type: "nightclub" as const,
+      rating: 4.5,
+      price_level: 3,
       verified: true,
-      vibes: ["🎵 Live Music", "🎉 Dancing", "🍺 Drinks"],
+      vibes: ["Techno", "Underground", "Industrial"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/?q=Paradiso+Amsterdam",
-      createdAt: new Date('2024-01-01'),
-      updatedAt: new Date('2024-01-01')
+      google_maps_url: "https://maps.google.com/maps?q=De+School+Amsterdam"
     },
     {
-      id: "amsterdam-2", 
-      name: "Rijksmuseum",
-      address: "Museumstraat 1",
+      id: "ams-2",
+      name: "Anne Frank House",
+      address: "Prinsengracht 263-267",
       city: "Amsterdam",
       country: "Netherlands",
-      coordinates: { lat: 52.3600, lng: 4.8852 },
-      lat: 52.3600,
-      lng: 4.8852,
-      type: "attraction",
-      rating: 4.6,
+      lat: 52.3752,
+      lng: 4.8840,
+      type: "attraction" as const,
+      rating: 4.7,
       verified: true,
-      vibes: ["🎨 Art", "🏛️ Culture", "📚 History"],
+      vibes: ["Historic", "Museum", "Cultural"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/?q=Rijksmuseum+Amsterdam",
-      createdAt: new Date('2024-01-01'),
-      updatedAt: new Date('2024-01-01')
+      google_maps_url: "https://maps.google.com/maps?q=Anne+Frank+House+Amsterdam"
     },
     {
-      id: "amsterdam-3",
+      id: "ams-3",
       name: "Café Central",
-      address: "Lange Nieuwstraat 62",
+      address: "Lange Nieuwstraat 462",
       city: "Amsterdam",
       country: "Netherlands",
-      coordinates: { lat: 52.3738, lng: 4.8937 },
       lat: 52.3738,
-      lng: 4.8937,
-      type: "cafe",
+      lng: 4.8909,
+      type: "cafe" as const,
       rating: 4.3,
       price_level: 2,
       verified: true,
-      vibes: ["☕ Coffee", "🥐 Breakfast", "📚 Reading"],
+      vibes: ["Brown Café", "Traditional", "Local"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/?q=Cafe+Central+Amsterdam",
-      createdAt: new Date('2024-01-01'),
-      updatedAt: new Date('2024-01-01')
+      google_maps_url: "https://maps.google.com/maps?q=Cafe+Central+Amsterdam"
     }
   ]
 };
+
+export default amsterdam;
