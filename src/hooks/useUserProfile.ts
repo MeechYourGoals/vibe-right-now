@@ -86,6 +86,29 @@ export const useUserProfile = (userId?: string) => {
     return mockComments.filter(c => c.postId === postId);
   };
 
+  // Add missing methods for UserProfile page
+  const updateBio = async (bio: string): Promise<boolean> => {
+    return true;
+  };
+
+  const blockUser = async (userId: string): Promise<boolean> => {
+    return true;
+  };
+
+  const reportUser = async (userId: string, reason: string): Promise<boolean> => {
+    return true;
+  };
+
+  const getUserBio = (userId: string): string => {
+    const user = mockUsers.find(u => u.id === userId);
+    return user?.bio || '';
+  };
+
+  const isPrivateProfile = (userId: string): boolean => {
+    const user = mockUsers.find(u => u.id === userId);
+    return user?.isPrivate || false;
+  };
+
   return {
     profile,
     loading,
@@ -102,6 +125,11 @@ export const useUserProfile = (userId?: string) => {
     getUserPosts,
     getUserStats,
     getPostComments,
-    setStats
+    setStats,
+    updateBio,
+    blockUser,
+    reportUser,
+    getUserBio,
+    isPrivateProfile
   };
 };
