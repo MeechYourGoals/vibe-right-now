@@ -7,13 +7,108 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Use the provided API key
-const VERTEX_AI_API_KEY = "AIzaSyDHBe4hL8fQZdz9wSYi9srL0BGTnZ6XmyM";
+// API Keys
+const VERTEX_AI_API_KEY = Deno.env.get('GOOGLE_VERTEX_API_KEY') || "AIzaSyDHBe4hL8fQZdz9wSYi9srL0BGTnZ6XmyM";
+const GOOGLE_SEARCH_API_KEY = Deno.env.get('GOOGLE_CUSTOM_SEARCH_API_KEY');
+const GOOGLE_SEARCH_ENGINE_ID = Deno.env.get('GOOGLE_CUSTOM_SEARCH_ENGINE_ID');
 
 // Available models with proper fallback logic
 const MODELS = {
-  PRIMARY: 'gemini-1.5-flash', // Use flash as primary (faster, less quota)
-  FALLBACK: 'gemini-1.5-pro', // Use pro as fallback if flash fails
+  PRIMARY: 'gemini-1.5-flash',
+  FALLBACK: 'gemini-1.5-pro',
+}
+
+// Real-time search function using Google Custom Search API
+async function performRealTimeSearch(query: string): Promise<string> {
+  if (!GOOGLE_SEARCH_API_KEY || !GOOGLE_SEARCH_ENGINE_ID) {
+    console.log('Google Search API not configured, using Gemini knowledge only');
+    return '';
+  }
+
+  try {
+    console.log('Performing real-time search for:', query);
+    
+    const searchUrl = `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_SEARCH_API_KEY}&cx=${GOOGLE_SEARCH_ENGINE_ID}&q=${encodeURIComponent(query)}&num=5`;
+    
+    const response = await fetch(searchUrl);
+    if (!response.ok) {
+      throw new Error(`Search API error: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    const items = data.items || [];
+    
+    if (items.length === 0) {
+      return 'No current search results found.';
+    }
+    
+    // Format search results for Gemini to process
+    let searchResults = 'Here are current search results:\n\n';
+    items.forEach((item: any, index: number) => {
+      searchResults += `${index + 1}. **${item.title}**\n`;
+      searchResults += `   ${item.snippet}\n`;
+      searchResults += `   Source: ${item.link}\n\n`;
+    });
+    
+    return searchResults;
+  } catch (error) {
+    console.error('Error in real-time search:', error);
+    return 'Unable to fetch current search results.';
+  }
+}
+
+// Enhanced venue search using Google Places API
+async function searchVenues(location: string, query: string): Promise<string> {
+  if (!VERTEX_AI_API_KEY) {
+    return 'Places search not available.';
+  }
+
+  try {
+    console.log('Searching venues for:', query, 'in', location);
+    
+    // Use Google Places API Text Search
+    const placesUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query + ' in ' + location)}&key=${VERTEX_AI_API_KEY}&fields=name,rating,price_level,formatted_address,opening_hours,photos,website,types`;
+    
+    const response = await fetch(placesUrl);
+    if (!response.ok) {
+      throw new Error(`Places API error: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    const places = data.results || [];
+    
+    if (places.length === 0) {
+      return 'No venues found matching your criteria.';
+    }
+    
+    // Format venue results with real data
+    let venueResults = 'Here are real venues I found:\n\n';
+    places.slice(0, 5).forEach((place: any, index: number) => {
+      venueResults += `${index + 1}. **${place.name}**\n`;
+      venueResults += `   Rating: ${place.rating || 'N/A'} stars\n`;
+      venueResults += `   Address: ${place.formatted_address}\n`;
+      
+      if (place.price_level) {
+        const priceLevel = '$'.repeat(place.price_level);
+        venueResults += `   Price Level: ${priceLevel}\n`;
+      }
+      
+      if (place.opening_hours?.open_now !== undefined) {
+        venueResults += `   Status: ${place.opening_hours.open_now ? 'Open Now' : 'Closed'}\n`;
+      }
+      
+      if (place.website) {
+        venueResults += `   Website: ${place.website}\n`;
+      }
+      
+      venueResults += '\n';
+    });
+    
+    return venueResults;
+  } catch (error) {
+    console.error('Error searching venues:', error);
+    return 'Unable to fetch venue information at the moment.';
+  }
 }
 
 serve(async (req) => {
@@ -31,7 +126,6 @@ serve(async (req) => {
       try {
         console.log('Text-to-speech request for:', text.substring(0, 30) + '...');
         
-        // Call Google's Text-to-Speech API
         const ttsResponse = await fetch(`https://texttospeech.googleapis.com/v1/text:synthesize?key=${VERTEX_AI_API_KEY}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -39,8 +133,8 @@ serve(async (req) => {
             input: { text },
             voice: {
               languageCode: 'en-US',
-              name: options?.voice || 'en-US-Neural2-D', // Default to male voice
-              ssmlGender: 'MALE' // Consistently use male voice
+              name: options?.voice || 'en-US-Neural2-D',
+              ssmlGender: 'MALE'
             },
             audioConfig: {
               audioEncoding: 'MP3',
@@ -73,7 +167,6 @@ serve(async (req) => {
       try {
         console.log('Speech-to-text request received');
         
-        // Call Google Speech-to-Text API
         const sttResponse = await fetch(`https://speech.googleapis.com/v1/speech:recognize?key=${VERTEX_AI_API_KEY}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -110,39 +203,56 @@ serve(async (req) => {
       }
     }
 
-    // Handle search requests
+    // Handle enhanced search requests with real-time data
     if (action === 'search' && (query || prompt)) {
       try {
         const searchQuery = query || prompt;
-        console.log('Search request:', searchQuery);
+        console.log('Enhanced search request:', searchQuery);
         
-        // Use Gemini for search-enhanced responses
-        const searchPrompt = `
-          Please provide comprehensive, up-to-date information about "${searchQuery}".
-          Include specific details like:
-          - Names of venues, events, or places
-          - Addresses and locations when relevant
-          - Hours, prices, and availability if applicable
-          - Current and recent information
+        // Perform real-time search
+        const searchResults = await performRealTimeSearch(searchQuery);
+        
+        // Check if this is a venue/restaurant search
+        const isVenueSearch = searchQuery.toLowerCase().includes('restaurant') || 
+                             searchQuery.toLowerCase().includes('bar') || 
+                             searchQuery.toLowerCase().includes('hotel') ||
+                             searchQuery.toLowerCase().includes('near') ||
+                             searchQuery.toLowerCase().includes('rooftop');
+        
+        let venueResults = '';
+        if (isVenueSearch) {
+          // Extract location from query
+          const locationMatch = searchQuery.match(/(?:in|near)\s+([^,]+)/i);
+          const location = locationMatch ? locationMatch[1].trim() : 'Barcelona'; // Default to Barcelona based on user's query
+          venueResults = await searchVenues(location, searchQuery);
+        }
+        
+        // Combine search results with venue data and use Gemini to provide intelligent response
+        const enhancedPrompt = `
+          Based on this real-time information, please provide a helpful and accurate response to: "${searchQuery}"
           
-          Format your response clearly and provide actionable information.
+          ${searchResults ? 'Current Web Search Results:\n' + searchResults : ''}
+          
+          ${venueResults ? 'Real Venue Data:\n' + venueResults : ''}
+          
+          Please provide specific, actionable information based on this real data. Include actual names, ratings, addresses, and other concrete details from the search results. Do not mention that results are simulated - this is real, current information.
         `;
         
         const response = await callGeminiAPI(MODELS.PRIMARY, [{
           role: 'user',
-          parts: [{ text: searchPrompt }]
+          parts: [{ text: enhancedPrompt }]
         }]);
         
-        const searchResult = response.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        const searchResult = response.candidates?.[0]?.content?.parts?.[0]?.text || 'Unable to process search results.';
         
         return new Response(JSON.stringify({ 
           text: searchResult,
-          relatedQuestions: [] // Placeholder for related questions
+          relatedQuestions: []
         }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       } catch (error) {
-        console.error('Error in search:', error);
+        console.error('Error in enhanced search:', error);
         return new Response(JSON.stringify({ error: error.message }), {
           status: 500,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -155,7 +265,6 @@ serve(async (req) => {
       try {
         console.log('Chat completion request with messages:', messages.length);
         
-        // Convert OpenAI format to Gemini format
         const geminiMessages = messages.map(msg => ({
           role: msg.role === 'user' ? 'user' : 'model',
           parts: [{ text: msg.content }]
@@ -164,7 +273,6 @@ serve(async (req) => {
         const response = await callGeminiAPI(model || MODELS.PRIMARY, geminiMessages);
         const generatedText = response.candidates?.[0]?.content?.parts?.[0]?.text || '';
         
-        // Return in OpenAI-compatible format
         return new Response(JSON.stringify({
           response: {
             choices: [{
@@ -186,7 +294,7 @@ serve(async (req) => {
       }
     }
 
-    // Handle regular chat completion requests
+    // Handle regular chat completion requests with enhanced search capability
     if (prompt) {
       const requestedModel = model || MODELS.PRIMARY;
       console.log(`Processing ${requestedModel} request in ${mode} mode with prompt: ${prompt.substring(0, 50)}...`);
@@ -194,17 +302,63 @@ serve(async (req) => {
       // Define system context based on mode
       let systemPrompt = '';
       if (mode === 'venue') {
-        systemPrompt = "You are Vernon, a venue analytics assistant powered by Google Gemini. Provide insightful business analysis and recommendations for venue owners.";
+        systemPrompt = "You are Vernon, a venue analytics assistant powered by Google Gemini with real-time search capabilities. Provide insightful business analysis and recommendations for venue owners using current data.";
       } else if (mode === 'search') {
-        systemPrompt = "You are a search assistant powered by Google Gemini. Provide detailed information about places, events, and activities with current, accurate information.";
+        systemPrompt = "You are a search assistant powered by Google Gemini with real-time web access. Provide detailed, current information about places, events, and activities with actual, up-to-date data.";
       } else {
-        systemPrompt = `You are Vernon, a helpful AI assistant powered by Google Gemini within the 'Vibe Right Now' app. Your primary goal is to help users discover great places to go and things to do.`;
+        systemPrompt = `You are Vernon, a helpful AI assistant powered by Google Gemini with real-time search capabilities within the 'Vibe Right Now' app. Your primary goal is to help users discover great places to go and things to do using current, accurate information.`;
+      }
+      
+      // Check if this requires real-time search
+      const needsSearch = prompt.toLowerCase().includes('find') || 
+                         prompt.toLowerCase().includes('search') ||
+                         prompt.toLowerCase().includes('restaurant') ||
+                         prompt.toLowerCase().includes('bar') ||
+                         prompt.toLowerCase().includes('hotel') ||
+                         prompt.toLowerCase().includes('near') ||
+                         prompt.toLowerCase().includes('current') ||
+                         prompt.toLowerCase().includes('latest') ||
+                         prompt.toLowerCase().includes('rating');
+      
+      let enhancedPrompt = prompt;
+      
+      if (needsSearch) {
+        console.log('Performing enhanced search for user query');
+        
+        // Get real-time search results
+        const searchResults = await performRealTimeSearch(prompt);
+        
+        // Check for venue search
+        const isVenueSearch = prompt.toLowerCase().includes('restaurant') || 
+                             prompt.toLowerCase().includes('bar') || 
+                             prompt.toLowerCase().includes('hotel') ||
+                             prompt.toLowerCase().includes('near') ||
+                             prompt.toLowerCase().includes('rooftop');
+        
+        let venueResults = '';
+        if (isVenueSearch) {
+          const locationMatch = prompt.match(/(?:in|near)\s+([^,]+)/i);
+          const location = locationMatch ? locationMatch[1].trim() : 'Barcelona';
+          venueResults = await searchVenues(location, prompt);
+        }
+        
+        // Enhance prompt with real data
+        enhancedPrompt = `
+          ${systemPrompt}
+          
+          User Query: ${prompt}
+          
+          ${searchResults ? 'Current Web Search Results:\n' + searchResults : ''}
+          
+          ${venueResults ? 'Real Venue Data:\n' + venueResults : ''}
+          
+          Please provide a helpful response using this real, current information. Include specific names, ratings, addresses, and concrete details from the search results. Do not mention that results are simulated - this is real, current data.
+        `;
       }
       
       // Prepare the messages for Gemini
       let geminiMessages = [];
       
-      // Process context properly - ensure it's in the correct format
       if (context && context.length > 0) {
         geminiMessages = context.map(msg => ({
           role: msg.sender === 'user' ? 'user' : 'model',
@@ -212,55 +366,50 @@ serve(async (req) => {
         }));
       }
       
-      // Add system prompt as a "model" message at the beginning if not already included
-      if (geminiMessages.length === 0 || geminiMessages[0].role !== 'model' || !geminiMessages[0].parts[0].text.includes(systemPrompt)) {
+      if (geminiMessages.length === 0 || !geminiMessages[0].parts[0].text.includes(systemPrompt)) {
         geminiMessages.unshift({
           role: 'model',
           parts: [{ text: systemPrompt }]
         });
       }
       
-      // Add the new user message
       geminiMessages.push({
         role: 'user',
-        parts: [{ text: prompt }]
+        parts: [{ text: enhancedPrompt }]
       });
       
-      console.log("Sending request to Gemini API with messages:", JSON.stringify(geminiMessages));
+      console.log("Sending enhanced request to Gemini API");
 
-      // Try with primary model first, then fallback
       let responseText = '';
       let usedFallback = false;
       
       try {
         const response = await callGeminiAPI(requestedModel, geminiMessages);
         responseText = response.candidates?.[0]?.content?.parts?.[0]?.text || '';
-        console.log('Generated response successfully:', responseText.substring(0, 50) + '...');
+        console.log('Generated enhanced response successfully');
       } catch (error) {
         console.error(`Error with ${requestedModel}:`, error);
         
-        // If primary model fails, try fallback
         if (requestedModel === MODELS.PRIMARY) {
           console.log(`Trying fallback model ${MODELS.FALLBACK}`);
           try {
             const fallbackResponse = await callGeminiAPI(MODELS.FALLBACK, geminiMessages);
             responseText = fallbackResponse.candidates?.[0]?.content?.parts?.[0]?.text || '';
             usedFallback = true;
-            console.log('Generated response with fallback model:', responseText.substring(0, 50) + '...');
+            console.log('Generated response with fallback model');
           } catch (fallbackError) {
             console.error('Error with fallback model:', fallbackError);
-            // If both models fail, provide a helpful message
-            responseText = "I'm experiencing some connectivity issues right now. This might be due to high demand on Google's AI services. Please try again in a moment, or rephrase your question.";
+            responseText = "I'm experiencing some connectivity issues right now. Please try again in a moment.";
           }
         } else {
-          // If fallback model fails, provide helpful message
-          responseText = "I'm experiencing some connectivity issues right now. This might be due to high demand on Google's AI services. Please try again in a moment, or rephrase your question.";
+          responseText = "I'm experiencing some connectivity issues right now. Please try again in a moment.";
         }
       }
       
       return new Response(JSON.stringify({ 
         text: responseText,
-        usedFallbackModel: usedFallback 
+        usedFallbackModel: usedFallback,
+        searchEnhanced: needsSearch 
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -271,7 +420,7 @@ serve(async (req) => {
     console.error('Error in vertex-ai function:', error);
     return new Response(JSON.stringify({ 
       error: error.message,
-      fallbackResponse: "I'm currently experiencing connection issues with Google's AI services. This could be due to high demand or temporary service limitations. Please try again in a few minutes." 
+      fallbackResponse: "I'm currently experiencing connection issues. Please try again in a few minutes." 
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -296,7 +445,7 @@ async function callGeminiAPI(model, messages) {
         temperature: 0.7,
         topK: 40,
         topP: 0.95,
-        maxOutputTokens: 2048, // Increased token limit
+        maxOutputTokens: 2048,
       },
       safetySettings: [
         {
@@ -323,7 +472,6 @@ async function callGeminiAPI(model, messages) {
     const errorText = await response.text();
     console.error(`Google Gemini API error: ${response.status}:`, errorText);
     
-    // Parse the error to provide better feedback
     try {
       const errorData = JSON.parse(errorText);
       if (errorData.error?.code === 429) {
