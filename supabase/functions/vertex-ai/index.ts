@@ -7,10 +7,10 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// API Keys
-const VERTEX_AI_API_KEY = Deno.env.get('GOOGLE_VERTEX_API_KEY') || "AIzaSyDHBe4hL8fQZdz9wSYi9srL0BGTnZ6XmyM";
+// API Keys from environment
+const VERTEX_AI_API_KEY = Deno.env.get('GOOGLE_VERTEX_API_KEY');
 const GOOGLE_SEARCH_API_KEY = Deno.env.get('GOOGLE_CUSTOM_SEARCH_API_KEY');
-const GOOGLE_SEARCH_ENGINE_ID = Deno.env.get('GOOGLE_CUSTOM_SEARCH_ENGINE_ID') || "9450222ed533f404b";
+const GOOGLE_SEARCH_ENGINE_ID = Deno.env.get('GOOGLE_CUSTOM_SEARCH_ENGINE_ID');
 
 // Available models with proper fallback logic
 const MODELS = {
@@ -32,7 +32,8 @@ async function performRealTimeSearch(query: string): Promise<string> {
     
     const response = await fetch(searchUrl);
     if (!response.ok) {
-      throw new Error(`Search API error: ${response.status}`);
+      console.error(`Search API error: ${response.status} - ${response.statusText}`);
+      return '';
     }
     
     const data = await response.json();
@@ -53,14 +54,15 @@ async function performRealTimeSearch(query: string): Promise<string> {
     return searchResults;
   } catch (error) {
     console.error('Error in real-time search:', error);
-    return 'Unable to fetch current search results.';
+    return '';
   }
 }
 
 // Enhanced venue search using Google Places API
 async function searchVenues(location: string, query: string): Promise<string> {
   if (!VERTEX_AI_API_KEY) {
-    return 'Places search not available.';
+    console.log('Places API not available, using Gemini knowledge');
+    return '';
   }
 
   try {
@@ -71,7 +73,8 @@ async function searchVenues(location: string, query: string): Promise<string> {
     
     const response = await fetch(placesUrl);
     if (!response.ok) {
-      throw new Error(`Places API error: ${response.status}`);
+      console.error(`Places API error: ${response.status} - ${response.statusText}`);
+      return '';
     }
     
     const data = await response.json();
@@ -107,7 +110,7 @@ async function searchVenues(location: string, query: string): Promise<string> {
     return venueResults;
   } catch (error) {
     console.error('Error searching venues:', error);
-    return 'Unable to fetch venue information at the moment.';
+    return '';
   }
 }
 
@@ -120,6 +123,18 @@ serve(async (req) => {
   try {
     console.log("Received request to vertex-ai function");
     const { prompt, mode = 'default', context = [], model = MODELS.PRIMARY, action, text, audio, options, messages, query } = await req.json();
+    
+    // Validate that we have the required API key
+    if (!VERTEX_AI_API_KEY) {
+      console.error('GOOGLE_VERTEX_API_KEY not configured');
+      return new Response(JSON.stringify({ 
+        error: 'AI service not configured',
+        fallbackResponse: "I'm currently experiencing configuration issues. Please check with the administrator." 
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
     
     // Handle text-to-speech requests
     if (action === 'text-to-speech' && text) {
@@ -235,7 +250,7 @@ serve(async (req) => {
           
           ${venueResults ? 'Real Venue Data:\n' + venueResults : ''}
           
-          Please provide specific, actionable information based on this real data. Include actual names, ratings, addresses, and other concrete details from the search results. Do not mention that results are simulated - this is real, current information.
+          Please provide specific, actionable information based on this real data. If no search results are available, provide helpful information from your training data. Include actual names, ratings, addresses, and other concrete details when available.
         `;
         
         const response = await callGeminiAPI(MODELS.PRIMARY, [{
@@ -253,10 +268,29 @@ serve(async (req) => {
         });
       } catch (error) {
         console.error('Error in enhanced search:', error);
-        return new Response(JSON.stringify({ error: error.message }), {
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
+        // Provide a fallback response using Gemini's training data
+        const fallbackPrompt = `Please help with this query using your training data: "${query || prompt}"`;
+        try {
+          const fallbackResponse = await callGeminiAPI(MODELS.PRIMARY, [{
+            role: 'user',
+            parts: [{ text: fallbackPrompt }]
+          }]);
+          
+          const fallbackResult = fallbackResponse.candidates?.[0]?.content?.parts?.[0]?.text || 'I can help with general information about this topic.';
+          
+          return new Response(JSON.stringify({ 
+            text: fallbackResult,
+            relatedQuestions: []
+          }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        } catch (fallbackError) {
+          console.error('Fallback response failed:', fallbackError);
+          return new Response(JSON.stringify({ error: error.message }), {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
       }
     }
 
@@ -302,11 +336,11 @@ serve(async (req) => {
       // Define system context based on mode
       let systemPrompt = '';
       if (mode === 'venue') {
-        systemPrompt = "You are Vernon, a venue analytics assistant powered by Google Gemini with real-time search capabilities. Provide insightful business analysis and recommendations for venue owners using current data.";
+        systemPrompt = "You are Vernon, a venue analytics assistant powered by Google Gemini. Provide insightful business analysis and recommendations for venue owners.";
       } else if (mode === 'search') {
-        systemPrompt = "You are a search assistant powered by Google Gemini with real-time web access. Provide detailed, current information about places, events, and activities with actual, up-to-date data.";
+        systemPrompt = "You are a search assistant powered by Google Gemini. Provide detailed information about places, events, and activities.";
       } else {
-        systemPrompt = `You are Vernon, a helpful AI assistant powered by Google Gemini with real-time search capabilities within the 'Vibe Right Now' app. Your primary goal is to help users discover great places to go and things to do using current, accurate information.`;
+        systemPrompt = `You are Vernon, a helpful AI assistant powered by Google Gemini within the 'Vibe Right Now' app. Your primary goal is to help users discover great places to go and things to do.`;
       }
       
       // Check if this requires real-time search
@@ -342,18 +376,22 @@ serve(async (req) => {
           venueResults = await searchVenues(location, prompt);
         }
         
-        // Enhance prompt with real data
-        enhancedPrompt = `
-          ${systemPrompt}
-          
-          User Query: ${prompt}
-          
-          ${searchResults ? 'Current Web Search Results:\n' + searchResults : ''}
-          
-          ${venueResults ? 'Real Venue Data:\n' + venueResults : ''}
-          
-          Please provide a helpful response using this real, current information. Include specific names, ratings, addresses, and concrete details from the search results. Do not mention that results are simulated - this is real, current data.
-        `;
+        // Enhance prompt with real data if available
+        if (searchResults || venueResults) {
+          enhancedPrompt = `
+            ${systemPrompt}
+            
+            User Query: ${prompt}
+            
+            ${searchResults ? 'Current Web Search Results:\n' + searchResults : ''}
+            
+            ${venueResults ? 'Real Venue Data:\n' + venueResults : ''}
+            
+            Please provide a helpful response using this real, current information when available. Include specific names, ratings, addresses, and concrete details from the search results when provided. If no search results are available, provide helpful information from your training data.
+          `;
+        } else {
+          enhancedPrompt = `${systemPrompt}\n\nUser Query: ${prompt}\n\nPlease provide helpful information from your training data.`;
+        }
       }
       
       // Prepare the messages for Gemini
@@ -378,7 +416,7 @@ serve(async (req) => {
         parts: [{ text: enhancedPrompt }]
       });
       
-      console.log("Sending enhanced request to Gemini API");
+      console.log("Sending request to Gemini API");
 
       let responseText = '';
       let usedFallback = false;
@@ -386,7 +424,7 @@ serve(async (req) => {
       try {
         const response = await callGeminiAPI(requestedModel, geminiMessages);
         responseText = response.candidates?.[0]?.content?.parts?.[0]?.text || '';
-        console.log('Generated enhanced response successfully');
+        console.log('Generated response successfully');
       } catch (error) {
         console.error(`Error with ${requestedModel}:`, error);
         
@@ -399,10 +437,10 @@ serve(async (req) => {
             console.log('Generated response with fallback model');
           } catch (fallbackError) {
             console.error('Error with fallback model:', fallbackError);
-            responseText = "I'm experiencing some connectivity issues right now. Please try again in a moment.";
+            responseText = "I'm experiencing some connectivity issues right now. I can help with general information from my training data. Please try again in a moment for the latest search results.";
           }
         } else {
-          responseText = "I'm experiencing some connectivity issues right now. Please try again in a moment.";
+          responseText = "I'm experiencing some connectivity issues right now. I can help with general information from my training data. Please try again in a moment for the latest search results.";
         }
       }
       
@@ -420,7 +458,7 @@ serve(async (req) => {
     console.error('Error in vertex-ai function:', error);
     return new Response(JSON.stringify({ 
       error: error.message,
-      fallbackResponse: "I'm currently experiencing connection issues. Please try again in a few minutes." 
+      fallbackResponse: "I'm currently experiencing connection issues. I can help with general information from my training data. Please try again in a few minutes for real-time search results." 
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -430,6 +468,10 @@ serve(async (req) => {
 
 // Helper function to call Gemini API with better error handling
 async function callGeminiAPI(model, messages) {
+  if (!VERTEX_AI_API_KEY) {
+    throw new Error('GOOGLE_VERTEX_API_KEY not configured');
+  }
+
   const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${VERTEX_AI_API_KEY}`;
   
   console.log(`Calling Gemini API with model: ${model}`);
@@ -478,6 +520,8 @@ async function callGeminiAPI(model, messages) {
         throw new Error(`Rate limit exceeded for ${model}. Please wait a moment before trying again.`);
       } else if (errorData.error?.code === 404) {
         throw new Error(`Model ${model} is not available. Please try again.`);
+      } else if (errorData.error?.code === 400 && errorData.error?.message?.includes('API key not valid')) {
+        throw new Error(`Invalid API key for Google Vertex AI. Please check your GOOGLE_VERTEX_API_KEY configuration.`);
       } else {
         throw new Error(`Google Gemini API error: ${response.status}: ${errorData.error?.message || errorText}`);
       }

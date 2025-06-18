@@ -1,60 +1,48 @@
 
-import { CityData } from '@/types';
+import { CityData } from "@/types";
 
-const bangkok: CityData = {
+const currentDate = new Date().toISOString();
+
+export const bangkokData: CityData = {
   name: "Bangkok",
   country: "Thailand",
   lat: 13.7563,
   lng: 100.5018,
   venues: [
     {
-      id: "bkk-1",
+      id: "bangkok-1",
       name: "Wat Pho",
-      address: "2 Sanamchai Rd",
+      address: "2 Sanamchai Road, Grand Palace Subdistrict",
       city: "Bangkok",
       country: "Thailand",
       lat: 13.7465,
       lng: 100.4927,
-      type: "attraction" as const,
+      type: "attraction",
       rating: 4.6,
       verified: true,
-      vibes: ["Temple", "Buddha", "Historic"],
+      vibes: ["Spiritual", "Historical", "Peaceful"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Wat+Pho+Bangkok"
+      google_maps_url: "https://maps.google.com/?cid=2234567890",
+      createdAt: currentDate,
+      updatedAt: currentDate
     },
     {
-      id: "bkk-2",
-      name: "Gaggan",
-      address: "68/1 Soi Langsuan",
+      id: "bangkok-2", 
+      name: "Gaggan Anand",
+      address: "68/1 Soi Langsuan, Ploenchit Road",
       city: "Bangkok",
       country: "Thailand",
-      lat: 13.7441,
+      lat: 13.7440,
       lng: 100.5416,
-      type: "restaurant" as const,
+      type: "restaurant",
       rating: 4.8,
       price_level: 4,
       verified: true,
-      vibes: ["Progressive Indian", "Molecular", "Award-winning"],
-      business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Gaggan+Bangkok"
-    },
-    {
-      id: "bkk-3",
-      name: "Levels Club",
-      address: "Aloft Bangkok",
-      city: "Bangkok",
-      country: "Thailand",
-      lat: 13.7558,
-      lng: 100.5389,
-      type: "nightclub" as const,
-      rating: 4.2,
-      price_level: 3,
-      verified: true,
-      vibes: ["Rooftop", "City Views", "Electronic"],
-      business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Levels+Club+Bangkok"
+      vibes: ["Fine Dining", "Innovative", "Upscale"],
+      business_status: "OPERATIONAL", 
+      google_maps_url: "https://maps.google.com/?cid=2234567891",
+      createdAt: currentDate,
+      updatedAt: currentDate
     }
   ]
 };
-
-export default bangkok;
