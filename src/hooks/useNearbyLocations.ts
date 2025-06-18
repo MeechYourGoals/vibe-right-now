@@ -3,11 +3,38 @@ import { useState, useEffect } from 'react';
 import { Location } from '@/types';
 import { mockCities } from '@/data/mockCities';
 
-export const useNearbyLocations = (userLat?: number, userLng?: number) => {
+export const useNearbyLocations = () => {
   const [nearbyLocations, setNearbyLocations] = useState<Location[]>([]);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [searchedCity, setSearchedCity] = useState<string>("");
+  const [userAddressLocation, setUserAddressLocation] = useState<{ lat: number; lng: number } | null>(null);
   
   useEffect(() => {
-    if (!userLat || !userLng) {
+    // Try to get user's current location
+    if (navigator.geolocation) {
+      setLoading(true);
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const coords = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          };
+          setUserLocation(coords);
+          setLoading(false);
+        },
+        (error) => {
+          console.log('Geolocation error:', error);
+          setLoading(false);
+        }
+      );
+    }
+  }, []);
+  
+  useEffect(() => {
+    const effectiveLocation = userAddressLocation || userLocation;
+    
+    if (!effectiveLocation) {
       // Return all locations from mock cities if no user location
       const allLocations = mockCities.flatMap(city => city.venues);
       setNearbyLocations(allLocations.slice(0, 20)); // Limit to 20 for performance
@@ -18,7 +45,7 @@ export const useNearbyLocations = (userLat?: number, userLng?: number) => {
     const allLocations = mockCities.flatMap(city => city.venues);
     const locationsWithDistance = allLocations.map(location => ({
       ...location,
-      distance: calculateDistance(userLat, userLng, location.lat, location.lng)
+      distance: calculateDistance(effectiveLocation.lat, effectiveLocation.lng, location.lat, location.lng)
     }));
     
     // Sort by distance and take closest 20
@@ -28,9 +55,17 @@ export const useNearbyLocations = (userLat?: number, userLng?: number) => {
       .map(({ distance, ...location }) => location);
     
     setNearbyLocations(nearby);
-  }, [userLat, userLng]);
+  }, [userLocation, userAddressLocation]);
   
-  return nearbyLocations;
+  return {
+    userLocation,
+    nearbyLocations,
+    loading,
+    searchedCity,
+    setSearchedCity,
+    userAddressLocation,
+    setUserAddressLocation
+  };
 };
 
 // Helper function to calculate distance between two coordinates
