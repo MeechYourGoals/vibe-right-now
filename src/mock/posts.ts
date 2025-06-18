@@ -1,6 +1,7 @@
+
 import { Post, Media } from "@/types";
 import { mockUsers } from "./users";
-import { findLocationById } from "@/data/mockCities";
+import { mockLocations } from "./locations";
 
 // Helper function to create media with required id
 const createMedia = (type: "image" | "video" | "audio", url: string, thumbnail?: string): Media => ({
@@ -10,201 +11,174 @@ const createMedia = (type: "image" | "video" | "audio", url: string, thumbnail?:
   thumbnail
 });
 
-// Helper function to create location with fallback
-const getLocationWithFallback = (locationId: string) => {
-  const location = findLocationById(locationId);
+// Helper function to get location with fallback
+const getLocationById = (id: string) => {
+  const location = mockLocations.find(loc => loc.id === id);
   if (!location) {
-    // Return a fallback location if not found
-    return {
-      id: locationId,
-      name: "Unknown Location",
-      address: "Unknown Address",
-      city: "Unknown City",
-      country: "USA",
-      lat: 40.7128,
-      lng: -74.0060,
-      type: "other" as const,
-      verified: true,
-      coordinates: {
-        lat: 40.7128,
-        lng: -74.0060
-      },
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
+    console.warn(`Location with ID ${id} not found`);
+    return mockLocations[0]; // fallback to first location
   }
-  
-  // Ensure all required fields are present
-  return {
-    ...location,
-    verified: location.verified ?? true,
-    coordinates: {
-      lat: location.lat,
-      lng: location.lng
-    },
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  };
+  return location;
 };
 
 export const mockPosts: Post[] = [
   {
     id: "1",
     user: mockUsers[0],
-    location: getLocationWithFallback("nyc-1"),
-    content: "Just discovered this amazing brunch spot! The avocado toast here is next level 🥑✨",
-    media: [createMedia("image", "https://images.unsplash.com/photo-1482049016688-2d3e1b311543?w=500")],
-    timestamp: new Date(),
-    likes: 3,
-    comments: 2,
+    location: getLocationById("8"), // Christ the Redeemer
+    content: "Standing before this iconic statue in Rio! The view from up here is absolutely breathtaking. The journey to get here was worth every step 🙏✨",
+    media: [createMedia("image", "https://images.unsplash.com/photo-1544378796-8b5ad8e3e13e?w=500")],
+    timestamp: new Date(Date.now() - 1000 * 60 * 30),
+    likes: 24,
+    comments: 8,
     saved: false,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
+    updatedAt: new Date(Date.now() - 1000 * 60 * 30).toISOString()
   },
   {
     id: "2",
     user: mockUsers[1],
-    location: getLocationWithFallback("la-1"),
-    content: "Date night vibes at this incredible Italian place 🍝💕 The ambiance is perfect!",
+    location: getLocationById("20"), // Coachella
+    content: "Coachella Weekend 1 was UNREAL! The energy, the music, the desert vibes - everything was perfect. Already planning for next year 🎵🌵",
     media: [
-      createMedia("image", "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=500"),
-      createMedia("image", "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=500")
+      createMedia("image", "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=500"),
+      createMedia("video", "https://example.com/coachella-video.mp4")
     ],
-    timestamp: new Date(),
-    likes: 2,
-    comments: 2,
+    timestamp: new Date(Date.now() - 1000 * 60 * 120),
+    likes: 89,
+    comments: 23,
     saved: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    createdAt: new Date(Date.now() - 1000 * 60 * 120).toISOString(),
+    updatedAt: new Date(Date.now() - 1000 * 60 * 120).toISOString()
   },
   {
     id: "3",
     user: mockUsers[2],
-    location: getLocationWithFallback("london-1"),
-    content: "Live music night was absolutely incredible! This band knows how to get the crowd going 🎸🔥",
-    media: [createMedia("video", "https://example.com/concert-video.mp4")],
-    timestamp: new Date(),
-    likes: 2,
-    comments: 2,
+    location: getLocationById("23"), // InvestFest
+    content: "InvestFest Atlanta was incredible! So much knowledge shared about building wealth and financial literacy. The energy in the room was electric! 💰📈",
+    media: [createMedia("image", "https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=500")],
+    timestamp: new Date(Date.now() - 1000 * 60 * 60),
+    likes: 45,
+    comments: 12,
     saved: false,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    createdAt: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
+    updatedAt: new Date(Date.now() - 1000 * 60 * 60).toISOString()
   },
   {
     id: "4",
     user: mockUsers[3],
-    location: getLocationWithFallback("chicago-1"),
-    content: "Perfect coffee shop for getting work done. Great WiFi and even better lattes! ☕💻",
-    media: [createMedia("image", "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=500")],
-    timestamp: new Date(),
-    likes: 2,
-    comments: 2,
+    location: getLocationById("18"), // Sydney Opera House
+    content: "Finally made it to the Sydney Opera House! The architecture is even more stunning in person. Caught an amazing performance tonight 🎭🏛️",
+    media: [createMedia("image", "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500")],
+    timestamp: new Date(Date.now() - 1000 * 60 * 90),
+    likes: 67,
+    comments: 15,
     saved: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    createdAt: new Date(Date.now() - 1000 * 60 * 90).toISOString(),
+    updatedAt: new Date(Date.now() - 1000 * 60 * 90).toISOString()
   },
   {
     id: "5",
     user: mockUsers[4],
-    location: getLocationWithFallback("miami-1"),
-    content: "Taco Tuesday never disappoints here! The flavors are absolutely authentic 🌮🌶️",
-    media: [createMedia("image", "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=500")],
-    timestamp: new Date(),
-    likes: 2,
-    comments: 2,
-    saved: false,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    location: getLocationById("19"), // Eiffel Tower
+    content: "Paris at sunset from the Eiffel Tower - no words can describe this magic! The city of lights truly lives up to its name ✨🇫🇷",
+    media: [createMedia("image", "https://images.unsplash.com/photo-1543349689-9a4d426bee8e?w=500")],
+    timestamp: new Date(Date.now() - 1000 * 60 * 45),
+    likes: 156,
+    comments: 34,
+    saved: true,
+    createdAt: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
+    updatedAt: new Date(Date.now() - 1000 * 60 * 45).toISOString()
   },
   {
     id: "6",
     user: mockUsers[5],
-    location: getLocationWithFallback("sanfrancisco-1"),
-    content: "Art gallery meets wine bar - what's not to love? Such a unique concept! 🎨🍷",
-    media: [createMedia("image", "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=500")],
-    timestamp: new Date(),
-    likes: 2,
-    comments: 2,
-    saved: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    location: getLocationById("30"), // Lakers vs Warriors
+    content: "WHAT A GAME! Lakers pulled through in overtime! The energy at Crypto.com Arena was absolutely insane! 🏀🔥",
+    media: [createMedia("image", "https://images.unsplash.com/photo-1546519638-68e109498ffc?w=500")],
+    timestamp: new Date(Date.now() - 1000 * 60 * 15),
+    likes: 78,
+    comments: 19,
+    saved: false,
+    createdAt: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
+    updatedAt: new Date(Date.now() - 1000 * 60 * 15).toISOString()
   },
   {
     id: "7",
     user: mockUsers[6],
-    location: getLocationWithFallback("paris-1"),
-    content: "Rooftop drinks with this view? Absolutely unbeatable! Paris never disappoints 🌅🥂",
-    media: [createMedia("image", "https://images.unsplash.com/photo-1551632811-561732d1e306?w=500")],
-    timestamp: new Date(),
-    likes: 2,
-    comments: 2,
-    saved: false,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    location: getLocationById("6"), // Madison Square Garden
+    content: "The Garden never disappoints! What an incredible show tonight. NYC always brings that special energy 🗽🎤",
+    media: [createMedia("image", "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500")],
+    timestamp: new Date(Date.now() - 1000 * 60 * 200),
+    likes: 92,
+    comments: 27,
+    saved: true,
+    createdAt: new Date(Date.now() - 1000 * 60 * 200).toISOString(),
+    updatedAt: new Date(Date.now() - 1000 * 60 * 200).toISOString()
   },
   {
     id: "8",
     user: mockUsers[7],
-    location: getLocationWithFallback("tokyo-1"),
-    content: "The energy at this club is insane! DJ had everyone dancing until sunrise 💃🎵",
-    media: [createMedia("image", "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=500")],
-    timestamp: new Date(),
-    likes: 2,
-    comments: 2,
-    saved: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    location: getLocationById("22"), // Bitcoin Conference
+    content: "Bitcoin Conference Nashville was mind-blowing! The future of finance is happening right here, right now. So many innovative minds in one place 🚀₿",
+    media: [createMedia("image", "https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=500")],
+    timestamp: new Date(Date.now() - 1000 * 60 * 180),
+    likes: 134,
+    comments: 41,
+    saved: false,
+    createdAt: new Date(Date.now() - 1000 * 60 * 180).toISOString(),
+    updatedAt: new Date(Date.now() - 1000 * 60 * 180).toISOString()
   },
   {
     id: "9",
     user: mockUsers[8],
-    location: getLocationWithFallback("sydney-1"),
-    content: "Cozy corner cafe with the best pastries in town. Perfect for a quiet morning ☕🥐",
-    media: [createMedia("image", "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=500")],
-    timestamp: new Date(),
-    likes: 2,
-    comments: 2,
-    saved: false,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    location: getLocationById("11"), // Mama's Fish House
+    content: "Best seafood I've ever had! Mama's Fish House in Maui is an absolute must-visit. The ocean view while dining is perfection 🌺🐟",
+    media: [createMedia("image", "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=500")],
+    timestamp: new Date(Date.now() - 1000 * 60 * 240),
+    likes: 67,
+    comments: 16,
+    saved: true,
+    createdAt: new Date(Date.now() - 1000 * 60 * 240).toISOString(),
+    updatedAt: new Date(Date.now() - 1000 * 60 * 240).toISOString()
   },
   {
     id: "10",
     user: mockUsers[9],
-    location: getLocationWithFallback("barcelona-1"),
-    content: "Seafood paella by the harbor - doesn't get more authentic than this! 🥘🌊",
-    media: [createMedia("image", "https://images.unsplash.com/photo-1534080564583-6be75777b70a?w=500")],
-    timestamp: new Date(),
-    likes: 2,
-    comments: 2,
-    saved: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    location: getLocationById("35"), // WM Phoenix Open
+    content: "Loudest hole in golf! The 16th at TPC Scottsdale during the Phoenix Open is pure chaos in the best way possible ⛳🍺",
+    media: [createMedia("image", "https://images.unsplash.com/photo-1587174486073-ae5e5cec4fe4?w=500")],
+    timestamp: new Date(Date.now() - 1000 * 60 * 300),
+    likes: 43,
+    comments: 11,
+    saved: false,
+    createdAt: new Date(Date.now() - 1000 * 60 * 300).toISOString(),
+    updatedAt: new Date(Date.now() - 1000 * 60 * 300).toISOString()
   },
   {
     id: "11",
     user: mockUsers[10],
-    location: getLocationWithFallback("nyc-2"),
-    content: "Craft beer heaven! So many unique brews to try, I'll be back for sure 🍺🍻",
-    media: [createMedia("image", "https://images.unsplash.com/photo-1608270586620-248524c67de9?w=500")],
-    timestamp: new Date(),
-    likes: 2,
-    comments: 2,
-    saved: false,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    location: getLocationById("7"), // Encore Beach Club
+    content: "Vegas pool party vibes at Encore Beach Club! The sun, the music, the energy - this is what summer dreams are made of ☀️🏊‍♀️",
+    media: [createMedia("image", "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=500")],
+    timestamp: new Date(Date.now() - 1000 * 60 * 360),
+    likes: 89,
+    comments: 24,
+    saved: true,
+    createdAt: new Date(Date.now() - 1000 * 60 * 360).toISOString(),
+    updatedAt: new Date(Date.now() - 1000 * 60 * 360).toISOString()
   },
   {
     id: "12",
     user: mockUsers[11],
-    location: getLocationWithFallback("la-2"),
-    content: "Game night at this sports bar was epic! Great atmosphere and even better wings 🏀🍗",
-    media: [createMedia("image", "https://images.unsplash.com/photo-1574068468668-a05a11f871da?w=500")],
-    timestamp: new Date(),
-    likes: 2,
-    comments: 2,
-    saved: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    location: getLocationById("25"), // The Comedy Cellar Austin
+    content: "Laughed until my sides hurt at The Comedy Cellar! Austin's comedy scene is absolutely phenomenal. Such talented performers 😂🎭",
+    media: [createMedia("image", "https://images.unsplash.com/photo-1577848915194-9596ddb85ad3?w=500")],
+    timestamp: new Date(Date.now() - 1000 * 60 * 420),
+    likes: 56,
+    comments: 13,
+    saved: false,
+    createdAt: new Date(Date.now() - 1000 * 60 * 420).toISOString(),
+    updatedAt: new Date(Date.now() - 1000 * 60 * 420).toISOString()
   }
 ];

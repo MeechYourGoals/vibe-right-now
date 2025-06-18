@@ -1,103 +1,107 @@
 
-import { useState } from 'react';
-import { User } from '@/types';
+import { useState, useEffect } from 'react';
+import { UserProfileData, UserProfileStats, User, Post, Location, Comment } from '@/types';
+import { mockUsers } from '@/mock/users';
+import { mockPosts } from '@/mock/posts';
+import { mockComments } from '@/mock/comments';
+import { mockLocations } from '@/mock/locations';
 
-export interface UserProfileStats {
-  posts: number;
-  followers: number;
-  following: number;
-}
-
-export const useUserProfile = () => {
-  const [user, setUser] = useState<User | null>(null);
+export const useUserProfile = (userId?: string) => {
+  const [profile, setProfile] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [userPosts, setUserPosts] = useState<Post[]>([]);
+  const [followedVenues, setFollowedVenues] = useState<Location[]>([]);
+  const [visitedPlaces, setVisitedPlaces] = useState<Location[]>([]);
+  const [wantToVisitPlaces, setWantToVisitPlaces] = useState<Location[]>([]);
   const [stats, setStats] = useState<UserProfileStats>({
     posts: 0,
     followers: 0,
-    following: 0
+    following: 0,
+    likes: 0
   });
 
-  const followUser = async (userToFollow: string): Promise<boolean> => {
-    try {
-      // Mock implementation
-      console.log('Following user:', userToFollow);
+  useEffect(() => {
+    if (userId) {
+      // Simulate loading
+      setLoading(true);
       
-      // Update stats optimistically
-      setStats(prev => ({
-        ...prev,
-        following: prev.following + 1
-      }));
-      
-      return true;
-    } catch (error) {
-      console.error('Failed to follow user:', error);
-      return false;
+      setTimeout(() => {
+        const user = mockUsers.find(u => u.id === userId);
+        if (user) {
+          setProfile(user);
+          const posts = mockPosts.filter(p => p.user.id === userId);
+          setUserPosts(posts);
+          setStats({
+            posts: posts.length,
+            followers: user.followers || 0,
+            following: user.following || 0,
+            likes: posts.reduce((sum, post) => sum + post.likes, 0)
+          });
+          setFollowedVenues(mockLocations.slice(0, 3));
+          setVisitedPlaces(mockLocations.slice(0, 5));
+          setWantToVisitPlaces(mockLocations.slice(5, 8));
+        } else {
+          setError('User not found');
+        }
+        setLoading(false);
+      }, 500);
     }
+  }, [userId]);
+
+  const followUser = async (userToFollow: string): Promise<boolean> => {
+    // Mock implementation
+    return true;
   };
 
   const unfollowUser = async (userToUnfollow: string): Promise<boolean> => {
-    try {
-      // Mock implementation
-      console.log('Unfollowing user:', userToUnfollow);
-      
-      // Update stats optimistically
-      setStats(prev => ({
-        ...prev,
-        following: Math.max(0, prev.following - 1)
-      }));
-      
-      return true;
-    } catch (error) {
-      console.error('Failed to unfollow user:', error);
-      return false;
-    }
+    // Mock implementation
+    return true;
   };
 
-  const updateBio = async (newBio: string): Promise<boolean> => {
-    try {
-      if (user) {
-        setUser({ ...user, bio: newBio });
-      }
-      return true;
-    } catch (error) {
-      console.error('Failed to update bio:', error);
-      return false;
-    }
+  const getFollowStatus = (userId: string): boolean => {
+    return false; // Mock implementation
   };
 
-  const blockUser = async (userToBlock: string): Promise<boolean> => {
-    try {
-      console.log('Blocking user:', userToBlock);
-      return true;
-    } catch (error) {
-      console.error('Failed to block user:', error);
-      return false;
-    }
+  const getMutualFollowers = (userId: string): User[] => {
+    return mockUsers.slice(0, 2); // Mock implementation
   };
 
-  const reportUser = async (userToReport: string, reason: string): Promise<boolean> => {
-    try {
-      console.log('Reporting user:', userToReport, 'for:', reason);
-      return true;
-    } catch (error) {
-      console.error('Failed to report user:', error);
-      return false;
-    }
+  const getUserPosts = (userId: string): Post[] => {
+    return mockPosts.filter(p => p.user.id === userId);
   };
 
-  const getUserBio = (): string => {
-    return user?.bio || '';
+  const getUserStats = (userId: string): UserProfileStats => {
+    const posts = getUserPosts(userId);
+    const user = mockUsers.find(u => u.id === userId);
+    return {
+      posts: posts.length,
+      followers: user?.followers || 0,
+      following: user?.following || 0,
+      likes: posts.reduce((sum, post) => sum + post.likes, 0)
+    };
+  };
+
+  const getPostComments = (postId: string): Comment[] => {
+    return mockComments.filter(c => c.postId === postId);
   };
 
   return {
-    user,
+    profile,
+    loading,
+    error,
+    userPosts,
+    followedVenues,
+    visitedPlaces,
+    wantToVisitPlaces,
     stats,
     followUser,
     unfollowUser,
-    updateBio,
-    blockUser,
-    reportUser,
-    getUserBio,
-    setUser,
+    getFollowStatus,
+    getMutualFollowers,
+    getUserPosts,
+    getUserStats,
+    getPostComments,
     setStats
   };
 };

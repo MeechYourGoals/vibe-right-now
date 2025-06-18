@@ -1,12 +1,7 @@
 
 import { useState, useEffect } from 'react';
-import { Location } from '@/types';
+import { Location, Coordinates } from '@/types';
 import { mockCities } from '@/data/mockCities';
-
-interface Coordinates {
-  lat: number;
-  lng: number;
-}
 
 export const useNearbyLocations = () => {
   const [nearbyLocations, setNearbyLocations] = useState<Location[]>([]);

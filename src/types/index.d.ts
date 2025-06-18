@@ -153,4 +153,44 @@ export interface VenueInsights {
   discountRedemptions?: number;
 }
 
+// Coordinates interface for map components
+export interface Coordinates {
+  lat: number;
+  lng: number;
+}
+
+// Google Places types
+export interface PlaceResult {
+  name: string;
+  city: string;
+  state?: string;
+  country: string;
+  lat: number;
+  lng: number;
+  type?: string;
+}
+
+// User profile hook types
+export interface UserProfileStats {
+  posts: number;
+  followers: number;
+  following: number;
+  likes: number;
+}
+
+export interface UserProfileData {
+  profile: User | null;
+  loading: boolean;
+  error: string | null;
+  userPosts: Post[];
+  followedVenues: Location[];
+  visitedPlaces: Location[];
+  wantToVisitPlaces: Location[];
+  getFollowStatus: (userId: string) => boolean;
+  getMutualFollowers: (userId: string) => User[];
+  getUserPosts: (userId: string) => Post[];
+  getUserStats: (userId: string) => UserProfileStats;
+  getPostComments: (postId: string) => Comment[];
+}
+
 export * from "./index";

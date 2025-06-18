@@ -8,7 +8,6 @@ import { CalendarIcon, MapPin, Search } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Location } from "@/types";
-import { useGooglePlacesAutocomplete } from "@/hooks/useGooglePlacesAutocomplete";
 
 interface ExploreSearchSectionProps {
   searchQuery: string;
@@ -33,27 +32,34 @@ const ExploreSearchSection: React.FC<ExploreSearchSectionProps> = ({
 }) => {
   const [isDateOpen, setIsDateOpen] = useState(false);
   const [isLocationOpen, setIsLocationOpen] = useState(false);
-
-  const {
-    inputValue: locationInputValue,
-    setInputValue: setLocationInputValue,
-    suggestions,
-    isLoading,
-    handleInputChange,
-    handleSuggestionSelect,
-    clearSuggestions
-  } = useGooglePlacesAutocomplete({
-    onPlaceSelect: (place) => {
-      onPlaceSelect(place);
-      onLocationChange(place.name);
-      setIsLocationOpen(false);
-    }
-  });
+  const [locationInputValue, setLocationInputValue] = useState(location);
 
   const handleLocationInputChange = (value: string) => {
     setLocationInputValue(value);
     onLocationChange(value);
-    handleInputChange(value);
+  };
+
+  const handleLocationSelect = (selectedLocation: string) => {
+    setLocationInputValue(selectedLocation);
+    onLocationChange(selectedLocation);
+    setIsLocationOpen(false);
+    
+    // Create a mock place object for the selection
+    const mockPlace: Location = {
+      id: `search-${Date.now()}`,
+      name: selectedLocation,
+      address: selectedLocation,
+      city: selectedLocation,
+      country: "USA",
+      lat: 40.7128,
+      lng: -74.0060,
+      type: "city",
+      verified: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    
+    onPlaceSelect(mockPlace);
   };
 
   return (
@@ -92,30 +98,23 @@ const ExploreSearchSection: React.FC<ExploreSearchSectionProps> = ({
                   onChange={(e) => handleLocationInputChange(e.target.value)}
                   className="mb-2"
                 />
-                {isLoading && (
-                  <div className="text-sm text-muted-foreground p-2">
-                    Searching...
-                  </div>
-                )}
-                {suggestions.length > 0 && (
-                  <div className="max-h-60 overflow-y-auto">
-                    {suggestions.map((suggestion, index) => (
-                      <Button
-                        key={index}
-                        variant="ghost"
-                        className="w-full justify-start text-left p-2 h-auto"
-                        onClick={() => handleSuggestionSelect(suggestion)}
-                      >
-                        <div>
-                          <div className="font-medium">{suggestion.name}</div>
-                          <div className="text-sm text-muted-foreground">
-                            {suggestion.city}, {suggestion.country}
-                          </div>
+                <div className="max-h-60 overflow-y-auto">
+                  {["New York", "Los Angeles", "Chicago", "Miami", "San Francisco", "Las Vegas", "Austin", "Boston"].map((city, index) => (
+                    <Button
+                      key={index}
+                      variant="ghost"
+                      className="w-full justify-start text-left p-2 h-auto"
+                      onClick={() => handleLocationSelect(city)}
+                    >
+                      <div>
+                        <div className="font-medium">{city}</div>
+                        <div className="text-sm text-muted-foreground">
+                          United States
                         </div>
-                      </Button>
-                    ))}
-                  </div>
-                )}
+                      </div>
+                    </Button>
+                  ))}
+                </div>
               </div>
             </PopoverContent>
           </Popover>

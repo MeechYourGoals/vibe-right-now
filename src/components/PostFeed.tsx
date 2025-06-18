@@ -2,9 +2,10 @@
 import { useState, useEffect } from "react";
 import { Post, Comment } from "@/types";
 // Use centralized mock data imports
-import { mockPosts, mockComments } from "@/mock";
+import { mockPosts } from "@/mock/posts";
+import { mockComments } from "@/mock/comments";
 import PostCard from "./post/PostCard";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 interface PostFeedProps {
   celebrityFeatured?: string[];
