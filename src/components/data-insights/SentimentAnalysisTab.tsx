@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -141,9 +140,9 @@ const SentimentAnalysisTab: React.FC<SentimentAnalysisTabProps> = ({ venueId, is
 
   const getQuoteColor = (sentiment: string) => {
     switch(sentiment) {
-      case 'positive': return 'border-l-green-500 bg-green-50';
-      case 'negative': return 'border-l-red-500 bg-red-50';
-      default: return 'border-l-yellow-500 bg-yellow-50';
+      case 'positive': return 'border-l-green-500 bg-card text-card-foreground border border-green-200 dark:border-green-800';
+      case 'negative': return 'border-l-red-500 bg-card text-card-foreground border border-red-200 dark:border-red-800';
+      default: return 'border-l-yellow-500 bg-card text-card-foreground border border-yellow-200 dark:border-yellow-800';
     }
   };
 
@@ -266,7 +265,7 @@ const SentimentAnalysisTab: React.FC<SentimentAnalysisTabProps> = ({ venueId, is
                           key={index}
                           className={`p-4 border-l-4 rounded-r-lg ${getQuoteColor(quote.sentiment)}`}
                         >
-                          <p className="text-sm font-medium mb-2">"{quote.text}"</p>
+                          <p className="text-sm font-medium mb-2 text-foreground">"{quote.text}"</p>
                           <p className="text-xs text-muted-foreground">— {quote.platform}</p>
                         </div>
                       ))}
