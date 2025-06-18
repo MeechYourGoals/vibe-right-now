@@ -37,7 +37,7 @@ const SmartCameraButton: React.FC<SmartCameraButtonProps> = ({ onClick }) => {
     <Button 
       onClick={onClick}
       className={cn(
-        "fixed right-6 w-16 h-16 rounded-full shadow-lg bg-gradient-to-r from-primary to-secondary flex items-center justify-center p-0 animate-pulse-gradient transition-all duration-300 z-60",
+        "fixed right-6 w-16 h-16 rounded-full shadow-lg bg-gradient-to-r from-primary to-secondary flex items-center justify-center p-0 transition-all duration-300 z-60",
         getBottomPosition(),
         isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90 pointer-events-none'
       )}
