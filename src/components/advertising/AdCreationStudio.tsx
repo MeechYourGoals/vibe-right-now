@@ -16,7 +16,11 @@ const adFormats: AdFormat[] = [
     type: "MomentCard",
     duration: "6s",
     placement: "2nd swipe in feed after organic",
-    kpis: ["Recall", "CPC"]
+    kpis: ["Recall", "CPC"],
+    platform: "VRN Feed",
+    dimensions: "9:16 vertical",
+    specifications: { duration: 6, autoplay: true },
+    bestPractices: ["Keep message clear", "Strong opening frame"]
   },
   {
     id: "vibe-overlay",
@@ -24,7 +28,11 @@ const adFormats: AdFormat[] = [
     description: "Semi-transparent brand filter over user clips",
     type: "VibeOverlay",
     placement: "AR mask over user content",
-    kpis: ["Engagement", "Shares"]
+    kpis: ["Engagement", "Shares"],
+    platform: "VRN Camera",
+    dimensions: "Full screen overlay",
+    specifications: { opacity: 0.3, blendMode: "multiply" },
+    bestPractices: ["Subtle branding", "Enhance don't distract"]
   },
   {
     id: "spawn-point",
@@ -32,7 +40,11 @@ const adFormats: AdFormat[] = [
     description: "Sponsored push when vibe matches brand",
     type: "SpawnPoint",
     placement: "Vernon chat notifications",
-    kpis: ["ROAS", "In-store sales"]
+    kpis: ["ROAS", "In-store sales"],
+    platform: "Vernon AI",
+    dimensions: "Text + small image",
+    specifications: { triggers: ["vibe_match", "location_proximity"] },
+    bestPractices: ["Contextual relevance", "Clear call-to-action"]
   },
   {
     id: "heat-ring",
@@ -40,7 +52,11 @@ const adFormats: AdFormat[] = [
     description: "Venue heat ring glows brand color",
     type: "HeatRingTakeover",
     placement: "Map overlay visualization",
-    kpis: ["Foot traffic lift"]
+    kpis: ["Foot traffic lift"],
+    platform: "VRN Map",
+    dimensions: "Circular overlay",
+    specifications: { duration: "persistent", customColor: true },
+    bestPractices: ["Brand color consistency", "Subtle animation"]
   }
 ];
 
@@ -92,7 +108,7 @@ const AdCreationStudio = () => {
                       {format.description}
                     </p>
                     <p className="text-xs text-muted-foreground mb-2">
-                      Placement: {format.placement}
+                      Platform: {format.platform} • {format.dimensions}
                     </p>
                     <div className="flex gap-1">
                       {format.kpis.map((kpi) => (

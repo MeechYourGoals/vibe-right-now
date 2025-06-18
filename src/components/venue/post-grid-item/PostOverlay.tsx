@@ -39,10 +39,12 @@ const PostOverlay: React.FC<PostOverlayProps> = ({
   
   // Calculate expiration time for detail view
   const formatExpiryTime = () => {
-    if (!post.expiresAt) return null;
+    // Check if post has expiresAt property (enhanced post)
+    const expiresAt = (post as any).expiresAt;
+    if (!expiresAt) return null;
     
     const now = new Date();
-    const expiry = new Date(post.expiresAt);
+    const expiry = new Date(expiresAt);
     const diffHours = Math.max(0, Math.floor((expiry.getTime() - now.getTime()) / (1000 * 60 * 60)));
     
     if (diffHours < 24) {
@@ -91,7 +93,7 @@ const PostOverlay: React.FC<PostOverlayProps> = ({
             className="h-8 px-2 text-white hover:bg-black/20"
           >
             <Heart className={`h-4 w-4 ${liked ? 'fill-red-500 text-red-500' : ''}`} />
-            <span className="ml-1">{post.likes + (liked ? 1 : 0)}</span>
+            <span className="ml-1">{(post.likes?.length || 0) + (liked ? 1 : 0)}</span>
           </Button>
           <span 
             className="text-xs text-white hover:underline cursor-pointer"
@@ -101,7 +103,7 @@ const PostOverlay: React.FC<PostOverlayProps> = ({
           </span>
         </div>
         
-        {isDetailView && !post.isPinned && post.expiresAt && (
+        {isDetailView && !post.isPinned && (post as any).expiresAt && (
           <div className="mt-1 flex items-center justify-end text-xs text-white/80">
             <Clock className="h-3 w-3 mr-1" />
             <span>Expires in {formatExpiryTime()}</span>

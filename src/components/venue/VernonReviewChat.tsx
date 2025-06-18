@@ -2,12 +2,13 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Bot, Send } from "lucide-react";
+import { Bot, Send, Sparkles, MessageCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface VernonReviewChatProps {
   reviewSummary: string;
   venueId: string;
+  platform?: string;
 }
 
 interface ChatMessage {
@@ -19,19 +20,30 @@ interface ChatMessage {
 
 const VernonReviewChat: React.FC<VernonReviewChatProps> = ({
   reviewSummary,
-  venueId
+  venueId,
+  platform = 'reviews'
 }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSendMessage = async () => {
-    if (!input.trim() || isLoading) return;
+  const suggestedQuestions = [
+    "What's the dress code?",
+    "How's the parking situation?",
+    "Is it family-friendly?",
+    "What's the best time to visit?",
+    "Are reservations needed?",
+    "What's the atmosphere like?"
+  ];
+
+  const handleSendMessage = async (question?: string) => {
+    const messageText = question || input;
+    if (!messageText.trim() || isLoading) return;
 
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
       type: 'user',
-      content: input,
+      content: messageText,
       timestamp: new Date()
     };
 
@@ -43,7 +55,12 @@ const VernonReviewChat: React.FC<VernonReviewChatProps> = ({
       // Call Gemini via our existing edge function
       const { data, error } = await supabase.functions.invoke('gemini-ai', {
         body: {
-          prompt: input,
+          prompt: `Based on the following ${platform} review summary for a venue, please answer this question: "${messageText}"
+
+Review Summary:
+${reviewSummary}
+
+Please provide a helpful, specific answer based on what customers have said in their reviews. If the information isn't available in the reviews, say so and suggest what to look for or ask the venue directly.`,
           mode: 'venue',
           context: reviewSummary
         }
@@ -62,18 +79,31 @@ const VernonReviewChat: React.FC<VernonReviewChatProps> = ({
     } catch (error) {
       console.error('Error sending message to Vernon:', error);
       
-      // Fallback mock responses
-      const mockResponses = [
-        "Based on the reviews, the dress code appears to be casual to smart casual. Most reviewers mention comfortable attire.",
-        "From what I can see in the reviews, parking can be challenging during peak hours. Many suggest using rideshare or arriving early.",
-        "The reviews indicate this venue is family-friendly during earlier hours, but becomes more adult-oriented in the evening.",
-        "Based on customer feedback, reservations are highly recommended, especially for weekend dining."
-      ];
+      // Provide contextual fallback responses
+      const getContextualResponse = (question: string) => {
+        const q = question.toLowerCase();
+        if (q.includes('dress code')) {
+          return "Based on the reviews, the dress code appears to be casual to smart casual. Most reviewers mention comfortable attire.";
+        }
+        if (q.includes('parking')) {
+          return "From what I can see in the reviews, parking can be challenging during peak hours. Many suggest using rideshare or arriving early.";
+        }
+        if (q.includes('family') || q.includes('kid')) {
+          return "The reviews indicate this venue is family-friendly during earlier hours, but becomes more adult-oriented in the evening.";
+        }
+        if (q.includes('reservation')) {
+          return "Based on customer feedback, reservations are highly recommended, especially for weekend dining.";
+        }
+        if (q.includes('time') || q.includes('when')) {
+          return "Reviewers suggest visiting during off-peak hours for a better experience and shorter wait times.";
+        }
+        return "I'd be happy to help answer that based on the review summary. Could you be more specific about what you'd like to know?";
+      };
 
       const vernonResponse: ChatMessage = {
         id: (Date.now() + 1).toString(),
         type: 'vernon',
-        content: mockResponses[Math.floor(Math.random() * mockResponses.length)],
+        content: getContextualResponse(messageText),
         timestamp: new Date()
       };
 
@@ -91,53 +121,84 @@ const VernonReviewChat: React.FC<VernonReviewChatProps> = ({
   };
 
   return (
-    <div className="mt-4 border-t pt-4">
+    <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-4">
       <div className="flex items-center gap-2 mb-3">
-        <Bot className="h-4 w-4 text-blue-500" />
-        <span className="text-sm font-medium">Ask Vernon about this venue</span>
+        <Bot className="h-5 w-5 text-purple-600" />
+        <span className="text-sm font-medium text-purple-800">Ask Vernon about these reviews</span>
+        <Sparkles className="h-4 w-4 text-purple-500" />
       </div>
       
+      {messages.length === 0 && (
+        <div className="mb-4">
+          <p className="text-xs text-purple-700 mb-2">Try asking:</p>
+          <div className="grid grid-cols-2 gap-1">
+            {suggestedQuestions.map((question, idx) => (
+              <button
+                key={idx}
+                onClick={() => handleSendMessage(question)}
+                className="text-left text-xs bg-white/70 hover:bg-white/90 text-purple-700 px-2 py-1 rounded border border-purple-200 transition-colors"
+                disabled={isLoading}
+              >
+                {question}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+      
       {messages.length > 0 && (
-        <div className="max-h-32 overflow-y-auto space-y-2 mb-3">
+        <div className="max-h-40 overflow-y-auto space-y-2 mb-3 bg-white/50 rounded p-2">
           {messages.map((message) => (
             <div
               key={message.id}
               className={`p-2 rounded text-sm ${
                 message.type === 'user'
-                  ? 'bg-blue-100 text-blue-900 ml-4'
-                  : 'bg-gray-100 text-gray-800 mr-4'
+                  ? 'bg-purple-100 text-purple-900 ml-4'
+                  : 'bg-white text-gray-800 mr-4 border border-purple-100'
               }`}
             >
-              <strong>{message.type === 'user' ? 'You: ' : 'Vernon: '}</strong>
+              <div className="flex items-center gap-1 mb-1">
+                {message.type === 'vernon' && <Bot className="h-3 w-3 text-purple-600" />}
+                <strong className="text-xs">
+                  {message.type === 'user' ? 'You' : 'Vernon'}
+                </strong>
+              </div>
               {message.content}
             </div>
           ))}
+          {isLoading && (
+            <div className="bg-white text-gray-800 mr-4 border border-purple-100 p-2 rounded text-sm">
+              <div className="flex items-center gap-1 mb-1">
+                <Bot className="h-3 w-3 text-purple-600" />
+                <strong className="text-xs">Vernon</strong>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="animate-pulse">Thinking...</div>
+                <Sparkles className="h-3 w-3 animate-spin text-purple-500" />
+              </div>
+            </div>
+          )}
         </div>
       )}
       
       <div className="flex gap-2">
         <Input
-          placeholder="Ask about dress code, parking, atmosphere..."
+          placeholder="Ask about dress code, parking, atmosphere, reservations..."
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyPress={handleKeyPress}
-          className="flex-1"
+          className="flex-1 bg-white/70 border-purple-200 focus:border-purple-400"
+          disabled={isLoading}
         />
         <Button
-          onClick={handleSendMessage}
+          onClick={() => handleSendMessage()}
           disabled={!input.trim() || isLoading}
           size="icon"
-          className="bg-blue-600 hover:bg-blue-700"
+          className="bg-purple-600 hover:bg-purple-700"
         >
           <Send className="h-4 w-4" />
         </Button>
       </div>
-      
-      {messages.length === 0 && (
-        <div className="text-xs text-muted-foreground mt-2">
-          Example questions: "What's the dress code?", "How's the parking?", "Is it kid-friendly?"
-        </div>
-      )}
     </div>
   );
 };

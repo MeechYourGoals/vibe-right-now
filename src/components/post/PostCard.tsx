@@ -102,7 +102,7 @@ const PostCard: React.FC<PostCardProps> = ({
           </div>
           <p className="text-sm text-muted-foreground mt-1">
             <Link to={`/venue/${firstPost.location.id}`} className="hover:underline">
-              {firstPost.location.city}, {firstPost.location.state}
+              {firstPost.location.city}, {firstPost.location.state || firstPost.location.country}
             </Link>
           </p>
         </div>
@@ -117,13 +117,20 @@ const PostCard: React.FC<PostCardProps> = ({
             location: post.location
           });
           
+          // Create a safe user object with fallbacks
+          const safeUser = {
+            ...post.user,
+            createdAt: post.user.createdAt || new Date().toISOString(),
+            updatedAt: post.user.updatedAt || new Date().toISOString()
+          };
+          
           return (
             <div 
               key={post.id} 
               className={`border-t ${isVenuePost ? 'ring-2 ring-amber-500' : ''}`}
             >
               <VenueFirstPostHeader 
-                user={post.user} 
+                user={safeUser} 
                 timestamp={String(post.timestamp)}
                 location={post.location}
                 isPinned={post.isPinned}
@@ -181,10 +188,17 @@ const PostCard: React.FC<PostCardProps> = ({
     location: post.location
   });
 
+  // Create a safe user object with fallbacks
+  const safeUser = {
+    ...post.user,
+    createdAt: post.user.createdAt || new Date().toISOString(),
+    updatedAt: post.user.updatedAt || new Date().toISOString()
+  };
+
   return (
     <Card className={`overflow-hidden ${isVenuePost ? 'ring-2 ring-amber-500' : ''} ${post.isPinned && !isVenuePost ? 'ring-2 ring-amber-300' : ''}`}>
       <VenueFirstPostHeader 
-        user={post.user} 
+        user={safeUser} 
         timestamp={String(post.timestamp)} 
         location={post.location}
         isPinned={post.isPinned}

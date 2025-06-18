@@ -50,7 +50,7 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
     name: 'Plus',
     price: 9.99,
     billingPeriod: 'month',
-    features: ['AI recommendations', 'URL-based External Review Summaries', 'Venue Messaging', 'Periodic Bonus Points'],
+    features: ['AI recommendations', 'URL-based External Review Summaries from any platform (Yelp, TripAdvisor, etc.)', 'Venue Messaging', 'Periodic Bonus Points'],
     isPopular: true
   },
   {
