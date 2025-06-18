@@ -3,119 +3,77 @@ import { CityData, Location } from '@/types';
 
 import nyc from './mockCities/nyc';
 import la from './mockCities/la';
-import phoenix from './mockCities/phoenix';
 import london from './mockCities/london';
 import chicago from './mockCities/chicago';
 import miami from './mockCities/miami';
-import vegas from './mockCities/vegas';
 import sanfrancisco from './mockCities/sanfrancisco';
 import paris from './mockCities/paris';
 import tokyo from './mockCities/tokyo';
-import berlin from './mockCities/berlin';
 import sydney from './mockCities/sydney';
-import amsterdam from './mockCities/amsterdam';
 import barcelona from './mockCities/barcelona';
-import rome from './mockCities/rome';
-import istanbul from './mockCities/istanbul';
-import dubai from './mockCities/dubai';
-import singapore from './mockCities/singapore';
-import mumbai from './mockCities/mumbai';
-import bangkok from './mockCities/bangkok';
-import seoul from './mockCities/seoul';
-import moscow from './mockCities/moscow';
-import saopaulo from './mockCities/saopaulo';
-import melbourne from './mockCities/melbourne';
-import toronto from './mockCities/toronto';
-import riodejaneiro from './mockCities/riodejaneiro';
 
-export const mockCitiesData: CityData[] = [
-  // North America
+// Reduced to ~50% of mock cities for better performance
+export const mockCities: CityData[] = [
   nyc,
   la,
-  phoenix,
+  london,
   chicago,
   miami,
-  vegas,
   sanfrancisco,
-  toronto,
-  
-  // Europe
-  london,
   paris,
-  berlin,
-  amsterdam,
-  barcelona,
-  rome,
-  istanbul,
-  moscow,
-  
-  // Asia
   tokyo,
-  dubai,
-  singapore,
-  mumbai,
-  bangkok,
-  seoul,
-  
-  // Oceania
   sydney,
-  melbourne,
-  
-  // South America
-  saopaulo,
-  riodejaneiro,
+  barcelona
 ];
 
-// Export utility/type helpers as before
-
-// Define VenueType strictly for code completion elsewhere
-export type VenueType = "restaurant" | "bar" | "event" | "attraction" | "sports" | "other" | "nightclub" | "mall" | "cafe";
-
-// Utility/Type helpers
-export function asVenueType(type: string): VenueType {
-  const allowed: VenueType[] = [
-    "restaurant", "bar", "event", "attraction", "sports", "other", "nightclub", "mall", "cafe"
-  ];
-  if (allowed.includes(type as VenueType)) return type as VenueType;
-  return "other";
-}
-
-// Find city by name
-export const findCityByName = (searchTerm: string): CityData | null => {
-  const normalizedSearch = searchTerm.toLowerCase().trim();
-  return mockCitiesData.find(city => {
-    const cityName = city.name.toLowerCase();
-    const fullName = `${city.name}${city.state ? `, ${city.state}` : ''}, ${city.country}`.toLowerCase();
-    return cityName.includes(normalizedSearch) || 
-      fullName.includes(normalizedSearch) ||
-      normalizedSearch.includes(cityName);
-  }) || null;
+export const findCityByName = (cityName: string): CityData | undefined => {
+  if (!cityName) return undefined;
+  
+  const normalizedSearch = cityName.toLowerCase().trim();
+  
+  return mockCities.find(city => {
+    const cityMatches = city.name.toLowerCase() === normalizedSearch;
+    
+    // Also check for partial matches for major cities
+    const partialMatches = city.name.toLowerCase().includes(normalizedSearch) ||
+                          normalizedSearch.includes(city.name.toLowerCase());
+    
+    return cityMatches || partialMatches;
+  });
 };
 
-// Search venues in all cities
-export const searchVenues = (searchTerm: string, cityName?: string): Location[] => {
-  const normalizedSearch = searchTerm.toLowerCase().trim();
-  let citiesToSearch = mockCitiesData;
-  if (cityName) {
-    const targetCity = findCityByName(cityName);
-    if (targetCity) {
-      citiesToSearch = [targetCity];
-    }
-  }
-  let results: Location[] = [];
-  citiesToSearch.forEach(city => {
-    city.venues.forEach(venue => {
-      const venueName = venue.name.toLowerCase();
-      const venueType = (venue.type as string).toLowerCase();
-      const venueVibes = (venue.vibes?.join(' ') || '').toLowerCase();
-      if (
-        venueName.includes(normalizedSearch) ||
-        venueType.includes(normalizedSearch) ||
-        venueVibes.includes(normalizedSearch)
-      ) {
-        results.push(venue);
-      }
-    });
+export const getAllLocations = (): Location[] => {
+  return mockCities.reduce((allLocations: Location[], city) => {
+    return [...allLocations, ...city.venues];
+  }, []);
+};
+
+export const getLocationsByType = (type: Location['type']): Location[] => {
+  return getAllLocations().filter(location => location.type === type);
+};
+
+export const getLocationsByCity = (cityName: string): Location[] => {
+  const city = findCityByName(cityName);
+  return city ? city.venues : [];
+};
+
+export const findLocationById = (id: string): Location | undefined => {
+  return getAllLocations().find(location => location.id === id);
+};
+
+export const searchLocations = (query: string): Location[] => {
+  const normalizedQuery = query.toLowerCase().trim();
+  
+  if (!normalizedQuery) return [];
+  
+  return getAllLocations().filter(location => {
+    const matchesName = location.name.toLowerCase().includes(normalizedQuery);
+    const matchesCity = location.city.toLowerCase().includes(normalizedQuery);
+    const matchesType = location.type.toLowerCase().includes(normalizedQuery);
+    const matchesVibes = location.vibes?.some(vibe => 
+      vibe.toLowerCase().includes(normalizedQuery)
+    );
+    
+    return matchesName || matchesCity || matchesType || matchesVibes;
   });
-  return results.slice(0, 10);
 };

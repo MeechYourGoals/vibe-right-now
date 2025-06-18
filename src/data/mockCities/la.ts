@@ -57,39 +57,6 @@ const la: CityData = {
       vibes: ["Hollywood", "Electronic Music", "Celebrity Sightings"],
       business_status: "OPERATIONAL",
       google_maps_url: "https://maps.google.com/maps?q=Academy+LA"
-    },
-    {
-      id: "la-4",
-      name: "Intelligentsia Coffee",
-      address: "3922 W Sunset Blvd",
-      city: "Los Angeles",
-      state: "CA",
-      country: "USA",
-      lat: 34.0978,
-      lng: -118.2785,
-      type: "restaurant" as const,
-      rating: 4.3,
-      price_level: 3,
-      verified: true,
-      vibes: ["Artisanal", "Silver Lake", "Specialty Coffee"],
-      business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Intelligentsia+Coffee+LA"
-    },
-    {
-      id: "la-5",
-      name: "The Grove",
-      address: "189 The Grove Dr",
-      city: "Los Angeles",
-      state: "CA",
-      country: "USA",
-      lat: 34.0719,
-      lng: -118.3564,
-      type: "attraction" as const,
-      rating: 4.2,
-      verified: true,
-      vibes: ["Outdoor Shopping", "Entertainment", "Tourist Destination"],
-      business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=The+Grove+LA"
     }
   ]
 };

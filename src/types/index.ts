@@ -17,7 +17,7 @@ export * from './features/advertising';
 export * from './features/sentiment';
 
 // Re-export specific types for compatibility
-export type { Post, Location, User, VenueInsights } from './core/base';
+export type { Post, User, VenueInsights } from './core/base';
 
 // Chat types (with selective exports to avoid conflicts)
 export type {
@@ -68,6 +68,45 @@ export interface UserProfile {
 // Enhanced Post interface with expiration
 export interface EnhancedPost extends Post {
   expiresAt?: string;
+}
+
+// Location interface that matches the base Location type
+export interface Location {
+  id: string;
+  name: string;
+  address: string;
+  city: string;
+  state?: string;
+  country: string;
+  lat: number;
+  lng: number;
+  type: "restaurant" | "bar" | "nightclub" | "cafe" | "attraction" | "sports" | "event" | "city" | "other";
+  rating?: number;
+  price_level?: number;
+  verified?: boolean;
+  vibes?: string[];
+  business_status?: string;
+  google_maps_url?: string;
+  hours?: BusinessHours;
+}
+
+// Business Hours interface
+export interface BusinessHours {
+  monday: DayHours | string;
+  tuesday: DayHours | string;
+  wednesday: DayHours | string;
+  thursday: DayHours | string;
+  friday: DayHours | string;
+  saturday: DayHours | string;
+  sunday: DayHours | string;
+  isOpenNow?: boolean;
+  timezone?: string;
+}
+
+export interface DayHours {
+  open: string;
+  close: string;
+  closed: boolean;
 }
 
 // Advertising types

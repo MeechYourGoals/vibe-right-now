@@ -57,39 +57,6 @@ const nyc: CityData = {
       vibes: ["Upscale", "Nightlife", "Celebrity Hotspot"],
       business_status: "OPERATIONAL",
       google_maps_url: "https://maps.google.com/maps?q=1+OAK+NYC"
-    },
-    {
-      id: "nyc-4",
-      name: "Blue Bottle Coffee",
-      address: "160 Berry St",
-      city: "New York",
-      state: "NY",
-      country: "USA",
-      lat: 40.7197,
-      lng: -73.9576,
-      type: "restaurant" as const,
-      rating: 4.3,
-      price_level: 3,
-      verified: true,
-      vibes: ["Artisanal", "Trendy", "Third Wave Coffee"],
-      business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Blue+Bottle+Coffee+NYC"
-    },
-    {
-      id: "nyc-5",
-      name: "Brookfield Place",
-      address: "230 Vesey St",
-      city: "New York",
-      state: "NY",
-      country: "USA",
-      lat: 40.7134,
-      lng: -74.0158,
-      type: "attraction" as const,
-      rating: 4.1,
-      verified: true,
-      vibes: ["Luxury Shopping", "Waterfront", "Modern"],
-      business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Brookfield+Place+NYC"
     }
   ]
 };
