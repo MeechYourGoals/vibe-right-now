@@ -1,6 +1,8 @@
 
 import { CityData } from '@/types';
 
+const currentDate = new Date().toISOString();
+
 const melbourne: CityData = {
   name: "Melbourne",
   country: "Australia",
@@ -20,7 +22,9 @@ const melbourne: CityData = {
       verified: true,
       vibes: ["Cultural Hub", "Events", "Modern"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Federation+Square+Melbourne"
+      google_maps_url: "https://maps.google.com/maps?q=Federation+Square+Melbourne",
+      createdAt: currentDate,
+      updatedAt: currentDate
     },
     {
       id: "mel-2",
@@ -36,7 +40,9 @@ const melbourne: CityData = {
       verified: true,
       vibes: ["Fine Dining", "Australian", "World-renowned"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Attica+Melbourne"
+      google_maps_url: "https://maps.google.com/maps?q=Attica+Melbourne",
+      createdAt: currentDate,
+      updatedAt: currentDate
     },
     {
       id: "mel-3",
@@ -52,7 +58,9 @@ const melbourne: CityData = {
       verified: true,
       vibes: ["Alternative", "Underground", "Live Music"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Revolver+Upstairs+Melbourne"
+      google_maps_url: "https://maps.google.com/maps?q=Revolver+Upstairs+Melbourne",
+      createdAt: currentDate,
+      updatedAt: currentDate
     }
   ]
 };

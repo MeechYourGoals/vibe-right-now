@@ -3,7 +3,7 @@ import { CityData } from "@/types";
 
 const currentDate = new Date().toISOString();
 
-export const amsterdamData: CityData = {
+const amsterdamData: CityData = {
   name: "Amsterdam",
   country: "Netherlands",
   lat: 52.3676,
@@ -64,3 +64,5 @@ export const amsterdamData: CityData = {
     }
   ]
 };
+
+export default amsterdamData;

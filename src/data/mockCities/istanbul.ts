@@ -1,6 +1,8 @@
 
 import { CityData } from '@/types';
 
+const currentDate = new Date().toISOString();
+
 const istanbul: CityData = {
   name: "Istanbul",
   country: "Turkey",
@@ -20,7 +22,9 @@ const istanbul: CityData = {
       verified: true,
       vibes: ["Historic", "Byzantine", "Ottoman"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Hagia+Sophia+Istanbul"
+      google_maps_url: "https://maps.google.com/maps?q=Hagia+Sophia+Istanbul",
+      createdAt: currentDate,
+      updatedAt: currentDate
     },
     {
       id: "ist-2",
@@ -36,7 +40,9 @@ const istanbul: CityData = {
       verified: true,
       vibes: ["Modern Turkish", "Rooftop", "Bosphorus Views"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Mikla+Istanbul"
+      google_maps_url: "https://maps.google.com/maps?q=Mikla+Istanbul",
+      createdAt: currentDate,
+      updatedAt: currentDate
     },
     {
       id: "ist-3",
@@ -52,7 +58,9 @@ const istanbul: CityData = {
       verified: true,
       vibes: ["Bosphorus", "Upscale", "Waterfront"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Reina+Istanbul"
+      google_maps_url: "https://maps.google.com/maps?q=Reina+Istanbul",
+      createdAt: currentDate,
+      updatedAt: currentDate
     }
   ]
 };

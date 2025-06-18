@@ -1,6 +1,8 @@
 
 import { CityData } from '@/types';
 
+const currentDate = new Date().toISOString();
+
 const phoenix: CityData = {
   name: "Phoenix",
   state: "AZ",
@@ -23,7 +25,9 @@ const phoenix: CityData = {
       verified: true,
       vibes: ["Wood-fired Pizza", "Local Favorite", "Popular"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Pizzeria+Bianco+Phoenix"
+      google_maps_url: "https://maps.google.com/maps?q=Pizzeria+Bianco+Phoenix",
+      createdAt: currentDate,
+      updatedAt: currentDate
     },
     {
       id: "phx-2",
@@ -39,7 +43,9 @@ const phoenix: CityData = {
       verified: true,
       vibes: ["Baseball", "Diamondbacks", "Downtown"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Chase+Field+Phoenix"
+      google_maps_url: "https://maps.google.com/maps?q=Chase+Field+Phoenix",
+      createdAt: currentDate,
+      updatedAt: currentDate
     },
     {
       id: "phx-3",
@@ -56,7 +62,9 @@ const phoenix: CityData = {
       verified: true,
       vibes: ["Rooftop", "Dance", "Downtown Vibes"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Bar+Smith+Phoenix"
+      google_maps_url: "https://maps.google.com/maps?q=Bar+Smith+Phoenix",
+      createdAt: currentDate,
+      updatedAt: currentDate
     },
     {
       id: "phx-4",
@@ -73,7 +81,9 @@ const phoenix: CityData = {
       verified: true,
       vibes: ["Hipster", "Café", "Work-Friendly"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Lux+Coffee+Phoenix"
+      google_maps_url: "https://maps.google.com/maps?q=Lux+Coffee+Phoenix",
+      createdAt: currentDate,
+      updatedAt: currentDate
     },
     {
       id: "phx-5",
@@ -89,7 +99,9 @@ const phoenix: CityData = {
       verified: true,
       vibes: ["Shopping", "Upscale", "Outdoor"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Biltmore+Fashion+Park+Phoenix"
+      google_maps_url: "https://maps.google.com/maps?q=Biltmore+Fashion+Park+Phoenix",
+      createdAt: currentDate,
+      updatedAt: currentDate
     }
   ]
 };

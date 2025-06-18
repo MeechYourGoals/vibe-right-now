@@ -3,7 +3,7 @@ import { CityData } from "@/types";
 
 const currentDate = new Date().toISOString();
 
-export const bangkokData: CityData = {
+const bangkokData: CityData = {
   name: "Bangkok",
   country: "Thailand",
   lat: 13.7563,
@@ -46,3 +46,5 @@ export const bangkokData: CityData = {
     }
   ]
 };
+
+export default bangkokData;

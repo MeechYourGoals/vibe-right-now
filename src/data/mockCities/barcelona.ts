@@ -1,6 +1,8 @@
 
 import { CityData } from '@/types';
 
+const currentDate = new Date().toISOString();
+
 const barcelona: CityData = {
   name: "Barcelona",
   country: "Spain",
@@ -20,7 +22,9 @@ const barcelona: CityData = {
       verified: true,
       vibes: ["Gaudi", "Architecture", "Iconic"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Sagrada+Familia+Barcelona"
+      google_maps_url: "https://maps.google.com/maps?q=Sagrada+Familia+Barcelona",
+      createdAt: currentDate,
+      updatedAt: currentDate
     },
     {
       id: "bcn-2",
@@ -36,7 +40,9 @@ const barcelona: CityData = {
       verified: true,
       vibes: ["Michelin Star", "Creative", "Molecular"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Disfrutar+Barcelona"
+      google_maps_url: "https://maps.google.com/maps?q=Disfrutar+Barcelona",
+      createdAt: currentDate,
+      updatedAt: currentDate
     },
     {
       id: "bcn-3",
@@ -52,7 +58,9 @@ const barcelona: CityData = {
       verified: true,
       vibes: ["Multi-room", "Electronic", "Live Music"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Razzmatazz+Barcelona"
+      google_maps_url: "https://maps.google.com/maps?q=Razzmatazz+Barcelona",
+      createdAt: currentDate,
+      updatedAt: currentDate
     }
   ]
 };

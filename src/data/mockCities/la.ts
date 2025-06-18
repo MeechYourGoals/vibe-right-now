@@ -1,6 +1,8 @@
 
 import { CityData } from '@/types';
 
+const currentDate = new Date().toISOString();
+
 const la: CityData = {
   name: "Los Angeles",
   state: "CA",
@@ -23,7 +25,9 @@ const la: CityData = {
       verified: true,
       vibes: ["West Coast Classic", "Fresh", "Cult Following"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=In-N-Out+Burger+LA"
+      google_maps_url: "https://maps.google.com/maps?q=In-N-Out+Burger+LA",
+      createdAt: currentDate,
+      updatedAt: currentDate
     },
     {
       id: "la-2",
@@ -39,7 +43,9 @@ const la: CityData = {
       verified: true,
       vibes: ["Lakers", "Entertainment", "Downtown LA"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Staples+Center+LA"
+      google_maps_url: "https://maps.google.com/maps?q=Staples+Center+LA",
+      createdAt: currentDate,
+      updatedAt: currentDate
     },
     {
       id: "la-3",
@@ -56,7 +62,9 @@ const la: CityData = {
       verified: true,
       vibes: ["Hollywood", "Electronic Music", "Celebrity Sightings"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Academy+LA"
+      google_maps_url: "https://maps.google.com/maps?q=Academy+LA",
+      createdAt: currentDate,
+      updatedAt: currentDate
     }
   ]
 };

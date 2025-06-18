@@ -1,6 +1,8 @@
 
 import { CityData } from '@/types';
 
+const currentDate = new Date().toISOString();
+
 const sanfrancisco: CityData = {
   name: "San Francisco",
   state: "CA",
@@ -23,7 +25,9 @@ const sanfrancisco: CityData = {
       verified: true,
       vibes: ["Artisanal", "Mission", "Bakery"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Tartine+Bakery+San+Francisco"
+      google_maps_url: "https://maps.google.com/maps?q=Tartine+Bakery+San+Francisco",
+      createdAt: currentDate,
+      updatedAt: currentDate
     },
     {
       id: "sf-2",
@@ -39,7 +43,9 @@ const sanfrancisco: CityData = {
       verified: true,
       vibes: ["Warriors", "Modern", "Bay View"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Chase+Center+San+Francisco"
+      google_maps_url: "https://maps.google.com/maps?q=Chase+Center+San+Francisco",
+      createdAt: currentDate,
+      updatedAt: currentDate
     },
     {
       id: "sf-3",
@@ -56,7 +62,9 @@ const sanfrancisco: CityData = {
       verified: true,
       vibes: ["Underground", "Electronic", "SOMA"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Audio+Nightclub+San+Francisco"
+      google_maps_url: "https://maps.google.com/maps?q=Audio+Nightclub+San+Francisco",
+      createdAt: currentDate,
+      updatedAt: currentDate
     },
     {
       id: "sf-4",
@@ -72,7 +80,9 @@ const sanfrancisco: CityData = {
       verified: true,
       vibes: ["Iconic", "Views", "Must-See"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Golden+Gate+Bridge"
+      google_maps_url: "https://maps.google.com/maps?q=Golden+Gate+Bridge",
+      createdAt: currentDate,
+      updatedAt: currentDate
     },
     {
       id: "sf-5",
@@ -89,7 +99,9 @@ const sanfrancisco: CityData = {
       verified: true,
       vibes: ["Third Wave", "Minimalist", "SOMA"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Blue+Bottle+Coffee+San+Francisco"
+      google_maps_url: "https://maps.google.com/maps?q=Blue+Bottle+Coffee+San+Francisco",
+      createdAt: currentDate,
+      updatedAt: currentDate
     }
   ]
 };

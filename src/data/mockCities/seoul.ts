@@ -1,6 +1,8 @@
 
 import { CityData } from '@/types';
 
+const currentDate = new Date().toISOString();
+
 const seoul: CityData = {
   name: "Seoul",
   country: "South Korea",
@@ -20,7 +22,9 @@ const seoul: CityData = {
       verified: true,
       vibes: ["Palace", "Traditional", "Historic"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Gyeongbokgung+Palace+Seoul"
+      google_maps_url: "https://maps.google.com/maps?q=Gyeongbokgung+Palace+Seoul",
+      createdAt: currentDate,
+      updatedAt: currentDate
     },
     {
       id: "seo-2",
@@ -36,7 +40,9 @@ const seoul: CityData = {
       verified: true,
       vibes: ["Michelin Star", "Korean Fusion", "Fine Dining"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Mingles+Seoul"
+      google_maps_url: "https://maps.google.com/maps?q=Mingles+Seoul",
+      createdAt: currentDate,
+      updatedAt: currentDate
     },
     {
       id: "seo-3",
@@ -52,7 +58,9 @@ const seoul: CityData = {
       verified: true,
       vibes: ["Gangnam", "K-Pop", "Electronic"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Octagon+Seoul"
+      google_maps_url: "https://maps.google.com/maps?q=Octagon+Seoul",
+      createdAt: currentDate,
+      updatedAt: currentDate
     }
   ]
 };

@@ -1,6 +1,8 @@
 
 import { CityData } from '@/types';
 
+const currentDate = new Date().toISOString();
+
 const chicago: CityData = {
   name: "Chicago",
   state: "IL",
@@ -23,7 +25,9 @@ const chicago: CityData = {
       verified: true,
       vibes: ["Deep Dish", "Chicago Classic", "Tourist Favorite"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Lou+Malnati's+Chicago"
+      google_maps_url: "https://maps.google.com/maps?q=Lou+Malnati's+Chicago",
+      createdAt: currentDate,
+      updatedAt: currentDate
     },
     {
       id: "chi-2",
@@ -39,7 +43,9 @@ const chicago: CityData = {
       verified: true,
       vibes: ["Bulls", "Blackhawks", "Arena"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=United+Center+Chicago"
+      google_maps_url: "https://maps.google.com/maps?q=United+Center+Chicago",
+      createdAt: currentDate,
+      updatedAt: currentDate
     },
     {
       id: "chi-3",
@@ -56,7 +62,9 @@ const chicago: CityData = {
       verified: true,
       vibes: ["Electronic", "Rooftop", "Downtown"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Sound-Bar+Chicago"
+      google_maps_url: "https://maps.google.com/maps?q=Sound-Bar+Chicago",
+      createdAt: currentDate,
+      updatedAt: currentDate
     },
     {
       id: "chi-4",
@@ -72,7 +80,9 @@ const chicago: CityData = {
       verified: true,
       vibes: ["Bean", "Outdoor", "Art"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Millennium+Park+Chicago"
+      google_maps_url: "https://maps.google.com/maps?q=Millennium+Park+Chicago",
+      createdAt: currentDate,
+      updatedAt: currentDate
     },
     {
       id: "chi-5",
@@ -89,7 +99,9 @@ const chicago: CityData = {
       verified: true,
       vibes: ["Third Wave", "Downtown", "Work-Friendly"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Intelligentsia+Coffee+Chicago"
+      google_maps_url: "https://maps.google.com/maps?q=Intelligentsia+Coffee+Chicago",
+      createdAt: currentDate,
+      updatedAt: currentDate
     }
   ]
 };

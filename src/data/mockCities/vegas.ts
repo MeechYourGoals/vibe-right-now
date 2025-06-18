@@ -1,6 +1,8 @@
 
 import { CityData } from '@/types';
 
+const currentDate = new Date().toISOString();
+
 const vegas: CityData = {
   name: "Las Vegas",
   state: "NV",
@@ -23,7 +25,9 @@ const vegas: CityData = {
       verified: true,
       vibes: ["Celebrity Chef", "Strip", "Fine Dining"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Hell's+Kitchen+Las+Vegas"
+      google_maps_url: "https://maps.google.com/maps?q=Hell's+Kitchen+Las+Vegas",
+      createdAt: currentDate,
+      updatedAt: currentDate
     },
     {
       id: "vegas-2",
@@ -40,7 +44,9 @@ const vegas: CityData = {
       verified: true,
       vibes: ["Pool Party", "EDM", "Luxury"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=XS+Nightclub+Las+Vegas"
+      google_maps_url: "https://maps.google.com/maps?q=XS+Nightclub+Las+Vegas",
+      createdAt: currentDate,
+      updatedAt: currentDate
     },
     {
       id: "vegas-3",
@@ -56,7 +62,9 @@ const vegas: CityData = {
       verified: true,
       vibes: ["Golden Knights", "Concerts", "New Arena"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=T-Mobile+Arena+Las+Vegas"
+      google_maps_url: "https://maps.google.com/maps?q=T-Mobile+Arena+Las+Vegas",
+      createdAt: currentDate,
+      updatedAt: currentDate
     },
     {
       id: "vegas-4",
@@ -72,7 +80,9 @@ const vegas: CityData = {
       verified: true,
       vibes: ["Iconic", "Free Show", "Romance"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Bellagio+Fountains+Las+Vegas"
+      google_maps_url: "https://maps.google.com/maps?q=Bellagio+Fountains+Las+Vegas",
+      createdAt: currentDate,
+      updatedAt: currentDate
     },
     {
       id: "vegas-5",
@@ -88,7 +98,9 @@ const vegas: CityData = {
       verified: true,
       vibes: ["Luxury Shopping", "Roman Theme", "Strip"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Forum+Shops+Las+Vegas"
+      google_maps_url: "https://maps.google.com/maps?q=Forum+Shops+Las+Vegas",
+      createdAt: currentDate,
+      updatedAt: currentDate
     }
   ]
 };

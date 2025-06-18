@@ -27,6 +27,7 @@ export interface TargetingOptions {
     occupation: string[];
     gender: GenderTargeting;
     ageRange: [number, number];
+    interests: string[];
   };
   behaviors: {
     purchaseHistory: string[];
@@ -55,11 +56,7 @@ export interface TargetingOptions {
     cities: string[];
     regions: string[];
   };
-  interests?: {
-    categories: string[];
-    keywords: string[];
-    competitors: string[];
-  };
+  categories?: string[];
 }
 
 export type GenderTargeting = 'all' | 'male' | 'female' | 'other' | 'non-binary';

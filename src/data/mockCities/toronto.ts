@@ -1,6 +1,8 @@
 
 import { CityData } from '@/types';
 
+const currentDate = new Date().toISOString();
+
 const toronto: CityData = {
   name: "Toronto",
   country: "Canada",
@@ -20,7 +22,9 @@ const toronto: CityData = {
       verified: true,
       vibes: ["Iconic", "Observation Deck", "City Views"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=CN+Tower+Toronto"
+      google_maps_url: "https://maps.google.com/maps?q=CN+Tower+Toronto",
+      createdAt: currentDate,
+      updatedAt: currentDate
     },
     {
       id: "tor-2",
@@ -36,7 +40,9 @@ const toronto: CityData = {
       verified: true,
       vibes: ["Fine Dining", "Canadian", "Tower Views"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Canoe+Restaurant+Toronto"
+      google_maps_url: "https://maps.google.com/maps?q=Canoe+Restaurant+Toronto",
+      createdAt: currentDate,
+      updatedAt: currentDate
     },
     {
       id: "tor-3",
@@ -52,7 +58,9 @@ const toronto: CityData = {
       verified: true,
       vibes: ["Massive", "Electronic", "Waterfront"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Rebel+Nightclub+Toronto"
+      google_maps_url: "https://maps.google.com/maps?q=Rebel+Nightclub+Toronto",
+      createdAt: currentDate,
+      updatedAt: currentDate
     }
   ]
 };

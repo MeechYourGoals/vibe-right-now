@@ -1,6 +1,8 @@
 
 import { CityData } from '@/types';
 
+const currentDate = new Date().toISOString();
+
 const paris: CityData = {
   name: "Paris",
   country: "France",
@@ -21,7 +23,9 @@ const paris: CityData = {
       verified: true,
       vibes: ["Bistro", "Traditional", "Eiffel Tower"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=L'Ami+Jean+Paris"
+      google_maps_url: "https://maps.google.com/maps?q=L'Ami+Jean+Paris",
+      createdAt: currentDate,
+      updatedAt: currentDate
     },
     {
       id: "par-2",
@@ -37,7 +41,9 @@ const paris: CityData = {
       verified: true,
       vibes: ["Techno", "Underground", "Historic"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Rex+Club+Paris"
+      google_maps_url: "https://maps.google.com/maps?q=Rex+Club+Paris",
+      createdAt: currentDate,
+      updatedAt: currentDate
     },
     {
       id: "par-3",
@@ -52,7 +58,9 @@ const paris: CityData = {
       verified: true,
       vibes: ["Football", "National Stadium", "Concerts"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Stade+de+France"
+      google_maps_url: "https://maps.google.com/maps?q=Stade+de+France",
+      createdAt: currentDate,
+      updatedAt: currentDate
     },
     {
       id: "par-4",
@@ -67,7 +75,9 @@ const paris: CityData = {
       verified: true,
       vibes: ["Art", "Historic", "Mona Lisa"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Louvre+Museum+Paris"
+      google_maps_url: "https://maps.google.com/maps?q=Louvre+Museum+Paris",
+      createdAt: currentDate,
+      updatedAt: currentDate
     },
     {
       id: "par-5",
@@ -83,7 +93,9 @@ const paris: CityData = {
       verified: true,
       vibes: ["Historic", "Literary", "Saint-Germain"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Cafe+de+Flore+Paris"
+      google_maps_url: "https://maps.google.com/maps?q=Cafe+de+Flore+Paris",
+      createdAt: currentDate,
+      updatedAt: currentDate
     }
   ]
 };

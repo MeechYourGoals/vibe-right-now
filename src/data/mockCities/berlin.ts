@@ -1,6 +1,8 @@
 
 import { CityData } from '@/types';
 
+const currentDate = new Date().toISOString();
+
 const berlin: CityData = {
   name: "Berlin",
   country: "Germany",
@@ -21,7 +23,9 @@ const berlin: CityData = {
       verified: true,
       vibes: ["Techno", "Industrial", "Legendary"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Berghain+Berlin"
+      google_maps_url: "https://maps.google.com/maps?q=Berghain+Berlin",
+      createdAt: currentDate,
+      updatedAt: currentDate
     },
     {
       id: "ber-2",
@@ -36,7 +40,9 @@ const berlin: CityData = {
       verified: true,
       vibes: ["Historic", "Iconic", "Tourism"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Brandenburg+Gate+Berlin"
+      google_maps_url: "https://maps.google.com/maps?q=Brandenburg+Gate+Berlin",
+      createdAt: currentDate,
+      updatedAt: currentDate
     },
     {
       id: "ber-3",
@@ -52,7 +58,9 @@ const berlin: CityData = {
       verified: true,
       vibes: ["Traditional", "Historic", "German Cuisine"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Zur+Letzten+Instanz+Berlin"
+      google_maps_url: "https://maps.google.com/maps?q=Zur+Letzten+Instanz+Berlin",
+      createdAt: currentDate,
+      updatedAt: currentDate
     }
   ]
 };

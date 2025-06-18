@@ -1,6 +1,8 @@
 
 import { CityData } from '@/types';
 
+const currentDate = new Date().toISOString();
+
 const rome: CityData = {
   name: "Rome",
   country: "Italy",
@@ -20,7 +22,9 @@ const rome: CityData = {
       verified: true,
       vibes: ["Ancient", "Historic", "Iconic"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Colosseum+Rome"
+      google_maps_url: "https://maps.google.com/maps?q=Colosseum+Rome",
+      createdAt: currentDate,
+      updatedAt: currentDate
     },
     {
       id: "rom-2",
@@ -36,7 +40,9 @@ const rome: CityData = {
       verified: true,
       vibes: ["Michelin Star", "Rooftop", "Fine Dining"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=La+Pergola+Rome"
+      google_maps_url: "https://maps.google.com/maps?q=La+Pergola+Rome",
+      createdAt: currentDate,
+      updatedAt: currentDate
     },
     {
       id: "rom-3",
@@ -52,7 +58,9 @@ const rome: CityData = {
       verified: true,
       vibes: ["Electronic", "Underground", "Alternative"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Goa+Club+Rome"
+      google_maps_url: "https://maps.google.com/maps?q=Goa+Club+Rome",
+      createdAt: currentDate,
+      updatedAt: currentDate
     }
   ]
 };

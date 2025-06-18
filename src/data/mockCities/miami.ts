@@ -1,6 +1,8 @@
 
 import { CityData } from '@/types';
 
+const currentDate = new Date().toISOString();
+
 const miami: CityData = {
   name: "Miami",
   state: "FL",
@@ -23,7 +25,9 @@ const miami: CityData = {
       verified: true,
       vibes: ["Seafood", "Historic", "South Beach"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Joe's+Stone+Crab+Miami"
+      google_maps_url: "https://maps.google.com/maps?q=Joe's+Stone+Crab+Miami",
+      createdAt: currentDate,
+      updatedAt: currentDate
     },
     {
       id: "mia-2",
@@ -40,7 +44,9 @@ const miami: CityData = {
       verified: true,
       vibes: ["Celebrity", "Upscale", "Beach Club"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=LIV+Nightclub+Miami"
+      google_maps_url: "https://maps.google.com/maps?q=LIV+Nightclub+Miami",
+      createdAt: currentDate,
+      updatedAt: currentDate
     },
     {
       id: "mia-3",
@@ -56,7 +62,9 @@ const miami: CityData = {
       verified: true,
       vibes: ["Heat", "Basketball", "Downtown"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=FTX+Arena+Miami"
+      google_maps_url: "https://maps.google.com/maps?q=FTX+Arena+Miami",
+      createdAt: currentDate,
+      updatedAt: currentDate
     },
     {
       id: "mia-4",
@@ -72,7 +80,9 @@ const miami: CityData = {
       verified: true,
       vibes: ["Art Deco", "Historic", "Colorful"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Art+Deco+District+Miami"
+      google_maps_url: "https://maps.google.com/maps?q=Art+Deco+District+Miami",
+      createdAt: currentDate,
+      updatedAt: currentDate
     },
     {
       id: "mia-5",
@@ -89,7 +99,9 @@ const miami: CityData = {
       verified: true,
       vibes: ["Local Roaster", "Wynwood", "Hip"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Panther+Coffee+Miami"
+      google_maps_url: "https://maps.google.com/maps?q=Panther+Coffee+Miami",
+      createdAt: currentDate,
+      updatedAt: currentDate
     }
   ]
 };
