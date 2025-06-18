@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { MapPin, Moon, Sparkles, VerifiedIcon } from "lucide-react";
+import { MapPin, Sparkles, VerifiedIcon } from "lucide-react";
 import { Location } from "@/types";
 
 interface NightlifeSectionProps {
@@ -27,10 +27,11 @@ const NightlifeSection = ({ nightlifeVenues, searchedCity, dateRange }: Nightlif
       zip: "10001",
       lat: 40.7128,
       lng: -74.0060,
-      type: "nightlife",
+      type: "nightlife" as const,
       verified: true,
       vibes: ["Nightlife", "Rooftop", "Cocktails"],
-      venueType: "Rooftop Bar"
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     },
     {
       id: "nl-default-2",
@@ -42,10 +43,11 @@ const NightlifeSection = ({ nightlifeVenues, searchedCity, dateRange }: Nightlif
       zip: "10001",
       lat: 40.7228,
       lng: -74.0160,
-      type: "nightlife",
+      type: "nightlife" as const,
       verified: true,
       vibes: ["Nightlife", "Dancing", "DJ"],
-      venueType: "Nightclub"
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     },
     {
       id: "nl-default-3",
@@ -57,19 +59,20 @@ const NightlifeSection = ({ nightlifeVenues, searchedCity, dateRange }: Nightlif
       zip: "10001",
       lat: 40.7328,
       lng: -74.0260,
-      type: "nightlife",
+      type: "nightlife" as const,
       verified: true,
       vibes: ["Cocktails", "Intimate", "Vintage"],
-      venueType: "Cocktail Bar"
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     }
   ];
 
   return (
     <div className="mb-6">
-      <h2 className="text-xl font-semibold mb-4 flex items-center">
+      <h2 className="text-xl font-semibold mb-4 flex items-center text-white">
         Nightlife in {searchedCity}
         {dateRange?.from && (
-          <Badge className="ml-2 bg-indigo-100 text-indigo-800">
+          <Badge className="ml-2 bg-purple-600 text-white border-purple-500">
             {format(dateRange.from, "MMM yyyy")}
             {dateRange.to && ` - ${format(dateRange.to, "MMM yyyy")}`}
           </Badge>
@@ -77,24 +80,24 @@ const NightlifeSection = ({ nightlifeVenues, searchedCity, dateRange }: Nightlif
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {displayVenues.map((venue) => (
-          <Card key={venue.id} className="vibe-card-hover bg-indigo-50 border-indigo-200 hover:bg-indigo-100">
+          <Card key={venue.id} className="vibe-card-hover bg-gray-800 border-gray-700 hover:bg-gray-750 text-white">
             <CardContent className="p-4">
               <div className="flex justify-between items-start mb-2">
-                <h3 className="text-lg font-semibold flex items-center">
+                <h3 className="text-lg font-semibold flex items-center text-white">
                   {venue.name}
                   {venue.verified && (
-                    <VerifiedIcon className="h-4 w-4 ml-1 text-indigo-500" />
+                    <VerifiedIcon className="h-4 w-4 ml-1 text-purple-400" />
                   )}
                 </h3>
-                <Badge variant="outline" className="bg-indigo-100 border-indigo-300 text-indigo-700">
+                <Badge variant="outline" className="bg-purple-600 border-purple-500 text-white">
                   Nightlife
                 </Badge>
               </div>
               
-              <div className="text-sm text-muted-foreground mb-3 flex items-center">
+              <div className="text-sm text-gray-300 mb-3 flex items-center">
                 <MapPin className="h-4 w-4 mr-1" />
                 <span>
-                  {venue.address}, {venue.city}, {venue.state}
+                  {venue.address}, {venue.city}{venue.state ? `, ${venue.state}` : ''}
                 </span>
               </div>
               
@@ -104,16 +107,16 @@ const NightlifeSection = ({ nightlifeVenues, searchedCity, dateRange }: Nightlif
                     <Badge 
                       key={index} 
                       variant="outline" 
-                      className="bg-indigo-50 text-indigo-700 border-indigo-200"
+                      className="bg-purple-700 text-purple-100 border-purple-500"
                     >
-                      <Sparkles className="h-3 w-3 mr-1 text-indigo-500" />
+                      <Sparkles className="h-3 w-3 mr-1 text-purple-300" />
                       {vibe}
                     </Badge>
                   ))}
                 </div>
               )}
               
-              <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white" asChild>
+              <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white border-0" asChild>
                 <Link to={`/venue/${venue.id}`}>View Vibes</Link>
               </Button>
             </CardContent>

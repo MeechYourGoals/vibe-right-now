@@ -75,7 +75,7 @@ export interface Location {
   zip?: string;
   lat: number;
   lng: number;
-  type: "restaurant" | "bar" | "nightclub" | "cafe" | "attraction" | "sports" | "event" | "city" | "other";
+  type: "restaurant" | "bar" | "nightclub" | "cafe" | "attraction" | "sports" | "event" | "city" | "other" | "nightlife";
   verified: boolean;
   rating?: number;
   price_level?: number;
