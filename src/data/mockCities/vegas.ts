@@ -83,7 +83,7 @@ const vegas: CityData = {
       country: "USA",
       lat: 36.1180,
       lng: -115.1751,
-      type: "mall" as const,
+      type: "other" as const,
       rating: 4.2,
       verified: true,
       vibes: ["Luxury Shopping", "Roman Theme", "Strip"],

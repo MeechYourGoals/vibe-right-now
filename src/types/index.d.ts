@@ -1,5 +1,5 @@
 
-// If this file doesn't exist, we're creating it
+// Unified type definitions to prevent conflicts
 import { MockUserProfile } from "@/mock/users";
 
 export interface User {
@@ -12,11 +12,18 @@ export interface User {
   followers?: number;
   following?: number;
   posts?: number;
+  displayName?: string;
+  isPrivate?: boolean;
+  email?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Media {
-  type: "image" | "video";
+  id?: string;
+  type: "image" | "video" | "audio";
   url: string;
+  thumbnail?: string;
 }
 
 export interface Post {
@@ -27,11 +34,11 @@ export interface Post {
   media?: Media[];
   timestamp: string;
   expiresAt?: string;
-  likes: User[]; // Array of users who liked the post
+  likes: User[];
   comments: number;
   isPinned?: boolean;
   isVenuePost?: boolean;
-  saved: boolean; // Added missing property
+  saved: boolean;
   vibeTags?: string[];
 }
 
@@ -55,14 +62,20 @@ export interface Location {
   zip?: string;
   lat: number;
   lng: number;
-  type: "restaurant" | "bar" | "event" | "attraction" | "sports" | "other";
+  type: "restaurant" | "bar" | "nightclub" | "cafe" | "attraction" | "sports" | "event" | "city" | "other";
   verified: boolean;
-  hours?: Record<string, string>;
-  vibes?: string[];
-  userProfile?: MockUserProfile;
   rating?: number;
+  price_level?: number;
+  vibes?: string[];
+  business_status?: string;
+  google_maps_url?: string;
+  hours?: Record<string, string>;
+  tags?: string[];
+  phone?: string;
+  website?: string;
   followers?: number;
   checkins?: number;
+  userProfile?: MockUserProfile;
 }
 
 export interface CreditCard {
@@ -80,7 +93,6 @@ export interface ChatMessage {
   role: 'user' | 'assistant' | 'system' | 'error';
   content: string;
   timestamp: string;
-  // For compatibility with older format
   text?: string;
   sender?: 'user' | 'ai';
 }
@@ -116,7 +128,7 @@ export interface VenueInsights {
   totalReach: number;
   impressions: number;
   viewsPer: number;
-  viewsCount?: number; // Adding as optional for backward compatibility
+  viewsCount?: number;
 }
 
 export * from "./index";

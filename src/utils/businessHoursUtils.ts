@@ -23,6 +23,7 @@ export const generateBusinessHours = (location: Location): BusinessHours => {
         saturday: { open: "5:00 PM", close: "3:00 AM", closed: false },
         sunday: { open: "5:00 PM", close: "12:00 AM", closed: false },
         isOpenNow: true,
+        isOpen24Hours: false,
         timezone: "America/Los_Angeles"
       };
     
@@ -36,6 +37,7 @@ export const generateBusinessHours = (location: Location): BusinessHours => {
         saturday: { open: "7:00 AM", close: "7:00 PM", closed: false },
         sunday: { open: "7:00 AM", close: "6:00 PM", closed: false },
         isOpenNow: true,
+        isOpen24Hours: false,
         timezone: "America/Los_Angeles"
       };
 
@@ -50,6 +52,7 @@ export const generateBusinessHours = (location: Location): BusinessHours => {
         saturday: { open: "9:00 AM", close: "11:00 PM", closed: false },
         sunday: defaultHours,
         isOpenNow: true,
+        isOpen24Hours: false,
         timezone: "America/Los_Angeles"
       };
   }

@@ -129,8 +129,8 @@ const PostCard: React.FC<PostCardProps> = ({
             isPrivate: post.user.isPrivate,
             email: post.user.email,
             posts: post.user.posts,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
+            createdAt: post.user.createdAt || new Date().toISOString(),
+            updatedAt: post.user.updatedAt || new Date().toISOString()
           };
           
           return (
@@ -209,8 +209,8 @@ const PostCard: React.FC<PostCardProps> = ({
     isPrivate: post.user.isPrivate,
     email: post.user.email,
     posts: post.user.posts,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    createdAt: post.user.createdAt || new Date().toISOString(),
+    updatedAt: post.user.updatedAt || new Date().toISOString()
   };
 
   return (

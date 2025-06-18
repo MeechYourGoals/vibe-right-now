@@ -70,7 +70,7 @@ export interface EnhancedPost extends Post {
   expiresAt?: string;
 }
 
-// Location interface that matches the base Location type
+// Unified Location interface that matches all usage patterns
 export interface Location {
   id: string;
   name: string;
@@ -78,6 +78,7 @@ export interface Location {
   city: string;
   state?: string;
   country: string;
+  zip?: string;
   lat: number;
   lng: number;
   type: "restaurant" | "bar" | "nightclub" | "cafe" | "attraction" | "sports" | "event" | "city" | "other";
@@ -88,9 +89,15 @@ export interface Location {
   business_status?: string;
   google_maps_url?: string;
   hours?: BusinessHours;
+  tags?: string[];
+  phone?: string;
+  website?: string;
+  followers?: number;
+  checkins?: number;
+  userProfile?: any;
 }
 
-// Business Hours interface
+// Business Hours interface with 24 hour support
 export interface BusinessHours {
   monday: DayHours | string;
   tuesday: DayHours | string;
@@ -100,6 +107,7 @@ export interface BusinessHours {
   saturday: DayHours | string;
   sunday: DayHours | string;
   isOpenNow?: boolean;
+  isOpen24Hours?: boolean;
   timezone?: string;
 }
 
