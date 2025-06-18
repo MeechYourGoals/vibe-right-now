@@ -1,17 +1,11 @@
-
 export interface User {
   id: string;
-  name: string;
   username: string;
+  name: string;
   avatar: string;
+  isPrivate: boolean;
   verified: boolean;
   bio?: string;
-  followers?: number;
-  following?: number;
-  posts?: number;
-  displayName?: string;
-  isPrivate?: boolean;
-  email?: string;
   isCelebrity?: boolean;
   createdAt: string;
   updatedAt: string;

@@ -2,11 +2,13 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { TrendingUp, TrendingDown, MessageSquare, Star, RefreshCw, ExternalLink } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { TrendingUp, TrendingDown, MessageSquare, Star, RefreshCw, ExternalLink, Edit3 } from 'lucide-react';
 import { SentimentAnalysisService } from "@/services/sentimentAnalysisService";
 import { PlatformSentimentSummary, SentimentTheme } from "@/types";
 import { toast } from "sonner";
@@ -20,16 +22,74 @@ const SentimentAnalysisTab: React.FC<SentimentAnalysisTabProps> = ({ venueId, is
   const [platformSummaries, setPlatformSummaries] = useState<PlatformSentimentSummary[]>([]);
   const [loading, setLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<string>('');
+  const [analyzedVenue, setAnalyzedVenue] = useState<string>('Artisan Coffee House');
+  const [isEditingVenue, setIsEditingVenue] = useState(false);
+
+  // Mock data for Artisan Coffee House
+  const getMockCoffeeHouseData = (): PlatformSentimentSummary[] => [
+    {
+      platform: 'Google Reviews',
+      sentiment: 0.7,
+      mentions: 45,
+      overallSentiment: 0.7,
+      summary: 'Customers love the cozy atmosphere and quality coffee, with frequent praise for the matcha drinks.',
+      reviewCount: 124,
+      lastUpdated: new Date().toISOString(),
+      themes: [
+        { theme: 'Coffee Quality', sentiment: 0.8, frequency: 89, name: 'Coffee Quality', score: 0.8 },
+        { theme: 'Atmosphere', sentiment: 0.9, frequency: 67, name: 'Atmosphere', score: 0.9 },
+        { theme: 'Service Speed', sentiment: -0.2, frequency: 34, name: 'Service Speed', score: -0.2 },
+        { theme: 'Pricing', sentiment: 0.3, frequency: 23, name: 'Pricing', score: 0.3 }
+      ]
+    },
+    {
+      platform: 'Yelp',
+      sentiment: 0.6,
+      mentions: 32,
+      overallSentiment: 0.6,
+      summary: 'Great spot for remote work with excellent wifi and comfortable seating.',
+      reviewCount: 89,
+      lastUpdated: new Date().toISOString(),
+      themes: [
+        { theme: 'Work Environment', sentiment: 0.9, frequency: 78, name: 'Work Environment', score: 0.9 },
+        { theme: 'Food Options', sentiment: 0.4, frequency: 45, name: 'Food Options', score: 0.4 },
+        { theme: 'Staff Friendliness', sentiment: 0.7, frequency: 56, name: 'Staff Friendliness', score: 0.7 }
+      ]
+    },
+    {
+      platform: 'TripAdvisor',
+      sentiment: 0.5,
+      mentions: 18,
+      overallSentiment: 0.5,
+      summary: 'Popular with tourists for Instagram-worthy drinks and local coffee culture experience.',
+      reviewCount: 67,
+      lastUpdated: new Date().toISOString(),
+      themes: [
+        { theme: 'Instagram Appeal', sentiment: 0.8, frequency: 56, name: 'Instagram Appeal', score: 0.8 },
+        { theme: 'Tourist Experience', sentiment: 0.6, frequency: 43, name: 'Tourist Experience', score: 0.6 },
+        { theme: 'Wait Times', sentiment: -0.4, frequency: 29, name: 'Wait Times', score: -0.4 }
+      ]
+    }
+  ];
+
+  // Customer review quotes for the overview
+  const customerQuotes = [
+    { text: "The matcha latte is a must-order here!", sentiment: "positive", platform: "Google Reviews" },
+    { text: "Perfect spot for remote work with great wifi", sentiment: "positive", platform: "Yelp" },
+    { text: "Service can be slow during peak hours", sentiment: "negative", platform: "Google Reviews" },
+    { text: "Cozy atmosphere makes it great for families", sentiment: "positive", platform: "TripAdvisor" },
+    { text: "Instagram-worthy drinks but pricey", sentiment: "neutral", platform: "Yelp" },
+    { text: "Best coffee shop in the neighborhood!", sentiment: "positive", platform: "Google Reviews" }
+  ];
 
   // Load sentiment data
   const loadSentimentData = async () => {
     setLoading(true);
     try {
-      const summaries = await SentimentAnalysisService.getPlatformSentimentSummaries(venueId);
-      setPlatformSummaries(summaries);
-      if (summaries.length > 0) {
-        setLastUpdated(new Date().toLocaleString());
-      }
+      // Use mock data for demo
+      const mockData = getMockCoffeeHouseData();
+      setPlatformSummaries(mockData);
+      setLastUpdated(new Date().toLocaleString());
     } catch (error) {
       console.error('Error loading sentiment data:', error);
       toast.error('Failed to load sentiment analysis');
@@ -38,21 +98,25 @@ const SentimentAnalysisTab: React.FC<SentimentAnalysisTabProps> = ({ venueId, is
     }
   };
 
-  // Trigger analysis with mock data for demo
+  // Trigger analysis with updated venue name
   const triggerAnalysis = async () => {
     setLoading(true);
     try {
-      await SentimentAnalysisService.triggerMockAnalysis(venueId);
-      toast.success('Sentiment analysis started! Results will appear shortly.');
+      toast.success(`Sentiment analysis started for ${analyzedVenue}! Results will appear shortly.`);
       setTimeout(() => {
         loadSentimentData();
-      }, 2000); // Wait for analysis to complete
+      }, 2000);
     } catch (error) {
       console.error('Error triggering analysis:', error);
       toast.error('Failed to start sentiment analysis');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleVenueUpdate = () => {
+    setIsEditingVenue(false);
+    triggerAnalysis();
   };
 
   useEffect(() => {
@@ -75,12 +139,12 @@ const SentimentAnalysisTab: React.FC<SentimentAnalysisTabProps> = ({ venueId, is
     return 'Very Negative';
   };
 
-  const formatThemeData = (themes: SentimentTheme[]) => {
-    return themes.map(theme => ({
-      name: theme.name,
-      score: Math.round((theme.score + 1) * 50), // Convert -1 to 1 scale to 0-100
-      originalScore: theme.score
-    }));
+  const getQuoteColor = (sentiment: string) => {
+    switch(sentiment) {
+      case 'positive': return 'border-l-green-500 bg-green-50';
+      case 'negative': return 'border-l-red-500 bg-red-50';
+      default: return 'border-l-yellow-500 bg-yellow-50';
+    }
   };
 
   if (!isPremium) {
@@ -174,7 +238,7 @@ const SentimentAnalysisTab: React.FC<SentimentAnalysisTabProps> = ({ venueId, is
                     <Card key={platform.platform}>
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-medium capitalize">{platform.platform}</h4>
+                          <h4 className="font-medium">{platform.platform}</h4>
                           <Badge variant="outline" className={getSentimentColor(platform.overallSentiment)}>
                             {getSentimentLabel(platform.overallSentiment)}
                           </Badge>
@@ -191,38 +255,82 @@ const SentimentAnalysisTab: React.FC<SentimentAnalysisTabProps> = ({ venueId, is
                   ))}
                 </div>
 
-                {platformSummaries.length > 0 && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Sentiment Trends</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={platformSummaries}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="platform" />
-                          <YAxis domain={[-1, 1]} />
-                          <Tooltip 
-                            formatter={(value: number) => [getSentimentLabel(value), 'Sentiment']}
-                          />
-                          <Bar 
-                            dataKey="overallSentiment" 
-                            fill="#8884d8"
-                            name="Overall Sentiment"
-                          />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </CardContent>
-                  </Card>
-                )}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Customer Review Highlights</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {customerQuotes.map((quote, index) => (
+                        <div 
+                          key={index}
+                          className={`p-4 border-l-4 rounded-r-lg ${getQuoteColor(quote.sentiment)}`}
+                        >
+                          <p className="text-sm font-medium mb-2">"{quote.text}"</p>
+                          <p className="text-xs text-muted-foreground">— {quote.platform}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
               </TabsContent>
 
               <TabsContent value="platforms" className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      Venue Analysis
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => setIsEditingVenue(!isEditingVenue)}
+                      >
+                        <Edit3 className="h-4 w-4" />
+                      </Button>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {isEditingVenue ? (
+                      <div className="flex gap-2">
+                        <div className="flex-1">
+                          <Label htmlFor="venue-name">Venue Name</Label>
+                          <Input
+                            id="venue-name"
+                            value={analyzedVenue}
+                            onChange={(e) => setAnalyzedVenue(e.target.value)}
+                            placeholder="Enter venue name to analyze..."
+                          />
+                        </div>
+                        <div className="flex items-end gap-2">
+                          <Button onClick={handleVenueUpdate}>
+                            Analyze
+                          </Button>
+                          <Button variant="outline" onClick={() => setIsEditingVenue(false)}>
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="text-lg font-medium">{analyzedVenue}</h3>
+                          <p className="text-sm text-muted-foreground">
+                            Currently analyzing sentiment for this venue
+                          </p>
+                        </div>
+                        <Badge variant="outline" className="bg-blue-100 text-blue-700">
+                          Active Analysis
+                        </Badge>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
                 {platformSummaries.map((platform) => (
                   <Card key={platform.platform}>
                     <CardHeader>
                       <div className="flex justify-between items-center">
-                        <CardTitle className="capitalize flex items-center">
+                        <CardTitle className="flex items-center">
                           {platform.platform}
                           <Badge 
                             variant="outline" 

@@ -1,55 +1,67 @@
 
-import { User } from "@/types";
+import { User } from '@/types';
+
+const currentDate = new Date().toISOString();
 
 export const celebrityUsers: User[] = [
   {
-    id: "24",
-    username: "kimkardashian",
-    name: "Kim Kardashian",
-    avatar: "https://randomuser.me/api/portraits/women/14.jpg",
+    id: 'celeb-1',
+    username: 'djkhaled',
+    name: 'DJ Khaled',
+    avatar: '/placeholder.svg',
     isCelebrity: true,
     verified: true,
-    bio: "Reality TV star, entrepreneur, and fashion icon. Creating vibes everywhere. SKIMS & KKW Beauty founder.",
+    bio: 'We The Best Music! Producer, DJ, and entrepreneur spreading positivity worldwide.',
     isPrivate: false,
+    createdAt: currentDate,
+    updatedAt: currentDate
   },
   {
-    id: "25",
-    username: "champagnepapi",
-    name: "Drake",
-    avatar: "https://randomuser.me/api/portraits/men/14.jpg",
+    id: 'celeb-2',
+    username: 'vancityreynolds',
+    name: 'Ryan Reynolds',
+    avatar: '/placeholder.svg',
     isCelebrity: true,
     verified: true,
-    bio: "Grammy-winning artist. OVO Sound. Discovering the best vibes across the globe.",
+    bio: 'Actor, producer, and gin enthusiast. Currently owned by my children.',
     isPrivate: false,
+    createdAt: currentDate,
+    updatedAt: currentDate
   },
   {
-    id: "26",
-    username: "keithlee",
-    name: "Keith Lee",
-    avatar: "https://randomuser.me/api/portraits/men/15.jpg",
+    id: 'celeb-3',
+    username: 'zendaya',
+    name: 'Zendaya',
+    avatar: '/placeholder.svg',
     isCelebrity: true,
     verified: true,
-    bio: "Food critic extraordinaire. Helping you find the best food spots in every city.",
+    bio: 'Actor and singer. Spider-Man universe resident. Dog mom to Noon.',
     isPrivate: false,
+    createdAt: currentDate,
+    updatedAt: currentDate
   },
   {
-    id: "27",
-    username: "ishowspeed",
-    name: "iShowSpeed",
-    avatar: "https://randomuser.me/api/portraits/men/16.jpg",
+    id: 'celeb-4',
+    username: 'therock',
+    name: 'Dwayne Johnson',
+    avatar: '/placeholder.svg',
     isCelebrity: true,
     verified: true,
-    bio: "Entertainer and content creator. Finding the most energetic vibes around the world!",
+    bio: 'Actor, producer, businessman, retired professional wrestler. CEO of @sevenbucksprod',
     isPrivate: false,
+    createdAt: currentDate,
+    updatedAt: currentDate
   },
   {
-    id: "28",
-    username: "sydney_sweeney",
-    name: "Sydney Sweeney",
-    avatar: "https://randomuser.me/api/portraits/women/15.jpg",
+    id: 'celeb-5',
+    username: 'selenagomez',
+    name: 'Selena Gomez',
+    avatar: '/placeholder.svg',
     isCelebrity: true,
     verified: true,
-    bio: "Actress, producer, and adventure seeker. Euphoria & White Lotus star. Sharing my favorite places.",
+    bio: 'Multi-platinum recording artist, actress, producer, entrepreneur, and philanthropist.',
     isPrivate: false,
-  },
+    createdAt: currentDate,
+    updatedAt: currentDate
+  }
 ];

@@ -1,33 +1,25 @@
-
-// Core types
-export * from './core/base';
-export * from './core/api';
-
-// Entity types
+export * from './geo';
+export * from './insights';
 export * from './entities/user';
-export * from './entities/venue';
-export * from './entities/content';
-export * from './entities/events';
-export * from './entities/messaging';
-
-// Feature types
-export * from './features/search';
-export * from './features/analytics';
 export * from './features/advertising';
+export * from './features/analytics';
 export * from './features/sentiment';
+export * from './venue';
 
-// Re-export specific types for compatibility
-export type { Post, User, VenueInsights, Comment, Location, CityData, Media } from './index.d';
+import { GeoCoordinates } from './geo';
+import { UserProfile } from './entities/user';
+import { Venue } from './venue';
 
-// Chat types (with selective exports to avoid conflicts)
-export type {
-  ChatSession,
-  ChatMessage,
-  MessageRole,
-  ChatContext,
-  VoiceSession,
-  AIAgent,
-  AgentCapability,
-  CapabilityType,
-  CapabilityLevel
-} from './features/chat';
+// Fix missing exports
+export type Coordinates = GeoCoordinates;
+export type UserProfileData = UserProfile;
+export type UserProfileStats = UserProfile;
+
+export interface CityData {
+  name: string;
+  country: string;
+  state?: string;
+  lat: number;
+  lng: number;
+  venues: Venue[];
+}

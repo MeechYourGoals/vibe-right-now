@@ -1,285 +1,499 @@
-
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Slider } from "@/components/ui/slider";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { TargetingOptions, GenderTargeting } from "@/types";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Plus, X } from 'lucide-react';
+
+interface TargetingOptions {
+  demographics: DemographicsTargeting;
+  behavioral: BehavioralTargeting;
+  geographic: string[];
+  contextual: ContextualTargeting;
+}
+
+interface DemographicsTargeting {
+  education: string[];
+  income: string[];
+  occupation: string[];
+  gender: GenderTargeting;
+  ageRange: [number, number];
+  interests: string[];
+}
+
+type GenderTargeting = 'male' | 'female' | 'all';
+
+interface BehavioralTargeting {
+  purchaseHistory: string[];
+  appUsage: string[];
+  venueVisits: string[];
+  socialEngagement: string[];
+}
+
+interface ContextualTargeting {
+  timeOfDay: string[];
+  deviceType: string[];
+  vibeTags: string[];
+  venueTypes: string[];
+  daypart: string[];
+  dayOfWeek: string[];
+  weather: string[];
+  eventTypes: string[];
+}
 
 const TargetingSegmentation = () => {
-  const [targeting, setTargeting] = useState<TargetingOptions>({
+  const [targetingOptions, setTargetingOptions] = useState({
     demographics: {
-      gender: 'all',
-      ageRange: [18, 65],
-      interests: [],
-      behaviors: [],
-      location: []
+      education: ['College', 'Graduate'],
+      income: ['$50k-75k', '$75k-100k'],
+      occupation: ['Professional', 'Student'],
+      gender: 'all' as GenderTargeting,
+      ageRange: [25, 45] as [number, number],
+      interests: ['Food & Dining', 'Nightlife']
     },
-    geographic: {
-      radius: 5,
-      cities: [],
-      regions: []
-    },
-    behaviors: {
+    behavioral: {
+      purchaseHistory: [],
+      appUsage: [],
       venueVisits: [],
-      socialEngagement: [],
-      purchaseHistory: []
+      socialEngagement: []
     },
-    interests: {
-      categories: [],
-      keywords: [],
-      competitors: []
-    },
+    geographic: ['Downtown', 'Midtown', 'Arts District'],
     contextual: {
+      timeOfDay: [],
+      deviceType: [],
       vibeTags: [],
       venueTypes: [],
       daypart: [],
-      timeOfDay: [],
       dayOfWeek: [],
       weather: [],
       eventTypes: []
-    },
-    momentScore: {
-      crowdDensity: '5',
-      vibeScore: 'high',
-      crowdLevel: 'medium',
-      engagement: 'active'
     }
   });
 
-  const handleGenderChange = (gender: GenderTargeting) => {
-    setTargeting(prev => ({
+  const addDemographicTarget = (category: string, value: string) => {
+    setTargetingOptions(prev => ({
       ...prev,
       demographics: {
         ...prev.demographics,
-        gender
+        [category]: [...prev.demographics[category], value]
       }
     }));
   };
 
-  const handleAgeRangeChange = (values: number[]) => {
-    setTargeting(prev => ({
+  const removeDemographicTarget = (category: string, value: string) => {
+    setTargetingOptions(prev => ({
       ...prev,
       demographics: {
         ...prev.demographics,
-        ageRange: [values[0], values[1]]
+        [category]: prev.demographics[category].filter(item => item !== value)
       }
     }));
   };
 
-  const handleInterestToggle = (interest: string, checked: boolean) => {
-    setTargeting(prev => ({
+  const addBehavioralTarget = (category: string, value: string) => {
+    setTargetingOptions(prev => ({
       ...prev,
-      interests: {
-        ...prev.interests,
-        categories: checked 
-          ? [...prev.interests.categories, interest]
-          : prev.interests.categories.filter(i => i !== interest)
+      behavioral: {
+        ...prev.behavioral,
+        [category]: [...prev.behavioral[category], value]
       }
     }));
   };
 
-  const handleBehaviorToggle = (behavior: string, checked: boolean) => {
-    setTargeting(prev => ({
+  const removeBehavioralTarget = (category: string, value: string) => {
+    setTargetingOptions(prev => ({
       ...prev,
-      behaviors: {
-        ...prev.behaviors,
-        venueVisits: checked 
-          ? [...prev.behaviors.venueVisits, behavior]
-          : prev.behaviors.venueVisits.filter(b => b !== behavior)
+      behavioral: {
+        ...prev.behavioral,
+        [category]: prev.behavioral[category].filter(item => item !== value)
       }
     }));
   };
 
-  const handleVibeTagToggle = (tag: string, checked: boolean) => {
-    setTargeting(prev => ({
+  const addGeographicTarget = (location: string) => {
+    if (location && !targetingOptions.geographic.includes(location)) {
+      setTargetingOptions(prev => ({
+        ...prev,
+        geographic: [...prev.geographic, location]
+      }));
+    }
+  };
+
+  const removeGeographicTarget = (location: string) => {
+    setTargetingOptions(prev => ({
+      ...prev,
+      geographic: prev.geographic.filter(loc => loc !== location)
+    }));
+  };
+
+  const addContextualTarget = (category: string, value: string) => {
+    setTargetingOptions(prev => ({
       ...prev,
       contextual: {
         ...prev.contextual,
-        vibeTags: checked 
-          ? [...prev.contextual.vibeTags, tag]
-          : prev.contextual.vibeTags.filter(t => t !== tag)
+        [category]: [...prev.contextual[category], value]
       }
     }));
   };
 
-  const handleMomentScoreChange = (field: keyof typeof targeting.momentScore, value: string) => {
-    setTargeting(prev => ({
+  const removeContextualTarget = (category: string, value: string) => {
+    setTargetingOptions(prev => ({
       ...prev,
-      momentScore: {
-        ...prev.momentScore,
-        [field]: value
+      contextual: {
+        ...prev.contextual,
+        [category]: prev.contextual[category].filter(item => item !== value)
       }
     }));
   };
-
-  const interests = [
-    'Nightlife', 'Food & Dining', 'Live Music', 'Cocktails', 'Dancing',
-    'Rooftop Venues', 'Happy Hour', 'Date Night', 'Group Outings'
-  ];
-
-  const behaviors = [
-    'Frequent bar visits', 'Weekend social events', 'Premium dining',
-    'Late night activities', 'Social media check-ins', 'Event attendance'
-  ];
-
-  const vibeTags = [
-    'Energetic', 'Chill', 'Romantic', 'Upscale', 'Casual', 'Trendy',
-    'Live Entertainment', 'Outdoor Seating', 'Craft Cocktails'
-  ];
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Demographic Targeting</CardTitle>
-          <CardDescription>Define your audience demographics</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label>Gender</Label>
-            <Select value={targeting.demographics.gender} onValueChange={(value: GenderTargeting) => handleGenderChange(value)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Genders</SelectItem>
-                <SelectItem value="male">Male</SelectItem>
-                <SelectItem value="female">Female</SelectItem>
-                <SelectItem value="non-binary">Non-Binary</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Targeting Segmentation</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Tabs defaultValue="demographics" className="w-full">
+          <TabsList>
+            <TabsTrigger value="demographics">Demographics</TabsTrigger>
+            <TabsTrigger value="behavioral">Behavioral</TabsTrigger>
+            <TabsTrigger value="geographic">Geographic</TabsTrigger>
+            <TabsTrigger value="contextual">Contextual</TabsTrigger>
+          </TabsList>
           
-          <div>
-            <Label>Age Range: {targeting.demographics.ageRange?.[0]} - {targeting.demographics.ageRange?.[1]}</Label>
-            <Slider
-              value={targeting.demographics.ageRange || [18, 65]}
-              onValueChange={handleAgeRangeChange}
-              min={18}
-              max={80}
-              step={1}
-              className="mt-2"
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Interest Targeting</CardTitle>
-          <CardDescription>Target users based on their interests</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 gap-3">
-            {interests.map((interest) => (
-              <div key={interest} className="flex items-center space-x-2">
-                <Checkbox
-                  id={interest}
-                  checked={targeting.interests.categories.includes(interest)}
-                  onCheckedChange={(checked) => handleInterestToggle(interest, checked as boolean)}
-                />
-                <Label htmlFor={interest} className="text-sm">{interest}</Label>
+          <TabsContent value="geographic" className="space-y-4">
+            <div>
+              <Label className="text-base font-medium">Geographic Targeting</Label>
+              <p className="text-sm text-muted-foreground mb-4">
+                Target users based on their location and geographic preferences
+              </p>
+              
+              <div className="space-y-4">
+                <div className="flex flex-wrap gap-2">
+                  {targetingOptions.geographic.map((location) => (
+                    <Badge 
+                      key={location} 
+                      variant="secondary" 
+                      className="flex items-center gap-1"
+                    >
+                      {location}
+                      <button 
+                        onClick={() => removeGeographicTarget(location)}
+                        className="ml-1 hover:bg-red-100 rounded-full p-1"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+                
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Add location (e.g., Downtown, Midtown)"
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        addGeographicTarget(e.currentTarget.value);
+                        e.currentTarget.value = '';
+                      }
+                    }}
+                  />
+                  <Button variant="outline" size="sm">
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+            </div>
+          </TabsContent>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Behavioral Targeting</CardTitle>
-          <CardDescription>Target based on user behaviors</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 gap-3">
-            {behaviors.map((behavior) => (
-              <div key={behavior} className="flex items-center space-x-2">
-                <Checkbox
-                  id={behavior}
-                  checked={targeting.behaviors.venueVisits.includes(behavior)}
-                  onCheckedChange={(checked) => handleBehaviorToggle(behavior, checked as boolean)}
-                />
-                <Label htmlFor={behavior} className="text-sm">{behavior}</Label>
+          <TabsContent value="demographics" className="space-y-4">
+            <div>
+              <Label className="text-base font-medium">Demographic Targeting</Label>
+              <p className="text-sm text-muted-foreground mb-4">
+                Target users based on their demographic characteristics
+              </p>
+              
+              {/* Education Targeting */}
+              <div className="space-y-4">
+                <Label className="text-sm font-medium">Education</Label>
+                <div className="flex flex-wrap gap-2">
+                  {targetingOptions.demographics.education.map((edu) => (
+                    <Badge 
+                      key={edu} 
+                      variant="secondary" 
+                      className="flex items-center gap-1"
+                    >
+                      {edu}
+                      <button 
+                        onClick={() => removeDemographicTarget('education', edu)}
+                        className="ml-1 hover:bg-red-100 rounded-full p-1"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+                
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Add education level (e.g., High School, College)"
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        addDemographicTarget('education', e.currentTarget.value);
+                        e.currentTarget.value = '';
+                      }
+                    }}
+                  />
+                  <Button variant="outline" size="sm">
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Contextual Targeting</CardTitle>
-          <CardDescription>Target based on venue vibes and context</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-3 gap-3">
-            {vibeTags.map((tag) => (
-              <div key={tag} className="flex items-center space-x-2">
-                <Checkbox
-                  id={tag}
-                  checked={targeting.contextual.vibeTags.includes(tag)}
-                  onCheckedChange={(checked) => handleVibeTagToggle(tag, checked as boolean)}
-                />
-                <Label htmlFor={tag} className="text-sm">{tag}</Label>
+              
+              {/* Income Targeting */}
+              <div className="space-y-4">
+                <Label className="text-sm font-medium">Income</Label>
+                <div className="flex flex-wrap gap-2">
+                  {targetingOptions.demographics.income.map((income) => (
+                    <Badge 
+                      key={income} 
+                      variant="secondary" 
+                      className="flex items-center gap-1"
+                    >
+                      {income}
+                      <button 
+                        onClick={() => removeDemographicTarget('income', income)}
+                        className="ml-1 hover:bg-red-100 rounded-full p-1"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+                
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Add income range (e.g., $50k-75k)"
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        addDemographicTarget('income', e.currentTarget.value);
+                        e.currentTarget.value = '';
+                      }
+                    }}
+                  />
+                  <Button variant="outline" size="sm">
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+              
+              {/* Occupation Targeting */}
+              <div className="space-y-4">
+                <Label className="text-sm font-medium">Occupation</Label>
+                <div className="flex flex-wrap gap-2">
+                  {targetingOptions.demographics.occupation.map((occupation) => (
+                    <Badge 
+                      key={occupation} 
+                      variant="secondary" 
+                      className="flex items-center gap-1"
+                    >
+                      {occupation}
+                      <button 
+                        onClick={() => removeDemographicTarget('occupation', occupation)}
+                        className="ml-1 hover:bg-red-100 rounded-full p-1"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+                
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Add occupation (e.g., Professional, Student)"
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        addDemographicTarget('occupation', e.currentTarget.value);
+                        e.currentTarget.value = '';
+                      }
+                    }}
+                  />
+                  <Button variant="outline" size="sm">
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Moment Scoring</CardTitle>
-          <CardDescription>Target based on real-time venue energy</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label>Crowd Density</Label>
-            <Select 
-              value={targeting.momentScore.crowdDensity} 
-              onValueChange={(value) => handleMomentScoreChange('crowdDensity', value)}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="1">Very Low</SelectItem>
-                <SelectItem value="2">Low</SelectItem>
-                <SelectItem value="3">Medium</SelectItem>
-                <SelectItem value="4">High</SelectItem>
-                <SelectItem value="5">Very High</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <TabsContent value="behavioral" className="space-y-4">
+            <div>
+              <Label className="text-base font-medium">Behavioral Targeting</Label>
+              <p className="text-sm text-muted-foreground mb-4">
+                Target users based on their online behavior and preferences
+              </p>
+              
+              {/* Purchase History Targeting */}
+              <div className="space-y-4">
+                <Label className="text-sm font-medium">Purchase History</Label>
+                <div className="flex flex-wrap gap-2">
+                  {targetingOptions.behavioral.purchaseHistory.map((purchase) => (
+                    <Badge 
+                      key={purchase} 
+                      variant="secondary" 
+                      className="flex items-center gap-1"
+                    >
+                      {purchase}
+                      <button 
+                        onClick={() => removeBehavioralTarget('purchaseHistory', purchase)}
+                        className="ml-1 hover:bg-red-100 rounded-full p-1"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+                
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Add purchase history (e.g., Online Shopping, Restaurant Visits)"
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        addBehavioralTarget('purchaseHistory', e.currentTarget.value);
+                        e.currentTarget.value = '';
+                      }
+                    }}
+                  />
+                  <Button variant="outline" size="sm">
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              
+              {/* App Usage Targeting */}
+              <div className="space-y-4">
+                <Label className="text-sm font-medium">App Usage</Label>
+                <div className="flex flex-wrap gap-2">
+                  {targetingOptions.behavioral.appUsage.map((app) => (
+                    <Badge 
+                      key={app} 
+                      variant="secondary" 
+                      className="flex items-center gap-1"
+                    >
+                      {app}
+                      <button 
+                        onClick={() => removeBehavioralTarget('appUsage', app)}
+                        className="ml-1 hover:bg-red-100 rounded-full p-1"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+                
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Add app usage (e.g., Social Media, Food Delivery)"
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        addBehavioralTarget('appUsage', e.currentTarget.value);
+                        e.currentTarget.value = '';
+                      }
+                    }}
+                  />
+                  <Button variant="outline" size="sm">
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
 
-          <div>
-            <Label>Vibe Score</Label>
-            <Select 
-              value={targeting.momentScore.vibeScore} 
-              onValueChange={(value) => handleMomentScoreChange('vibeScore', value)}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="low">Low Energy</SelectItem>
-                <SelectItem value="medium">Medium Energy</SelectItem>
-                <SelectItem value="high">High Energy</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="flex justify-between">
-        <Button variant="outline">Save as Template</Button>
-        <Button>Create Campaign</Button>
-      </div>
-    </div>
+          <TabsContent value="contextual" className="space-y-4">
+            <div>
+              <Label className="text-base font-medium">Contextual Targeting</Label>
+              <p className="text-sm text-muted-foreground mb-4">
+                Target users based on the context of their environment and activities
+              </p>
+              
+              {/* Vibe Tags Targeting */}
+              <div className="space-y-4">
+                <Label className="text-sm font-medium">Vibe Tags</Label>
+                <div className="flex flex-wrap gap-2">
+                  {targetingOptions.contextual.vibeTags.map((vibe) => (
+                    <Badge 
+                      key={vibe} 
+                      variant="secondary" 
+                      className="flex items-center gap-1"
+                    >
+                      {vibe}
+                      <button 
+                        onClick={() => removeContextualTarget('vibeTags', vibe)}
+                        className="ml-1 hover:bg-red-100 rounded-full p-1"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+                
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Add vibe tag (e.g., Lively, Relaxed)"
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        addContextualTarget('vibeTags', e.currentTarget.value);
+                        e.currentTarget.value = '';
+                      }
+                    }}
+                  />
+                  <Button variant="outline" size="sm">
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              
+              {/* Venue Types Targeting */}
+              <div className="space-y-4">
+                <Label className="text-sm font-medium">Venue Types</Label>
+                <div className="flex flex-wrap gap-2">
+                  {targetingOptions.contextual.venueTypes.map((venueType) => (
+                    <Badge 
+                      key={venueType} 
+                      variant="secondary" 
+                      className="flex items-center gap-1"
+                    >
+                      {venueType}
+                      <button 
+                        onClick={() => removeContextualTarget('venueTypes', venueType)}
+                        className="ml-1 hover:bg-red-100 rounded-full p-1"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+                
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Add venue type (e.g., Restaurant, Nightclub)"
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        addContextualTarget('venueTypes', e.currentTarget.value);
+                        e.currentTarget.value = '';
+                      }
+                    }}
+                  />
+                  <Button variant="outline" size="sm">
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </CardContent>
+    </Card>
   );
 };
 
