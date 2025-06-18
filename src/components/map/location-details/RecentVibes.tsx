@@ -42,16 +42,22 @@ const RecentVibes = ({ location }: RecentVibesProps) => {
       <h4 className="font-medium text-sm mb-2">Recent Vibes <span className="text-xs text-muted-foreground">(up to 3 months)</span></h4>
       <div className="space-y-4">
         {locationVibes.length > 0 ? (
-          locationVibes.map(post => (
-            <div key={post.id} className="border-2 border-amber-500/50 rounded-lg overflow-hidden">
-              <VenuePost
-                venue={location}
-                content={post.content || ''}
-                media={getMediaForLocation(location)}
-                timestamp={formatTimestamp(post.timestamp)}
-              />
-            </div>
-          ))
+          locationVibes.map(post => {
+            const mediaForLocation = getMediaForLocation(location);
+            return (
+              <div key={post.id} className="border-2 border-amber-500/50 rounded-lg overflow-hidden">
+                <VenuePost
+                  venue={location}
+                  content={post.content || ''}
+                  media={{
+                    type: mediaForLocation.type === "audio" ? "image" : mediaForLocation.type,
+                    url: mediaForLocation.url
+                  }}
+                  timestamp={formatTimestamp(post.timestamp)}
+                />
+              </div>
+            );
+          })
         ) : (
           <>
             <div className="border-2 border-amber-500/50 rounded-lg overflow-hidden">
