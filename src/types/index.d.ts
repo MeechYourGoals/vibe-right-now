@@ -15,12 +15,12 @@ export interface User {
   displayName?: string;
   isPrivate?: boolean;
   email?: string;
-  createdAt?: string;
-  updatedAt?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Media {
-  id?: string;
+  id: string;
   type: "image" | "video" | "audio";
   url: string;
   thumbnail?: string;
@@ -32,14 +32,16 @@ export interface Post {
   location: Location;
   content: string;
   media?: Media[];
-  timestamp: string;
+  timestamp: Date;
   expiresAt?: string;
-  likes: User[];
+  likes: number;
   comments: number;
   isPinned?: boolean;
   isVenuePost?: boolean;
   saved: boolean;
   vibeTags?: string[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Comment {
@@ -47,9 +49,19 @@ export interface Comment {
   postId: string;
   user: User;
   content: string;
-  timestamp: string;
-  likes: User[];
+  timestamp: Date;
+  likes: number;
   replies?: Comment[];
+  vibedHere?: boolean;
+  contentId?: string;
+  parentId?: string;
+  author?: User;
+  body?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+  status?: 'published';
+  engagement?: { likes: number; replies: number; reactions: any[] };
+  moderation?: { status: 'approved'; flags: any[] };
 }
 
 export interface Location {
@@ -76,6 +88,12 @@ export interface Location {
   followers?: number;
   checkins?: number;
   userProfile?: MockUserProfile;
+  coordinates?: {
+    lat: number;
+    lng: number;
+  };
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface CreditCard {
@@ -129,6 +147,10 @@ export interface VenueInsights {
   impressions: number;
   viewsPer: number;
   viewsCount?: number;
+  visitorCount?: number;
+  checkInCount?: number;
+  receiptUploads?: number;
+  discountRedemptions?: number;
 }
 
 export * from "./index";

@@ -65,11 +65,11 @@ const PostFeed = ({ celebrityFeatured = [], feedType = "for-you" }: PostFeedProp
       default:
         // Mix of trending and recent with featured users
         const featuredPosts = allPosts.filter(post => {
-          const username = post.user?.username || post.author?.username;
+          const username = post.user?.username;
           return username && celebrityFeatured.includes(username);
         });
         const otherPosts = allPosts.filter(post => {
-          const username = post.user?.username || post.author?.username;
+          const username = post.user?.username;
           return !username || !celebrityFeatured.includes(username);
         });
         

@@ -1,4 +1,3 @@
-
 import { Post, Media } from "@/types";
 import { mockUsers } from "./users";
 import { findLocationById } from "@/data/mockCities";
@@ -25,7 +24,7 @@ const getLocationWithFallback = (locationId: string) => {
       lat: 40.7128,
       lng: -74.0060,
       type: "other" as const,
-      verified: false,
+      verified: true,
       coordinates: {
         lat: 40.7128,
         lng: -74.0060
@@ -38,6 +37,7 @@ const getLocationWithFallback = (locationId: string) => {
   // Ensure all required fields are present
   return {
     ...location,
+    verified: location.verified ?? true,
     coordinates: {
       lat: location.lat,
       lng: location.lng
@@ -57,7 +57,9 @@ export const mockPosts: Post[] = [
     timestamp: new Date(),
     likes: 3,
     comments: 2,
-    saved: false
+    saved: false,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "2",
@@ -71,7 +73,9 @@ export const mockPosts: Post[] = [
     timestamp: new Date(),
     likes: 2,
     comments: 2,
-    saved: true
+    saved: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "3",
@@ -82,7 +86,9 @@ export const mockPosts: Post[] = [
     timestamp: new Date(),
     likes: 2,
     comments: 2,
-    saved: false
+    saved: false,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "4",
@@ -93,7 +99,9 @@ export const mockPosts: Post[] = [
     timestamp: new Date(),
     likes: 2,
     comments: 2,
-    saved: true
+    saved: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "5",
@@ -104,7 +112,9 @@ export const mockPosts: Post[] = [
     timestamp: new Date(),
     likes: 2,
     comments: 2,
-    saved: false
+    saved: false,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "6",
@@ -115,7 +125,9 @@ export const mockPosts: Post[] = [
     timestamp: new Date(),
     likes: 2,
     comments: 2,
-    saved: true
+    saved: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "7",
@@ -126,7 +138,9 @@ export const mockPosts: Post[] = [
     timestamp: new Date(),
     likes: 2,
     comments: 2,
-    saved: false
+    saved: false,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "8",
@@ -137,7 +151,9 @@ export const mockPosts: Post[] = [
     timestamp: new Date(),
     likes: 2,
     comments: 2,
-    saved: true
+    saved: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "9",
@@ -148,7 +164,9 @@ export const mockPosts: Post[] = [
     timestamp: new Date(),
     likes: 2,
     comments: 2,
-    saved: false
+    saved: false,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "10",
@@ -159,7 +177,9 @@ export const mockPosts: Post[] = [
     timestamp: new Date(),
     likes: 2,
     comments: 2,
-    saved: true
+    saved: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "11",
@@ -170,7 +190,9 @@ export const mockPosts: Post[] = [
     timestamp: new Date(),
     likes: 2,
     comments: 2,
-    saved: false
+    saved: false,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "12",
@@ -181,6 +203,8 @@ export const mockPosts: Post[] = [
     timestamp: new Date(),
     likes: 2,
     comments: 2,
-    saved: true
+    saved: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   }
 ];

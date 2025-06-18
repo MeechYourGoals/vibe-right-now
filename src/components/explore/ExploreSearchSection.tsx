@@ -27,7 +27,7 @@ const ExploreSearchSection: React.FC<ExploreSearchSectionProps> = ({
   return (
     <EnhancedSearchSection 
       searchQuery={searchQuery}
-      onSearchChange={onSearchChange}
+      onSearchQueryChange={onSearchChange}
       selectedDates={dateRange ? { from: dateRange.from, to: dateRange.to } : null}
       onDateChange={(dates) => onDateChange(dates ? { from: dates.from, to: dates.to } : null)}
       location={location}
