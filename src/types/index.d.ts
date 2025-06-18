@@ -102,6 +102,11 @@ export interface Coordinates {
   lng: number;
 }
 
+export interface GeoCoordinates {
+  lat: number;
+  lng: number;
+}
+
 export interface CreditCard {
   id: string;
   last4: string;
@@ -191,6 +196,44 @@ export interface UserProfileData {
   getUserPosts: (userId: string) => Post[];
   getUserStats: (userId: string) => UserProfileStats;
   getPostComments: (postId: string) => Comment[];
+}
+
+// City Data type
+export interface CityData {
+  name: string;
+  country: string;
+  lat: number;
+  lng: number;
+  venues: Location[];
+}
+
+// Advertising types
+export interface AdFormat {
+  id: string;
+  name: string;
+  description: string;
+}
+
+export interface TargetingOptions {
+  ageRange: { min: number; max: number };
+  gender: GenderTargeting;
+  interests: string[];
+  location: string;
+}
+
+export type GenderTargeting = 'all' | 'male' | 'female' | 'other';
+
+// Sentiment analysis types
+export interface PlatformSentimentSummary {
+  platform: string;
+  sentiment: number;
+  mentions: number;
+}
+
+export interface SentimentTheme {
+  theme: string;
+  sentiment: number;
+  frequency: number;
 }
 
 export * from "./index";
