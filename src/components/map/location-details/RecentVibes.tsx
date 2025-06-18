@@ -25,6 +25,7 @@ const RecentVibes = ({ location }: RecentVibesProps) => {
   // Get content specific to today's day of week
   const todayContent = getDaySpecificContent(location.type || 'default', dayOfWeek);
   const todayImage = {
+    id: `today-${location.id}`,
     type: "image" as const,
     url: getDaySpecificImageUrl(location.type || 'default', dayOfWeek)
   };
@@ -33,6 +34,7 @@ const RecentVibes = ({ location }: RecentVibesProps) => {
   const previousDay = (dayOfWeek - 2 + 7) % 7; // Ensure it's a positive number
   const previousContent = getDaySpecificContent(location.type || 'default', previousDay);
   const previousImage = {
+    id: `previous-${location.id}`,
     type: "image" as const,
     url: getDaySpecificImageUrl(location.type || 'default', previousDay)
   };

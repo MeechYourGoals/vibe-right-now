@@ -3,12 +3,17 @@ import { useState, useEffect } from 'react';
 import { Location } from '@/types';
 import { mockCities } from '@/data/mockCities';
 
+interface Coordinates {
+  lat: number;
+  lng: number;
+}
+
 export const useNearbyLocations = () => {
   const [nearbyLocations, setNearbyLocations] = useState<Location[]>([]);
-  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [userLocation, setUserLocation] = useState<Coordinates | null>(null);
   const [loading, setLoading] = useState(false);
   const [searchedCity, setSearchedCity] = useState<string>("");
-  const [userAddressLocation, setUserAddressLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [userAddressLocation, setUserAddressLocation] = useState<Coordinates | null>(null);
   
   useEffect(() => {
     // Try to get user's current location
@@ -16,7 +21,7 @@ export const useNearbyLocations = () => {
       setLoading(true);
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          const coords = {
+          const coords: Coordinates = {
             lat: position.coords.latitude,
             lng: position.coords.longitude
           };
