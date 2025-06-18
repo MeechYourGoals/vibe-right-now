@@ -79,7 +79,7 @@ export const mockPosts: Post[] = [
     user: mockUsers[3],
     location: getLocationById("18"), // Sydney Opera House
     content: "Finally made it to the Sydney Opera House! The architecture is even more stunning in person. Caught an amazing performance tonight 🎭🏛️",
-    media: [createMedia("image", "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80&auto=format&fit=crop")], // Sydney Opera House
+    media: [createMedia("image", "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80&auto=format&fit=crop")], // Sydney Opera House - this is the actual opera house
     timestamp: new Date(Date.now() - 1000 * 60 * 90),
     likes: 67,
     comments: 15,
@@ -92,7 +92,7 @@ export const mockPosts: Post[] = [
     user: mockUsers[4],
     location: getLocationById("19"), // Eiffel Tower
     content: "Paris at sunset from the Eiffel Tower - no words can describe this magic! The city of lights truly lives up to its name ✨🇫🇷",
-    media: [createMedia("image", "https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?w=600&q=80&auto=format&fit=crop")], // Eiffel Tower
+    media: [createMedia("image", "https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?w=600&q=80&auto=format&fit=crop")], // Eiffel Tower - this is the actual tower
     timestamp: new Date(Date.now() - 1000 * 60 * 45),
     likes: 156,
     comments: 34,
@@ -105,7 +105,7 @@ export const mockPosts: Post[] = [
     user: mockUsers[5],
     location: getLocationById("30"), // Lakers vs Warriors
     content: "WHAT A GAME! Lakers pulled through in overtime! The energy at Crypto.com Arena was absolutely insane! 🏀🔥",
-    media: [createMedia("image", "https://images.unsplash.com/photo-1546519638-68e109498ffc?w=600&q=80&auto=format&fit=crop")], // Basketball game
+    media: [createMedia("image", "https://images.unsplash.com/photo-1504450758481-7338eba7524a?w=600&q=80&auto=format&fit=crop")], // Basketball arena with crowd
     timestamp: new Date(Date.now() - 1000 * 60 * 15),
     likes: 78,
     comments: 19,
@@ -118,7 +118,7 @@ export const mockPosts: Post[] = [
     user: mockUsers[6],
     location: getLocationById("6"), // Madison Square Garden
     content: "The Garden never disappoints! What an incredible show tonight. NYC always brings that special energy 🗽🎤",
-    media: [createMedia("image", "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&q=80&auto=format&fit=crop")], // Madison Square Garden concert
+    media: [createMedia("image", "https://images.unsplash.com/photo-1459865264687-595d652de67e?w=600&q=80&auto=format&fit=crop")], // Indoor arena/stadium
     timestamp: new Date(Date.now() - 1000 * 60 * 200),
     likes: 92,
     comments: 27,
@@ -144,7 +144,7 @@ export const mockPosts: Post[] = [
     user: mockUsers[8],
     location: getLocationById("11"), // Mama's Fish House
     content: "Best seafood I've ever had! Mama's Fish House in Maui is an absolute must-visit. The ocean view while dining is perfection 🌺🐟",
-    media: [createMedia("image", "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=600&q=80&auto=format&fit=crop")], // Hawaiian restaurant/seafood
+    media: [createMedia("image", "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=600&q=80&auto=format&fit=crop")], // Beachside restaurant
     timestamp: new Date(Date.now() - 1000 * 60 * 240),
     likes: 67,
     comments: 16,
@@ -183,7 +183,7 @@ export const mockPosts: Post[] = [
     user: mockUsers[11],
     location: getLocationById("25"), // The Comedy Cellar Austin
     content: "Laughed until my sides hurt at The Comedy Cellar! Austin's comedy scene is absolutely phenomenal. Such talented performers 😂🎭",
-    media: [createMedia("image", "https://images.unsplash.com/photo-1502602898536-47ad22581b52?w=600&q=80&auto=format&fit=crop")], // Comedy club
+    media: [createMedia("image", "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=600&q=80&auto=format&fit=crop")], // Microphone on stage
     timestamp: new Date(Date.now() - 1000 * 60 * 420),
     likes: 56,
     comments: 13,

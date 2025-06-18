@@ -82,7 +82,7 @@ export interface Location {
   vibes?: string[];
   business_status?: string;
   google_maps_url?: string;
-  hours?: Record<string, string>;
+  hours?: Record<string, string | { open: string; close: string; closed?: boolean; }>;
   tags?: string[];
   phone?: string;
   website?: string;

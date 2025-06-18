@@ -13,6 +13,24 @@ export const mockLocations: Location[] = [
     lng: -80.191788,
     type: "bar",
     verified: true,
+    rating: 4.5,
+    price_level: 3,
+    vibes: ["trendy", "beachfront", "cocktails"],
+    business_status: "OPERATIONAL",
+    hours: {
+      monday: { open: "4:00 PM", close: "2:00 AM" },
+      tuesday: { open: "4:00 PM", close: "2:00 AM" },
+      wednesday: { open: "4:00 PM", close: "2:00 AM" },
+      thursday: { open: "4:00 PM", close: "2:00 AM" },
+      friday: { open: "4:00 PM", close: "3:00 AM" },
+      saturday: { open: "2:00 PM", close: "3:00 AM" },
+      sunday: { open: "2:00 PM", close: "1:00 AM" }
+    },
+    tags: ["bar", "cocktails", "sunset", "beach"],
+    phone: "+1-305-555-0123",
+    website: "https://sunsetlounge-miami.com",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "2",
@@ -26,6 +44,24 @@ export const mockLocations: Location[] = [
     lng: -122.6765,
     type: "restaurant",
     verified: true,
+    rating: 4.7,
+    price_level: 2,
+    vibes: ["cozy", "artisanal", "local"],
+    business_status: "OPERATIONAL",
+    hours: {
+      monday: { open: "6:00 AM", close: "9:00 PM" },
+      tuesday: { open: "6:00 AM", close: "9:00 PM" },
+      wednesday: { open: "6:00 AM", close: "9:00 PM" },
+      thursday: { open: "6:00 AM", close: "9:00 PM" },
+      friday: { open: "6:00 AM", close: "10:00 PM" },
+      saturday: { open: "7:00 AM", close: "10:00 PM" },
+      sunday: { open: "7:00 AM", close: "8:00 PM" }
+    },
+    tags: ["coffee", "cafe", "artisan", "local"],
+    phone: "+1-503-555-0456",
+    website: "https://artisancoffeehouse.com",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "3",
@@ -39,6 +75,8 @@ export const mockLocations: Location[] = [
     lng: -97.7431,
     type: "event",
     verified: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "4",
@@ -52,6 +90,8 @@ export const mockLocations: Location[] = [
     lng: -74.006,
     type: "attraction",
     verified: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "5",
@@ -65,6 +105,8 @@ export const mockLocations: Location[] = [
     lng: -87.6298,
     type: "bar",
     verified: false,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "6",
@@ -78,6 +120,25 @@ export const mockLocations: Location[] = [
     lng: -73.9934,
     type: "event",
     verified: true,
+    rating: 4.8,
+    price_level: 4,
+    vibes: ["iconic", "sports", "concerts", "legendary"],
+    business_status: "OPERATIONAL",
+    hours: {
+      monday: "Event dependent",
+      tuesday: "Event dependent",
+      wednesday: "Event dependent",
+      thursday: "Event dependent",
+      friday: "Event dependent",
+      saturday: "Event dependent",
+      sunday: "Event dependent"
+    },
+    tags: ["arena", "sports", "concerts", "events"],
+    phone: "+1-212-465-6741",
+    website: "https://www.msg.com",
+    google_maps_url: "https://goo.gl/maps/msg",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "7",
@@ -91,6 +152,8 @@ export const mockLocations: Location[] = [
     lng: -115.1672,
     type: "bar",
     verified: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "8",
@@ -104,6 +167,8 @@ export const mockLocations: Location[] = [
     lng: -43.2106,
     type: "attraction",
     verified: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "9",
@@ -117,6 +182,8 @@ export const mockLocations: Location[] = [
     lng: -106.8556,
     type: "attraction",
     verified: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "10",
@@ -130,6 +197,8 @@ export const mockLocations: Location[] = [
     lng: -115.1833,
     type: "event",
     verified: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "11",
@@ -143,6 +212,11 @@ export const mockLocations: Location[] = [
     lng: -156.3674,
     type: "restaurant",
     verified: true,
+    rating: 4.8,
+    vibes: ["beachfront", "seafood", "tropical"],
+    tags: ["restaurant", "seafood", "beach", "hawaii"],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "12",
@@ -156,6 +230,8 @@ export const mockLocations: Location[] = [
     lng: -80.1446,
     type: "other",
     verified: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "13",
@@ -169,6 +245,8 @@ export const mockLocations: Location[] = [
     lng: -95.4102,
     type: "event",
     verified: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "14",
@@ -182,6 +260,8 @@ export const mockLocations: Location[] = [
     lng: -118.3650,
     type: "event",
     verified: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "15",
@@ -195,6 +275,8 @@ export const mockLocations: Location[] = [
     lng: -80.6045,
     type: "other",
     verified: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "16",
@@ -208,6 +290,8 @@ export const mockLocations: Location[] = [
     lng: -93.6250,
     type: "restaurant",
     verified: false,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "17",
@@ -221,6 +305,8 @@ export const mockLocations: Location[] = [
     lng: -118.4143,
     type: "bar",
     verified: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "18",
@@ -234,6 +320,25 @@ export const mockLocations: Location[] = [
     lng: 151.2153,
     type: "attraction",
     verified: true,
+    rating: 4.9,
+    price_level: 4,
+    vibes: ["iconic", "cultural", "architectural", "world-class"],
+    business_status: "OPERATIONAL",
+    hours: {
+      monday: { open: "9:00 AM", close: "8:30 PM" },
+      tuesday: { open: "9:00 AM", close: "8:30 PM" },
+      wednesday: { open: "9:00 AM", close: "8:30 PM" },
+      thursday: { open: "9:00 AM", close: "8:30 PM" },
+      friday: { open: "9:00 AM", close: "8:30 PM" },
+      saturday: { open: "9:00 AM", close: "8:30 PM" },
+      sunday: { open: "9:00 AM", close: "8:30 PM" }
+    },
+    tags: ["opera", "culture", "architecture", "unesco"],
+    phone: "+61-2-9250-7111",
+    website: "https://www.sydneyoperahouse.com",
+    google_maps_url: "https://goo.gl/maps/operahouse",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "19",
@@ -247,6 +352,25 @@ export const mockLocations: Location[] = [
     lng: 2.2945,
     type: "attraction",
     verified: true,
+    rating: 4.6,
+    price_level: 3,
+    vibes: ["iconic", "romantic", "historic", "breathtaking"],
+    business_status: "OPERATIONAL",
+    hours: {
+      monday: { open: "9:30 AM", close: "11:45 PM" },
+      tuesday: { open: "9:30 AM", close: "11:45 PM" },
+      wednesday: { open: "9:30 AM", close: "11:45 PM" },
+      thursday: { open: "9:30 AM", close: "11:45 PM" },
+      friday: { open: "9:30 AM", close: "11:45 PM" },
+      saturday: { open: "9:30 AM", close: "11:45 PM" },
+      sunday: { open: "9:30 AM", close: "11:45 PM" }
+    },
+    tags: ["tower", "paris", "landmark", "views"],
+    phone: "+33-892-70-12-39",
+    website: "https://www.toureiffel.paris",
+    google_maps_url: "https://goo.gl/maps/eiffel",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "20",
@@ -260,6 +384,8 @@ export const mockLocations: Location[] = [
     lng: -116.2378,
     type: "event",
     verified: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "21",
@@ -273,6 +399,8 @@ export const mockLocations: Location[] = [
     lng: -118.4058,
     type: "other",
     verified: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "22",
@@ -286,6 +414,8 @@ export const mockLocations: Location[] = [
     lng: -86.7816,
     type: "event",
     verified: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "23",
@@ -299,6 +429,8 @@ export const mockLocations: Location[] = [
     lng: -84.3971,
     type: "event",
     verified: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "24",
@@ -312,6 +444,8 @@ export const mockLocations: Location[] = [
     lng: -97.7470,
     type: "other",
     verified: false,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "25",
@@ -325,6 +459,10 @@ export const mockLocations: Location[] = [
     lng: -97.7383,
     type: "event",
     verified: true,
+    vibes: ["comedy", "intimate", "nightlife"],
+    tags: ["comedy", "club", "entertainment"],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "26",
@@ -338,6 +476,8 @@ export const mockLocations: Location[] = [
     lng: -80.1936,
     type: "bar",
     verified: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "27",
@@ -351,6 +491,8 @@ export const mockLocations: Location[] = [
     lng: -122.6778,
     type: "restaurant",
     verified: false,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "28",
@@ -364,6 +506,8 @@ export const mockLocations: Location[] = [
     lng: -116.2383,
     type: "event",
     verified: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "29",
@@ -377,6 +521,8 @@ export const mockLocations: Location[] = [
     lng: -115.1516,
     type: "event",
     verified: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "30",
@@ -390,6 +536,10 @@ export const mockLocations: Location[] = [
     lng: -118.2673,
     type: "sports",
     verified: true,
+    vibes: ["basketball", "arena", "energy"],
+    tags: ["sports", "basketball", "nba"],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "31",
@@ -403,6 +553,8 @@ export const mockLocations: Location[] = [
     lng: -118.3387,
     type: "sports",
     verified: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "32",
@@ -416,6 +568,8 @@ export const mockLocations: Location[] = [
     lng: -118.2400,
     type: "sports",
     verified: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "33",
@@ -429,6 +583,8 @@ export const mockLocations: Location[] = [
     lng: -118.2611,
     type: "sports",
     verified: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "34",
@@ -442,6 +598,8 @@ export const mockLocations: Location[] = [
     lng: -118.4695,
     type: "sports",
     verified: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "35",
@@ -455,6 +613,8 @@ export const mockLocations: Location[] = [
     lng: -111.8938,
     type: "sports",
     verified: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "95",
@@ -462,11 +622,13 @@ export const mockLocations: Location[] = [
     address: "789 Harbor Street",
     city: "Portland",
     state: "ME",
-    zip: "04101", // Added zip code
+    zip: "04101",
     country: "USA",
     lat: 43.6591,
     lng: -70.2568,
     type: "bar",
     verified: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
 ];
