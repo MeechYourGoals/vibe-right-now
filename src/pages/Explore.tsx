@@ -1,25 +1,15 @@
 
 import React, { useState, useCallback } from "react";
 import Header from "@/components/Header";
-import { Badge } from "@/components/ui/badge";
 import CameraButton from "@/components/CameraButton";
 import NearbyVibesMap from "@/components/NearbyVibesMap";
-import VenuePost from "@/components/VenuePost";
 import useExploreState from "@/hooks/useExploreState";
-import { getCitySpecificContent, getMediaForLocation } from "@/utils/explore/mockGenerators";
-import EnhancedSearchSection from "@/components/explore/EnhancedSearchSection";
-import CategoryTabs from "@/components/explore/CategoryTabs";
-import MusicSection from "@/components/explore/MusicSection";
-import ComedySection from "@/components/explore/ComedySection";
-import NightlifeSection from "@/components/explore/NightlifeSection";
-import LocationsGrid from "@/components/explore/LocationsGrid";
-import RecommendedForYou from "@/components/RecommendedForYou";
-import TrendingLocations from "@/components/TrendingLocations";
-import DiscountLocations from "@/components/DiscountLocations";
+import ExploreSearchSection from "@/components/explore/ExploreSearchSection";
+import ExploreContent from "@/components/explore/ExploreContent";
+import ExploreSidebar from "@/components/explore/ExploreSidebar";
 import { useMapSync } from "@/hooks/useMapSync";
 import { Location } from "@/types";
 import { findCityByName } from "@/data/mockCities";
-import { format } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const Explore = () => {
@@ -114,10 +104,10 @@ const Explore = () => {
             {getDisplayTitle()}
           </h1>
           
-          <EnhancedSearchSection 
+          <ExploreSearchSection 
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
-            selectedDates={dateRange ? { from: dateRange.from!, to: dateRange.to! } : null}
+            dateRange={dateRange ? { from: dateRange.from!, to: dateRange.to! } : null}
             onDateChange={(dates) => handleDateRangeChange(dates ? { from: dates.from, to: dates.to } : null)}
             location={location}
             onLocationChange={setLocation}
@@ -129,102 +119,26 @@ const Explore = () => {
           <div className="w-full mb-6">
             <NearbyVibesMap />
           </div>
-          
-          <CategoryTabs 
-            activeTab={activeTab}
-            onTabChange={handleTabChange}
-          />
         </div>
 
         <div className="flex flex-col md:flex-row gap-6">
           <div className={`${isMobile ? 'w-full' : 'w-3/4'}`}>
-            {isLoadingResults ? (
-              <div className="flex justify-center items-center py-12">
-                <div className="text-center">
-                  <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent motion-reduce:animate-[spin_1.5s_linear_infinite] mb-4"></div>
-                  <p className="text-muted-foreground">Finding the perfect matches for your search...</p>
-                </div>
-              </div>
-            ) : (
-              <div>
-                {activeTab === "music" && (
-                  <MusicSection
-                    musicEvents={musicEvents.length > 0 ? musicEvents : []}
-                    searchedCity={searchedCity || ""}
-                    dateRange={dateRange}
-                  />
-                )}
-                
-                {activeTab === "comedy" && (
-                  <ComedySection
-                    comedyEvents={comedyEvents.length > 0 ? comedyEvents : []}
-                    searchedCity={searchedCity || ""}
-                    dateRange={dateRange}
-                  />
-                )}
-                
-                {activeTab === "nightlife" && (
-                  <NightlifeSection
-                    nightlifeVenues={nightlifeVenues.length > 0 ? nightlifeVenues : []}
-                    searchedCity={searchedCity || ""}
-                    dateRange={dateRange}
-                  />
-                )}
-                
-                {searchCategory === "places" && activeTab === "sports" && (
-                  <div className="mb-6">
-                    <h2 className="text-xl font-semibold mb-4 flex items-center">
-                      Trending Sports Events
-                      {dateRange?.from && (
-                        <Badge className="ml-2 bg-indigo-100 text-indigo-800">
-                          {format(dateRange.from, "MMM yyyy")}
-                          {dateRange.to && ` - ${format(dateRange.to, "MMM yyyy")}`}
-                        </Badge>
-                      )}
-                    </h2>
-                    <div className="space-y-4">
-                      {filteredLocations
-                        .filter(loc => loc.type === "sports")
-                        .slice(0, 3)
-                        .map(location => (
-                          <VenuePost
-                            key={location.id}
-                            venue={location}
-                            content={getCitySpecificContent(location)}
-                            media={getMediaForLocation(location)}
-                            timestamp={new Date().toISOString()}
-                          />
-                        ))}
-                    </div>
-                  </div>
-                )}
-                
-                {activeTab !== "music" && activeTab !== "comedy" && activeTab !== "nightlife" && (
-                  <LocationsGrid
-                    locations={filteredLocations}
-                    locationTags={locationTags}
-                  />
-                )}
-              </div>
-            )}
+            <ExploreContent
+              activeTab={activeTab}
+              onTabChange={handleTabChange}
+              isLoadingResults={isLoadingResults}
+              searchCategory={searchCategory}
+              musicEvents={musicEvents}
+              comedyEvents={comedyEvents}
+              nightlifeVenues={nightlifeVenues}
+              filteredLocations={filteredLocations}
+              locationTags={locationTags}
+              searchedCity={searchedCity || ""}
+              dateRange={dateRange}
+            />
           </div>
           
-          {!isMobile && (
-            <div className="w-1/4 space-y-6">
-              <RecommendedForYou featuredLocations={["5", "7", "10", "13", "20"]} />
-              <TrendingLocations />
-              <DiscountLocations />
-            </div>
-          )}
-          
-          {isMobile && (
-            <div className="mt-8 space-y-6">
-              <h2 className="text-xl font-bold mb-4 vibe-gradient-text">Around You</h2>
-              <RecommendedForYou featuredLocations={["5", "7", "10", "13", "20"]} />
-              <TrendingLocations />
-              <DiscountLocations />
-            </div>
-          )}
+          <ExploreSidebar isMobile={isMobile} />
         </div>
       </main>
       

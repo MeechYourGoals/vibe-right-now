@@ -25,10 +25,26 @@ const getLocationWithFallback = (locationId: string) => {
       lat: 40.7128,
       lng: -74.0060,
       type: "other" as const,
-      verified: false
+      verified: false,
+      coordinates: {
+        lat: 40.7128,
+        lng: -74.0060
+      },
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     };
   }
-  return location;
+  
+  // Ensure all required fields are present
+  return {
+    ...location,
+    coordinates: {
+      lat: location.lat,
+      lng: location.lng
+    },
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
 };
 
 export const mockPosts: Post[] = [
@@ -38,8 +54,8 @@ export const mockPosts: Post[] = [
     location: getLocationWithFallback("nyc-1"),
     content: "Just discovered this amazing brunch spot! The avocado toast here is next level 🥑✨",
     media: [createMedia("image", "https://images.unsplash.com/photo-1482049016688-2d3e1b311543?w=500")],
-    timestamp: new Date().toISOString(),
-    likes: [mockUsers[1], mockUsers[2], mockUsers[3]],
+    timestamp: new Date(),
+    likes: 3,
     comments: 2,
     saved: false
   },
@@ -52,8 +68,8 @@ export const mockPosts: Post[] = [
       createMedia("image", "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=500"),
       createMedia("image", "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=500")
     ],
-    timestamp: new Date().toISOString(),
-    likes: [mockUsers[0], mockUsers[4]],
+    timestamp: new Date(),
+    likes: 2,
     comments: 2,
     saved: true
   },
@@ -63,8 +79,8 @@ export const mockPosts: Post[] = [
     location: getLocationWithFallback("london-1"),
     content: "Live music night was absolutely incredible! This band knows how to get the crowd going 🎸🔥",
     media: [createMedia("video", "https://example.com/concert-video.mp4")],
-    timestamp: new Date().toISOString(),
-    likes: [mockUsers[5], mockUsers[6]],
+    timestamp: new Date(),
+    likes: 2,
     comments: 2,
     saved: false
   },
@@ -74,8 +90,8 @@ export const mockPosts: Post[] = [
     location: getLocationWithFallback("chicago-1"),
     content: "Perfect coffee shop for getting work done. Great WiFi and even better lattes! ☕💻",
     media: [createMedia("image", "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=500")],
-    timestamp: new Date().toISOString(),
-    likes: [mockUsers[7], mockUsers[8]],
+    timestamp: new Date(),
+    likes: 2,
     comments: 2,
     saved: true
   },
@@ -85,8 +101,8 @@ export const mockPosts: Post[] = [
     location: getLocationWithFallback("miami-1"),
     content: "Taco Tuesday never disappoints here! The flavors are absolutely authentic 🌮🌶️",
     media: [createMedia("image", "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=500")],
-    timestamp: new Date().toISOString(),
-    likes: [mockUsers[9], mockUsers[10]],
+    timestamp: new Date(),
+    likes: 2,
     comments: 2,
     saved: false
   },
@@ -96,8 +112,8 @@ export const mockPosts: Post[] = [
     location: getLocationWithFallback("sanfrancisco-1"),
     content: "Art gallery meets wine bar - what's not to love? Such a unique concept! 🎨🍷",
     media: [createMedia("image", "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=500")],
-    timestamp: new Date().toISOString(),
-    likes: [mockUsers[11], mockUsers[12]],
+    timestamp: new Date(),
+    likes: 2,
     comments: 2,
     saved: true
   },
@@ -107,8 +123,8 @@ export const mockPosts: Post[] = [
     location: getLocationWithFallback("paris-1"),
     content: "Rooftop drinks with this view? Absolutely unbeatable! Paris never disappoints 🌅🥂",
     media: [createMedia("image", "https://images.unsplash.com/photo-1551632811-561732d1e306?w=500")],
-    timestamp: new Date().toISOString(),
-    likes: [mockUsers[13], mockUsers[14]],
+    timestamp: new Date(),
+    likes: 2,
     comments: 2,
     saved: false
   },
@@ -118,8 +134,8 @@ export const mockPosts: Post[] = [
     location: getLocationWithFallback("tokyo-1"),
     content: "The energy at this club is insane! DJ had everyone dancing until sunrise 💃🎵",
     media: [createMedia("image", "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=500")],
-    timestamp: new Date().toISOString(),
-    likes: [mockUsers[15], mockUsers[16]],
+    timestamp: new Date(),
+    likes: 2,
     comments: 2,
     saved: true
   },
@@ -129,8 +145,8 @@ export const mockPosts: Post[] = [
     location: getLocationWithFallback("sydney-1"),
     content: "Cozy corner cafe with the best pastries in town. Perfect for a quiet morning ☕🥐",
     media: [createMedia("image", "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=500")],
-    timestamp: new Date().toISOString(),
-    likes: [mockUsers[17], mockUsers[18]],
+    timestamp: new Date(),
+    likes: 2,
     comments: 2,
     saved: false
   },
@@ -140,8 +156,8 @@ export const mockPosts: Post[] = [
     location: getLocationWithFallback("barcelona-1"),
     content: "Seafood paella by the harbor - doesn't get more authentic than this! 🥘🌊",
     media: [createMedia("image", "https://images.unsplash.com/photo-1534080564583-6be75777b70a?w=500")],
-    timestamp: new Date().toISOString(),
-    likes: [mockUsers[19], mockUsers[20]],
+    timestamp: new Date(),
+    likes: 2,
     comments: 2,
     saved: true
   },
@@ -151,8 +167,8 @@ export const mockPosts: Post[] = [
     location: getLocationWithFallback("nyc-2"),
     content: "Craft beer heaven! So many unique brews to try, I'll be back for sure 🍺🍻",
     media: [createMedia("image", "https://images.unsplash.com/photo-1608270586620-248524c67de9?w=500")],
-    timestamp: new Date().toISOString(),
-    likes: [mockUsers[21], mockUsers[0]],
+    timestamp: new Date(),
+    likes: 2,
     comments: 2,
     saved: false
   },
@@ -162,8 +178,8 @@ export const mockPosts: Post[] = [
     location: getLocationWithFallback("la-2"),
     content: "Game night at this sports bar was epic! Great atmosphere and even better wings 🏀🍗",
     media: [createMedia("image", "https://images.unsplash.com/photo-1574068468668-a05a11f871da?w=500")],
-    timestamp: new Date().toISOString(),
-    likes: [mockUsers[1], mockUsers[2]],
+    timestamp: new Date(),
+    likes: 2,
     comments: 2,
     saved: true
   }
