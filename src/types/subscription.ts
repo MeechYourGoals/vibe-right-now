@@ -13,6 +13,7 @@ export interface UserSubscriptionFeatures {
   savePreferences: boolean;
   groupTrips: boolean;
   aiRecommendations: boolean;
+  urlReviewSummaries: boolean;
   externalReviewsAISummaries: boolean;
   venueMessaging: boolean;
   periodicBonusPoints: boolean;
@@ -21,6 +22,7 @@ export interface UserSubscriptionFeatures {
   basicVernonChat: boolean;
   vernonConcierge: boolean;
   enhancedVernonChat: boolean;
+  vernonReviewChat: boolean;
   vernonAgenticBooking: boolean;
   influencerMarketplace: boolean;
   earlyAccessARXR: boolean;
@@ -48,7 +50,7 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
     name: 'Plus',
     price: 9.99,
     billingPeriod: 'month',
-    features: ['AI recommendations', 'External Reviews AI Summaries', 'Venue Messaging', 'Periodic Bonus Points'],
+    features: ['AI recommendations', 'URL-based External Review Summaries', 'Venue Messaging', 'Periodic Bonus Points'],
     isPopular: true
   },
   {
@@ -56,7 +58,7 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
     name: 'Premium',
     price: 14.99,
     billingPeriod: 'month',
-    features: ['Vibe With Me mode', 'Link Ticketing and Transportation accounts', 'Basic Vernon Chat', 'Access to Vernon Concierge']
+    features: ['Vibe With Me mode', 'Link Ticketing and Transportation accounts', 'Basic Vernon Chat', 'Vernon Review Chat for summaries', 'Access to Vernon Concierge']
   },
   {
     tier: 'pro',
@@ -73,6 +75,7 @@ export const TIER_FEATURES: Record<UserSubscriptionTier, UserSubscriptionFeature
     savePreferences: true,
     groupTrips: true,
     aiRecommendations: false,
+    urlReviewSummaries: false,
     externalReviewsAISummaries: false,
     venueMessaging: false,
     periodicBonusPoints: false,
@@ -81,6 +84,7 @@ export const TIER_FEATURES: Record<UserSubscriptionTier, UserSubscriptionFeature
     basicVernonChat: false,
     vernonConcierge: false,
     enhancedVernonChat: false,
+    vernonReviewChat: false,
     vernonAgenticBooking: false,
     influencerMarketplace: false,
     earlyAccessARXR: false
@@ -90,6 +94,7 @@ export const TIER_FEATURES: Record<UserSubscriptionTier, UserSubscriptionFeature
     savePreferences: true,
     groupTrips: true,
     aiRecommendations: true,
+    urlReviewSummaries: true,
     externalReviewsAISummaries: true,
     venueMessaging: true,
     periodicBonusPoints: true,
@@ -98,6 +103,7 @@ export const TIER_FEATURES: Record<UserSubscriptionTier, UserSubscriptionFeature
     basicVernonChat: false,
     vernonConcierge: false,
     enhancedVernonChat: false,
+    vernonReviewChat: false,
     vernonAgenticBooking: false,
     influencerMarketplace: false,
     earlyAccessARXR: false
@@ -107,6 +113,7 @@ export const TIER_FEATURES: Record<UserSubscriptionTier, UserSubscriptionFeature
     savePreferences: true,
     groupTrips: true,
     aiRecommendations: true,
+    urlReviewSummaries: true,
     externalReviewsAISummaries: true,
     venueMessaging: true,
     periodicBonusPoints: true,
@@ -115,6 +122,7 @@ export const TIER_FEATURES: Record<UserSubscriptionTier, UserSubscriptionFeature
     basicVernonChat: true,
     vernonConcierge: true,
     enhancedVernonChat: false,
+    vernonReviewChat: true,
     vernonAgenticBooking: false,
     influencerMarketplace: false,
     earlyAccessARXR: false
@@ -124,6 +132,7 @@ export const TIER_FEATURES: Record<UserSubscriptionTier, UserSubscriptionFeature
     savePreferences: true,
     groupTrips: true,
     aiRecommendations: true,
+    urlReviewSummaries: true,
     externalReviewsAISummaries: true,
     venueMessaging: true,
     periodicBonusPoints: true,
@@ -132,6 +141,7 @@ export const TIER_FEATURES: Record<UserSubscriptionTier, UserSubscriptionFeature
     basicVernonChat: true,
     vernonConcierge: true,
     enhancedVernonChat: true,
+    vernonReviewChat: true,
     vernonAgenticBooking: true,
     influencerMarketplace: true,
     earlyAccessARXR: true

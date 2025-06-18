@@ -33,11 +33,13 @@ export interface UserProfile {
   id: string;
   username: string;
   displayName: string;
-  name?: string; // Added for compatibility
+  name?: string;
   avatar?: string;
   bio?: string;
   verified: boolean;
   isPrivate?: boolean;
+  email?: string;
+  posts?: number;
 }
 
 export interface Timestamps {
@@ -70,20 +72,20 @@ export interface Location extends BaseEntity {
   state?: string;
   country: string;
   coordinates: GeoCoordinates;
-  lat?: number; // Added for compatibility
-  lng?: number; // Added for compatibility
+  lat?: number;
+  lng?: number;
   type: LocationType;
   verified?: boolean;
   tags?: string[];
   hours?: BusinessHours;
   metadata?: LocationMetadata;
-  rating?: number; // Added for compatibility
-  business_status?: string; // Added for compatibility
-  vibes?: string[]; // Added for compatibility
-  google_maps_url?: string; // Added for compatibility
-  price_level?: number; // Added for compatibility
-  phone?: string; // Added for compatibility
-  website?: string; // Added for compatibility
+  rating?: number;
+  business_status?: string;
+  vibes?: string[];
+  google_maps_url?: string;
+  price_level?: number;
+  phone?: string;
+  website?: string;
 }
 
 export interface LocationMetadata {
@@ -101,16 +103,19 @@ export interface Post extends BaseEntity {
   title?: string;
   content: string;
   author: UserProfile;
-  user?: UserProfile; // Added for compatibility
+  user?: UserProfile;
   location?: Location;
   media?: MediaItem[];
   tags?: string[];
+  vibeTags?: string[];
   visibility: VisibilityLevel;
-  likes?: number; // Added for compatibility
-  timestamp?: Date; // Added for compatibility
-  isVenuePost?: boolean; // Added for venue posts
-  isPinned?: boolean; // Added for pinned posts
-  isExternalPost?: boolean; // Added for external posts
+  likes?: number;
+  comments?: number;
+  saved?: boolean;
+  timestamp?: Date;
+  isVenuePost?: boolean;
+  isPinned?: boolean;
+  isExternalPost?: boolean;
 }
 
 // User interface
@@ -120,7 +125,9 @@ export interface User extends BaseEntity {
   name: string;
   email: string;
   avatar?: string;
+  bio?: string;
   verified: boolean;
+  posts?: number;
 }
 
 // Venue insights interface
@@ -143,4 +150,73 @@ export interface VenueInsights {
   checkInCount?: number;
   receiptUploads?: number;
   discountRedemptions?: number;
+}
+
+// Advertising interfaces
+export interface AdFormat {
+  id: string;
+  name: string;
+  description: string;
+  type: string;
+  placement: string;
+  platform: string;
+  dimensions: string;
+  specifications: Record<string, any>;
+  bestPractices: string[];
+  kpis: string[];
+  duration?: number;
+}
+
+export type GenderTargeting = 'all' | 'male' | 'female' | 'other';
+
+export interface DemographicTargeting {
+  gender: GenderTargeting;
+  ageRange?: [number, number];
+  interests?: string[];
+  behaviors?: string[];
+  location?: string[];
+}
+
+export interface GeographicTargeting {
+  radius: number;
+  cities: string[];
+  excludeLocations: string[];
+}
+
+export interface BehavioralTargeting {
+  visitFrequency: string[];
+  spendingHabits: string[];
+  deviceUsage: string[];
+}
+
+export interface InterestTargeting {
+  categories: string[];
+  brands: string[];
+  keywords: string[];
+}
+
+export interface ContextualTargeting {
+  timeOfDay: string[];
+  dayOfWeek: string[];
+  weather: string[];
+  eventTypes: string[];
+  vibeTags?: string[];
+  venueTypes?: string[];
+  daypart?: string[];
+}
+
+export interface MomentScoring {
+  vibeScore: number;
+  crowdLevel: number;
+  engagement: number;
+  crowdDensity?: string;
+}
+
+export interface TargetingOptions {
+  demographics: DemographicTargeting;
+  geographic: GeographicTargeting;
+  behaviors: BehavioralTargeting;
+  interests: InterestTargeting;
+  contextual: ContextualTargeting;
+  momentScore: MomentScoring;
 }
