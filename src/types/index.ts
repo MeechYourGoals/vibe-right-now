@@ -17,7 +17,7 @@ export * from './features/advertising';
 export * from './features/sentiment';
 
 // Re-export specific types for compatibility
-export type { Post, User, VenueInsights } from './index.d';
+export type { Post, User, VenueInsights, Comment, Location, CityData } from './index.d';
 
 // Chat types (with selective exports to avoid conflicts)
 export type {

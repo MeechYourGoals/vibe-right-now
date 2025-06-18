@@ -10,7 +10,7 @@ const corsHeaders = {
 // API Keys
 const VERTEX_AI_API_KEY = Deno.env.get('GOOGLE_VERTEX_API_KEY') || "AIzaSyDHBe4hL8fQZdz9wSYi9srL0BGTnZ6XmyM";
 const GOOGLE_SEARCH_API_KEY = Deno.env.get('GOOGLE_CUSTOM_SEARCH_API_KEY');
-const GOOGLE_SEARCH_ENGINE_ID = Deno.env.get('GOOGLE_CUSTOM_SEARCH_ENGINE_ID');
+const GOOGLE_SEARCH_ENGINE_ID = Deno.env.get('GOOGLE_CUSTOM_SEARCH_ENGINE_ID') || "9450222ed533f404b";
 
 // Available models with proper fallback logic
 const MODELS = {
