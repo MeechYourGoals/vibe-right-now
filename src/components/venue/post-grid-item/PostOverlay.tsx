@@ -61,6 +61,9 @@ const PostOverlay: React.FC<PostOverlayProps> = ({
     }
   };
 
+  // Get likes count as number
+  const likesCount = Array.isArray(post.likes) ? post.likes.length : (typeof post.likes === 'number' ? post.likes : 0);
+
   return (
     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
       <div className="absolute bottom-0 left-0 right-0 p-3">
@@ -93,7 +96,7 @@ const PostOverlay: React.FC<PostOverlayProps> = ({
             className="h-8 px-2 text-white hover:bg-black/20"
           >
             <Heart className={`h-4 w-4 ${liked ? 'fill-red-500 text-red-500' : ''}`} />
-            <span className="ml-1">{(post.likes?.length || 0) + (liked ? 1 : 0)}</span>
+            <span className="ml-1">{likesCount + (liked ? 1 : 0)}</span>
           </Button>
           <span 
             className="text-xs text-white hover:underline cursor-pointer"

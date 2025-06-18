@@ -52,8 +52,8 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
           
           <div className="flex gap-4 text-sm">
             <span><strong>{user.posts || 0}</strong> posts</span>
-            <span><strong>{user.followers || 0}</strong> followers</span>
-            <span><strong>{user.following || 0}</strong> following</span>
+            <span><strong>0</strong> followers</span>
+            <span><strong>0</strong> following</span>
           </div>
         </div>
         

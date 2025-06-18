@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { Post, Comment, Location } from "@/types";
+import { Post, Comment, Location, User } from "@/types";
 import { Card } from "@/components/ui/card";
 import VenueFirstPostHeader from "./VenueFirstPostHeader";
 import PostContent from "./PostContent";
@@ -118,10 +118,19 @@ const PostCard: React.FC<PostCardProps> = ({
           });
           
           // Create a safe user object with fallbacks
-          const safeUser = {
-            ...post.user,
-            createdAt: post.user.createdAt || new Date().toISOString(),
-            updatedAt: post.user.updatedAt || new Date().toISOString()
+          const safeUser: User = {
+            id: post.user.id,
+            username: post.user.username,
+            displayName: post.user.displayName || post.user.name || post.user.username,
+            name: post.user.name || post.user.displayName || post.user.username,
+            avatar: post.user.avatar,
+            bio: post.user.bio,
+            verified: post.user.verified || false,
+            isPrivate: post.user.isPrivate,
+            email: post.user.email,
+            posts: post.user.posts,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
           };
           
           return (
@@ -189,10 +198,19 @@ const PostCard: React.FC<PostCardProps> = ({
   });
 
   // Create a safe user object with fallbacks
-  const safeUser = {
-    ...post.user,
-    createdAt: post.user.createdAt || new Date().toISOString(),
-    updatedAt: post.user.updatedAt || new Date().toISOString()
+  const safeUser: User = {
+    id: post.user.id,
+    username: post.user.username,
+    displayName: post.user.displayName || post.user.name || post.user.username,
+    name: post.user.name || post.user.displayName || post.user.username,
+    avatar: post.user.avatar,
+    bio: post.user.bio,
+    verified: post.user.verified || false,
+    isPrivate: post.user.isPrivate,
+    email: post.user.email,
+    posts: post.user.posts,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   };
 
   return (

@@ -34,7 +34,7 @@ const RecentVibes = ({ location }: RecentVibesProps) => {
   const previousDay = (dayOfWeek - 2 + 7) % 7; // Ensure it's a positive number
   const previousContent = getDaySpecificContent(location.type || 'default', previousDay);
   const previousImage = {
-    id: 'previous-image',
+    id: 'previous-image', 
     type: "image" as const,
     url: getDaySpecificImageUrl(location.type || 'default', previousDay)
   };

@@ -36,16 +36,18 @@ export type {
 export interface CityData {
   name: string;
   country: string;
+  state?: string;
   lat: number;
   lng: number;
   venues: Location[];
 }
 
-// Enhanced Media interface with id property
+// Enhanced Media interface with consistent properties
 export interface Media {
   id?: string;
   type: "image" | "video" | "audio";
   url: string;
+  thumbnail?: string;
 }
 
 // Enhanced User interface with social stats
@@ -84,7 +86,7 @@ export interface AdFormat {
 }
 
 export type GenderTargeting = 'all' | 'male' | 'female' | 'non-binary';
-export type LocationType = 'restaurant' | 'bar' | 'nightclub' | 'cafe' | 'attraction' | 'sports' | 'event' | 'other';
+export type LocationType = 'restaurant' | 'bar' | 'nightclub' | 'cafe' | 'attraction' | 'sports' | 'event' | 'city' | 'other';
 
 export interface DemographicTargeting {
   gender: GenderTargeting;
