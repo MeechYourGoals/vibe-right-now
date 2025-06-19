@@ -1,6 +1,6 @@
 
 import { MessageContext, MessageProcessor, ProcessingResult } from '../types';
-import { VertexAIService } from '@/services/VertexAIService';
+import { PerplexityAIService } from '@/services/PerplexityAIService';
 import { createAIMessage } from '../../messageFactory';
 
 export class AIProcessor implements MessageProcessor {
@@ -18,14 +18,14 @@ export class AIProcessor implements MessageProcessor {
       let responseText = '';
       
       try {
-        responseText = await VertexAIService.generateResponse(
+        responseText = await PerplexityAIService.generateResponse(
           context.query, 
           context.isVenueMode ? 'venue' : 'default',
           contextMessages
         );
-        console.log('Got response from Vernon AI:', responseText.substring(0, 50) + '...');
+        console.log('Got response from Vernon AI (Perplexity):', responseText.substring(0, 50) + '...');
       } catch (error) {
-        console.error('Error with Vernon AI:', error);
+        console.error('Error with Perplexity AI:', error);
         responseText = "I'm having trouble connecting to my AI services right now. Please try again later.";
       }
       

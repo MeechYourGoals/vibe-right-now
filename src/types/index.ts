@@ -52,7 +52,19 @@ export interface Location {
   state?: string;
   phone?: string;
   website?: string;
-  hours?: string | { open: string; close: string; closed?: boolean; monday?: string; tuesday?: string; wednesday?: string; thursday?: string; friday?: string; saturday?: string; sunday?: string; };
+  hours?: string | { 
+    open: string; 
+    close: string; 
+    closed?: boolean; 
+    monday?: string; 
+    tuesday?: string; 
+    wednesday?: string; 
+    thursday?: string; 
+    friday?: string; 
+    saturday?: string; 
+    sunday?: string;
+    isOpen24Hours?: boolean;
+  };
   tags?: string[];
   createdAt?: string;
   updatedAt?: string;

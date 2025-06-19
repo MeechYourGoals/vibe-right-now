@@ -1,8 +1,9 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Bot, Send, Sparkles, MessageCircle } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { PerplexityAIService } from "@/services/PerplexityAIService";
 
 interface VernonReviewChatProps {
   reviewSummary: string;
@@ -51,26 +52,20 @@ const VernonReviewChat: React.FC<VernonReviewChatProps> = ({
     setIsLoading(true);
 
     try {
-      // Call Gemini via our existing edge function
-      const { data, error } = await supabase.functions.invoke('gemini-ai', {
-        body: {
-          prompt: `Based on the following ${platform} review summary for a venue, please answer this question: "${messageText}"
+      // Call Perplexity via our service
+      const prompt = `Based on the following ${platform} review summary for a venue, please answer this question: "${messageText}"
 
 Review Summary:
 ${reviewSummary}
 
-Please provide a helpful, specific answer based on what customers have said in their reviews. If the information isn't available in the reviews, say so and suggest what to look for or ask the venue directly.`,
-          mode: 'venue',
-          context: reviewSummary
-        }
-      });
+Please provide a helpful, specific answer based on what customers have said in their reviews. If the information isn't available in the reviews, say so and suggest what to look for or ask the venue directly.`;
 
-      if (error) throw error;
+      const response = await PerplexityAIService.generateResponse(prompt, 'venue');
 
       const vernonResponse: ChatMessage = {
         id: (Date.now() + 1).toString(),
         type: 'vernon',
-        content: data.text || 'I apologize, but I encountered an issue processing your question. Please try again.',
+        content: response,
         timestamp: new Date()
       };
 
