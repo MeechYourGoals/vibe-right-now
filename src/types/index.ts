@@ -101,6 +101,7 @@ export interface Comment {
   vibedHere?: boolean;
   parentId?: string;
   body?: string;
+  createdAt?: Date;
 }
 
 export interface Media {

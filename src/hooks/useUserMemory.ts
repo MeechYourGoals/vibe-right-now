@@ -1,5 +1,5 @@
+
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { UserMemory, UserInteraction, RecommendationFeedback } from '@/types/entities/user';
 
 export const useUserMemory = (userId?: string) => {
@@ -7,46 +7,48 @@ export const useUserMemory = (userId?: string) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch user memory from database
+  // Mock data for now until database is set up
+  const mockUserMemory: UserMemory = {
+    id: 'mock-memory-1',
+    user_id: userId || 'current-user',
+    location_history: ['Barcelona', 'Madrid', 'Lisbon'],
+    venue_ratings: {
+      '1': 5,
+      '2': 4,
+      'soho-house-barcelona': 5,
+      'cafe-de-la-luz': 2
+    },
+    favorite_categories: ['rooftop bars', 'hidden gems', 'live music'],
+    disliked_features: ['loud', 'crowded', 'touristy'],
+    booking_history: [
+      {
+        venue_id: 'soho-house-barcelona',
+        venue_name: 'Soho House Barcelona',
+        timestamp: '2024-01-15T18:00:00Z',
+        rating: 5
+      },
+      {
+        venue_id: 'cafe-de-la-luz',
+        venue_name: 'Café de la Luz',
+        timestamp: '2024-01-10T14:30:00Z',
+        rating: 2
+      }
+    ],
+    language_tone_preference: 'witty',
+    ai_feedback_summary: 'User prefers personalized recommendations with local insights. Appreciates brief, engaging responses.',
+    created_at: '2024-01-01T00:00:00Z',
+    updated_at: '2024-01-15T12:00:00Z'
+  };
+
+  // Simulate loading user memory
   const fetchUserMemory = useCallback(async () => {
     if (!userId) return;
 
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('user_memory')
-        .select('*')
-        .eq('user_id', userId)
-        .single();
-
-      if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
-        throw error;
-      }
-
-      if (data) {
-        setUserMemory(data);
-      } else {
-        // Create default user memory if none exists
-        const defaultMemory: Partial<UserMemory> = {
-          user_id: userId,
-          location_history: [],
-          venue_ratings: {},
-          favorite_categories: [],
-          disliked_features: [],
-          booking_history: [],
-          language_tone_preference: 'friendly',
-          ai_feedback_summary: ''
-        };
-
-        const { data: newMemory, error: createError } = await supabase
-          .from('user_memory')
-          .insert(defaultMemory)
-          .select()
-          .single();
-
-        if (createError) throw createError;
-        setUserMemory(newMemory);
-      }
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+      setUserMemory(mockUserMemory);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch user memory');
     } finally {
@@ -54,43 +56,28 @@ export const useUserMemory = (userId?: string) => {
     }
   }, [userId]);
 
-  // Update user memory
+  // Update user memory (mock implementation)
   const updateUserMemory = useCallback(async (updates: Partial<UserMemory>) => {
     if (!userId || !userMemory) return;
 
     try {
-      const { data, error } = await supabase
-        .from('user_memory')
-        .update({
-          ...updates,
-          updated_at: new Date().toISOString()
-        })
-        .eq('user_id', userId)
-        .select()
-        .single();
-
-      if (error) throw error;
-      setUserMemory(data);
+      const updatedMemory = {
+        ...userMemory,
+        ...updates,
+        updated_at: new Date().toISOString()
+      };
+      setUserMemory(updatedMemory);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update user memory');
     }
   }, [userId, userMemory]);
 
-  // Track user interaction
+  // Track user interaction (mock implementation)
   const trackInteraction = useCallback(async (interaction: Omit<UserInteraction, 'id' | 'user_id' | 'timestamp'>) => {
     if (!userId) return;
-
-    try {
-      await supabase
-        .from('user_interactions')
-        .insert({
-          ...interaction,
-          user_id: userId,
-          timestamp: new Date().toISOString()
-        });
-    } catch (err) {
-      console.error('Failed to track interaction:', err);
-    }
+    
+    console.log('Tracking interaction:', interaction);
+    // Will implement database storage later
   }, [userId]);
 
   // Add venue rating
@@ -135,7 +122,6 @@ export const useUserMemory = (userId?: string) => {
     const updatedHistory = [...userMemory.location_history];
     if (!updatedHistory.includes(location)) {
       updatedHistory.push(location);
-      // Keep only last 10 locations
       if (updatedHistory.length > 10) {
         updatedHistory.shift();
       }

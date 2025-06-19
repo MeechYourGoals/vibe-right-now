@@ -25,7 +25,8 @@ export const mockLocations: Location[] = [
       thursday: '6:00 PM - 2:00 AM',
       friday: '6:00 PM - 3:00 AM',
       saturday: '6:00 PM - 3:00 AM',
-      sunday: '6:00 PM - 2:00 AM'
+      sunday: '6:00 PM - 2:00 AM',
+      isOpen24Hours: false
     },
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-15T12:00:00Z'
@@ -53,9 +54,39 @@ export const mockLocations: Location[] = [
       thursday: '12:00 PM - 11:00 PM',
       friday: '12:00 PM - 12:00 AM',
       saturday: '12:00 PM - 12:00 AM',
-      sunday: '12:00 PM - 11:00 PM'
+      sunday: '12:00 PM - 11:00 PM',
+      isOpen24Hours: false
     },
     createdAt: '2024-01-02T00:00:00Z',
     updatedAt: '2024-01-16T10:30:00Z'
+  },
+  {
+    id: '3',
+    name: 'Lisbon Coffee House',
+    address: 'Rua do Carmo, 2, 1200-092 Lisboa, Portugal',
+    coordinates: [38.7111, -9.1413],
+    category: 'Coffee Shop',
+    rating: 4.3,
+    images: ['/api/placeholder/400/300'],
+    city: 'Lisbon',
+    country: 'Portugal',
+    lat: 38.7111,
+    lng: -9.1413,
+    type: 'cafe',
+    verified: true,
+    vibes: ['cozy', 'local', 'authentic'],
+    tags: ['coffee', 'pastries', 'wifi'],
+    hours: {
+      monday: '7:00 AM - 7:00 PM',
+      tuesday: '7:00 AM - 7:00 PM',
+      wednesday: '7:00 AM - 7:00 PM',
+      thursday: '7:00 AM - 7:00 PM',
+      friday: '7:00 AM - 8:00 PM',
+      saturday: '8:00 AM - 8:00 PM',
+      sunday: '8:00 AM - 6:00 PM',
+      isOpen24Hours: false
+    },
+    createdAt: '2024-01-03T00:00:00Z',
+    updatedAt: '2024-01-17T09:15:00Z'
   }
 ];

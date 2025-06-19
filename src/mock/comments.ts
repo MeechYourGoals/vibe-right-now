@@ -1,4 +1,3 @@
-
 import { Comment } from '@/types';
 import { mockUsers } from './users';
 
@@ -11,6 +10,7 @@ export const mockComments: Comment[] = [
     content: 'Amazing rooftop view! Perfect for sunset drinks.',
     timestamp: new Date('2024-01-15T18:30:00'),
     likes: 12,
+    createdAt: new Date('2024-01-15T18:30:00'),
   },
   {
     id: '2',
@@ -20,6 +20,7 @@ export const mockComments: Comment[] = [
     content: 'Love the vibe here. Great cocktails!',
     timestamp: new Date('2024-01-15T19:15:00'),
     likes: 8,
+    createdAt: new Date('2024-01-15T19:15:00'),
   },
   {
     id: '3',
@@ -29,6 +30,7 @@ export const mockComments: Comment[] = [
     content: 'Best paella in the city hands down.',
     timestamp: new Date('2024-01-14T20:00:00'),
     likes: 15,
+    createdAt: new Date('2024-01-14T20:00:00'),
   },
   {
     id: '4',
@@ -38,6 +40,7 @@ export const mockComments: Comment[] = [
     content: 'The ambiance is incredible at night.',
     timestamp: new Date('2024-01-14T20:30:00'),
     likes: 6,
+    createdAt: new Date('2024-01-14T20:30:00'),
   },
   {
     id: '5',
@@ -47,6 +50,7 @@ export const mockComments: Comment[] = [
     content: 'Hidden gem! Great coffee and pastries.',
     timestamp: new Date('2024-01-13T10:15:00'),
     likes: 20,
+    createdAt: new Date('2024-01-13T10:15:00'),
   },
   {
     id: '6',
@@ -56,6 +60,7 @@ export const mockComments: Comment[] = [
     content: 'Perfect spot for morning meetings.',
     timestamp: new Date('2024-01-13T11:00:00'),
     likes: 3,
+    createdAt: new Date('2024-01-13T11:00:00'),
   },
   {
     id: '7',
@@ -65,6 +70,7 @@ export const mockComments: Comment[] = [
     content: 'The DJs here are incredible!',
     timestamp: new Date('2024-01-12T23:45:00'),
     likes: 25,
+    createdAt: new Date('2024-01-12T23:45:00'),
   },
   {
     id: '8',
@@ -74,6 +80,7 @@ export const mockComments: Comment[] = [
     content: 'Great energy, dancing all night!',
     timestamp: new Date('2024-01-13T00:30:00'),
     likes: 18,
+    createdAt: new Date('2024-01-13T00:30:00'),
   },
   {
     id: '9',
@@ -83,6 +90,7 @@ export const mockComments: Comment[] = [
     content: 'The tapas selection is amazing.',
     timestamp: new Date('2024-01-11T21:00:00'),
     likes: 14,
+    createdAt: new Date('2024-01-11T21:00:00'),
   },
   {
     id: '10',
@@ -92,6 +100,7 @@ export const mockComments: Comment[] = [
     content: 'Love the local crowd here.',
     timestamp: new Date('2024-01-11T21:30:00'),
     likes: 9,
+    createdAt: new Date('2024-01-11T21:30:00'),
   },
   {
     id: '11',
@@ -101,6 +110,7 @@ export const mockComments: Comment[] = [
     content: 'Fresh seafood, great service!',
     timestamp: new Date('2024-01-10T19:45:00'),
     likes: 22,
+    createdAt: new Date('2024-01-10T19:45:00'),
   },
   {
     id: '12',
@@ -110,6 +120,7 @@ export const mockComments: Comment[] = [
     content: 'The ocean view is breathtaking.',
     timestamp: new Date('2024-01-10T20:15:00'),
     likes: 16,
+    createdAt: new Date('2024-01-10T20:15:00'),
   },
   {
     id: '13',
@@ -119,6 +130,7 @@ export const mockComments: Comment[] = [
     content: 'Cozy atmosphere, perfect for dates.',
     timestamp: new Date('2024-01-09T22:00:00'),
     likes: 11,
+    createdAt: new Date('2024-01-09T22:00:00'),
   },
   {
     id: '14',
@@ -128,6 +140,7 @@ export const mockComments: Comment[] = [
     content: 'Wine selection is top notch.',
     timestamp: new Date('2024-01-09T22:30:00'),
     likes: 7,
+    createdAt: new Date('2024-01-09T22:30:00'),
   },
   {
     id: '15',
@@ -137,6 +150,7 @@ export const mockComments: Comment[] = [
     content: 'Artistic vibe, love the exhibitions.',
     timestamp: new Date('2024-01-08T16:45:00'),
     likes: 13,
+    createdAt: new Date('2024-01-08T16:45:00'),
   },
   {
     id: '16',
@@ -146,6 +160,7 @@ export const mockComments: Comment[] = [
     content: 'Great spot for creative inspiration.',
     timestamp: new Date('2024-01-08T17:15:00'),
     likes: 8,
+    createdAt: new Date('2024-01-08T17:15:00'),
   },
   {
     id: '17',
@@ -155,6 +170,7 @@ export const mockComments: Comment[] = [
     content: 'Fun karaoke nights!',
     timestamp: new Date('2024-01-07T23:00:00'),
     likes: 19,
+    createdAt: new Date('2024-01-07T23:00:00'),
   },
   {
     id: '18',
@@ -164,6 +180,7 @@ export const mockComments: Comment[] = [
     content: 'Great drinks and friendly staff.',
     timestamp: new Date('2024-01-07T23:30:00'),
     likes: 12,
+    createdAt: new Date('2024-01-07T23:30:00'),
   },
   {
     id: '19',
@@ -173,6 +190,7 @@ export const mockComments: Comment[] = [
     content: 'Beautiful terrace, amazing views.',
     timestamp: new Date('2024-01-06T20:00:00'),
     likes: 24,
+    createdAt: new Date('2024-01-06T20:00:00'),
   },
   {
     id: '20',
@@ -182,5 +200,6 @@ export const mockComments: Comment[] = [
     content: 'Perfect for watching the sunset.',
     timestamp: new Date('2024-01-06T20:45:00'),
     likes: 17,
+    createdAt: new Date('2024-01-06T20:45:00'),
   }
 ];

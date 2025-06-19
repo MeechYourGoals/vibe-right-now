@@ -2,7 +2,6 @@
 import { MessageContext, MessageProcessor, ProcessingResult } from '../types';
 import { EnhancedVertexAIService } from '@/services/EnhancedVertexAIService';
 import { createAIMessage } from '../../messageFactory';
-import { useUserMemory } from '@/hooks/useUserMemory';
 
 export class AIProcessor implements MessageProcessor {
   name = 'ai';
@@ -19,11 +18,8 @@ export class AIProcessor implements MessageProcessor {
       let responseText = '';
       
       try {
-        // Get current user ID (in a real app, this would come from auth context)
-        const userId = 'current-user-id'; // This should be passed through context
-        
         // For now, we'll use the enhanced service without user memory
-        // In a real implementation, you'd get user memory from the hook
+        // User memory integration will be added once database is set up
         responseText = await EnhancedVertexAIService.generatePersonalizedResponse(
           context.query, 
           null, // User memory would be passed here
