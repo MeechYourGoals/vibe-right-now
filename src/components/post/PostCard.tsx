@@ -52,6 +52,21 @@ const PostCard: React.FC<PostCardProps> = ({
     const seed = parseInt(locationId) || 5;
     return Math.floor((seed * 13) % 115) + 5;
   };
+
+  // Create a default user object for posts without user data
+  const createDefaultUser = (): User => ({
+    id: "default-user",
+    username: "anonymous",
+    displayName: "Anonymous User",
+    name: "Anonymous User",
+    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+    bio: "Anonymous user",
+    verified: false,
+    email: "anonymous@example.com",
+    posts: 0,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  });
   
   // Handle multiple posts mode (used in feed)
   if (posts && posts.length > 0 && getComments) {
@@ -108,6 +123,12 @@ const PostCard: React.FC<PostCardProps> = ({
         </div>
         
         {posts.map(post => {
+          // Safety check for post.user - use default if undefined
+          if (!post.user) {
+            console.warn(`Post ${post.id} is missing user data`);
+            return null; // Skip posts without user data
+          }
+
           // Determine if the post is from the venue itself
           const isVenuePost = post.isVenuePost || post.location?.id === firstPost.location.id;
           
@@ -172,6 +193,12 @@ const PostCard: React.FC<PostCardProps> = ({
   // Single post mode
   if (!post) {
     return null;
+  }
+
+  // Safety check for post.user in single post mode
+  if (!post.user) {
+    console.warn(`Post ${post.id} is missing user data`);
+    return null; // Skip rendering posts without user data
   }
   
   // Don't render if the post has been deleted
