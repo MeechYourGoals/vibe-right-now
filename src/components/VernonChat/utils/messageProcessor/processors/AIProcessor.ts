@@ -1,6 +1,6 @@
 
 import { MessageContext, MessageProcessor, ProcessingResult } from '../types';
-import { EnhancedVertexAIService } from '@/services/EnhancedVertexAIService';
+import { VertexAIService } from '@/services/VertexAIService';
 import { createAIMessage } from '../../messageFactory';
 
 export class AIProcessor implements MessageProcessor {
@@ -18,18 +18,14 @@ export class AIProcessor implements MessageProcessor {
       let responseText = '';
       
       try {
-        // For now, we'll use the enhanced service without user memory
-        // User memory integration will be added once database is set up
-        responseText = await EnhancedVertexAIService.generatePersonalizedResponse(
+        responseText = await VertexAIService.generateResponse(
           context.query, 
-          null, // User memory would be passed here
           context.isVenueMode ? 'venue' : 'default',
           contextMessages
         );
-        
-        console.log('Got response from Enhanced Vertex AI:', responseText.substring(0, 50) + '...');
+        console.log('Got response from Vertex AI:', responseText.substring(0, 50) + '...');
       } catch (error) {
-        console.error('Error with Enhanced Vertex AI:', error);
+        console.error('Error with Vertex AI:', error);
         responseText = "I'm having trouble connecting to my AI services right now. Please try again later.";
       }
       

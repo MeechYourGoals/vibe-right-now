@@ -5,7 +5,6 @@ export * from './entities/user';
 export * from './features/advertising';
 export * from './features/analytics';
 export * from './features/sentiment';
-export * from './features/chat';
 export * from './venue';
 
 import { GeoCoordinates } from './geo';
@@ -48,19 +47,7 @@ export interface Location {
   state?: string;
   phone?: string;
   website?: string;
-  hours?: string | { 
-    open: string; 
-    close: string; 
-    closed?: boolean; 
-    monday?: string; 
-    tuesday?: string; 
-    wednesday?: string; 
-    thursday?: string; 
-    friday?: string; 
-    saturday?: string; 
-    sunday?: string;
-    isOpen24Hours?: boolean;
-  };
+  hours?: string | { open: string; close: string; closed?: boolean; monday?: string; tuesday?: string; wednesday?: string; thursday?: string; friday?: string; saturday?: string; sunday?: string; };
   tags?: string[];
   createdAt?: string;
   updatedAt?: string;
@@ -70,14 +57,14 @@ export interface Location {
 export interface Post {
   id: string;
   content: string;
-  author?: User;
-  user: User;
+  author: User;
+  user?: User;
   location: Location;
   media: Media[];
   likes: number;
   comments: Comment[];
   timestamp: Date;
-  vibes?: string[];
+  vibes: string[];
   isLiked?: boolean;
   checkInReward?: number;
   createdAt?: string;
@@ -91,7 +78,7 @@ export interface Post {
 export interface Comment {
   id: string;
   content: string;
-  author?: User;
+  author: User;
   user?: User;
   timestamp: Date;
   likes: number;
@@ -100,9 +87,6 @@ export interface Comment {
   contentId?: string;
   vibedHere?: boolean;
   parentId?: string;
-  body?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
 }
 
 export interface Media {
