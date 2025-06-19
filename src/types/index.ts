@@ -5,6 +5,7 @@ export * from './entities/user';
 export * from './features/advertising';
 export * from './features/analytics';
 export * from './features/sentiment';
+export * from './features/chat';
 export * from './venue';
 
 import { GeoCoordinates } from './geo';
@@ -47,7 +48,18 @@ export interface Location {
   state?: string;
   phone?: string;
   website?: string;
-  hours?: string | { open: string; close: string; closed?: boolean; monday?: string; tuesday?: string; wednesday?: string; thursday?: string; friday?: string; saturday?: string; sunday?: string; };
+  hours?: string | { 
+    open: string; 
+    close: string; 
+    closed?: boolean; 
+    monday?: string; 
+    tuesday?: string; 
+    wednesday?: string; 
+    thursday?: string; 
+    friday?: string; 
+    saturday?: string; 
+    sunday?: string; 
+  };
   tags?: string[];
   createdAt?: string;
   updatedAt?: string;
