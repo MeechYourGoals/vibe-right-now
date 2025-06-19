@@ -59,6 +59,17 @@ export const useUserProfile = (userId?: string) => {
 
   const updateStats = (newStats: Partial<UserStats>) => {
     setStats(prev => ({ ...prev, ...newStats }));
+    
+    // Also update the profile stats
+    if (profile) {
+      setProfile(prev => prev ? {
+        ...prev,
+        posts: newStats.posts ?? prev.posts,
+        followers: newStats.followers ?? prev.followers,
+        following: newStats.following ?? prev.following,
+        likes: newStats.likes ?? prev.likes
+      } : prev);
+    }
   };
 
   return {

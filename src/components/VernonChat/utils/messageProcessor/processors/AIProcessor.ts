@@ -1,7 +1,8 @@
 
 import { MessageContext, MessageProcessor, ProcessingResult } from '../types';
-import { VertexAIService } from '@/services/VertexAIService';
+import { EnhancedVertexAIService } from '@/services/EnhancedVertexAIService';
 import { createAIMessage } from '../../messageFactory';
+import { useUserMemory } from '@/hooks/useUserMemory';
 
 export class AIProcessor implements MessageProcessor {
   name = 'ai';
@@ -18,14 +19,21 @@ export class AIProcessor implements MessageProcessor {
       let responseText = '';
       
       try {
-        responseText = await VertexAIService.generateResponse(
+        // Get current user ID (in a real app, this would come from auth context)
+        const userId = 'current-user-id'; // This should be passed through context
+        
+        // For now, we'll use the enhanced service without user memory
+        // In a real implementation, you'd get user memory from the hook
+        responseText = await EnhancedVertexAIService.generatePersonalizedResponse(
           context.query, 
+          null, // User memory would be passed here
           context.isVenueMode ? 'venue' : 'default',
           contextMessages
         );
-        console.log('Got response from Vertex AI:', responseText.substring(0, 50) + '...');
+        
+        console.log('Got response from Enhanced Vertex AI:', responseText.substring(0, 50) + '...');
       } catch (error) {
-        console.error('Error with Vertex AI:', error);
+        console.error('Error with Enhanced Vertex AI:', error);
         responseText = "I'm having trouble connecting to my AI services right now. Please try again later.";
       }
       

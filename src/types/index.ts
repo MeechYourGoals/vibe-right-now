@@ -58,7 +58,8 @@ export interface Location {
     thursday?: string; 
     friday?: string; 
     saturday?: string; 
-    sunday?: string; 
+    sunday?: string;
+    isOpen24Hours?: boolean;
   };
   tags?: string[];
   createdAt?: string;
@@ -99,6 +100,7 @@ export interface Comment {
   contentId?: string;
   vibedHere?: boolean;
   parentId?: string;
+  body?: string;
 }
 
 export interface Media {
