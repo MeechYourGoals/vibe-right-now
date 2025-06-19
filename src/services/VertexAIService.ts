@@ -1,10 +1,9 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
 
 /**
  * Service for interacting with Google Vertex AI API via Supabase Edge Functions
- * This is the central service for all Google AI functionality with robust fallback
+ * This is the central service for all Google AI functionality - training data only
  */
 export class VertexAIService {
   // Default model settings - using flash as primary for better quota management
@@ -13,15 +12,15 @@ export class VertexAIService {
   private static DEFAULT_VOICE = 'en-US-Neural2-D'; // Default male voice
   
   /**
-   * Generate a response using Google Gemini model with enhanced fallback
+   * Generate a response using Google Gemini model - training data only
    */
   static async generateResponse(
     prompt: string, 
-    mode: 'default' | 'search' | 'venue' = 'default', 
+    mode: 'default' | 'venue' = 'default', 
     context: any[] = []
   ): Promise<string> {
     try {
-      console.log(`Generating Gemini response with mode: ${mode}`);
+      console.log(`Generating Gemini response with mode: ${mode} - training data only`);
       
       // Ensure context is in the correct format
       const formattedContext = context.map(msg => ({
@@ -40,36 +39,22 @@ export class VertexAIService {
       
       if (error) {
         console.error('Error calling Vertex AI function:', error);
-        
-        // Handle specific error types with helpful messages
-        if (error.message?.includes('429') || error.message?.includes('quota')) {
-          return "I'm experiencing high demand right now, but I can help with general information from my training data. For real-time search results, please try again in a moment.";
-        } else if (error.message?.includes('404')) {
-          return "I'm temporarily using my training data while my search services are being updated. I can still help with general information about your query.";
-        } else {
-          return `I can help with general information about your query from my training data. For the most current information, please try again later.`;
-        }
+        return this.generateTrainingDataResponse(prompt);
       }
       
       if (!data || !data.text) {
-        // Return training data response if available
-        if (data?.text) {
-          return data.text;
-        }
         return "I can help with general information from my training data. Please be more specific about what you'd like to know.";
       }
       
       return data.text;
     } catch (error) {
       console.error('Error generating response with Vertex AI:', error);
-      
-      // Provide helpful fallback responses based on the prompt
       return this.generateTrainingDataResponse(prompt);
     }
   }
 
   /**
-   * Generate a helpful response using training data when APIs are unavailable
+   * Generate a helpful response using training data
    */
   private static generateTrainingDataResponse(prompt: string): string {
     const lowerPrompt = prompt.toLowerCase();
@@ -95,33 +80,6 @@ export class VertexAIService {
     }
     
     return "I can help with general information from my training data. For the most current and specific details, you may want to verify information from official sources. What would you like to know more about?";
-  }
-
-  /**
-   * Search for information using Google Search and Vertex AI with proper fallback
-   */
-  static async searchWithVertex(query: string, categories?: string[]): Promise<string> {
-    try {
-      console.log('Searching with Google Vertex AI:', query);
-      
-      const { data, error } = await supabase.functions.invoke('vertex-ai', {
-        body: { 
-          action: 'search',
-          query,
-          categories: categories || []
-        }
-      });
-      
-      if (error) {
-        console.error('Error with Vertex AI search:', error);
-        return this.generateTrainingDataResponse(query);
-      }
-      
-      return data?.text || this.generateTrainingDataResponse(query);
-    } catch (error) {
-      console.error('Error in Vertex AI search:', error);
-      return this.generateTrainingDataResponse(query);
-    }
   }
 
   /**
