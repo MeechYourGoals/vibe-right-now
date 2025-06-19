@@ -1,20 +1,39 @@
 
 import { useState, useEffect } from 'react';
-import { UserProfileData, UserProfileStats, User, Post, Location, Comment } from '@/types';
-import { mockUsers } from '@/mock/users';
-import { mockPosts } from '@/mock/posts';
-import { mockComments } from '@/mock/comments';
-import { mockLocations } from '@/mock/locations';
+import { UserProfile } from '@/types/entities/user';
+
+interface UserStats {
+  posts: number;
+  followers: number;
+  following: number;
+  likes: number;
+}
 
 export const useUserProfile = (userId?: string) => {
-  const [profile, setProfile] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [userPosts, setUserPosts] = useState<Post[]>([]);
-  const [followedVenues, setFollowedVenues] = useState<Location[]>([]);
-  const [visitedPlaces, setVisitedPlaces] = useState<Location[]>([]);
-  const [wantToVisitPlaces, setWantToVisitPlaces] = useState<Location[]>([]);
-  const [stats, setStats] = useState<UserProfileStats>({
+
+  // Create a default profile with all required fields
+  const defaultProfile: UserProfile = {
+    id: userId || '1',
+    username: 'defaultuser',
+    name: 'Default User',
+    avatar: '/api/placeholder/150/150',
+    bio: 'Welcome to my profile',
+    isPrivate: false,
+    verified: false,
+    isCelebrity: false,
+    followers: 0,
+    following: 0,
+    posts: 0,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    email: '',
+    likes: 0
+  };
+
+  const [stats, setStats] = useState<UserStats>({
     posts: 0,
     followers: 0,
     following: 0,
@@ -23,113 +42,30 @@ export const useUserProfile = (userId?: string) => {
 
   useEffect(() => {
     if (userId) {
-      // Simulate loading
       setLoading(true);
-      
+      // Simulate API call
       setTimeout(() => {
-        const user = mockUsers.find(u => u.id === userId);
-        if (user) {
-          setProfile(user);
-          const posts = mockPosts.filter(p => p.user?.id === userId);
-          setUserPosts(posts);
-          setStats({
-            posts: posts.length,
-            followers: user.followers || 0,
-            following: user.following || 0,
-            likes: posts.reduce((sum, post) => sum + post.likes, 0)
-          });
-          setFollowedVenues(mockLocations.slice(0, 3));
-          setVisitedPlaces(mockLocations.slice(0, 5));
-          setWantToVisitPlaces(mockLocations.slice(5, 8));
-        } else {
-          setError('User not found');
-        }
+        setProfile(defaultProfile);
+        setStats({
+          posts: 25,
+          followers: 1250,
+          following: 180,
+          likes: 3420
+        });
         setLoading(false);
-      }, 500);
+      }, 1000);
     }
   }, [userId]);
 
-  const followUser = async (userToFollow: string): Promise<boolean> => {
-    // Mock implementation
-    return true;
-  };
-
-  const unfollowUser = async (userToUnfollow: string): Promise<boolean> => {
-    // Mock implementation
-    return true;
-  };
-
-  const getFollowStatus = (userId: string): boolean => {
-    return false; // Mock implementation
-  };
-
-  const getMutualFollowers = (userId: string): User[] => {
-    return mockUsers.slice(0, 2); // Mock implementation
-  };
-
-  const getUserPosts = (userId: string): Post[] => {
-    return mockPosts.filter(p => p.user.id === userId);
-  };
-
-  const getUserStats = (userId: string): UserProfileStats => {
-    const posts = getUserPosts(userId);
-    const user = mockUsers.find(u => u.id === userId);
-    return {
-      posts: posts.length,
-      followers: user?.followers || 0,
-      following: user?.following || 0,
-      likes: posts.reduce((sum, post) => sum + post.likes, 0)
-    };
-  };
-
-  const getPostComments = (postId: string): Comment[] => {
-    return mockComments.filter(c => c.postId === postId);
-  };
-
-  // Add missing methods for UserProfile page
-  const updateBio = async (bio: string): Promise<boolean> => {
-    return true;
-  };
-
-  const blockUser = async (userId: string): Promise<boolean> => {
-    return true;
-  };
-
-  const reportUser = async (userId: string, reason: string): Promise<boolean> => {
-    return true;
-  };
-
-  const getUserBio = (userId: string): string => {
-    const user = mockUsers.find(u => u.id === userId);
-    return user?.bio || '';
-  };
-
-  const isPrivateProfile = (userId: string): boolean => {
-    const user = mockUsers.find(u => u.id === userId);
-    return user?.isPrivate || false;
+  const updateStats = (newStats: Partial<UserStats>) => {
+    setStats(prev => ({ ...prev, ...newStats }));
   };
 
   return {
     profile,
     loading,
     error,
-    userPosts,
-    followedVenues,
-    visitedPlaces,
-    wantToVisitPlaces,
     stats,
-    followUser,
-    unfollowUser,
-    getFollowStatus,
-    getMutualFollowers,
-    getUserPosts,
-    getUserStats,
-    getPostComments,
-    setStats,
-    updateBio,
-    blockUser,
-    reportUser,
-    getUserBio,
-    isPrivateProfile
+    updateStats
   };
 };

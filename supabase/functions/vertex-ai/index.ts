@@ -8,9 +8,10 @@ const corsHeaders = {
 };
 
 // API Keys from environment with proper validation
-const VERTEX_AI_API_KEY = Deno.env.get('GOOGLE_VERTEX_API_KEY') || Deno.env.get('GEMINI_API_KEY');
+const VERTEX_AI_API_KEY = Deno.env.get('GOOGLE_VERTEX_API_KEY');
 const GOOGLE_SEARCH_API_KEY = Deno.env.get('GOOGLE_CUSTOM_SEARCH_API_KEY');
 const GOOGLE_SEARCH_ENGINE_ID = Deno.env.get('GOOGLE_CUSTOM_SEARCH_ENGINE_ID');
+const GOOGLE_MAPS_API_KEY = Deno.env.get('GOOGLE_MAPS_API_KEY'); // Correct API key for Places
 
 // Available models with proper fallback logic
 const MODELS = {
@@ -20,98 +21,154 @@ const MODELS = {
 
 // Validate API keys at startup
 function validateApiKeys() {
+  const missing = [];
+  if (!VERTEX_AI_API_KEY) missing.push('GOOGLE_VERTEX_API_KEY');
+  if (!GOOGLE_SEARCH_API_KEY) missing.push('GOOGLE_CUSTOM_SEARCH_API_KEY');
+  if (!GOOGLE_SEARCH_ENGINE_ID) missing.push('GOOGLE_CUSTOM_SEARCH_ENGINE_ID');
+  if (!GOOGLE_MAPS_API_KEY) missing.push('GOOGLE_MAPS_API_KEY');
+  
   console.log('API Key Status:', {
     vertex: !!VERTEX_AI_API_KEY,
     search: !!GOOGLE_SEARCH_API_KEY,
-    searchEngine: !!GOOGLE_SEARCH_ENGINE_ID
+    searchEngine: !!GOOGLE_SEARCH_ENGINE_ID,
+    maps: !!GOOGLE_MAPS_API_KEY
   });
   
-  const missing = [];
-  if (!VERTEX_AI_API_KEY) missing.push('GOOGLE_VERTEX_API_KEY or GEMINI_API_KEY');
   return missing;
 }
 
-// Enhanced web search function
-async function performWebSearch(query: string): Promise<string[]> {
+// Enhanced real-time search with proper fallback
+async function performRealTimeSearch(query: string): Promise<{ success: boolean; data: string; source: string }> {
   if (!GOOGLE_SEARCH_API_KEY || !GOOGLE_SEARCH_ENGINE_ID) {
-    console.log('Google Search not configured, skipping web search');
-    return [];
+    console.log('Google Search API not configured, skipping search');
+    return { success: false, data: '', source: 'search_unavailable' };
   }
 
   try {
+    console.log('Performing real-time search for:', query);
+    
     const searchUrl = `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_SEARCH_API_KEY}&cx=${GOOGLE_SEARCH_ENGINE_ID}&q=${encodeURIComponent(query)}&num=5`;
     
     const response = await fetch(searchUrl);
     if (!response.ok) {
-      console.error('Google Search API error:', response.status);
-      return [];
+      console.error(`Search API error: ${response.status} - ${response.statusText}`);
+      return { success: false, data: '', source: 'search_error' };
     }
     
     const data = await response.json();
-    const results = data.items || [];
+    const items = data.items || [];
     
-    return results.map((item: any) => ({
-      title: item.title,
-      snippet: item.snippet,
-      link: item.link
-    })).slice(0, 3); // Limit to top 3 results
+    if (items.length === 0) {
+      return { success: false, data: 'No current search results found.', source: 'no_results' };
+    }
+    
+    // Format search results for Gemini to process
+    let searchResults = 'Here are current search results:\n\n';
+    items.forEach((item: any, index: number) => {
+      searchResults += `${index + 1}. **${item.title}**\n`;
+      searchResults += `   ${item.snippet}\n`;
+      searchResults += `   Source: ${item.link}\n\n`;
+    });
+    
+    return { success: true, data: searchResults, source: 'google_search' };
   } catch (error) {
-    console.error('Error performing web search:', error);
-    return [];
+    console.error('Error in real-time search:', error);
+    return { success: false, data: '', source: 'search_exception' };
   }
 }
 
-// Generate intelligent response using Gemini with enhanced context
-async function generateGeminiResponse(prompt: string, context: any[] = [], enableSearch = true): Promise<string> {
-  if (!VERTEX_AI_API_KEY) {
-    throw new Error("Vernon AI is not properly configured. Please check API keys.");
+// Enhanced venue search using correct Google Maps API key
+async function searchVenues(location: string, query: string): Promise<{ success: boolean; data: string; source: string }> {
+  if (!GOOGLE_MAPS_API_KEY) {
+    console.log('Google Maps API not available, skipping venue search');
+    return { success: false, data: '', source: 'maps_unavailable' };
   }
 
   try {
-    let searchResults: any[] = [];
-    let enhancedPrompt = prompt;
+    console.log('Searching venues for:', query, 'in', location);
     
-    // Perform web search if enabled and appropriate
-    if (enableSearch && shouldPerformSearch(prompt)) {
-      console.log('Performing web search for:', prompt);
-      searchResults = await performWebSearch(prompt);
-      
-      if (searchResults.length > 0) {
-        const searchContext = searchResults.map(result => 
-          `${result.title}: ${result.snippet}`
-        ).join('\n');
-        
-        enhancedPrompt = `Based on the following current information from the web and your knowledge, provide a helpful and accurate response:
-
-Current Web Information:
-${searchContext}
-
-User Question: ${prompt}
-
-Please provide a comprehensive answer that combines current information with your knowledge. Be specific and helpful.`;
-      }
+    // Use Google Places API Text Search with correct API key
+    const placesUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query + ' in ' + location)}&key=${GOOGLE_MAPS_API_KEY}&fields=name,rating,price_level,formatted_address,opening_hours,photos,website,types`;
+    
+    const response = await fetch(placesUrl);
+    if (!response.ok) {
+      console.error(`Places API error: ${response.status} - ${response.statusText}`);
+      return { success: false, data: '', source: 'places_error' };
     }
     
+    const data = await response.json();
+    const places = data.results || [];
+    
+    if (places.length === 0) {
+      return { success: false, data: 'No venues found matching your criteria.', source: 'no_venues' };
+    }
+    
+    // Format venue results with real data
+    let venueResults = 'Here are real venues I found:\n\n';
+    places.slice(0, 5).forEach((place: any, index: number) => {
+      venueResults += `${index + 1}. **${place.name}**\n`;
+      venueResults += `   Rating: ${place.rating || 'N/A'} stars\n`;
+      venueResults += `   Address: ${place.formatted_address}\n`;
+      
+      if (place.price_level) {
+        const priceLevel = '$'.repeat(place.price_level);
+        venueResults += `   Price Level: ${priceLevel}\n`;
+      }
+      
+      if (place.opening_hours?.open_now !== undefined) {
+        venueResults += `   Status: ${place.opening_hours.open_now ? 'Open Now' : 'Closed'}\n`;
+      }
+      
+      if (place.website) {
+        venueResults += `   Website: ${place.website}\n`;
+      }
+      
+      venueResults += '\n';
+    });
+    
+    return { success: true, data: venueResults, source: 'google_places' };
+  } catch (error) {
+    console.error('Error searching venues:', error);
+    return { success: false, data: '', source: 'places_exception' };
+  }
+}
+
+// Enhanced Gemini response with proper fallback context
+async function generateGeminiResponse(prompt: string, context: any[] = [], searchData?: string, venueData?: string, dataSource?: string): Promise<string> {
+  if (!VERTEX_AI_API_KEY) {
+    return "I'm currently experiencing configuration issues with my AI services. Please contact support.";
+  }
+
+  try {
+    let enhancedPrompt = prompt;
+    
+    // Add search context if available
+    if (searchData || venueData) {
+      enhancedPrompt = `
+        Based on this information, please provide a helpful response to: "${prompt}"
+        
+        ${searchData ? 'Current Web Search Results:\n' + searchData : ''}
+        ${venueData ? 'Real Venue Data:\n' + venueData : ''}
+        
+        Please provide specific, actionable information based on this real data. Include actual names, ratings, addresses, and other concrete details when available.
+      `;
+    } else {
+      // Fallback to training data with clear indication
+      enhancedPrompt = `
+        Please help with this query using your training data: "${prompt}"
+        
+        Note: I'm currently unable to access real-time search results, so I'm providing information from my training data. For the most current information, please verify details independently.
+      `;
+    }
+
     // Prepare messages for Gemini
     let geminiMessages = [];
     
-    // Add system message for better responses
-    geminiMessages.push({
-      role: 'user',
-      parts: [{ text: `You are Vernon, a helpful AI assistant. You provide direct, accurate, and useful responses. When asked about locations, events, or current information, you give specific recommendations and details. You don't start responses with disclaimers about training data - you just provide helpful information directly.` }]
-    });
-    
-    geminiMessages.push({
-      role: 'model',
-      parts: [{ text: 'I understand. I\'ll provide direct, helpful responses without unnecessary disclaimers.' }]
-    });
-    
     if (context && context.length > 0) {
-      const recentContext = context.slice(-5).map(msg => ({
+      geminiMessages = context.map(msg => ({
         role: msg.sender === 'user' ? 'user' : 'model',
         parts: [{ text: msg.text || msg.content || '' }]
       }));
-      geminiMessages = [...geminiMessages, ...recentContext];
     }
     
     geminiMessages.push({
@@ -122,52 +179,20 @@ Please provide a comprehensive answer that combines current information with you
     const response = await callGeminiAPI(MODELS.PRIMARY, geminiMessages);
     let responseText = response.candidates?.[0]?.content?.parts?.[0]?.text || '';
     
-    // Clean up the response
-    responseText = cleanResponse(responseText);
-    
-    if (!responseText) {
-      throw new Error('Empty response from Gemini');
+    // Add data source indication
+    if (dataSource && (searchData || venueData)) {
+      responseText += `\n\n*Source: ${dataSource === 'google_search' ? 'Real-time web search' : dataSource === 'google_places' ? 'Live venue data' : 'Training data'}*`;
+    } else {
+      responseText += `\n\n*Source: AI training data (real-time search unavailable)*`;
     }
     
     return responseText;
   } catch (error) {
     console.error('Error generating Gemini response:', error);
-    throw error;
+    
+    // Ultimate fallback
+    return `I can help with general information about "${prompt}" from my training data. However, I'm currently experiencing connectivity issues with real-time search. Please try again later for the most current information.`;
   }
-}
-
-// Check if query should trigger web search
-function shouldPerformSearch(query: string): boolean {
-  const searchTriggers = [
-    'restaurant', 'bar', 'hotel', 'event', 'concert', 'show', 'movie',
-    'weather', 'news', 'current', 'today', 'now', 'latest', 'recent',
-    'open', 'hours', 'phone', 'address', 'location', 'near me',
-    'best', 'top', 'recommended', 'popular', 'trending',
-    'price', 'cost', 'booking', 'reservation', 'ticket'
-  ];
-  
-  const lowerQuery = query.toLowerCase();
-  return searchTriggers.some(trigger => lowerQuery.includes(trigger));
-}
-
-// Clean and enhance response
-function cleanResponse(text: string): string {
-  // Remove common AI disclaimer patterns
-  const disclaimers = [
-    /^I don't have access to real-time information[^.]*\./gi,
-    /^I can't provide real-time information[^.]*\./gi,
-    /^My training data doesn't include[^.]*\./gi,
-    /^I don't have current information[^.]*\./gi,
-    /^Based on my training data[^,]*,?\s*/gi,
-    /^From my training data[^,]*,?\s*/gi
-  ];
-  
-  let cleaned = text;
-  disclaimers.forEach(pattern => {
-    cleaned = cleaned.replace(pattern, '');
-  });
-  
-  return cleaned.trim();
 }
 
 serve(async (req) => {
@@ -185,7 +210,7 @@ serve(async (req) => {
       console.warn('Missing API keys:', missingKeys);
     }
 
-    const { prompt, mode = 'default', context = [], model = MODELS.PRIMARY, action, text, audio, options, messages, query, enableSearch = true } = await req.json();
+    const { prompt, mode = 'default', context = [], model = MODELS.PRIMARY, action, text, audio, options, messages, query } = await req.json();
     
     // Handle text-to-speech requests
     if (action === 'text-to-speech' && text) {
@@ -289,6 +314,57 @@ serve(async (req) => {
       }
     }
 
+    // Handle enhanced search requests with waterfall fallback
+    if ((action === 'search' && query) || prompt) {
+      const searchQuery = query || prompt;
+      console.log('Enhanced search request:', searchQuery);
+      
+      let searchResult = { success: false, data: '', source: 'none' };
+      let venueResult = { success: false, data: '', source: 'none' };
+      let finalResponse = '';
+      let dataSource = 'training_data';
+      
+      // Step 1: Try real-time search
+      searchResult = await performRealTimeSearch(searchQuery);
+      
+      // Step 2: Try venue search if relevant
+      const isVenueSearch = searchQuery.toLowerCase().includes('restaurant') || 
+                           searchQuery.toLowerCase().includes('bar') || 
+                           searchQuery.toLowerCase().includes('hotel') ||
+                           searchQuery.toLowerCase().includes('near') ||
+                           searchQuery.toLowerCase().includes('rooftop');
+      
+      if (isVenueSearch) {
+        const locationMatch = searchQuery.match(/(?:in|near)\s+([^,]+)/i);
+        const location = locationMatch ? locationMatch[1].trim() : 'Barcelona';
+        venueResult = await searchVenues(location, searchQuery);
+      }
+      
+      // Step 3: Generate response with Gemini using available data
+      if (searchResult.success || venueResult.success) {
+        dataSource = searchResult.success ? searchResult.source : venueResult.source;
+        finalResponse = await generateGeminiResponse(
+          searchQuery, 
+          context, 
+          searchResult.success ? searchResult.data : '', 
+          venueResult.success ? venueResult.data : '',
+          dataSource
+        );
+      } else {
+        // Step 4: Fallback to training data
+        console.log('All search methods failed, using training data fallback');
+        finalResponse = await generateGeminiResponse(searchQuery, context);
+      }
+      
+      return new Response(JSON.stringify({ 
+        text: finalResponse,
+        searchEnhanced: searchResult.success || venueResult.success,
+        dataSource: dataSource
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     // Handle OpenAI-style chat completion requests
     if (action === 'chat' && messages) {
       if (!VERTEX_AI_API_KEY) {
@@ -303,7 +379,7 @@ serve(async (req) => {
       try {
         console.log('Chat completion request with messages:', messages.length);
         
-        const geminiMessages = messages.map((msg: any) => ({
+        const geminiMessages = messages.map(msg => ({
           role: msg.role === 'user' ? 'user' : 'model',
           parts: [{ text: msg.content }]
         }));
@@ -332,13 +408,11 @@ serve(async (req) => {
       }
     }
 
-    // Handle regular chat completion requests - intelligent responses with search
-    if (prompt || query) {
-      const userPrompt = prompt || query;
-      
+    // Handle regular chat completion requests
+    if (prompt) {
       if (!VERTEX_AI_API_KEY) {
         return new Response(JSON.stringify({ 
-          error: 'Vernon AI service not configured',
+          error: 'AI service not configured',
           text: "I'm currently experiencing configuration issues. Please check with the administrator.",
           dataSource: 'error'
         }), {
@@ -348,15 +422,58 @@ serve(async (req) => {
       }
 
       const requestedModel = model || MODELS.PRIMARY;
-      console.log(`Processing ${requestedModel} request in ${mode} mode with search: ${enableSearch}`);
+      console.log(`Processing ${requestedModel} request in ${mode} mode`);
       
-      // Generate response with web search capabilities
-      const responseText = await generateGeminiResponse(userPrompt, context, enableSearch);
+      // Check if this requires real-time search
+      const needsSearch = prompt.toLowerCase().includes('find') || 
+                         prompt.toLowerCase().includes('search') ||
+                         prompt.toLowerCase().includes('restaurant') ||
+                         prompt.toLowerCase().includes('bar') ||
+                         prompt.toLowerCase().includes('hotel') ||
+                         prompt.toLowerCase().includes('near') ||
+                         prompt.toLowerCase().includes('current') ||
+                         prompt.toLowerCase().includes('latest') ||
+                         prompt.toLowerCase().includes('rating');
+      
+      let searchData = '';
+      let venueData = '';
+      let dataSource = 'training_data';
+      
+      if (needsSearch) {
+        console.log('Performing enhanced search for user query');
+        
+        // Try search
+        const searchResult = await performRealTimeSearch(prompt);
+        if (searchResult.success) {
+          searchData = searchResult.data;
+          dataSource = searchResult.source;
+        }
+        
+        // Try venue search if relevant
+        const isVenueSearch = prompt.toLowerCase().includes('restaurant') || 
+                             prompt.toLowerCase().includes('bar') || 
+                             prompt.toLowerCase().includes('hotel') ||
+                             prompt.toLowerCase().includes('near') ||
+                             prompt.toLowerCase().includes('rooftop');
+        
+        if (isVenueSearch) {
+          const locationMatch = prompt.match(/(?:in|near)\s+([^,]+)/i);
+          const location = locationMatch ? locationMatch[1].trim() : 'Barcelona';
+          const venueResult = await searchVenues(location, prompt);
+          if (venueResult.success) {
+            venueData = venueResult.data;
+            dataSource = venueResult.source;
+          }
+        }
+      }
+      
+      // Generate response with available data
+      const responseText = await generateGeminiResponse(prompt, context, searchData, venueData, dataSource);
       
       return new Response(JSON.stringify({ 
         text: responseText,
-        searchEnhanced: enableSearch && shouldPerformSearch(userPrompt),
-        dataSource: 'vernon_ai'
+        searchEnhanced: !!(searchData || venueData),
+        dataSource: dataSource
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -367,8 +484,8 @@ serve(async (req) => {
     console.error('Error in vertex-ai function:', error);
     return new Response(JSON.stringify({ 
       error: error.message,
-      text: "I'm having trouble processing your request right now. Please try again in a moment.",
-      dataSource: 'error'
+      text: "I'm currently experiencing connection issues, but I can help with general information from my training data. Please try again in a few minutes for real-time search results.",
+      dataSource: 'fallback'
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -377,7 +494,7 @@ serve(async (req) => {
 });
 
 // Helper function to call Gemini API with better error handling
-async function callGeminiAPI(model: string, messages: any[]) {
+async function callGeminiAPI(model, messages) {
   if (!VERTEX_AI_API_KEY) {
     throw new Error('GOOGLE_VERTEX_API_KEY not configured');
   }
@@ -394,7 +511,7 @@ async function callGeminiAPI(model: string, messages: any[]) {
     body: JSON.stringify({
       contents: messages,
       generationConfig: {
-        temperature: 0.8,
+        temperature: 0.7,
         topK: 40,
         topP: 0.95,
         maxOutputTokens: 2048,
@@ -427,9 +544,9 @@ async function callGeminiAPI(model: string, messages: any[]) {
     try {
       const errorData = JSON.parse(errorText);
       if (errorData.error?.code === 429) {
-        throw new Error(`Rate limit exceeded for ${model}. Please try again in a moment.`);
+        throw new Error(`Rate limit exceeded for ${model}. Using training data fallback.`);
       } else if (errorData.error?.code === 404) {
-        throw new Error(`Model ${model} is not available. Please try again.`);
+        throw new Error(`Model ${model} is not available. Using training data fallback.`);
       } else if (errorData.error?.code === 400 && errorData.error?.message?.includes('API key not valid')) {
         throw new Error(`Invalid API key for Google Vertex AI. Please check configuration.`);
       } else {

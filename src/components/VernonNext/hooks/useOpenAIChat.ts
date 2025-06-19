@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import { v4 as uuidv4 } from 'uuid';
 import { Message } from '../types';
-import { PerplexityAIService } from '@/services/PerplexityAIService';
+import { VertexAIService } from '@/services/VertexAIService';
 
 interface UseOpenAIChatProps {
   initialMessages?: Message[];
@@ -43,7 +43,7 @@ export const useOpenAIChat = ({ initialMessages = [], onContentChange }: UseOpen
     setMessages(prevMessages => [...prevMessages, userMessage]);
     setInput('');
     
-    // Call Perplexity AI
+    // Call Vertex AI / Gemini
     setIsLoading(true);
     
     try {
@@ -53,8 +53,8 @@ export const useOpenAIChat = ({ initialMessages = [], onContentChange }: UseOpen
         text: msg.content
       }));
       
-      // Call Perplexity AI service
-      const response = await PerplexityAIService.generateResponse(text, 'default', context);
+      // Call Vertex AI service
+      const response = await VertexAIService.generateResponse(text, 'default', context);
       
       // Create AI message
       const aiResponse: Message = {
@@ -124,24 +124,12 @@ export const useOpenAIChat = ({ initialMessages = [], onContentChange }: UseOpen
             const base64Audio = (reader.result as string).split(',')[1];
             
             try {
-              // For now, use browser's built-in speech recognition as fallback
-              // since Perplexity doesn't have speech-to-text
-              if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-                const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-                const recognition = new SpeechRecognition();
-                recognition.onresult = (event: any) => {
-                  const transcript = event.results[0][0].transcript;
-                  setTranscript(transcript);
-                  sendMessage(transcript);
-                };
-                recognition.start();
-              } else {
-                setInterimTranscript('');
-                toast({
-                  title: "Speech recognition not supported",
-                  description: "Please type your message instead.",
-                  variant: "destructive",
-                });
+              // Use Vertex AI speech-to-text
+              const transcriptionResult = await VertexAIService.speechToText(base64Audio);
+              
+              if (transcriptionResult) {
+                setTranscript(transcriptionResult);
+                sendMessage(transcriptionResult);
               }
             } catch (error) {
               console.error('Speech recognition error:', error);
@@ -187,14 +175,50 @@ export const useOpenAIChat = ({ initialMessages = [], onContentChange }: UseOpen
     setIsSpeaking(true);
     
     try {
-      // Use browser TTS since Perplexity doesn't have text-to-speech
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.onend = () => setIsSpeaking(false);
-      utterance.onerror = () => setIsSpeaking(false);
-      speechSynthesis.speak(utterance);
+      // Use Vertex AI text-to-speech
+      const audioContent = await VertexAIService.textToSpeech(text, {
+        voice: 'en-US-Neural2-D',
+        speakingRate: 1.0,
+        pitch: 0
+      });
+      
+      if (audioContent) {
+        // Create audio element
+        const audio = new Audio(`data:audio/mp3;base64,${audioContent}`);
+        
+        // Set up event listeners
+        audio.onended = () => {
+          setIsSpeaking(false);
+        };
+        
+        audio.onerror = () => {
+          console.error('Audio playback error');
+          setIsSpeaking(false);
+        };
+        
+        // Play the audio
+        await audio.play();
+      } else {
+        // Fall back to browser TTS
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.onend = () => setIsSpeaking(false);
+        utterance.onerror = () => setIsSpeaking(false);
+        speechSynthesis.speak(utterance);
+      }
     } catch (error) {
-      console.error('Speech synthesis error:', error);
+      console.error('Error speaking text:', error);
       setIsSpeaking(false);
+      
+      // Fall back to browser TTS
+      try {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.onend = () => setIsSpeaking(false);
+        utterance.onerror = () => setIsSpeaking(false);
+        speechSynthesis.speak(utterance);
+      } catch (fallbackError) {
+        console.error('Speech synthesis fallback error:', fallbackError);
+        setIsSpeaking(false);
+      }
     }
   }, [isSpeaking]);
 

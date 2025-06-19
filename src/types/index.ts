@@ -5,6 +5,7 @@ export * from './entities/user';
 export * from './features/advertising';
 export * from './features/analytics';
 export * from './features/sentiment';
+export * from './features/chat';
 export * from './venue';
 
 import { GeoCoordinates } from './geo';
@@ -14,12 +15,7 @@ import { Venue } from './venue';
 // Fix missing exports
 export type Coordinates = GeoCoordinates;
 export type UserProfileData = UserProfile;
-export type UserProfileStats = {
-  posts: number;
-  followers: number;
-  following: number;
-  likes: number;
-};
+export type UserProfileStats = UserProfile;
 
 export interface CityData {
   name: string;
@@ -62,8 +58,7 @@ export interface Location {
     thursday?: string; 
     friday?: string; 
     saturday?: string; 
-    sunday?: string;
-    isOpen24Hours?: boolean;
+    sunday?: string; 
   };
   tags?: string[];
   createdAt?: string;
