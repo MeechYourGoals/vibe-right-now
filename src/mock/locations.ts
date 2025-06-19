@@ -19,6 +19,8 @@ export const mockLocations: Location[] = [
     vibes: ['trendy', 'rooftop', 'sunset'],
     tags: ['cocktails', 'views', 'nightlife'],
     hours: {
+      open: '6:00 PM',
+      close: '2:00 AM',
       monday: '6:00 PM - 2:00 AM',
       tuesday: '6:00 PM - 2:00 AM',
       wednesday: '6:00 PM - 2:00 AM',
@@ -48,6 +50,8 @@ export const mockLocations: Location[] = [
     vibes: ['romantic', 'upscale', 'mediterranean'],
     tags: ['seafood', 'wine', 'fine dining'],
     hours: {
+      open: '12:00 PM',
+      close: '11:00 PM',
       monday: '12:00 PM - 11:00 PM',
       tuesday: '12:00 PM - 11:00 PM',
       wednesday: '12:00 PM - 11:00 PM',
@@ -77,6 +81,8 @@ export const mockLocations: Location[] = [
     vibes: ['cozy', 'local', 'authentic'],
     tags: ['coffee', 'pastries', 'wifi'],
     hours: {
+      open: '7:00 AM',
+      close: '7:00 PM',
       monday: '7:00 AM - 7:00 PM',
       tuesday: '7:00 AM - 7:00 PM',
       wednesday: '7:00 AM - 7:00 PM',
