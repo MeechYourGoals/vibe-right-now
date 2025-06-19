@@ -8,7 +8,9 @@ const corsHeaders = {
 };
 
 // API Keys from environment with proper validation
-const VERTEX_AI_API_KEY = Deno.env.get('GOOGLE_VERTEX_API_KEY');
+const VERTEX_AI_API_KEY = Deno.env.get('GOOGLE_VERTEX_API_KEY') || Deno.env.get('GEMINI_API_KEY');
+const GOOGLE_SEARCH_API_KEY = Deno.env.get('GOOGLE_CUSTOM_SEARCH_API_KEY');
+const GOOGLE_SEARCH_ENGINE_ID = Deno.env.get('GOOGLE_CUSTOM_SEARCH_ENGINE_ID');
 
 // Available models with proper fallback logic
 const MODELS = {
@@ -19,71 +21,153 @@ const MODELS = {
 // Validate API keys at startup
 function validateApiKeys() {
   console.log('API Key Status:', {
-    vertex: !!VERTEX_AI_API_KEY
+    vertex: !!VERTEX_AI_API_KEY,
+    search: !!GOOGLE_SEARCH_API_KEY,
+    searchEngine: !!GOOGLE_SEARCH_ENGINE_ID
   });
   
-  return !VERTEX_AI_API_KEY ? ['GOOGLE_VERTEX_API_KEY'] : [];
+  const missing = [];
+  if (!VERTEX_AI_API_KEY) missing.push('GOOGLE_VERTEX_API_KEY or GEMINI_API_KEY');
+  return missing;
 }
 
-// Generate response using Gemini - direct answers without training data disclaimers
-async function generateGeminiResponse(prompt: string, context: any[] = []): Promise<string> {
-  if (!VERTEX_AI_API_KEY) {
-    return "I'm currently experiencing configuration issues. Please try again later.";
+// Enhanced web search function
+async function performWebSearch(query: string): Promise<string[]> {
+  if (!GOOGLE_SEARCH_API_KEY || !GOOGLE_SEARCH_ENGINE_ID) {
+    console.log('Google Search not configured, skipping web search');
+    return [];
   }
 
   try {
+    const searchUrl = `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_SEARCH_API_KEY}&cx=${GOOGLE_SEARCH_ENGINE_ID}&q=${encodeURIComponent(query)}&num=5`;
+    
+    const response = await fetch(searchUrl);
+    if (!response.ok) {
+      console.error('Google Search API error:', response.status);
+      return [];
+    }
+    
+    const data = await response.json();
+    const results = data.items || [];
+    
+    return results.map((item: any) => ({
+      title: item.title,
+      snippet: item.snippet,
+      link: item.link
+    })).slice(0, 3); // Limit to top 3 results
+  } catch (error) {
+    console.error('Error performing web search:', error);
+    return [];
+  }
+}
+
+// Generate intelligent response using Gemini with enhanced context
+async function generateGeminiResponse(prompt: string, context: any[] = [], enableSearch = true): Promise<string> {
+  if (!VERTEX_AI_API_KEY) {
+    throw new Error("Vernon AI is not properly configured. Please check API keys.");
+  }
+
+  try {
+    let searchResults: any[] = [];
+    let enhancedPrompt = prompt;
+    
+    // Perform web search if enabled and appropriate
+    if (enableSearch && shouldPerformSearch(prompt)) {
+      console.log('Performing web search for:', prompt);
+      searchResults = await performWebSearch(prompt);
+      
+      if (searchResults.length > 0) {
+        const searchContext = searchResults.map(result => 
+          `${result.title}: ${result.snippet}`
+        ).join('\n');
+        
+        enhancedPrompt = `Based on the following current information from the web and your knowledge, provide a helpful and accurate response:
+
+Current Web Information:
+${searchContext}
+
+User Question: ${prompt}
+
+Please provide a comprehensive answer that combines current information with your knowledge. Be specific and helpful.`;
+      }
+    }
+    
     // Prepare messages for Gemini
     let geminiMessages = [];
     
+    // Add system message for better responses
+    geminiMessages.push({
+      role: 'user',
+      parts: [{ text: `You are Vernon, a helpful AI assistant. You provide direct, accurate, and useful responses. When asked about locations, events, or current information, you give specific recommendations and details. You don't start responses with disclaimers about training data - you just provide helpful information directly.` }]
+    });
+    
+    geminiMessages.push({
+      role: 'model',
+      parts: [{ text: 'I understand. I\'ll provide direct, helpful responses without unnecessary disclaimers.' }]
+    });
+    
     if (context && context.length > 0) {
-      geminiMessages = context.map(msg => ({
+      const recentContext = context.slice(-5).map(msg => ({
         role: msg.sender === 'user' ? 'user' : 'model',
         parts: [{ text: msg.text || msg.content || '' }]
       }));
+      geminiMessages = [...geminiMessages, ...recentContext];
     }
     
     geminiMessages.push({
       role: 'user',
-      parts: [{ text: prompt }]
+      parts: [{ text: enhancedPrompt }]
     });
 
     const response = await callGeminiAPI(MODELS.PRIMARY, geminiMessages);
     let responseText = response.candidates?.[0]?.content?.parts?.[0]?.text || '';
     
-    return responseText || "I'd be happy to help with that! Could you provide a bit more detail about what you're looking for?";
+    // Clean up the response
+    responseText = cleanResponse(responseText);
+    
+    if (!responseText) {
+      throw new Error('Empty response from Gemini');
+    }
+    
+    return responseText;
   } catch (error) {
     console.error('Error generating Gemini response:', error);
-    
-    // Provide helpful fallback responses based on the prompt
-    return generateHelpfulResponse(prompt);
+    throw error;
   }
 }
 
-// Generate helpful responses without training data disclaimers
-function generateHelpfulResponse(prompt: string): string {
-  const lowerPrompt = prompt.toLowerCase();
+// Check if query should trigger web search
+function shouldPerformSearch(query: string): boolean {
+  const searchTriggers = [
+    'restaurant', 'bar', 'hotel', 'event', 'concert', 'show', 'movie',
+    'weather', 'news', 'current', 'today', 'now', 'latest', 'recent',
+    'open', 'hours', 'phone', 'address', 'location', 'near me',
+    'best', 'top', 'recommended', 'popular', 'trending',
+    'price', 'cost', 'booking', 'reservation', 'ticket'
+  ];
   
-  if (lowerPrompt.includes('restaurant') || lowerPrompt.includes('food')) {
-    return "I'd recommend checking out local favorites in your area! Popular spots often include farm-to-table restaurants, local bistros, and well-reviewed establishments on platforms like Yelp or Google Reviews. What type of cuisine are you in the mood for?";
-  }
+  const lowerQuery = query.toLowerCase();
+  return searchTriggers.some(trigger => lowerQuery.includes(trigger));
+}
+
+// Clean and enhance response
+function cleanResponse(text: string): string {
+  // Remove common AI disclaimer patterns
+  const disclaimers = [
+    /^I don't have access to real-time information[^.]*\./gi,
+    /^I can't provide real-time information[^.]*\./gi,
+    /^My training data doesn't include[^.]*\./gi,
+    /^I don't have current information[^.]*\./gi,
+    /^Based on my training data[^,]*,?\s*/gi,
+    /^From my training data[^,]*,?\s*/gi
+  ];
   
-  if (lowerPrompt.includes('bar') || lowerPrompt.includes('drink')) {
-    return "Great bars often have unique atmospheres - from craft cocktail lounges to sports bars and rooftop venues. Look for places with good reviews and the vibe you're after. Are you looking for cocktails, beer, or a specific type of bar experience?";
-  }
+  let cleaned = text;
+  disclaimers.forEach(pattern => {
+    cleaned = cleaned.replace(pattern, '');
+  });
   
-  if (lowerPrompt.includes('hotel') || lowerPrompt.includes('stay')) {
-    return "For accommodations, consider factors like location, amenities, and budget. Popular booking sites can help you compare options and read reviews. What's your destination and what kind of stay are you looking for?";
-  }
-  
-  if (lowerPrompt.includes('weather') || lowerPrompt.includes('temperature')) {
-    return "Weather can vary significantly by location and season. For current conditions, weather apps and sites like Weather.com provide up-to-date forecasts. What area are you interested in?";
-  }
-  
-  if (lowerPrompt.includes('event') || lowerPrompt.includes('concert')) {
-    return "Events and concerts are great ways to experience local culture! Check platforms like Eventbrite, venue websites, or local event listings. What type of event interests you?";
-  }
-  
-  return "I'd be happy to help with that! Could you provide a bit more detail about what you're looking for?";
+  return cleaned.trim();
 }
 
 serve(async (req) => {
@@ -101,7 +185,7 @@ serve(async (req) => {
       console.warn('Missing API keys:', missingKeys);
     }
 
-    const { prompt, mode = 'default', context = [], model = MODELS.PRIMARY, action, text, audio, options, messages, query } = await req.json();
+    const { prompt, mode = 'default', context = [], model = MODELS.PRIMARY, action, text, audio, options, messages, query, enableSearch = true } = await req.json();
     
     // Handle text-to-speech requests
     if (action === 'text-to-speech' && text) {
@@ -219,7 +303,7 @@ serve(async (req) => {
       try {
         console.log('Chat completion request with messages:', messages.length);
         
-        const geminiMessages = messages.map(msg => ({
+        const geminiMessages = messages.map((msg: any) => ({
           role: msg.role === 'user' ? 'user' : 'model',
           parts: [{ text: msg.content }]
         }));
@@ -248,13 +332,13 @@ serve(async (req) => {
       }
     }
 
-    // Handle regular chat completion requests - direct answers
+    // Handle regular chat completion requests - intelligent responses with search
     if (prompt || query) {
       const userPrompt = prompt || query;
       
       if (!VERTEX_AI_API_KEY) {
         return new Response(JSON.stringify({ 
-          error: 'AI service not configured',
+          error: 'Vernon AI service not configured',
           text: "I'm currently experiencing configuration issues. Please check with the administrator.",
           dataSource: 'error'
         }), {
@@ -264,15 +348,15 @@ serve(async (req) => {
       }
 
       const requestedModel = model || MODELS.PRIMARY;
-      console.log(`Processing ${requestedModel} request in ${mode} mode`);
+      console.log(`Processing ${requestedModel} request in ${mode} mode with search: ${enableSearch}`);
       
-      // Generate response with direct answers
-      const responseText = await generateGeminiResponse(userPrompt, context);
+      // Generate response with web search capabilities
+      const responseText = await generateGeminiResponse(userPrompt, context, enableSearch);
       
       return new Response(JSON.stringify({ 
         text: responseText,
-        searchEnhanced: false,
-        dataSource: 'ai_model'
+        searchEnhanced: enableSearch && shouldPerformSearch(userPrompt),
+        dataSource: 'vernon_ai'
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -283,8 +367,8 @@ serve(async (req) => {
     console.error('Error in vertex-ai function:', error);
     return new Response(JSON.stringify({ 
       error: error.message,
-      text: "I'd be happy to help with that! Could you provide a bit more detail about what you're looking for?",
-      dataSource: 'fallback'
+      text: "I'm having trouble processing your request right now. Please try again in a moment.",
+      dataSource: 'error'
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -293,7 +377,7 @@ serve(async (req) => {
 });
 
 // Helper function to call Gemini API with better error handling
-async function callGeminiAPI(model, messages) {
+async function callGeminiAPI(model: string, messages: any[]) {
   if (!VERTEX_AI_API_KEY) {
     throw new Error('GOOGLE_VERTEX_API_KEY not configured');
   }
@@ -310,7 +394,7 @@ async function callGeminiAPI(model, messages) {
     body: JSON.stringify({
       contents: messages,
       generationConfig: {
-        temperature: 0.7,
+        temperature: 0.8,
         topK: 40,
         topP: 0.95,
         maxOutputTokens: 2048,

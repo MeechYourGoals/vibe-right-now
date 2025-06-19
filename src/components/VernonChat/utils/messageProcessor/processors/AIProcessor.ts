@@ -23,9 +23,9 @@ export class AIProcessor implements MessageProcessor {
           context.isVenueMode ? 'venue' : 'default',
           contextMessages
         );
-        console.log('Got response from Vertex AI:', responseText.substring(0, 50) + '...');
+        console.log('Got response from Vernon AI:', responseText.substring(0, 50) + '...');
       } catch (error) {
-        console.error('Error with Vertex AI:', error);
+        console.error('Error with Vernon AI:', error);
         responseText = "I'm having trouble connecting to my AI services right now. Please try again later.";
       }
       
