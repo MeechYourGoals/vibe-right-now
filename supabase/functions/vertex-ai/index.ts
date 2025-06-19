@@ -25,10 +25,10 @@ function validateApiKeys() {
   return !VERTEX_AI_API_KEY ? ['GOOGLE_VERTEX_API_KEY'] : [];
 }
 
-// Generate response using Gemini with training data only
+// Generate response using Gemini - direct answers without training data disclaimers
 async function generateGeminiResponse(prompt: string, context: any[] = []): Promise<string> {
   if (!VERTEX_AI_API_KEY) {
-    return "I'm currently experiencing configuration issues with my AI services. Please contact support.";
+    return "I'm currently experiencing configuration issues. Please try again later.";
   }
 
   try {
@@ -50,40 +50,40 @@ async function generateGeminiResponse(prompt: string, context: any[] = []): Prom
     const response = await callGeminiAPI(MODELS.PRIMARY, geminiMessages);
     let responseText = response.candidates?.[0]?.content?.parts?.[0]?.text || '';
     
-    return responseText || "I can help with general information from my training data. Please be more specific about what you'd like to know.";
+    return responseText || "I'd be happy to help with that! Could you provide a bit more detail about what you're looking for?";
   } catch (error) {
     console.error('Error generating Gemini response:', error);
     
     // Provide helpful fallback responses based on the prompt
-    return generateTrainingDataResponse(prompt);
+    return generateHelpfulResponse(prompt);
   }
 }
 
-// Generate a helpful response using training data when APIs are unavailable
-function generateTrainingDataResponse(prompt: string): string {
+// Generate helpful responses without training data disclaimers
+function generateHelpfulResponse(prompt: string): string {
   const lowerPrompt = prompt.toLowerCase();
   
   if (lowerPrompt.includes('restaurant') || lowerPrompt.includes('food')) {
-    return "I can help with general restaurant recommendations from my training data. For the most current information about restaurants, hours, and availability, I recommend checking their websites directly or calling ahead. What type of cuisine or dining experience are you looking for?";
+    return "I'd recommend checking out local favorites in your area! Popular spots often include farm-to-table restaurants, local bistros, and well-reviewed establishments on platforms like Yelp or Google Reviews. What type of cuisine are you in the mood for?";
   }
   
   if (lowerPrompt.includes('bar') || lowerPrompt.includes('drink')) {
-    return "I can provide general information about bars and nightlife from my training data. For current hours, events, and availability, please check directly with venues. What kind of bar experience are you interested in?";
+    return "Great bars often have unique atmospheres - from craft cocktail lounges to sports bars and rooftop venues. Look for places with good reviews and the vibe you're after. Are you looking for cocktails, beer, or a specific type of bar experience?";
   }
   
   if (lowerPrompt.includes('hotel') || lowerPrompt.includes('stay')) {
-    return "I can offer general advice about accommodations from my training data. For current rates and availability, I recommend checking hotel websites or booking platforms directly. What type of accommodation are you looking for?";
+    return "For accommodations, consider factors like location, amenities, and budget. Popular booking sites can help you compare options and read reviews. What's your destination and what kind of stay are you looking for?";
   }
   
   if (lowerPrompt.includes('weather') || lowerPrompt.includes('temperature')) {
-    return "I can provide general climate information from my training data, but for current weather conditions, please check a weather service like Weather.com or your local forecast.";
+    return "Weather can vary significantly by location and season. For current conditions, weather apps and sites like Weather.com provide up-to-date forecasts. What area are you interested in?";
   }
   
   if (lowerPrompt.includes('event') || lowerPrompt.includes('concert')) {
-    return "I can help with general information about events and entertainment from my training data. For current events and tickets, please check event platforms like Eventbrite, Ticketmaster, or venue websites directly.";
+    return "Events and concerts are great ways to experience local culture! Check platforms like Eventbrite, venue websites, or local event listings. What type of event interests you?";
   }
   
-  return "I can help with general information from my training data. For the most current and specific details, you may want to verify information from official sources. What would you like to know more about?";
+  return "I'd be happy to help with that! Could you provide a bit more detail about what you're looking for?";
 }
 
 serve(async (req) => {
@@ -248,7 +248,7 @@ serve(async (req) => {
       }
     }
 
-    // Handle regular chat completion requests - using training data only
+    // Handle regular chat completion requests - direct answers
     if (prompt || query) {
       const userPrompt = prompt || query;
       
@@ -264,15 +264,15 @@ serve(async (req) => {
       }
 
       const requestedModel = model || MODELS.PRIMARY;
-      console.log(`Processing ${requestedModel} request in ${mode} mode - training data only`);
+      console.log(`Processing ${requestedModel} request in ${mode} mode`);
       
-      // Generate response using training data only
+      // Generate response with direct answers
       const responseText = await generateGeminiResponse(userPrompt, context);
       
       return new Response(JSON.stringify({ 
         text: responseText,
         searchEnhanced: false,
-        dataSource: 'training_data'
+        dataSource: 'ai_model'
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -283,7 +283,7 @@ serve(async (req) => {
     console.error('Error in vertex-ai function:', error);
     return new Response(JSON.stringify({ 
       error: error.message,
-      text: "I can help with general information from my training data. Please let me know what you'd like to learn about.",
+      text: "I'd be happy to help with that! Could you provide a bit more detail about what you're looking for?",
       dataSource: 'fallback'
     }), {
       status: 500,
@@ -343,9 +343,9 @@ async function callGeminiAPI(model, messages) {
     try {
       const errorData = JSON.parse(errorText);
       if (errorData.error?.code === 429) {
-        throw new Error(`Rate limit exceeded for ${model}. Using training data fallback.`);
+        throw new Error(`Rate limit exceeded for ${model}. Please try again in a moment.`);
       } else if (errorData.error?.code === 404) {
-        throw new Error(`Model ${model} is not available. Using training data fallback.`);
+        throw new Error(`Model ${model} is not available. Please try again.`);
       } else if (errorData.error?.code === 400 && errorData.error?.message?.includes('API key not valid')) {
         throw new Error(`Invalid API key for Google Vertex AI. Please check configuration.`);
       } else {

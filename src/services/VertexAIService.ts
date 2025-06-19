@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 /**
  * Service for interacting with Google Vertex AI API via Supabase Edge Functions
- * This is the central service for all Google AI functionality - training data only
+ * Provides direct answers without training data disclaimers
  */
 export class VertexAIService {
   // Default model settings - using flash as primary for better quota management
@@ -12,7 +12,7 @@ export class VertexAIService {
   private static DEFAULT_VOICE = 'en-US-Neural2-D'; // Default male voice
   
   /**
-   * Generate a response using Google Gemini model - training data only
+   * Generate a response using Google Gemini model - direct answers
    */
   static async generateResponse(
     prompt: string, 
@@ -20,7 +20,7 @@ export class VertexAIService {
     context: any[] = []
   ): Promise<string> {
     try {
-      console.log(`Generating Gemini response with mode: ${mode} - training data only`);
+      console.log(`Generating Gemini response with mode: ${mode}`);
       
       // Ensure context is in the correct format
       const formattedContext = context.map(msg => ({
@@ -39,47 +39,47 @@ export class VertexAIService {
       
       if (error) {
         console.error('Error calling Vertex AI function:', error);
-        return this.generateTrainingDataResponse(prompt);
+        return this.generateDirectResponse(prompt);
       }
       
       if (!data || !data.text) {
-        return "I can help with general information from my training data. Please be more specific about what you'd like to know.";
+        return "I'd be happy to help with that! Could you provide a bit more detail about what you're looking for?";
       }
       
       return data.text;
     } catch (error) {
       console.error('Error generating response with Vertex AI:', error);
-      return this.generateTrainingDataResponse(prompt);
+      return this.generateDirectResponse(prompt);
     }
   }
 
   /**
-   * Generate a helpful response using training data
+   * Generate a direct helpful response
    */
-  private static generateTrainingDataResponse(prompt: string): string {
+  private static generateDirectResponse(prompt: string): string {
     const lowerPrompt = prompt.toLowerCase();
     
     if (lowerPrompt.includes('restaurant') || lowerPrompt.includes('food')) {
-      return "I can help with general restaurant recommendations from my training data. For the most current information about restaurants, hours, and availability, I recommend checking their websites directly or calling ahead. What type of cuisine or dining experience are you looking for?";
+      return "I'd recommend checking out local favorites in your area! Popular spots often include farm-to-table restaurants, local bistros, and well-reviewed establishments. What type of cuisine are you in the mood for?";
     }
     
     if (lowerPrompt.includes('bar') || lowerPrompt.includes('drink')) {
-      return "I can provide general information about bars and nightlife from my training data. For current hours, events, and availability, please check directly with venues. What kind of bar experience are you interested in?";
+      return "Great bars often have unique atmospheres - from craft cocktail lounges to sports bars and rooftop venues. Look for places with good reviews and the vibe you're after. Are you looking for cocktails, beer, or a specific type of bar experience?";
     }
     
     if (lowerPrompt.includes('hotel') || lowerPrompt.includes('stay')) {
-      return "I can offer general advice about accommodations from my training data. For current rates and availability, I recommend checking hotel websites or booking platforms directly. What type of accommodation are you looking for?";
+      return "For accommodations, consider factors like location, amenities, and budget. Popular booking sites can help you compare options and read reviews. What's your destination and what kind of stay are you looking for?";
     }
     
     if (lowerPrompt.includes('weather') || lowerPrompt.includes('temperature')) {
-      return "I can provide general climate information from my training data, but for current weather conditions, please check a weather service like Weather.com or your local forecast.";
+      return "Weather can vary significantly by location and season. For current conditions, weather apps provide up-to-date forecasts. What area are you interested in?";
     }
     
     if (lowerPrompt.includes('event') || lowerPrompt.includes('concert')) {
-      return "I can help with general information about events and entertainment from my training data. For current events and tickets, please check event platforms like Eventbrite, Ticketmaster, or venue websites directly.";
+      return "Events and concerts are great ways to experience local culture! Check platforms like Eventbrite, venue websites, or local event listings. What type of event interests you?";
     }
     
-    return "I can help with general information from my training data. For the most current and specific details, you may want to verify information from official sources. What would you like to know more about?";
+    return "I'd be happy to help with that! Could you provide a bit more detail about what you're looking for?";
   }
 
   /**

@@ -30,7 +30,7 @@ export const useUserProfile = (userId?: string) => {
         const user = mockUsers.find(u => u.id === userId);
         if (user) {
           setProfile(user);
-          const posts = mockPosts.filter(p => p.user.id === userId);
+          const posts = mockPosts.filter(p => p.user?.id === userId);
           setUserPosts(posts);
           setStats({
             posts: posts.length,

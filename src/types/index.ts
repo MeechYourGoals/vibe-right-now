@@ -14,7 +14,12 @@ import { Venue } from './venue';
 // Fix missing exports
 export type Coordinates = GeoCoordinates;
 export type UserProfileData = UserProfile;
-export type UserProfileStats = UserProfile;
+export type UserProfileStats = {
+  posts: number;
+  followers: number;
+  following: number;
+  likes: number;
+};
 
 export interface CityData {
   name: string;
