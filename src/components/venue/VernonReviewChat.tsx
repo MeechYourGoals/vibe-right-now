@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -120,22 +121,22 @@ Please provide a helpful, specific answer based on what customers have said in t
   };
 
   return (
-    <div className="bg-card border border-border rounded-lg p-4">
+    <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-4">
       <div className="flex items-center gap-2 mb-3">
-        <Bot className="h-5 w-5 text-purple-500" />
-        <span className="text-sm font-medium text-foreground">Ask Vernon about these reviews</span>
-        <Sparkles className="h-4 w-4 text-purple-400" />
+        <Bot className="h-5 w-5 text-purple-600" />
+        <span className="text-sm font-medium text-purple-800">Ask Vernon about these reviews</span>
+        <Sparkles className="h-4 w-4 text-purple-500" />
       </div>
       
       {messages.length === 0 && (
         <div className="mb-4">
-          <p className="text-xs text-muted-foreground mb-2">Try asking:</p>
+          <p className="text-xs text-purple-700 mb-2">Try asking:</p>
           <div className="grid grid-cols-2 gap-1">
             {suggestedQuestions.map((question, idx) => (
               <button
                 key={idx}
                 onClick={() => handleSendMessage(question)}
-                className="text-left text-xs bg-muted/50 hover:bg-muted text-foreground px-2 py-1 rounded border border-border transition-colors"
+                className="text-left text-xs bg-white/70 hover:bg-white/90 text-purple-700 px-2 py-1 rounded border border-purple-200 transition-colors"
                 disabled={isLoading}
               >
                 {question}
@@ -146,19 +147,19 @@ Please provide a helpful, specific answer based on what customers have said in t
       )}
       
       {messages.length > 0 && (
-        <div className="max-h-40 overflow-y-auto space-y-2 mb-3 bg-muted/20 rounded p-2">
+        <div className="max-h-40 overflow-y-auto space-y-2 mb-3 bg-white/50 rounded p-2">
           {messages.map((message) => (
             <div
               key={message.id}
               className={`p-2 rounded text-sm ${
                 message.type === 'user'
-                  ? 'bg-purple-900/30 text-foreground ml-4 border border-purple-500/30'
-                  : 'bg-card text-foreground mr-4 border border-border'
+                  ? 'bg-purple-100 text-purple-900 ml-4'
+                  : 'bg-white text-gray-800 mr-4 border border-purple-100'
               }`}
             >
               <div className="flex items-center gap-1 mb-1">
-                {message.type === 'vernon' && <Bot className="h-3 w-3 text-purple-500" />}
-                <strong className="text-xs text-foreground">
+                {message.type === 'vernon' && <Bot className="h-3 w-3 text-purple-600" />}
+                <strong className="text-xs">
                   {message.type === 'user' ? 'You' : 'Vernon'}
                 </strong>
               </div>
@@ -166,14 +167,14 @@ Please provide a helpful, specific answer based on what customers have said in t
             </div>
           ))}
           {isLoading && (
-            <div className="bg-card text-foreground mr-4 border border-border p-2 rounded text-sm">
+            <div className="bg-white text-gray-800 mr-4 border border-purple-100 p-2 rounded text-sm">
               <div className="flex items-center gap-1 mb-1">
-                <Bot className="h-3 w-3 text-purple-500" />
-                <strong className="text-xs text-foreground">Vernon</strong>
+                <Bot className="h-3 w-3 text-purple-600" />
+                <strong className="text-xs">Vernon</strong>
               </div>
               <div className="flex items-center gap-1">
                 <div className="animate-pulse">Thinking...</div>
-                <Sparkles className="h-3 w-3 animate-spin text-purple-400" />
+                <Sparkles className="h-3 w-3 animate-spin text-purple-500" />
               </div>
             </div>
           )}
@@ -186,14 +187,14 @@ Please provide a helpful, specific answer based on what customers have said in t
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyPress={handleKeyPress}
-          className="flex-1 bg-background border-border text-foreground placeholder:text-muted-foreground focus:border-purple-500"
+          className="flex-1 bg-white/70 border-purple-200 focus:border-purple-400"
           disabled={isLoading}
         />
         <Button
           onClick={() => handleSendMessage()}
           disabled={!input.trim() || isLoading}
           size="icon"
-          className="bg-purple-600 hover:bg-purple-700 text-white"
+          className="bg-purple-600 hover:bg-purple-700"
         >
           <Send className="h-4 w-4" />
         </Button>

@@ -1,8 +1,6 @@
 
 import { CityData } from '@/types';
 
-const currentDate = new Date().toISOString();
-
 const saopaulo: CityData = {
   name: "São Paulo",
   country: "Brazil",
@@ -22,9 +20,7 @@ const saopaulo: CityData = {
       verified: true,
       vibes: ["Art Museum", "Modern", "Cultural"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=MASP+Sao+Paulo",
-      createdAt: currentDate,
-      updatedAt: currentDate
+      google_maps_url: "https://maps.google.com/maps?q=MASP+Sao+Paulo"
     },
     {
       id: "sao-2",
@@ -40,9 +36,7 @@ const saopaulo: CityData = {
       verified: true,
       vibes: ["Brazilian", "Fine Dining", "Award-winning"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=DOM+Restaurant+Sao+Paulo",
-      createdAt: currentDate,
-      updatedAt: currentDate
+      google_maps_url: "https://maps.google.com/maps?q=DOM+Restaurant+Sao+Paulo"
     },
     {
       id: "sao-3",
@@ -58,9 +52,7 @@ const saopaulo: CityData = {
       verified: true,
       vibes: ["Electronic", "Underground", "World-class"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=D.Edge+Sao+Paulo",
-      createdAt: currentDate,
-      updatedAt: currentDate
+      google_maps_url: "https://maps.google.com/maps?q=D.Edge+Sao+Paulo"
     }
   ]
 };

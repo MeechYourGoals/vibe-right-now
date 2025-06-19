@@ -1,8 +1,6 @@
 
 import { CityData } from '@/types';
 
-const currentDate = new Date().toISOString();
-
 const tokyo: CityData = {
   name: "Tokyo",
   country: "Japan",
@@ -23,9 +21,7 @@ const tokyo: CityData = {
       verified: true,
       vibes: ["Michelin Star", "Sushi Master", "Ginza"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Sukiyabashi+Jiro+Tokyo",
-      createdAt: currentDate,
-      updatedAt: currentDate
+      google_maps_url: "https://maps.google.com/maps?q=Sukiyabashi+Jiro+Tokyo"
     },
     {
       id: "tok-2",
@@ -41,9 +37,7 @@ const tokyo: CityData = {
       verified: true,
       vibes: ["Techno", "Shibuya", "Underground"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Womb+Nightclub+Tokyo",
-      createdAt: currentDate,
-      updatedAt: currentDate
+      google_maps_url: "https://maps.google.com/maps?q=Womb+Nightclub+Tokyo"
     },
     {
       id: "tok-3",
@@ -58,9 +52,7 @@ const tokyo: CityData = {
       verified: true,
       vibes: ["Baseball", "Giants", "Big Egg"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Tokyo+Dome",
-      createdAt: currentDate,
-      updatedAt: currentDate
+      google_maps_url: "https://maps.google.com/maps?q=Tokyo+Dome"
     },
     {
       id: "tok-4",
@@ -75,9 +67,7 @@ const tokyo: CityData = {
       verified: true,
       vibes: ["Historic", "Temple", "Traditional"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Senso-ji+Temple+Tokyo",
-      createdAt: currentDate,
-      updatedAt: currentDate
+      google_maps_url: "https://maps.google.com/maps?q=Senso-ji+Temple+Tokyo"
     },
     {
       id: "tok-5",
@@ -93,9 +83,7 @@ const tokyo: CityData = {
       verified: true,
       vibes: ["Modern", "Shibuya", "Japanese Coffee"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Blue+Seal+Coffee+Tokyo",
-      createdAt: currentDate,
-      updatedAt: currentDate
+      google_maps_url: "https://maps.google.com/maps?q=Blue+Seal+Coffee+Tokyo"
     }
   ]
 };

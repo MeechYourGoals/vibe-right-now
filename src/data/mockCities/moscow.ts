@@ -1,8 +1,6 @@
 
 import { CityData } from '@/types';
 
-const currentDate = new Date().toISOString();
-
 const moscow: CityData = {
   name: "Moscow",
   country: "Russia",
@@ -22,9 +20,7 @@ const moscow: CityData = {
       verified: true,
       vibes: ["Historic", "Kremlin", "Iconic"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Red+Square+Moscow",
-      createdAt: currentDate,
-      updatedAt: currentDate
+      google_maps_url: "https://maps.google.com/maps?q=Red+Square+Moscow"
     },
     {
       id: "mos-2",
@@ -40,9 +36,7 @@ const moscow: CityData = {
       verified: true,
       vibes: ["Modern Russian", "Panoramic Views", "Fine Dining"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=White+Rabbit+Moscow",
-      createdAt: currentDate,
-      updatedAt: currentDate
+      google_maps_url: "https://maps.google.com/maps?q=White+Rabbit+Moscow"
     },
     {
       id: "mos-3",
@@ -58,9 +52,7 @@ const moscow: CityData = {
       verified: true,
       vibes: ["Upscale", "Live Music", "Russian Elite"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Gipsy+Moscow",
-      createdAt: currentDate,
-      updatedAt: currentDate
+      google_maps_url: "https://maps.google.com/maps?q=Gipsy+Moscow"
     }
   ]
 };

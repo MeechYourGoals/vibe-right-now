@@ -1,212 +1,225 @@
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AdFormat } from '@/types/features/advertising';
+import React, { useState } from "react";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Play, Image, Zap, MapPin, Palette, Eye, Download, Share } from "lucide-react";
+import { AdFormat } from "@/types";
 
-const AD_FORMATS: AdFormat[] = [
+const adFormats: AdFormat[] = [
   {
-    id: 'moment-card',
-    name: 'Moment Card',
-    description: 'Native card that appears in feed during high-vibe moments',
-    type: 'MomentCard',
-    platform: 'Vibe Right Now',
-    dimensions: { width: 375, height: 200 },
-    kpis: ['Engagement Rate', 'Click-through Rate', 'Moment Score Impact'],
-    placement: 'Feed Integration',
-    specifications: {
-      maxTextLength: 120,
-      imageRequired: true,
-      aspectRatio: '16:9'
-    },
-    bestPractices: [
-      'Match the current vibe of the venue',
-      'Use high-quality, mood-appropriate imagery',
-      'Keep copy concise and action-oriented'
-    ]
+    id: "moment-card",
+    name: "MomentCard",
+    description: "6-second vertical video auto-play",
+    type: "MomentCard",
+    duration: "6s",
+    placement: "2nd swipe in feed after organic",
+    kpis: ["Recall", "CPC"],
+    platform: "VRN Feed",
+    dimensions: "9:16 vertical",
+    specifications: { duration: 6, autoplay: true },
+    bestPractices: ["Keep message clear", "Strong opening frame"]
   },
   {
-    id: 'vibe-overlay',
-    name: 'Vibe Overlay',
-    description: 'Subtle overlay on venue photos when vibe score is high',
-    type: 'VibeOverlay',
-    platform: 'Vibe Right Now',
-    dimensions: { width: 300, height: 100 },
-    kpis: ['Vibe Score Correlation', 'Brand Recall', 'Venue Association'],
-    placement: 'Photo Overlay',
-    specifications: {
-      opacity: 0.8,
-      fadeAnimation: true,
-      vibeThreshold: 7.5
-    },
-    bestPractices: [
-      'Ensure overlay doesn\'t obstruct key photo elements',
-      'Use brand colors that complement venue atmosphere',
-      'Trigger only during peak vibe moments'
-    ]
+    id: "vibe-overlay",
+    name: "VibeOverlay",
+    description: "Semi-transparent brand filter over user clips",
+    type: "VibeOverlay",
+    placement: "AR mask over user content",
+    kpis: ["Engagement", "Shares"],
+    platform: "VRN Camera",
+    dimensions: "Full screen overlay",
+    specifications: { opacity: 0.3, blendMode: "multiply" },
+    bestPractices: ["Subtle branding", "Enhance don't distract"]
+  },
+  {
+    id: "spawn-point",
+    name: "Spawn Point",
+    description: "Sponsored push when vibe matches brand",
+    type: "SpawnPoint",
+    placement: "Vernon chat notifications",
+    kpis: ["ROAS", "In-store sales"],
+    platform: "Vernon AI",
+    dimensions: "Text + small image",
+    specifications: { triggers: ["vibe_match", "location_proximity"] },
+    bestPractices: ["Contextual relevance", "Clear call-to-action"]
+  },
+  {
+    id: "heat-ring",
+    name: "Heat Ring Takeover",
+    description: "Venue heat ring glows brand color",
+    type: "HeatRingTakeover",
+    placement: "Map overlay visualization",
+    kpis: ["Foot traffic lift"],
+    platform: "VRN Map",
+    dimensions: "Circular overlay",
+    specifications: { duration: "persistent", customColor: true },
+    bestPractices: ["Brand color consistency", "Subtle animation"]
   }
 ];
 
-export default function AdCreationStudio() {
-  const [selectedFormat, setSelectedFormat] = useState<AdFormat | null>(null);
-  const [adContent, setAdContent] = useState({
-    headline: '',
-    description: '',
-    callToAction: '',
-    targetUrl: ''
-  });
-
-  const renderDimensions = (dimensions: AdFormat['dimensions']) => {
-    if (typeof dimensions === 'string') {
-      return dimensions;
-    }
-    return `${dimensions.width}x${dimensions.height}px`;
-  };
+const AdCreationStudio = () => {
+  const [selectedFormat, setSelectedFormat] = useState<AdFormat>(adFormats[0]);
+  const [campaignName, setCampaignName] = useState("");
+  const [adContent, setAdContent] = useState("");
+  const [showPreview, setShowPreview] = useState(false);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Ad Creation Studio</h2>
-        <Button>Launch Campaign</Button>
-      </div>
-
-      <Tabs defaultValue="format" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="format">1. Format</TabsTrigger>
-          <TabsTrigger value="content">2. Content</TabsTrigger>
-          <TabsTrigger value="targeting">3. Targeting</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="format" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            {AD_FORMATS.map((format) => (
-              <Card 
-                key={format.id} 
-                className={`cursor-pointer transition-colors ${
-                  selectedFormat?.id === format.id ? 'ring-2 ring-primary' : ''
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Ad Format Selection */}
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Palette className="h-5 w-5" />
+              Choose Ad Format
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {adFormats.map((format) => (
+              <div
+                key={format.id}
+                className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                  selectedFormat.id === format.id
+                    ? "border-primary bg-primary/5"
+                    : "border-border hover:border-primary/50"
                 }`}
                 onClick={() => setSelectedFormat(format)}
               >
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    {format.name}
-                    <Badge variant="secondary">{format.type}</Badge>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    {format.description}
-                  </p>
-                  <div className="space-y-2 text-sm">
-                    <div><strong>Platform:</strong> {format.platform}</div>
-                    <div><strong>Dimensions:</strong> {renderDimensions(format.dimensions)}</div>
-                    <div><strong>Placement:</strong> {format.placement}</div>
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-lg bg-gradient-to-r from-purple-500/20 to-pink-500/20">
+                    {format.type === "MomentCard" && <Play className="h-4 w-4" />}
+                    {format.type === "VibeOverlay" && <Image className="h-4 w-4" />}
+                    {format.type === "SpawnPoint" && <Zap className="h-4 w-4" />}
+                    {format.type === "HeatRingTakeover" && <MapPin className="h-4 w-4" />}
                   </div>
-                  <div className="mt-3">
-                    <div className="text-xs font-medium mb-1">Key KPIs:</div>
-                    <div className="flex flex-wrap gap-1">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-semibold">{format.name}</h3>
+                      {format.duration && (
+                        <Badge variant="outline" className="text-xs">
+                          {format.duration}
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      {format.description}
+                    </p>
+                    <p className="text-xs text-muted-foreground mb-2">
+                      Platform: {format.platform} • {format.dimensions}
+                    </p>
+                    <div className="flex gap-1">
                       {format.kpis.map((kpi) => (
-                        <Badge key={kpi} variant="outline" className="text-xs">
+                        <Badge key={kpi} variant="secondary" className="text-xs">
                           {kpi}
                         </Badge>
                       ))}
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             ))}
-          </div>
-        </TabsContent>
+          </CardContent>
+        </Card>
 
-        <TabsContent value="content" className="space-y-4">
-          {selectedFormat ? (
-            <Card>
-              <CardHeader>
-                <CardTitle>Create Content for {selectedFormat.name}</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="headline">Headline</Label>
-                  <Input
-                    id="headline"
-                    placeholder="Enter compelling headline..."
-                    value={adContent.headline}
-                    onChange={(e) => setAdContent(prev => ({ ...prev, headline: e.target.value }))}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    placeholder="Describe your offer..."
-                    value={adContent.description}
-                    onChange={(e) => setAdContent(prev => ({ ...prev, description: e.target.value }))}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="cta">Call to Action</Label>
-                  <Input
-                    id="cta"
-                    placeholder="e.g., Visit Now, Learn More..."
-                    value={adContent.callToAction}
-                    onChange={(e) => setAdContent(prev => ({ ...prev, callToAction: e.target.value }))}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="url">Target URL</Label>
-                  <Input
-                    id="url"
-                    placeholder="https://..."
-                    value={adContent.targetUrl}
-                    onChange={(e) => setAdContent(prev => ({ ...prev, targetUrl: e.target.value }))}
-                  />
-                </div>
+        {/* Campaign Details */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Campaign Details</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">Campaign Name</label>
+              <Input
+                value={campaignName}
+                onChange={(e) => setCampaignName(e.target.value)}
+                placeholder="Enter campaign name"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Ad Content</label>
+              <Textarea
+                value={adContent}
+                onChange={(e) => setAdContent(e.target.value)}
+                placeholder="Enter your ad copy or description"
+                rows={4}
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button className="flex items-center gap-2">
+                <Image className="h-4 w-4" />
+                Generate with Imagen 3
+              </Button>
+              <Button variant="outline" className="flex items-center gap-2">
+                <Play className="h-4 w-4" />
+                Create with Veo
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
-                {selectedFormat.bestPractices && (
-                  <div className="mt-6 p-4 bg-muted rounded-lg">
-                    <h4 className="font-medium mb-2">Best Practices for {selectedFormat.name}:</h4>
-                    <ul className="text-sm space-y-1">
-                      {selectedFormat.bestPractices.map((practice, index) => (
-                        <li key={index} className="flex items-start">
-                          <span className="text-primary mr-2">•</span>
-                          {practice}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          ) : (
-            <Card>
-              <CardContent className="pt-6">
-                <p className="text-center text-muted-foreground">
-                  Please select an ad format first to create content.
+      {/* Live Preview */}
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Eye className="h-5 w-5" />
+              Live Preview
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="aspect-[9/16] bg-gradient-to-b from-purple-900/20 to-pink-900/20 rounded-lg border-2 border-dashed border-border flex items-center justify-center">
+              <div className="text-center p-6">
+                <div className="p-4 rounded-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                  {selectedFormat.type === "MomentCard" && <Play className="h-8 w-8" />}
+                  {selectedFormat.type === "VibeOverlay" && <Image className="h-8 w-8" />}
+                  {selectedFormat.type === "SpawnPoint" && <Zap className="h-8 w-8" />}
+                  {selectedFormat.type === "HeatRingTakeover" && <MapPin className="h-8 w-8" />}
+                </div>
+                <h3 className="font-semibold mb-2">{selectedFormat.name} Preview</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  {selectedFormat.description}
                 </p>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
+                <Button onClick={() => setShowPreview(true)} size="sm">
+                  Generate Preview
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-        <TabsContent value="targeting" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Advanced Targeting</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                Targeting options will appear here based on selected format.
-              </p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+        {/* Export Options */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Export & Share</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-2">
+              <Button variant="outline" className="flex items-center gap-2">
+                <Download className="h-4 w-4" />
+                Download
+              </Button>
+              <Button variant="outline" className="flex items-center gap-2">
+                <Share className="h-4 w-4" />
+                Share
+              </Button>
+            </div>
+            <div className="space-y-2">
+              <h4 className="text-sm font-medium">Available Formats:</h4>
+              <div className="grid grid-cols-3 gap-2">
+                <Badge variant="outline">MP4</Badge>
+                <Badge variant="outline">GIF</Badge>
+                <Badge variant="outline">PNG</Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
-}
+};
+
+export default AdCreationStudio;

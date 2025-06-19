@@ -1,8 +1,6 @@
 
 import { CityData } from '@/types';
 
-const currentDate = new Date().toISOString();
-
 const sydney: CityData = {
   name: "Sydney",
   country: "Australia",
@@ -22,9 +20,7 @@ const sydney: CityData = {
       verified: true,
       vibes: ["Iconic", "Architecture", "Opera"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Sydney+Opera+House",
-      createdAt: currentDate,
-      updatedAt: currentDate
+      google_maps_url: "https://maps.google.com/maps?q=Sydney+Opera+House"
     },
     {
       id: "syd-2",
@@ -40,9 +36,7 @@ const sydney: CityData = {
       verified: true,
       vibes: ["Fine Dining", "Harbor Views", "Modern Australian"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Quay+Restaurant+Sydney",
-      createdAt: currentDate,
-      updatedAt: currentDate
+      google_maps_url: "https://maps.google.com/maps?q=Quay+Restaurant+Sydney"
     },
     {
       id: "syd-3",
@@ -58,9 +52,7 @@ const sydney: CityData = {
       verified: true,
       vibes: ["Electronic", "Underground", "Warehouse"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Home+The+Venue+Sydney",
-      createdAt: currentDate,
-      updatedAt: currentDate
+      google_maps_url: "https://maps.google.com/maps?q=Home+The+Venue+Sydney"
     }
   ]
 };

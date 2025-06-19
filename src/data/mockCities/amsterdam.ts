@@ -1,68 +1,60 @@
 
-import { CityData } from "@/types";
+import { CityData } from '@/types';
 
-const currentDate = new Date().toISOString();
-
-const amsterdamData: CityData = {
+const amsterdam: CityData = {
   name: "Amsterdam",
   country: "Netherlands",
   lat: 52.3676,
   lng: 4.9041,
   venues: [
     {
-      id: "amsterdam-1",
-      name: "Paradiso",
-      address: "Weteringschans 6-8",
+      id: "ams-1",
+      name: "De School",
+      address: "Doctor Jan van Breemenstraat 1",
       city: "Amsterdam",
       country: "Netherlands",
-      lat: 52.3623,
-      lng: 4.8834,
-      type: "nightclub",
-      rating: 4.3,
+      lat: 52.3567,
+      lng: 4.8634,
+      type: "nightclub" as const,
+      rating: 4.5,
       price_level: 3,
       verified: true,
-      vibes: ["Energetic", "Live Music", "Dancing"],
+      vibes: ["Techno", "Underground", "Industrial"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/?cid=1234567890",
-      createdAt: currentDate,
-      updatedAt: currentDate
+      google_maps_url: "https://maps.google.com/maps?q=De+School+Amsterdam"
     },
     {
-      id: "amsterdam-2",
+      id: "ams-2",
       name: "Anne Frank House",
       address: "Prinsengracht 263-267",
-      city: "Amsterdam", 
+      city: "Amsterdam",
       country: "Netherlands",
       lat: 52.3752,
       lng: 4.8840,
-      type: "attraction",
-      rating: 4.5,
+      type: "attraction" as const,
+      rating: 4.7,
       verified: true,
-      vibes: ["Historical", "Educational", "Moving"],
+      vibes: ["Historic", "Museum", "Cultural"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/?cid=1234567891",
-      createdAt: currentDate,
-      updatedAt: currentDate
+      google_maps_url: "https://maps.google.com/maps?q=Anne+Frank+House+Amsterdam"
     },
     {
-      id: "amsterdam-3",
-      name: "Café de Reiger",
-      address: "Nieuwe Leliestraat 34",
+      id: "ams-3",
+      name: "Café Central",
+      address: "Lange Nieuwstraat 462",
       city: "Amsterdam",
-      country: "Netherlands", 
-      lat: 52.3725,
-      lng: 4.8824,
-      type: "cafe",
-      rating: 4.2,
+      country: "Netherlands",
+      lat: 52.3738,
+      lng: 4.8909,
+      type: "cafe" as const,
+      rating: 4.3,
       price_level: 2,
       verified: true,
-      vibes: ["Cozy", "Local", "Traditional"],
+      vibes: ["Brown Café", "Traditional", "Local"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/?cid=1234567892",
-      createdAt: currentDate,
-      updatedAt: currentDate
+      google_maps_url: "https://maps.google.com/maps?q=Cafe+Central+Amsterdam"
     }
   ]
 };
 
-export default amsterdamData;
+export default amsterdam;

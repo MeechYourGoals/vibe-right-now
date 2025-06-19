@@ -1,8 +1,6 @@
 
 import { CityData } from '@/types';
 
-const currentDate = new Date().toISOString();
-
 const singapore: CityData = {
   name: "Singapore",
   country: "Singapore",
@@ -22,9 +20,7 @@ const singapore: CityData = {
       verified: true,
       vibes: ["Infinity Pool", "Luxury", "Skyline Views"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Marina+Bay+Sands+Singapore",
-      createdAt: currentDate,
-      updatedAt: currentDate
+      google_maps_url: "https://maps.google.com/maps?q=Marina+Bay+Sands+Singapore"
     },
     {
       id: "sgp-2",
@@ -40,9 +36,7 @@ const singapore: CityData = {
       verified: true,
       vibes: ["Michelin Star", "Street Food", "Local"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Hawker+Chan+Singapore",
-      createdAt: currentDate,
-      updatedAt: currentDate
+      google_maps_url: "https://maps.google.com/maps?q=Hawker+Chan+Singapore"
     },
     {
       id: "sgp-3",
@@ -58,9 +52,7 @@ const singapore: CityData = {
       verified: true,
       vibes: ["Electronic", "World-renowned", "Multi-room"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Zouk+Singapore",
-      createdAt: currentDate,
-      updatedAt: currentDate
+      google_maps_url: "https://maps.google.com/maps?q=Zouk+Singapore"
     }
   ]
 };

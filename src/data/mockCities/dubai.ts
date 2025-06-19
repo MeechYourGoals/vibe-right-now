@@ -1,8 +1,6 @@
 
 import { CityData } from '@/types';
 
-const currentDate = new Date().toISOString();
-
 const dubai: CityData = {
   name: "Dubai",
   country: "UAE",
@@ -22,9 +20,7 @@ const dubai: CityData = {
       verified: true,
       vibes: ["Skyscraper", "Observation Deck", "Luxury"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Burj+Khalifa+Dubai",
-      createdAt: currentDate,
-      updatedAt: currentDate
+      google_maps_url: "https://maps.google.com/maps?q=Burj+Khalifa+Dubai"
     },
     {
       id: "dub-2",
@@ -40,9 +36,7 @@ const dubai: CityData = {
       verified: true,
       vibes: ["Japanese", "Celebrity Chef", "Luxury"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Nobu+Dubai",
-      createdAt: currentDate,
-      updatedAt: currentDate
+      google_maps_url: "https://maps.google.com/maps?q=Nobu+Dubai"
     },
     {
       id: "dub-3",
@@ -58,9 +52,7 @@ const dubai: CityData = {
       verified: true,
       vibes: ["Rooftop", "Luxury", "International DJs"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=White+Dubai",
-      createdAt: currentDate,
-      updatedAt: currentDate
+      google_maps_url: "https://maps.google.com/maps?q=White+Dubai"
     }
   ]
 };
