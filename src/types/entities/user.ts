@@ -13,6 +13,8 @@ export interface User {
   displayName?: string;
   posts?: number;
   email?: string;
+  followers?: number;
+  following?: number;
 }
 
 export interface UserProfile {
@@ -30,4 +32,5 @@ export interface UserProfile {
   createdAt: string;
   updatedAt: string;
   email?: string;
+  likes?: number;
 }

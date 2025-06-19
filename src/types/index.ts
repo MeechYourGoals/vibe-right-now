@@ -47,10 +47,11 @@ export interface Location {
   state?: string;
   phone?: string;
   website?: string;
-  hours?: string | { open: string; close: string; closed?: boolean; };
+  hours?: string | { open: string; close: string; closed?: boolean; monday?: string; tuesday?: string; wednesday?: string; thursday?: string; friday?: string; saturday?: string; sunday?: string; };
   tags?: string[];
   createdAt?: string;
   updatedAt?: string;
+  zip?: string;
 }
 
 export interface Post {
@@ -70,6 +71,8 @@ export interface Post {
   updatedAt?: string;
   isVenuePost?: boolean;
   isPinned?: boolean;
+  saved?: boolean;
+  vibeTags?: string[];
 }
 
 export interface Comment {
@@ -83,6 +86,7 @@ export interface Comment {
   postId?: string;
   contentId?: string;
   vibedHere?: boolean;
+  parentId?: string;
 }
 
 export interface Media {
