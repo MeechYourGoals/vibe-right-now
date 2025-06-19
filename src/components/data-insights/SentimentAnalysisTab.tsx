@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -125,9 +126,9 @@ const SentimentAnalysisTab: React.FC<SentimentAnalysisTabProps> = ({ venueId, is
   }, [venueId, isPremium]);
 
   const getSentimentColor = (score: number) => {
-    if (score > 0.3) return 'text-green-600';
-    if (score < -0.3) return 'text-red-600';
-    return 'text-yellow-600';
+    if (score > 0.3) return 'text-green-400';
+    if (score < -0.3) return 'text-red-400';
+    return 'text-yellow-400';
   };
 
   const getSentimentLabel = (score: number) => {
@@ -140,27 +141,27 @@ const SentimentAnalysisTab: React.FC<SentimentAnalysisTabProps> = ({ venueId, is
 
   const getQuoteColor = (sentiment: string) => {
     switch(sentiment) {
-      case 'positive': return 'border-l-green-500 bg-card text-card-foreground border border-green-200 dark:border-green-800';
-      case 'negative': return 'border-l-red-500 bg-card text-card-foreground border border-red-200 dark:border-red-800';
-      default: return 'border-l-yellow-500 bg-card text-card-foreground border border-yellow-200 dark:border-yellow-800';
+      case 'positive': return 'border-l-green-400 bg-card text-card-foreground border border-green-400/20';
+      case 'negative': return 'border-l-red-400 bg-card text-card-foreground border border-red-400/20';
+      default: return 'border-l-yellow-400 bg-card text-card-foreground border border-yellow-400/20';
     }
   };
 
   if (!isPremium) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
+      <Card className="bg-card border-border">
+        <CardHeader className="bg-card">
+          <CardTitle className="flex items-center text-card-foreground">
             <MessageSquare className="mr-2 h-5 w-5" />
             AI Sentiment Analysis
-            <Badge variant="outline" className="ml-2">Premium Feature</Badge>
+            <Badge variant="outline" className="ml-2 border-border text-muted-foreground">Premium Feature</Badge>
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="bg-card">
           <p className="text-muted-foreground mb-4">
             Get AI-powered sentiment analysis of customer reviews across all your connected platforms.
           </p>
-          <Button disabled>
+          <Button disabled className="bg-muted text-muted-foreground">
             Upgrade to Premium to Access
           </Button>
         </CardContent>
@@ -170,13 +171,13 @@ const SentimentAnalysisTab: React.FC<SentimentAnalysisTabProps> = ({ venueId, is
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
+      <Card className="bg-card border-border">
+        <CardHeader className="bg-card">
           <div className="flex justify-between items-center">
-            <CardTitle className="flex items-center">
+            <CardTitle className="flex items-center text-card-foreground">
               <MessageSquare className="mr-2 h-5 w-5" />
               AI Sentiment Analysis
-              <Badge variant="outline" className="ml-2 bg-purple-100 text-purple-700">Premium</Badge>
+              <Badge variant="outline" className="ml-2 bg-purple-500/20 text-purple-300 border-purple-400/30">Premium</Badge>
             </CardTitle>
             <div className="flex gap-2">
               <Button 
@@ -184,6 +185,7 @@ const SentimentAnalysisTab: React.FC<SentimentAnalysisTabProps> = ({ venueId, is
                 size="sm" 
                 onClick={loadSentimentData}
                 disabled={loading}
+                className="bg-card border-border text-card-foreground hover:bg-muted"
               >
                 <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                 Refresh
@@ -193,6 +195,7 @@ const SentimentAnalysisTab: React.FC<SentimentAnalysisTabProps> = ({ venueId, is
                 size="sm" 
                 onClick={triggerAnalysis}
                 disabled={loading}
+                className="bg-purple-600 hover:bg-purple-700 text-white"
               >
                 <Star className="mr-2 h-4 w-4" />
                 Analyze Reviews
@@ -205,7 +208,7 @@ const SentimentAnalysisTab: React.FC<SentimentAnalysisTabProps> = ({ venueId, is
             </p>
           )}
         </CardHeader>
-        <CardContent>
+        <CardContent className="bg-card">
           {loading ? (
             <div className="flex items-center justify-center h-40">
               <div className="text-center">
@@ -216,29 +219,29 @@ const SentimentAnalysisTab: React.FC<SentimentAnalysisTabProps> = ({ venueId, is
           ) : platformSummaries.length === 0 ? (
             <div className="text-center py-8">
               <MessageSquare className="mx-auto h-12 w-12 text-muted-foreground" />
-              <h3 className="mt-4 text-lg font-medium">No Sentiment Analysis Available</h3>
+              <h3 className="mt-4 text-lg font-medium text-card-foreground">No Sentiment Analysis Available</h3>
               <p className="text-muted-foreground mb-4">
                 Click "Analyze Reviews" to start analyzing customer sentiment from your connected platforms.
               </p>
-              <Button onClick={triggerAnalysis} disabled={loading}>
+              <Button onClick={triggerAnalysis} disabled={loading} className="bg-purple-600 hover:bg-purple-700 text-white">
                 Start Analysis
               </Button>
             </div>
           ) : (
             <Tabs defaultValue="overview" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="platforms">By Platform</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-2 bg-muted border-border">
+                <TabsTrigger value="overview" className="data-[state=active]:bg-card data-[state=active]:text-card-foreground">Overview</TabsTrigger>
+                <TabsTrigger value="platforms" className="data-[state=active]:bg-card data-[state=active]:text-card-foreground">By Platform</TabsTrigger>
               </TabsList>
               
               <TabsContent value="overview" className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {platformSummaries.slice(0, 3).map((platform) => (
-                    <Card key={platform.platform}>
-                      <CardContent className="p-4">
+                    <Card key={platform.platform} className="bg-card border-border">
+                      <CardContent className="p-4 bg-card">
                         <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-medium">{platform.platform}</h4>
-                          <Badge variant="outline" className={getSentimentColor(platform.overallSentiment)}>
+                          <h4 className="font-medium text-card-foreground">{platform.platform}</h4>
+                          <Badge variant="outline" className={`${getSentimentColor(platform.overallSentiment)} border-current/30 bg-current/10`}>
                             {getSentimentLabel(platform.overallSentiment)}
                           </Badge>
                         </div>
@@ -254,18 +257,18 @@ const SentimentAnalysisTab: React.FC<SentimentAnalysisTabProps> = ({ venueId, is
                   ))}
                 </div>
 
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Customer Review Highlights</CardTitle>
+                <Card className="bg-card border-border">
+                  <CardHeader className="bg-card">
+                    <CardTitle className="text-card-foreground">Customer Review Highlights</CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="bg-card">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {customerQuotes.map((quote, index) => (
                         <div 
                           key={index}
                           className={`p-4 border-l-4 rounded-r-lg ${getQuoteColor(quote.sentiment)}`}
                         >
-                          <p className="text-sm font-medium mb-2 text-foreground">"{quote.text}"</p>
+                          <p className="text-sm font-medium mb-2 text-card-foreground">"{quote.text}"</p>
                           <p className="text-xs text-muted-foreground">— {quote.platform}</p>
                         </div>
                       ))}
@@ -275,36 +278,38 @@ const SentimentAnalysisTab: React.FC<SentimentAnalysisTabProps> = ({ venueId, is
               </TabsContent>
 
               <TabsContent value="platforms" className="space-y-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
+                <Card className="bg-card border-border">
+                  <CardHeader className="bg-card">
+                    <CardTitle className="flex items-center gap-2 text-card-foreground">
                       Venue Analysis
                       <Button 
                         variant="ghost" 
                         size="sm"
                         onClick={() => setIsEditingVenue(!isEditingVenue)}
+                        className="text-card-foreground hover:bg-muted"
                       >
                         <Edit3 className="h-4 w-4" />
                       </Button>
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="bg-card">
                     {isEditingVenue ? (
                       <div className="flex gap-2">
                         <div className="flex-1">
-                          <Label htmlFor="venue-name">Venue Name</Label>
+                          <Label htmlFor="venue-name" className="text-card-foreground">Venue Name</Label>
                           <Input
                             id="venue-name"
                             value={analyzedVenue}
                             onChange={(e) => setAnalyzedVenue(e.target.value)}
                             placeholder="Enter venue name to analyze..."
+                            className="bg-background border-border text-foreground placeholder:text-muted-foreground"
                           />
                         </div>
                         <div className="flex items-end gap-2">
-                          <Button onClick={handleVenueUpdate}>
+                          <Button onClick={handleVenueUpdate} className="bg-purple-600 hover:bg-purple-700 text-white">
                             Analyze
                           </Button>
-                          <Button variant="outline" onClick={() => setIsEditingVenue(false)}>
+                          <Button variant="outline" onClick={() => setIsEditingVenue(false)} className="border-border text-card-foreground hover:bg-muted">
                             Cancel
                           </Button>
                         </div>
@@ -312,12 +317,12 @@ const SentimentAnalysisTab: React.FC<SentimentAnalysisTabProps> = ({ venueId, is
                     ) : (
                       <div className="flex items-center justify-between">
                         <div>
-                          <h3 className="text-lg font-medium">{analyzedVenue}</h3>
+                          <h3 className="text-lg font-medium text-card-foreground">{analyzedVenue}</h3>
                           <p className="text-sm text-muted-foreground">
                             Currently analyzing sentiment for this venue
                           </p>
                         </div>
-                        <Badge variant="outline" className="bg-blue-100 text-blue-700">
+                        <Badge variant="outline" className="bg-blue-500/20 text-blue-300 border-blue-400/30">
                           Active Analysis
                         </Badge>
                       </div>
@@ -326,37 +331,37 @@ const SentimentAnalysisTab: React.FC<SentimentAnalysisTabProps> = ({ venueId, is
                 </Card>
 
                 {platformSummaries.map((platform) => (
-                  <Card key={platform.platform}>
-                    <CardHeader>
+                  <Card key={platform.platform} className="bg-card border-border">
+                    <CardHeader className="bg-card">
                       <div className="flex justify-between items-center">
-                        <CardTitle className="flex items-center">
+                        <CardTitle className="flex items-center text-card-foreground">
                           {platform.platform}
                           <Badge 
                             variant="outline" 
-                            className={`ml-2 ${getSentimentColor(platform.overallSentiment)}`}
+                            className={`ml-2 ${getSentimentColor(platform.overallSentiment)} border-current/30 bg-current/10`}
                           >
                             {getSentimentLabel(platform.overallSentiment)}
                           </Badge>
                         </CardTitle>
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" className="text-card-foreground hover:bg-muted">
                           <ExternalLink className="h-4 w-4" />
                         </Button>
                       </div>
                     </CardHeader>
-                    <CardContent>
-                      <p className="text-lg mb-4">{platform.summary}</p>
+                    <CardContent className="bg-card">
+                      <p className="text-lg mb-4 text-card-foreground">{platform.summary}</p>
                       
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                          <h4 className="font-medium mb-3">Theme Breakdown</h4>
+                          <h4 className="font-medium mb-3 text-card-foreground">Theme Breakdown</h4>
                           <div className="space-y-2">
                             {platform.themes.map((theme) => (
                               <div key={theme.name} className="flex items-center justify-between">
-                                <span className="text-sm">{theme.name}</span>
+                                <span className="text-sm text-card-foreground">{theme.name}</span>
                                 <div className="flex items-center gap-2 w-32">
                                   <Progress 
                                     value={(theme.score + 1) * 50} 
-                                    className="flex-1" 
+                                    className="flex-1 bg-muted" 
                                   />
                                   <span className={`text-xs ${getSentimentColor(theme.score)}`}>
                                     {theme.score > 0 ? '+' : ''}{(theme.score * 100).toFixed(0)}%
@@ -368,15 +373,15 @@ const SentimentAnalysisTab: React.FC<SentimentAnalysisTabProps> = ({ venueId, is
                         </div>
                         
                         <div>
-                          <h4 className="font-medium mb-3">Quick Stats</h4>
+                          <h4 className="font-medium mb-3 text-card-foreground">Quick Stats</h4>
                           <div className="space-y-2">
                             <div className="flex justify-between">
                               <span className="text-sm text-muted-foreground">Reviews Analyzed</span>
-                              <span className="font-medium">{platform.reviewCount}</span>
+                              <span className="font-medium text-card-foreground">{platform.reviewCount}</span>
                             </div>
                             <div className="flex justify-between">
                               <span className="text-sm text-muted-foreground">Last Updated</span>
-                              <span className="font-medium">
+                              <span className="font-medium text-card-foreground">
                                 {new Date(platform.lastUpdated).toLocaleDateString()}
                               </span>
                             </div>

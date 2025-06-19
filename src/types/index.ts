@@ -44,6 +44,11 @@ export interface Location {
   google_maps_url?: string;
   city?: string;
   country?: string;
+  state?: string;
+  phone?: string;
+  website?: string;
+  hours?: string | { open: string; close: string; closed?: boolean; };
+  tags?: string[];
   createdAt?: string;
   updatedAt?: string;
 }
@@ -52,6 +57,7 @@ export interface Post {
   id: string;
   content: string;
   author: User;
+  user?: User;
   location: Location;
   media: Media[];
   likes: number;
@@ -60,20 +66,28 @@ export interface Post {
   vibes: string[];
   isLiked?: boolean;
   checkInReward?: number;
+  createdAt?: string;
+  updatedAt?: string;
+  isVenuePost?: boolean;
+  isPinned?: boolean;
 }
 
 export interface Comment {
   id: string;
   content: string;
   author: User;
+  user?: User;
   timestamp: Date;
   likes: number;
   replies?: Comment[];
+  postId?: string;
+  contentId?: string;
+  vibedHere?: boolean;
 }
 
 export interface Media {
   id: string;
-  type: 'image' | 'video';
+  type: 'image' | 'video' | 'audio';
   url: string;
   thumbnail?: string;
   caption?: string;

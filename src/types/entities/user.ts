@@ -12,6 +12,7 @@ export interface User {
   updatedAt: string;
   displayName?: string;
   posts?: number;
+  email?: string;
 }
 
 export interface UserProfile {
@@ -28,4 +29,5 @@ export interface UserProfile {
   posts: number;
   createdAt: string;
   updatedAt: string;
+  email?: string;
 }
