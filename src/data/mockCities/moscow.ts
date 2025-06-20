@@ -20,7 +20,9 @@ const moscow: CityData = {
       verified: true,
       vibes: ["Historic", "Kremlin", "Iconic"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Red+Square+Moscow"
+      google_maps_url: "https://maps.google.com/maps?q=Red+Square+Moscow",
+      createdAt: "2024-01-01T00:00:00Z",
+      updatedAt: "2024-01-01T00:00:00Z"
     },
     {
       id: "mos-2",
@@ -36,7 +38,9 @@ const moscow: CityData = {
       verified: true,
       vibes: ["Modern Russian", "Panoramic Views", "Fine Dining"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=White+Rabbit+Moscow"
+      google_maps_url: "https://maps.google.com/maps?q=White+Rabbit+Moscow",
+      createdAt: "2024-01-01T00:00:00Z",
+      updatedAt: "2024-01-01T00:00:00Z"
     },
     {
       id: "mos-3",
@@ -52,7 +56,9 @@ const moscow: CityData = {
       verified: true,
       vibes: ["Upscale", "Live Music", "Russian Elite"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Gipsy+Moscow"
+      google_maps_url: "https://maps.google.com/maps?q=Gipsy+Moscow",
+      createdAt: "2024-01-01T00:00:00Z",
+      updatedAt: "2024-01-01T00:00:00Z"
     }
   ]
 };

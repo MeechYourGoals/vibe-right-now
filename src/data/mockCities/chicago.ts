@@ -22,7 +22,9 @@ const chicago: CityData = {
       verified: true,
       rating: 4.8,
       vibes: ["Upscale", "Fine Dining", "Innovative"],
-      tags: ["molecular gastronomy", "tasting menu"]
+      tags: ["molecular gastronomy", "tasting menu"],
+      createdAt: "2024-01-01T00:00:00Z",
+      updatedAt: "2024-01-01T00:00:00Z"
     },
     {
       id: "chicago_2",
@@ -38,7 +40,9 @@ const chicago: CityData = {
       verified: true,
       rating: 4.6,
       vibes: ["Craft Cocktails", "Speakeasy", "Dark"],
-      tags: ["cocktails", "intimate", "prohibition era"]
+      tags: ["cocktails", "intimate", "prohibition era"],
+      createdAt: "2024-01-01T00:00:00Z",
+      updatedAt: "2024-01-01T00:00:00Z"
     },
     {
       id: "chicago_3",
@@ -54,7 +58,9 @@ const chicago: CityData = {
       verified: true,
       rating: 4.5,
       vibes: ["Historic", "Jazz", "Live Music"],
-      tags: ["jazz club", "historic", "live music"]
+      tags: ["jazz club", "historic", "live music"],
+      createdAt: "2024-01-01T00:00:00Z",
+      updatedAt: "2024-01-01T00:00:00Z"
     },
     {
       id: "chicago_4",
@@ -70,7 +76,9 @@ const chicago: CityData = {
       verified: true,
       rating: 4.3,
       vibes: ["Historic", "Sports", "Iconic"],
-      tags: ["baseball", "cubs", "historic ballpark"]
+      tags: ["baseball", "cubs", "historic ballpark"],
+      createdAt: "2024-01-01T00:00:00Z",
+      updatedAt: "2024-01-01T00:00:00Z"
     },
     {
       id: "chicago_5",
@@ -86,7 +94,9 @@ const chicago: CityData = {
       verified: true,
       rating: 4.4,
       vibes: ["Comedy", "Entertainment", "Historic"],
-      tags: ["comedy club", "improv", "sketch comedy"]
+      tags: ["comedy club", "improv", "sketch comedy"],
+      createdAt: "2024-01-01T00:00:00Z",
+      updatedAt: "2024-01-01T00:00:00Z"
     }
   ]
 };

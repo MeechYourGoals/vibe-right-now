@@ -20,7 +20,9 @@ const amsterdam: CityData = {
       verified: true,
       rating: 4.4,
       vibes: ["Historic", "Educational", "Memorial"],
-      tags: ["history", "museum", "memorial"]
+      tags: ["history", "museum", "memorial"],
+      createdAt: "2024-01-01T00:00:00Z",
+      updatedAt: "2024-01-01T00:00:00Z"
     },
     {
       id: "amsterdam_2",
@@ -35,7 +37,9 @@ const amsterdam: CityData = {
       verified: true,
       rating: 4.3,
       vibes: ["Traditional", "Dutch Cuisine", "Cozy"],
-      tags: ["dutch food", "traditional", "neighborhood"]
+      tags: ["dutch food", "traditional", "neighborhood"],
+      createdAt: "2024-01-01T00:00:00Z",
+      updatedAt: "2024-01-01T00:00:00Z"
     },
     {
       id: "amsterdam_3",
@@ -50,7 +54,9 @@ const amsterdam: CityData = {
       verified: true,
       rating: 4.5,
       vibes: ["Speakeasy", "Craft Cocktails", "Hidden"],
-      tags: ["cocktails", "speakeasy", "craft drinks"]
+      tags: ["cocktails", "speakeasy", "craft drinks"],
+      createdAt: "2024-01-01T00:00:00Z",
+      updatedAt: "2024-01-01T00:00:00Z"
     }
   ]
 };

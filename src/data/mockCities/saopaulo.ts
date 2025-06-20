@@ -20,7 +20,9 @@ const saopaulo: CityData = {
       verified: true,
       vibes: ["Art Museum", "Modern", "Cultural"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=MASP+Sao+Paulo"
+      google_maps_url: "https://maps.google.com/maps?q=MASP+Sao+Paulo",
+      createdAt: "2024-01-01T00:00:00Z",
+      updatedAt: "2024-01-01T00:00:00Z"
     },
     {
       id: "sao-2",
@@ -36,7 +38,9 @@ const saopaulo: CityData = {
       verified: true,
       vibes: ["Brazilian", "Fine Dining", "Award-winning"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=DOM+Restaurant+Sao+Paulo"
+      google_maps_url: "https://maps.google.com/maps?q=DOM+Restaurant+Sao+Paulo",
+      createdAt: "2024-01-01T00:00:00Z",
+      updatedAt: "2024-01-01T00:00:00Z"
     },
     {
       id: "sao-3",
@@ -52,7 +56,9 @@ const saopaulo: CityData = {
       verified: true,
       vibes: ["Electronic", "Underground", "World-class"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=D.Edge+Sao+Paulo"
+      google_maps_url: "https://maps.google.com/maps?q=D.Edge+Sao+Paulo",
+      createdAt: "2024-01-01T00:00:00Z",
+      updatedAt: "2024-01-01T00:00:00Z"
     }
   ]
 };
