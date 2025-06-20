@@ -4,7 +4,7 @@ export * from './core/base';
 export * from './core/api';
 
 // Entity types - Location must be exported properly
-export type { Location } from './entities/venue';
+export * from './entities/venue';
 export * from './entities/user';
 export * from './entities/content';
 export * from './entities/events';
