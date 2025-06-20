@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Building, MapPin, Phone, Globe, Clock, Video, Star, DollarSign, CreditCard } from "lucide-react";
 import { Location } from "@/types";
@@ -88,6 +89,9 @@ const VenueProfileHeader = ({ venue, onMapExpand }: { venue: Location, onMapExpa
     toast.success(`Points redemption requested for ${venue.name}`);
     toast.info(`${pointsRequired.toLocaleString()} points will be deducted from your account`);
   };
+
+  // Check if venue has 24-hour hours
+  const isOpen24Hours = typeof venue.hours === 'object' && venue.hours !== null && 'isOpen24Hours' in venue.hours && venue.hours.isOpen24Hours;
   
   return (
     <div className="mb-4">
@@ -236,7 +240,7 @@ const VenueProfileHeader = ({ venue, onMapExpand }: { venue: Location, onMapExpa
         </a>
       </div>
 
-      {venue.hours && venue.hours.isOpen24Hours && (
+      {isOpen24Hours && (
         <Badge className="mt-2 bg-green-500 hover:bg-green-600">Open 24 Hours</Badge>
       )}
     </div>
