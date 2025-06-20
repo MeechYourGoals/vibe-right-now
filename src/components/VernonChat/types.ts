@@ -1,3 +1,4 @@
+
 // Update the types to include what's needed for Vernon Chat
 export interface Message {
   id: string;
@@ -18,9 +19,7 @@ export type ChatMode = 'user' | 'venue';
 
 export interface ChatWindowProps {
   messages: Message[];
-  input: string;
-  setInput?: (input: string) => void;
-  onSendMessage: (message: string) => void;
+  onSendMessage: (text: string) => Promise<void>;
   onClose: () => void;
   isProcessing: boolean;
   chatMode: ChatMode;
@@ -28,20 +27,10 @@ export interface ChatWindowProps {
   clearMessages: () => void;
   isListening: boolean;
   toggleListening: () => void;
-  isModelLoading?: boolean;
-  transcript?: string;
-  
-  // Enhanced voice synthesis props
-  isSpeaking?: boolean;
-  isPaused?: boolean;
-  currentText?: string;
-  speak?: (text: string) => Promise<boolean>;
-  stopSpeaking?: () => void;
-  togglePause?: () => void;
-  speechMethod?: 'browser' | 'elevenlabs';
-  hasElevenLabsKey?: boolean;
-  setSpeechMethod?: (method: 'browser' | 'elevenlabs') => void;
-  hasBrowserSupport?: boolean;
+  isModelLoading: boolean;
+  transcript: string;
+  input?: string;
+  setInput?: React.Dispatch<React.SetStateAction<string>>;
 }
 
 export interface SpeechRecognitionHookReturn {
