@@ -1,9 +1,25 @@
 
 import { BaseEntity, GeoCoordinates, Address, Timestamps } from '../core/base';
 
+export type LocationType = 
+  | 'restaurant' 
+  | 'bar' 
+  | 'attraction' 
+  | 'hotel' 
+  | 'cafe' 
+  | 'club' 
+  | 'sports' 
+  | 'shopping' 
+  | 'entertainment' 
+  | 'event'
+  | 'other'
+  | 'city'
+  | 'nightlife'
+  | 'nightclub';
+
 export interface Location extends BaseEntity, GeoCoordinates, Address, Timestamps {
   name: string;
-  type: 'restaurant' | 'bar' | 'attraction' | 'hotel' | 'cafe' | 'club' | 'sports' | 'shopping' | 'entertainment' | 'event';
+  type: LocationType;
   verified?: boolean;
   rating?: number;
   vibes?: string[];
