@@ -15,7 +15,9 @@ export type LocationType =
   | 'other'
   | 'city'
   | 'nightlife'
-  | 'nightclub';
+  | 'nightclub'
+  | 'music'
+  | 'comedy';
 
 export interface Location extends BaseEntity, GeoCoordinates, Address, Timestamps {
   name: string;
@@ -25,7 +27,7 @@ export interface Location extends BaseEntity, GeoCoordinates, Address, Timestamp
   vibes?: string[];
   tags?: string[];
   hours?: string | {
-    [key: string]: string | { open: string; close: string; closed?: boolean; };
+    [key: string]: string | { open: string; close: string; closed?: boolean; isOpen24Hours?: boolean; };
   };
   phone?: string;
   website?: string;

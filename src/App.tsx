@@ -1,3 +1,4 @@
+
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Suspense, lazy, useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
@@ -54,7 +55,7 @@ function App() {
 
   return (
     <Auth0Provider>
-      <ThemeProvider defaultTheme="light" storageKey="vibe-ui-theme">
+      <ThemeProvider defaultTheme="dark" storageKey="vibe-ui-theme">
         <BrowserRouter>
           <Suspense fallback={<div className="h-screen w-screen flex items-center justify-center">Loading...</div>}>
             <Routes>
