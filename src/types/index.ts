@@ -53,7 +53,7 @@ export interface CreditCard {
   vernonApproved?: boolean;
 }
 
-// Add missing business hours type
+// Add missing business hours type - make it compatible with Location.hours
 export interface BusinessHours {
   monday: string | { open: string; close: string; closed?: boolean; };
   tuesday: string | { open: string; close: string; closed?: boolean; };
@@ -286,7 +286,7 @@ export interface Location {
   vibes?: string[];
   business_status?: string;
   google_maps_url?: string;
-  hours?: Record<string, string | { open: string; close: string; closed?: boolean; }>;
+  hours?: BusinessHours;
   tags?: string[];
   phone?: string;
   website?: string;

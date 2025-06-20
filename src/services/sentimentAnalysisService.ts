@@ -27,7 +27,7 @@ export const mockSentimentData: PlatformSentimentSummary[] = [
     ]
   },
   {
-    platform: "Yelp",
+    platform: "Yelp", 
     sentiment: 3.8,
     mentions: 89,
     overallSentiment: 3.8,
@@ -100,9 +100,54 @@ export const mockSentimentData: PlatformSentimentSummary[] = [
   }
 ];
 
+export const SentimentAnalysisService = {
+  async getPlatformSentimentSummaries(venueId: string, venueName?: string): Promise<PlatformSentimentSummary[]> {
+    try {
+      const { data, error } = await supabase
+        .from('venue_sentiment_analysis')
+        .select('*')
+        .eq('venue_id', venueId);
+
+      if (error) {
+        console.error('Error fetching sentiment analysis:', error);
+        return mockSentimentData;
+      }
+
+      if (!data || data.length === 0) {
+        return mockSentimentData;
+      }
+
+      return data.map(record => ({
+        platform: record.platform,
+        sentiment: record.overall_sentiment,
+        mentions: record.review_count || 0,
+        overallSentiment: record.overall_sentiment,
+        summary: record.sentiment_summary,
+        reviewCount: record.review_count || 0,
+        lastUpdated: record.last_analyzed_at,
+        sentimentDistribution: {
+          positive: 70,
+          neutral: 20,
+          negative: 10
+        },
+        themes: Array.isArray(record.themes) ? record.themes as SentimentTheme[] : []
+      }));
+
+    } catch (error) {
+      console.error('Error in getPlatformSentimentSummaries:', error);
+      return mockSentimentData;
+    }
+  },
+
+  async triggerMockAnalysis(venueId: string): Promise<void> {
+    console.log(`Triggering mock analysis for venue: ${venueId}`);
+    // Simulate analysis delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  }
+};
+
 export const getSentimentAnalysis = async (venueId: string): Promise<VenueSentimentAnalysis[]> => {
   try {
-    // Try to fetch from Supabase first
     const { data, error } = await supabase
       .from('venue_sentiment_analysis')
       .select('*')
@@ -110,7 +155,6 @@ export const getSentimentAnalysis = async (venueId: string): Promise<VenueSentim
 
     if (error) {
       console.error('Error fetching sentiment analysis:', error);
-      // Return mock data as fallback with proper types
       return mockSentimentData.map(item => ({
         venueId,
         platform: item.platform,
@@ -124,13 +168,12 @@ export const getSentimentAnalysis = async (venueId: string): Promise<VenueSentim
       }));
     }
 
-    // Convert database records to proper format
     return data?.map(record => ({
       venueId: record.venue_id,
       platform: record.platform,
       overallSentiment: record.overall_sentiment,
       sentimentSummary: record.sentiment_summary,
-      themes: record.themes || [],
+      themes: Array.isArray(record.themes) ? record.themes as SentimentTheme[] : [],
       reviewCount: record.review_count || 0,
       lastAnalyzedAt: record.last_analyzed_at,
       createdAt: record.created_at,
@@ -139,7 +182,6 @@ export const getSentimentAnalysis = async (venueId: string): Promise<VenueSentim
 
   } catch (error) {
     console.error('Error in getSentimentAnalysis:', error);
-    // Return mock data as fallback
     return mockSentimentData.map(item => ({
       venueId,
       platform: item.platform,
@@ -155,6 +197,5 @@ export const getSentimentAnalysis = async (venueId: string): Promise<VenueSentim
 };
 
 export const refreshSentimentAnalysis = async (venueId: string): Promise<void> => {
-  // This would trigger a refresh of sentiment analysis
   console.log(`Refreshing sentiment analysis for venue: ${venueId}`);
 };

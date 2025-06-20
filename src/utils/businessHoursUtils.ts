@@ -1,3 +1,4 @@
+
 import { Location, BusinessHours } from "@/types";
 
 export const generateBusinessHours = (location: Location): BusinessHours => {
@@ -62,13 +63,12 @@ export const getTodaysHours = (location: Location): string => {
     location.hours = generateBusinessHours(location);
   }
 
-  // Fixed: Get day of week correctly and use proper day names
   const today = new Date();
-  const dayIndex = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+  const dayIndex = today.getDay();
   const fullDayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
   const dayName = fullDayNames[dayIndex];
   
-  const todaysHours = location.hours[dayName];
+  const todaysHours = location.hours[dayName as keyof BusinessHours];
   
   if (!todaysHours) {
     return "Hours not available";
@@ -78,11 +78,15 @@ export const getTodaysHours = (location: Location): string => {
     return todaysHours;
   }
 
-  if (todaysHours.closed) {
+  if (typeof todaysHours === 'object' && 'closed' in todaysHours && todaysHours.closed) {
     return "Closed";
   }
 
-  return `${todaysHours.open} - ${todaysHours.close}`;
+  if (typeof todaysHours === 'object' && 'open' in todaysHours && 'close' in todaysHours) {
+    return `${todaysHours.open} - ${todaysHours.close}`;
+  }
+
+  return "Hours not available";
 };
 
 export const isOpenNow = (location: Location): boolean => {
@@ -98,16 +102,13 @@ export const isVenueOpen = (venue: Location): boolean => {
 
   const now = new Date();
   const dayName = getDayName(now.getDay());
-  const currentTime = now.getHours() * 60 + now.getMinutes(); // minutes since midnight
+  const currentTime = now.getHours() * 60 + now.getMinutes();
   
-  const todaysHours = venue.hours[dayName];
+  const todaysHours = venue.hours[dayName as keyof BusinessHours];
   
-  // Handle different hour formats
   if (typeof todaysHours === 'string') {
-    // If it's a string like "Closed" or "24/7"
     if (todaysHours.toLowerCase() === 'closed') return false;
     if (todaysHours === '24/7') return true;
-    // Try to parse as "HH:MM - HH:MM" format
     const match = todaysHours.match(/(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})/);
     if (match) {
       const [, openHour, openMin, closeHour, closeMin] = match;
@@ -119,7 +120,6 @@ export const isVenueOpen = (venue: Location): boolean => {
   }
   
   if (typeof todaysHours === 'object' && todaysHours !== null) {
-    // Handle object format with open/close/closed properties
     if ('closed' in todaysHours && todaysHours.closed) return false;
     if ('open' in todaysHours && 'close' in todaysHours) {
       const openTime = parseTimeString(todaysHours.open);

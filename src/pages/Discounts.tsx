@@ -1,151 +1,172 @@
+
 import { useState } from "react";
-import { Layout } from "@/components/Layout";
-import MapContainer from "@/components/map/MapContainer";
-import { Card, CardContent } from "@/components/ui/card";
-import { discountOffers } from "@/mock/discountOffers";
-import { Badge } from "@/components/ui/badge";
+import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, MapPin, Ticket } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { VenueWithDiscount } from "@/components/venue/events/types";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { MapPin, Clock, Star, Gift, Percent } from "lucide-react";
 import { Location } from "@/types";
-
-// Fix the mock location around line 16 by adding required timestamp properties:
-const mockLocation: Location = {
-  id: "discount-venue-1",
-  name: "Sample Venue",
-  type: "restaurant",
-  address: "123 Main St",
-  city: "Sample City",
-  state: "CA",
-  country: "USA",
-  lat: 34.0522,
-  lng: -118.2437,
-  verified: true,
-  createdAt: "2024-01-01T00:00:00Z",
-  updatedAt: "2024-01-01T00:00:00Z"
-};
-
-// Convert VenueWithDiscount to Location for MapContainer compatibility
-const convertToLocation = (venue: VenueWithDiscount): Location => {
-  return {
-    id: venue.id,
-    name: venue.name,
-    type: venue.type as Location['type'],
-    address: venue.address,
-    city: venue.city,
-    state: venue.state,
-    country: venue.country,
-    zip: venue.zip,
-    lat: venue.lat,
-    lng: venue.lng,
-    verified: venue.verified
-  };
-};
+import { useNavigate } from "react-router-dom";
 
 const Discounts = () => {
   const navigate = useNavigate();
-  const [selectedVenue, setSelectedVenue] = useState<VenueWithDiscount | null>(null);
-  const [mapExpanded, setMapExpanded] = useState(false);
+  const [activeTab, setActiveTab] = useState("available");
 
-  const handleVenueSelect = (location: Location) => {
-    // Find the corresponding venue from discountOffers
-    const venue = discountOffers.find(v => v.id === location.id);
-    if (venue) {
-      setSelectedVenue(venue);
+  // Mock discount locations with proper Location type
+  const discountLocations: Location[] = [
+    {
+      id: "1",
+      name: "Artisan Coffee House",
+      type: "cafe",
+      address: "123 Main St",
+      city: "San Francisco",
+      state: "CA",
+      country: "USA",
+      lat: 37.7749,
+      lng: -122.4194,
+      verified: true,
+      rating: 4.5,
+      price_level: 2,
+      vibes: ["Cozy", "Trendy"],
+      business_status: "OPERATIONAL",
+      tags: ["Coffee", "Wi-Fi"],
+      phone: "(555) 123-4567",
+      website: "https://artisancoffeehouse.com",
+      followers: 1200,
+      checkins: 850,
+      createdAt: "2024-01-01T00:00:00Z",
+      updatedAt: "2024-01-01T00:00:00Z"
+    },
+    {
+      id: "2", 
+      name: "Sunset Bistro",
+      type: "restaurant",
+      address: "456 Ocean Ave",
+      city: "San Francisco", 
+      state: "CA",
+      country: "USA",
+      lat: 37.7849,
+      lng: -122.4094,
+      verified: true,
+      rating: 4.3,
+      price_level: 3,
+      vibes: ["Romantic", "Upscale"],
+      business_status: "OPERATIONAL", 
+      tags: ["Fine Dining", "Seafood"],
+      phone: "(555) 234-5678",
+      website: "https://sunsetbistro.com",
+      followers: 2100,
+      checkins: 1400,
+      createdAt: "2024-01-01T00:00:00Z",
+      updatedAt: "2024-01-01T00:00:00Z"
     }
-  };
+  ];
 
-  const handleCloseLocation = () => {
-    setSelectedVenue(null);
+  const handleViewLocation = (locationId: string) => {
+    navigate(`/venue/${locationId}`);
   };
-
-  // Convert discount venues to Location type for map compatibility
-  const locationsForMap = discountOffers.map(convertToLocation);
 
   return (
-    <Layout>
-      <div className="container py-6">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-3xl font-bold vibe-gradient-text">
-              Nearby Discounts & Deals
-            </h1>
-            <p className="text-muted-foreground mt-2">
-              Exclusive offers at venues near you
-            </p>
+    <div className="min-h-screen bg-background">
+      <Header />
+      
+      <main className="container py-6">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-center mb-2 vibe-gradient-text">
+            Exclusive Discounts
+          </h1>
+          <p className="text-center text-muted-foreground mb-6">
+            Save money at your favorite spots with Vibe Right Now discounts
+          </p>
+          
+          <div className="flex justify-center mb-6">
+            <div className="flex rounded-lg bg-muted p-1">
+              <Button
+                variant={activeTab === "available" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setActiveTab("available")}
+              >
+                Available
+              </Button>
+              <Button
+                variant={activeTab === "used" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setActiveTab("used")}
+              >
+                Used
+              </Button>
+            </div>
           </div>
         </div>
 
-        {/* Map Section */}
-        <div className="mb-8">
-          <MapContainer
-            loading={false}
-            isExpanded={mapExpanded}
-            userLocation={null}
-            locations={locationsForMap}
-            searchedCity=""
-            mapStyle="default"
-            selectedLocation={selectedVenue ? convertToLocation(selectedVenue) : null}
-            showDistances={true}
-            userAddressLocation={null}
-            onLocationSelect={handleVenueSelect}
-            onCloseLocation={handleCloseLocation}
-            nearbyCount={discountOffers.length}
-            onToggleDistances={() => {}}
-          />
-        </div>
-
-        {/* Discount List */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {discountOffers.map((venue) => (
-            <Card key={venue.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-              <CardContent className="p-4">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="font-semibold text-lg">{venue.name}</h3>
-                    <p className="text-sm text-muted-foreground flex items-center mt-1">
-                      <MapPin className="h-3 w-3 mr-1" />
-                      {venue.city}, {venue.state}
+        {activeTab === "available" && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {discountLocations.map((location) => (
+              <Card key={location.id} className="hover:shadow-lg transition-shadow">
+                <CardHeader className="pb-3">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <CardTitle className="text-lg">{location.name}</CardTitle>
+                      <CardDescription className="flex items-center mt-1">
+                        <MapPin className="h-3 w-3 mr-1" />
+                        {location.city}, {location.state}
+                      </CardDescription>
+                    </div>
+                    <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30">
+                      <Percent className="h-3 w-3 mr-1" />
+                      20% OFF
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center">
+                      <Star className="h-4 w-4 text-yellow-400 mr-1" />
+                      <span className="text-sm">{location.rating}</span>
+                    </div>
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <Clock className="h-3 w-3 mr-1" />
+                      Expires in 3 days
+                    </div>
+                  </div>
+                  
+                  <div className="mb-3">
+                    <p className="text-sm text-muted-foreground">
+                      Get 20% off your entire order when you check in with Vibe Right Now
                     </p>
                   </div>
-                  <Badge variant={venue.discount.type === "percentOff" ? "secondary" : "default"}>
-                    <Ticket className="h-3 w-3 mr-1" />
-                    {venue.discount.type === "percentOff" 
-                      ? `${venue.discount.value}% OFF`
-                      : venue.discount.type.replace(/([A-Z])/g, ' $1').trim()}
-                  </Badge>
-                </div>
-                
-                <p className="mt-3 text-sm">{venue.discount.description}</p>
-                
-                {venue.discount.conditions && (
-                  <p className="mt-2 text-xs text-muted-foreground">
-                    {venue.discount.conditions}
-                  </p>
-                )}
-                
-                <div className="mt-4 flex justify-between items-center">
-                  {venue.discount.code && (
-                    <Badge variant="outline" className="text-xs">
-                      Code: {venue.discount.code}
-                    </Badge>
-                  )}
-                  <Button 
-                    size="sm" 
-                    className="ml-auto"
-                    onClick={() => navigate(`/venue/${venue.id}`)}
-                  >
-                    View Venue
-                    <ArrowRight className="h-4 w-4 ml-1" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-    </Layout>
+                  
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex-1"
+                      onClick={() => handleViewLocation(location.id)}
+                    >
+                      View Location
+                    </Button>
+                    <Button size="sm" className="flex-1">
+                      <Gift className="h-3 w-3 mr-1" />
+                      Claim Discount
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+
+        {activeTab === "used" && (
+          <div className="text-center py-12">
+            <Gift className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+            <h3 className="text-lg font-medium mb-2">No Used Discounts Yet</h3>
+            <p className="text-muted-foreground">
+              Your used discounts will appear here after you redeem them
+            </p>
+          </div>
+        )}
+      </main>
+    </div>
   );
 };
 
