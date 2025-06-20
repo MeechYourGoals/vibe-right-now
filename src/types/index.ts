@@ -77,6 +77,7 @@ export interface Media {
   thumbnail?: string;
 }
 
+// Consolidated AdFormat with all necessary properties
 export interface AdFormat {
   id: string;
   name: string;
@@ -87,20 +88,29 @@ export interface AdFormat {
   dimensions?: string;
   kpis?: string[];
   placement?: string;
+  specifications?: any;
+  bestPractices?: string[];
 }
 
+// Consolidated TargetingOptions with all necessary properties
 export interface TargetingOptions {
-  ageRange: { min: number; max: number };
-  gender: GenderTargeting;
+  ageRanges: string[];
+  locations: string[];
   interests: string[];
+  gender: GenderTargeting;
+  ageRange: { min: number; max: number };
   location: string;
-  ageRanges?: string[];
   demographics?: {
     gender: GenderTargeting | string;
     ageRange: { min: number; max: number } | number[];
     interests?: string[];
     behaviors?: string[];
     location?: string[];
+  };
+  geographic?: {
+    radius: number;
+    cities: string[];
+    regions: string[];
   };
   behaviors?: {
     categories: string[];
