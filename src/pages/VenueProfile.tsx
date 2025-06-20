@@ -1,4 +1,3 @@
-
 import { useState, useMemo, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Minimize } from "lucide-react";
@@ -37,9 +36,7 @@ const VenueProfile = () => {
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [isMapExpanded, setIsMapExpanded] = useState(false);
   const [selectedDays, setSelectedDays] = useState<number[]>([]);
-  const [isVenueOwner, setIsV
-
-enueOwner] = useState(false);
+  const [isVenueOwner, setIsVenueOwner] = useState(false);
   const [subscriptionTier, setSubscriptionTier] = useState<'standard' | 'plus' | 'premium' | 'pro'>('standard');
   
   const { user, isAuthenticated } = useAuth0();
