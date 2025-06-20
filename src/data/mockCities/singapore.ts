@@ -1,5 +1,5 @@
 
-import { CityData } from '@/types';
+import { CityData, Location } from '@/types';
 
 const singapore: CityData = {
   name: "Singapore",
@@ -8,51 +8,49 @@ const singapore: CityData = {
   lng: 103.8198,
   venues: [
     {
-      id: "sgp-1",
+      id: "singapore_1",
       name: "Marina Bay Sands",
       address: "10 Bayfront Ave",
       city: "Singapore",
       country: "Singapore",
-      lat: 1.2834,
-      lng: 103.8607,
-      type: "attraction" as const,
-      rating: 4.5,
+      zip: "018956",
+      lat: 1.283333,
+      lng: 103.860833,
+      type: "attraction",
       verified: true,
-      vibes: ["Infinity Pool", "Luxury", "Skyline Views"],
-      business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Marina+Bay+Sands+Singapore"
-    },
-    {
-      id: "sgp-2",
-      name: "Hawker Chan",
-      address: "2 Bayfront Ave",
-      city: "Singapore",
-      country: "Singapore",
-      lat: 1.2837,
-      lng: 103.8583,
-      type: "restaurant" as const,
-      rating: 4.3,
-      price_level: 1,
-      verified: true,
-      vibes: ["Michelin Star", "Street Food", "Local"],
-      business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Hawker+Chan+Singapore"
-    },
-    {
-      id: "sgp-3",
-      name: "Zouk",
-      address: "3C River Valley Rd",
-      city: "Singapore",
-      country: "Singapore",
-      lat: 1.2936,
-      lng: 103.8461,
-      type: "nightclub" as const,
       rating: 4.4,
-      price_level: 3,
+      vibes: ["Luxury", "Iconic", "Modern"],
+      tags: ["infinity pool", "luxury", "skyline"]
+    },
+    {
+      id: "singapore_2",
+      name: "Odette",
+      address: "1 St Andrew's Rd",
+      city: "Singapore",
+      country: "Singapore",
+      zip: "178957",
+      lat: 1.289722,
+      lng: 103.851389,
+      type: "restaurant",
       verified: true,
-      vibes: ["Electronic", "World-renowned", "Multi-room"],
-      business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Zouk+Singapore"
+      rating: 4.6,
+      vibes: ["Fine Dining", "French", "Michelin Star"],
+      tags: ["french cuisine", "fine dining", "michelin star"]
+    },
+    {
+      id: "singapore_3",
+      name: "28 HongKong Street",
+      address: "28 Hongkong St",
+      city: "Singapore",
+      country: "Singapore",
+      zip: "059667",
+      lat: 1.284167,
+      lng: 103.847222,
+      type: "bar",
+      verified: true,
+      rating: 4.5,
+      vibes: ["Speakeasy", "Craft Cocktails", "Asian"],
+      tags: ["cocktails", "speakeasy", "asian inspired"]
     }
   ]
 };

@@ -1,5 +1,5 @@
 
-import { CityData } from '@/types';
+import { CityData, Location } from '@/types';
 
 const rome: CityData = {
   name: "Rome",
@@ -8,51 +8,49 @@ const rome: CityData = {
   lng: 12.4964,
   venues: [
     {
-      id: "rom-1",
+      id: "rome_1",
       name: "Colosseum",
-      address: "Piazza del Colosseo",
+      address: "Piazza del Colosseo, 1",
       city: "Rome",
       country: "Italy",
-      lat: 41.8902,
-      lng: 12.4922,
-      type: "attraction" as const,
+      zip: "00184",
+      lat: 41.890169,
+      lng: 12.492269,
+      type: "attraction",
+      verified: true,
       rating: 4.6,
-      verified: true,
       vibes: ["Ancient", "Historic", "Iconic"],
-      business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Colosseum+Rome"
+      tags: ["ancient rome", "gladiators", "amphitheater"]
     },
     {
-      id: "rom-2",
+      id: "rome_2",
       name: "La Pergola",
-      address: "Via Alberto Cadlolo 101",
+      address: "Via Alberto Cadlolo, 101",
       city: "Rome",
       country: "Italy",
-      lat: 41.9146,
-      lng: 12.4516,
-      type: "restaurant" as const,
-      rating: 4.7,
-      price_level: 4,
+      zip: "00136",
+      lat: 41.915278,
+      lng: 12.454167,
+      type: "restaurant",
       verified: true,
-      vibes: ["Michelin Star", "Rooftop", "Fine Dining"],
-      business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=La+Pergola+Rome"
+      rating: 4.8,
+      vibes: ["Fine Dining", "Michelin Star", "Panoramic"],
+      tags: ["fine dining", "michelin star", "rooftop"]
     },
     {
-      id: "rom-3",
-      name: "Goa Club",
-      address: "Via Giuseppe Libetta 13",
+      id: "rome_3",
+      name: "Jerry Thomas Project",
+      address: "Vicolo Cellini, 30",
       city: "Rome",
       country: "Italy",
-      lat: 41.8773,
-      lng: 12.4738,
-      type: "nightclub" as const,
-      rating: 4.0,
-      price_level: 3,
+      zip: "00186",
+      lat: 41.895278,
+      lng: 12.473611,
+      type: "bar",
       verified: true,
-      vibes: ["Electronic", "Underground", "Alternative"],
-      business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Goa+Club+Rome"
+      rating: 4.4,
+      vibes: ["Speakeasy", "Craft Cocktails", "Hidden"],
+      tags: ["speakeasy", "cocktails", "prohibition"]
     }
   ]
 };

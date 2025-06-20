@@ -1,5 +1,5 @@
 
-import { CityData } from '@/types';
+import { CityData, Location } from '@/types';
 
 const berlin: CityData = {
   name: "Berlin",
@@ -8,51 +8,49 @@ const berlin: CityData = {
   lng: 13.4050,
   venues: [
     {
-      id: "ber-1",
-      name: "Berghain",
-      address: "Am Wriezener Bahnhof",
-      city: "Berlin",
-      country: "Germany",
-      lat: 52.5109,
-      lng: 13.4434,
-      type: "nightclub" as const,
-      rating: 4.7,
-      price_level: 3,
-      verified: true,
-      vibes: ["Techno", "Industrial", "Legendary"],
-      business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Berghain+Berlin"
-    },
-    {
-      id: "ber-2",
+      id: "berlin_1",
       name: "Brandenburg Gate",
       address: "Pariser Platz",
       city: "Berlin",
       country: "Germany",
-      lat: 52.5163,
-      lng: 13.3777,
-      type: "attraction" as const,
-      rating: 4.6,
+      zip: "10117",
+      lat: 52.516275,
+      lng: 13.377704,
+      type: "attraction",
       verified: true,
-      vibes: ["Historic", "Iconic", "Tourism"],
-      business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Brandenburg+Gate+Berlin"
+      rating: 4.5,
+      vibes: ["Historic", "Iconic", "Political"],
+      tags: ["landmark", "history", "gate"]
     },
     {
-      id: "ber-3",
+      id: "berlin_2",
       name: "Zur Letzten Instanz",
       address: "Waisenstraße 14-16",
       city: "Berlin",
       country: "Germany",
-      lat: 52.5186,
-      lng: 13.4081,
-      type: "restaurant" as const,
-      rating: 4.2,
-      price_level: 2,
+      zip: "10179",
+      lat: 52.516941,
+      lng: 13.418385,
+      type: "restaurant",
       verified: true,
-      vibes: ["Traditional", "Historic", "German Cuisine"],
-      business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Zur+Letzten+Instanz+Berlin"
+      rating: 4.2,
+      vibes: ["Historic", "German Cuisine", "Traditional"],
+      tags: ["german food", "historic", "traditional"]
+    },
+    {
+      id: "berlin_3",
+      name: "Berghain",
+      address: "Am Wriezener Bahnhof",
+      city: "Berlin",
+      country: "Germany",
+      zip: "10243",
+      lat: 52.510972,
+      lng: 13.442222,
+      type: "bar",
+      verified: true,
+      rating: 4.3,
+      vibes: ["Techno", "Underground", "Industrial"],
+      tags: ["techno", "club", "underground"]
     }
   ]
 };

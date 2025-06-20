@@ -1,5 +1,5 @@
 
-import { CityData } from '@/types';
+import { CityData, Location } from '@/types';
 
 const dubai: CityData = {
   name: "Dubai",
@@ -8,51 +8,49 @@ const dubai: CityData = {
   lng: 55.2708,
   venues: [
     {
-      id: "dub-1",
+      id: "dubai_1",
       name: "Burj Khalifa",
       address: "1 Sheikh Mohammed bin Rashid Blvd",
       city: "Dubai",
       country: "UAE",
-      lat: 25.1972,
-      lng: 55.2744,
-      type: "attraction" as const,
-      rating: 4.7,
+      zip: "00000",
+      lat: 25.197197,
+      lng: 55.274376,
+      type: "attraction",
       verified: true,
-      vibes: ["Skyscraper", "Observation Deck", "Luxury"],
-      business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Burj+Khalifa+Dubai"
-    },
-    {
-      id: "dub-2",
-      name: "Nobu Dubai",
-      address: "Four Seasons Resort Dubai",
-      city: "Dubai",
-      country: "UAE",
-      lat: 25.1938,
-      lng: 55.2731,
-      type: "restaurant" as const,
       rating: 4.6,
-      price_level: 4,
-      verified: true,
-      vibes: ["Japanese", "Celebrity Chef", "Luxury"],
-      business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Nobu+Dubai"
+      vibes: ["Skyscraper", "Luxury", "Modern"],
+      tags: ["tallest building", "observation deck", "luxury"]
     },
     {
-      id: "dub-3",
-      name: "White Dubai",
-      address: "Meydan Racecourse",
+      id: "dubai_2",
+      name: "Nobu Dubai",
+      address: "Atlantis The Palm",
       city: "Dubai",
       country: "UAE",
-      lat: 25.1729,
-      lng: 55.3276,
-      type: "nightclub" as const,
-      rating: 4.2,
-      price_level: 4,
+      zip: "00000",
+      lat: 25.130556,
+      lng: 55.116667,
+      type: "restaurant",
       verified: true,
-      vibes: ["Rooftop", "Luxury", "International DJs"],
-      business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=White+Dubai"
+      rating: 4.5,
+      vibes: ["Japanese Fusion", "Luxury", "Celebrity Chef"],
+      tags: ["japanese", "nobu", "luxury dining"]
+    },
+    {
+      id: "dubai_3",
+      name: "CÉ LA VIE",
+      address: "Address Sky View",
+      city: "Dubai",
+      country: "UAE",
+      zip: "00000",
+      lat: 25.182778,
+      lng: 55.274167,
+      type: "bar",
+      verified: true,
+      rating: 4.4,
+      vibes: ["Rooftop", "Luxury", "Views"],
+      tags: ["rooftop bar", "views", "luxury"]
     }
   ]
 };

@@ -1,5 +1,5 @@
 
-import { CityData } from '@/types';
+import { CityData, Location } from '@/types';
 
 const tokyo: CityData = {
   name: "Tokyo",
@@ -8,82 +8,49 @@ const tokyo: CityData = {
   lng: 139.6503,
   venues: [
     {
-      id: "tok-1",
+      id: "tokyo_1",
       name: "Sukiyabashi Jiro",
-      address: "Tsukamoto Sogyo Building",
+      address: "Tsukamoto Sogyo Building B1F",
       city: "Tokyo",
       country: "Japan",
-      lat: 35.6717,
-      lng: 139.7648,
-      type: "restaurant" as const,
-      rating: 4.8,
-      price_level: 4,
+      zip: "104-0061",
+      lat: 35.671236,
+      lng: 139.763635,
+      type: "restaurant",
       verified: true,
-      vibes: ["Michelin Star", "Sushi Master", "Ginza"],
-      business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Sukiyabashi+Jiro+Tokyo"
+      rating: 4.7,
+      vibes: ["Sushi", "Master Chef", "Traditional"],
+      tags: ["sushi", "omakase", "michelin star"]
     },
     {
-      id: "tok-2",
-      name: "Womb",
-      address: "2-16 Maruyamacho",
+      id: "tokyo_2",
+      name: "Robot Restaurant",
+      address: "1-7-1 Kabukicho",
       city: "Tokyo",
       country: "Japan",
-      lat: 35.6588,
-      lng: 139.7016,
-      type: "nightclub" as const,
-      rating: 4.3,
-      price_level: 3,
+      zip: "160-0021",
+      lat: 35.694668,
+      lng: 139.702687,
+      type: "attraction",
       verified: true,
-      vibes: ["Techno", "Shibuya", "Underground"],
-      business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Womb+Nightclub+Tokyo"
-    },
-    {
-      id: "tok-3",
-      name: "Tokyo Dome",
-      address: "1-3-61 Koraku",
-      city: "Tokyo",
-      country: "Japan",
-      lat: 35.7056,
-      lng: 139.7519,
-      type: "sports" as const,
       rating: 4.2,
-      verified: true,
-      vibes: ["Baseball", "Giants", "Big Egg"],
-      business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Tokyo+Dome"
+      vibes: ["Entertainment", "Unique", "Colorful"],
+      tags: ["robots", "show", "shinjuku"]
     },
     {
-      id: "tok-4",
-      name: "Senso-ji Temple",
-      address: "2-3-1 Asakusa",
+      id: "tokyo_3",
+      name: "Golden Gai",
+      address: "1-1-6 Kabukicho",
       city: "Tokyo",
       country: "Japan",
-      lat: 35.7148,
-      lng: 139.7967,
-      type: "attraction" as const,
-      rating: 4.6,
+      zip: "160-0021",
+      lat: 35.693836,
+      lng: 139.703049,
+      type: "bar",
       verified: true,
-      vibes: ["Historic", "Temple", "Traditional"],
-      business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Senso-ji+Temple+Tokyo"
-    },
-    {
-      id: "tok-5",
-      name: "Blue Seal Coffee",
-      address: "Shibuya Crossing",
-      city: "Tokyo",
-      country: "Japan",
-      lat: 35.6598,
-      lng: 139.7006,
-      type: "cafe" as const,
       rating: 4.4,
-      price_level: 2,
-      verified: true,
-      vibes: ["Modern", "Shibuya", "Japanese Coffee"],
-      business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Blue+Seal+Coffee+Tokyo"
+      vibes: ["Traditional", "Tiny Bars", "Local"],
+      tags: ["yakitori", "tiny bars", "local culture"]
     }
   ]
 };

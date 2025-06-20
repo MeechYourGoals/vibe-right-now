@@ -1,5 +1,5 @@
 
-import { CityData } from '@/types';
+import { CityData, Location } from '@/types';
 
 const sanfrancisco: CityData = {
   name: "San Francisco",
@@ -9,87 +9,52 @@ const sanfrancisco: CityData = {
   lng: -122.4194,
   venues: [
     {
-      id: "sf-1",
-      name: "Tartine Bakery",
-      address: "600 Guerrero St",
+      id: "sf_1",
+      name: "The French Laundry",
+      address: "6640 Washington St",
+      city: "Yountville",
+      state: "CA",
+      country: "USA",
+      zip: "94599",
+      lat: 38.401668,
+      lng: -122.359862,
+      type: "restaurant",
+      verified: true,
+      rating: 4.9,
+      vibes: ["Fine Dining", "Michelin Star", "Wine Country"],
+      tags: ["french cuisine", "tasting menu", "napa valley"]
+    },
+    {
+      id: "sf_2",
+      name: "Trick Dog",
+      address: "3010 20th St",
       city: "San Francisco",
       state: "CA",
       country: "USA",
-      lat: 37.7603,
-      lng: -122.4238,
-      type: "restaurant" as const,
-      rating: 4.4,
-      price_level: 3,
+      zip: "94110",
+      lat: 37.759021,
+      lng: -122.414185,
+      type: "bar",
       verified: true,
-      vibes: ["Artisanal", "Mission", "Bakery"],
-      business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Tartine+Bakery+San+Francisco"
+      rating: 4.6,
+      vibes: ["Craft Cocktails", "Creative", "Mission"],
+      tags: ["cocktails", "creative drinks", "mission district"]
     },
     {
-      id: "sf-2",
-      name: "Chase Center",
-      address: "1 Warriors Way",
-      city: "San Francisco",
-      state: "CA",
-      country: "USA",
-      lat: 37.7680,
-      lng: -122.3875,
-      type: "sports" as const,
-      rating: 4.3,
-      verified: true,
-      vibes: ["Warriors", "Modern", "Bay View"],
-      business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Chase+Center+San+Francisco"
-    },
-    {
-      id: "sf-3",
-      name: "Audio Nightclub",
-      address: "316 11th St",
-      city: "San Francisco",
-      state: "CA",
-      country: "USA",
-      lat: 37.7708,
-      lng: -122.4147,
-      type: "nightclub" as const,
-      rating: 3.8,
-      price_level: 3,
-      verified: true,
-      vibes: ["Underground", "Electronic", "SOMA"],
-      business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Audio+Nightclub+San+Francisco"
-    },
-    {
-      id: "sf-4",
+      id: "sf_3",
       name: "Golden Gate Bridge",
       address: "Golden Gate Bridge",
       city: "San Francisco",
       state: "CA",
       country: "USA",
-      lat: 37.8199,
-      lng: -122.4783,
-      type: "attraction" as const,
-      rating: 4.7,
+      zip: "94129",
+      lat: 37.819929,
+      lng: -122.478255,
+      type: "attraction",
       verified: true,
-      vibes: ["Iconic", "Views", "Must-See"],
-      business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Golden+Gate+Bridge"
-    },
-    {
-      id: "sf-5",
-      name: "Blue Bottle Coffee",
-      address: "66 Mint St",
-      city: "San Francisco",
-      state: "CA",
-      country: "USA",
-      lat: 37.7815,
-      lng: -122.4054,
-      type: "cafe" as const,
-      rating: 4.2,
-      price_level: 3,
-      verified: true,
-      vibes: ["Third Wave", "Minimalist", "SOMA"],
-      business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Blue+Bottle+Coffee+San+Francisco"
+      rating: 4.8,
+      vibes: ["Iconic", "Views", "Historic"],
+      tags: ["landmark", "bridge", "photography"]
     }
   ]
 };

@@ -1,5 +1,5 @@
 
-import { CityData } from '@/types';
+import { CityData, Location } from '@/types';
 
 const amsterdam: CityData = {
   name: "Amsterdam",
@@ -8,51 +8,49 @@ const amsterdam: CityData = {
   lng: 4.9041,
   venues: [
     {
-      id: "ams-1",
-      name: "De School",
-      address: "Doctor Jan van Breemenstraat 1",
-      city: "Amsterdam",
-      country: "Netherlands",
-      lat: 52.3567,
-      lng: 4.8634,
-      type: "nightclub" as const,
-      rating: 4.5,
-      price_level: 3,
-      verified: true,
-      vibes: ["Techno", "Underground", "Industrial"],
-      business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=De+School+Amsterdam"
-    },
-    {
-      id: "ams-2",
+      id: "amsterdam_1",
       name: "Anne Frank House",
       address: "Prinsengracht 263-267",
       city: "Amsterdam",
       country: "Netherlands",
-      lat: 52.3752,
-      lng: 4.8840,
-      type: "attraction" as const,
-      rating: 4.7,
+      zip: "1016 GV",
+      lat: 52.375417,
+      lng: 4.883961,
+      type: "attraction",
       verified: true,
-      vibes: ["Historic", "Museum", "Cultural"],
-      business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Anne+Frank+House+Amsterdam"
+      rating: 4.4,
+      vibes: ["Historic", "Educational", "Memorial"],
+      tags: ["history", "museum", "memorial"]
     },
     {
-      id: "ams-3",
-      name: "Café Central",
-      address: "Lange Nieuwstraat 462",
+      id: "amsterdam_2",
+      name: "Café de Reiger",
+      address: "Nieuwe Leliestraat 34",
       city: "Amsterdam",
       country: "Netherlands",
-      lat: 52.3738,
-      lng: 4.8909,
-      type: "cafe" as const,
-      rating: 4.3,
-      price_level: 2,
+      zip: "1015 SZ",
+      lat: 52.378056,
+      lng: 4.883611,
+      type: "restaurant",
       verified: true,
-      vibes: ["Brown Café", "Traditional", "Local"],
-      business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Cafe+Central+Amsterdam"
+      rating: 4.3,
+      vibes: ["Traditional", "Dutch Cuisine", "Cozy"],
+      tags: ["dutch food", "traditional", "neighborhood"]
+    },
+    {
+      id: "amsterdam_3",
+      name: "Door 74",
+      address: "Reguliersdwarsstraat 74",
+      city: "Amsterdam",
+      country: "Netherlands",
+      zip: "1017 BN",
+      lat: 52.364722,
+      lng: 4.891944,
+      type: "bar",
+      verified: true,
+      rating: 4.5,
+      vibes: ["Speakeasy", "Craft Cocktails", "Hidden"],
+      tags: ["cocktails", "speakeasy", "craft drinks"]
     }
   ]
 };

@@ -1,5 +1,5 @@
 
-import { CityData } from '@/types';
+import { CityData, Location } from '@/types';
 
 const bangkok: CityData = {
   name: "Bangkok",
@@ -8,51 +8,49 @@ const bangkok: CityData = {
   lng: 100.5018,
   venues: [
     {
-      id: "bkk-1",
-      name: "Wat Pho",
-      address: "2 Sanamchai Rd",
+      id: "bangkok_1",
+      name: "Grand Palace",
+      address: "Na Phra Lan Rd",
       city: "Bangkok",
       country: "Thailand",
-      lat: 13.7465,
-      lng: 100.4927,
-      type: "attraction" as const,
-      rating: 4.6,
+      zip: "10200",
+      lat: 13.749722,
+      lng: 100.491389,
+      type: "attraction",
       verified: true,
-      vibes: ["Temple", "Buddha", "Historic"],
-      business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Wat+Pho+Bangkok"
+      rating: 4.4,
+      vibes: ["Historic", "Royal", "Traditional"],
+      tags: ["palace", "thai architecture", "royal"]
     },
     {
-      id: "bkk-2",
+      id: "bangkok_2",
       name: "Gaggan",
       address: "68/1 Soi Langsuan",
       city: "Bangkok",
       country: "Thailand",
-      lat: 13.7441,
-      lng: 100.5416,
-      type: "restaurant" as const,
-      rating: 4.8,
-      price_level: 4,
+      zip: "10330",
+      lat: 13.737222,
+      lng: 100.544167,
+      type: "restaurant",
       verified: true,
-      vibes: ["Progressive Indian", "Molecular", "Award-winning"],
-      business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Gaggan+Bangkok"
+      rating: 4.7,
+      vibes: ["Progressive Indian", "Fine Dining", "Creative"],
+      tags: ["progressive indian", "molecular gastronomy", "tasting menu"]
     },
     {
-      id: "bkk-3",
-      name: "Levels Club",
-      address: "Aloft Bangkok",
+      id: "bangkok_3",
+      name: "Sky Bar",
+      address: "1055 Silom Rd",
       city: "Bangkok",
       country: "Thailand",
-      lat: 13.7558,
-      lng: 100.5389,
-      type: "nightclub" as const,
-      rating: 4.2,
-      price_level: 3,
+      zip: "10500",
+      lat: 13.724722,
+      lng: 100.524167,
+      type: "bar",
       verified: true,
-      vibes: ["Rooftop", "City Views", "Electronic"],
-      business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Levels+Club+Bangkok"
+      rating: 4.3,
+      vibes: ["Rooftop", "Luxury", "City Views"],
+      tags: ["rooftop bar", "city views", "luxury"]
     }
   ]
 };

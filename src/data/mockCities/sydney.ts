@@ -1,5 +1,5 @@
 
-import { CityData } from '@/types';
+import { CityData, Location } from '@/types';
 
 const sydney: CityData = {
   name: "Sydney",
@@ -8,51 +8,49 @@ const sydney: CityData = {
   lng: 151.2093,
   venues: [
     {
-      id: "syd-1",
+      id: "sydney_1",
       name: "Sydney Opera House",
       address: "Bennelong Point",
       city: "Sydney",
       country: "Australia",
-      lat: -33.8568,
-      lng: 151.2153,
-      type: "attraction" as const,
-      rating: 4.8,
+      zip: "2000",
+      lat: -33.856159,
+      lng: 151.215256,
+      type: "attraction",
       verified: true,
-      vibes: ["Iconic", "Architecture", "Opera"],
-      business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Sydney+Opera+House"
-    },
-    {
-      id: "syd-2",
-      name: "Quay Restaurant",
-      address: "Overseas Passenger Terminal",
-      city: "Sydney",
-      country: "Australia",
-      lat: -33.8609,
-      lng: 151.2111,
-      type: "restaurant" as const,
       rating: 4.6,
-      price_level: 4,
-      verified: true,
-      vibes: ["Fine Dining", "Harbor Views", "Modern Australian"],
-      business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Quay+Restaurant+Sydney"
+      vibes: ["Iconic", "Architecture", "Performance"],
+      tags: ["opera", "architecture", "harbor"]
     },
     {
-      id: "syd-3",
-      name: "Home The Venue",
-      address: "101 Wheat Rd",
+      id: "sydney_2",
+      name: "Quay Restaurant",
+      address: "Upper Level, Overseas Passenger Terminal",
       city: "Sydney",
       country: "Australia",
-      lat: -33.8570,
-      lng: 151.2092,
-      type: "nightclub" as const,
-      rating: 4.1,
-      price_level: 3,
+      zip: "2000",
+      lat: -33.858667,
+      lng: 151.211056,
+      type: "restaurant",
       verified: true,
-      vibes: ["Electronic", "Underground", "Warehouse"],
-      business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Home+The+Venue+Sydney"
+      rating: 4.5,
+      vibes: ["Fine Dining", "Harbor Views", "Modern Australian"],
+      tags: ["fine dining", "harbor views", "modern australian"]
+    },
+    {
+      id: "sydney_3",
+      name: "Frankie's Pizza",
+      address: "50 Hunter St",
+      city: "Sydney",
+      country: "Australia",
+      zip: "2000",
+      lat: -33.866143,
+      lng: 151.209900,
+      type: "bar",
+      verified: true,
+      rating: 4.3,
+      vibes: ["Rock Bar", "Pizza", "Underground"],
+      tags: ["rock music", "pizza", "underground"]
     }
   ]
 };

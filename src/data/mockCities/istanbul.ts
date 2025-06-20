@@ -1,5 +1,5 @@
 
-import { CityData } from '@/types';
+import { CityData, Location } from '@/types';
 
 const istanbul: CityData = {
   name: "Istanbul",
@@ -8,51 +8,49 @@ const istanbul: CityData = {
   lng: 28.9784,
   venues: [
     {
-      id: "ist-1",
+      id: "istanbul_1",
       name: "Hagia Sophia",
-      address: "Sultan Ahmet",
+      address: "Sultan Ahmet, Ayasofya Meydanı",
       city: "Istanbul",
       country: "Turkey",
-      lat: 41.0086,
-      lng: 28.9802,
-      type: "attraction" as const,
-      rating: 4.7,
+      zip: "34122",
+      lat: 41.008583,
+      lng: 28.980833,
+      type: "attraction",
       verified: true,
+      rating: 4.6,
       vibes: ["Historic", "Byzantine", "Ottoman"],
-      business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Hagia+Sophia+Istanbul"
+      tags: ["historic", "byzantine", "museum"]
     },
     {
-      id: "ist-2",
-      name: "Mikla",
-      address: "Marmara Pera Hotel",
+      id: "istanbul_2",
+      name: "Pandeli",
+      address: "Eminönü, Mısır Çarşısı 1",
       city: "Istanbul",
       country: "Turkey",
-      lat: 41.0362,
-      lng: 28.9744,
-      type: "restaurant" as const,
-      rating: 4.5,
-      price_level: 4,
+      zip: "34116",
+      lat: 41.016944,
+      lng: 28.970278,
+      type: "restaurant",
       verified: true,
-      vibes: ["Modern Turkish", "Rooftop", "Bosphorus Views"],
-      business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Mikla+Istanbul"
+      rating: 4.3,
+      vibes: ["Ottoman Cuisine", "Historic", "Traditional"],
+      tags: ["ottoman cuisine", "historic", "spice bazaar"]
     },
     {
-      id: "ist-3",
-      name: "Reina",
-      address: "Muallim Naci Cd.",
+      id: "istanbul_3",
+      name: "360 Istanbul",
+      address: "Istiklal Cd. No:311",
       city: "Istanbul",
       country: "Turkey",
-      lat: 41.0436,
-      lng: 29.0058,
-      type: "nightclub" as const,
-      rating: 4.1,
-      price_level: 4,
+      zip: "34433",
+      lat: 41.036389,
+      lng: 28.976944,
+      type: "bar",
       verified: true,
-      vibes: ["Bosphorus", "Upscale", "Waterfront"],
-      business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Reina+Istanbul"
+      rating: 4.2,
+      vibes: ["Rooftop", "Panoramic Views", "Modern"],
+      tags: ["rooftop", "bosphorus views", "modern"]
     }
   ]
 };

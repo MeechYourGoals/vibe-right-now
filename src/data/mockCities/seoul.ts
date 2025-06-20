@@ -1,5 +1,5 @@
 
-import { CityData } from '@/types';
+import { CityData, Location } from '@/types';
 
 const seoul: CityData = {
   name: "Seoul",
@@ -8,51 +8,49 @@ const seoul: CityData = {
   lng: 126.9780,
   venues: [
     {
-      id: "seo-1",
+      id: "seoul_1",
       name: "Gyeongbokgung Palace",
       address: "161 Sajik-ro",
       city: "Seoul",
       country: "South Korea",
-      lat: 37.5797,
-      lng: 126.9770,
-      type: "attraction" as const,
-      rating: 4.5,
+      zip: "03045",
+      lat: 37.579617,
+      lng: 126.977041,
+      type: "attraction",
       verified: true,
-      vibes: ["Palace", "Traditional", "Historic"],
-      business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Gyeongbokgung+Palace+Seoul"
+      rating: 4.5,
+      vibes: ["Historic", "Royal", "Traditional"],
+      tags: ["palace", "korean architecture", "historic"]
     },
     {
-      id: "seo-2",
+      id: "seoul_2",
       name: "Mingles",
       address: "19 Dosan-daero 67-gil",
       city: "Seoul",
       country: "South Korea",
-      lat: 37.5219,
-      lng: 127.0411,
-      type: "restaurant" as const,
-      rating: 4.7,
-      price_level: 4,
+      zip: "06015",
+      lat: 37.526111,
+      lng: 127.038889,
+      type: "restaurant",
       verified: true,
-      vibes: ["Michelin Star", "Korean Fusion", "Fine Dining"],
-      business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Mingles+Seoul"
+      rating: 4.6,
+      vibes: ["Korean Fusion", "Fine Dining", "Modern"],
+      tags: ["korean fusion", "fine dining", "modern korean"]
     },
     {
-      id: "seo-3",
-      name: "Octagon",
-      address: "645 Nonhyeon-ro",
+      id: "seoul_3",
+      name: "Charles H",
+      address: "25 Itaewon-ro 27ga-gil",
       city: "Seoul",
       country: "South Korea",
-      lat: 37.5172,
-      lng: 127.0286,
-      type: "nightclub" as const,
-      rating: 4.3,
-      price_level: 4,
+      zip: "04349",
+      lat: 37.534167,
+      lng: 126.994722,
+      type: "bar",
       verified: true,
-      vibes: ["Gangnam", "K-Pop", "Electronic"],
-      business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Octagon+Seoul"
+      rating: 4.4,
+      vibes: ["Craft Cocktails", "Speakeasy", "Intimate"],
+      tags: ["cocktails", "speakeasy", "craft drinks"]
     }
   ]
 };

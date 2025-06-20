@@ -1,5 +1,5 @@
 
-import { CityData } from '@/types';
+import { CityData, Location } from '@/types';
 
 const barcelona: CityData = {
   name: "Barcelona",
@@ -8,51 +8,49 @@ const barcelona: CityData = {
   lng: 2.1734,
   venues: [
     {
-      id: "bcn-1",
+      id: "barcelona_1",
       name: "Sagrada Familia",
-      address: "Carrer de Mallorca 401",
+      address: "Carrer de Mallorca, 401",
       city: "Barcelona",
       country: "Spain",
-      lat: 41.4036,
-      lng: 2.1744,
-      type: "attraction" as const,
+      zip: "08013",
+      lat: 41.403630,
+      lng: 2.174356,
+      type: "attraction",
+      verified: true,
       rating: 4.7,
-      verified: true,
-      vibes: ["Gaudi", "Architecture", "Iconic"],
-      business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Sagrada+Familia+Barcelona"
+      vibes: ["Architectural", "Historic", "Religious"],
+      tags: ["gaudi", "basilica", "architecture"]
     },
     {
-      id: "bcn-2",
-      name: "Disfrutar",
-      address: "Carrer de Villarroel 163",
+      id: "barcelona_2",
+      name: "Cal Pep",
+      address: "Plaça de les Olles, 8",
       city: "Barcelona",
       country: "Spain",
-      lat: 41.3851,
-      lng: 2.1590,
-      type: "restaurant" as const,
-      rating: 4.8,
-      price_level: 4,
+      zip: "08003",
+      lat: 41.383812,
+      lng: 2.183449,
+      type: "restaurant",
       verified: true,
-      vibes: ["Michelin Star", "Creative", "Molecular"],
-      business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Disfrutar+Barcelona"
+      rating: 4.4,
+      vibes: ["Tapas", "Traditional", "Busy"],
+      tags: ["tapas", "seafood", "traditional"]
     },
     {
-      id: "bcn-3",
-      name: "Razzmatazz",
-      address: "Carrer dels Almogàvers 122",
+      id: "barcelona_3",
+      name: "Dry Martini",
+      address: "Carrer d'Aribau, 162",
       city: "Barcelona",
       country: "Spain",
-      lat: 41.4009,
-      lng: 2.1965,
-      type: "nightclub" as const,
-      rating: 4.2,
-      price_level: 3,
+      zip: "08036",
+      lat: 41.395077,
+      lng: 2.154721,
+      type: "bar",
       verified: true,
-      vibes: ["Multi-room", "Electronic", "Live Music"],
-      business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Razzmatazz+Barcelona"
+      rating: 4.5,
+      vibes: ["Classic Cocktails", "Elegant", "Traditional"],
+      tags: ["martini", "classic cocktails", "elegant"]
     }
   ]
 };
