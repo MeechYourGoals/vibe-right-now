@@ -80,7 +80,12 @@ export interface Media {
 export interface AdFormat {
   id: string;
   name: string;
-  description: string;
+  type: string;
+  description?: string;
+  duration?: number | string;
+  platform?: string;
+  dimensions?: string;
+  kpis?: string[];
 }
 
 export interface TargetingOptions {
@@ -88,18 +93,115 @@ export interface TargetingOptions {
   gender: GenderTargeting;
   interests: string[];
   location: string;
+  demographics?: {
+    gender: GenderTargeting | string;
+    ageRange: { min: number; max: number } | number[];
+    interests?: string[];
+    behaviors?: string[];
+    location?: string[];
+  };
+  behaviors?: {
+    categories: string[];
+    frequency: string;
+    venueVisits?: string[];
+    socialEngagement?: string[];
+    purchaseHistory?: string[];
+  };
+  contextual?: {
+    categories: string[];
+    frequency: string;
+    vibeTags?: string[];
+    venueTypes?: string[];
+    daypart?: string[];
+    timeOfDay?: string[];
+    dayOfWeek?: string[];
+    weather?: string[];
+    eventTypes?: string[];
+  };
+  momentScore?: number | {
+    crowdDensity: string;
+    vibeScore: string;
+    crowdLevel: string;
+    engagement: string;
+  };
 }
 
-export type GenderTargeting = 'all' | 'male' | 'female' | 'other';
+export interface GenderTargeting {
+  all: boolean;
+  male: boolean;
+  female: boolean;
+  other: boolean;
+}
 
 export interface PlatformSentimentSummary {
   platform: string;
   sentiment: number;
   mentions: number;
+  overallSentiment?: number;
+  summary?: string;
+  reviewCount?: number;
+  themes?: SentimentTheme[];
 }
 
 export interface SentimentTheme {
   theme: string;
   sentiment: number;
   frequency: number;
+  name?: string;
+  score?: number;
+}
+
+export interface VenueInsights {
+  visitors: number;
+  visitorsChange: string;
+  posts: number;
+  postsChange: string;
+  shares: number;
+  sharesChange: string;
+  likes: number;
+  likesChange: string;
+  engagementRate: string;
+  followerGrowth: string;
+  clickThroughRate: string;
+  totalVisits: number;
+  revenueImpact: string;
+  totalReach: number;
+  impressions: number;
+  viewsPer: number;
+  viewsCount?: number;
+  visitorCount?: number;
+  checkInCount?: number;
+  receiptUploads?: number;
+  discountRedemptions?: number;
+}
+
+export interface Location {
+  id: string;
+  name: string;
+  address: string;
+  city: string;
+  state?: string;
+  country: string;
+  zip?: string;
+  lat: number;
+  lng: number;
+  type: "restaurant" | "bar" | "nightclub" | "cafe" | "attraction" | "sports" | "event" | "city" | "other" | "nightlife";
+  verified: boolean;
+  rating?: number;
+  price_level?: number;
+  vibes?: string[];
+  business_status?: string;
+  google_maps_url?: string;
+  hours?: Record<string, string | { open: string; close: string; closed?: boolean; }>;
+  tags?: string[];
+  phone?: string;
+  website?: string;
+  followers?: number;
+  checkins?: number;
+  coordinates?: {
+    lat: number;
+    lng: number;
+  };
+  createdAt: string;
+  updatedAt: string;
 }
