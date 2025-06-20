@@ -11,6 +11,15 @@ import { TargetingOptions, GenderTargeting } from "@/types";
 
 const TargetingSegmentation = () => {
   const [targeting, setTargeting] = useState<TargetingOptions>({
+    ageRanges: [],
+    locations: [],
+    interests: [],
+    gender: {
+      all: true,
+      male: false,
+      female: false,
+      other: false
+    },
     demographics: {
       gender: 'all',
       ageRange: [18, 65],
@@ -24,16 +33,15 @@ const TargetingSegmentation = () => {
       regions: []
     },
     behaviors: {
+      categories: [],
+      frequency: 'weekly',
       venueVisits: [],
       socialEngagement: [],
       purchaseHistory: []
     },
-    interests: {
-      categories: [],
-      keywords: [],
-      competitors: []
-    },
     contextual: {
+      categories: [],
+      frequency: 'daily',
       vibeTags: [],
       venueTypes: [],
       daypart: [],
@@ -50,11 +58,11 @@ const TargetingSegmentation = () => {
     }
   });
 
-  const handleGenderChange = (gender: GenderTargeting) => {
+  const handleGenderChange = (gender: string) => {
     setTargeting(prev => ({
       ...prev,
       demographics: {
-        ...prev.demographics,
+        ...prev.demographics!,
         gender
       }
     }));
@@ -64,7 +72,7 @@ const TargetingSegmentation = () => {
     setTargeting(prev => ({
       ...prev,
       demographics: {
-        ...prev.demographics,
+        ...prev.demographics!,
         ageRange: [values[0], values[1]]
       }
     }));
@@ -73,12 +81,9 @@ const TargetingSegmentation = () => {
   const handleInterestToggle = (interest: string, checked: boolean) => {
     setTargeting(prev => ({
       ...prev,
-      interests: {
-        ...prev.interests,
-        categories: checked 
-          ? [...prev.interests.categories, interest]
-          : prev.interests.categories.filter(i => i !== interest)
-      }
+      interests: checked 
+        ? [...prev.interests, interest]
+        : prev.interests.filter(i => i !== interest)
     }));
   };
 
@@ -86,10 +91,10 @@ const TargetingSegmentation = () => {
     setTargeting(prev => ({
       ...prev,
       behaviors: {
-        ...prev.behaviors,
+        ...prev.behaviors!,
         venueVisits: checked 
-          ? [...prev.behaviors.venueVisits, behavior]
-          : prev.behaviors.venueVisits.filter(b => b !== behavior)
+          ? [...(prev.behaviors?.venueVisits || []), behavior]
+          : (prev.behaviors?.venueVisits || []).filter(b => b !== behavior)
       }
     }));
   };
@@ -98,22 +103,24 @@ const TargetingSegmentation = () => {
     setTargeting(prev => ({
       ...prev,
       contextual: {
-        ...prev.contextual,
+        ...prev.contextual!,
         vibeTags: checked 
-          ? [...prev.contextual.vibeTags, tag]
-          : prev.contextual.vibeTags.filter(t => t !== tag)
+          ? [...(prev.contextual?.vibeTags || []), tag]
+          : (prev.contextual?.vibeTags || []).filter(t => t !== tag)
       }
     }));
   };
 
-  const handleMomentScoreChange = (field: keyof typeof targeting.momentScore, value: string) => {
-    setTargeting(prev => ({
-      ...prev,
-      momentScore: {
-        ...prev.momentScore,
-        [field]: value
-      }
-    }));
+  const handleMomentScoreChange = (field: string, value: string) => {
+    if (typeof targeting.momentScore === 'object' && targeting.momentScore !== null) {
+      setTargeting(prev => ({
+        ...prev,
+        momentScore: {
+          ...(prev.momentScore as object),
+          [field]: value
+        }
+      }));
+    }
   };
 
   const interests = [
@@ -131,6 +138,19 @@ const TargetingSegmentation = () => {
     'Live Entertainment', 'Outdoor Seating', 'Craft Cocktails'
   ];
 
+  const getAgeRangeValues = (): number[] => {
+    const ageRange = targeting.demographics?.ageRange;
+    if (Array.isArray(ageRange)) {
+      return ageRange;
+    }
+    if (ageRange && typeof ageRange === 'object' && 'min' in ageRange && 'max' in ageRange) {
+      return [ageRange.min, ageRange.max];
+    }
+    return [18, 65];
+  };
+
+  const ageRangeValues = getAgeRangeValues();
+
   return (
     <div className="space-y-6">
       <Card>
@@ -141,7 +161,10 @@ const TargetingSegmentation = () => {
         <CardContent className="space-y-4">
           <div>
             <Label>Gender</Label>
-            <Select value={targeting.demographics.gender} onValueChange={(value: GenderTargeting) => handleGenderChange(value)}>
+            <Select 
+              value={typeof targeting.demographics?.gender === 'string' ? targeting.demographics.gender : 'all'} 
+              onValueChange={handleGenderChange}
+            >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -155,9 +178,9 @@ const TargetingSegmentation = () => {
           </div>
           
           <div>
-            <Label>Age Range: {targeting.demographics.ageRange?.[0]} - {targeting.demographics.ageRange?.[1]}</Label>
+            <Label>Age Range: {ageRangeValues[0]} - {ageRangeValues[1]}</Label>
             <Slider
-              value={targeting.demographics.ageRange || [18, 65]}
+              value={ageRangeValues}
               onValueChange={handleAgeRangeChange}
               min={18}
               max={80}
@@ -179,7 +202,7 @@ const TargetingSegmentation = () => {
               <div key={interest} className="flex items-center space-x-2">
                 <Checkbox
                   id={interest}
-                  checked={targeting.interests.categories.includes(interest)}
+                  checked={targeting.interests.includes(interest)}
                   onCheckedChange={(checked) => handleInterestToggle(interest, checked as boolean)}
                 />
                 <Label htmlFor={interest} className="text-sm">{interest}</Label>
@@ -200,7 +223,7 @@ const TargetingSegmentation = () => {
               <div key={behavior} className="flex items-center space-x-2">
                 <Checkbox
                   id={behavior}
-                  checked={targeting.behaviors.venueVisits.includes(behavior)}
+                  checked={(targeting.behaviors?.venueVisits || []).includes(behavior)}
                   onCheckedChange={(checked) => handleBehaviorToggle(behavior, checked as boolean)}
                 />
                 <Label htmlFor={behavior} className="text-sm">{behavior}</Label>
@@ -221,7 +244,7 @@ const TargetingSegmentation = () => {
               <div key={tag} className="flex items-center space-x-2">
                 <Checkbox
                   id={tag}
-                  checked={targeting.contextual.vibeTags.includes(tag)}
+                  checked={(targeting.contextual?.vibeTags || []).includes(tag)}
                   onCheckedChange={(checked) => handleVibeTagToggle(tag, checked as boolean)}
                 />
                 <Label htmlFor={tag} className="text-sm">{tag}</Label>
@@ -240,7 +263,7 @@ const TargetingSegmentation = () => {
           <div>
             <Label>Crowd Density</Label>
             <Select 
-              value={targeting.momentScore.crowdDensity} 
+              value={typeof targeting.momentScore === 'object' && targeting.momentScore !== null ? targeting.momentScore.crowdDensity : '5'} 
               onValueChange={(value) => handleMomentScoreChange('crowdDensity', value)}
             >
               <SelectTrigger>
@@ -259,7 +282,7 @@ const TargetingSegmentation = () => {
           <div>
             <Label>Vibe Score</Label>
             <Select 
-              value={targeting.momentScore.vibeScore} 
+              value={typeof targeting.momentScore === 'object' && targeting.momentScore !== null ? targeting.momentScore.vibeScore : 'high'} 
               onValueChange={(value) => handleMomentScoreChange('vibeScore', value)}
             >
               <SelectTrigger>
