@@ -34,6 +34,27 @@ export const useEnhancedVernonChat = () => {
     ]);
   }, [setMessages]);
 
+  // Auto-processing callback for speech recognition
+  const handleTranscriptComplete = useCallback(async (finalTranscript: string) => {
+    console.log('Auto-processing transcript:', finalTranscript);
+    if (finalTranscript.trim()) {
+      await handleSendMessage(finalTranscript);
+    }
+  }, []); // Remove handleSendMessage dependency temporarily to fix circular reference
+
+  // Initialize speech recognition with auto-processing
+  const { 
+    isListening, 
+    transcript, 
+    interimTranscript,
+    toggleListening,
+    clearTranscript 
+  } = useOptimizedSpeechRecognition({
+    continuous: true,
+    interimResults: true,
+    onTranscriptComplete: handleTranscriptComplete
+  });
+
   const handleSendMessage = useCallback(async (text: string) => {
     if (!text.trim()) return;
     
@@ -68,27 +89,6 @@ export const useEnhancedVernonChat = () => {
       setIsProcessing(false);
     }
   }, [addMessage, messages, processMessage, chatMode, speak, stopSpeaking, isListening]);
-
-  // Auto-processing callback for speech recognition
-  const handleTranscriptComplete = useCallback(async (finalTranscript: string) => {
-    console.log('Auto-processing transcript:', finalTranscript);
-    if (finalTranscript.trim()) {
-      await handleSendMessage(finalTranscript);
-    }
-  }, [handleSendMessage]);
-
-  // Initialize speech recognition with auto-processing
-  const { 
-    isListening, 
-    transcript, 
-    interimTranscript,
-    toggleListening,
-    clearTranscript 
-  } = useOptimizedSpeechRecognition({
-    continuous: true,
-    interimResults: true,
-    onTranscriptComplete: handleTranscriptComplete
-  });
 
   const toggleChat = () => {
     setIsOpen(!isOpen);
