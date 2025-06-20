@@ -4,7 +4,6 @@ import { Location } from '@/types';
 import { MapPin, Share2, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { generateBusinessHours } from '@/utils/businessHoursUtils';
 import WaitTimeDisplay from '@/components/venue/WaitTimeDisplay';
 
 interface InfoWindowContentProps {
@@ -14,24 +13,6 @@ interface InfoWindowContentProps {
 
 const InfoWindowContent: React.FC<InfoWindowContentProps> = ({ location, onSelect }) => {
   const navigate = useNavigate();
-
-  // Ensure we have business hours
-  if (!location.hours) {
-    location.hours = generateBusinessHours(location);
-  }
-  
-  // Get today's hours
-  const today = new Date();
-  const dayOfWeek = today.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
-  const todaysHours = location.hours[dayOfWeek as keyof typeof location.hours];
-  
-  // Format hours for display
-  const formatHours = (hours: string | true | { open: string; close: string; }) => {
-    if (hours === true) return 'Open 24/7';
-    if (typeof hours === 'string') return hours;
-    if (typeof hours === 'object') return `${hours.open} - ${hours.close}`;
-    return 'Closed';
-  };
 
   const handleViewVenue = () => {
     navigate(`/venue/${location.id}`);
@@ -58,9 +39,6 @@ const InfoWindowContent: React.FC<InfoWindowContentProps> = ({ location, onSelec
       <div className="text-sm text-muted-foreground flex items-center mb-1">
         <MapPin className="h-3 w-3 mr-1" />
         <span>{location.address}, {location.city}</span>
-      </div>
-      <div className="text-sm mb-2">
-        <span className="font-medium">Today:</span> {formatHours(todaysHours || 'Closed')}
       </div>
       
       {/* Display wait time if available */}

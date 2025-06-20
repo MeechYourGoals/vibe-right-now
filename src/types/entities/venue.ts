@@ -22,7 +22,6 @@ export interface Location extends BaseEntity, Address, GeoCoordinates, Timestamp
   vibes?: string[];
   business_status?: string;
   google_maps_url?: string;
-  hours?: Record<string, string | { open: string; close: string; closed?: boolean; }>;
   tags?: string[];
   phone?: string;
   website?: string;

@@ -53,20 +53,6 @@ export interface CreditCard {
   vernonApproved?: boolean;
 }
 
-// Add missing business hours type - make it compatible with Location.hours
-export interface BusinessHours {
-  monday: string | { open: string; close: string; closed?: boolean; };
-  tuesday: string | { open: string; close: string; closed?: boolean; };
-  wednesday: string | { open: string; close: string; closed?: boolean; };
-  thursday: string | { open: string; close: string; closed?: boolean; };
-  friday: string | { open: string; close: string; closed?: boolean; };
-  saturday: string | { open: string; close: string; closed?: boolean; };
-  sunday: string | { open: string; close: string; closed?: boolean; };
-  isOpenNow?: boolean;
-  isOpen24Hours?: boolean;
-  timezone?: string;
-}
-
 // Add missing sentiment analysis types
 export interface SentimentAnalysisResult {
   overallSentiment: number;
@@ -267,35 +253,4 @@ export interface VenueInsights {
   checkInCount?: number;
   receiptUploads?: number;
   discountRedemptions?: number;
-}
-
-export interface Location {
-  id: string;
-  name: string;
-  address: string;
-  city: string;
-  state?: string;
-  country: string;
-  zip?: string;
-  lat: number;
-  lng: number;
-  type: "restaurant" | "bar" | "nightclub" | "cafe" | "attraction" | "sports" | "event" | "city" | "other" | "nightlife";
-  verified: boolean;
-  rating?: number;
-  price_level?: number;
-  vibes?: string[];
-  business_status?: string;
-  google_maps_url?: string;
-  hours?: BusinessHours;
-  tags?: string[];
-  phone?: string;
-  website?: string;
-  followers?: number;
-  checkins?: number;
-  coordinates?: {
-    lat: number;
-    lng: number;
-  };
-  createdAt: string;
-  updatedAt: string;
 }

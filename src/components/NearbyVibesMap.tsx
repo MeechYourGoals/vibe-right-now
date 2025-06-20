@@ -131,7 +131,7 @@ const NearbyVibesMap = () => {
   
   const effectiveLoading = loading || localLoading;
   
-  // Convert GeolocationCoordinates to GeoCoordinates for consistent typing
+  // Convert GeolocationCoordinates to GeoCoordinates for map component
   const convertUserLocation = userLocation ? {
     lat: userLocation.latitude,
     lng: userLocation.longitude

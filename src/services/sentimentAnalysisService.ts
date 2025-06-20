@@ -130,7 +130,7 @@ export const SentimentAnalysisService = {
           neutral: 20,
           negative: 10
         },
-        themes: Array.isArray(record.themes) ? record.themes as SentimentTheme[] : []
+        themes: Array.isArray(record.themes) ? record.themes as unknown as SentimentTheme[] : []
       }));
 
     } catch (error) {
@@ -173,7 +173,7 @@ export const getSentimentAnalysis = async (venueId: string): Promise<VenueSentim
       platform: record.platform,
       overallSentiment: record.overall_sentiment,
       sentimentSummary: record.sentiment_summary,
-      themes: Array.isArray(record.themes) ? record.themes as SentimentTheme[] : [],
+      themes: Array.isArray(record.themes) ? record.themes as unknown as SentimentTheme[] : [],
       reviewCount: record.review_count || 0,
       lastAnalyzedAt: record.last_analyzed_at,
       createdAt: record.created_at,

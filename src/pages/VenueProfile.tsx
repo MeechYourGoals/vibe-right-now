@@ -8,7 +8,6 @@ import CameraButton from "@/components/CameraButton";
 import Header from "@/components/Header";
 import { Comment, Post, Location as VenueLocation } from "@/types";
 import GoogleMapComponent from "@/components/map/google/GoogleMap";
-import { generateBusinessHours } from "@/utils/businessHoursUtils";
 import { 
   isPostFromDayOfWeek, 
   isWithinThreeMonths,
@@ -38,7 +37,9 @@ const VenueProfile = () => {
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [isMapExpanded, setIsMapExpanded] = useState(false);
   const [selectedDays, setSelectedDays] = useState<number[]>([]);
-  const [isVenueOwner, setIsVenueOwner] = useState(false);
+  const [isVenueOwner, setIsV
+
+enueOwner] = useState(false);
   const [subscriptionTier, setSubscriptionTier] = useState<'standard' | 'plus' | 'premium' | 'pro'>('standard');
   
   const { user, isAuthenticated } = useAuth0();
@@ -54,10 +55,6 @@ const VenueProfile = () => {
       }
     }
   }, [isAuthenticated, user, venue]);
-  
-  if (venue && !venue.hours) {
-    venue.hours = generateBusinessHours(venue);
-  }
   
   const venuePosts = useMemo(() => {
     return mockPosts.filter(post => 
