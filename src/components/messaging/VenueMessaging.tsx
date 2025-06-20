@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,14 +23,21 @@ const VenueMessaging: React.FC = () => {
 
   const canUseVenueMessaging = hasFeature('venueMessaging');
 
+  const loadConversations = useCallback(() => {
+    setConversations(mockVenueConversations);
+    if (mockVenueConversations.length > 0 && !selectedConversation) {
+      setSelectedConversation(mockVenueConversations[0].id);
+    }
+  }, [selectedConversation]);
+
   useEffect(() => {
     if (canUseVenueMessaging) {
       loadConversations();
     }
-  }, [canUseVenueMessaging]);
+  }, [canUseVenueMessaging, loadConversations]);
 
   useEffect(() => {
-    if (selectedConversation) {
+    if (selectedConversation && conversations.length > 0) {
       const conversation = conversations.find(c => c.id === selectedConversation);
       if (conversation) {
         setMessages(conversation.messages);
@@ -42,14 +49,7 @@ const VenueMessaging: React.FC = () => {
     }
   }, [selectedConversation, conversations]);
 
-  const loadConversations = () => {
-    setConversations(mockVenueConversations);
-    if (mockVenueConversations.length > 0) {
-      setSelectedConversation(mockVenueConversations[0].id);
-    }
-  };
-
-  const sendMessage = () => {
+  const sendMessage = useCallback(() => {
     if (!newMessage.trim() || !selectedConversation) return;
 
     const message: VenueMessage = {
@@ -71,7 +71,7 @@ const VenueMessaging: React.FC = () => {
         ? { ...c, lastMessage: message, messages: [...c.messages, message] }
         : c
     ));
-  };
+  }, [newMessage, selectedConversation]);
 
   const filteredConversations = conversations.filter(conversation =>
     conversation.venueName.toLowerCase().includes(searchQuery.toLowerCase())

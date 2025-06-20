@@ -10,6 +10,14 @@ export interface GeoCoordinates {
   lng: number;
 }
 
+export interface Address {
+  address: string;
+  city: string;
+  state?: string;
+  country: string;
+  zip?: string;
+}
+
 export interface Timestamps {
   createdAt?: string;
   updatedAt?: string;

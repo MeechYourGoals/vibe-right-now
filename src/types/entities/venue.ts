@@ -3,20 +3,23 @@ import { BaseEntity, GeoCoordinates, Address, Timestamps } from '../core/base';
 
 export interface Location extends BaseEntity, GeoCoordinates, Address, Timestamps {
   name: string;
-  type: 'restaurant' | 'bar' | 'attraction' | 'hotel' | 'cafe' | 'club' | 'sports' | 'shopping' | 'entertainment';
+  type: 'restaurant' | 'bar' | 'attraction' | 'hotel' | 'cafe' | 'club' | 'sports' | 'shopping' | 'entertainment' | 'event';
   verified?: boolean;
   rating?: number;
   vibes?: string[];
   tags?: string[];
-  state?: string;
-  zip?: string;
+  hours?: string | {
+    [key: string]: string | { open: string; close: string; closed?: boolean; };
+  };
+  phone?: string;
+  website?: string;
+  google_maps_url?: string;
+  business_status?: string;
+  price_level?: number;
 }
 
 export interface Venue extends Location {
   description?: string;
-  hours?: string;
-  phone?: string;
-  website?: string;
   socialMedia?: {
     instagram?: string;
     facebook?: string;
