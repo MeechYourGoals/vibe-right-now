@@ -53,7 +53,7 @@ export interface Comment {
   moderation?: { status: 'approved'; flags: any[] };
 }
 
-// Consolidated Media interface
+// Consolidated Media interface (single definition to avoid conflicts)
 export interface Media {
   id?: string;
   type: 'image' | 'video';
@@ -69,46 +69,13 @@ export interface CityData {
   venues: Location[];
 }
 
-// Extended AdFormat interface
-export interface AdFormat {
-  id: string;
-  name: string;
-  type: string;
-  description?: string;
-  duration?: number;
-  platform?: string;
-  dimensions?: string;
-  kpis?: string[];
-}
-
-// Extended TargetingOptions interface
-export interface TargetingOptions {
-  ageRanges: string[];
-  locations: string[];
-  interests: string[];
-  gender: GenderTargeting;
-  // Extended properties for compatibility
-  demographics?: {
-    gender: GenderTargeting;
-    ageRange: { min: number; max: number };
-  };
-  behaviors?: {
-    categories: string[];
-    frequency: string;
-  };
-  contextual?: {
-    categories: string[];
-    frequency: string;
-  };
-  momentScore?: number;
-}
-
-export interface GenderTargeting {
+// Fix GenderTargeting to work with both string and object usage
+export type GenderTargeting = string | {
   all: boolean;
   male: boolean;
   female: boolean;
   other: boolean;
-}
+};
 
 // Sentiment Analysis Types
 export interface SentimentTheme {

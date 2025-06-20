@@ -2,6 +2,7 @@
 import { BaseEntity, GeoCoordinates, Timestamps } from '../core/base';
 
 export interface Location extends BaseEntity, GeoCoordinates, Timestamps {
+  id: string;
   name: string;
   address: string;
   city: string;
