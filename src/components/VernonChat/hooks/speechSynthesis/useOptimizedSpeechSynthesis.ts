@@ -14,6 +14,7 @@ export const useOptimizedSpeechSynthesis = () => {
   const currentAudioRef = useRef<HTMLAudioElement | null>(null);
   const synthRef = useRef<SpeechSynthesis | null>(null);
   const currentlyPlayingText = useRef<string | null>(null);
+  const lastSpokenMessage = useRef<string | null>(null);
   
   // Initialize speech synthesis
   useEffect(() => {
@@ -67,6 +68,7 @@ export const useOptimizedSpeechSynthesis = () => {
           setIsSpeaking(false);
           currentlyPlayingText.current = null;
           currentAudioRef.current = null;
+          lastSpokenMessage.current = text;
           resolve(true);
         };
         
@@ -127,6 +129,7 @@ export const useOptimizedSpeechSynthesis = () => {
     utterance.onend = () => {
       setIsSpeaking(false);
       currentlyPlayingText.current = null;
+      lastSpokenMessage.current = text;
     };
     
     utterance.onerror = (event) => {
@@ -141,6 +144,12 @@ export const useOptimizedSpeechSynthesis = () => {
   // Main speak function that tries ElevenLabs first, then falls back to browser
   const speak = useCallback(async (text: string): Promise<void> => {
     if (!text.trim()) return;
+    
+    // Prevent speaking the same message twice in a row
+    if (lastSpokenMessage.current === text) {
+      console.log('Skipping duplicate message:', text.substring(0, 50));
+      return;
+    }
     
     // Don't repeat the same text if it's already playing
     if (isSpeaking && currentlyPlayingText.current === text) {
@@ -182,10 +191,12 @@ export const useOptimizedSpeechSynthesis = () => {
   // ElevenLabs key management
   const promptForElevenLabsKey = useCallback(() => {
     const apiKey = prompt('Enter your ElevenLabs API key for improved voice quality:');
-    if (apiKey) {
-      ElevenLabsService.setApiKey(apiKey);
+    if (apiKey && apiKey.trim()) {
+      ElevenLabsService.setApiKey(apiKey.trim());
       setIsElevenLabsReady(true);
-      toast.success('ElevenLabs API key set successfully!');
+      toast.success('ElevenLabs API key set successfully! Voice quality will be improved.');
+    } else if (apiKey === '') {
+      toast.error('Please enter a valid API key');
     }
   }, []);
   

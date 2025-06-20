@@ -1,6 +1,6 @@
 
 import React, { useEffect, useRef } from 'react';
-import { X, Send, Mic, MicOff, User, Bot, Trash2, Volume2 } from 'lucide-react';
+import { X, Send, Mic, MicOff, User, Bot, Trash2, Volume2, VolumeX, Settings } from 'lucide-react';
 import { ChatWindowProps, Message } from './types';
 
 const ChatWindow: React.FC<ChatWindowProps> = ({
@@ -16,7 +16,10 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   isListening,
   toggleListening,
   isModelLoading,
-  transcript
+  transcript,
+  isSpeaking,
+  stopSpeaking,
+  promptForElevenLabsKey
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -58,6 +61,18 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       setInput('');
     }
     toggleListening();
+  };
+
+  const handleStopSpeaking = () => {
+    if (stopSpeaking) {
+      stopSpeaking();
+    }
+  };
+
+  const handleElevenLabsSetup = () => {
+    if (promptForElevenLabsKey) {
+      promptForElevenLabsKey();
+    }
   };
 
   const renderMessage = (message: Message) => {
@@ -114,8 +129,34 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
               <span className="text-xs text-red-500">Listening</span>
             </div>
           )}
+          {isSpeaking && (
+            <div className="flex items-center space-x-1">
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+              <span className="text-xs text-blue-500">Speaking</span>
+            </div>
+          )}
         </div>
         <div className="flex items-center space-x-2">
+          {/* Stop Speaking Button */}
+          {isSpeaking && (
+            <button
+              onClick={handleStopSpeaking}
+              className="p-1 rounded-md hover:bg-muted text-red-500"
+              title="Stop speaking"
+            >
+              <VolumeX className="w-4 h-4" />
+            </button>
+          )}
+          
+          {/* ElevenLabs Setup Button */}
+          <button
+            onClick={handleElevenLabsSetup}
+            className="p-1 rounded-md hover:bg-muted"
+            title="Setup ElevenLabs for better voice quality"
+          >
+            <Settings className="w-4 h-4" />
+          </button>
+          
           <button
             onClick={toggleMode}
             className="p-1 rounded-md hover:bg-muted text-xs"
@@ -164,6 +205,19 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
         </div>
       )}
 
+      {/* Speaking status */}
+      {isSpeaking && (
+        <div className="px-3 py-2 bg-green-50 dark:bg-green-900/20 text-sm text-green-700 dark:text-green-300 italic border-t flex items-center justify-between">
+          <span>Vernon is speaking...</span>
+          <button
+            onClick={handleStopSpeaking}
+            className="text-red-500 hover:text-red-700 text-xs"
+          >
+            Stop
+          </button>
+        </div>
+      )}
+
       {/* Input form */}
       <form onSubmit={handleSubmit} className="p-3 border-t flex items-center gap-2">
         <button
@@ -175,6 +229,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
               : 'bg-muted text-foreground hover:bg-blue-100 hover:text-blue-500'
           }`}
           title={isListening ? 'Stop listening (auto-sends when done)' : 'Start voice input'}
+          disabled={isSpeaking}
         >
           {isListening ? <MicOff size={18} /> : <Mic size={18} />}
         </button>
@@ -187,23 +242,31 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
           placeholder={
             isListening 
               ? "Listening... (will auto-send when you stop speaking)" 
+              : isSpeaking
+              ? "Please wait for Vernon to finish speaking..."
               : "Type or speak your message..."
           }
-          disabled={isProcessing || isModelLoading || isListening}
+          disabled={isProcessing || isModelLoading || isListening || isSpeaking}
           className={`flex-1 p-2 bg-background border rounded-md focus:outline-none focus:ring-1 focus:ring-primary ${
             isListening ? 'bg-blue-50 dark:bg-blue-900/20' : ''
+          } ${
+            isSpeaking ? 'bg-gray-50 dark:bg-gray-900/20' : ''
           }`}
         />
 
         <button
           type="submit"
-          disabled={!input || isProcessing || isListening}
+          disabled={!input || isProcessing || isListening || isSpeaking}
           className={`p-2 rounded-full ${
-            !input || isProcessing || isListening
+            !input || isProcessing || isListening || isSpeaking
               ? 'bg-muted text-muted-foreground'
               : 'bg-primary text-primary-foreground hover:bg-primary/90'
           }`}
-          title={isListening ? 'Voice mode active - message will auto-send' : 'Send message'}
+          title={
+            isListening ? 'Voice mode active - message will auto-send' 
+            : isSpeaking ? 'Please wait for Vernon to finish speaking'
+            : 'Send message'
+          }
         >
           <Send size={18} />
         </button>

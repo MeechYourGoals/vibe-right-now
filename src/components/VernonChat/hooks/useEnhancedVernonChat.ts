@@ -15,7 +15,7 @@ export const useEnhancedVernonChat = () => {
   const { processMessage } = useMessageProcessor();
   
   // Use optimized speech hooks
-  const { speak, stop: stopSpeaking, isSpeaking } = useOptimizedSpeechSynthesis();
+  const { speak, stop: stopSpeaking, isSpeaking, promptForElevenLabsKey } = useOptimizedSpeechSynthesis();
 
   const addMessage = useCallback((content: string, direction: MessageDirection, aiResponse = false) => {
     const timestamp = new Date();
@@ -37,6 +37,7 @@ export const useEnhancedVernonChat = () => {
   const handleSendMessage = useCallback(async (text: string) => {
     if (!text.trim()) return;
     
+    // Stop any current speech before sending new message
     stopSpeaking();
     
     setInput('');
@@ -49,19 +50,24 @@ export const useEnhancedVernonChat = () => {
       
       // Auto-speak response if listening mode was active
       if (isListening) {
-        await speak(response);
+        // Add a small delay to ensure the message is rendered first
+        setTimeout(() => {
+          speak(response);
+        }, 100);
       }
     } catch (error) {
       console.error('Error processing message:', error);
       const errorMsg = 'Sorry, I encountered an error. Please try again later.';
       addMessage(errorMsg, 'incoming');
       if (isListening) {
-        await speak(errorMsg);
+        setTimeout(() => {
+          speak(errorMsg);
+        }, 100);
       }
     } finally {
       setIsProcessing(false);
     }
-  }, [addMessage, messages, processMessage, chatMode, speak, stopSpeaking]);
+  }, [addMessage, messages, processMessage, chatMode, speak, stopSpeaking, isListening]);
 
   // Auto-processing callback for speech recognition
   const handleTranscriptComplete = useCallback(async (finalTranscript: string) => {
@@ -132,6 +138,8 @@ export const useEnhancedVernonChat = () => {
     toggleListening,
     transcript: interimTranscript || transcript,
     isSpeaking,
+    stopSpeaking,
+    promptForElevenLabsKey,
     initializeWelcomeMessage
   };
 };
