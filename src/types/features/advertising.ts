@@ -27,6 +27,8 @@ export interface TargetingOptions {
   locations: string[];
   interests: string[];
   gender: GenderTargeting;
+  ageRange: { min: number; max: number };
+  location: string;
   demographics?: {
     gender: GenderTargeting | string;
     ageRange: { min: number; max: number } | number[];

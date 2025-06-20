@@ -50,6 +50,14 @@ const EnhancedSentimentTab: React.FC<EnhancedSentimentTabProps> = ({
   const [currentMessage, setCurrentMessage] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isChatting, setIsChatting] = useState(false);
+  const [connectedPlatforms, setConnectedPlatforms] = useState<Record<string, boolean>>({
+    google: false,
+    yelp: false,
+    tripadvisor: false,
+    facebook: false,
+    instagram: false,
+    tiktok: false
+  });
 
   const addPlatformUrl = () => {
     if (!newUrl || !newPlatformName) {
@@ -91,6 +99,19 @@ const EnhancedSentimentTab: React.FC<EnhancedSentimentTabProps> = ({
       setIsAnalyzing(false);
       toast.success('Analysis completed');
     }, 3000);
+  };
+
+  const connectPlatform = (platform: string) => {
+    setConnectedPlatforms(prev => ({
+      ...prev,
+      [platform]: !prev[platform]
+    }));
+    
+    if (!connectedPlatforms[platform]) {
+      toast.success(`${platform.charAt(0).toUpperCase() + platform.slice(1)} connected successfully`);
+    } else {
+      toast.success(`${platform.charAt(0).toUpperCase() + platform.slice(1)} disconnected`);
+    }
   };
 
   const sendChatMessage = async () => {
@@ -157,6 +178,18 @@ const EnhancedSentimentTab: React.FC<EnhancedSentimentTabProps> = ({
     if (validSentiments.length === 0) return 4.2;
     const avgSentiment = validSentiments.reduce((sum, p) => sum + (p.sentiment || 0), 0) / validSentiments.length;
     return sentimentToStars(avgSentiment);
+  };
+
+  const getPlatformIcon = (platform: string) => {
+    const icons: Record<string, string> = {
+      google: '🔴',
+      yelp: '🟡', 
+      tripadvisor: '🟢',
+      facebook: '🔵',
+      instagram: '🟣',
+      tiktok: '⚫'
+    };
+    return icons[platform] || '🌐';
   };
 
   if (!isPremium) {
@@ -228,14 +261,42 @@ const EnhancedSentimentTab: React.FC<EnhancedSentimentTabProps> = ({
                   </div>
                 </div>
 
-                {/* Overall Rating Display */}
-                <div className="bg-muted p-4 rounded-lg border border-border">
-                  <h4 className="font-medium text-foreground mb-2">Overall Customer Rating</h4>
-                  <StarRating rating={getAverageRating()} size="xl" />
+                <div className="space-y-2">
+                  <h4 className="font-medium text-foreground">Connected Platforms</h4>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {Object.entries({
+                      google: 'Google',
+                      yelp: 'Yelp',
+                      tripadvisor: 'TripAdvisor',
+                      facebook: 'Facebook Business',
+                      instagram: 'Instagram',
+                      tiktok: 'TikTok'
+                    }).map(([platform, displayName]) => (
+                      <Button
+                        key={platform}
+                        variant={connectedPlatforms[platform] ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => connectPlatform(platform)}
+                        className={`flex items-center gap-2 justify-start ${
+                          connectedPlatforms[platform] 
+                            ? 'bg-green-600 hover:bg-green-700 text-white' 
+                            : 'bg-background border-border text-foreground hover:bg-muted'
+                        }`}
+                      >
+                        <span className="text-lg">{getPlatformIcon(platform)}</span>
+                        <span className="text-xs">{displayName}</span>
+                      </Button>
+                    ))}
+                  </div>
+                  {Object.values(connectedPlatforms).every(connected => !connected) && (
+                    <p className="text-muted-foreground text-sm">
+                      Connect to review platforms to start analyzing customer sentiment.
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
-                  <h4 className="font-medium text-foreground">Connected Platforms</h4>
+                  <h4 className="font-medium text-foreground">Manual Platform URLs</h4>
                   {platformUrls.length === 0 ? (
                     <p className="text-muted-foreground text-sm">
                       No platforms added yet. Add URLs from review sites to get started.
@@ -363,3 +424,4 @@ const EnhancedSentimentTab: React.FC<EnhancedSentimentTabProps> = ({
 };
 
 export default EnhancedSentimentTab;
+```
