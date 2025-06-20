@@ -53,10 +53,10 @@ export interface Comment {
   moderation?: { status: 'approved'; flags: any[] };
 }
 
-// Consolidated Media interface (single definition to avoid conflicts)
+// Consolidated Media interface (single definition to avoid conflicts) - Updated to include audio
 export interface Media {
   id?: string;
-  type: 'image' | 'video';
+  type: 'image' | 'video' | 'audio';
   url: string;
   thumbnail?: string;
 }
