@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -112,15 +111,18 @@ const TargetingSegmentation = () => {
   };
 
   const handleMomentScoreChange = (field: string, value: string) => {
-    if (typeof targeting.momentScore === 'object' && targeting.momentScore !== null) {
-      setTargeting(prev => ({
-        ...prev,
-        momentScore: {
-          ...(prev.momentScore as object),
-          [field]: value
-        }
-      }));
-    }
+    setTargeting(prev => ({
+      ...prev,
+      momentScore: typeof prev.momentScore === 'object' && prev.momentScore !== null ? {
+        ...prev.momentScore,
+        [field]: value
+      } : {
+        crowdDensity: field === 'crowdDensity' ? value : '5',
+        vibeScore: field === 'vibeScore' ? value : 'high',
+        crowdLevel: field === 'crowdLevel' ? value : 'medium',
+        engagement: field === 'engagement' ? value : 'active'
+      }
+    }));
   };
 
   const interests = [
