@@ -1,39 +1,59 @@
-
 import { Location } from "@/types";
-import { getMockUserProfile } from "@/mock/users";
-import { getRandomItems } from "@/utils/explore/mockGenerators";
-import { vibeTags } from "../helpers/vibeTags";
-import { generateZipCode } from "../helpers/zipCodeGenerator";
+import {
+  generateAddress,
+  generateCity,
+  generateCountry,
+  generateLatitude,
+  generateLongitude,
+  generatePhoneNumber,
+  generateState,
+  generateTags,
+  generateVibes,
+  generateWebsite,
+  generateZipCode,
+} from "../locationGenerator";
 
-// Generate sports venues for a city
-export const generateSportsLocations = (city: string, state: string = ""): Location[] => {
-  const locations: Location[] = [];
-  
-  // Sports location
-  locations.push({
-    id: `${city.toLowerCase().replace(/\s+/g, '-')}-sports-1`,
-    name: `${city} Arena`,
-    address: `300 Sports Center Drive`,
-    city: city,
-    state: state || 'CA',
-    country: 'USA',
-    zip: generateZipCode(city),
-    lat: 37.7749 + (Math.random() * 0.02 - 0.01),
-    lng: -122.4194 + (Math.random() * 0.02 - 0.01),
-    type: 'sports',
+const sportsVenueNames = [
+  "Victory Stadium",
+  "Champions Arena",
+  "Titans Field",
+  "Gladiators Coliseum",
+  "Legends Park",
+  "Royals Arena",
+  "Stars Stadium",
+  "Eagles Field",
+  "Phoenix Coliseum",
+  "Warriors Park",
+];
+
+export const generateSportsVenues = (city: string, state: string, count: number = 1): Location[] => {
+  return Array.from({ length: count }, (_, index) => ({
+    id: `${city.toLowerCase().replace(/\s+/g, '-')}-sports-${index + 1}`,
+    name: sportsVenueNames[Math.floor(Math.random() * sportsVenueNames.length)],
+    address: generateAddress(),
+    city,
+    state,
+    country: "USA",
+    zip: generateZipCode(),
+    lat: generateLatitude(),
+    lng: generateLongitude(),
+    type: "sports" as const,
     verified: true,
-    hours: {
-      monday: 'Varies by event',
-      tuesday: 'Varies by event',
-      wednesday: 'Varies by event',
-      thursday: 'Varies by event',
-      friday: 'Varies by event',
-      saturday: 'Varies by event',
-      sunday: 'Varies by event'
-    },
-    vibes: getRandomItems(vibeTags, 3),
-    userProfile: getMockUserProfile('venue'),
-  });
-  
-  return locations;
+    rating: Math.round((Math.random() * 1.5 + 3.5) * 10) / 10,
+    price_level: Math.floor(Math.random() * 4) + 2,
+    vibes: generateVibes(),
+    business_status: "OPERATIONAL",
+    tags: generateTags(),
+    phone: generatePhoneNumber(),
+    website: generateWebsite(),
+    followers: Math.floor(Math.random() * 15000) + 1000,
+    checkins: Math.floor(Math.random() * 5000) + 500,
+    createdAt: "2024-01-01T00:00:00Z",
+    updatedAt: "2024-01-01T00:00:00Z"
+  }));
+};
+
+// Helper function to generate a random item from an array
+const generateRandomItem = (items: string[]): string => {
+  return items[Math.floor(Math.random() * items.length)];
 };

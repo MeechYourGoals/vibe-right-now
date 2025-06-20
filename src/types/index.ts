@@ -13,8 +13,8 @@ export interface CityData {
   venues: Location[];
 }
 
-// Add missing coordinate types
-export interface Coordinates {
+// Add missing coordinate types - rename to avoid conflict with GeolocationCoordinates
+export interface GeoCoordinates {
   lat: number;
   lng: number;
 }
@@ -37,6 +37,42 @@ export interface UserProfileStats {
   followers: number;
   following: number;
   likes: number;
+}
+
+// Add missing credit card type
+export interface CreditCard {
+  id: string;
+  last4: string;
+  brand: string;
+  expiryMonth: number;
+  expiryYear: number;
+  isDefault: boolean;
+}
+
+// Add missing business hours type
+export interface BusinessHours {
+  [key: string]: string | { open: string; close: string; closed?: boolean; };
+}
+
+// Add missing sentiment analysis types
+export interface SentimentAnalysisResult {
+  overallSentiment: number;
+  sentimentSummary: string;
+  themes: SentimentTheme[];
+  reviewCount: number;
+  lastAnalyzedAt: string;
+}
+
+export interface VenueSentimentAnalysis {
+  venueId: string;
+  platform: string;
+  overallSentiment: number;
+  sentimentSummary: string;
+  themes: SentimentTheme[];
+  reviewCount: number;
+  lastAnalyzedAt: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // Export missing types that are causing build errors

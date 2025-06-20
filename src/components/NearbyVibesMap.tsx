@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation as useRouterLocation } from "react-router-dom";
 import { toast } from "sonner";
@@ -96,7 +97,12 @@ const NearbyVibesMap = () => {
       const coordinates = await geocodeAddress(address);
       
       if (coordinates) {
-        setUserAddressLocation(coordinates);
+        // Convert [lat, lng] array to GeoCoordinates object
+        const geoCoords: GeoCoordinates = {
+          lat: coordinates[0],
+          lng: coordinates[1]
+        };
+        setUserAddressLocation(geoCoords);
         setShowDistances(true);
         setIsAddressPopoverOpen(false);
         
@@ -125,6 +131,12 @@ const NearbyVibesMap = () => {
   
   const effectiveLoading = loading || localLoading;
   
+  // Convert GeolocationCoordinates to GeoCoordinates for consistent typing
+  const convertUserLocation = userLocation ? {
+    lat: userLocation.latitude,
+    lng: userLocation.longitude
+  } : null;
+  
   return (
     <div className={`space-y-4 ${isMapExpanded ? "fixed inset-0 z-50 bg-background p-4" : ""}`}>
       <div className="flex justify-between items-center">
@@ -152,7 +164,7 @@ const NearbyVibesMap = () => {
       
       <div className={`rounded-lg overflow-hidden ${isMapExpanded ? "h-[calc(100vh-8rem)]" : "h-96"}`}>
         <EnhancedGoogleMapComponent
-          userLocation={userLocation}
+          userLocation={convertUserLocation}
           locations={nearbyLocations}
           realPlaces={mapState.realPlaces}
           searchedCity={searchedCity}

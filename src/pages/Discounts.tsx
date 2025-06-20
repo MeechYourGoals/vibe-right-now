@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Layout } from "@/components/Layout";
 import MapContainer from "@/components/map/MapContainer";
@@ -10,6 +9,22 @@ import { ArrowRight, MapPin, Ticket } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { VenueWithDiscount } from "@/components/venue/events/types";
 import { Location } from "@/types";
+
+// Fix the mock location around line 16 by adding required timestamp properties:
+const mockLocation: Location = {
+  id: "discount-venue-1",
+  name: "Sample Venue",
+  type: "restaurant",
+  address: "123 Main St",
+  city: "Sample City",
+  state: "CA",
+  country: "USA",
+  lat: 34.0522,
+  lng: -118.2437,
+  verified: true,
+  createdAt: "2024-01-01T00:00:00Z",
+  updatedAt: "2024-01-01T00:00:00Z"
+};
 
 // Convert VenueWithDiscount to Location for MapContainer compatibility
 const convertToLocation = (venue: VenueWithDiscount): Location => {
