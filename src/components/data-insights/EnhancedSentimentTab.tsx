@@ -4,9 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import StarRating from "@/components/ui/star-rating";
 import { 
   MessageSquare, 
   ExternalLink, 
@@ -145,11 +145,25 @@ const EnhancedSentimentTab: React.FC<EnhancedSentimentTabProps> = ({
     return 'Very Negative';
   };
 
+  // Convert sentiment (-1 to 1) to star rating (0 to 5)
+  const sentimentToStars = (sentiment: number) => {
+    return ((sentiment + 1) / 2) * 5;
+  };
+
+  // Calculate average rating from all platforms
+  const getAverageRating = () => {
+    if (platformUrls.length === 0) return 4.2; // Default rating for demo
+    const validSentiments = platformUrls.filter(p => p.sentiment !== undefined);
+    if (validSentiments.length === 0) return 4.2;
+    const avgSentiment = validSentiments.reduce((sum, p) => sum + (p.sentiment || 0), 0) / validSentiments.length;
+    return sentimentToStars(avgSentiment);
+  };
+
   if (!isPremium) {
     return (
-      <Card>
+      <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle className="flex items-center">
+          <CardTitle className="flex items-center text-foreground">
             <MessageSquare className="mr-2 h-5 w-5" />
             Enhanced Review Analysis
             <Badge variant="outline" className="ml-2">Premium Feature</Badge>
@@ -169,41 +183,43 @@ const EnhancedSentimentTab: React.FC<EnhancedSentimentTabProps> = ({
 
   return (
     <div className="space-y-6">
-      <Card>
+      <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle className="flex items-center">
+          <CardTitle className="flex items-center text-foreground">
             <Sparkles className="mr-2 h-5 w-5 text-purple-500" />
             Enhanced Review Analysis
-            <Badge variant="outline" className="ml-2 bg-purple-100 text-purple-700">Premium</Badge>
+            <Badge variant="outline" className="ml-2 bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">Premium</Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="platforms" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="platforms">Platform URLs</TabsTrigger>
-              <TabsTrigger value="chat">AI Chat Analysis</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 bg-muted">
+              <TabsTrigger value="platforms" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Platform URLs</TabsTrigger>
+              <TabsTrigger value="chat" className="data-[state=active]:bg-background data-[state=active]:text-foreground">AI Chat Analysis</TabsTrigger>
             </TabsList>
             
             <TabsContent value="platforms" className="space-y-4">
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="platform-name">Platform Name</Label>
+                    <Label htmlFor="platform-name" className="text-foreground">Platform Name</Label>
                     <Input
                       id="platform-name"
                       placeholder="e.g., Yelp, Google Reviews, TripAdvisor"
                       value={newPlatformName}
                       onChange={(e) => setNewPlatformName(e.target.value)}
+                      className="bg-background border-border text-foreground"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="platform-url">Platform URL</Label>
+                    <Label htmlFor="platform-url" className="text-foreground">Platform URL</Label>
                     <div className="flex gap-2">
                       <Input
                         id="platform-url"
                         placeholder="https://www.yelp.com/biz/your-venue"
                         value={newUrl}
                         onChange={(e) => setNewUrl(e.target.value)}
+                        className="bg-background border-border text-foreground"
                       />
                       <Button onClick={addPlatformUrl} size="sm">
                         <Plus className="h-4 w-4" />
@@ -212,8 +228,14 @@ const EnhancedSentimentTab: React.FC<EnhancedSentimentTabProps> = ({
                   </div>
                 </div>
 
+                {/* Overall Rating Display */}
+                <div className="bg-muted p-4 rounded-lg border border-border">
+                  <h4 className="font-medium text-foreground mb-2">Overall Customer Rating</h4>
+                  <StarRating rating={getAverageRating()} size="xl" />
+                </div>
+
                 <div className="space-y-2">
-                  <h4 className="font-medium">Connected Platforms</h4>
+                  <h4 className="font-medium text-foreground">Connected Platforms</h4>
                   {platformUrls.length === 0 ? (
                     <p className="text-muted-foreground text-sm">
                       No platforms added yet. Add URLs from review sites to get started.
@@ -221,17 +243,20 @@ const EnhancedSentimentTab: React.FC<EnhancedSentimentTabProps> = ({
                   ) : (
                     <div className="space-y-2">
                       {platformUrls.map((platform) => (
-                        <div key={platform.id} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div key={platform.id} className="flex items-center justify-between p-3 border border-border rounded-lg bg-card">
                           <div className="flex-1">
                             <div className="flex items-center gap-2">
-                              <h5 className="font-medium">{platform.name}</h5>
+                              <h5 className="font-medium text-foreground">{platform.name}</h5>
                               {platform.sentiment !== undefined && (
-                                <Badge 
-                                  variant="outline" 
-                                  className={getSentimentColor(platform.sentiment)}
-                                >
-                                  {getSentimentLabel(platform.sentiment)}
-                                </Badge>
+                                <div className="flex items-center gap-2">
+                                  <StarRating rating={sentimentToStars(platform.sentiment)} size="sm" showValue={false} />
+                                  <Badge 
+                                    variant="outline" 
+                                    className={getSentimentColor(platform.sentiment)}
+                                  >
+                                    {getSentimentLabel(platform.sentiment)}
+                                  </Badge>
+                                </div>
                               )}
                             </div>
                             <p className="text-sm text-muted-foreground truncate">
@@ -273,10 +298,10 @@ const EnhancedSentimentTab: React.FC<EnhancedSentimentTabProps> = ({
             </TabsContent>
 
             <TabsContent value="chat" className="space-y-4">
-              <div className="border rounded-lg p-4 h-96 overflow-y-auto bg-gray-50">
+              <div className="border border-border rounded-lg p-4 h-96 overflow-y-auto bg-card">
                 {chatMessages.length === 0 ? (
                   <div className="text-center py-8">
-                    <Bot className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+                    <Bot className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
                     <p className="text-muted-foreground">
                       Ask me questions about your reviews! Try: "What do customers complain about most?"
                     </p>
@@ -293,7 +318,7 @@ const EnhancedSentimentTab: React.FC<EnhancedSentimentTabProps> = ({
                               <Bot className="h-4 w-4 text-white" />
                             )}
                           </div>
-                          <div className={`p-3 rounded-lg ${message.type === 'user' ? 'bg-blue-500 text-white' : 'bg-white border'}`}>
+                          <div className={`p-3 rounded-lg ${message.type === 'user' ? 'bg-blue-500 text-white' : 'bg-background border border-border text-foreground'}`}>
                             <p className="text-sm">{message.content}</p>
                           </div>
                         </div>
@@ -304,11 +329,11 @@ const EnhancedSentimentTab: React.FC<EnhancedSentimentTabProps> = ({
                         <div className="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center">
                           <Bot className="h-4 w-4 text-white" />
                         </div>
-                        <div className="bg-white border p-3 rounded-lg">
+                        <div className="bg-background border border-border p-3 rounded-lg">
                           <div className="flex space-x-1">
-                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                            <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"></div>
+                            <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                            <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                           </div>
                         </div>
                       </div>
@@ -323,6 +348,7 @@ const EnhancedSentimentTab: React.FC<EnhancedSentimentTabProps> = ({
                   value={currentMessage}
                   onChange={(e) => setCurrentMessage(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && sendChatMessage()}
+                  className="bg-background border-border text-foreground"
                 />
                 <Button onClick={sendChatMessage} disabled={isChatting || !currentMessage.trim()}>
                   <Send className="h-4 w-4" />

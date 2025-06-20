@@ -86,6 +86,7 @@ export interface AdFormat {
   platform?: string;
   dimensions?: string;
   kpis?: string[];
+  placement?: string;
 }
 
 export interface TargetingOptions {
@@ -93,6 +94,7 @@ export interface TargetingOptions {
   gender: GenderTargeting;
   interests: string[];
   location: string;
+  ageRanges?: string[];
   demographics?: {
     gender: GenderTargeting | string;
     ageRange: { min: number; max: number } | number[];
@@ -141,6 +143,12 @@ export interface PlatformSentimentSummary {
   summary?: string;
   reviewCount?: number;
   themes?: SentimentTheme[];
+  lastUpdated?: string;
+  sentimentDistribution?: {
+    positive: number;
+    neutral: number;
+    negative: number;
+  };
 }
 
 export interface SentimentTheme {
@@ -149,6 +157,7 @@ export interface SentimentTheme {
   frequency: number;
   name?: string;
   score?: number;
+  examples?: string[];
 }
 
 export interface VenueInsights {
