@@ -13,6 +13,32 @@ export interface CityData {
   venues: Location[];
 }
 
+// Add missing coordinate types
+export interface Coordinates {
+  lat: number;
+  lng: number;
+}
+
+// Add missing user profile types
+export interface UserProfileData {
+  id: string;
+  username: string;
+  name: string;
+  avatar: string;
+  bio?: string;
+  verified: boolean;
+  followers?: number;
+  following?: number;
+  posts?: number;
+}
+
+export interface UserProfileStats {
+  posts: number;
+  followers: number;
+  following: number;
+  likes: number;
+}
+
 // Export missing types that are causing build errors
 export interface Comment {
   id: string;
