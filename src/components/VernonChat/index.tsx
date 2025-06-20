@@ -19,7 +19,16 @@ const VernonChat: React.FC = () => {
     isListening,
     toggleListening,
     transcript,
+    hasBrowserSupport,
     isSpeaking,
+    isPaused,
+    currentText,
+    speak,
+    stopSpeaking,
+    togglePause,
+    speechMethod,
+    hasElevenLabsKey,
+    setSpeechMethod,
     initializeWelcomeMessage
   } = useEnhancedVernonChat();
 
@@ -45,6 +54,16 @@ const VernonChat: React.FC = () => {
           toggleListening={toggleListening}
           isModelLoading={false}
           transcript={transcript}
+          isSpeaking={isSpeaking}
+          isPaused={isPaused}
+          currentText={currentText}
+          speak={speak}
+          stopSpeaking={stopSpeaking}
+          togglePause={togglePause}
+          speechMethod={speechMethod}
+          hasElevenLabsKey={hasElevenLabsKey}
+          setSpeechMethod={setSpeechMethod}
+          hasBrowserSupport={hasBrowserSupport}
         />
       ) : (
         <ChatButton onClick={toggleChat} />

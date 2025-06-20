@@ -1,7 +1,8 @@
 
 import React, { useEffect, useRef } from 'react';
-import { X, Send, Mic, MicOff, User, Bot, Trash2, Volume2 } from 'lucide-react';
+import { X, Send, User, Bot, Trash2 } from 'lucide-react';
 import { ChatWindowProps, Message } from './types';
+import VoiceControls from './components/VoiceControls';
 
 const ChatWindow: React.FC<ChatWindowProps> = ({
   messages,
@@ -16,7 +17,18 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   isListening,
   toggleListening,
   isModelLoading,
-  transcript
+  transcript,
+  // New voice synthesis props
+  isSpeaking,
+  isPaused,
+  currentText,
+  speak,
+  stopSpeaking,
+  togglePause,
+  speechMethod,
+  hasElevenLabsKey,
+  setSpeechMethod,
+  hasBrowserSupport
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -51,14 +63,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
     }
   };
 
-  const handleMicClick = () => {
-    // Clear input when starting to listen
-    if (!isListening && setInput) {
-      setInput('');
-    }
-    toggleListening();
-  };
-
   const renderMessage = (message: Message) => {
     const isIncoming = message.direction === 'incoming';
 
@@ -83,10 +87,17 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
           >
             <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
             
-            {isIncoming && (
-              <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
-                <Volume2 size={12} className="text-white" />
-              </div>
+            {isIncoming && speak && (
+              <button
+                onClick={() => speak(message.content)}
+                className="absolute -bottom-2 -right-2 w-6 h-6 bg-blue-500 hover:bg-blue-600 rounded-full flex items-center justify-center transition-colors"
+                title="Speak this message"
+                disabled={isSpeaking}
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="white">
+                  <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                </svg>
+              </button>
             )}
           </div>
 
@@ -106,12 +117,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
         <div className="flex items-center space-x-2">
           <Bot className="w-5 h-5 text-primary" />
           <span className="font-medium">Vernon - Enhanced Voice AI</span>
-          {isListening && (
-            <div className="flex items-center space-x-1">
-              <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-              <span className="text-xs text-red-500">Listening</span>
-            </div>
-          )}
         </div>
         <div className="flex items-center space-x-2">
           <button
@@ -138,6 +143,24 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
         </div>
       </div>
 
+      {/* Voice Controls Panel */}
+      <div className="p-3 border-b">
+        <VoiceControls
+          isListening={isListening}
+          toggleListening={toggleListening}
+          transcript={transcript}
+          hasBrowserSupport={hasBrowserSupport || false}
+          isSpeaking={isSpeaking || false}
+          isPaused={isPaused || false}
+          currentText={currentText || ''}
+          stopSpeaking={stopSpeaking || (() => {})}
+          togglePause={togglePause || (() => {})}
+          speechMethod={speechMethod || 'browser'}
+          hasElevenLabsKey={hasElevenLabsKey || false}
+          setSpeechMethod={setSpeechMethod || (() => {})}
+        />
+      </div>
+
       <div className="flex-1 overflow-y-auto p-4 flex flex-col">
         {messages.map(renderMessage)}
         {isProcessing && (
@@ -154,26 +177,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
         <div ref={messagesEndRef} />
       </div>
 
-      {isListening && transcript && (
-        <div className="px-3 py-2 bg-blue-50 dark:bg-blue-900/20 text-sm text-blue-700 dark:text-blue-300 italic border-t">
-          Speaking: {transcript}
-        </div>
-      )}
-
       <form onSubmit={handleSubmit} className="p-3 border-t flex items-center gap-2">
-        <button
-          type="button"
-          onClick={handleMicClick}
-          className={`p-2 rounded-full transition-all ${
-            isListening 
-              ? 'bg-red-100 text-red-500 animate-pulse' 
-              : 'bg-muted text-foreground hover:bg-blue-100 hover:text-blue-500'
-          }`}
-          title={isListening ? 'Stop listening' : 'Start voice input'}
-        >
-          {isListening ? <MicOff size={18} /> : <Mic size={18} />}
-        </button>
-
         <input
           type="text"
           value={input}
