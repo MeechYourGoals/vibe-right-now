@@ -32,16 +32,30 @@ export type {
   CapabilityLevel
 } from './features/chat';
 
-// Additional missing types that are used throughout the codebase
+// Extended Comment interface with all required properties
 export interface Comment {
   id: string;
   content: string;
   author: string;
   timestamp: string;
   likes: number;
+  // Extended properties for compatibility
+  user: User;
+  postId: string;
+  contentId?: string;
+  parentId?: string;
+  body?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+  vibedHere?: boolean;
+  status?: 'published';
+  engagement?: { likes: number; replies: number; reactions: any[] };
+  moderation?: { status: 'approved'; flags: any[] };
 }
 
+// Consolidated Media interface
 export interface Media {
+  id?: string;
   type: 'image' | 'video';
   url: string;
   thumbnail?: string;
@@ -55,17 +69,38 @@ export interface CityData {
   venues: Location[];
 }
 
+// Extended AdFormat interface
 export interface AdFormat {
   id: string;
   name: string;
   type: string;
+  description?: string;
+  duration?: number;
+  platform?: string;
+  dimensions?: string;
+  kpis?: string[];
 }
 
+// Extended TargetingOptions interface
 export interface TargetingOptions {
   ageRanges: string[];
   locations: string[];
   interests: string[];
   gender: GenderTargeting;
+  // Extended properties for compatibility
+  demographics?: {
+    gender: GenderTargeting;
+    ageRange: { min: number; max: number };
+  };
+  behaviors?: {
+    categories: string[];
+    frequency: string;
+  };
+  contextual?: {
+    categories: string[];
+    frequency: string;
+  };
+  momentScore?: number;
 }
 
 export interface GenderTargeting {

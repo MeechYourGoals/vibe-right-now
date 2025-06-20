@@ -20,4 +20,12 @@ export interface Location extends BaseEntity, GeoCoordinates, Timestamps {
   hours?: {
     [key: string]: string | { open: string; close: string; closed?: boolean; };
   };
+  // Extended properties for compatibility with mock data
+  zip?: string;
+  followers?: number;
+  checkins?: number;
+  coordinates?: {
+    lat: number;
+    lng: number;
+  };
 }
