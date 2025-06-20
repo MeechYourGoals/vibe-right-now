@@ -1,3 +1,4 @@
+
 import { Location } from "@/types";
 import { generateAddress, generateZipCode, generateLatitude, generateLongitude, generateVibes, generateTags, generatePhoneNumber, generateWebsite } from "../locationUtils";
 
@@ -79,16 +80,4 @@ export const generateCafes = (city: string, state: string, count: number = 2): L
     createdAt: "2024-01-01T00:00:00Z",
     updatedAt: "2024-01-01T00:00:00Z"
   }));
-};
-
-// Helper function to generate a random cuisine
-const generateCuisine = (): string => {
-  const cuisines = ["Italian", "Mexican", "American", "Chinese", "Indian", "Thai", "Japanese", "French"];
-  return cuisines[Math.floor(Math.random() * cuisines.length)];
-};
-
-// Helper function to generate a random price range
-const generatePriceRange = (): string => {
-  const prices = ["$", "$$", "$$$"];
-  return prices[Math.floor(Math.random() * prices.length)];
 };

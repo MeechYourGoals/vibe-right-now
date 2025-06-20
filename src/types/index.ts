@@ -13,7 +13,7 @@ export interface CityData {
   venues: Location[];
 }
 
-// Add missing coordinate types - rename to avoid conflict with GeolocationCoordinates
+// Use GeoCoordinates instead of Coordinates to avoid conflict with GeolocationCoordinates
 export interface GeoCoordinates {
   lat: number;
   lng: number;
@@ -39,19 +39,32 @@ export interface UserProfileStats {
   likes: number;
 }
 
-// Add missing credit card type
+// Enhanced credit card type with all needed properties
 export interface CreditCard {
   id: string;
   last4: string;
   brand: string;
   expiryMonth: number;
   expiryYear: number;
+  expMonth: number;
+  expYear: number;
   isDefault: boolean;
+  maxSpendLimit?: number;
+  vernonApproved?: boolean;
 }
 
 // Add missing business hours type
 export interface BusinessHours {
-  [key: string]: string | { open: string; close: string; closed?: boolean; };
+  monday: string | { open: string; close: string; closed?: boolean; };
+  tuesday: string | { open: string; close: string; closed?: boolean; };
+  wednesday: string | { open: string; close: string; closed?: boolean; };
+  thursday: string | { open: string; close: string; closed?: boolean; };
+  friday: string | { open: string; close: string; closed?: boolean; };
+  saturday: string | { open: string; close: string; closed?: boolean; };
+  sunday: string | { open: string; close: string; closed?: boolean; };
+  isOpenNow?: boolean;
+  isOpen24Hours?: boolean;
+  timezone?: string;
 }
 
 // Add missing sentiment analysis types

@@ -1,17 +1,15 @@
+
 import { Location } from "@/types";
 import {
   generateAddress,
-  generateCity,
-  generateCountry,
+  generateZipCode,
   generateLatitude,
   generateLongitude,
-  generatePhoneNumber,
-  generateState,
-  generateTags,
   generateVibes,
+  generateTags,
+  generatePhoneNumber,
   generateWebsite,
-  generateZipCode,
-} from "../locationGenerator";
+} from "../locationUtils";
 
 const sportsVenueNames = [
   "Victory Stadium",
@@ -51,9 +49,4 @@ export const generateSportsVenues = (city: string, state: string, count: number 
     createdAt: "2024-01-01T00:00:00Z",
     updatedAt: "2024-01-01T00:00:00Z"
   }));
-};
-
-// Helper function to generate a random item from an array
-const generateRandomItem = (items: string[]): string => {
-  return items[Math.floor(Math.random() * items.length)];
 };

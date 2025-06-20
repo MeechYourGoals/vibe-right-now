@@ -1,17 +1,15 @@
+
 import { Location } from "@/types";
 import {
   generateAddress,
-  generateCity,
-  generateCountry,
+  generateZipCode,
   generateLatitude,
   generateLongitude,
-  generatePhoneNumber,
-  generateState,
-  generateTags,
   generateVibes,
+  generateTags,
+  generatePhoneNumber,
   generateWebsite,
-  generateZipCode,
-} from "../locationGenerator";
+} from "../locationUtils";
 
 const attractionNames = [
   "Museum of Modern Art",
@@ -27,16 +25,16 @@ const attractionNames = [
 ];
 
 const landmarkNames = [
-  "Statue of Liberty",
-  "Eiffel Tower",
-  "Great Wall of China",
-  "Machu Picchu",
-  "Colosseum",
-  "Big Ben",
-  "Pyramids of Giza",
-  "Taj Mahal",
-  "Sydney Opera House",
-  "Christ the Redeemer",
+  "City Monument",
+  "Historic Tower",
+  "Famous Bridge",
+  "Cultural Center",
+  "Memorial Park",
+  "Observation Deck",
+  "Heritage Site",
+  "Public Square",
+  "Scenic Overlook",
+  "Landmark Building",
 ];
 
 export const generateAttractions = (city: string, state: string, count: number = 2): Location[] => {
@@ -91,19 +89,4 @@ export const generateLandmarks = (city: string, state: string, count: number = 1
     createdAt: "2024-01-01T00:00:00Z",
     updatedAt: "2024-01-01T00:00:00Z"
   }));
-};
-
-// Helper function to generate a random item from an array
-const generateRandomItem = (items: string[]): string => {
-  return items[Math.floor(Math.random() * items.length)];
-};
-
-// Helper function to generate a random rating
-const generateRandomRating = (): number => {
-  return Math.round((Math.random() * 4 + 1) * 10) / 10;
-};
-
-// Helper function to generate a random price level
-const generateRandomPriceLevel = (): number => {
-  return Math.floor(Math.random() * 4) + 1;
 };

@@ -1,14 +1,14 @@
 
 import { useState, useEffect } from 'react';
-import { Location, Coordinates } from '@/types';
+import { Location, GeoCoordinates } from '@/types';
 import { mockCities } from '@/data/mockCities';
 
 export const useNearbyLocations = () => {
   const [nearbyLocations, setNearbyLocations] = useState<Location[]>([]);
-  const [userLocation, setUserLocation] = useState<Coordinates | null>(null);
+  const [userLocation, setUserLocation] = useState<GeolocationCoordinates | null>(null);
   const [loading, setLoading] = useState(false);
   const [searchedCity, setSearchedCity] = useState<string>("");
-  const [userAddressLocation, setUserAddressLocation] = useState<Coordinates | null>(null);
+  const [userAddressLocation, setUserAddressLocation] = useState<GeoCoordinates | null>(null);
   
   useEffect(() => {
     // Try to get user's current location
@@ -16,11 +16,7 @@ export const useNearbyLocations = () => {
       setLoading(true);
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          const coords: Coordinates = {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          };
-          setUserLocation(coords);
+          setUserLocation(position.coords);
           setLoading(false);
         },
         (error) => {
@@ -32,7 +28,10 @@ export const useNearbyLocations = () => {
   }, []);
   
   useEffect(() => {
-    const effectiveLocation = userAddressLocation || userLocation;
+    const effectiveLocation = userAddressLocation || (userLocation ? {
+      lat: userLocation.latitude,
+      lng: userLocation.longitude
+    } : null);
     
     if (!effectiveLocation) {
       // Return all locations from mock cities if no user location

@@ -1,3 +1,4 @@
+
 import { Location } from "@/types";
 import { generateRestaurants, generateCafes } from "@/utils/explore/generators/restaurantGenerator";
 import { generateBars, generateNightlife } from "@/utils/explore/generators/barGenerator";
