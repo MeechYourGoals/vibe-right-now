@@ -7,6 +7,7 @@ interface SpeechRecognitionConfig {
   interimResults?: boolean;
   language?: string;
   maxAlternatives?: number;
+  onTranscriptComplete?: (transcript: string) => void;
 }
 
 export const useOptimizedSpeechRecognition = (config: SpeechRecognitionConfig = {}) => {
@@ -19,6 +20,7 @@ export const useOptimizedSpeechRecognition = (config: SpeechRecognitionConfig = 
   // Refs
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const finalTranscriptRef = useRef('');
+  const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
   
   // Initialize speech recognition
   useEffect(() => {
@@ -37,11 +39,25 @@ export const useOptimizedSpeechRecognition = (config: SpeechRecognitionConfig = 
       recognition.onstart = () => {
         console.log('Speech recognition started');
         setIsListening(true);
+        // Clear any existing silence timer
+        if (silenceTimerRef.current) {
+          clearTimeout(silenceTimerRef.current);
+          silenceTimerRef.current = null;
+        }
       };
       
       recognition.onend = () => {
         console.log('Speech recognition ended');
         setIsListening(false);
+        
+        // Auto-send the final transcript if available and callback is provided
+        if (finalTranscriptRef.current.trim() && config.onTranscriptComplete) {
+          config.onTranscriptComplete(finalTranscriptRef.current.trim());
+          // Clear transcript after auto-sending
+          finalTranscriptRef.current = '';
+          setTranscript('');
+          setInterimTranscript('');
+        }
       };
       
       recognition.onerror = (event) => {
@@ -76,8 +92,27 @@ export const useOptimizedSpeechRecognition = (config: SpeechRecognitionConfig = 
           finalTranscriptRef.current += final;
           setTranscript(finalTranscriptRef.current);
           setInterimTranscript('');
+          
+          // Start silence detection timer for auto-processing
+          if (silenceTimerRef.current) {
+            clearTimeout(silenceTimerRef.current);
+          }
+          
+          silenceTimerRef.current = setTimeout(() => {
+            if (isListening && finalTranscriptRef.current.trim()) {
+              // Stop listening to trigger auto-send
+              stopListening();
+            }
+          }, 2000); // 2 seconds of silence
+          
         } else {
           setInterimTranscript(interim);
+          
+          // Reset silence timer when still getting interim results
+          if (silenceTimerRef.current) {
+            clearTimeout(silenceTimerRef.current);
+            silenceTimerRef.current = null;
+          }
         }
       };
       
@@ -92,8 +127,11 @@ export const useOptimizedSpeechRecognition = (config: SpeechRecognitionConfig = 
       if (recognitionRef.current) {
         recognitionRef.current.abort();
       }
+      if (silenceTimerRef.current) {
+        clearTimeout(silenceTimerRef.current);
+      }
     };
-  }, [config.continuous, config.interimResults, config.language, config.maxAlternatives]);
+  }, [config.continuous, config.interimResults, config.language, config.maxAlternatives, config.onTranscriptComplete, isListening]);
   
   // Start listening
   const startListening = useCallback(() => {
@@ -116,6 +154,11 @@ export const useOptimizedSpeechRecognition = (config: SpeechRecognitionConfig = 
     
     try {
       recognitionRef.current.stop();
+      // Clear silence timer
+      if (silenceTimerRef.current) {
+        clearTimeout(silenceTimerRef.current);
+        silenceTimerRef.current = null;
+      }
     } catch (error) {
       console.error('Error stopping speech recognition:', error);
     }
@@ -135,6 +178,10 @@ export const useOptimizedSpeechRecognition = (config: SpeechRecognitionConfig = 
     finalTranscriptRef.current = '';
     setTranscript('');
     setInterimTranscript('');
+    if (silenceTimerRef.current) {
+      clearTimeout(silenceTimerRef.current);
+      silenceTimerRef.current = null;
+    }
   }, []);
   
   return {
