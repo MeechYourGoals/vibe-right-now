@@ -25,8 +25,16 @@ const VenueMessaging = lazy(() => import("@/components/messaging/VenueMessaging"
 const Messages = lazy(() => import("@/pages/Messages"));
 
 function App() {
-  // Add a useEffect to handle mobile view adjustments
+  // Force dark mode on app load
   useEffect(() => {
+    // Clear any conflicting localStorage theme settings
+    localStorage.removeItem('theme');
+    localStorage.setItem('vibe-ui-theme', 'dark');
+    
+    // Force dark class on HTML element
+    document.documentElement.classList.add('dark');
+    document.documentElement.classList.remove('light');
+    
     // Set viewport meta tag to ensure proper scaling on mobile devices
     const viewportMeta = document.querySelector('meta[name="viewport"]');
     if (viewportMeta) {
@@ -55,7 +63,7 @@ function App() {
 
   return (
     <Auth0Provider>
-      <ThemeProvider defaultTheme="dark" storageKey="vibe-ui-theme">
+      <ThemeProvider storageKey="vibe-ui-theme">
         <BrowserRouter>
           <Suspense fallback={<div className="h-screen w-screen flex items-center justify-center">Loading...</div>}>
             <Routes>
