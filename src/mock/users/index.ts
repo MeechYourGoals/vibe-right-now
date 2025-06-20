@@ -1,6 +1,7 @@
 
 import { regularUsers } from "./regularUsers";
 import { celebrityUsers } from "./celebrityUsers";
+import { diverseUsers } from "./diverseUsers";
 
 // Define the MockUserProfile type directly here if missing from @/types
 export interface MockUserProfile {
@@ -16,6 +17,9 @@ export interface MockUserProfile {
   posts?: number;
 }
 
+// Create a combined mockUsers array with all user types
+export const mockUsers = [...regularUsers, ...celebrityUsers, ...diverseUsers];
+
 // Mock user profile utility
 export const getMockUserProfile = (type: 'regular' | 'celebrity' | 'venue'): MockUserProfile => {
   const collection = type === 'celebrity' ? celebrityUsers : regularUsers;
@@ -23,14 +27,21 @@ export const getMockUserProfile = (type: 'regular' | 'celebrity' | 'venue'): Moc
   const user = collection[randomIndex];
   return {
     ...user,
-    name: user.name || user.username, // Ensure name property exists
+    name: user.name || user.username,
     type: type,
     verified: type === 'venue' ? true : collection[randomIndex].verified
   };
 };
 
-// Create a combined mockUsers array
-export const mockUsers = [...regularUsers, ...celebrityUsers];
+// Helper function to get user by ID consistently
+export const getUserById = (id: string) => {
+  return mockUsers.find(user => user.id === id);
+};
+
+// Helper function to get user by username consistently
+export const getUserByUsername = (username: string) => {
+  return mockUsers.find(user => user.username === username);
+};
 
 // Utility functions
 export const hashString = (str: string): string => {
@@ -38,7 +49,7 @@ export const hashString = (str: string): string => {
   for (let i = 0; i < str.length; i++) {
     const char = str.charCodeAt(i);
     hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // Convert to 32bit integer
+    hash = hash & hash;
   }
   return Math.abs(hash).toString();
 };
@@ -55,4 +66,4 @@ export const generateUserBio = (username: string): string => {
   return bios[parseInt(hash) % bios.length];
 };
 
-export { regularUsers, celebrityUsers };
+export { regularUsers, celebrityUsers, diverseUsers };

@@ -1,32 +1,56 @@
 
-import { BaseEntity, GeoCoordinates, Timestamps } from '../core/base';
+import { BaseEntity, GeoCoordinates, Address, Timestamps } from '../core/base';
 
-export interface Location extends BaseEntity, GeoCoordinates, Timestamps {
-  id: string;
+export interface Location extends BaseEntity, GeoCoordinates, Address, Timestamps {
   name: string;
-  address: string;
-  city: string;
-  country: string;
-  state?: string;
-  type: string;
-  verified: boolean;
+  type: 'restaurant' | 'bar' | 'attraction' | 'hotel' | 'cafe' | 'club' | 'sports' | 'shopping' | 'entertainment';
+  verified?: boolean;
   rating?: number;
-  price_level?: number;
-  business_status?: string;
-  phone?: string;
-  website?: string;
-  google_maps_url?: string;
   vibes?: string[];
   tags?: string[];
-  hours?: {
-    [key: string]: string | { open: string; close: string; closed?: boolean; };
-  };
-  // Extended properties for compatibility with mock data
+  state?: string;
   zip?: string;
-  followers?: number;
-  checkins?: number;
-  coordinates?: {
-    lat: number;
-    lng: number;
+}
+
+export interface Venue extends Location {
+  description?: string;
+  hours?: string;
+  phone?: string;
+  website?: string;
+  socialMedia?: {
+    instagram?: string;
+    facebook?: string;
+    twitter?: string;
   };
+  amenities?: string[];
+  priceRange?: '$' | '$$' | '$$$' | '$$$$';
+  capacity?: number;
+  ageRestriction?: number;
+  dressCode?: string;
+  reservationsRequired?: boolean;
+  parkingAvailable?: boolean;
+  wheelchairAccessible?: boolean;
+}
+
+export interface VenueInsights {
+  venueId: string;
+  totalVisits: number;
+  uniqueVisitors: number;
+  averageRating: number;
+  topVibes: string[];
+  busyHours: { hour: number; visitors: number }[];
+  demographics: {
+    ageGroups: { range: string; percentage: number }[];
+    genderSplit: { male: number; female: number; other: number };
+  };
+  recentActivity: {
+    posts: number;
+    checkins: number;
+    reviews: number;
+  };
+  trends: {
+    period: string;
+    visitChange: number;
+    ratingChange: number;
+  }[];
 }

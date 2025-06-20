@@ -1,12 +1,11 @@
-
 import { useState, useEffect } from 'react';
 import { UserProfileData, UserProfileStats, User, Post, Location, Comment } from '@/types';
-import { mockUsers } from '@/mock/users';
+import { mockUsers, getUserById, getUserByUsername } from '@/mock/users';
 import { mockPosts } from '@/mock/posts';
 import { mockComments } from '@/mock/comments';
 import { mockLocations } from '@/mock/locations';
 
-export const useUserProfile = (userId?: string) => {
+export const useUserProfile = (userIdOrUsername?: string) => {
   const [profile, setProfile] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -22,15 +21,19 @@ export const useUserProfile = (userId?: string) => {
   });
 
   useEffect(() => {
-    if (userId) {
-      // Simulate loading
+    if (userIdOrUsername) {
       setLoading(true);
       
       setTimeout(() => {
-        const user = mockUsers.find(u => u.id === userId);
+        // Try to find user by ID first, then by username
+        let user = getUserById(userIdOrUsername);
+        if (!user) {
+          user = getUserByUsername(userIdOrUsername);
+        }
+        
         if (user) {
           setProfile(user);
-          const posts = mockPosts.filter(p => p.user.id === userId);
+          const posts = mockPosts.filter(p => p.user.id === user.id);
           setUserPosts(posts);
           setStats({
             posts: posts.length,
@@ -41,30 +44,30 @@ export const useUserProfile = (userId?: string) => {
           setFollowedVenues(mockLocations.slice(0, 3));
           setVisitedPlaces(mockLocations.slice(0, 5));
           setWantToVisitPlaces(mockLocations.slice(5, 8));
+          setError(null);
         } else {
           setError('User not found');
+          setProfile(null);
         }
         setLoading(false);
       }, 500);
     }
-  }, [userId]);
+  }, [userIdOrUsername]);
 
   const followUser = async (userToFollow: string): Promise<boolean> => {
-    // Mock implementation
     return true;
   };
 
   const unfollowUser = async (userToUnfollow: string): Promise<boolean> => {
-    // Mock implementation
     return true;
   };
 
   const getFollowStatus = (userId: string): boolean => {
-    return false; // Mock implementation
+    return false;
   };
 
   const getMutualFollowers = (userId: string): User[] => {
-    return mockUsers.slice(0, 2); // Mock implementation
+    return mockUsers.slice(0, 2);
   };
 
   const getUserPosts = (userId: string): Post[] => {
@@ -86,7 +89,6 @@ export const useUserProfile = (userId?: string) => {
     return mockComments.filter(c => c.postId === postId);
   };
 
-  // Add missing methods for UserProfile page
   const updateBio = async (bio: string): Promise<boolean> => {
     return true;
   };
