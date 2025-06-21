@@ -15,6 +15,39 @@ export interface BookingRequest {
 }
 
 export class BookingAgent {
+  // Add missing methods that BookingProcessor expects
+  static isBookingRequest(query: string): boolean {
+    const bookingKeywords = ['book', 'reserve', 'reservation', 'table', 'appointment'];
+    const lowerQuery = query.toLowerCase();
+    return bookingKeywords.some(keyword => lowerQuery.includes(keyword));
+  }
+
+  static extractBookingDetails(query: string): BookingRequest | null {
+    // Simple extraction - in production this would be more sophisticated
+    return {
+      venueId: 'default',
+      venueName: 'Default Venue',
+      date: new Date().toISOString().split('T')[0],
+      time: '19:00',
+      partySize: 2,
+      customerName: 'Guest',
+      customerPhone: '',
+      customerEmail: '',
+      specialRequests: query
+    };
+  }
+
+  static async bookVenue(request: BookingRequest): Promise<any> {
+    return this.processBookingRequest(request);
+  }
+
+  static generateBookingConfirmation(result: any): string {
+    if (result.success) {
+      return result.message;
+    }
+    return "I'm sorry, there was an issue with your booking request.";
+  }
+
   static async processBookingRequest(request: BookingRequest): Promise<{
     success: boolean;
     message: string;

@@ -1,309 +1,195 @@
+
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Slider } from "@/components/ui/slider";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { TargetingOptions, GenderTargeting } from "@/types";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Slider } from '@/components/ui/slider';
 
-const TargetingSegmentation = () => {
-  const [targeting, setTargeting] = useState<TargetingOptions>({
-    ageRanges: [],
-    locations: [],
-    interests: [],
-    gender: {
-      all: true,
-      male: false,
-      female: false,
-      other: false
-    },
-    demographics: {
-      gender: 'all',
-      ageRange: [18, 65],
-      interests: [],
-      behaviors: [],
-      location: []
-    },
-    geographic: {
-      radius: 5,
-      cities: [],
-      regions: []
-    },
-    behaviors: {
-      categories: [],
-      frequency: 'weekly',
-      venueVisits: [],
-      socialEngagement: [],
-      purchaseHistory: []
-    },
-    contextual: {
-      categories: [],
-      frequency: 'daily',
-      vibeTags: [],
-      venueTypes: [],
-      daypart: [],
-      timeOfDay: [],
-      dayOfWeek: [],
-      weather: [],
-      eventTypes: []
-    },
-    momentScore: {
-      crowdDensity: '5',
-      vibeScore: 'high',
-      crowdLevel: 'medium',
-      engagement: 'active'
-    }
-  });
+// Simplified targeting options without locations for now
+const initialTargeting = {
+  ageRanges: ['18-24', '25-34'],
+  interests: ['dining', 'nightlife'],
+  gender: {
+    all: true,
+    male: true,
+    female: true,
+    other: true
+  }
+};
 
-  const handleGenderChange = (gender: string) => {
-    setTargeting(prev => ({
-      ...prev,
-      demographics: {
-        ...prev.demographics!,
-        gender
-      }
-    }));
-  };
-
-  const handleAgeRangeChange = (values: number[]) => {
-    setTargeting(prev => ({
-      ...prev,
-      demographics: {
-        ...prev.demographics!,
-        ageRange: [values[0], values[1]]
-      }
-    }));
-  };
-
-  const handleInterestToggle = (interest: string, checked: boolean) => {
-    setTargeting(prev => ({
-      ...prev,
-      interests: checked 
-        ? [...prev.interests, interest]
-        : prev.interests.filter(i => i !== interest)
-    }));
-  };
-
-  const handleBehaviorToggle = (behavior: string, checked: boolean) => {
-    setTargeting(prev => ({
-      ...prev,
-      behaviors: {
-        ...prev.behaviors!,
-        venueVisits: checked 
-          ? [...(prev.behaviors?.venueVisits || []), behavior]
-          : (prev.behaviors?.venueVisits || []).filter(b => b !== behavior)
-      }
-    }));
-  };
-
-  const handleVibeTagToggle = (tag: string, checked: boolean) => {
-    setTargeting(prev => ({
-      ...prev,
-      contextual: {
-        ...prev.contextual!,
-        vibeTags: checked 
-          ? [...(prev.contextual?.vibeTags || []), tag]
-          : (prev.contextual?.vibeTags || []).filter(t => t !== tag)
-      }
-    }));
-  };
-
-  const handleMomentScoreChange = (field: string, value: string) => {
-    setTargeting(prev => ({
-      ...prev,
-      momentScore: typeof prev.momentScore === 'object' && prev.momentScore !== null ? {
-        ...prev.momentScore,
-        [field]: value
-      } : {
-        crowdDensity: field === 'crowdDensity' ? value : '5',
-        vibeScore: field === 'vibeScore' ? value : 'high',
-        crowdLevel: field === 'crowdLevel' ? value : 'medium',
-        engagement: field === 'engagement' ? value : 'active'
-      }
-    }));
-  };
+const TargetingSegmentation: React.FC = () => {
+  const [targeting, setTargeting] = useState(initialTargeting);
+  const [selectedAge, setSelectedAge] = useState('18-34');
+  const [selectedInterests, setSelectedInterests] = useState<string[]>(['dining']);
+  const [radiusValue, setRadiusValue] = useState([5]);
 
   const interests = [
-    'Nightlife', 'Food & Dining', 'Live Music', 'Cocktails', 'Dancing',
-    'Rooftop Venues', 'Happy Hour', 'Date Night', 'Group Outings'
+    'dining', 'nightlife', 'sports', 'music', 'art', 'shopping',
+    'fitness', 'travel', 'technology', 'outdoor activities'
   ];
 
-  const behaviors = [
-    'Frequent bar visits', 'Weekend social events', 'Premium dining',
-    'Late night activities', 'Social media check-ins', 'Event attendance'
+  const ageRanges = [
+    '18-24', '25-34', '35-44', '45-54', '55-64', '65+'
   ];
 
-  const vibeTags = [
-    'Energetic', 'Chill', 'Romantic', 'Upscale', 'Casual', 'Trendy',
-    'Live Entertainment', 'Outdoor Seating', 'Craft Cocktails'
-  ];
-
-  const getAgeRangeValues = (): number[] => {
-    const ageRange = targeting.demographics?.ageRange;
-    if (Array.isArray(ageRange)) {
-      return ageRange;
-    }
-    if (ageRange && typeof ageRange === 'object' && 'min' in ageRange && 'max' in ageRange) {
-      return [ageRange.min, ageRange.max];
-    }
-    return [18, 65];
+  const handleInterestToggle = (interest: string) => {
+    setSelectedInterests(prev =>
+      prev.includes(interest)
+        ? prev.filter(i => i !== interest)
+        : [...prev, interest]
+    );
   };
 
-  const ageRangeValues = getAgeRangeValues();
-
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Demographic Targeting</CardTitle>
-          <CardDescription>Define your audience demographics</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label>Gender</Label>
-            <Select 
-              value={typeof targeting.demographics?.gender === 'string' ? targeting.demographics.gender : 'all'} 
-              onValueChange={handleGenderChange}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Genders</SelectItem>
-                <SelectItem value="male">Male</SelectItem>
-                <SelectItem value="female">Female</SelectItem>
-                <SelectItem value="non-binary">Non-Binary</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div>
-            <Label>Age Range: {ageRangeValues[0]} - {ageRangeValues[1]}</Label>
-            <Slider
-              value={ageRangeValues}
-              onValueChange={handleAgeRangeChange}
-              min={18}
-              max={80}
-              step={1}
-              className="mt-2"
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Interest Targeting</CardTitle>
-          <CardDescription>Target users based on their interests</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 gap-3">
-            {interests.map((interest) => (
-              <div key={interest} className="flex items-center space-x-2">
-                <Checkbox
-                  id={interest}
-                  checked={targeting.interests.includes(interest)}
-                  onCheckedChange={(checked) => handleInterestToggle(interest, checked as boolean)}
-                />
-                <Label htmlFor={interest} className="text-sm">{interest}</Label>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Behavioral Targeting</CardTitle>
-          <CardDescription>Target based on user behaviors</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 gap-3">
-            {behaviors.map((behavior) => (
-              <div key={behavior} className="flex items-center space-x-2">
-                <Checkbox
-                  id={behavior}
-                  checked={(targeting.behaviors?.venueVisits || []).includes(behavior)}
-                  onCheckedChange={(checked) => handleBehaviorToggle(behavior, checked as boolean)}
-                />
-                <Label htmlFor={behavior} className="text-sm">{behavior}</Label>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Contextual Targeting</CardTitle>
-          <CardDescription>Target based on venue vibes and context</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-3 gap-3">
-            {vibeTags.map((tag) => (
-              <div key={tag} className="flex items-center space-x-2">
-                <Checkbox
-                  id={tag}
-                  checked={(targeting.contextual?.vibeTags || []).includes(tag)}
-                  onCheckedChange={(checked) => handleVibeTagToggle(tag, checked as boolean)}
-                />
-                <Label htmlFor={tag} className="text-sm">{tag}</Label>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Moment Scoring</CardTitle>
-          <CardDescription>Target based on real-time venue energy</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label>Crowd Density</Label>
-            <Select 
-              value={typeof targeting.momentScore === 'object' && targeting.momentScore !== null ? targeting.momentScore.crowdDensity : '5'} 
-              onValueChange={(value) => handleMomentScoreChange('crowdDensity', value)}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="1">Very Low</SelectItem>
-                <SelectItem value="2">Low</SelectItem>
-                <SelectItem value="3">Medium</SelectItem>
-                <SelectItem value="4">High</SelectItem>
-                <SelectItem value="5">Very High</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <Label>Vibe Score</Label>
-            <Select 
-              value={typeof targeting.momentScore === 'object' && targeting.momentScore !== null ? targeting.momentScore.vibeScore : 'high'} 
-              onValueChange={(value) => handleMomentScoreChange('vibeScore', value)}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="low">Low Energy</SelectItem>
-                <SelectItem value="medium">Medium Energy</SelectItem>
-                <SelectItem value="high">High Energy</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="flex justify-between">
-        <Button variant="outline">Save as Template</Button>
-        <Button>Create Campaign</Button>
+    <div className="container mx-auto p-6 space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold">Targeting & Segmentation</h1>
+        <Button className="bg-purple-600 hover:bg-purple-700">
+          Save Targeting
+        </Button>
       </div>
+
+      <Tabs defaultValue="demographics" className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="demographics">Demographics</TabsTrigger>
+          <TabsTrigger value="interests">Interests</TabsTrigger>
+          <TabsTrigger value="location">Location</TabsTrigger>
+          <TabsTrigger value="behavior">Behavior</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="demographics" className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Age Range</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Select value={selectedAge} onValueChange={setSelectedAge}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ageRanges.map(range => (
+                      <SelectItem key={range} value={range}>{range}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Gender</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {Object.entries(targeting.gender).map(([key, value]) => (
+                  <label key={key} className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={value}
+                      onChange={(e) => setTargeting(prev => ({
+                        ...prev,
+                        gender: { ...prev.gender, [key]: e.target.checked }
+                      }))}
+                    />
+                    <span className="capitalize">{key === 'all' ? 'All Genders' : key}</span>
+                  </label>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="interests" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Select Interests</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-2">
+                {interests.map(interest => (
+                  <Badge
+                    key={interest}
+                    variant={selectedInterests.includes(interest) ? "default" : "outline"}
+                    className="cursor-pointer"
+                    onClick={() => handleInterestToggle(interest)}
+                  >
+                    {interest}
+                  </Badge>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="location" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Geographic Targeting</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Radius: {radiusValue[0]} miles
+                </label>
+                <Slider
+                  value={radiusValue}
+                  onValueChange={setRadiusValue}
+                  max={50}
+                  min={1}
+                  step={1}
+                  className="w-full"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">City/Region</label>
+                <Input placeholder="Enter city or region" />
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="behavior" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Behavioral Targeting</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Visit Frequency</label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select frequency" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="daily">Daily visitors</SelectItem>
+                    <SelectItem value="weekly">Weekly visitors</SelectItem>
+                    <SelectItem value="monthly">Monthly visitors</SelectItem>
+                    <SelectItem value="occasional">Occasional visitors</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Spending Level</label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select spending level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">Budget-conscious</SelectItem>
+                    <SelectItem value="medium">Moderate spenders</SelectItem>
+                    <SelectItem value="high">High spenders</SelectItem>
+                    <SelectItem value="luxury">Luxury seekers</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

@@ -1,15 +1,15 @@
 
 import { useCallback } from 'react';
-import { ElevenLabsService } from '@/services/ElevenLabsService';
+import { DeepgramService } from '@/services/DeepgramService';
 import { toast } from 'sonner';
 
 export const useElevenLabsKeyManager = (setUseElevenLabs: (value: boolean) => void) => {
   const promptForElevenLabsKey = useCallback((): void => {
-    const apiKey = prompt('Enter your Eleven Labs API key for improved voice quality:');
+    const apiKey = prompt('Enter your Deepgram API key for improved voice quality:');
     if (apiKey) {
-      ElevenLabsService.setApiKey(apiKey);
+      DeepgramService.setApiKey(apiKey);
       setUseElevenLabs(true);
-      toast.success('Eleven Labs API key saved. Voice quality will be improved.');
+      toast.success('Deepgram API key saved. Voice quality will be improved.');
     }
   }, [setUseElevenLabs]);
 
