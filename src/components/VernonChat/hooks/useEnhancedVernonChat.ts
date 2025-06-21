@@ -14,8 +14,8 @@ export const useEnhancedVernonChat = () => {
   const [chatMode, setChatMode] = useLocalStorage<ChatMode>('vernon_chat_mode', 'user');
   const { processMessage } = useMessageProcessor();
   
-  // Use optimized speech hooks
-  const { speak, stop: stopSpeaking, isSpeaking, promptForElevenLabsKey } = useOptimizedSpeechSynthesis();
+  // Use optimized speech hooks with Deepgram
+  const { speak, stop: stopSpeaking, isSpeaking, promptForDeepgramKey } = useOptimizedSpeechSynthesis();
 
   const addMessage = useCallback((content: string, direction: MessageDirection, aiResponse = false) => {
     const timestamp = new Date();
@@ -107,7 +107,7 @@ export const useEnhancedVernonChat = () => {
   const initializeWelcomeMessage = useCallback(() => {
     if (messages.length === 0) {
       const timestamp = new Date();
-      const welcomeMsg = 'Hello! I\'m Vernon, your AI assistant powered by Google Gemini. How can I help you discover venues and events today?';
+      const welcomeMsg = 'Hello! I\'m Vernon, your AI assistant powered by Google Gemini with enhanced Deepgram voice capabilities. How can I help you discover venues and events today?';
       
       setMessages([
         {
@@ -139,7 +139,8 @@ export const useEnhancedVernonChat = () => {
     transcript: interimTranscript || transcript,
     isSpeaking,
     stopSpeaking,
-    promptForElevenLabsKey,
+    promptForElevenLabsKey: promptForDeepgramKey, // Backward compatibility
+    promptForDeepgramKey,
     initializeWelcomeMessage
   };
 };

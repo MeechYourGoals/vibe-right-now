@@ -1,9 +1,9 @@
 
-import { useCallback } from 'react';
-import { ElevenLabsService } from '@/services/ElevenLabsService';
-import { toast } from '@/hooks/use-toast';
+import { useState, useRef, useCallback } from 'react';
+import { DeepgramService } from '@/services/DeepgramService';
+import { toast } from 'sonner';
 
-interface UseElevenLabsSpeechProps {
+interface UseDeepgramSpeechProps {
   audioElement: React.MutableRefObject<HTMLAudioElement | null>;
   isSpeaking: boolean;
   setIsSpeaking: (value: boolean) => void;
@@ -11,15 +11,15 @@ interface UseElevenLabsSpeechProps {
   stopSpeaking: () => void;
 }
 
-export const useElevenLabsSpeech = ({
+export const useDeepgramSpeech = ({
   audioElement,
   isSpeaking,
   setIsSpeaking,
   currentlyPlayingText,
   stopSpeaking
-}: UseElevenLabsSpeechProps) => {
+}: UseDeepgramSpeechProps) => {
   
-  const speakWithElevenLabs = useCallback(async (text: string): Promise<boolean> => {
+  const speakWithDeepgram = useCallback(async (text: string): Promise<boolean> => {
     try {
       // Don't repeat the same text if it's already playing
       if (isSpeaking && currentlyPlayingText.current === text) {
@@ -35,19 +35,18 @@ export const useElevenLabsSpeech = ({
       currentlyPlayingText.current = text;
       
       // Request to convert text to speech
-      console.log('Requesting Eleven Labs text-to-speech with Adam voice');
-      const audioData = await ElevenLabsService.textToSpeech(text);
+      console.log('Requesting Deepgram text-to-speech with Aura voice');
+      const audioData = await DeepgramService.textToSpeech(text);
       
       if (!audioData || !audioElement.current) {
-        console.error('Failed to get audio from Eleven Labs or audio element not available');
-        // If failed, don't show error toast as the browser speech synthesis will take over
+        console.error('Failed to get audio from Deepgram or audio element not available');
         setIsSpeaking(false);
         currentlyPlayingText.current = null;
         return false;
       }
       
       // Create blob from array buffer
-      const blob = new Blob([audioData], { type: 'audio/mpeg' });
+      const blob = new Blob([audioData], { type: 'audio/wav' });
       const url = URL.createObjectURL(blob);
       
       // Set audio source and play
@@ -71,26 +70,12 @@ export const useElevenLabsSpeech = ({
         return false;
       }
     } catch (error) {
-      if (error instanceof Error && error.message.includes('quota_exceeded')) {
-        console.warn('ElevenLabs quota exceeded, falling back to browser speech');
-        // Show toast only once per session
-        if (!localStorage.getItem('elevenlabs_quota_notified')) {
-          toast({
-            title: "Voice Synthesis Fallback",
-            description: "Your ElevenLabs quota has been exceeded. Using browser voice instead.",
-            duration: 5000,
-          });
-          localStorage.setItem('elevenlabs_quota_notified', 'true');
-        }
-      } else {
-        console.error('Error with Eleven Labs speech synthesis:', error);
-      }
-      
+      console.error('Error with Deepgram speech synthesis:', error);
       setIsSpeaking(false);
       currentlyPlayingText.current = null;
       return false;
     }
   }, [audioElement, isSpeaking, currentlyPlayingText, setIsSpeaking, stopSpeaking]);
   
-  return { speakWithElevenLabs };
+  return { speakWithDeepgram };
 };

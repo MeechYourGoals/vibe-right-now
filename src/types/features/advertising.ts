@@ -9,7 +9,7 @@ export interface AdFormat {
   kpis: string[];
   platform: string;
   dimensions: string;
-  specifications: {
+  specifications?: {
     minWidth?: number;
     minHeight?: number;
     maxFileSize?: string;
@@ -34,7 +34,7 @@ export interface GenderTargeting {
 
 export interface TargetingOptions {
   ageRanges: string[];
-  locations: string[];
+  locations?: string[];
   interests: string[];
   gender?: GenderTargeting;
   demographics?: {

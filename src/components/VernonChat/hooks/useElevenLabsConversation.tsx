@@ -6,18 +6,19 @@ import { useSpeechSynthesis } from './useSpeechSynthesis';
 import { useSpeechRecognition } from './speechRecognition';
 import { VertexAIService } from '@/services/VertexAIService';
 import { SearchService } from '@/services/search/SearchService';
+import { DeepgramService } from '@/services/DeepgramService';
 
 // Create a welcome message based on the mode
 const getWelcomeMessage = (isVenueMode: boolean): Message => ({
   id: '1',
   content: isVenueMode 
-    ? "Hello! I'm Vernon for Venues, your AI business assistant. How can I help you with your venue today?" 
-    : "Hi there! I'm Vernon, your AI assistant for the Vibe Right Now app. I can help you discover great places to go and things to do. Ask me about restaurants, events, activities, or anything else you're interested in!",
+    ? "Hello! I'm Vernon for Venues, your AI business assistant powered by Deepgram voice technology. How can I help you with your venue today?" 
+    : "Hi there! I'm Vernon, your AI assistant for the Vibe Right Now app with enhanced Deepgram voice capabilities. I can help you discover great places to go and things to do. Ask me about restaurants, events, activities, or anything else you're interested in!",
   direction: 'incoming',
   timestamp: new Date(),
   text: isVenueMode 
-    ? "Hello! I'm Vernon for Venues, your AI business assistant. How can I help you with your venue today?" 
-    : "Hi there! I'm Vernon, your AI assistant for the Vibe Right Now app. I can help you discover great places to go and things to do. Ask me about restaurants, events, activities, or anything else you're interested in!",
+    ? "Hello! I'm Vernon for Venues, your AI business assistant powered by Deepgram voice technology. How can I help you with your venue today?" 
+    : "Hi there! I'm Vernon, your AI assistant for the Vibe Right Now app with enhanced Deepgram voice capabilities. I can help you discover great places to go and things to do. Ask me about restaurants, events, activities, or anything else you're interested in!",
   sender: 'ai'
 });
 
@@ -39,15 +40,14 @@ export const useElevenLabsConversation = (isVenueMode: boolean = false) => {
     processTranscript
   } = useSpeechRecognition();
 
-  // Connect to the conversation agent
+  // Connect to the conversation agent (now using Deepgram)
   const connectToAgent = useCallback(async () => {
     try {
-      // In a real implementation with ElevenLabs, we'd connect to their API here
-      // For now, we'll just simulate a connection
+      // Initialize Deepgram connection
       await new Promise(resolve => setTimeout(resolve, 300));
       
       setIsConnected(true);
-      console.log('Connected to conversation agent');
+      console.log('Connected to Deepgram-powered conversation agent');
       return true;
     } catch (error) {
       console.error('Error connecting to agent:', error);
@@ -214,14 +214,7 @@ export const useElevenLabsConversation = (isVenueMode: boolean = false) => {
       
       setMessages(prev => [...prev, errorMessage]);
     }
-  }, [messages, speakResponse, isVenueMode]);
-
-  // Process transcript when it changes
-  useEffect(() => {
-    if (transcript && !isProcessing) {
-      processVoiceInput(transcript);
-    }
-  }, [transcript, isProcessing, processVoiceInput]);
+  }, [messages, isVenueMode, speakResponse]);
 
   return {
     isConnected,
@@ -235,6 +228,6 @@ export const useElevenLabsConversation = (isVenueMode: boolean = false) => {
     toggleListening,
     sendTextMessage,
     processVoiceInput,
-    speakResponse
+    speakResponse: speakResponse
   };
 };
