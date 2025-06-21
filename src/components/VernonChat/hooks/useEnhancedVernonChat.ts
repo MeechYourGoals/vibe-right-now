@@ -16,12 +16,13 @@ export const useEnhancedVernonChat = () => {
   
   // Use optimized speech hooks
   const { speak, stop: stopSpeaking, isSpeaking } = useOptimizedSpeechSynthesis();
-  const { 
-    isListening, 
-    transcript, 
+  const {
+    isListening,
+    transcript,
     interimTranscript,
     toggleListening,
-    clearTranscript 
+    clearTranscript,
+    audioLevel
   } = useOptimizedSpeechRecognition({
     continuous: true,
     interimResults: true
@@ -135,6 +136,7 @@ export const useEnhancedVernonChat = () => {
     isListening,
     toggleListening,
     transcript: interimTranscript || transcript,
+    audioLevel,
     isSpeaking,
     initializeWelcomeMessage,
     handleTranscriptUpdate
