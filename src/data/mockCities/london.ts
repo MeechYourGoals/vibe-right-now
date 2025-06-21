@@ -21,7 +21,9 @@ const london: CityData = {
       verified: true,
       vibes: ["Bombay Canteen", "Indian Street Food", "Trendy"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Dishoom+London"
+      google_maps_url: "https://maps.google.com/maps?q=Dishoom+London",
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z'
     },
     {
       id: "lon-2",
@@ -36,7 +38,9 @@ const london: CityData = {
       verified: true,
       vibes: ["Football", "Concert Venue", "Iconic"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Wembley+Stadium+London"
+      google_maps_url: "https://maps.google.com/maps?q=Wembley+Stadium+London",
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z'
     },
     {
       id: "lon-3",
@@ -52,7 +56,9 @@ const london: CityData = {
       verified: true,
       vibes: ["Dance", "Electronic", "Legendary"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Ministry+of+Sound+London"
+      google_maps_url: "https://maps.google.com/maps?q=Ministry+of+Sound+London",
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z'
     },
     {
       id: "lon-4",
@@ -68,7 +74,9 @@ const london: CityData = {
       verified: true,
       vibes: ["Specialty Coffee", "Covent Garden", "Relaxed"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Monmouth+Coffee+London"
+      google_maps_url: "https://maps.google.com/maps?q=Monmouth+Coffee+London",
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z'
     },
     {
       id: "lon-5",
@@ -83,7 +91,9 @@ const london: CityData = {
       verified: true,
       vibes: ["Shopping", "Modern", "Dining"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Westfield+London"
+      google_maps_url: "https://maps.google.com/maps?q=Westfield+London",
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z'
     }
   ]
 };

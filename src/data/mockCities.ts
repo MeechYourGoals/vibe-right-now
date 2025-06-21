@@ -2,9 +2,9 @@
 import { CityData, Location } from '@/types';
 
 import nyc from './mockCities/nyc';
-import la from './mockCities/la';
+import { laLocations } from './mockCities/la';
 import london from './mockCities/london';
-import chicago from './mockCities/chicago';
+import { chicagoLocations } from './mockCities/chicago';
 import miami from './mockCities/miami';
 import sanfrancisco from './mockCities/sanfrancisco';
 import paris from './mockCities/paris';
@@ -12,12 +12,31 @@ import tokyo from './mockCities/tokyo';
 import sydney from './mockCities/sydney';
 import barcelona from './mockCities/barcelona';
 
+// Convert location arrays to city data format
+const laCity: CityData = {
+  name: "Los Angeles",
+  state: "CA",
+  country: "USA",
+  lat: 34.0522,
+  lng: -118.2437,
+  venues: laLocations
+};
+
+const chicagoCity: CityData = {
+  name: "Chicago", 
+  state: "IL",
+  country: "USA",
+  lat: 41.8781,
+  lng: -87.6298,
+  venues: chicagoLocations
+};
+
 // Reduced to ~50% of mock cities for better performance
 export const mockCities: CityData[] = [
   nyc,
-  la,
+  laCity,
   london,
-  chicago,
+  chicagoCity,
   miami,
   sanfrancisco,
   paris,
