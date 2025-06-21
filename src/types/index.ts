@@ -29,4 +29,51 @@ export interface CityData {
   lng: number;
   timezone?: string;
   population?: number;
+  state?: string;
+  venues?: Location[];
+}
+
+// Missing sentiment analysis types
+export interface PlatformSentimentSummary {
+  platform: string;
+  sentiment: 'positive' | 'negative' | 'neutral';
+  score: number;
+  count: number;
+}
+
+export interface SentimentTheme {
+  theme: string;
+  sentiment: 'positive' | 'negative' | 'neutral';
+  mentions: number;
+  examples: string[];
+}
+
+// Missing coordinate types
+export interface Coordinates {
+  lat: number;
+  lng: number;
+}
+
+export interface GeoCoordinates {
+  latitude: number;
+  longitude: number;
+}
+
+// User profile types
+export interface UserProfileData {
+  id: string;
+  username: string;
+  name: string;
+  bio?: string;
+  avatar?: string;
+  verified?: boolean;
+  followersCount?: number;
+  followingCount?: number;
+}
+
+export interface UserProfileStats {
+  postsCount: number;
+  followersCount: number;
+  followingCount: number;
+  vibesCount: number;
 }

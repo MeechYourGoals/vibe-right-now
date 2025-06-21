@@ -17,13 +17,16 @@ export interface Post {
   comments: number;
   shares?: number;
   timestamp: string;
+  createdAt?: string | Date;
   location?: Location;
   user: User;
   vibes?: string[];
+  vibeTags?: string[];
   tags?: string[];
   verified?: boolean;
   isPinned?: boolean;
   isVenuePost?: boolean;
+  saved?: boolean;
 }
 
 export interface Comment {

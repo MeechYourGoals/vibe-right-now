@@ -22,7 +22,7 @@ export interface Location {
   business_status?: string;
   google_maps_url?: string;
   isOpen24Hours?: boolean;
-  createdAt?: Date;
+  createdAt?: Date | string;
 }
 
 export interface VenueHours {
@@ -46,4 +46,9 @@ export interface VenueInsights {
   priceRange: '$' | '$$' | '$$$' | '$$$$';
   ageGroup: string;
   atmosphere: string[];
+  visitorCount?: number;
+  visitors?: number;
+  checkInCount?: number;
+  receiptUploads?: number;
+  discountRedemptions?: number;
 }

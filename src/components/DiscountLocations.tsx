@@ -27,45 +27,55 @@ const DiscountLocations = () => {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {discountPosts.map((post) => (
-            <div 
-              key={post.id} 
-              className="p-3 border rounded-lg flex justify-between items-start hover:bg-accent/10 transition-colors"
-            >
-              <div className="flex gap-3">
-                <Avatar className="h-10 w-10">
-                  <AvatarImage 
-                    src={post.media[0]?.url || `https://source.unsplash.com/random/200x200/?${post.location.type}`} 
-                    alt={post.location.name} 
-                  />
-                  <AvatarFallback>{post.location.name.charAt(0)}</AvatarFallback>
-                </Avatar>
-                <div>
-                  <div className="font-medium">{post.location.name}</div>
-                  <div className="text-sm text-muted-foreground">
-                    {post.location.city}, {post.location.state}
-                  </div>
-                  <div className="mt-1">
-                    <Badge variant="secondary" className="text-xs">
-                      <Ticket className="h-3 w-3 mr-1" />
-                      {post.content.includes("FREE TICKETS") ? "Free Tickets" :
-                        post.content.includes("FREE COVER") ? "Free Entry" :
-                        post.content.includes("FREE pastry") ? "Free Item w/ Purchase" :
-                        "VIP Access"}
-                    </Badge>
+          {discountPosts.map((post) => {
+            // Handle media safely - check if it's an array and get the first media item
+            const firstMedia = post.media && Array.isArray(post.media) && post.media.length > 0 
+              ? post.media[0] 
+              : null;
+            const mediaUrl = firstMedia 
+              ? (typeof firstMedia === 'string' ? firstMedia : firstMedia.url)
+              : `https://source.unsplash.com/random/200x200/?${post.location?.type}`;
+            
+            return (
+              <div 
+                key={post.id} 
+                className="p-3 border rounded-lg flex justify-between items-start hover:bg-accent/10 transition-colors"
+              >
+                <div className="flex gap-3">
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage 
+                      src={mediaUrl} 
+                      alt={post.location?.name || 'Venue'} 
+                    />
+                    <AvatarFallback>{post.location?.name?.charAt(0) || 'V'}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <div className="font-medium">{post.location?.name}</div>
+                    <div className="text-sm text-muted-foreground">
+                      {post.location?.city}, {post.location?.state}
+                    </div>
+                    <div className="mt-1">
+                      <Badge variant="secondary" className="text-xs">
+                        <Ticket className="h-3 w-3 mr-1" />
+                        {post.content.includes("FREE TICKETS") ? "Free Tickets" :
+                          post.content.includes("FREE COVER") ? "Free Entry" :
+                          post.content.includes("FREE pastry") ? "Free Item w/ Purchase" :
+                          "VIP Access"}
+                      </Badge>
+                    </div>
                   </div>
                 </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-8" 
+                  onClick={() => navigate(`/venue/${post.location?.id}`)}
+                >
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
               </div>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="h-8" 
-                onClick={() => navigate(`/venue/${post.location.id}`)}
-              >
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </div>
-          ))}
+            );
+          })}
 
           <Button 
             variant="outline" 

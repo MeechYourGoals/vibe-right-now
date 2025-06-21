@@ -3,14 +3,21 @@ import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Heart, MessageCircle, Share2, MoreHorizontal } from 'lucide-react';
-import { Post, Media } from '@/types';
+import { Post, Media, User, Location } from '@/types';
 
 interface ProfileTabContentProps {
-  posts: Post[];
+  posts?: Post[];
   activeTab: string;
+  user?: User;
+  locations?: Location[];
 }
 
-const ProfileTabContent: React.FC<ProfileTabContentProps> = ({ posts, activeTab }) => {
+const ProfileTabContent: React.FC<ProfileTabContentProps> = ({ 
+  posts = [], 
+  activeTab, 
+  user, 
+  locations = [] 
+}) => {
   const renderMedia = (media: string[] | Media[] | undefined) => {
     if (!media || media.length === 0) return null;
     
@@ -44,6 +51,25 @@ const ProfileTabContent: React.FC<ProfileTabContentProps> = ({ posts, activeTab 
         return true;
     }
   });
+
+  if (activeTab === 'places' && locations) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {locations.map((location) => (
+          <div key={location.id} className="bg-card border rounded-lg p-4">
+            <h3 className="font-semibold">{location.name}</h3>
+            <p className="text-sm text-muted-foreground">{location.address}</p>
+            <div className="flex items-center gap-2 mt-2">
+              <Badge variant="secondary">{location.type}</Badge>
+              {location.rating && (
+                <span className="text-sm">⭐ {location.rating}</span>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   if (activeTab === 'vibes') {
     return (

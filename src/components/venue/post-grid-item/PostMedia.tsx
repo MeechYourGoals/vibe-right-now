@@ -18,10 +18,15 @@ const PostMedia: React.FC<PostMediaProps> = ({ post }) => {
     );
   }
 
-  if (post.media[0].type === "image") {
+  const firstMedia = post.media[0];
+  const isMediaObject = typeof firstMedia === 'object' && firstMedia !== null;
+  const mediaType = isMediaObject ? firstMedia.type : 'image';
+  const mediaUrl = isMediaObject ? firstMedia.url : firstMedia;
+
+  if (mediaType === "image") {
     return (
       <ImageWithFallback
-        src={post.media[0].url}
+        src={mediaUrl}
         alt={`Post by ${post.user.username}`}
         className="h-full w-full object-cover transition-transform group-hover:scale-105"
       />
@@ -30,7 +35,7 @@ const PostMedia: React.FC<PostMediaProps> = ({ post }) => {
   
   return (
     <video
-      src={post.media[0].url}
+      src={mediaUrl}
       className="h-full w-full object-cover"
       poster="https://images.unsplash.com/photo-1473091534298-04dcbce3278c?w=500&q=80&auto=format&fit=crop"
     />

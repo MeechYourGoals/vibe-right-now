@@ -43,8 +43,8 @@ const PostFeed = ({ celebrityFeatured = [], feedType = "for-you" }: PostFeedProp
         // Sort by timestamp (most recent first)
         return allPosts
           .sort((a, b) => {
-            const aTime = a.timestamp ? new Date(a.timestamp).getTime() : new Date(a.createdAt).getTime();
-            const bTime = b.timestamp ? new Date(b.timestamp).getTime() : new Date(b.createdAt).getTime();
+            const aTime = new Date(a.timestamp).getTime();
+            const bTime = new Date(b.timestamp).getTime();
             return bTime - aTime;
           })
           .slice(0, 20);
@@ -79,8 +79,8 @@ const PostFeed = ({ celebrityFeatured = [], feedType = "for-you" }: PostFeedProp
           .sort((a, b) => {
             const aLikes = a.likes || 0;
             const bLikes = b.likes || 0;
-            const aTime = a.timestamp ? new Date(a.timestamp).getTime() : new Date(a.createdAt).getTime();
-            const bTime = b.timestamp ? new Date(b.timestamp).getTime() : new Date(b.createdAt).getTime();
+            const aTime = new Date(a.timestamp).getTime();
+            const bTime = new Date(b.timestamp).getTime();
             const aScore = aLikes * 0.7 + (Date.now() - aTime) / (1000 * 60 * 60) * 0.3;
             const bScore = bLikes * 0.7 + (Date.now() - bTime) / (1000 * 60 * 60) * 0.3;
             return bScore - aScore;
