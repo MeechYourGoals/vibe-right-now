@@ -23,7 +23,7 @@ const Index = () => {
 
   return (
     <Layout>
-      <main className="container py-6">
+      <main className={`container py-6 ${isMobile ? 'mobile-smooth-scroll' : ''}`}>
         <div className="flex flex-col gap-6">
           {/* Search bar with feed tabs */}
           <SearchVibes 
@@ -44,8 +44,8 @@ const Index = () => {
               </h1>
             </div>
 
-            {/* Posts feed layout */}
-            <div className="w-full">
+            {/* Posts feed layout with enhanced mobile scrolling */}
+            <div className={`w-full ${isMobile ? 'mobile-scroll-container' : ''}`}>
               <PostFeed 
                 celebrityFeatured={featuredUsers} 
                 feedType={currentFeedTab}
