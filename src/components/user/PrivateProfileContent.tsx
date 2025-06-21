@@ -19,13 +19,13 @@ const PrivateProfileContent = ({ user }: PrivateProfileContentProps) => {
   return (
     <div className="bg-card rounded-lg overflow-hidden">
       {/* Cover/Banner area */}
-      <div className="h-32 bg-gradient-to-r from-teal-500 via-blue-500 to-purple-600 relative">
+      <div className="h-32 bg-gradient-to-r from-purple-600 via-pink-500 to-red-500 relative">
         <div className="absolute top-4 right-4 flex gap-2">
           <Button variant="outline" size="sm" className="bg-background/80 backdrop-blur-sm">
             <Share className="h-4 w-4 mr-1" />
             Share
           </Button>
-          <Button size="sm" className="bg-teal-600 hover:bg-teal-700">
+          <Button size="sm" className="bg-white text-black hover:bg-gray-100">
             <UserPlus className="h-4 w-4 mr-1" />
             Follow
           </Button>
@@ -35,10 +35,13 @@ const PrivateProfileContent = ({ user }: PrivateProfileContentProps) => {
       {/* Profile content */}
       <div className="px-6 pb-6 -mt-16 relative">
         <div className="flex items-start gap-6">
-          <Avatar className="h-24 w-24 border-4 border-background bg-background">
-            <AvatarImage src={user.avatar} alt={user.name} />
-            <AvatarFallback className="text-2xl">{user.name.charAt(0)}</AvatarFallback>
-          </Avatar>
+          <div className="relative">
+            <Avatar className="h-24 w-24 border-4 border-background bg-background">
+              <AvatarImage src={user.avatar} alt={user.name} />
+              <AvatarFallback className="text-2xl">{user.name.charAt(0)}</AvatarFallback>
+            </Avatar>
+            <div className="absolute -inset-1 bg-gradient-to-r from-cyan-400 to-teal-400 rounded-full blur opacity-30"></div>
+          </div>
           
           <div className="flex-1 pt-16">
             <div className="flex items-center gap-2 mb-2">
@@ -100,7 +103,7 @@ const PrivateProfileContent = ({ user }: PrivateProfileContentProps) => {
             @{user.username} has chosen to keep their profile private. 
             Follow them to request access to their content.
           </p>
-          <Button className="bg-teal-600 hover:bg-teal-700">
+          <Button className="bg-white text-black hover:bg-gray-100">
             Request to Follow
           </Button>
         </div>

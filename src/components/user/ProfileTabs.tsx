@@ -21,7 +21,7 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
   wantToVisitPlaces = [],
   isPrivate = false
 }) => {
-  const [activeTab, setActiveTab] = useState('posts');
+  const [activeTab, setActiveTab] = useState('content');
 
   if (isPrivate) {
     return (
@@ -33,37 +33,29 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <TabsList className="grid w-full grid-cols-4">
-        <TabsTrigger value="posts">Posts</TabsTrigger>
-        <TabsTrigger value="venues">Venues</TabsTrigger>
-        <TabsTrigger value="visited">Visited</TabsTrigger>
-        <TabsTrigger value="wishlist">Wishlist</TabsTrigger>
+      <TabsList className="grid w-full grid-cols-3">
+        <TabsTrigger value="content">Content</TabsTrigger>
+        <TabsTrigger value="places">Places</TabsTrigger>
+        <TabsTrigger value="following">Following</TabsTrigger>
       </TabsList>
       
-      <TabsContent value="posts" className="mt-6">
+      <TabsContent value="content" className="mt-6">
         <ProfileTabContent 
           posts={posts}
           user={user}
         />
       </TabsContent>
       
-      <TabsContent value="venues" className="mt-6">
-        <ProfileTabContent 
-          locations={followedVenues}
-          user={user}
-        />
-      </TabsContent>
-      
-      <TabsContent value="visited" className="mt-6">
+      <TabsContent value="places" className="mt-6">
         <ProfileTabContent 
           locations={visitedPlaces}
           user={user}
         />
       </TabsContent>
       
-      <TabsContent value="wishlist" className="mt-6">
+      <TabsContent value="following" className="mt-6">
         <ProfileTabContent 
-          locations={wantToVisitPlaces}
+          locations={followedVenues}
           user={user}
         />
       </TabsContent>
