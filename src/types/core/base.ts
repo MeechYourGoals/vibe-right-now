@@ -22,3 +22,15 @@ export interface Timestamps {
   createdAt?: string;
   updatedAt?: string;
 }
+
+export interface UserProfile {
+  username: string;
+  name: string;
+  avatar: string;
+  bio?: string;
+  verified?: boolean;
+  posts?: number;
+  followers?: number;
+  following?: number;
+  isPrivate?: boolean;
+}

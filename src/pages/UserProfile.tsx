@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import UserProfileHeader from '@/components/user/UserProfileHeader';
+import PrivateProfileContent from '@/components/user/PrivateProfileContent';
 import ProfileTabs from '@/components/user/ProfileTabs';
 import { useUserProfile } from '@/hooks/useUserProfile';
 
@@ -23,11 +24,6 @@ const UserProfile = () => {
     updateBio,
     blockUser,
     reportUser,
-    getFollowStatus,
-    getMutualFollowers,
-    getUserPosts,
-    getUserStats,
-    getPostComments,
     getUserBio,
     isPrivateProfile
   } = useUserProfile(username || '');
@@ -74,31 +70,35 @@ const UserProfile = () => {
     );
   }
 
-  const handleGetUserBio = () => getUserBio(profile.id);
-
   return (
     <div className="min-h-screen bg-background">
       <Header />
       <main className="container py-6">
-        <UserProfileHeader 
-          user={profile}
-          onFollow={followUser}
-          onUnfollow={unfollowUser}
-          onUpdateBio={updateBio}
-          onBlock={blockUser}
-          onReport={reportUser}
-          isPrivate={isPrivateProfile}
-          getUserBio={handleGetUserBio}
-        />
-        
-        <ProfileTabs
-          user={profile}
-          posts={userPosts}
-          followedVenues={followedVenues}
-          visitedPlaces={visitedPlaces}
-          wantToVisitPlaces={wantToVisitPlaces}
-          isPrivate={isPrivateProfile}
-        />
+        {profile.isPrivate ? (
+          <PrivateProfileContent user={profile} />
+        ) : (
+          <>
+            <UserProfileHeader 
+              user={profile}
+              onFollow={followUser}
+              onUnfollow={unfollowUser}
+              onUpdateBio={updateBio}
+              onBlock={blockUser}
+              onReport={reportUser}
+              isPrivate={isPrivateProfile}
+              getUserBio={() => getUserBio(profile.id)}
+            />
+            
+            <ProfileTabs
+              user={profile}
+              posts={userPosts}
+              followedVenues={followedVenues}
+              visitedPlaces={visitedPlaces}
+              wantToVisitPlaces={wantToVisitPlaces}
+              isPrivate={isPrivateProfile}
+            />
+          </>
+        )}
       </main>
     </div>
   );

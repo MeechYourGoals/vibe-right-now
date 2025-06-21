@@ -1,59 +1,50 @@
 
 import { BaseEntity, GeoCoordinates, Address, Timestamps } from '../core/base';
 
+export type LocationType = 
+  | 'restaurant' 
+  | 'bar' 
+  | 'attraction' 
+  | 'hotel' 
+  | 'cafe' 
+  | 'club' 
+  | 'sports' 
+  | 'shopping' 
+  | 'entertainment' 
+  | 'event'
+  | 'nightclub'
+  | 'nightlife'
+  | 'other'
+  | 'city';
+
 export interface Location extends BaseEntity, GeoCoordinates, Address, Timestamps {
   name: string;
-  type: 'restaurant' | 'bar' | 'attraction' | 'hotel' | 'cafe' | 'club' | 'sports' | 'shopping' | 'entertainment' | 'event';
+  type: LocationType;
   verified?: boolean;
   rating?: number;
   vibes?: string[];
   tags?: string[];
-  hours?: string | {
-    [key: string]: string | { open: string; close: string; closed?: boolean; };
-  };
+  description?: string;
   phone?: string;
   website?: string;
-  google_maps_url?: string;
-  business_status?: string;
-  price_level?: number;
-}
-
-export interface Venue extends Location {
-  description?: string;
-  socialMedia?: {
+  hours?: string | { [key: string]: string | { open: string; close: string; closed?: boolean } };
+  priceRange?: string;
+  capacity?: number;
+  amenities?: string[];
+  socialLinks?: {
     instagram?: string;
     facebook?: string;
     twitter?: string;
   };
-  amenities?: string[];
-  priceRange?: '$' | '$$' | '$$$' | '$$$$';
-  capacity?: number;
-  ageRestriction?: number;
-  dressCode?: string;
-  reservationsRequired?: boolean;
-  parkingAvailable?: boolean;
-  wheelchairAccessible?: boolean;
+  images?: string[];
+  waitTime?: number;
+  isOpen24Hours?: boolean;
 }
 
-export interface VenueInsights {
-  venueId: string;
-  totalVisits: number;
-  uniqueVisitors: number;
-  averageRating: number;
-  topVibes: string[];
-  busyHours: { hour: number; visitors: number }[];
-  demographics: {
-    ageGroups: { range: string; percentage: number }[];
-    genderSplit: { male: number; female: number; other: number };
-  };
-  recentActivity: {
-    posts: number;
-    checkins: number;
-    reviews: number;
-  };
-  trends: {
-    period: string;
-    visitChange: number;
-    ratingChange: number;
-  }[];
+export interface CityData {
+  name: string;
+  country: string;
+  lat: number;
+  lng: number;
+  venues: Location[];
 }

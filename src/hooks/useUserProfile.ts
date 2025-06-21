@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { UserProfileData, UserProfileStats, User, Post, Location, Comment } from '@/types';
 import { mockUsers, getUserById, getUserByUsername } from '@/mock/users';
@@ -132,6 +133,6 @@ export const useUserProfile = (userIdOrUsername?: string) => {
     blockUser,
     reportUser,
     getUserBio,
-    isPrivateProfile
+    isPrivateProfile: profile?.isPrivate || false
   };
 };
