@@ -70,20 +70,27 @@ serve(async (req) => {
 
       return new Response(
         JSON.stringify({ transcript }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        {
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json',
+          },
+        }
       );
     }
-    
-    else {
-      throw new Error('Invalid action or missing parameters');
-    }
+
+    throw new Error('Invalid action or missing required parameters');
+
   } catch (error) {
-    console.error('Error in Deepgram speech function:', error);
+    console.error('Edge function error:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
       {
         status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json',
+        },
       }
     );
   }

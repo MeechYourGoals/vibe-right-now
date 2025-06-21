@@ -1,23 +1,19 @@
 
-// Core Deepgram service for text-to-speech and speech-to-text functionality
+import { supabase } from '@/integrations/supabase/client';
+
 export class DeepgramService {
   private static apiKey: string | null = null;
-  private static defaultApiKey: string = 'a615f48b1cfac2c90654240a126e3cbbb05fdc5f';
   
-  // Set API key
+  // Set API key in localStorage for client-side persistence
   public static setApiKey(apiKey: string) {
     this.apiKey = apiKey;
     localStorage.setItem('deepgramApiKey', apiKey);
   }
   
-  // Get API key from local storage if available, or use default
+  // Get API key from localStorage
   public static getApiKey(): string | null {
     if (!this.apiKey) {
-      this.apiKey = localStorage.getItem('deepgramApiKey') || this.defaultApiKey;
-      
-      if (this.apiKey === this.defaultApiKey && !localStorage.getItem('deepgramApiKey')) {
-        localStorage.setItem('deepgramApiKey', this.defaultApiKey);
-      }
+      this.apiKey = localStorage.getItem('deepgramApiKey');
     }
     return this.apiKey;
   }
@@ -33,71 +29,79 @@ export class DeepgramService {
     return !!this.getApiKey();
   }
 
-  // Text to speech conversion using Deepgram Aura
+  // Text to speech using Supabase edge function
   public static async textToSpeech(text: string, voice: string = 'aura-asteria-en'): Promise<ArrayBuffer | null> {
-    const apiKey = this.getApiKey();
-    
-    if (!apiKey) {
-      console.error('Deepgram API key not set');
-      return null;
-    }
-    
     try {
-      console.log(`Converting text to speech with Deepgram Aura voice: ${voice}`);
+      console.log(`Converting text to speech with Deepgram voice: ${voice}`);
       
-      const response = await fetch('https://api.deepgram.com/v1/speak?model=aura-asteria-en', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Token ${apiKey}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          text: text.length > 500 ? text.substring(0, 500) + '...' : text
-        })
+      const { data, error } = await supabase.functions.invoke('deepgram-speech', {
+        body: {
+          action: 'text-to-speech',
+          text: text.length > 800 ? text.substring(0, 800) + '...' : text,
+          voice: voice
+        }
       });
       
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.warn('Deepgram TTS API error:', errorText);
+      if (error) {
+        console.error('Deepgram TTS error:', error);
         return null;
       }
       
-      return await response.arrayBuffer();
+      // The edge function returns raw audio data
+      if (data instanceof ArrayBuffer) {
+        return data;
+      }
+      
+      // If it's base64 encoded, decode it
+      if (typeof data === 'string') {
+        const binaryString = atob(data);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        return bytes.buffer;
+      }
+      
+      return null;
     } catch (error) {
       console.error('Error in Deepgram text-to-speech:', error);
       return null;
     }
   }
 
-  // Speech to text conversion using Deepgram Nova-2
-  public static async speechToText(audioData: ArrayBuffer | Blob): Promise<string | null> {
-    const apiKey = this.getApiKey();
-    
-    if (!apiKey) {
-      console.error('Deepgram API key not set');
-      return null;
-    }
-    
+  // Speech to text using Supabase edge function
+  public static async speechToText(audioData: ArrayBuffer | Blob | string): Promise<string | null> {
     try {
       console.log('Processing speech to text with Deepgram Nova-2');
       
-      const response = await fetch('https://api.deepgram.com/v1/listen?model=nova-2&smart_format=true', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Token ${apiKey}`,
-          'Content-Type': 'audio/wav'
-        },
-        body: audioData
+      let base64Audio: string;
+      
+      if (typeof audioData === 'string') {
+        base64Audio = audioData;
+      } else if (audioData instanceof ArrayBuffer) {
+        const bytes = new Uint8Array(audioData);
+        base64Audio = btoa(String.fromCharCode(...bytes));
+      } else if (audioData instanceof Blob) {
+        const arrayBuffer = await audioData.arrayBuffer();
+        const bytes = new Uint8Array(arrayBuffer);
+        base64Audio = btoa(String.fromCharCode(...bytes));
+      } else {
+        throw new Error('Unsupported audio data format');
+      }
+      
+      const { data, error } = await supabase.functions.invoke('deepgram-speech', {
+        body: {
+          action: 'speech-to-text',
+          audioData: base64Audio
+        }
       });
       
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Deepgram STT API error:', errorText);
+      if (error) {
+        console.error('Deepgram STT error:', error);
         return null;
       }
       
-      const data = await response.json();
-      return data.results?.channels[0]?.alternatives[0]?.transcript || null;
+      return data?.transcript || null;
     } catch (error) {
       console.error('Error in Deepgram speech-to-text:', error);
       return null;

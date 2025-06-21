@@ -22,7 +22,6 @@ export const useOptimizedSpeechRecognition = ({
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
-  const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
   
   // Initialize speech recognition with browser fallback
   useEffect(() => {
@@ -89,7 +88,7 @@ export const useOptimizedSpeechRecognition = ({
     };
   }, [continuous, interimResults, onTranscriptComplete]);
   
-  // Enhanced speech recognition using Deepgram for better accuracy
+  // Enhanced speech recognition using Deepgram
   const startDeepgramRecognition = useCallback(async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
