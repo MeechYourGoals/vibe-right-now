@@ -1,149 +1,100 @@
 
-import React, { useState, useCallback } from "react";
-import Header from "@/components/Header";
-import CameraButton from "@/components/CameraButton";
-import NearbyVibesMap from "@/components/NearbyVibesMap";
-import useExploreState from "@/hooks/useExploreState";
-import ExploreSearchSection from "@/components/explore/ExploreSearchSection";
-import ExploreContent from "@/components/explore/ExploreContent";
-import ExploreSidebar from "@/components/explore/ExploreSidebar";
-import { useMapSync } from "@/hooks/useMapSync";
-import { Location } from "@/types";
-import { findCityByName } from "@/data/mockCities";
-import { useIsMobile } from "@/hooks/use-mobile";
+import React, { useState, useEffect } from "react";
+import { Layout } from "@/components/Layout";
+import { ExploreContent } from "@/components/explore/ExploreContent";
+import { ExploreSidebar } from "@/components/explore/ExploreSidebar";
+import { useSearchParams } from "react-router-dom";
+import { useExploreState } from "@/hooks/useExploreState";
+import { useFilterHandling } from "@/hooks/explore/useFilterHandling";
+import { useLocationData } from "@/hooks/explore/useLocationData";
+import { useQueryProcessing } from "@/hooks/explore/useQueryProcessing";
+import { useCityDetection } from "@/hooks/explore/useCityDetection";
+import { cityLocations } from "@/mock/cityLocations";
 
 const Explore = () => {
-  const isMobile = useIsMobile();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [location, setLocation] = useState("");
-  
-  const { mapState, updateMapCenter, updateRealPlaces, zoomToPlace } = useMapSync();
-  
+  const [searchParams] = useSearchParams();
   const {
-    activeTab,
-    searchedCity,
-    searchedState,
-    searchCategory,
-    filteredLocations,
-    locationTags,
-    musicEvents,
-    comedyEvents,
-    nightlifeVenues,
-    vibeFilter,
-    isNaturalLanguageSearch,
-    isLoadingResults,
-    dateRange,
-    showDateFilter,
-    activeSearchTab,
-    getPageTitle,
-    handleSearch,
-    handleTabChange,
-    handleClearVibeFilter,
-    handleDateRangeChange,
-    handleClearDates,
-    handleSearchTabChange,
-    setShowDateFilter
+    selectedCity,
+    setSelectedCity,
+    selectedCategory,
+    setSelectedCategory,
+    selectedFilters,
+    setSelectedFilters,
+    selectedVibeFilter,
+    setSelectedVibeFilter,
+    selectedDateRange,
+    setSelectedDateRange,
+    isLoading,
+    setIsLoading
   } = useExploreState();
+  
+  const { filteredResults, allLocations } = useLocationData(
+    selectedCity,
+    selectedCategory,
+    selectedFilters,
+    selectedVibeFilter,
+    selectedDateRange
+  );
+  
+  const { processedQuery, setProcessedQuery } = useQueryProcessing();
+  const { cityFromQuery } = useCityDetection(processedQuery);
+  
+  const { handleCategoryFilter, handleVibeFilter, handleDateRangeFilter } = useFilterHandling(
+    setSelectedCategory,
+    setSelectedVibeFilter,
+    setSelectedDateRange,
+    setIsLoading
+  );
 
-  // Enhanced place selection handlers
-  const handlePlaceSelect = useCallback((place: Location) => {
-    if (place.lat && place.lng) {
-      updateMapCenter(place);
-
-      // If this is a city selection, update the location field and show venues
-      if (place.type === 'city') {
-        const cityName = place.name || '';
-        setLocation(cityName);
-        
-        // Find and show venues for this city
-        const cityData = findCityByName(cityName);
-        if (cityData) {
-          updateRealPlaces(cityData.venues);
-        }
-      } else {
-        // Show this specific venue
-        updateRealPlaces([place]);
-      }
-      
-      zoomToPlace(place);
+  useEffect(() => {
+    if (cityFromQuery && cityFromQuery !== selectedCity) {
+      setSelectedCity(cityFromQuery);
     }
-  }, [updateMapCenter, updateRealPlaces, setLocation, zoomToPlace]);
+  }, [cityFromQuery, selectedCity, setSelectedCity]);
 
-  const handleVenueSelect = useCallback((place: Location) => {
-    if (place.lat && place.lng) {
-      updateMapCenter(place);
-
-      // Try to populate city for context
-      if (place.city && !location) {
-        setLocation(place.city);
-      }
-      
-      // Always show this place on the map
-      updateRealPlaces([place]);
-      zoomToPlace(place);
+  useEffect(() => {
+    const query = searchParams.get('q');
+    if (query) {
+      setProcessedQuery(query);
     }
-  }, [updateMapCenter, updateRealPlaces, location, setLocation, zoomToPlace]);
+  }, [searchParams, setProcessedQuery]);
 
-  // Update the page title logic to handle empty cities
-  const getDisplayTitle = () => {
-    if (isNaturalLanguageSearch) {
-      return "Smart Search Results";
-    } else if (searchedCity && searchedCity.trim() !== "") {
-      return `Explore Vibes in ${searchedCity}${searchedState ? `, ${searchedState}` : ''}`;
-    }
-    return "Explore Vibes";
+  // Helper function to find city by name
+  const findCityByName = (cityName: string) => {
+    return cityLocations[cityName] || null;
   };
 
-  return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      
-      <main className="container py-6">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-center mb-6 vibe-gradient-text">
-            {getDisplayTitle()}
-          </h1>
-          
-          <ExploreSearchSection 
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            dateRange={dateRange ? { from: dateRange.from!, to: dateRange.to! } : null}
-            onDateChange={(dates) => handleDateRangeChange(dates ? { from: dates.from, to: dates.to } : null)}
-            location={location}
-            onLocationChange={setLocation}
-            onPlaceSelect={handlePlaceSelect}
-            onVenueSelect={handleVenueSelect}
-          />
-          
-          {/* Enhanced Map */}
-          <div className="w-full mb-6">
-            <NearbyVibesMap />
-          </div>
-        </div>
+  const cityData = findCityByName(selectedCity);
+  const locations = cityData || filteredResults;
 
-        <div className="flex flex-col md:flex-row gap-6">
-          <div className={`${isMobile ? 'w-full' : 'w-3/4'}`}>
-            <ExploreContent
-              activeTab={activeTab}
-              onTabChange={handleTabChange}
-              isLoadingResults={isLoadingResults}
-              searchCategory={searchCategory}
-              musicEvents={musicEvents}
-              comedyEvents={comedyEvents}
-              nightlifeVenues={nightlifeVenues}
-              filteredLocations={filteredLocations}
-              locationTags={locationTags}
-              searchedCity={searchedCity || ""}
-              dateRange={dateRange}
-            />
-          </div>
-          
-          <ExploreSidebar isMobile={isMobile} />
+  return (
+    <Layout>
+      <div className="flex min-h-screen">
+        <ExploreSidebar
+          selectedCity={selectedCity}
+          onCityChange={setSelectedCity}
+          selectedCategory={selectedCategory}
+          onCategoryChange={handleCategoryFilter}
+          selectedFilters={selectedFilters}
+          onFiltersChange={setSelectedFilters}
+          selectedVibeFilter={selectedVibeFilter}
+          onVibeFilterChange={handleVibeFilter}
+          selectedDateRange={selectedDateRange}
+          onDateRangeChange={handleDateRangeFilter}
+          allLocations={allLocations}
+        />
+        
+        <div className="flex-1 overflow-hidden">
+          <ExploreContent
+            locations={locations}
+            selectedCity={selectedCity}
+            isLoading={isLoading}
+            processedQuery={processedQuery}
+            onQueryChange={setProcessedQuery}
+          />
         </div>
-      </main>
-      
-      <CameraButton />
-    </div>
+      </div>
+    </Layout>
   );
 };
 

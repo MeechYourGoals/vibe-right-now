@@ -1,4 +1,3 @@
-
 // Re-export all types from the entities
 export * from './entities/venue';
 export * from './core/base';
@@ -213,4 +212,44 @@ export interface Location {
   };
   createdAt: string;
   updatedAt: string;
+}
+
+export interface CreditCard {
+  id: string;
+  last4: string;
+  brand: string;
+  expiryMonth: number;
+  expiryYear: number;
+  isDefault: boolean;
+}
+
+export interface BusinessHours {
+  monday: { open: string; close: string; closed?: boolean } | false;
+  tuesday: { open: string; close: string; closed?: boolean } | false;
+  wednesday: { open: string; close: string; closed?: boolean } | false;
+  thursday: { open: string; close: string; closed?: boolean } | false;
+  friday: { open: string; close: string; closed?: boolean } | false;
+  saturday: { open: string; close: string; closed?: boolean } | false;
+  sunday: { open: string; close: string; closed?: boolean } | false;
+}
+
+export interface SentimentAnalysisResult {
+  id: string;
+  score: number;
+  label: 'positive' | 'negative' | 'neutral';
+  confidence: number;
+  date: string;
+}
+
+export interface VenueSentimentAnalysis {
+  venueId: string;
+  overallSentiment: number;
+  totalReviews: number;
+  sentimentBreakdown: {
+    positive: number;
+    negative: number;
+    neutral: number;
+  };
+  recentTrend: 'improving' | 'declining' | 'stable';
+  date: string;
 }
