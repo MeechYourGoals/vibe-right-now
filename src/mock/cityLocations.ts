@@ -21,26 +21,26 @@ const convertToLocations = (cityData: any): Location[] => {
 };
 
 export const cityLocations: Record<string, Location[]> = {
-  'New York': convertToLocations(cities.nyc),
-  'Los Angeles': convertToLocations(cities.la),
-  'Chicago': convertToLocations(cities.chicago),
-  'Phoenix': convertToLocations(cities.phoenix),
-  'Miami': convertToLocations(cities.miami),
-  'Las Vegas': convertToLocations(cities.vegas),
-  'Toronto': convertToLocations(cities.toronto),
-  'Amsterdam': convertToLocations(cities.amsterdam),
-  'Paris': convertToLocations(cities.paris),
-  'Rome': convertToLocations(cities.rome),
-  'Tokyo': convertToLocations(cities.tokyo),
-  'Seoul': convertToLocations(cities.seoul),
-  'Singapore': convertToLocations(cities.singapore),
-  'Sydney': convertToLocations(cities.sydney),
-  'São Paulo': convertToLocations(cities.saopaulo),
-  'Rio de Janeiro': convertToLocations(cities.riodejaneiro),
-  'San Francisco': convertToLocations(cities.sanfrancisco),
-  'Melbourne': convertToLocations(cities.melbourne),
-  'Mumbai': convertToLocations(cities.mumbai),
-  'Moscow': convertToLocations(cities.moscow)
+  'New York': convertToLocations(cities.nycData),
+  'Los Angeles': convertToLocations(cities.laData),
+  'Chicago': convertToLocations(cities.chicagoData),
+  'Phoenix': convertToLocations(cities.phoenixData),
+  'Miami': convertToLocations(cities.miamiData),
+  'Las Vegas': convertToLocations(cities.vegasData),
+  'Toronto': convertToLocations(cities.torontoData),
+  'Amsterdam': convertToLocations(cities.amsterdamData),
+  'Paris': convertToLocations(cities.parisData),
+  'Rome': convertToLocations(cities.romeData),
+  'Tokyo': convertToLocations(cities.tokyoData),
+  'Seoul': convertToLocations(cities.seoulData),
+  'Singapore': convertToLocations(cities.singaporeData),
+  'Sydney': convertToLocations(cities.sydneyData),
+  'São Paulo': convertToLocations(cities.saoPauloData),
+  'Rio de Janeiro': convertToLocations(cities.rioData),
+  'San Francisco': convertToLocations(cities.sanFranciscoData),
+  'Melbourne': convertToLocations(cities.melbourneData),
+  'Mumbai': convertToLocations(cities.mumbaiData),
+  'Moscow': convertToLocations(cities.moscowData)
 };
 
 // Get nearby locations based on coordinates

@@ -4,7 +4,8 @@ import { Comment } from '@/types';
 export const mockComments: Comment[] = [
   {
     id: '1',
-    author: {
+    postId: 'post1',
+    user: {
       id: 'user1',
       username: 'foodie_sarah',
       name: 'Sarah M.',
@@ -19,7 +20,8 @@ export const mockComments: Comment[] = [
   },
   {
     id: '2',
-    author: {
+    postId: 'post1',
+    user: {
       id: 'user2',
       username: 'mike_explorer',
       name: 'Mike R.',
@@ -34,7 +36,8 @@ export const mockComments: Comment[] = [
   },
   {
     id: '3',
-    author: {
+    postId: 'post1',
+    user: {
       id: 'user3',
       username: 'travel_jenny',
       name: 'Jenny T.',
@@ -49,7 +52,8 @@ export const mockComments: Comment[] = [
   },
   {
     id: '4',
-    author: {
+    postId: 'post2',
+    user: {
       id: 'user4',
       username: 'city_wanderer',
       name: 'Alex C.',
@@ -64,7 +68,8 @@ export const mockComments: Comment[] = [
   },
   {
     id: '5',
-    author: {
+    postId: 'post2',
+    user: {
       id: 'user5',
       username: 'nightlife_alex',
       name: 'Alex N.',
