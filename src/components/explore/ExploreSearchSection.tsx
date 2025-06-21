@@ -105,10 +105,10 @@ const ExploreSearchSection: React.FC<ExploreSearchSectionProps> = ({
                       <Button
                         key={index}
                         variant="ghost"
-                        className="w-full justify-start text-left p-2 h-auto"
+                        className="w-full justify-start text-left p-2 h-12"
                         onClick={() => handleLocationSelect(city)}
                       >
-                        <div>
+                        <div className="truncate overflow-hidden">
                           <div className="font-medium">{city}</div>
                           <div className="text-sm text-muted-foreground">
                             United States
