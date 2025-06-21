@@ -10,6 +10,7 @@ export const regularUsers: User[] = [
     avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b93c?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
     bio: "Coffee enthusiast and digital nomad. Always searching for the perfect espresso and cozy workspaces.",
     verified: false,
+    isPrivate: false, // Public profile
     posts: 45,
     followers: 287,
     following: 156,
@@ -36,6 +37,7 @@ export const regularUsers: User[] = [
     avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
     bio: "Food blogger exploring local gems. Weekend warrior and taco connoisseur documenting the best eats.",
     verified: false,
+    isPrivate: false, // Public profile
     posts: 67,
     followers: 432,
     following: 189,
@@ -63,6 +65,7 @@ export const regularUsers: User[] = [
     avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
     bio: "Photographer capturing city vibes. Love finding hidden spots for the perfect shot and aesthetic moments.",
     verified: false,
+    isPrivate: false, // Public profile
     posts: 89,
     followers: 623,
     following: 234,
@@ -89,6 +92,7 @@ export const regularUsers: User[] = [
     avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
     bio: "Tech startup founder. Always looking for great co-working spots with good wifi and innovative atmospheres.",
     verified: false,
+    isPrivate: false, // Public profile
     posts: 34,
     followers: 198,
     following: 87,
@@ -114,6 +118,7 @@ export const regularUsers: User[] = [
     avatar: "https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
     bio: "Marketing professional and brunch enthusiast. Exploring the city one meal at a time, documenting every bite.",
     verified: false,
+    isPrivate: false, // Public profile
     posts: 52,
     followers: 356,
     following: 142,

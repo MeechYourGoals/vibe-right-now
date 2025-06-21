@@ -1,4 +1,3 @@
-
 import { User } from '@/types';
 
 export const diverseUsers: User[] = [
@@ -10,6 +9,7 @@ export const diverseUsers: User[] = [
     avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
     bio: "Adventure photographer documenting hidden gems around the world. Always seeking the next perfect shot.",
     verified: false,
+    isPrivate: false, // Public profile
     posts: 78,
     followers: 1250,
     following: 456,
@@ -36,6 +36,7 @@ export const diverseUsers: User[] = [
     avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
     bio: "Michelin-starred chef exploring street food cultures. Every meal tells a story worth sharing.",
     verified: true,
+    isPrivate: false, // Public profile
     posts: 156,
     followers: 3420,
     following: 234,
@@ -63,6 +64,7 @@ export const diverseUsers: User[] = [
     avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
     bio: "DJ and nightlife curator. Finding the best beats in every city from London to Tokyo.",
     verified: true,
+    isPrivate: false,
     posts: 203,
     followers: 5670,
     following: 789,
@@ -90,6 +92,7 @@ export const diverseUsers: User[] = [
     avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
     bio: "Professional surfer and fitness coach. Chasing waves and positive vibes worldwide.",
     verified: false,
+    isPrivate: false,
     posts: 89,
     followers: 2100,
     following: 345,
@@ -116,6 +119,7 @@ export const diverseUsers: User[] = [
     avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
     bio: "Digital artist and gallery curator. Bridging traditional art with modern experiences.",
     verified: false,
+    isPrivate: false,
     posts: 67,
     followers: 890,
     following: 567,
@@ -142,6 +146,7 @@ export const diverseUsers: User[] = [
     avatar: "https://images.unsplash.com/photo-1566492031773-4f4e44671d66?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
     bio: "Tech entrepreneur and angel investor. Building the future one startup at a time.",
     verified: true,
+    isPrivate: false,
     posts: 124,
     followers: 4560,
     following: 123,
@@ -168,6 +173,7 @@ export const diverseUsers: User[] = [
     avatar: "https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
     bio: "Architecture student exploring urban design. Finding beauty in city structures and spaces.",
     verified: false,
+    isPrivate: false,
     posts: 45,
     followers: 320,
     following: 890,
@@ -193,6 +199,7 @@ export const diverseUsers: User[] = [
     avatar: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
     bio: "Indie musician and sound engineer. Discovering acoustic gems in intimate venues worldwide.",
     verified: false,
+    isPrivate: false,
     posts: 112,
     followers: 1780,
     following: 445,

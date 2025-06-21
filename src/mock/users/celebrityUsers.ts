@@ -10,6 +10,7 @@ export const celebrityUsers: User[] = [
     avatar: "https://images.unsplash.com/photo-1595273670150-bd0c3c392e46?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
     bio: "James Beard Award winner. Sharing my culinary adventures and hidden gems around the world.",
     verified: true,
+    isPrivate: true, // Only this profile should be private
     posts: 127,
     followers: 15420,
     following: 89,
@@ -38,6 +39,7 @@ export const celebrityUsers: User[] = [
     avatar: "https://images.unsplash.com/photo-1566492031773-4f4e44671d66?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
     bio: "Travel influencer with 2M followers. Discovering amazing places and authentic experiences worldwide.",
     verified: true,
+    isPrivate: false, // Public profile
     posts: 234,
     followers: 2000000,
     following: 156,
@@ -66,6 +68,7 @@ export const celebrityUsers: User[] = [
     avatar: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60", 
     bio: "Electronic music producer and DJ. Scouting the best nightlife scenes and underground venues worldwide.",
     verified: true,
+    isPrivate: false, // Public profile
     posts: 89,
     followers: 456789,
     following: 234,
@@ -93,6 +96,7 @@ export const celebrityUsers: User[] = [
     avatar: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
     bio: "Certified personal trainer and wellness coach. Finding the best healthy spots and fitness venues in every city.",
     verified: true,
+    isPrivate: false, // Public profile
     posts: 156,
     followers: 123456,
     following: 67,
@@ -120,6 +124,7 @@ export const celebrityUsers: User[] = [
     avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
     bio: "Contemporary artist and creative director. Curating inspiring spaces and cultural experiences in galleries worldwide.",
     verified: true,
+    isPrivate: false, // Public profile
     posts: 98,
     followers: 78910,
     following: 145,

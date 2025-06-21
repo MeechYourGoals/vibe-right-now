@@ -1,75 +1,59 @@
 
-import { BaseEntity } from '../core/base';
-
-export interface Ad extends BaseEntity {
-  title: string;
-  content: string;
-}
-
-// Extended AdFormat for compatibility
 export interface AdFormat {
   id: string;
   name: string;
-  type: string;
-  description?: string;
-  duration?: number | string;
-  platform?: string;
-  dimensions?: string;
-  kpis?: string[];
-  placement?: string;
-  specifications?: any;
-  bestPractices?: string[];
+  dimensions: string;
+  type: 'image' | 'video' | 'carousel';
+  specifications: {
+    minWidth?: number;
+    minHeight?: number;
+    maxFileSize?: string;
+    aspectRatio?: string;
+    formats?: string[];
+  };
 }
 
-// Fix TargetingOptions to match actual component usage
 export interface TargetingOptions {
-  ageRanges: string[];
-  locations: string[];
-  interests: string[];
-  gender: GenderTargeting;
-  ageRange: { min: number; max: number };
-  location: string;
-  demographics?: {
-    gender: GenderTargeting | string;
-    ageRange: { min: number; max: number } | number[];
-    interests?: string[];
-    behaviors?: string[];
-    location?: string[];
+  demographics: {
+    ageRanges: string[];
+    genders: string[];
+    interests: string[];
   };
-  geographic?: {
-    radius: number;
+  geographic: {
+    countries: string[];
     cities: string[];
-    regions: string[];
+    radius?: number;
   };
-  behaviors?: {
-    categories: string[];
-    frequency: string;
-    venueVisits?: string[];
-    socialEngagement?: string[];
-    purchaseHistory?: string[];
-  };
-  contextual?: {
-    categories: string[];
-    frequency: string;
-    vibeTags?: string[];
-    venueTypes?: string[];
-    daypart?: string[];
-    timeOfDay?: string[];
-    dayOfWeek?: string[];
-    weather?: string[];
-    eventTypes?: string[];
-  };
-  momentScore?: number | {
-    crowdDensity: string;
-    vibeScore: string;
-    crowdLevel: string;
-    engagement: string;
+  locations: string[];
+  behavioral: {
+    deviceTypes: string[];
+    platforms: string[];
+    spendingHabits: string[];
   };
 }
 
-export interface GenderTargeting {
-  all: boolean;
-  male: boolean;
-  female: boolean;
-  other: boolean;
+export interface AdCampaign {
+  id: string;
+  name: string;
+  status: 'active' | 'paused' | 'completed';
+  budget: number;
+  spent: number;
+  impressions: number;
+  clicks: number;
+  conversions: number;
+  startDate: string;
+  endDate?: string;
+  targeting: TargetingOptions;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdMetrics {
+  impressions: number;
+  clicks: number;
+  conversions: number;
+  ctr: number;
+  cpc: number;
+  cpm: number;
+  roas: number;
 }
