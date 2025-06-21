@@ -10,7 +10,7 @@ export interface Location {
   zip?: string;
   lat: number;
   lng: number;
-  type: "restaurant" | "bar" | "event" | "attraction" | "sports" | "other" | "nightclub" | "cafe";
+  type: "restaurant" | "bar" | "event" | "attraction" | "sports" | "other" | "nightclub" | "cafe" | "city" | "nightlife";
   verified?: boolean;
   rating?: number;
   price_level?: number;

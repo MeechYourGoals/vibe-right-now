@@ -28,8 +28,8 @@ const VenueProfileHeader: React.FC<VenueProfileHeaderProps> = ({
         return <span className="text-sm text-green-600">Open 24 Hours</span>;
       }
       
-      // Handle current day or show summary
-      const today = new Date().toLocaleDateString('en-US', { weekday: 'lowercase' });
+      // Handle current day or show summary - fix the date formatting
+      const today = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
       const todayHours = hours[today as keyof typeof hours];
       
       if (typeof todayHours === 'object' && todayHours !== null && 'open' in todayHours) {

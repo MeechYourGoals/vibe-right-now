@@ -1,4 +1,3 @@
-
 import { Location } from './venue';
 import { User } from './user';
 
@@ -22,6 +21,8 @@ export interface Post {
   vibes?: string[];
   tags?: string[];
   verified?: boolean;
+  isPinned?: boolean;
+  isVenuePost?: boolean;
 }
 
 export interface Comment {
