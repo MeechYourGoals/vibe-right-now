@@ -7,50 +7,41 @@ import { getApiKey } from "../_shared/auth.ts";
 import { logInfo, logError } from "../_shared/logging.ts";
 import { corsHeaders } from "../_shared/cors.ts";
 
-const BRIAN_VOICE_ID = "nPczCjzI2devNBz1zQrb";
+const DEFAULT_MODEL = "aura-asteria-en";
 
 const handler = withErrorHandling(async (req: Request): Promise<Response> => {
-  const ELEVEN_LABS_API_KEY = Deno.env.get('ELEVEN_LABS_API_KEY') || '';
-  
-  if (!ELEVEN_LABS_API_KEY) {
-    return createValidationErrorResponse('ElevenLabs API key not configured');
+  const DEEPGRAM_API_KEY = Deno.env.get('DEEPGRAM_API_KEY') || '';
+
+  if (!DEEPGRAM_API_KEY) {
+    return createValidationErrorResponse('Deepgram API key not configured');
   }
 
-  const { text, voiceId = BRIAN_VOICE_ID, model = "eleven_multilingual_v2" } = await req.json();
+  const { text, model = DEFAULT_MODEL } = await req.json();
 
   validateRequired(text, 'text');
 
   const reducedText = reduceLongText(text);
-  logInfo(`Converting text to speech with Brian voice`, { textLength: reducedText.length });
+  logInfo(`Converting text to speech with Deepgram`, { textLength: reducedText.length });
 
-  const elevenLabsResponse = await fetch(
-    `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
+  const dgResponse = await fetch(
+    `https://api.deepgram.com/v1/speak?model=${model}`,
     {
       method: 'POST',
       headers: {
-        'xi-api-key': ELEVEN_LABS_API_KEY,
+        'Authorization': `Token ${DEEPGRAM_API_KEY}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        text: reducedText,
-        model_id: model,
-        voice_settings: {
-          stability: 0.75,
-          similarity_boost: 0.85,
-          style: 0.2,
-          use_speaker_boost: true
-        },
-      }),
+      body: JSON.stringify({ text: reducedText })
     }
   );
 
-  if (!elevenLabsResponse.ok) {
-    const errorText = await elevenLabsResponse.text();
-    logError(`ElevenLabs API error: ${errorText}`, { status: elevenLabsResponse.status });
-    throw new Error('Error calling ElevenLabs API');
+  if (!dgResponse.ok) {
+    const errorText = await dgResponse.text();
+    logError(`Deepgram API error: ${errorText}`, { status: dgResponse.status });
+    throw new Error('Error calling Deepgram API');
   }
 
-  const audioArrayBuffer = await elevenLabsResponse.arrayBuffer();
+  const audioArrayBuffer = await dgResponse.arrayBuffer();
 
   return new Response(audioArrayBuffer, {
     headers: {

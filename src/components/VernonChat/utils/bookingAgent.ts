@@ -1,5 +1,5 @@
 
-import { ElevenLabsService } from '@/services/ElevenLabsService';
+import { DeepgramService } from '@/services';
 import { toast } from 'sonner';
 
 interface BookingDetails {
@@ -75,12 +75,12 @@ export const BookingAgent = {
     try {
       console.log('Attempting to book venue with details:', details);
       
-      // If ElevenLabs API key is available, try to use agent capabilities
-      if (ElevenLabsService.hasApiKey()) {
+      // If Deepgram API key is available, try to use agent capabilities
+      if (DeepgramService.hasApiKey()) {
         try {
-          // This would use the actual ElevenLabs agent API when available
+          // This would use the actual Deepgram agent API when available
           // Fix here: The createAgentTask expects an AgentTaskRequest object, not two separate arguments
-          const agentResponse = await ElevenLabsService.createAgentTask({
+          const agentResponse = await DeepgramService.createAgentTask({
             task: 'book_venue',
             user_id: 'user_' + Date.now(),
             conversation_id: 'conv_' + Date.now()
@@ -94,7 +94,7 @@ export const BookingAgent = {
             };
           }
         } catch (error) {
-          console.error('Error using ElevenLabs agent:', error);
+          console.error('Error using Deepgram agent:', error);
           // Fall back to simulation
         }
       }
