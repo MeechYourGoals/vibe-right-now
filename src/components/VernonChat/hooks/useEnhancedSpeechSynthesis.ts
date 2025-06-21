@@ -1,11 +1,11 @@
 
 import { useState, useCallback, useRef } from 'react';
-import { useElevenLabsVoice } from './useElevenLabsVoice';
+import { useDeepgramVoice } from './useDeepgramVoice';
 
 export const useEnhancedSpeechSynthesis = () => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const currentAudioRef = useRef<HTMLAudioElement | null>(null);
-  const { speakWithElevenLabs } = useElevenLabsVoice();
+  const { speakWithDeepgram } = useDeepgramVoice();
   
   const speak = useCallback(async (text: string): Promise<void> => {
     if (!text.trim()) return;
@@ -18,7 +18,7 @@ export const useEnhancedSpeechSynthesis = () => {
     setIsSpeaking(true);
     
     try {
-      const success = await speakWithElevenLabs(text);
+      const success = await speakWithDeepgram(text);
       
       if (!success) {
         console.log('Falling back to browser speech synthesis');
@@ -30,7 +30,7 @@ export const useEnhancedSpeechSynthesis = () => {
     } finally {
       setIsSpeaking(false);
     }
-  }, [speakWithElevenLabs]);
+  }, [speakWithDeepgram]);
   
   const fallbackToSpeechSynthesis = useCallback(async (text: string): Promise<void> => {
     return new Promise((resolve) => {

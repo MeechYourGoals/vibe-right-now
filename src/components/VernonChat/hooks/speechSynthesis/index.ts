@@ -8,9 +8,9 @@ export { useSpeechSynthesisCore } from './useSpeechSynthesisCore';
 export { useSpeakResponse } from './useSpeakResponse';
 export { useElevenLabsKeyManager } from './useElevenLabsKeyManager';
 export { useSpeechSynthesisVoices } from './useSpeechSynthesisVoices';
-export { useElevenLabsVoice } from './useElevenLabsVoice';
+export { useDeepgramVoice } from './useDeepgramVoice';
 export { useBrowserSpeechSynthesis } from './useBrowserSpeechSynthesis';
-export { useElevenLabsSpeech } from './useElevenLabsSpeech';
+export { useDeepgramSpeech } from './useDeepgramSpeech';
 
 // Export utility functions
 export { 
