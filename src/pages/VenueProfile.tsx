@@ -1,3 +1,4 @@
+
 import { useState, useMemo, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Minimize } from "lucide-react";
@@ -7,6 +8,7 @@ import CameraButton from "@/components/CameraButton";
 import Header from "@/components/Header";
 import { Comment, Post, Location as VenueLocation } from "@/types";
 import GoogleMapComponent from "@/components/map/google/GoogleMap";
+import { generateBusinessHours } from "@/utils/businessHoursUtils";
 import { 
   isPostFromDayOfWeek, 
   isWithinThreeMonths,
@@ -52,6 +54,10 @@ const VenueProfile = () => {
       }
     }
   }, [isAuthenticated, user, venue]);
+  
+  if (venue && !venue.hours) {
+    venue.hours = generateBusinessHours(venue);
+  }
   
   const venuePosts = useMemo(() => {
     return mockPosts.filter(post => 

@@ -20,9 +20,7 @@ const sydney: CityData = {
       verified: true,
       rating: 4.6,
       vibes: ["Iconic", "Architecture", "Performance"],
-      tags: ["opera", "architecture", "harbor"],
-      createdAt: "2024-01-01T00:00:00Z",
-      updatedAt: "2024-01-01T00:00:00Z"
+      tags: ["opera", "architecture", "harbor"]
     },
     {
       id: "sydney_2",
@@ -37,9 +35,7 @@ const sydney: CityData = {
       verified: true,
       rating: 4.5,
       vibes: ["Fine Dining", "Harbor Views", "Modern Australian"],
-      tags: ["fine dining", "harbor views", "modern australian"],
-      createdAt: "2024-01-01T00:00:00Z",
-      updatedAt: "2024-01-01T00:00:00Z"
+      tags: ["fine dining", "harbor views", "modern australian"]
     },
     {
       id: "sydney_3",
@@ -54,9 +50,7 @@ const sydney: CityData = {
       verified: true,
       rating: 4.3,
       vibes: ["Rock Bar", "Pizza", "Underground"],
-      tags: ["rock music", "pizza", "underground"],
-      createdAt: "2024-01-01T00:00:00Z",
-      updatedAt: "2024-01-01T00:00:00Z"
+      tags: ["rock music", "pizza", "underground"]
     }
   ]
 };

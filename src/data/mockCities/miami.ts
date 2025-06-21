@@ -22,9 +22,7 @@ const miami: CityData = {
       verified: true,
       rating: 4.5,
       vibes: ["Historic", "Seafood", "Upscale"],
-      tags: ["stone crab", "seafood", "miami institution"],
-      createdAt: "2024-01-01T00:00:00Z",
-      updatedAt: "2024-01-01T00:00:00Z"
+      tags: ["stone crab", "seafood", "miami institution"]
     },
     {
       id: "miami_2",
@@ -40,9 +38,7 @@ const miami: CityData = {
       verified: true,
       rating: 4.2,
       vibes: ["Nightclub", "VIP", "Dancing"],
-      tags: ["nightclub", "edm", "celebrity hotspot"],
-      createdAt: "2024-01-01T00:00:00Z",
-      updatedAt: "2024-01-01T00:00:00Z"
+      tags: ["nightclub", "edm", "celebrity hotspot"]
     },
     {
       id: "miami_3",
@@ -58,9 +54,7 @@ const miami: CityData = {
       verified: true,
       rating: 4.3,
       vibes: ["Live Music", "Latin", "Historic"],
-      tags: ["salsa", "live music", "little havana"],
-      createdAt: "2024-01-01T00:00:00Z",
-      updatedAt: "2024-01-01T00:00:00Z"
+      tags: ["salsa", "live music", "little havana"]
     },
     {
       id: "miami_4",
@@ -76,9 +70,7 @@ const miami: CityData = {
       verified: true,
       rating: 4.4,
       vibes: ["Historic", "Art Deco", "Beach"],
-      tags: ["architecture", "historic", "ocean drive"],
-      createdAt: "2024-01-01T00:00:00Z",
-      updatedAt: "2024-01-01T00:00:00Z"
+      tags: ["architecture", "historic", "ocean drive"]
     },
     {
       id: "miami_5",
@@ -94,9 +86,7 @@ const miami: CityData = {
       verified: true,
       rating: 4.2,
       vibes: ["Sports", "Basketball", "Entertainment"],
-      tags: ["miami heat", "basketball", "downtown"],
-      createdAt: "2024-01-01T00:00:00Z",
-      updatedAt: "2024-01-01T00:00:00Z"
+      tags: ["miami heat", "basketball", "downtown"]
     }
   ]
 };

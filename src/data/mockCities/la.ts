@@ -23,9 +23,7 @@ const la: CityData = {
       verified: true,
       vibes: ["West Coast Classic", "Fresh", "Cult Following"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=In-N-Out+Burger+LA",
-      createdAt: "2024-01-01T00:00:00Z",
-      updatedAt: "2024-01-01T00:00:00Z"
+      google_maps_url: "https://maps.google.com/maps?q=In-N-Out+Burger+LA"
     },
     {
       id: "la-2",
@@ -41,9 +39,7 @@ const la: CityData = {
       verified: true,
       vibes: ["Lakers", "Entertainment", "Downtown LA"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Staples+Center+LA",
-      createdAt: "2024-01-01T00:00:00Z",
-      updatedAt: "2024-01-01T00:00:00Z"
+      google_maps_url: "https://maps.google.com/maps?q=Staples+Center+LA"
     },
     {
       id: "la-3",
@@ -60,9 +56,7 @@ const la: CityData = {
       verified: true,
       vibes: ["Hollywood", "Electronic Music", "Celebrity Sightings"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Academy+LA",
-      createdAt: "2024-01-01T00:00:00Z",
-      updatedAt: "2024-01-01T00:00:00Z"
+      google_maps_url: "https://maps.google.com/maps?q=Academy+LA"
     }
   ]
 };

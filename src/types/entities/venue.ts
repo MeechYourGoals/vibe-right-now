@@ -1,73 +1,77 @@
 
-import { BaseEntity, Address, GeoCoordinates, Timestamps } from '../core/base';
+import { BaseEntity, GeoCoordinates, Address, Timestamps } from '../core/base';
 
 export type LocationType = 
-  | "restaurant" 
-  | "bar" 
-  | "nightclub" 
-  | "cafe" 
-  | "attraction" 
-  | "sports" 
-  | "event" 
-  | "city" 
-  | "other" 
-  | "nightlife";
+  | 'restaurant' 
+  | 'bar' 
+  | 'attraction' 
+  | 'hotel' 
+  | 'cafe' 
+  | 'club' 
+  | 'sports' 
+  | 'shopping' 
+  | 'entertainment' 
+  | 'event'
+  | 'other'
+  | 'city'
+  | 'nightlife'
+  | 'nightclub'
+  | 'music'
+  | 'comedy';
 
-export interface Location extends BaseEntity, Address, GeoCoordinates, Timestamps {
+export interface Location extends BaseEntity, GeoCoordinates, Address, Timestamps {
   name: string;
   type: LocationType;
-  verified: boolean;
+  verified?: boolean;
   rating?: number;
-  price_level?: number;
   vibes?: string[];
-  business_status?: string;
-  google_maps_url?: string;
   tags?: string[];
+  hours?: string | {
+    [key: string]: string | { open: string; close: string; closed?: boolean; isOpen24Hours?: boolean; };
+  };
   phone?: string;
   website?: string;
-  followers?: number;
-  checkins?: number;
-  coordinates?: {
-    lat: number;
-    lng: number;
-  };
+  google_maps_url?: string;
+  business_status?: string;
+  price_level?: number;
 }
 
 export interface Venue extends Location {
   description?: string;
-  photos?: string[];
-  amenities?: string[];
-  capacity?: number;
-  priceRange?: string;
-  cuisine?: string[];
-  musicGenres?: string[];
-  dressCode?: string;
-  ageRestriction?: number;
-  parking?: boolean;
-  wifi?: boolean;
-  outdoor?: boolean;
-  reservations?: boolean;
-  delivery?: boolean;
-  takeout?: boolean;
-  accessibility?: boolean;
-  petFriendly?: boolean;
-  liveMusic?: boolean;
-  danceFloor?: boolean;
-  rooftop?: boolean;
-  waterfront?: boolean;
-  happyHour?: {
-    days: string[];
-    startTime: string;
-    endTime: string;
-    details?: string;
+  socialMedia?: {
+    instagram?: string;
+    facebook?: string;
+    twitter?: string;
   };
-  events?: {
-    id: string;
-    name: string;
-    date: string;
-    time: string;
-    description?: string;
-    price?: number;
-    capacity?: number;
+  amenities?: string[];
+  priceRange?: '$' | '$$' | '$$$' | '$$$$';
+  capacity?: number;
+  ageRestriction?: number;
+  dressCode?: string;
+  reservationsRequired?: boolean;
+  parkingAvailable?: boolean;
+  wheelchairAccessible?: boolean;
+}
+
+export interface VenueInsights {
+  venueId: string;
+  totalVisits: number;
+  uniqueVisitors: number;
+  averageRating: number;
+  topVibes: string[];
+  busyHours: { hour: number; visitors: number }[];
+  demographics: {
+    ageGroups: { range: string; percentage: number }[];
+    genderSplit: { male: number; female: number; other: number };
+  };
+  recentActivity: {
+    posts: number;
+    checkins: number;
+    reviews: number;
+  };
+  trends: {
+    period: string;
+    visitChange: number;
+    ratingChange: number;
   }[];
 }

@@ -13,67 +13,6 @@ export interface CityData {
   venues: Location[];
 }
 
-// Use GeoCoordinates instead of Coordinates to avoid conflict with GeolocationCoordinates
-export interface GeoCoordinates {
-  lat: number;
-  lng: number;
-}
-
-// Add missing user profile types
-export interface UserProfileData {
-  id: string;
-  username: string;
-  name: string;
-  avatar: string;
-  bio?: string;
-  verified: boolean;
-  followers?: number;
-  following?: number;
-  posts?: number;
-}
-
-export interface UserProfileStats {
-  posts: number;
-  followers: number;
-  following: number;
-  likes: number;
-}
-
-// Enhanced credit card type with all needed properties
-export interface CreditCard {
-  id: string;
-  last4: string;
-  brand: string;
-  expiryMonth: number;
-  expiryYear: number;
-  expMonth: number;
-  expYear: number;
-  isDefault: boolean;
-  maxSpendLimit?: number;
-  vernonApproved?: boolean;
-}
-
-// Add missing sentiment analysis types
-export interface SentimentAnalysisResult {
-  overallSentiment: number;
-  sentimentSummary: string;
-  themes: SentimentTheme[];
-  reviewCount: number;
-  lastAnalyzedAt: string;
-}
-
-export interface VenueSentimentAnalysis {
-  venueId: string;
-  platform: string;
-  overallSentiment: number;
-  sentimentSummary: string;
-  themes: SentimentTheme[];
-  reviewCount: number;
-  lastAnalyzedAt: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
 // Export missing types that are causing build errors
 export interface Comment {
   id: string;
@@ -138,7 +77,6 @@ export interface Media {
   thumbnail?: string;
 }
 
-// Consolidated AdFormat with all necessary properties
 export interface AdFormat {
   id: string;
   name: string;
@@ -149,29 +87,20 @@ export interface AdFormat {
   dimensions?: string;
   kpis?: string[];
   placement?: string;
-  specifications?: any;
-  bestPractices?: string[];
 }
 
-// Consolidated TargetingOptions with all necessary properties
 export interface TargetingOptions {
-  ageRanges: string[];
-  locations: string[];
-  interests: string[];
-  gender: GenderTargeting;
   ageRange: { min: number; max: number };
+  gender: GenderTargeting;
+  interests: string[];
   location: string;
+  ageRanges?: string[];
   demographics?: {
     gender: GenderTargeting | string;
     ageRange: { min: number; max: number } | number[];
     interests?: string[];
     behaviors?: string[];
     location?: string[];
-  };
-  geographic?: {
-    radius: number;
-    cities: string[];
-    regions: string[];
   };
   behaviors?: {
     categories: string[];
@@ -253,4 +182,35 @@ export interface VenueInsights {
   checkInCount?: number;
   receiptUploads?: number;
   discountRedemptions?: number;
+}
+
+export interface Location {
+  id: string;
+  name: string;
+  address: string;
+  city: string;
+  state?: string;
+  country: string;
+  zip?: string;
+  lat: number;
+  lng: number;
+  type: "restaurant" | "bar" | "nightclub" | "cafe" | "attraction" | "sports" | "event" | "city" | "other" | "nightlife";
+  verified: boolean;
+  rating?: number;
+  price_level?: number;
+  vibes?: string[];
+  business_status?: string;
+  google_maps_url?: string;
+  hours?: Record<string, string | { open: string; close: string; closed?: boolean; }>;
+  tags?: string[];
+  phone?: string;
+  website?: string;
+  followers?: number;
+  checkins?: number;
+  coordinates?: {
+    lat: number;
+    lng: number;
+  };
+  createdAt: string;
+  updatedAt: string;
 }

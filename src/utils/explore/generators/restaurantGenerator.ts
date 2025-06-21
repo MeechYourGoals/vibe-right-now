@@ -1,83 +1,65 @@
 
 import { Location } from "@/types";
-import { generateAddress, generateZipCode, generateLatitude, generateLongitude, generateVibes, generateTags, generatePhoneNumber, generateWebsite } from "../locationUtils";
+import { getMockUserProfile } from "@/mock/users";
+import { getRandomItems } from "@/utils/explore/mockGenerators";
+import { vibeTags } from "../helpers/vibeTags";
+import { generateZipCode } from "../helpers/zipCodeGenerator";
 
-const restaurantNames = [
-  "The Spicy Spoon",
-  "Urban Eats",
-  "Mama Rosa's",
-  "The Blue Plate Diner",
-  "Sizzle Steakhouse",
-  "Aqua Grill",
-  "The Daily Grind",
-  "Bella Italia",
-  "Zenith Bistro",
-  "Rustic Tavern"
-];
-
-const cafeNames = [
-  "The Coffee Corner",
-  "Brew & Bites",
-  "Cozy Cafe",
-  "The Daily Drip",
-  "Sweet Surrender Cafe",
-  "Bean Scene",
-  "The Latte Lounge",
-  "Caffeine Fix",
-  "Morning Glory Cafe",
-  "The Tea Spot"
-];
-
-export const generateRestaurants = (city: string, state: string, count: number = 4): Location[] => {
-  return Array.from({ length: count }, (_, index) => ({
-    id: `${city.toLowerCase().replace(/\s+/g, '-')}-restaurant-${index + 1}`,
-    name: restaurantNames[Math.floor(Math.random() * restaurantNames.length)],
-    address: generateAddress(),
-    city,
-    state,
-    country: "USA",
-    zip: generateZipCode(),
-    lat: generateLatitude(),
-    lng: generateLongitude(),
-    type: "restaurant" as const,
-    verified: Math.random() > 0.3,
-    rating: Math.round((Math.random() * 2.5 + 2.5) * 10) / 10,
-    price_level: Math.floor(Math.random() * 4) + 1,
-    vibes: generateVibes(),
-    business_status: "OPERATIONAL",
-    tags: generateTags(),
-    phone: generatePhoneNumber(),
-    website: generateWebsite(),
-    followers: Math.floor(Math.random() * 4000) + 150,
-    checkins: Math.floor(Math.random() * 1000) + 75,
-    createdAt: "2024-01-01T00:00:00Z",
-    updatedAt: "2024-01-01T00:00:00Z"
-  }));
-};
-
-export const generateCafes = (city: string, state: string, count: number = 2): Location[] => {
-  return Array.from({ length: count }, (_, index) => ({
-    id: `${city.toLowerCase().replace(/\s+/g, '-')}-cafe-${index + 1}`,
-    name: cafeNames[Math.floor(Math.random() * cafeNames.length)],
-    address: generateAddress(),
-    city,
-    state,
-    country: "USA",
-    zip: generateZipCode(),
-    lat: generateLatitude(),
-    lng: generateLongitude(),
-    type: "cafe" as const,
-    verified: Math.random() > 0.4,
-    rating: Math.round((Math.random() * 2 + 3) * 10) / 10,
-    price_level: Math.floor(Math.random() * 3) + 1,
-    vibes: generateVibes(),
-    business_status: "OPERATIONAL",
-    tags: generateTags(),
-    phone: generatePhoneNumber(),
-    website: generateWebsite(),
-    followers: Math.floor(Math.random() * 2000) + 100,
-    checkins: Math.floor(Math.random() * 600) + 50,
-    createdAt: "2024-01-01T00:00:00Z",
-    updatedAt: "2024-01-01T00:00:00Z"
-  }));
+// Generate restaurant locations for a city
+export const generateRestaurantLocations = (city: string, state: string = ""): Location[] => {
+  const locations: Location[] = [];
+  
+  // First restaurant
+  locations.push({
+    id: `${city.toLowerCase().replace(/\s+/g, '-')}-restaurant-1`,
+    name: `Taste of ${city}`,
+    address: `123 Main Street`,
+    city: city,
+    state: state || 'CA',
+    country: 'USA',
+    zip: generateZipCode(city),
+    lat: 37.7749 + (Math.random() * 0.02 - 0.01),
+    lng: -122.4194 + (Math.random() * 0.02 - 0.01),
+    type: 'restaurant',
+    verified: true,
+    hours: {
+      monday: '11:00 AM - 10:00 PM',
+      tuesday: '11:00 AM - 10:00 PM',
+      wednesday: '11:00 AM - 10:00 PM',
+      thursday: '11:00 AM - 10:00 PM',
+      friday: '11:00 AM - 11:00 PM',
+      saturday: '11:00 AM - 11:00 PM',
+      sunday: '12:00 PM - 9:00 PM'
+    },
+    vibes: getRandomItems(vibeTags, 3),
+    userProfile: getMockUserProfile('venue'),
+  });
+  
+  // Second restaurant
+  locations.push({
+    id: `${city.toLowerCase().replace(/\s+/g, '-')}-restaurant-2`,
+    name: `${city} Bistro`,
+    address: `456 Oak Avenue`,
+    city: city,
+    state: state || 'CA',
+    country: 'USA',
+    zip: generateZipCode(city),
+    lat: 37.7749 + (Math.random() * 0.02 - 0.01),
+    lng: -122.4194 + (Math.random() * 0.02 - 0.01),
+    type: 'restaurant',
+    verified: true,
+    hours: {
+      monday: '5:00 PM - 10:00 PM',
+      tuesday: '5:00 PM - 10:00 PM',
+      wednesday: '5:00 PM - 10:00 PM',
+      thursday: '5:00 PM - 10:00 PM',
+      friday: '5:00 PM - 11:00 PM',
+      saturday: '5:00 PM - 11:00 PM',
+      sunday: '5:00 PM - 9:00 PM'
+    },
+    vibes: getRandomItems(vibeTags, 3),
+    userProfile: getMockUserProfile('venue'),
+  });
+  
+  return locations;
 };

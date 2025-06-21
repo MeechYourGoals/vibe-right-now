@@ -1,5 +1,5 @@
 
-import { Location } from '@/types';
+import { Location } from '@/types/entities/venue';
 import { CityCoordinates } from './types';
 
 // Import all city data
