@@ -43,6 +43,7 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
         <ProfileTabContent 
           posts={posts}
           user={user}
+          activeTab="content"
         />
       </TabsContent>
       
@@ -50,6 +51,7 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
         <ProfileTabContent 
           locations={visitedPlaces}
           user={user}
+          activeTab="places"
         />
       </TabsContent>
       
@@ -57,6 +59,7 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
         <ProfileTabContent 
           locations={followedVenues}
           user={user}
+          activeTab="following"
         />
       </TabsContent>
     </Tabs>

@@ -29,6 +29,9 @@ export interface User {
   vibesPosted?: number;
   placesVisited?: number;
   checkInsCount?: number;
+  followers?: number;
+  following?: number;
+  posts?: number;
 }
 
 export interface UserSettings {

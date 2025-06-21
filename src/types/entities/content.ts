@@ -16,7 +16,7 @@ export interface Post {
   likes: number;
   comments: number;
   shares?: number;
-  timestamp: string;
+  timestamp: string | Date;
   createdAt?: string | Date;
   location?: Location;
   user: User;
@@ -33,7 +33,7 @@ export interface Comment {
   id: string;
   content: string;
   author: string;
-  timestamp: string;
+  timestamp: string | Date;
   likes: number;
   user: User;
   postId: string;

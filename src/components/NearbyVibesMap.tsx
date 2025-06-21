@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation as useRouterLocation } from "react-router-dom";
 import { toast } from "sonner";
@@ -8,7 +9,7 @@ import NearbyLocationsList from "./map/NearbyLocationsList";
 import AddressSearchPopover from "./map/AddressSearchPopover";
 import EnhancedGoogleMapComponent from "./map/google/EnhancedGoogleMapComponent";
 import { useMapSync } from "@/hooks/useMapSync";
-import { Location, GeoCoordinates } from "@/types";
+import { Location, Coordinates } from "@/types";
 
 declare global {
   interface Window {
@@ -96,7 +97,7 @@ const NearbyVibesMap = () => {
       const coordinates = await geocodeAddress(address);
       
       if (coordinates) {
-        setUserAddressLocation(coordinates);
+        setUserAddressLocation({ lat: coordinates.lat, lng: coordinates.lng });
         setShowDistances(true);
         setIsAddressPopoverOpen(false);
         
