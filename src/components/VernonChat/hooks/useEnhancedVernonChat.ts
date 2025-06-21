@@ -15,7 +15,7 @@ export const useEnhancedVernonChat = () => {
   const { processMessage } = useMessageProcessor();
   
   // Use optimized speech hooks with Deepgram
-  const { speak, stop: stopSpeaking, isSpeaking, promptForDeepgramKey } = useOptimizedSpeechSynthesis();
+  const { speak, stop: stopSpeaking, isSpeaking } = useOptimizedSpeechSynthesis();
 
   const addMessage = useCallback((content: string, direction: MessageDirection, aiResponse = false) => {
     const timestamp = new Date();
@@ -139,7 +139,6 @@ export const useEnhancedVernonChat = () => {
     transcript: interimTranscript || transcript,
     isSpeaking,
     stopSpeaking,
-    promptForDeepgramKey,
     initializeWelcomeMessage
   };
 };

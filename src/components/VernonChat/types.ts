@@ -32,7 +32,6 @@ export interface ChatWindowProps {
   setInput?: React.Dispatch<React.SetStateAction<string>>;
   isSpeaking?: boolean;
   stopSpeaking?: () => void;
-  promptForDeepgramKey?: () => void;
 }
 
 export interface SpeechRecognitionHookReturn {

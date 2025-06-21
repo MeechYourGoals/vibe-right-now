@@ -21,7 +21,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   transcript,
   isSpeaking,
   stopSpeaking,
-  promptForDeepgramKey
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -108,11 +107,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
     }
   };
 
-  const handleDeepgramSetup = () => {
-    if (promptForDeepgramKey) {
-      promptForDeepgramKey();
-    }
-  };
 
   const getConversationStateText = () => {
     switch (conversationState) {
