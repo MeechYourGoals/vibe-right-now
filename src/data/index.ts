@@ -1,95 +1,62 @@
 
-// Import all city data
-import amsterdam from './mockCities/amsterdam';
-import bangkok from './mockCities/bangkok';
-import barcelona from './mockCities/barcelona';
-import berlin from './mockCities/berlin';
-import chicago from './mockCities/chicago';
-import dubai from './mockCities/dubai';
-import istanbul from './mockCities/istanbul';
-import la from './mockCities/la';
-import london from './mockCities/london';
-import melbourne from './mockCities/melbourne';
-import miami from './mockCities/miami';
-import moscow from './mockCities/moscow';
-import mumbai from './mockCities/mumbai';
-import nyc from './mockCities/nyc';
-import paris from './mockCities/paris';
-import phoenix from './mockCities/phoenix';
-import rio from './mockCities/riodejaneiro';
-import sanfrancisco from './mockCities/sanfrancisco';
-import saopaulo from './mockCities/saopaulo';
-import seoul from './mockCities/seoul';
-import singapore from './mockCities/singapore';
-import sydney from './mockCities/sydney';
-import tokyo from './mockCities/tokyo';
-import toronto from './mockCities/toronto';
-import vegas from './mockCities/vegas';
-import rome from './mockCities/rome';
+// Centralized data exports
+export { default as amsterdamData } from './mockCities/amsterdam';
+export { default as bangkokData } from './mockCities/bangkok';
+export { default as barcelonaData } from './mockCities/barcelona';
+export { default as berlinData } from './mockCities/berlin';
+export { default as chicagoData } from './mockCities/chicago';
+export { default as dubaiData } from './mockCities/dubai';
+export { default as istanbulData } from './mockCities/istanbul';
+export { default as laData } from './mockCities/la';
+export { default as londonData } from './mockCities/london';
+export { default as melbourneData } from './mockCities/melbourne';
+export { default as miamiData } from './mockCities/miami';
+export { default as moscowData } from './mockCities/moscow';
+export { default as mumbaiData } from './mockCities/mumbai';
+export { default as nycData } from './mockCities/nyc';
+export { default as parisData } from './mockCities/paris';
+export { default as phoenixData } from './mockCities/phoenix';
+export { default as rioData } from './mockCities/riodejaneiro';
+export { default as sanFranciscoData } from './mockCities/sanfrancisco';
+export { default as saoPauloData } from './mockCities/saopaulo';
+export { default as seoulData } from './mockCities/seoul';
+export { default as singaporeData } from './mockCities/singapore';
+export { default as sydneyData } from './mockCities/sydney';
+export { default as tokyoData } from './mockCities/tokyo';
+export { default as torontoData } from './mockCities/toronto';
+export { default as vegasData } from './mockCities/vegas';
+export { default as romeData } from './mockCities/rome';
 
 import { CityData } from '@/types';
 
-// Export individual city data with proper names
-export const amsterdamData = amsterdam;
-export const bangkokData = bangkok;
-export const barcelonaData = barcelona;
-export const berlinData = berlin;
-export const chicagoData = chicago;
-export const dubaiData = dubai;
-export const istanbulData = istanbul;
-export const laData = la;
-export const londonData = london;
-export const melbourneData = melbourne;
-export const miamiData = miami;
-export const moscowData = moscow;
-export const mumbaiData = mumbai;
-export const nycData = nyc;
-export const parisData = paris;
-export const phoenixData = phoenix;
-export const rioData = rio;
-export const sanFranciscoData = sanfrancisco;
-export const saoPauloData = saopaulo;
-export const seoulData = seoul;
-export const singaporeData = singapore;
-export const sydneyData = sydney;
-export const tokyoData = tokyo;
-export const torontoData = toronto;
-export const vegasData = vegas;
-export const romeData = rome;
-
 // Consolidated city data map
 export const CITY_DATA_MAP: Record<string, CityData> = {
-  'amsterdam': amsterdam,
-  'bangkok': bangkok,
-  'barcelona': barcelona,
-  'berlin': berlin,
-  'chicago': chicago,
-  'dubai': dubai,
-  'istanbul': istanbul,
-  'losangeles': la,
-  'la': la,
-  'london': london,
-  'melbourne': melbourne,
-  'miami': miami,
-  'moscow': moscow,
-  'mumbai': mumbai,
-  'newyork': nyc,
-  'nyc': nyc,
-  'paris': paris,
-  'phoenix': phoenix,
-  'riodejaneiro': rio,
-  'rio': rio,
-  'sanfrancisco': sanfrancisco,
-  'sf': sanfrancisco,
-  'saopaulo': saopaulo,
-  'seoul': seoul,
-  'singapore': singapore,
-  'sydney': sydney,
-  'tokyo': tokyo,
-  'toronto': toronto,
-  'lasvegas': vegas,
-  'vegas': vegas,
-  'rome': rome
+  amsterdam: require('./mockCities/amsterdam').default,
+  bangkok: require('./mockCities/bangkok').default,
+  barcelona: require('./mockCities/barcelona').default,
+  berlin: require('./mockCities/berlin').default,
+  chicago: require('./mockCities/chicago').default,
+  dubai: require('./mockCities/dubai').default,
+  istanbul: require('./mockCities/istanbul').default,
+  la: require('./mockCities/la').default,
+  london: require('./mockCities/london').default,
+  melbourne: require('./mockCities/melbourne').default,
+  miami: require('./mockCities/miami').default,
+  moscow: require('./mockCities/moscow').default,
+  mumbai: require('./mockCities/mumbai').default,
+  nyc: require('./mockCities/nyc').default,
+  paris: require('./mockCities/paris').default,
+  phoenix: require('./mockCities/phoenix').default,
+  rio: require('./mockCities/riodejaneiro').default,
+  sanfrancisco: require('./mockCities/sanfrancisco').default,
+  saopaulo: require('./mockCities/saopaulo').default,
+  seoul: require('./mockCities/seoul').default,
+  singapore: require('./mockCities/singapore').default,
+  sydney: require('./mockCities/sydney').default,
+  tokyo: require('./mockCities/tokyo').default,
+  toronto: require('./mockCities/toronto').default,
+  vegas: require('./mockCities/vegas').default,
+  rome: require('./mockCities/rome').default
 };
 
 // Helper functions for city data

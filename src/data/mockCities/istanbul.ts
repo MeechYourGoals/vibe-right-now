@@ -20,9 +20,7 @@ const istanbul: CityData = {
       verified: true,
       rating: 4.6,
       vibes: ["Historic", "Byzantine", "Ottoman"],
-      tags: ["historic", "byzantine", "museum"],
-      createdAt: '2024-01-01T00:00:00Z',
-      updatedAt: '2024-01-01T00:00:00Z'
+      tags: ["historic", "byzantine", "museum"]
     },
     {
       id: "istanbul_2",
@@ -37,9 +35,7 @@ const istanbul: CityData = {
       verified: true,
       rating: 4.3,
       vibes: ["Ottoman Cuisine", "Historic", "Traditional"],
-      tags: ["ottoman cuisine", "historic", "spice bazaar"],
-      createdAt: '2024-01-01T00:00:00Z',
-      updatedAt: '2024-01-01T00:00:00Z'
+      tags: ["ottoman cuisine", "historic", "spice bazaar"]
     },
     {
       id: "istanbul_3",
@@ -54,9 +50,7 @@ const istanbul: CityData = {
       verified: true,
       rating: 4.2,
       vibes: ["Rooftop", "Panoramic Views", "Modern"],
-      tags: ["rooftop", "bosphorus views", "modern"],
-      createdAt: '2024-01-01T00:00:00Z',
-      updatedAt: '2024-01-01T00:00:00Z'
+      tags: ["rooftop", "bosphorus views", "modern"]
     }
   ]
 };

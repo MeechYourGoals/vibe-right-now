@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Layout } from "@/components/Layout";
 import MapContainer from "@/components/map/MapContainer";
@@ -26,26 +27,6 @@ const convertToLocation = (venue: VenueWithDiscount): Location => {
     verified: venue.verified
   };
 };
-
-const sampleDiscountLocations = [
-  {
-    id: 'discount-1',
-    name: 'The Garden Rooftop',
-    type: 'bar' as const,
-    address: '789 Sky Blvd',
-    city: 'San Francisco',
-    state: 'CA',
-    country: 'USA',
-    lat: 37.7749,
-    lng: -122.4194,
-    rating: 4.2,
-    priceLevel: 2,
-    verified: false,
-    source: 'mock' as const,
-    createdAt: '2024-01-01T00:00:00Z',
-    updatedAt: '2024-01-01T00:00:00Z'
-  }
-];
 
 const Discounts = () => {
   const navigate = useNavigate();

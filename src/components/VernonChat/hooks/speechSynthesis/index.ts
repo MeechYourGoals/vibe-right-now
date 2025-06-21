@@ -6,11 +6,11 @@ export { useOptimizedSpeechSynthesis } from './useOptimizedSpeechSynthesis';
 export { useSpeechSynthesis } from '../useSpeechSynthesis';
 export { useSpeechSynthesisCore } from './useSpeechSynthesisCore';
 export { useSpeakResponse } from './useSpeakResponse';
+export { useElevenLabsKeyManager } from './useElevenLabsKeyManager';
 export { useSpeechSynthesisVoices } from './useSpeechSynthesisVoices';
+export { useElevenLabsVoice } from './useElevenLabsVoice';
 export { useBrowserSpeechSynthesis } from './useBrowserSpeechSynthesis';
-
-// Export Deepgram hooks (replacing ElevenLabs)
-export { useDeepgramSpeech } from './useDeepgramSpeech';
+export { useElevenLabsSpeech } from './useElevenLabsSpeech';
 
 // Export utility functions
 export { 

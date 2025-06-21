@@ -1,4 +1,3 @@
-
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Suspense, lazy, useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
@@ -25,16 +24,8 @@ const VenueMessaging = lazy(() => import("@/components/messaging/VenueMessaging"
 const Messages = lazy(() => import("@/pages/Messages"));
 
 function App() {
-  // Force dark mode on app load
+  // Add a useEffect to handle mobile view adjustments
   useEffect(() => {
-    // Clear any conflicting localStorage theme settings
-    localStorage.removeItem('theme');
-    localStorage.setItem('vibe-ui-theme', 'dark');
-    
-    // Force dark class on HTML element
-    document.documentElement.classList.add('dark');
-    document.documentElement.classList.remove('light');
-    
     // Set viewport meta tag to ensure proper scaling on mobile devices
     const viewportMeta = document.querySelector('meta[name="viewport"]');
     if (viewportMeta) {
@@ -63,7 +54,7 @@ function App() {
 
   return (
     <Auth0Provider>
-      <ThemeProvider storageKey="vibe-ui-theme">
+      <ThemeProvider defaultTheme="light" storageKey="vibe-ui-theme">
         <BrowserRouter>
           <Suspense fallback={<div className="h-screen w-screen flex items-center justify-center">Loading...</div>}>
             <Routes>

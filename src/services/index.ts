@@ -1,11 +1,11 @@
 
-export { OpenAIService } from './OpenAIService';
-export { PerplexityService } from './PerplexityService';
-export { HuggingFaceService } from './HuggingFaceService';
-export { DeepgramService } from './DeepgramService';
+// Centralized service exports
+export { ElevenLabsService } from './ElevenLabs';
 export { VertexAIService } from './VertexAIService';
-export { CoquiTTSService } from './CoquiTTSService';
-export { WhisperSpeechService } from './WhisperSpeechService';
-export { SwirlSearchService } from './SwirlSearchService';
-export { SimpleSearchService } from './SimpleSearchService';
-export type { ServiceConfig } from './BaseService';
+export { OpenAIService } from './OpenAIService';
+export { GeminiService } from './GeminiService';
+export { SocialMediaAggregator } from './socialMedia/aggregator';
+
+// Service types
+export type { ElevenLabsOptions, ScribeTranscriptionOptions } from './ElevenLabs';
+export type { SocialMediaApiKeys, SocialMediaPost } from './socialMedia/types';

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation as useRouterLocation } from "react-router-dom";
 import { toast } from "sonner";
@@ -25,9 +24,7 @@ const NearbyVibesMap = () => {
     searchedCity,
     setSearchedCity,
     userAddressLocation,
-    setUserAddressLocation,
-    locations,
-    isLoading
+    setUserAddressLocation
   } = useNearbyLocations();
   
   const [isMapExpanded, setIsMapExpanded] = useState(false);
@@ -126,13 +123,7 @@ const NearbyVibesMap = () => {
     toast.success("Using your current location for distances");
   };
   
-  const effectiveLoading = loading || localLoading || isLoading;
-  
-  // Convert GeolocationCoordinates to GeoCoordinates for userLocation
-  const userLocationCoords = userLocation ? {
-    lat: userLocation.latitude,
-    lng: userLocation.longitude
-  } : null;
+  const effectiveLoading = loading || localLoading;
   
   return (
     <div className={`space-y-4 ${isMapExpanded ? "fixed inset-0 z-50 bg-background p-4" : ""}`}>
@@ -161,8 +152,8 @@ const NearbyVibesMap = () => {
       
       <div className={`rounded-lg overflow-hidden ${isMapExpanded ? "h-[calc(100vh-8rem)]" : "h-96"}`}>
         <EnhancedGoogleMapComponent
-          userLocation={userLocationCoords}
-          locations={nearbyLocations || locations}
+          userLocation={userLocation}
+          locations={nearbyLocations}
           realPlaces={mapState.realPlaces}
           searchedCity={searchedCity}
           mapStyle={mapStyle}
@@ -180,7 +171,7 @@ const NearbyVibesMap = () => {
       
       {!isMapExpanded && (
         <NearbyLocationsList
-          locations={nearbyLocations || locations}
+          locations={nearbyLocations}
           isExpanded={isMapExpanded}
           onViewMap={handleViewMap}
           onViewLocation={handleLocationClick}

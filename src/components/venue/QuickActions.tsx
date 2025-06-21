@@ -2,7 +2,7 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Calendar, Users, MessageSquare } from "lucide-react";
+import { Plus, Calendar, Users, MessageSquare, Share2 } from "lucide-react";
 
 interface QuickActionsProps {
   onTierChange: (tier: string) => void;
@@ -16,23 +16,23 @@ const QuickActions = ({ onTierChange, currentTier }: QuickActionsProps) => {
         <CardTitle>Quick Actions</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-2 gap-3">
-          <Button size="default" className="flex items-center justify-center gap-2 h-12 text-sm">
+        <div className="grid grid-cols-2 gap-2">
+          <Button size="sm" className="flex items-center justify-start gap-2">
             <Plus className="h-4 w-4" />
             New Post
           </Button>
           
-          <Button size="default" className="flex items-center justify-center gap-2 h-12 text-sm">
+          <Button size="sm" className="flex items-center justify-start gap-2">
             <Calendar className="h-4 w-4" />
             Add Event
           </Button>
           
-          <Button size="default" className="flex items-center justify-center gap-2 h-12 text-sm">
+          <Button size="sm" className="flex items-center justify-start gap-2">
             <Users className="h-4 w-4" />
             Promotions
           </Button>
           
-          <Button size="default" className="flex items-center justify-center gap-2 h-12 text-sm">
+          <Button size="sm" className="flex items-center justify-start gap-2">
             <MessageSquare className="h-4 w-4" />
             Send Message
           </Button>

@@ -20,9 +20,7 @@ const berlin: CityData = {
       verified: true,
       rating: 4.5,
       vibes: ["Historic", "Iconic", "Political"],
-      tags: ["landmark", "history", "gate"],
-      createdAt: '2024-01-01T00:00:00Z',
-      updatedAt: '2024-01-01T00:00:00Z'
+      tags: ["landmark", "history", "gate"]
     },
     {
       id: "berlin_2",
@@ -37,9 +35,7 @@ const berlin: CityData = {
       verified: true,
       rating: 4.2,
       vibes: ["Historic", "German Cuisine", "Traditional"],
-      tags: ["german food", "historic", "traditional"],
-      createdAt: '2024-01-01T00:00:00Z',
-      updatedAt: '2024-01-01T00:00:00Z'
+      tags: ["german food", "historic", "traditional"]
     },
     {
       id: "berlin_3",
@@ -54,9 +50,7 @@ const berlin: CityData = {
       verified: true,
       rating: 4.3,
       vibes: ["Techno", "Underground", "Industrial"],
-      tags: ["techno", "club", "underground"],
-      createdAt: '2024-01-01T00:00:00Z',
-      updatedAt: '2024-01-01T00:00:00Z'
+      tags: ["techno", "club", "underground"]
     }
   ]
 };

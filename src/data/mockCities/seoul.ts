@@ -1,5 +1,5 @@
 
-import { CityData } from '@/types';
+import { CityData, Location } from '@/types';
 
 const seoul: CityData = {
   name: "Seoul",
@@ -20,9 +20,7 @@ const seoul: CityData = {
       verified: true,
       rating: 4.5,
       vibes: ["Historic", "Royal", "Traditional"],
-      tags: ["palace", "korean architecture", "historic"],
-      createdAt: '2024-01-01T00:00:00Z',
-      updatedAt: '2024-01-01T00:00:00Z'
+      tags: ["palace", "korean architecture", "historic"]
     },
     {
       id: "seoul_2",
@@ -37,9 +35,7 @@ const seoul: CityData = {
       verified: true,
       rating: 4.6,
       vibes: ["Korean Fusion", "Fine Dining", "Modern"],
-      tags: ["korean fusion", "fine dining", "modern korean"],
-      createdAt: '2024-01-01T00:00:00Z',
-      updatedAt: '2024-01-01T00:00:00Z'
+      tags: ["korean fusion", "fine dining", "modern korean"]
     },
     {
       id: "seoul_3",
@@ -54,9 +50,7 @@ const seoul: CityData = {
       verified: true,
       rating: 4.4,
       vibes: ["Craft Cocktails", "Speakeasy", "Intimate"],
-      tags: ["cocktails", "speakeasy", "craft drinks"],
-      createdAt: '2024-01-01T00:00:00Z',
-      updatedAt: '2024-01-01T00:00:00Z'
+      tags: ["cocktails", "speakeasy", "craft drinks"]
     }
   ]
 };

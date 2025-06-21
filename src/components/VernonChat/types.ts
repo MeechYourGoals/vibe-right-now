@@ -1,3 +1,4 @@
+
 // Update the types to include what's needed for Vernon Chat
 export interface Message {
   id: string;
@@ -30,9 +31,6 @@ export interface ChatWindowProps {
   transcript: string;
   input?: string;
   setInput?: React.Dispatch<React.SetStateAction<string>>;
-  isSpeaking?: boolean;
-  stopSpeaking?: () => void;
-  promptForElevenLabsKey?: () => void;
 }
 
 export interface SpeechRecognitionHookReturn {

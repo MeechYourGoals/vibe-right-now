@@ -20,9 +20,7 @@ const mumbai: CityData = {
       verified: true,
       vibes: ["Historic", "Landmark", "Colonial"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Gateway+of+India+Mumbai",
-      createdAt: '2024-01-01T00:00:00Z',
-      updatedAt: '2024-01-01T00:00:00Z'
+      google_maps_url: "https://maps.google.com/maps?q=Gateway+of+India+Mumbai"
     },
     {
       id: "mum-2",
@@ -38,9 +36,7 @@ const mumbai: CityData = {
       verified: true,
       vibes: ["Seafood", "Contemporary Indian", "Fine Dining"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Trishna+Mumbai",
-      createdAt: '2024-01-01T00:00:00Z',
-      updatedAt: '2024-01-01T00:00:00Z'
+      google_maps_url: "https://maps.google.com/maps?q=Trishna+Mumbai"
     },
     {
       id: "mum-3",
@@ -56,9 +52,7 @@ const mumbai: CityData = {
       verified: true,
       vibes: ["Upscale", "Hotel Club", "Bollywood"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Trilogy+Mumbai",
-      createdAt: '2024-01-01T00:00:00Z',
-      updatedAt: '2024-01-01T00:00:00Z'
+      google_maps_url: "https://maps.google.com/maps?q=Trilogy+Mumbai"
     }
   ]
 };

@@ -75,8 +75,6 @@ const UserProfile = () => {
   }
 
   const handleGetUserBio = () => getUserBio(profile.id);
-  // Fix: Call the function to get the boolean result instead of passing the function itself
-  const isPrivate = isPrivateProfile(profile.id);
 
   return (
     <div className="min-h-screen bg-background">
@@ -89,7 +87,7 @@ const UserProfile = () => {
           onUpdateBio={updateBio}
           onBlock={blockUser}
           onReport={reportUser}
-          isPrivate={isPrivate}
+          isPrivate={isPrivateProfile}
           getUserBio={handleGetUserBio}
         />
         
@@ -99,7 +97,7 @@ const UserProfile = () => {
           followedVenues={followedVenues}
           visitedPlaces={visitedPlaces}
           wantToVisitPlaces={wantToVisitPlaces}
-          isPrivate={isPrivate}
+          isPrivate={isPrivateProfile}
         />
       </main>
     </div>

@@ -1,150 +1,136 @@
-
 import { useState, useEffect } from 'react';
-import { User, Post, Location } from '@/types';
+import { UserProfileData, UserProfileStats, User, Post, Location, Comment } from '@/types';
+import { mockUsers, getUserById, getUserByUsername } from '@/mock/users';
+import { mockPosts } from '@/mock/posts';
+import { mockComments } from '@/mock/comments';
+import { mockLocations } from '@/mock/locations';
 
-interface UserProfileStats {
-  postsCount: number;
-  followersCount: number;
-  followingCount: number;
-  placesVisited: number;
-}
-
-export const useUserProfile = (username: string) => {
+export const useUserProfile = (userIdOrUsername?: string) => {
   const [profile, setProfile] = useState<User | null>(null);
-  const [stats, setStats] = useState<UserProfileStats>({
-    postsCount: 0,
-    followersCount: 0,
-    followingCount: 0,
-    placesVisited: 0
-  });
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [userPosts, setUserPosts] = useState<Post[]>([]);
   const [followedVenues, setFollowedVenues] = useState<Location[]>([]);
   const [visitedPlaces, setVisitedPlaces] = useState<Location[]>([]);
   const [wantToVisitPlaces, setWantToVisitPlaces] = useState<Location[]>([]);
+  const [stats, setStats] = useState<UserProfileStats>({
+    posts: 0,
+    followers: 0,
+    following: 0,
+    likes: 0
+  });
 
   useEffect(() => {
-    if (!username) return;
-
-    setLoading(true);
-    setError(null);
-    
-    // Mock implementation
-    setTimeout(() => {
-      if (username === 'party_queen') {
-        setProfile({
-          id: 'user_sophie',
-          username: 'party_queen',
-          name: 'Sophie Garcia',
-          avatar: '/placeholder.svg',
-          verified: true,
-          bio: 'Nightlife connoisseur and music lover. Finding the best clubs, festivals, and dance floors wherever I go. 🎵🕺',
-          createdAt: '2023-08-01T00:00:00Z',
-          updatedAt: '2024-01-01T00:00:00Z'
-        });
-        setStats({
-          postsCount: 42,
-          followersCount: 354000,
-          followingCount: 234,
-          placesVisited: 89
-        });
-      } else {
-        setProfile({
-          id: username,
-          username: username,
-          name: username.replace('_', ' '),
-          avatar: '/placeholder.svg',
-          verified: false,
-          bio: 'Mock user profile',
-          createdAt: '2023-01-01T00:00:00Z',
-          updatedAt: '2024-01-01T00:00:00Z'
-        });
-        setStats({
-          postsCount: 12,
-          followersCount: 150,
-          followingCount: 89,
-          placesVisited: 25
-        });
-      }
-      setLoading(false);
-    }, 1000);
-  }, [username]);
+    if (userIdOrUsername) {
+      setLoading(true);
+      
+      setTimeout(() => {
+        // Try to find user by ID first, then by username
+        let user = getUserById(userIdOrUsername);
+        if (!user) {
+          user = getUserByUsername(userIdOrUsername);
+        }
+        
+        if (user) {
+          setProfile(user);
+          const posts = mockPosts.filter(p => p.user.id === user.id);
+          setUserPosts(posts);
+          setStats({
+            posts: posts.length,
+            followers: user.followers || 0,
+            following: user.following || 0,
+            likes: posts.reduce((sum, post) => sum + post.likes, 0)
+          });
+          setFollowedVenues(mockLocations.slice(0, 3));
+          setVisitedPlaces(mockLocations.slice(0, 5));
+          setWantToVisitPlaces(mockLocations.slice(5, 8));
+          setError(null);
+        } else {
+          setError('User not found');
+          setProfile(null);
+        }
+        setLoading(false);
+      }, 500);
+    }
+  }, [userIdOrUsername]);
 
   const followUser = async (userToFollow: string): Promise<boolean> => {
-    console.log('Following user:', userToFollow);
     return true;
   };
 
   const unfollowUser = async (userToUnfollow: string): Promise<boolean> => {
-    console.log('Unfollowing user:', userToUnfollow);
-    return true;
-  };
-
-  const updateBio = async (newBio: string): Promise<boolean> => {
-    if (profile) {
-      setProfile({ ...profile, bio: newBio });
-    }
-    return true;
-  };
-
-  const blockUser = async (userToBlock: string): Promise<boolean> => {
-    console.log('Blocking user:', userToBlock);
-    return true;
-  };
-
-  const reportUser = async (userToReport: string, reason: string): Promise<boolean> => {
-    console.log('Reporting user:', userToReport, 'for:', reason);
     return true;
   };
 
   const getFollowStatus = (userId: string): boolean => {
-    return false; // Mock implementation
+    return false;
   };
 
   const getMutualFollowers = (userId: string): User[] => {
-    return []; // Mock implementation
+    return mockUsers.slice(0, 2);
   };
 
   const getUserPosts = (userId: string): Post[] => {
-    return userPosts;
+    return mockPosts.filter(p => p.user.id === userId);
   };
 
   const getUserStats = (userId: string): UserProfileStats => {
-    return stats;
+    const posts = getUserPosts(userId);
+    const user = mockUsers.find(u => u.id === userId);
+    return {
+      posts: posts.length,
+      followers: user?.followers || 0,
+      following: user?.following || 0,
+      likes: posts.reduce((sum, post) => sum + post.likes, 0)
+    };
   };
 
-  const getPostComments = (postId: string) => {
-    return []; // Mock implementation
+  const getPostComments = (postId: string): Comment[] => {
+    return mockComments.filter(c => c.postId === postId);
+  };
+
+  const updateBio = async (bio: string): Promise<boolean> => {
+    return true;
+  };
+
+  const blockUser = async (userId: string): Promise<boolean> => {
+    return true;
+  };
+
+  const reportUser = async (userId: string, reason: string): Promise<boolean> => {
+    return true;
   };
 
   const getUserBio = (userId: string): string => {
-    return profile?.bio || '';
+    const user = mockUsers.find(u => u.id === userId);
+    return user?.bio || '';
   };
 
   const isPrivateProfile = (userId: string): boolean => {
-    return false; // Mock implementation
+    const user = mockUsers.find(u => u.id === userId);
+    return user?.isPrivate || false;
   };
 
   return {
     profile,
-    stats,
     loading,
     error,
     userPosts,
     followedVenues,
     visitedPlaces,
     wantToVisitPlaces,
+    stats,
     followUser,
     unfollowUser,
-    updateBio,
-    blockUser,
-    reportUser,
     getFollowStatus,
     getMutualFollowers,
     getUserPosts,
     getUserStats,
     getPostComments,
+    setStats,
+    updateBio,
+    blockUser,
+    reportUser,
     getUserBio,
     isPrivateProfile
   };

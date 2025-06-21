@@ -20,9 +20,7 @@ const dubai: CityData = {
       verified: true,
       rating: 4.6,
       vibes: ["Skyscraper", "Luxury", "Modern"],
-      tags: ["tallest building", "observation deck", "luxury"],
-      createdAt: '2024-01-01T00:00:00Z',
-      updatedAt: '2024-01-01T00:00:00Z'
+      tags: ["tallest building", "observation deck", "luxury"]
     },
     {
       id: "dubai_2",
@@ -37,9 +35,7 @@ const dubai: CityData = {
       verified: true,
       rating: 4.5,
       vibes: ["Japanese Fusion", "Luxury", "Celebrity Chef"],
-      tags: ["japanese", "nobu", "luxury dining"],
-      createdAt: '2024-01-01T00:00:00Z',
-      updatedAt: '2024-01-01T00:00:00Z'
+      tags: ["japanese", "nobu", "luxury dining"]
     },
     {
       id: "dubai_3",
@@ -54,9 +50,7 @@ const dubai: CityData = {
       verified: true,
       rating: 4.4,
       vibes: ["Rooftop", "Luxury", "Views"],
-      tags: ["rooftop bar", "views", "luxury"],
-      createdAt: '2024-01-01T00:00:00Z',
-      updatedAt: '2024-01-01T00:00:00Z'
+      tags: ["rooftop bar", "views", "luxury"]
     }
   ]
 };

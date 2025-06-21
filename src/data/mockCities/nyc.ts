@@ -23,9 +23,7 @@ const nyc: CityData = {
       verified: true,
       vibes: ["Authentic", "Classic NYC", "Local Favorite"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Joe's+Pizza+NYC",
-      createdAt: '2024-01-01T00:00:00Z',
-      updatedAt: '2024-01-01T00:00:00Z'
+      google_maps_url: "https://maps.google.com/maps?q=Joe's+Pizza+NYC"
     },
     {
       id: "nyc-2",
@@ -41,9 +39,7 @@ const nyc: CityData = {
       verified: true,
       vibes: ["Iconic", "Sports", "Entertainment"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Madison+Square+Garden",
-      createdAt: '2024-01-01T00:00:00Z',
-      updatedAt: '2024-01-01T00:00:00Z'
+      google_maps_url: "https://maps.google.com/maps?q=Madison+Square+Garden"
     },
     {
       id: "nyc-3",
@@ -60,9 +56,7 @@ const nyc: CityData = {
       verified: true,
       vibes: ["Upscale", "Nightlife", "Celebrity Hotspot"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=1+OAK+NYC",
-      createdAt: '2024-01-01T00:00:00Z',
-      updatedAt: '2024-01-01T00:00:00Z'
+      google_maps_url: "https://maps.google.com/maps?q=1+OAK+NYC"
     }
   ]
 };

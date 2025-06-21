@@ -20,9 +20,7 @@ const bangkok: CityData = {
       verified: true,
       rating: 4.4,
       vibes: ["Historic", "Royal", "Traditional"],
-      tags: ["palace", "thai architecture", "royal"],
-      createdAt: '2024-01-01T00:00:00Z',
-      updatedAt: '2024-01-01T00:00:00Z'
+      tags: ["palace", "thai architecture", "royal"]
     },
     {
       id: "bangkok_2",
@@ -37,9 +35,7 @@ const bangkok: CityData = {
       verified: true,
       rating: 4.7,
       vibes: ["Progressive Indian", "Fine Dining", "Creative"],
-      tags: ["progressive indian", "molecular gastronomy", "tasting menu"],
-      createdAt: '2024-01-01T00:00:00Z',
-      updatedAt: '2024-01-01T00:00:00Z'
+      tags: ["progressive indian", "molecular gastronomy", "tasting menu"]
     },
     {
       id: "bangkok_3",
@@ -54,9 +50,7 @@ const bangkok: CityData = {
       verified: true,
       rating: 4.3,
       vibes: ["Rooftop", "Luxury", "City Views"],
-      tags: ["rooftop bar", "city views", "luxury"],
-      createdAt: '2024-01-01T00:00:00Z',
-      updatedAt: '2024-01-01T00:00:00Z'
+      tags: ["rooftop bar", "city views", "luxury"]
     }
   ]
 };

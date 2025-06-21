@@ -20,9 +20,7 @@ const barcelona: CityData = {
       verified: true,
       rating: 4.7,
       vibes: ["Architectural", "Historic", "Religious"],
-      tags: ["gaudi", "basilica", "architecture"],
-      createdAt: '2024-01-01T00:00:00Z',
-      updatedAt: '2024-01-01T00:00:00Z'
+      tags: ["gaudi", "basilica", "architecture"]
     },
     {
       id: "barcelona_2",
@@ -37,9 +35,7 @@ const barcelona: CityData = {
       verified: true,
       rating: 4.4,
       vibes: ["Tapas", "Traditional", "Busy"],
-      tags: ["tapas", "seafood", "traditional"],
-      createdAt: '2024-01-01T00:00:00Z',
-      updatedAt: '2024-01-01T00:00:00Z'
+      tags: ["tapas", "seafood", "traditional"]
     },
     {
       id: "barcelona_3",
@@ -54,9 +50,7 @@ const barcelona: CityData = {
       verified: true,
       rating: 4.5,
       vibes: ["Classic Cocktails", "Elegant", "Traditional"],
-      tags: ["martini", "classic cocktails", "elegant"],
-      createdAt: '2024-01-01T00:00:00Z',
-      updatedAt: '2024-01-01T00:00:00Z'
+      tags: ["martini", "classic cocktails", "elegant"]
     }
   ]
 };

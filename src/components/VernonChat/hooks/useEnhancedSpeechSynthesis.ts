@@ -1,34 +1,11 @@
 
 import { useState, useCallback, useRef } from 'react';
-import { useDeepgramSpeech } from './speechSynthesis/useDeepgramSpeech';
+import { useElevenLabsVoice } from './useElevenLabsVoice';
 
 export const useEnhancedSpeechSynthesis = () => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const currentAudioRef = useRef<HTMLAudioElement | null>(null);
-  const audioElement = useRef<HTMLAudioElement | null>(new Audio());
-  const currentlyPlayingText = useRef<string | null>(null);
-  
-  const stopSpeaking = useCallback(() => {
-    if (currentAudioRef.current) {
-      currentAudioRef.current.pause();
-      currentAudioRef.current = null;
-    }
-    
-    if (window.speechSynthesis) {
-      window.speechSynthesis.cancel();
-    }
-    
-    setIsSpeaking(false);
-    currentlyPlayingText.current = null;
-  }, []);
-
-  const { speakWithDeepgram } = useDeepgramSpeech({
-    audioElement,
-    isSpeaking,
-    setIsSpeaking,
-    currentlyPlayingText,
-    stopSpeaking
-  });
+  const { speakWithElevenLabs } = useElevenLabsVoice();
   
   const speak = useCallback(async (text: string): Promise<void> => {
     if (!text.trim()) return;
@@ -41,7 +18,7 @@ export const useEnhancedSpeechSynthesis = () => {
     setIsSpeaking(true);
     
     try {
-      const success = await speakWithDeepgram(text);
+      const success = await speakWithElevenLabs(text);
       
       if (!success) {
         console.log('Falling back to browser speech synthesis');
@@ -53,7 +30,7 @@ export const useEnhancedSpeechSynthesis = () => {
     } finally {
       setIsSpeaking(false);
     }
-  }, [speakWithDeepgram]);
+  }, [speakWithElevenLabs]);
   
   const fallbackToSpeechSynthesis = useCallback(async (text: string): Promise<void> => {
     return new Promise((resolve) => {
@@ -85,6 +62,19 @@ export const useEnhancedSpeechSynthesis = () => {
       
       window.speechSynthesis.speak(utterance);
     });
+  }, []);
+  
+  const stopSpeaking = useCallback(() => {
+    if (currentAudioRef.current) {
+      currentAudioRef.current.pause();
+      currentAudioRef.current = null;
+    }
+    
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+    
+    setIsSpeaking(false);
   }, []);
   
   return {

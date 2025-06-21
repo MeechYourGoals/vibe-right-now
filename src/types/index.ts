@@ -1,8 +1,66 @@
-// Re-export all types from the entities
-export * from './entities/venue';
-export * from './core/base';
 
-// Define CityData type here to avoid circular imports
+// Core types
+export * from './core/base';
+export * from './core/api';
+
+// Entity types - Location must be exported properly
+export * from './entities/venue';
+export * from './entities/user';
+export * from './entities/content';
+export * from './entities/events';
+export * from './entities/messaging';
+
+// Feature types
+export * from './features/search';
+export * from './features/analytics';
+export * from './features/advertising';
+export * from './features/sentiment';
+
+// Re-export specific types for compatibility
+export type { Post, User, VenueInsights } from './index.d';
+
+// Chat types (with selective exports to avoid conflicts)
+export type {
+  ChatSession,
+  ChatMessage,
+  MessageRole,
+  ChatContext,
+  VoiceSession,
+  AIAgent,
+  AgentCapability,
+  CapabilityType,
+  CapabilityLevel
+} from './features/chat';
+
+// Extended Comment interface with all required properties
+export interface Comment {
+  id: string;
+  content: string;
+  author: string;
+  timestamp: string;
+  likes: number;
+  // Extended properties for compatibility
+  user: User;
+  postId: string;
+  contentId?: string;
+  parentId?: string;
+  body?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+  vibedHere?: boolean;
+  status?: 'published';
+  engagement?: { likes: number; replies: number; reactions: any[] };
+  moderation?: { status: 'approved'; flags: any[] };
+}
+
+// Consolidated Media interface (single definition to avoid conflicts) - Updated to include audio
+export interface Media {
+  id?: string;
+  type: 'image' | 'video' | 'audio';
+  url: string;
+  thumbnail?: string;
+}
+
 export interface CityData {
   name: string;
   state?: string;
@@ -12,244 +70,64 @@ export interface CityData {
   venues: Location[];
 }
 
-// Export missing types that are causing build errors
-export interface Comment {
-  id: string;
-  postId: string;
-  user: User;
-  content: string;
-  timestamp: Date;
-  likes: number;
-  replies?: Comment[];
-  vibedHere?: boolean;
-  contentId?: string;
-  parentId?: string;
-  author?: User;
-  body?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
-  status?: 'published';
-  engagement?: { likes: number; replies: number; reactions: any[] };
-  moderation?: { status: 'approved'; flags: any[] };
-}
-
-export interface Post {
-  id: string;
-  user: User;
-  location: Location;
-  content: string;
-  media?: Media[];
-  timestamp: Date;
-  expiresAt?: string;
-  likes: number;
-  comments: number;
-  isPinned?: boolean;
-  isVenuePost?: boolean;
-  saved: boolean;
-  vibeTags?: string[];
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface User {
-  id: string;
-  name: string;
-  username: string;
-  avatar: string;
-  verified: boolean;
-  bio?: string;
-  followers?: number;
-  following?: number;
-  posts?: number;
-  displayName?: string;
-  isPrivate?: boolean;
-  email?: string;
-  isCelebrity?: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface Media {
-  id?: string;
-  type: "image" | "video" | "audio";
-  url: string;
-  thumbnail?: string;
-}
-
-export interface AdFormat {
-  id: string;
-  name: string;
-  type: string;
-  description?: string;
-  duration?: number | string;
-  platform?: string;
-  dimensions?: string;
-  kpis?: string[];
-  placement?: string;
-}
-
-export interface TargetingOptions {
-  ageRange: { min: number; max: number };
-  gender: GenderTargeting;
-  interests: string[];
-  location: string;
-  ageRanges?: string[];
-  demographics?: {
-    gender: GenderTargeting | string;
-    ageRange: { min: number; max: number } | number[];
-    interests?: string[];
-    behaviors?: string[];
-    location?: string[];
-  };
-  behaviors?: {
-    categories: string[];
-    frequency: string;
-    venueVisits?: string[];
-    socialEngagement?: string[];
-    purchaseHistory?: string[];
-  };
-  contextual?: {
-    categories: string[];
-    frequency: string;
-    vibeTags?: string[];
-    venueTypes?: string[];
-    daypart?: string[];
-    timeOfDay?: string[];
-    dayOfWeek?: string[];
-    weather?: string[];
-    eventTypes?: string[];
-  };
-  momentScore?: number | {
-    crowdDensity: string;
-    vibeScore: string;
-    crowdLevel: string;
-    engagement: string;
-  };
-}
-
-export interface GenderTargeting {
+// Fix GenderTargeting to work with both string and object usage
+export type GenderTargeting = string | {
   all: boolean;
   male: boolean;
   female: boolean;
   other: boolean;
+};
+
+// Sentiment Analysis Types
+export interface SentimentTheme {
+  name: string;
+  theme: string;
+  sentiment: 'positive' | 'negative' | 'neutral';
+  confidence: number;
+  mentions: number;
+  keywords: string[];
+  examples: string[];
+  score: number;
 }
 
 export interface PlatformSentimentSummary {
   platform: string;
-  sentiment: number;
-  mentions: number;
-  overallSentiment?: number;
-  summary?: string;
-  reviewCount?: number;
-  themes?: SentimentTheme[];
-  lastUpdated?: string;
-  sentimentDistribution?: {
+  totalReviews: number;
+  reviewCount: number;
+  averageSentiment: number;
+  overallSentiment: number;
+  summary: string;
+  sentimentDistribution: {
     positive: number;
-    neutral: number;
     negative: number;
+    neutral: number;
   };
-}
-
-export interface SentimentTheme {
-  theme: string;
-  sentiment: number;
-  frequency: number;
-  name?: string;
-  score?: number;
-  examples?: string[];
-}
-
-export interface VenueInsights {
-  visitors: number;
-  visitorsChange: string;
-  posts: number;
-  postsChange: string;
-  shares: number;
-  sharesChange: string;
-  likes: number;
-  likesChange: string;
-  engagementRate: string;
-  followerGrowth: string;
-  clickThroughRate: string;
-  totalVisits: number;
-  revenueImpact: string;
-  totalReach: number;
-  impressions: number;
-  viewsPer: number;
-  viewsCount?: number;
-  visitorCount?: number;
-  checkInCount?: number;
-  receiptUploads?: number;
-  discountRedemptions?: number;
-}
-
-export interface Location {
-  id: string;
-  name: string;
-  address: string;
-  city: string;
-  state?: string;
-  country: string;
-  zip?: string;
-  lat: number;
-  lng: number;
-  type: "restaurant" | "bar" | "nightclub" | "cafe" | "attraction" | "sports" | "event" | "city" | "other" | "nightlife";
-  verified: boolean;
-  rating?: number;
-  price_level?: number;
-  vibes?: string[];
-  business_status?: string;
-  google_maps_url?: string;
-  hours?: Record<string, string | { open: string; close: string; closed?: boolean; }>;
-  tags?: string[];
-  phone?: string;
-  website?: string;
-  followers?: number;
-  checkins?: number;
-  coordinates?: {
-    lat: number;
-    lng: number;
-  };
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface CreditCard {
-  id: string;
-  last4: string;
-  brand: string;
-  expiryMonth: number;
-  expiryYear: number;
-  isDefault: boolean;
-}
-
-export interface BusinessHours {
-  monday: { open: string; close: string; closed?: boolean } | false;
-  tuesday: { open: string; close: string; closed?: boolean } | false;
-  wednesday: { open: string; close: string; closed?: boolean } | false;
-  thursday: { open: string; close: string; closed?: boolean } | false;
-  friday: { open: string; close: string; closed?: boolean } | false;
-  saturday: { open: string; close: string; closed?: boolean } | false;
-  sunday: { open: string; close: string; closed?: boolean } | false;
+  themes: SentimentTheme[];
+  lastUpdated: Date;
+  trends: Array<{
+    period: string;
+    change: number;
+  }>;
 }
 
 export interface SentimentAnalysisResult {
-  id: string;
   score: number;
-  label: 'positive' | 'negative' | 'neutral';
-  confidence: number;
-  date: string;
+  magnitude: number;
+  themes: SentimentTheme[];
+  summary: string;
 }
 
 export interface VenueSentimentAnalysis {
   venueId: string;
+  venueName: string;
   overallSentiment: number;
   totalReviews: number;
-  sentimentBreakdown: {
-    positive: number;
-    negative: number;
-    neutral: number;
-  };
-  recentTrend: 'improving' | 'declining' | 'stable';
-  date: string;
+  platformSummaries: PlatformSentimentSummary[];
+  topThemes: SentimentTheme[];
+  sentimentTrend: Array<{
+    date: Date;
+    sentiment: number;
+  }>;
+  lastAnalyzed: Date;
+  recommendations: string[];
 }

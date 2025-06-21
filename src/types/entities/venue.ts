@@ -1,60 +1,59 @@
 
-import { BaseEntity } from '../core/base';
-import { GeoCoordinates, Address } from '../core/base';
+import { BaseEntity, GeoCoordinates, Address, Timestamps } from '../core/base';
 
-export interface Location extends BaseEntity {
+export interface Location extends BaseEntity, GeoCoordinates, Address, Timestamps {
   name: string;
-  address: string;
-  city: string;
-  state?: string;
-  country: string;
-  zip?: string;
-  lat: number;
-  lng: number;
-  type: 'restaurant' | 'bar' | 'attraction' | 'sports' | 'nightlife' | 'music' | 'comedy' | 'venue';
+  type: 'restaurant' | 'bar' | 'attraction' | 'hotel' | 'cafe' | 'club' | 'sports' | 'shopping' | 'entertainment' | 'event';
   verified?: boolean;
   rating?: number;
-  price_level?: number;
-  business_status?: string;
-  google_maps_url?: string;
   vibes?: string[];
   tags?: string[];
-  hours?: {
-    monday?: string;
-    tuesday?: string;
-    wednesday?: string;
-    thursday?: string;
-    friday?: string;
-    saturday?: string;
-    sunday?: string;
+  hours?: string | {
+    [key: string]: string | { open: string; close: string; closed?: boolean; };
   };
-  userProfile?: {
-    id: string;
-    username: string;
-    avatar: string;
-    bio?: string;
-    name: string;
-    type?: 'regular' | 'celebrity' | 'venue';
-    verified?: boolean;
-  };
-  // Optional timestamps that will be added by the system
-  createdAt?: string;
-  updatedAt?: string;
+  phone?: string;
+  website?: string;
+  google_maps_url?: string;
+  business_status?: string;
+  price_level?: number;
 }
 
 export interface Venue extends Location {
   description?: string;
-  photos?: string[];
-  phone?: string;
-  website?: string;
-  social_media?: {
+  socialMedia?: {
     instagram?: string;
     facebook?: string;
     twitter?: string;
   };
   amenities?: string[];
+  priceRange?: '$' | '$$' | '$$$' | '$$$$';
   capacity?: number;
-  dress_code?: string;
-  parking?: boolean;
-  accessibility?: boolean;
+  ageRestriction?: number;
+  dressCode?: string;
+  reservationsRequired?: boolean;
+  parkingAvailable?: boolean;
+  wheelchairAccessible?: boolean;
+}
+
+export interface VenueInsights {
+  venueId: string;
+  totalVisits: number;
+  uniqueVisitors: number;
+  averageRating: number;
+  topVibes: string[];
+  busyHours: { hour: number; visitors: number }[];
+  demographics: {
+    ageGroups: { range: string; percentage: number }[];
+    genderSplit: { male: number; female: number; other: number };
+  };
+  recentActivity: {
+    posts: number;
+    checkins: number;
+    reviews: number;
+  };
+  trends: {
+    period: string;
+    visitChange: number;
+    ratingChange: number;
+  }[];
 }

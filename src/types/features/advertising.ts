@@ -1,48 +1,38 @@
 
+import { BaseEntity } from '../core/base';
+
+export interface Ad extends BaseEntity {
+  title: string;
+  content: string;
+}
+
+// Extended AdFormat for compatibility
 export interface AdFormat {
   id: string;
   name: string;
-  description: string;
-  type: 'MomentCard' | 'VibeOverlay' | 'SpawnPoint' | 'HeatRingTakeover';
-  duration?: string;
-  placement: string;
-  kpis: string[];
-  platform: string;
-  dimensions: string;
-  specifications: {
-    minWidth?: number;
-    minHeight?: number;
-    maxFileSize?: string;
-    aspectRatio?: string;
-    formats?: string[];
-    duration?: number;
-    autoplay?: boolean;
-    opacity?: number;
-    blendMode?: string;
-    triggers?: string[];
-    customColor?: boolean;
-  };
-  bestPractices: string[];
+  type: string;
+  description?: string;
+  duration?: number | string;
+  platform?: string;
+  dimensions?: string;
+  kpis?: string[];
+  placement?: string;
+  specifications?: any;
+  bestPractices?: string[];
 }
 
-export interface GenderTargeting {
-  all: boolean;
-  male: boolean;
-  female: boolean;
-  other: boolean;
-}
-
+// Fix TargetingOptions to match actual component usage
 export interface TargetingOptions {
   ageRanges: string[];
   locations: string[];
   interests: string[];
-  gender?: GenderTargeting;
+  gender: GenderTargeting;
   demographics?: {
-    gender: string;
-    ageRange: number[] | { min: number; max: number };
-    interests: string[];
-    behaviors: string[];
-    location: string[];
+    gender: GenderTargeting | string;
+    ageRange: { min: number; max: number } | number[];
+    interests?: string[];
+    behaviors?: string[];
+    location?: string[];
   };
   geographic?: {
     radius: number;
@@ -52,22 +42,22 @@ export interface TargetingOptions {
   behaviors?: {
     categories: string[];
     frequency: string;
-    venueVisits: string[];
-    socialEngagement: string[];
-    purchaseHistory: string[];
+    venueVisits?: string[];
+    socialEngagement?: string[];
+    purchaseHistory?: string[];
   };
   contextual?: {
     categories: string[];
     frequency: string;
-    vibeTags: string[];
-    venueTypes: string[];
-    daypart: string[];
-    timeOfDay: string[];
-    dayOfWeek: string[];
-    weather: string[];
-    eventTypes: string[];
+    vibeTags?: string[];
+    venueTypes?: string[];
+    daypart?: string[];
+    timeOfDay?: string[];
+    dayOfWeek?: string[];
+    weather?: string[];
+    eventTypes?: string[];
   };
-  momentScore?: string | {
+  momentScore?: number | {
     crowdDensity: string;
     vibeScore: string;
     crowdLevel: string;
@@ -75,28 +65,9 @@ export interface TargetingOptions {
   };
 }
 
-export interface AdCampaign {
-  id: string;
-  name: string;
-  status: 'active' | 'paused' | 'completed';
-  budget: number;
-  spent: number;
-  impressions: number;
-  clicks: number;
-  conversions: number;
-  startDate: string;
-  endDate?: string;
-  targeting: TargetingOptions;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface AdMetrics {
-  impressions: number;
-  clicks: number;
-  conversions: number;
-  ctr: number;
-  cpc: number;
-  cpm: number;
-  roas: number;
+export interface GenderTargeting {
+  all: boolean;
+  male: boolean;
+  female: boolean;
+  other: boolean;
 }

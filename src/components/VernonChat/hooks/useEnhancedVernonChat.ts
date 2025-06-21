@@ -14,8 +14,18 @@ export const useEnhancedVernonChat = () => {
   const [chatMode, setChatMode] = useLocalStorage<ChatMode>('vernon_chat_mode', 'user');
   const { processMessage } = useMessageProcessor();
   
-  // Use optimized speech hooks with Deepgram
-  const { speak, stop: stopSpeaking, isSpeaking, promptForDeepgramKey } = useOptimizedSpeechSynthesis();
+  // Use optimized speech hooks
+  const { speak, stop: stopSpeaking, isSpeaking } = useOptimizedSpeechSynthesis();
+  const { 
+    isListening, 
+    transcript, 
+    interimTranscript,
+    toggleListening,
+    clearTranscript 
+  } = useOptimizedSpeechRecognition({
+    continuous: true,
+    interimResults: true
+  });
 
   const addMessage = useCallback((content: string, direction: MessageDirection, aiResponse = false) => {
     const timestamp = new Date();
@@ -34,32 +44,11 @@ export const useEnhancedVernonChat = () => {
     ]);
   }, [setMessages]);
 
-  // Auto-processing callback for speech recognition
-  const handleTranscriptComplete = useCallback(async (finalTranscript: string) => {
-    console.log('Auto-processing transcript:', finalTranscript);
-    if (finalTranscript.trim()) {
-      await handleSendMessage(finalTranscript);
-    }
-  }, []); // Remove handleSendMessage dependency temporarily to fix circular reference
-
-  // Initialize speech recognition with auto-processing
-  const { 
-    isListening, 
-    transcript, 
-    interimTranscript,
-    toggleListening,
-    clearTranscript 
-  } = useOptimizedSpeechRecognition({
-    continuous: true,
-    interimResults: true,
-    onTranscriptComplete: handleTranscriptComplete
-  });
-
   const handleSendMessage = useCallback(async (text: string) => {
     if (!text.trim()) return;
     
-    // Stop any current speech before sending new message
     stopSpeaking();
+    clearTranscript();
     
     setInput('');
     addMessage(text, 'outgoing');
@@ -69,26 +58,36 @@ export const useEnhancedVernonChat = () => {
       const response = await processMessage(text, messages, chatMode);
       addMessage(response, 'incoming', true);
       
-      // Auto-speak response if listening mode was active
+      // Auto-speak response if listening mode is active
       if (isListening) {
-        // Add a small delay to ensure the message is rendered first
-        setTimeout(() => {
-          speak(response);
-        }, 100);
+        await speak(response);
       }
     } catch (error) {
       console.error('Error processing message:', error);
       const errorMsg = 'Sorry, I encountered an error. Please try again later.';
       addMessage(errorMsg, 'incoming');
       if (isListening) {
-        setTimeout(() => {
-          speak(errorMsg);
-        }, 100);
+        await speak(errorMsg);
       }
     } finally {
       setIsProcessing(false);
     }
-  }, [addMessage, messages, processMessage, chatMode, speak, stopSpeaking, isListening]);
+  }, [addMessage, messages, processMessage, chatMode, speak, stopSpeaking, clearTranscript, isListening]);
+
+  // Handle transcript completion (when user stops speaking)
+  const onTranscriptComplete = useCallback((finalTranscript: string) => {
+    if (finalTranscript.trim()) {
+      handleSendMessage(finalTranscript);
+    }
+  }, [handleSendMessage]);
+
+  // Handle transcript updates
+  const handleTranscriptUpdate = useCallback(() => {
+    if (transcript && !isListening) {
+      // User has stopped speaking, process the transcript
+      onTranscriptComplete(transcript);
+    }
+  }, [transcript, isListening, onTranscriptComplete]);
 
   const toggleChat = () => {
     setIsOpen(!isOpen);
@@ -101,13 +100,12 @@ export const useEnhancedVernonChat = () => {
   const clearMessages = useCallback(() => {
     setMessages([]);
     stopSpeaking();
-    clearTranscript();
-  }, [setMessages, stopSpeaking, clearTranscript]);
+  }, [setMessages, stopSpeaking]);
 
   const initializeWelcomeMessage = useCallback(() => {
     if (messages.length === 0) {
       const timestamp = new Date();
-      const welcomeMsg = 'Hello! I\'m Vernon, your AI assistant powered by Google Gemini with enhanced Deepgram voice capabilities. How can I help you discover venues and events today?';
+      const welcomeMsg = 'Hello! I\'m Vernon, your AI assistant powered by Google Gemini. How can I help you discover venues and events today?';
       
       setMessages([
         {
@@ -138,9 +136,7 @@ export const useEnhancedVernonChat = () => {
     toggleListening,
     transcript: interimTranscript || transcript,
     isSpeaking,
-    stopSpeaking,
-    promptForElevenLabsKey: promptForDeepgramKey, // Backward compatibility
-    promptForDeepgramKey,
-    initializeWelcomeMessage
+    initializeWelcomeMessage,
+    handleTranscriptUpdate
   };
 };
