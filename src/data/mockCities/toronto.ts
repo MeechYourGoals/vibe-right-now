@@ -20,7 +20,9 @@ const toronto: CityData = {
       verified: true,
       vibes: ["Iconic", "Observation Deck", "City Views"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=CN+Tower+Toronto"
+      google_maps_url: "https://maps.google.com/maps?q=CN+Tower+Toronto",
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z'
     },
     {
       id: "tor-2",
@@ -36,7 +38,9 @@ const toronto: CityData = {
       verified: true,
       vibes: ["Fine Dining", "Canadian", "Tower Views"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Canoe+Restaurant+Toronto"
+      google_maps_url: "https://maps.google.com/maps?q=Canoe+Restaurant+Toronto",
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z'
     },
     {
       id: "tor-3",
@@ -52,7 +56,9 @@ const toronto: CityData = {
       verified: true,
       vibes: ["Massive", "Electronic", "Waterfront"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Rebel+Nightclub+Toronto"
+      google_maps_url: "https://maps.google.com/maps?q=Rebel+Nightclub+Toronto",
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z'
     }
   ]
 };

@@ -1,5 +1,5 @@
 
-import { CityData, Location } from '@/types';
+import { CityData } from '@/types';
 
 const sydney: CityData = {
   name: "Sydney",
@@ -20,7 +20,9 @@ const sydney: CityData = {
       verified: true,
       rating: 4.6,
       vibes: ["Iconic", "Architecture", "Performance"],
-      tags: ["opera", "architecture", "harbor"]
+      tags: ["opera", "architecture", "harbor"],
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z'
     },
     {
       id: "sydney_2",
@@ -35,7 +37,9 @@ const sydney: CityData = {
       verified: true,
       rating: 4.5,
       vibes: ["Fine Dining", "Harbor Views", "Modern Australian"],
-      tags: ["fine dining", "harbor views", "modern australian"]
+      tags: ["fine dining", "harbor views", "modern australian"],
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z'
     },
     {
       id: "sydney_3",
@@ -50,7 +54,9 @@ const sydney: CityData = {
       verified: true,
       rating: 4.3,
       vibes: ["Rock Bar", "Pizza", "Underground"],
-      tags: ["rock music", "pizza", "underground"]
+      tags: ["rock music", "pizza", "underground"],
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z'
     }
   ]
 };

@@ -1,5 +1,5 @@
 
-import { CityData, Location } from '@/types';
+import { CityData } from '@/types';
 
 const rome: CityData = {
   name: "Rome",
@@ -20,7 +20,9 @@ const rome: CityData = {
       verified: true,
       rating: 4.6,
       vibes: ["Ancient", "Historic", "Iconic"],
-      tags: ["ancient rome", "gladiators", "amphitheater"]
+      tags: ["ancient rome", "gladiators", "amphitheater"],
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z'
     },
     {
       id: "rome_2",
@@ -35,7 +37,9 @@ const rome: CityData = {
       verified: true,
       rating: 4.8,
       vibes: ["Fine Dining", "Michelin Star", "Panoramic"],
-      tags: ["fine dining", "michelin star", "rooftop"]
+      tags: ["fine dining", "michelin star", "rooftop"],
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z'
     },
     {
       id: "rome_3",
@@ -50,7 +54,9 @@ const rome: CityData = {
       verified: true,
       rating: 4.4,
       vibes: ["Speakeasy", "Craft Cocktails", "Hidden"],
-      tags: ["speakeasy", "cocktails", "prohibition"]
+      tags: ["speakeasy", "cocktails", "prohibition"],
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z'
     }
   ]
 };

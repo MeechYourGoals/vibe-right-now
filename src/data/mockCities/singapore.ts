@@ -1,5 +1,5 @@
 
-import { CityData, Location } from '@/types';
+import { CityData } from '@/types';
 
 const singapore: CityData = {
   name: "Singapore",
@@ -20,7 +20,9 @@ const singapore: CityData = {
       verified: true,
       rating: 4.4,
       vibes: ["Luxury", "Iconic", "Modern"],
-      tags: ["infinity pool", "luxury", "skyline"]
+      tags: ["infinity pool", "luxury", "skyline"],
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z'
     },
     {
       id: "singapore_2",
@@ -35,7 +37,9 @@ const singapore: CityData = {
       verified: true,
       rating: 4.6,
       vibes: ["Fine Dining", "French", "Michelin Star"],
-      tags: ["french cuisine", "fine dining", "michelin star"]
+      tags: ["french cuisine", "fine dining", "michelin star"],
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z'
     },
     {
       id: "singapore_3",
@@ -50,7 +54,9 @@ const singapore: CityData = {
       verified: true,
       rating: 4.5,
       vibes: ["Speakeasy", "Craft Cocktails", "Asian"],
-      tags: ["cocktails", "speakeasy", "asian inspired"]
+      tags: ["cocktails", "speakeasy", "asian inspired"],
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z'
     }
   ]
 };

@@ -20,7 +20,9 @@ const riodejaneiro: CityData = {
       verified: true,
       vibes: ["Iconic", "Religious", "City Views"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Christ+the+Redeemer+Rio"
+      google_maps_url: "https://maps.google.com/maps?q=Christ+the+Redeemer+Rio",
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z'
     },
     {
       id: "rio-2",
@@ -36,7 +38,9 @@ const riodejaneiro: CityData = {
       verified: true,
       vibes: ["Brazilian", "Fine Dining", "Local Ingredients"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Oro+Restaurant+Rio"
+      google_maps_url: "https://maps.google.com/maps?q=Oro+Restaurant+Rio",
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z'
     },
     {
       id: "rio-3",
@@ -52,7 +56,9 @@ const riodejaneiro: CityData = {
       verified: true,
       vibes: ["Beach Club", "Electronic", "Lagoa"],
       business_status: "OPERATIONAL",
-      google_maps_url: "https://maps.google.com/maps?q=Green+Nation+Fest+Rio"
+      google_maps_url: "https://maps.google.com/maps?q=Green+Nation+Fest+Rio",
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z'
     }
   ]
 };

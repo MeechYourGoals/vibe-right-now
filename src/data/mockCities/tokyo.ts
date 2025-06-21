@@ -1,5 +1,5 @@
 
-import { CityData, Location } from '@/types';
+import { CityData } from '@/types';
 
 const tokyo: CityData = {
   name: "Tokyo",
@@ -20,7 +20,9 @@ const tokyo: CityData = {
       verified: true,
       rating: 4.7,
       vibes: ["Sushi", "Master Chef", "Traditional"],
-      tags: ["sushi", "omakase", "michelin star"]
+      tags: ["sushi", "omakase", "michelin star"],
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z'
     },
     {
       id: "tokyo_2",
@@ -35,7 +37,9 @@ const tokyo: CityData = {
       verified: true,
       rating: 4.2,
       vibes: ["Entertainment", "Unique", "Colorful"],
-      tags: ["robots", "show", "shinjuku"]
+      tags: ["robots", "show", "shinjuku"],
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z'
     },
     {
       id: "tokyo_3",
@@ -50,7 +54,9 @@ const tokyo: CityData = {
       verified: true,
       rating: 4.4,
       vibes: ["Traditional", "Tiny Bars", "Local"],
-      tags: ["yakitori", "tiny bars", "local culture"]
+      tags: ["yakitori", "tiny bars", "local culture"],
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z'
     }
   ]
 };

@@ -1,5 +1,5 @@
 
-import { CityData, Location } from '@/types';
+import { CityData } from '@/types';
 
 const sanfrancisco: CityData = {
   name: "San Francisco",
@@ -22,7 +22,9 @@ const sanfrancisco: CityData = {
       verified: true,
       rating: 4.9,
       vibes: ["Fine Dining", "Michelin Star", "Wine Country"],
-      tags: ["french cuisine", "tasting menu", "napa valley"]
+      tags: ["french cuisine", "tasting menu", "napa valley"],
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z'
     },
     {
       id: "sf_2",
@@ -38,7 +40,9 @@ const sanfrancisco: CityData = {
       verified: true,
       rating: 4.6,
       vibes: ["Craft Cocktails", "Creative", "Mission"],
-      tags: ["cocktails", "creative drinks", "mission district"]
+      tags: ["cocktails", "creative drinks", "mission district"],
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z'
     },
     {
       id: "sf_3",
@@ -54,7 +58,9 @@ const sanfrancisco: CityData = {
       verified: true,
       rating: 4.8,
       vibes: ["Iconic", "Views", "Historic"],
-      tags: ["landmark", "bridge", "photography"]
+      tags: ["landmark", "bridge", "photography"],
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z'
     }
   ]
 };
