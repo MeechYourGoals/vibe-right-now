@@ -1,6 +1,45 @@
 
 import { Location } from '@/types';
-import * as cities from '@/data/mockCities';
+
+// Mock city data structure to match what's expected
+const mockCityData = {
+  venues: [
+    {
+      id: 'loc1',
+      name: 'The Rooftop Bar',
+      type: 'bar',
+      address: '123 Main St',
+      city: 'Los Angeles',
+      state: 'CA',
+      country: 'USA',
+      lat: 34.0522,
+      lng: -118.2437,
+      rating: 4.5,
+      priceLevel: 3,
+      verified: true,
+      source: 'mock',
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z'
+    },
+    {
+      id: 'loc2',
+      name: 'Sunset Lounge',
+      type: 'nightlife',
+      address: '456 Ocean Ave',
+      city: 'Los Angeles',
+      state: 'CA',
+      country: 'USA',
+      lat: 34.0522,
+      lng: -118.2437,
+      rating: 4.2,
+      priceLevel: 2,
+      verified: false,
+      source: 'mock',
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z'
+    }
+  ]
+};
 
 // Convert city data to location format
 const convertToLocations = (cityData: any): Location[] => {
@@ -21,26 +60,26 @@ const convertToLocations = (cityData: any): Location[] => {
 };
 
 export const cityLocations: Record<string, Location[]> = {
-  'New York': convertToLocations(cities.nycData),
-  'Los Angeles': convertToLocations(cities.laData),
-  'Chicago': convertToLocations(cities.chicagoData),
-  'Phoenix': convertToLocations(cities.phoenixData),
-  'Miami': convertToLocations(cities.miamiData),
-  'Las Vegas': convertToLocations(cities.vegasData),
-  'Toronto': convertToLocations(cities.torontoData),
-  'Amsterdam': convertToLocations(cities.amsterdamData),
-  'Paris': convertToLocations(cities.parisData),
-  'Rome': convertToLocations(cities.romeData),
-  'Tokyo': convertToLocations(cities.tokyoData),
-  'Seoul': convertToLocations(cities.seoulData),
-  'Singapore': convertToLocations(cities.singaporeData),
-  'Sydney': convertToLocations(cities.sydneyData),
-  'São Paulo': convertToLocations(cities.saoPauloData),
-  'Rio de Janeiro': convertToLocations(cities.rioData),
-  'San Francisco': convertToLocations(cities.sanFranciscoData),
-  'Melbourne': convertToLocations(cities.melbourneData),
-  'Mumbai': convertToLocations(cities.mumbaiData),
-  'Moscow': convertToLocations(cities.moscowData)
+  'New York': convertToLocations(mockCityData),
+  'Los Angeles': convertToLocations(mockCityData),
+  'Chicago': convertToLocations(mockCityData),
+  'Phoenix': convertToLocations(mockCityData),
+  'Miami': convertToLocations(mockCityData),
+  'Las Vegas': convertToLocations(mockCityData),
+  'Toronto': convertToLocations(mockCityData),
+  'Amsterdam': convertToLocations(mockCityData),
+  'Paris': convertToLocations(mockCityData),
+  'Rome': convertToLocations(mockCityData),
+  'Tokyo': convertToLocations(mockCityData),
+  'Seoul': convertToLocations(mockCityData),
+  'Singapore': convertToLocations(mockCityData),
+  'Sydney': convertToLocations(mockCityData),
+  'São Paulo': convertToLocations(mockCityData),
+  'Rio de Janeiro': convertToLocations(mockCityData),
+  'San Francisco': convertToLocations(mockCityData),
+  'Melbourne': convertToLocations(mockCityData),
+  'Mumbai': convertToLocations(mockCityData),
+  'Moscow': convertToLocations(mockCityData)
 };
 
 // Get nearby locations based on coordinates

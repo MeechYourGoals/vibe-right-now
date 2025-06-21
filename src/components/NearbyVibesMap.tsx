@@ -128,6 +128,12 @@ const NearbyVibesMap = () => {
   
   const effectiveLoading = loading || localLoading || isLoading;
   
+  // Convert GeolocationCoordinates to GeoCoordinates for userLocation
+  const userLocationCoords = userLocation ? {
+    lat: userLocation.latitude,
+    lng: userLocation.longitude
+  } : null;
+  
   return (
     <div className={`space-y-4 ${isMapExpanded ? "fixed inset-0 z-50 bg-background p-4" : ""}`}>
       <div className="flex justify-between items-center">
@@ -155,7 +161,7 @@ const NearbyVibesMap = () => {
       
       <div className={`rounded-lg overflow-hidden ${isMapExpanded ? "h-[calc(100vh-8rem)]" : "h-96"}`}>
         <EnhancedGoogleMapComponent
-          userLocation={userLocation}
+          userLocation={userLocationCoords}
           locations={nearbyLocations || locations}
           realPlaces={mapState.realPlaces}
           searchedCity={searchedCity}
