@@ -1,25 +1,27 @@
-
-import { useState, useRef, useCallback, useEffect } from 'react';
-import { toast } from 'sonner';
+import { useState, useRef, useCallback, useEffect } from "react";
+import { toast } from "sonner";
 
 interface SpeechRecognitionConfig {
   continuous?: boolean;
   interimResults?: boolean;
   language?: string;
   maxAlternatives?: number;
+  onStartListening?: () => void;
 }
 
-export const useOptimizedSpeechRecognition = (config: SpeechRecognitionConfig = {}) => {
+export const useOptimizedSpeechRecognition = (
+  config: SpeechRecognitionConfig = {},
+) => {
   // State
   const [isListening, setIsListening] = useState(false);
-  const [transcript, setTranscript] = useState('');
-  const [interimTranscript, setInterimTranscript] = useState('');
+  const [transcript, setTranscript] = useState("");
+  const [interimTranscript, setInterimTranscript] = useState("");
   const [isSupported, setIsSupported] = useState(false);
   const [audioLevel, setAudioLevel] = useState(0);
-  
+
   // Refs
   const recognitionRef = useRef<SpeechRecognition | null>(null);
-  const finalTranscriptRef = useRef('');
+  const finalTranscriptRef = useRef("");
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
@@ -30,7 +32,8 @@ export const useOptimizedSpeechRecognition = (config: SpeechRecognitionConfig = 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       mediaStreamRef.current = stream;
-      const AudioContextCls = (window.AudioContext || (window as any).webkitAudioContext) as typeof AudioContext;
+      const AudioContextCls = (window.AudioContext ||
+        (window as any).webkitAudioContext) as typeof AudioContext;
       const audioContext = new AudioContextCls();
       const analyser = audioContext.createAnalyser();
       analyser.fftSize = 512;
@@ -45,7 +48,7 @@ export const useOptimizedSpeechRecognition = (config: SpeechRecognitionConfig = 
         setAudioLevel(avg / 255);
       }, 100);
     } catch (err) {
-      console.error('Audio monitor error', err);
+      console.error("Audio monitor error", err);
     }
   }, []);
 
@@ -55,7 +58,7 @@ export const useOptimizedSpeechRecognition = (config: SpeechRecognitionConfig = 
       levelIntervalRef.current = null;
     }
     if (mediaStreamRef.current) {
-      mediaStreamRef.current.getTracks().forEach(t => t.stop());
+      mediaStreamRef.current.getTracks().forEach((t) => t.stop());
       mediaStreamRef.current = null;
     }
     if (audioContextRef.current) {
@@ -65,99 +68,108 @@ export const useOptimizedSpeechRecognition = (config: SpeechRecognitionConfig = 
     analyserRef.current = null;
     setAudioLevel(0);
   }, []);
-  
+
   // Initialize speech recognition
   useEffect(() => {
-    const SpeechRecognition = window.SpeechRecognition || (window as any).webkitSpeechRecognition;
-    
+    const SpeechRecognition =
+      window.SpeechRecognition || (window as any).webkitSpeechRecognition;
+
     if (SpeechRecognition) {
       const recognition = new SpeechRecognition();
-      
+
       // Configure recognition
       recognition.continuous = config.continuous ?? true;
       recognition.interimResults = config.interimResults ?? true;
-      recognition.lang = config.language ?? 'en-US';
+      recognition.lang = config.language ?? "en-US";
       recognition.maxAlternatives = config.maxAlternatives ?? 1;
-      
+
       // Event handlers
       recognition.onstart = () => {
-        console.log('Speech recognition started');
+        console.log("Speech recognition started");
         setIsListening(true);
       };
-      
+
       recognition.onend = () => {
-        console.log('Speech recognition ended');
+        console.log("Speech recognition ended");
         setIsListening(false);
       };
-      
+
       recognition.onerror = (event) => {
-        console.error('Speech recognition error:', event.error);
+        console.error("Speech recognition error:", event.error);
         setIsListening(false);
-        
-        if (event.error === 'not-allowed') {
-          toast.error('Microphone access denied. Please allow microphone access.');
-        } else if (event.error === 'no-speech') {
-          console.log('No speech detected, continuing...');
+
+        if (event.error === "not-allowed") {
+          toast.error(
+            "Microphone access denied. Please allow microphone access.",
+          );
+        } else if (event.error === "no-speech") {
+          console.log("No speech detected, continuing...");
         } else {
           toast.error(`Speech recognition error: ${event.error}`);
         }
       };
-      
+
       recognition.onresult = (event) => {
-        let interim = '';
-        let final = '';
-        
+        let interim = "";
+        let final = "";
+
         for (let i = event.resultIndex; i < event.results.length; i++) {
           const result = event.results[i];
           const transcript = result[0].transcript;
-          
+
           if (result.isFinal) {
             final += transcript;
           } else {
             interim += transcript;
           }
         }
-        
+
         if (final) {
           finalTranscriptRef.current += final;
           setTranscript(finalTranscriptRef.current);
-          setInterimTranscript('');
+          setInterimTranscript("");
         } else {
           setInterimTranscript(interim);
         }
       };
-      
+
       recognitionRef.current = recognition;
       setIsSupported(true);
     } else {
-      console.warn('Speech recognition not supported');
+      console.warn("Speech recognition not supported");
       setIsSupported(false);
     }
-    
+
     return () => {
       if (recognitionRef.current) {
         recognitionRef.current.abort();
       }
       stopMonitoring();
     };
-  }, [config.continuous, config.interimResults, config.language, config.maxAlternatives]);
-  
+  }, [
+    config.continuous,
+    config.interimResults,
+    config.language,
+    config.maxAlternatives,
+  ]);
+
   // Start listening
   const startListening = useCallback(async () => {
     if (!recognitionRef.current || isListening) return;
 
     try {
-      finalTranscriptRef.current = '';
-      setTranscript('');
-      setInterimTranscript('');
+      config.onStartListening?.();
+      finalTranscriptRef.current = "";
+      setTranscript("");
+      setInterimTranscript("");
       await startMonitoring();
       recognitionRef.current.start();
     } catch (error) {
-      console.error('Error starting speech recognition:', error);
-      toast.error('Failed to start speech recognition');
+      console.error("Error starting speech recognition:", error);
+      toast.error("Failed to start speech recognition");
     }
-  }, [isListening, startMonitoring]);
-  
+  }, [isListening, startMonitoring, config.onStartListening]);
+
   // Stop listening
   const stopListening = useCallback(() => {
     if (!recognitionRef.current || !isListening) return;
@@ -166,10 +178,10 @@ export const useOptimizedSpeechRecognition = (config: SpeechRecognitionConfig = 
       recognitionRef.current.stop();
       stopMonitoring();
     } catch (error) {
-      console.error('Error stopping speech recognition:', error);
+      console.error("Error stopping speech recognition:", error);
     }
   }, [isListening, stopMonitoring]);
-  
+
   // Toggle listening
   const toggleListening = useCallback(() => {
     if (isListening) {
@@ -178,14 +190,14 @@ export const useOptimizedSpeechRecognition = (config: SpeechRecognitionConfig = 
       startListening();
     }
   }, [isListening, startListening, stopListening]);
-  
+
   // Clear transcript
   const clearTranscript = useCallback(() => {
-    finalTranscriptRef.current = '';
-    setTranscript('');
-    setInterimTranscript('');
+    finalTranscriptRef.current = "";
+    setTranscript("");
+    setInterimTranscript("");
   }, []);
-  
+
   return {
     // State
     isListening,
@@ -193,11 +205,11 @@ export const useOptimizedSpeechRecognition = (config: SpeechRecognitionConfig = 
     interimTranscript,
     isSupported,
     audioLevel,
-    
+
     // Actions
     startListening,
     stopListening,
     toggleListening,
-    clearTranscript
+    clearTranscript,
   };
 };

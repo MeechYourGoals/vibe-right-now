@@ -1,6 +1,5 @@
-
-import { useEffect } from 'react';
-import { Message } from '../../types';
+import { useEffect } from "react";
+import { Message } from "../../types";
 
 // Extending the Message type with the spoken property
 interface MessageWithSpoken extends Message {
@@ -44,14 +43,19 @@ export const useVoiceEffects = ({
   stopListening,
   processTranscript,
   onSendMessage,
-  isOpen
+  isOpen,
 }: UseVoiceEffectsProps) => {
   // Speak intro message when chat is first opened
   useEffect(() => {
     const speakIntro = async () => {
-      if (isOpen && isFirstInteraction && !introMessageSpoken && messages.length > 0) {
-        const messageText = messages[0].content || messages[0].text || '';
-        console.log('Attempting to speak intro message:', messageText);
+      if (
+        isOpen &&
+        isFirstInteraction &&
+        !introMessageSpoken &&
+        messages.length > 0
+      ) {
+        const messageText = messages[0].content || messages[0].text || "";
+        console.log("Attempting to speak intro message:", messageText);
         try {
           const success = await speakIntroOnce(messageText);
           if (success) {
@@ -59,58 +63,81 @@ export const useVoiceEffects = ({
             markIntroAsSpoken();
           }
         } catch (error) {
-          console.error('Error speaking intro:', error);
+          console.error("Error speaking intro:", error);
         }
       }
     };
-    
+
     speakIntro();
-  }, [isOpen, isFirstInteraction, introMessageSpoken, messages, speakIntroOnce, setIntroMessageSpoken, markIntroAsSpoken]);
-  
+  }, [
+    isOpen,
+    isFirstInteraction,
+    introMessageSpoken,
+    messages,
+    speakIntroOnce,
+    setIntroMessageSpoken,
+    markIntroAsSpoken,
+  ]);
+
   // Speak new AI messages
   useEffect(() => {
     const speakLastMessage = async () => {
       // Skip if intro hasn't been spoken yet to avoid conflict
       if (!introMessageSpoken) return;
-      
+
       // Only speak if messages exist, not typing, not processing, and not already speaking
       if (messages.length > 0 && !isTyping && !isProcessing && !isSpeaking) {
         const lastMessage = messages[messages.length - 1] as MessageWithSpoken;
-        const isAiMessage = lastMessage.direction === 'incoming' || lastMessage.sender === 'ai';
-        
+        const isAiMessage =
+          lastMessage.direction === "incoming" || lastMessage.sender === "ai";
+
         // Only speak AI messages, not user ones
         if (isAiMessage && !lastMessage.spoken) {
-          console.log('Speaking last AI message');
-          
+          console.log("Speaking last AI message");
+
           // Mark this message as spoken to avoid repeating
           const updatedMessages = [...messages];
           (updatedMessages[updatedMessages.length - 1] as MessageWithSpoken) = {
             ...lastMessage,
-            spoken: true
+            spoken: true,
           };
-          
+
           try {
-            const messageText = lastMessage.content || lastMessage.text || '';
+            const messageText = lastMessage.content || lastMessage.text || "";
             await speakResponse(messageText);
           } catch (error) {
-            console.error('Error speaking message:', error);
+            console.error("Error speaking message:", error);
           }
         }
       }
     };
-    
+
     speakLastMessage();
-  }, [messages, isTyping, isProcessing, isSpeaking, introMessageSpoken, speakResponse]);
-  
+  }, [
+    messages,
+    isTyping,
+    isProcessing,
+    isSpeaking,
+    introMessageSpoken,
+    speakResponse,
+  ]);
+
   // Process transcript when listening stops
   useEffect(() => {
     if (!isListening && isProcessing) {
-      console.log('Processing transcript after listening stopped');
+      console.log("Processing transcript after listening stopped");
+      stopSpeaking();
       processTranscript();
       setIsProcessing(false);
     }
-  }, [isListening, isProcessing, processTranscript, setIsProcessing]);
-  
+  }, [
+    isListening,
+    isProcessing,
+    processTranscript,
+    setIsProcessing,
+    stopSpeaking,
+  ]);
+
   // Clear up when component unmounts
   useEffect(() => {
     return () => {
