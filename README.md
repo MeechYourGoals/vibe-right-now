@@ -67,3 +67,8 @@ Simply open [Lovable](https://lovable.dev/projects/6615c5b7-93f5-41b0-b375-6a374
 ## I want to use a custom domain - is that possible?
 
 We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+
+## Audio generation
+
+The `generate-audio` Supabase Edge Function converts text to speech using the Deepgram API. To enable it, set the `DEEPGRAM_API_KEY` environment variable in your Supabase project.
+
