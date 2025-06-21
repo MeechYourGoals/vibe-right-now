@@ -2,25 +2,25 @@
 import { useState, useCallback } from 'react';
 import { DeepgramService } from '@/services';
 
-export const useElevenLabsVoice = () => {
-  const [isElevenLabsReady, setIsElevenLabsReady] = useState<boolean>(DeepgramService.hasApiKey());
+export const useDeepgramVoice = () => {
+  const [isDeepgramReady, setIsDeepgramReady] = useState<boolean>(DeepgramService.hasApiKey());
   
   // Function to prompt user for Deepgram API key
-  const promptForElevenLabsKey = useCallback(() => {
+  const promptForDeepgramKey = useCallback(() => {
     const apiKey = prompt('Enter your Deepgram API key for improved voice quality:');
     if (apiKey) {
       DeepgramService.setApiKey(apiKey);
-      setIsElevenLabsReady(true);
+      setIsDeepgramReady(true);
     }
   }, []);
   
-  // Function to speak using ElevenLabs
-  const speakWithElevenLabs = useCallback(async (text: string): Promise<void> => {
+  // Function to speak using Deepgram
+  const speakWithDeepgram = useCallback(async (text: string): Promise<void> => {
     try {
       const audioData = await DeepgramService.textToSpeech(text);
       
       if (!audioData) {
-        throw new Error('Failed to get audio from Eleven Labs');
+        throw new Error('Failed to get audio from Deepgram');
       }
       
       // Create a blob from the audio data
@@ -44,13 +44,13 @@ export const useElevenLabsVoice = () => {
         audio.play().catch(reject);
       });
     } catch (error) {
-      console.error('Error with Eleven Labs speech:', error);
+      console.error('Error with Deepgram speech:', error);
       throw error;
     }
   }, []);
   
-  // Function to cancel ElevenLabs speech
-  const cancelElevenLabsSpeech = useCallback(() => {
+  // Function to cancel Deepgram speech
+  const cancelDeepgramSpeech = useCallback(() => {
     // This is a simple implementation
     // In a more complex app, you might need to track active audio elements
     const audios = document.querySelectorAll('audio');
@@ -61,9 +61,9 @@ export const useElevenLabsVoice = () => {
   }, []);
   
   return {
-    isElevenLabsReady,
-    speakWithElevenLabs,
-    promptForElevenLabsKey,
-    cancelElevenLabsSpeech
+    isDeepgramReady,
+    speakWithDeepgram,
+    promptForDeepgramKey,
+    cancelDeepgramSpeech
   };
 };

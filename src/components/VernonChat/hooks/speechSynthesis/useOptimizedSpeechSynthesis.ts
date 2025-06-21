@@ -2,13 +2,14 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { DeepgramService } from '@/services';
 import { configureSpeechSynthesis, createUtterance, handleSynthesisError } from './speechSynthesisUtils';
+import { useDeepgramSpeech } from './useDeepgramSpeech';
 import { toast } from 'sonner';
 
 export const useOptimizedSpeechSynthesis = () => {
   // Core state
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
-  const [isElevenLabsReady, setIsElevenLabsReady] = useState<boolean>(DeepgramService.hasApiKey());
+  const [isDeepgramReady, setIsDeepgramReady] = useState<boolean>(DeepgramService.hasApiKey());
   
   // Refs for tracking
   const currentAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -40,60 +41,15 @@ export const useOptimizedSpeechSynthesis = () => {
     };
   }, []);
   
-  // ElevenLabs speech function
-  const speakWithElevenLabs = useCallback(async (text: string): Promise<boolean> => {
-    try {
-      console.log('Using Deepgram TTS for:', text.substring(0, 50) + '...');
 
-      const audioData = await DeepgramService.textToSpeech(text);
-      
-      if (!audioData) {
-        console.warn('No audio data from ElevenLabs');
-        return false;
-      }
-      
-      // Create blob and audio element
-      const blob = new Blob([audioData], { type: 'audio/mpeg' });
-      const url = URL.createObjectURL(blob);
-      const audio = new Audio(url);
-      
-      currentAudioRef.current = audio;
-      setIsSpeaking(true);
-      currentlyPlayingText.current = text;
-      
-      return new Promise((resolve) => {
-        audio.onended = () => {
-          URL.revokeObjectURL(url);
-          setIsSpeaking(false);
-          currentlyPlayingText.current = null;
-          currentAudioRef.current = null;
-          resolve(true);
-        };
-        
-        audio.onerror = () => {
-          URL.revokeObjectURL(url);
-          setIsSpeaking(false);
-          currentlyPlayingText.current = null;
-          currentAudioRef.current = null;
-          resolve(false);
-        };
-        
-        audio.play().catch(() => {
-          URL.revokeObjectURL(url);
-          setIsSpeaking(false);
-          currentlyPlayingText.current = null;
-          currentAudioRef.current = null;
-          resolve(false);
-        });
-      });
-    } catch (error) {
-      console.error('Deepgram speech error:', error);
-      setIsSpeaking(false);
-      currentlyPlayingText.current = null;
-      currentAudioRef.current = null;
-      return false;
-    }
-  }, []);
+  // Deepgram speech hook
+  const { speakWithDeepgram } = useDeepgramSpeech({
+    audioElement: currentAudioRef,
+    isSpeaking,
+    setIsSpeaking,
+    currentlyPlayingText,
+    stopSpeaking: stop
+  });
   
   // Browser speech fallback
   const speakWithBrowser = useCallback((text: string, voice?: SpeechSynthesisVoice) => {
@@ -138,7 +94,7 @@ export const useOptimizedSpeechSynthesis = () => {
     synthRef.current.speak(utterance);
   }, [voices]);
   
-  // Main speak function that tries ElevenLabs first, then falls back to browser
+  // Main speak function that tries Deepgram first, then falls back to browser
   const speak = useCallback(async (text: string): Promise<void> => {
     if (!text.trim()) return;
     
@@ -151,9 +107,9 @@ export const useOptimizedSpeechSynthesis = () => {
     // Stop any current speech
     stop();
     
-    // Try ElevenLabs first if available
-    if (isElevenLabsReady) {
-      const success = await speakWithElevenLabs(text);
+    // Try Deepgram first if available
+    if (isDeepgramReady) {
+      const success = await speakWithDeepgram(text);
       if (success) return;
       
       console.log('Deepgram failed, falling back to browser speech');
@@ -161,7 +117,7 @@ export const useOptimizedSpeechSynthesis = () => {
     
     // Fallback to browser speech synthesis
     speakWithBrowser(text);
-  }, [isElevenLabsReady, isSpeaking, speakWithElevenLabs, speakWithBrowser]);
+  }, [isDeepgramReady, isSpeaking, speakWithDeepgram, speakWithBrowser]);
   
   // Stop function
   const stop = useCallback(() => {
@@ -179,13 +135,13 @@ export const useOptimizedSpeechSynthesis = () => {
     currentlyPlayingText.current = null;
   }, []);
   
-  // ElevenLabs key management
-  const promptForElevenLabsKey = useCallback(() => {
+  // Deepgram key management
+  const promptForDeepgramKey = useCallback(() => {
     const apiKey = prompt('Enter your Deepgram API key for improved voice quality:');
     if (apiKey) {
       DeepgramService.setApiKey(apiKey);
-      setIsElevenLabsReady(true);
-      toast.success('ElevenLabs API key set successfully!');
+      setIsDeepgramReady(true);
+      toast.success('Deepgram API key set successfully!');
     }
   }, []);
   
@@ -196,15 +152,15 @@ export const useOptimizedSpeechSynthesis = () => {
     
     // State
     isSpeaking,
-    isElevenLabsReady,
+    isDeepgramReady,
     voices,
     
     // Individual speech methods
-    speakWithElevenLabs,
+    speakWithDeepgram,
     speakWithBrowser,
     
     // Key management
-    promptForElevenLabsKey,
+    promptForDeepgramKey,
     
     // Legacy compatibility
     speakResponse: speak,

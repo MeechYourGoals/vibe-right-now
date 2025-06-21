@@ -119,8 +119,8 @@ export const useSpeechSynthesis = () => {
     speakResponse,
     stopSpeaking,
     togglePause,
-    useElevenLabs: false,
-    promptForElevenLabsKey: () => {
+    useDeepgram: false,
+    promptForDeepgramKey: () => {
       toast.info("Using browser's built-in speech services");
     }
   };
