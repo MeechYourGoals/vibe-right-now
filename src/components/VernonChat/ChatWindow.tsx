@@ -1,8 +1,17 @@
-
-import React, { useEffect, useRef } from 'react';
-import { X, Send, Mic, MicOff, User, Bot, Trash2, Volume2 } from 'lucide-react';
-import { ChatWindowProps, Message } from './types';
-import VoiceActivityBar from '../VoiceActivityBar';
+import React, { useEffect, useRef } from "react";
+import {
+  X,
+  Send,
+  Mic,
+  MicOff,
+  User,
+  Bot,
+  Trash2,
+  Volume2,
+  VolumeX,
+} from "lucide-react";
+import { ChatWindowProps, Message } from "./types";
+import VoiceActivityBar from "../VoiceActivityBar";
 
 const ChatWindow: React.FC<ChatWindowProps> = ({
   messages,
@@ -16,16 +25,17 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   clearMessages,
   isListening,
   toggleListening,
+  stopSpeaking,
   isSpeaking,
   audioLevel,
   isModelLoading,
-  transcript
+  transcript,
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   useEffect(() => {
@@ -57,18 +67,19 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   const handleMicClick = () => {
     // Clear input when starting to listen
     if (!isListening && setInput) {
-      setInput('');
+      setInput("");
     }
+    stopSpeaking();
     toggleListening();
   };
 
   const renderMessage = (message: Message) => {
-    const isIncoming = message.direction === 'incoming';
+    const isIncoming = message.direction === "incoming";
 
     return (
       <div
         key={message.id}
-        className={`mb-3 ${isIncoming ? 'self-start' : 'self-end'}`}
+        className={`mb-3 ${isIncoming ? "self-start" : "self-end"}`}
       >
         <div className="flex items-start gap-2">
           {isIncoming && (
@@ -80,12 +91,14 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
           <div
             className={`p-3 rounded-lg max-w-[80%] relative ${
               isIncoming
-                ? 'bg-muted text-foreground'
-                : 'bg-primary text-primary-foreground'
+                ? "bg-muted text-foreground"
+                : "bg-primary text-primary-foreground"
             }`}
           >
-            <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
-            
+            <p className="text-sm whitespace-pre-wrap break-words">
+              {message.content}
+            </p>
+
             {isIncoming && (
               <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
                 <Volume2 size={12} className="text-white" />
@@ -126,16 +139,22 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                 <span className="text-xs text-muted-foreground">Muted</span>
               </>
             )}
-            {isListening && <VoiceActivityBar level={audioLevel} isActive={isListening} />}
+            {isListening && (
+              <VoiceActivityBar level={audioLevel} isActive={isListening} />
+            )}
           </div>
         </div>
         <div className="flex items-center space-x-2">
           <button
             onClick={toggleMode}
             className="p-1 rounded-md hover:bg-muted text-xs"
-            title={chatMode === 'user' ? 'Switch to venue mode' : 'Switch to user mode'}
+            title={
+              chatMode === "user"
+                ? "Switch to venue mode"
+                : "Switch to user mode"
+            }
           >
-            {chatMode === 'user' ? 'User' : 'Venue'}
+            {chatMode === "user" ? "User" : "Venue"}
           </button>
           <button
             onClick={clearMessages}
@@ -143,6 +162,13 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
             title="Clear conversation"
           >
             <Trash2 className="w-4 h-4" />
+          </button>
+          <button
+            onClick={stopSpeaking}
+            className="p-1 rounded-md hover:bg-muted"
+            title="Stop speaking"
+          >
+            <VolumeX className="w-4 h-4" />
           </button>
           <button
             onClick={onClose}
@@ -176,27 +202,34 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="p-3 border-t flex items-center gap-2">
+      <form
+        onSubmit={handleSubmit}
+        className="p-3 border-t flex items-center gap-2"
+      >
         <button
           type="button"
           onClick={handleMicClick}
           className={`p-2 rounded-full transition-all ${
             isListening
-              ? 'bg-red-100 text-red-500 animate-pulse'
-              : 'bg-muted text-foreground hover:bg-blue-100 hover:text-blue-500'
+              ? "bg-red-100 text-red-500 animate-pulse"
+              : "bg-muted text-foreground hover:bg-blue-100 hover:text-blue-500"
           }`}
-          title={isListening ? 'Stop listening' : 'Start voice input'}
+          title={isListening ? "Stop listening" : "Start voice input"}
         >
           {isListening ? <MicOff size={18} /> : <Mic size={18} />}
         </button>
-        {isListening && <VoiceActivityBar level={audioLevel} isActive={isListening} />}
+        {isListening && (
+          <VoiceActivityBar level={audioLevel} isActive={isListening} />
+        )}
 
         <input
           type="text"
           value={input}
           onChange={handleInputChange}
           ref={inputRef}
-          placeholder={isListening ? "Listening..." : "Type or speak your message..."}
+          placeholder={
+            isListening ? "Listening..." : "Type or speak your message..."
+          }
           disabled={isProcessing || isModelLoading}
           className="flex-1 p-2 bg-background border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
         />
@@ -206,8 +239,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
           disabled={!input || isProcessing}
           className={`p-2 rounded-full ${
             !input || isProcessing
-              ? 'bg-muted text-muted-foreground'
-              : 'bg-primary text-primary-foreground hover:bg-primary/90'
+              ? "bg-muted text-muted-foreground"
+              : "bg-primary text-primary-foreground hover:bg-primary/90"
           }`}
         >
           <Send size={18} />

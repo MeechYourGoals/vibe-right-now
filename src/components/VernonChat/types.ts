@@ -1,4 +1,3 @@
-
 // Update the types to include what's needed for Vernon Chat
 export interface Message {
   id: string;
@@ -8,14 +7,14 @@ export interface Message {
   aiResponse?: boolean;
   // Adding these fields for compatibility with existing components
   text?: string;
-  sender?: 'user' | 'ai' | string;
-  role?: 'user' | 'assistant' | 'system';
+  sender?: "user" | "ai" | string;
+  role?: "user" | "assistant" | "system";
   spoken?: boolean;
   verified?: boolean;
 }
 
-export type MessageDirection = 'incoming' | 'outgoing';
-export type ChatMode = 'user' | 'venue';
+export type MessageDirection = "incoming" | "outgoing";
+export type ChatMode = "user" | "venue";
 
 export interface ChatWindowProps {
   messages: Message[];
@@ -27,6 +26,7 @@ export interface ChatWindowProps {
   clearMessages: () => void;
   isListening: boolean;
   toggleListening: () => void;
+  stopSpeaking: () => void;
   isSpeaking: boolean;
   audioLevel: number;
   isModelLoading: boolean;
@@ -69,7 +69,7 @@ export interface ChatMessage {
   id: string;
   content?: string;
   text?: string;
-  role?: 'user' | 'assistant' | 'system';
-  sender?: 'user' | 'ai' | string;
+  role?: "user" | "assistant" | "system";
+  sender?: "user" | "ai" | string;
   timestamp: string | Date;
 }

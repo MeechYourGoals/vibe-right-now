@@ -1,8 +1,7 @@
-
-import React, { useEffect } from 'react';
-import ChatWindow from './ChatWindow';
-import ChatButton from './ChatButton';
-import { useEnhancedVernonChat } from './hooks/useEnhancedVernonChat';
+import React, { useEffect } from "react";
+import ChatWindow from "./ChatWindow";
+import ChatButton from "./ChatButton";
+import { useEnhancedVernonChat } from "./hooks/useEnhancedVernonChat";
 
 const VernonChat: React.FC = () => {
   const {
@@ -20,8 +19,9 @@ const VernonChat: React.FC = () => {
     toggleListening,
     transcript,
     isSpeaking,
+    stopSpeaking,
     audioLevel,
-    initializeWelcomeMessage
+    initializeWelcomeMessage,
   } = useEnhancedVernonChat();
 
   // Initialize welcome message
@@ -44,6 +44,7 @@ const VernonChat: React.FC = () => {
           clearMessages={clearMessages}
           isListening={isListening}
           toggleListening={toggleListening}
+          stopSpeaking={stopSpeaking}
           isSpeaking={isSpeaking}
           audioLevel={audioLevel}
           isModelLoading={false}
