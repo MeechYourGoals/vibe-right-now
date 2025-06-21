@@ -3,7 +3,13 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import { DeepgramService } from '@/services/DeepgramService';
 import { toast } from 'sonner';
 
-export const useOptimizedSpeechSynthesis = () => {
+interface VoiceSettings {
+  voice?: string;
+  volume?: number;
+  speechRate?: number;
+}
+
+export const useOptimizedSpeechSynthesis = (settings: VoiceSettings = {}) => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [isDeepgramReady, setIsDeepgramReady] = useState<boolean>(DeepgramService.hasApiKey());
@@ -12,6 +18,13 @@ export const useOptimizedSpeechSynthesis = () => {
   const synthRef = useRef<SpeechSynthesis | null>(null);
   const currentlyPlayingText = useRef<string | null>(null);
   const lastSpokenMessage = useRef<string | null>(null);
+  
+  // Voice settings with defaults
+  const voiceSettings = {
+    voice: settings.voice || 'aura-asteria-en',
+    volume: settings.volume || 80,
+    speechRate: settings.speechRate || 1.0
+  };
   
   // Initialize speech synthesis
   useEffect(() => {
@@ -40,9 +53,9 @@ export const useOptimizedSpeechSynthesis = () => {
   // Deepgram speech function
   const speakWithDeepgram = useCallback(async (text: string): Promise<boolean> => {
     try {
-      console.log('Using Deepgram TTS for:', text.substring(0, 50) + '...');
+      console.log(`Using Deepgram TTS with voice: ${voiceSettings.voice}`);
       
-      const audioData = await DeepgramService.textToSpeech(text);
+      const audioData = await DeepgramService.textToSpeech(text, voiceSettings.voice);
       
       if (!audioData) {
         console.warn('No audio data from Deepgram');
@@ -53,6 +66,9 @@ export const useOptimizedSpeechSynthesis = () => {
       const blob = new Blob([audioData], { type: 'audio/wav' });
       const url = URL.createObjectURL(blob);
       const audio = new Audio(url);
+      
+      // Apply volume setting
+      audio.volume = voiceSettings.volume / 100;
       
       currentAudioRef.current = audio;
       setIsSpeaking(true);
@@ -69,6 +85,7 @@ export const useOptimizedSpeechSynthesis = () => {
         };
         
         audio.onerror = () => {
+          console.error('Audio playback error');
           URL.revokeObjectURL(url);
           setIsSpeaking(false);
           currentlyPlayingText.current = null;
@@ -76,7 +93,8 @@ export const useOptimizedSpeechSynthesis = () => {
           resolve(false);
         };
         
-        audio.play().catch(() => {
+        audio.play().catch((error) => {
+          console.error('Audio play error:', error);
           URL.revokeObjectURL(url);
           setIsSpeaking(false);
           currentlyPlayingText.current = null;
@@ -91,7 +109,7 @@ export const useOptimizedSpeechSynthesis = () => {
       currentAudioRef.current = null;
       return false;
     }
-  }, []);
+  }, [voiceSettings]);
   
   // Browser speech fallback
   const speakWithBrowser = useCallback((text: string, voice?: SpeechSynthesisVoice) => {
@@ -102,18 +120,22 @@ export const useOptimizedSpeechSynthesis = () => {
     
     const utterance = new SpeechSynthesisUtterance(text);
     
+    // Apply voice settings
+    utterance.volume = voiceSettings.volume / 100;
+    utterance.rate = voiceSettings.speechRate;
+    
     if (voice) {
       utterance.voice = voice;
     } else {
-      // Try to find a male voice
-      const maleVoice = voices.find(v => 
+      // Try to find a suitable voice
+      const preferredVoice = voices.find(v => 
         v.name.includes('Male') || 
         v.name.includes('David') || 
         v.name.includes('Daniel') ||
         v.name.includes('Google UK English Male')
       );
-      if (maleVoice) {
-        utterance.voice = maleVoice;
+      if (preferredVoice) {
+        utterance.voice = preferredVoice;
       }
     }
     
@@ -135,7 +157,7 @@ export const useOptimizedSpeechSynthesis = () => {
     };
     
     synthRef.current.speak(utterance);
-  }, [voices]);
+  }, [voices, voiceSettings]);
   
   // Main speak function
   const speak = useCallback(async (text: string): Promise<void> => {

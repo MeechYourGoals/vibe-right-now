@@ -1,7 +1,9 @@
 
-import React, { useEffect, useRef } from 'react';
-import { X, Send, Mic, MicOff, User, Bot, Trash2, Volume2, VolumeX, Settings } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { X, Send, Mic, MicOff, User, Bot, Trash2, Volume2, VolumeX, Settings, MessageCircle } from 'lucide-react';
 import { ChatWindowProps, Message } from './types';
+import VoiceSettings from './VoiceSettings';
+import { useConversationManager } from './hooks/useConversationManager';
 
 const ChatWindow: React.FC<ChatWindowProps> = ({
   messages,
@@ -23,6 +25,33 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  
+  // Voice settings state
+  const [showVoiceSettings, setShowVoiceSettings] = useState(false);
+  const [currentVoice, setCurrentVoice] = useState('aura-asteria-en');
+  const [volume, setVolume] = useState(80);
+  const [speechRate, setSpeechRate] = useState(1.0);
+  
+  // Conversation manager
+  const {
+    conversationState,
+    isConversationMode,
+    audioLevel,
+    isVoiceActive,
+    startConversation,
+    stopConversation,
+    toggleConversation,
+    speakResponse
+  } = useConversationManager({
+    onMessageSend: onSendMessage,
+    autoStartListening: true,
+    interruptionEnabled: true,
+    voiceSettings: {
+      voice: currentVoice,
+      volume,
+      speechRate
+    }
+  });
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -33,6 +62,16 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       inputRef.current?.focus();
     }
   }, [isModelLoading]);
+
+  // Auto-speak new AI responses when in conversation mode
+  useEffect(() => {
+    if (messages.length > 0 && isConversationMode) {
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage.direction === 'incoming' && lastMessage.aiResponse) {
+        speakResponse(lastMessage.content);
+      }
+    }
+  }, [messages, isConversationMode, speakResponse]);
 
   // Update input field with transcript for visual feedback
   useEffect(() => {
@@ -75,6 +114,26 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
     }
   };
 
+  const getConversationStateText = () => {
+    switch (conversationState) {
+      case 'listening': return 'Listening...';
+      case 'processing': return 'Processing...';
+      case 'speaking': return 'Speaking...';
+      case 'interrupted': return 'Interrupted';
+      default: return 'Ready';
+    }
+  };
+
+  const getConversationStateColor = () => {
+    switch (conversationState) {
+      case 'listening': return 'text-blue-500';
+      case 'processing': return 'text-yellow-500';
+      case 'speaking': return 'text-green-500';
+      case 'interrupted': return 'text-red-500';
+      default: return 'text-gray-500';
+    }
+  };
+
   const renderMessage = (message: Message) => {
     const isIncoming = message.direction === 'incoming';
 
@@ -100,9 +159,13 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
             <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
             
             {isIncoming && (
-              <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+              <button
+                onClick={() => speakResponse(message.content)}
+                className="absolute -bottom-2 -right-2 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center hover:bg-blue-600 transition-colors"
+                title="Speak this message"
+              >
                 <Volume2 size={12} className="text-white" />
-              </div>
+              </button>
             )}
           </div>
 
@@ -119,24 +182,56 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   return (
     <div className="fixed right-6 bottom-6 w-96 h-[600px] max-h-[80vh] bg-background border rounded-lg shadow-lg flex flex-col z-50">
       {/* Header */}
-      <div className="flex items-center justify-between p-3 border-b">
+      <div className="flex items-center justify-between p-3 border-b relative">
         <div className="flex items-center space-x-2">
           <Bot className="w-5 h-5 text-primary" />
           <span className="font-medium">Vernon - Enhanced Voice AI</span>
-          {isListening && (
+          
+          {/* Conversation Mode Status */}
+          {isConversationMode && (
             <div className="flex items-center space-x-1">
-              <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-              <span className="text-xs text-red-500">Listening</span>
+              <div className={`w-2 h-2 rounded-full animate-pulse ${
+                conversationState === 'listening' ? 'bg-blue-500' :
+                conversationState === 'processing' ? 'bg-yellow-500' :
+                conversationState === 'speaking' ? 'bg-green-500' :
+                conversationState === 'interrupted' ? 'bg-red-500' :
+                'bg-gray-500'
+              }`}></div>
+              <span className={`text-xs ${getConversationStateColor()}`}>
+                {getConversationStateText()}
+              </span>
             </div>
           )}
-          {isSpeaking && (
+          
+          {/* Voice Activity Indicator */}
+          {isVoiceActive && (
             <div className="flex items-center space-x-1">
-              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-              <span className="text-xs text-blue-500">Speaking</span>
+              <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+              <div 
+                className="w-8 h-2 bg-gray-200 rounded-full overflow-hidden"
+                title={`Voice level: ${Math.round(audioLevel * 100)}%`}
+              >
+                <div 
+                  className="h-full bg-red-500 transition-all duration-100"
+                  style={{ width: `${audioLevel * 100}%` }}
+                />
+              </div>
             </div>
           )}
         </div>
+        
         <div className="flex items-center space-x-2">
+          {/* Conversation Mode Toggle */}
+          <button
+            onClick={toggleConversation}
+            className={`p-1 rounded-md hover:bg-muted ${
+              isConversationMode ? 'bg-blue-100 text-blue-600' : ''
+            }`}
+            title={isConversationMode ? 'Stop conversation mode' : 'Start conversation mode'}
+          >
+            <MessageCircle className="w-4 h-4" />
+          </button>
+          
           {/* Stop Speaking Button */}
           {isSpeaking && (
             <button
@@ -148,11 +243,11 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
             </button>
           )}
           
-          {/* ElevenLabs Setup Button */}
+          {/* Voice Settings Button */}
           <button
-            onClick={handleElevenLabsSetup}
+            onClick={() => setShowVoiceSettings(!showVoiceSettings)}
             className="p-1 rounded-md hover:bg-muted"
-            title="Setup ElevenLabs for better voice quality"
+            title="Voice settings"
           >
             <Settings className="w-4 h-4" />
           </button>
@@ -179,6 +274,18 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
             <X className="w-4 h-4" />
           </button>
         </div>
+        
+        {/* Voice Settings Panel */}
+        <VoiceSettings
+          isOpen={showVoiceSettings}
+          onClose={() => setShowVoiceSettings(false)}
+          currentVoice={currentVoice}
+          onVoiceChange={setCurrentVoice}
+          volume={volume}
+          onVolumeChange={setVolume}
+          speechRate={speechRate}
+          onSpeechRateChange={setSpeechRate}
+        />
       </div>
 
       {/* Messages */}
@@ -186,13 +293,9 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
         {messages.map(renderMessage)}
         {isProcessing && (
           <div className="self-start mb-3">
-            <div className="flex items-center p-3 rounded-lg bg-muted text-foreground">
-              <div className="typing-indicator">
-                <span></span>
-                <span></span>
-                <span></span>
-              </div>
-            </div>
+            <div className="flex items-center p-3 rounded-lg bg-muted text-foregroun
+
+</div>
           </div>
         )}
         <div ref={messagesEndRef} />
@@ -244,6 +347,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
               ? "Listening... (will auto-send when you stop speaking)" 
               : isSpeaking
               ? "Please wait for Vernon to finish speaking..."
+              : isConversationMode
+              ? "Conversation mode active - use voice or type..."
               : "Type or speak your message..."
           }
           disabled={isProcessing || isModelLoading || isListening || isSpeaking}
@@ -251,6 +356,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
             isListening ? 'bg-blue-50 dark:bg-blue-900/20' : ''
           } ${
             isSpeaking ? 'bg-gray-50 dark:bg-gray-900/20' : ''
+          } ${
+            isConversationMode ? 'bg-green-50 dark:bg-green-900/20' : ''
           }`}
         />
 
