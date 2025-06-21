@@ -67,3 +67,9 @@ Simply open [Lovable](https://lovable.dev/projects/6615c5b7-93f5-41b0-b375-6a374
 ## I want to use a custom domain - is that possible?
 
 We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+
+## Setting the `DEEPGRAM_API_KEY` for Supabase functions
+
+Some Supabase Edge Functions in this repo use Deepgram for text-to-speech. These functions expect a `DEEPGRAM_API_KEY` environment variable to be available.
+
+Make sure **not** to commit your API key to the repository. Add the key to a `.env` file for local development or provide it in your deployment dashboard when you deploy the functions.
