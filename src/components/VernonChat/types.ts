@@ -27,6 +27,8 @@ export interface ChatWindowProps {
   clearMessages: () => void;
   isListening: boolean;
   toggleListening: () => void;
+  isSpeaking: boolean;
+  audioLevel: number;
   isModelLoading: boolean;
   transcript: string;
   input?: string;
@@ -40,6 +42,7 @@ export interface SpeechRecognitionHookReturn {
   toggleListening: () => void;
   startListening: () => void;
   stopListening: () => void;
+  audioLevel: number;
 }
 
 export interface ChatButtonProps {

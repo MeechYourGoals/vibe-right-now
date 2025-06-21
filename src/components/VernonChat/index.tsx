@@ -20,6 +20,7 @@ const VernonChat: React.FC = () => {
     toggleListening,
     transcript,
     isSpeaking,
+    audioLevel,
     initializeWelcomeMessage
   } = useEnhancedVernonChat();
 
@@ -43,6 +44,8 @@ const VernonChat: React.FC = () => {
           clearMessages={clearMessages}
           isListening={isListening}
           toggleListening={toggleListening}
+          isSpeaking={isSpeaking}
+          audioLevel={audioLevel}
           isModelLoading={false}
           transcript={transcript}
         />
