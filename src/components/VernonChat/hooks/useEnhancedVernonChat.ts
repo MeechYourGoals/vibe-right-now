@@ -4,6 +4,7 @@ import { useLocalStorage } from './useLocalStorage';
 import { useMessageProcessor } from './useMessageProcessor';
 import { useOptimizedSpeechRecognition } from './speechRecognition/useOptimizedSpeechRecognition';
 import { useOptimizedSpeechSynthesis } from './speechSynthesis/useOptimizedSpeechSynthesis';
+import { useMicrophoneLevel } from './useMicrophoneLevel';
 import { Message, MessageDirection, ChatMode } from '../types';
 
 export const useEnhancedVernonChat = () => {
@@ -20,16 +21,17 @@ export const useEnhancedVernonChat = () => {
   
   // Use optimized speech hooks
   const { speak, stop: stopSpeaking, isSpeaking } = useOptimizedSpeechSynthesis();
-  const { 
-    isListening, 
-    transcript, 
+  const {
+    isListening,
+    transcript,
     interimTranscript,
     toggleListening,
-    clearTranscript 
+    clearTranscript
   } = useOptimizedSpeechRecognition({
     continuous: true,
     interimResults: true
   });
+  const audioLevel = useMicrophoneLevel(isListening);
 
   const addMessage = useCallback((content: string, direction: MessageDirection, aiResponse = false) => {
     const timestamp = new Date();
@@ -146,6 +148,7 @@ export const useEnhancedVernonChat = () => {
     setSpeed,
     transcript: interimTranscript || transcript,
     isSpeaking,
+    audioLevel,
     initializeWelcomeMessage,
     handleTranscriptUpdate
   };

@@ -3,6 +3,7 @@ import React, { useEffect, useRef } from 'react';
 import { X, Send, Mic, MicOff, User, Bot, Trash2, Volume2 } from 'lucide-react';
 import { ChatWindowProps, Message } from './types';
 import ChatSettings from './components/ChatSettings';
+import VoiceActivityBar from '../VoiceActivityBar';
 
 const ChatWindow: React.FC<ChatWindowProps> = ({
   messages,
@@ -16,6 +17,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   clearMessages,
   isListening,
   toggleListening,
+  isSpeaking,
+  audioLevel,
   isModelLoading,
   transcript,
   voiceModel,
@@ -113,12 +116,25 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
         <div className="flex items-center space-x-2">
           <Bot className="w-5 h-5 text-primary" />
           <span className="font-medium">Vernon - Enhanced Voice AI</span>
-          {isListening && (
-            <div className="flex items-center space-x-1">
-              <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-              <span className="text-xs text-red-500">Listening</span>
-            </div>
-          )}
+          <div className="flex items-center space-x-1">
+            {isListening ? (
+              <>
+                <Mic className="w-3 h-3 text-red-500 animate-pulse" />
+                <span className="text-xs text-red-500">Listening</span>
+              </>
+            ) : isSpeaking ? (
+              <>
+                <Volume2 className="w-3 h-3 text-green-500" />
+                <span className="text-xs text-green-500">Speaking</span>
+              </>
+            ) : (
+              <>
+                <MicOff className="w-3 h-3 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">Muted</span>
+              </>
+            )}
+            {isListening && <VoiceActivityBar level={audioLevel} isActive={isListening} />}
+          </div>
         </div>
         <div className="flex items-center space-x-2">
           <button
@@ -185,14 +201,15 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
           type="button"
           onClick={handleMicClick}
           className={`p-2 rounded-full transition-all ${
-            isListening 
-              ? 'bg-red-100 text-red-500 animate-pulse' 
+            isListening
+              ? 'bg-red-100 text-red-500 animate-pulse'
               : 'bg-muted text-foreground hover:bg-blue-100 hover:text-blue-500'
           }`}
           title={isListening ? 'Stop listening' : 'Start voice input'}
         >
           {isListening ? <MicOff size={18} /> : <Mic size={18} />}
         </button>
+        {isListening && <VoiceActivityBar level={audioLevel} isActive={isListening} />}
 
         <input
           type="text"
