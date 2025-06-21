@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { User, Post, Location } from '@/types';
 import ProfileTabContent from './ProfileTabContent';
+import UserPlacesContent from './UserPlacesContent';
 
 interface ProfileTabsProps {
   user: User;
@@ -22,6 +23,7 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
   isPrivate = false
 }) => {
   const [activeTab, setActiveTab] = useState('posts');
+  const [activePlacesTab, setActivePlacesTab] = useState('visited');
 
   if (isPrivate) {
     return (
@@ -33,39 +35,39 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <TabsList className="grid w-full grid-cols-4">
+      <TabsList className="grid w-full grid-cols-3">
         <TabsTrigger value="posts">Posts</TabsTrigger>
-        <TabsTrigger value="venues">Venues</TabsTrigger>
-        <TabsTrigger value="visited">Visited</TabsTrigger>
-        <TabsTrigger value="wishlist">Wishlist</TabsTrigger>
+        <TabsTrigger value="places">My Places</TabsTrigger>
+        <TabsTrigger value="venues">Following</TabsTrigger>
       </TabsList>
       
       <TabsContent value="posts" className="mt-6">
-        <ProfileTabContent 
-          posts={posts}
-          user={user}
+        <div className="space-y-4">
+          <p className="text-muted-foreground mb-4">Posts and venue pins from this user.</p>
+          <ProfileTabContent 
+            posts={posts}
+            user={user}
+          />
+        </div>
+      </TabsContent>
+      
+      <TabsContent value="places" className="mt-6">
+        <UserPlacesContent
+          visitedPlaces={visitedPlaces}
+          wantToVisitPlaces={wantToVisitPlaces}
+          activeTab={activePlacesTab}
+          setActiveTab={setActivePlacesTab}
         />
       </TabsContent>
       
       <TabsContent value="venues" className="mt-6">
-        <ProfileTabContent 
-          locations={followedVenues}
-          user={user}
-        />
-      </TabsContent>
-      
-      <TabsContent value="visited" className="mt-6">
-        <ProfileTabContent 
-          locations={visitedPlaces}
-          user={user}
-        />
-      </TabsContent>
-      
-      <TabsContent value="wishlist" className="mt-6">
-        <ProfileTabContent 
-          locations={wantToVisitPlaces}
-          user={user}
-        />
+        <div className="space-y-4">
+          <p className="text-muted-foreground mb-4">Venues and events this user is following.</p>
+          <ProfileTabContent 
+            locations={followedVenues}
+            user={user}
+          />
+        </div>
       </TabsContent>
     </Tabs>
   );

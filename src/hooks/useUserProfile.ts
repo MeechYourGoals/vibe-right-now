@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { UserProfileData, UserProfileStats, User, Post, Location, Comment } from '@/types';
 import { mockUsers, getUserById, getUserByUsername } from '@/mock/users';
@@ -41,9 +42,25 @@ export const useUserProfile = (userIdOrUsername?: string) => {
             following: user.following || 0,
             likes: posts.reduce((sum, post) => sum + post.likes, 0)
           });
-          setFollowedVenues(mockLocations.slice(0, 3));
-          setVisitedPlaces(mockLocations.slice(0, 5));
-          setWantToVisitPlaces(mockLocations.slice(5, 8));
+          
+          // Get followed venues based on user's followedVenues array
+          const userFollowedVenues = user.followedVenues 
+            ? mockLocations.filter(loc => user.followedVenues?.includes(loc.id))
+            : mockLocations.slice(0, 3);
+          setFollowedVenues(userFollowedVenues);
+          
+          // Get visited places based on user's visitedPlaces array
+          const userVisitedPlaces = user.visitedPlaces 
+            ? mockLocations.filter(loc => user.visitedPlaces?.includes(loc.id))
+            : mockLocations.slice(0, 5);
+          setVisitedPlaces(userVisitedPlaces);
+          
+          // Get want to visit places based on user's wantToVisitPlaces array
+          const userWantToVisitPlaces = user.wantToVisitPlaces 
+            ? mockLocations.filter(loc => user.wantToVisitPlaces?.includes(loc.id))
+            : mockLocations.slice(5, 8);
+          setWantToVisitPlaces(userWantToVisitPlaces);
+          
           setError(null);
         } else {
           setError('User not found');
