@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { UserProfileData, UserProfileStats, User, Post, Location, Comment } from '@/types';
 import { mockUsers, getUserById, getUserByUsername } from '@/mock/users';
@@ -34,13 +33,17 @@ export const useUserProfile = (userIdOrUsername?: string) => {
         
         if (user) {
           setProfile(user);
-          const posts = mockPosts.filter(p => p.user.id === user.id);
-          setUserPosts(posts);
+          
+          // Get pinned posts instead of all posts for the profile feed
+          const pinnedPostIds = user.pinnedPosts || [];
+          const pinnedPosts = mockPosts.filter(p => pinnedPostIds.includes(p.id));
+          setUserPosts(pinnedPosts);
+          
           setStats({
-            posts: posts.length,
+            posts: pinnedPosts.length,
             followers: user.followers || 0,
             following: user.following || 0,
-            likes: posts.reduce((sum, post) => sum + post.likes, 0)
+            likes: pinnedPosts.reduce((sum, post) => sum + post.likes, 0)
           });
           
           // Get followed venues based on user's followedVenues array
