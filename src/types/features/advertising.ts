@@ -2,33 +2,76 @@
 export interface AdFormat {
   id: string;
   name: string;
+  description: string;
+  type: 'MomentCard' | 'VibeOverlay' | 'SpawnPoint' | 'HeatRingTakeover';
+  duration?: string;
+  placement: string;
+  kpis: string[];
+  platform: string;
   dimensions: string;
-  type: 'image' | 'video' | 'carousel';
   specifications: {
     minWidth?: number;
     minHeight?: number;
     maxFileSize?: string;
     aspectRatio?: string;
     formats?: string[];
+    duration?: number;
+    autoplay?: boolean;
+    opacity?: number;
+    blendMode?: string;
+    triggers?: string[];
+    customColor?: boolean;
   };
+  bestPractices: string[];
+}
+
+export interface GenderTargeting {
+  all: boolean;
+  male: boolean;
+  female: boolean;
+  other: boolean;
 }
 
 export interface TargetingOptions {
-  demographics: {
-    ageRanges: string[];
-    genders: string[];
-    interests: string[];
-  };
-  geographic: {
-    countries: string[];
-    cities: string[];
-    radius?: number;
-  };
+  ageRanges: string[];
   locations: string[];
-  behavioral: {
-    deviceTypes: string[];
-    platforms: string[];
-    spendingHabits: string[];
+  interests: string[];
+  gender?: GenderTargeting;
+  demographics?: {
+    gender: string;
+    ageRange: number[] | { min: number; max: number };
+    interests: string[];
+    behaviors: string[];
+    location: string[];
+  };
+  geographic?: {
+    radius: number;
+    cities: string[];
+    regions: string[];
+  };
+  behaviors?: {
+    categories: string[];
+    frequency: string;
+    venueVisits: string[];
+    socialEngagement: string[];
+    purchaseHistory: string[];
+  };
+  contextual?: {
+    categories: string[];
+    frequency: string;
+    vibeTags: string[];
+    venueTypes: string[];
+    daypart: string[];
+    timeOfDay: string[];
+    dayOfWeek: string[];
+    weather: string[];
+    eventTypes: string[];
+  };
+  momentScore?: string | {
+    crowdDensity: string;
+    vibeScore: string;
+    crowdLevel: string;
+    engagement: string;
   };
 }
 
