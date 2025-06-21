@@ -2,6 +2,7 @@
 import React, { useEffect, useRef } from 'react';
 import { X, Send, Mic, MicOff, User, Bot, Trash2, Volume2 } from 'lucide-react';
 import { ChatWindowProps, Message } from './types';
+import ChatSettings from './components/ChatSettings';
 
 const ChatWindow: React.FC<ChatWindowProps> = ({
   messages,
@@ -16,7 +17,13 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   isListening,
   toggleListening,
   isModelLoading,
-  transcript
+  transcript,
+  voiceModel,
+  setVoiceModel,
+  volume,
+  setVolume,
+  speed,
+  setSpeed
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -121,6 +128,19 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
           >
             {chatMode === 'user' ? 'User' : 'Venue'}
           </button>
+          <ChatSettings
+            isListening={isListening}
+            isVenueMode={chatMode === 'venue'}
+            isModelLoading={isModelLoading}
+            toggleListening={toggleListening}
+            toggleVenueMode={toggleMode}
+            voiceModel={voiceModel}
+            onVoiceChange={setVoiceModel}
+            volume={volume}
+            onVolumeChange={setVolume}
+            speed={speed}
+            onSpeedChange={setSpeed}
+          />
           <button
             onClick={clearMessages}
             className="p-1 rounded-md hover:bg-muted"

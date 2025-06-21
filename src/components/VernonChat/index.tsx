@@ -18,6 +18,12 @@ const VernonChat: React.FC = () => {
     clearMessages,
     isListening,
     toggleListening,
+    voiceModel,
+    setVoiceModel,
+    volume,
+    setVolume,
+    speed,
+    setSpeed,
     transcript,
     isSpeaking,
     initializeWelcomeMessage
@@ -45,6 +51,12 @@ const VernonChat: React.FC = () => {
           toggleListening={toggleListening}
           isModelLoading={false}
           transcript={transcript}
+          voiceModel={voiceModel}
+          setVoiceModel={setVoiceModel}
+          volume={volume}
+          setVolume={setVolume}
+          speed={speed}
+          setSpeed={setSpeed}
         />
       ) : (
         <ChatButton onClick={toggleChat} />

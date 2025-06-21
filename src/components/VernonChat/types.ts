@@ -29,6 +29,12 @@ export interface ChatWindowProps {
   toggleListening: () => void;
   isModelLoading: boolean;
   transcript: string;
+  voiceModel: string;
+  setVoiceModel: React.Dispatch<React.SetStateAction<string>>;
+  volume: number;
+  setVolume: React.Dispatch<React.SetStateAction<number>>;
+  speed: number;
+  setSpeed: React.Dispatch<React.SetStateAction<number>>;
   input?: string;
   setInput?: React.Dispatch<React.SetStateAction<string>>;
 }

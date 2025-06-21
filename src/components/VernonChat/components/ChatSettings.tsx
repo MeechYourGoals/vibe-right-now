@@ -12,6 +12,9 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
+import { Label } from '@/components/ui/label';
 
 interface ChatSettingsProps {
   isListening: boolean;
@@ -19,6 +22,12 @@ interface ChatSettingsProps {
   isModelLoading: boolean;
   toggleListening: () => void;
   toggleVenueMode: () => void;
+  voiceModel: string;
+  onVoiceChange: (v: string) => void;
+  volume: number;
+  onVolumeChange: (v: number) => void;
+  speed: number;
+  onSpeedChange: (v: number) => void;
 }
 
 const ChatSettings: React.FC<ChatSettingsProps> = ({
@@ -27,14 +36,34 @@ const ChatSettings: React.FC<ChatSettingsProps> = ({
   isModelLoading,
   toggleListening,
   toggleVenueMode,
+  voiceModel,
+  onVoiceChange,
+  volume,
+  onVolumeChange,
+  speed,
+  onSpeedChange,
 }) => {
+  const voiceOptions = [
+    'aura-angus-en',
+    'aura-arcas-en',
+    'aura-asteria-en',
+    'aura-athena-en',
+    'aura-helios-en',
+    'aura-hera-en',
+    'aura-luna-en',
+    'aura-orion-en',
+    'aura-orpheus-en',
+    'aura-perseus-en',
+    'aura-stella-en',
+    'aura-zeus-en'
+  ];
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="absolute top-3 right-12 h-8 w-8 text-gray-400 hover:text-white hover:bg-gray-700"
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 text-gray-400 hover:text-white hover:bg-gray-700"
         >
           <Settings className="h-4 w-4" />
         </Button>
@@ -78,6 +107,30 @@ const ChatSettings: React.FC<ChatSettingsProps> = ({
               onCheckedChange={toggleListening}
               className="bg-gray-600 data-[state=checked]:bg-red-500"
             />
+          </div>
+
+          <div className="mt-4 space-y-3">
+            <div>
+              <Label className="text-xs">Voice</Label>
+              <Select value={voiceModel} onValueChange={onVoiceChange}>
+                <SelectTrigger className="mt-1 h-8">
+                  <SelectValue placeholder="Select voice" />
+                </SelectTrigger>
+                <SelectContent>
+                  {voiceOptions.map(v => (
+                    <SelectItem key={v} value={v}>{v}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-xs">Volume</Label>
+              <Slider min={0} max={1} step={0.1} value={[volume]} onValueChange={(val) => onVolumeChange(val[0])} className="mt-1" />
+            </div>
+            <div>
+              <Label className="text-xs">Speed</Label>
+              <Slider min={0.5} max={2} step={0.1} value={[speed]} onValueChange={(val) => onSpeedChange(val[0])} className="mt-1" />
+            </div>
           </div>
           
           {isModelLoading && (

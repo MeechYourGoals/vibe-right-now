@@ -13,6 +13,10 @@ export const useEnhancedVernonChat = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [chatMode, setChatMode] = useLocalStorage<ChatMode>('vernon_chat_mode', 'user');
   const { processMessage } = useMessageProcessor();
+
+  const [voiceModel, setVoiceModel] = useLocalStorage<string>('vernon_voice_model', 'aura-asteria-en');
+  const [volume, setVolume] = useLocalStorage<number>('vernon_volume', 1);
+  const [speed, setSpeed] = useLocalStorage<number>('vernon_speed', 1);
   
   // Use optimized speech hooks
   const { speak, stop: stopSpeaking, isSpeaking } = useOptimizedSpeechSynthesis();
@@ -60,14 +64,14 @@ export const useEnhancedVernonChat = () => {
       
       // Auto-speak response if listening mode is active
       if (isListening) {
-        await speak(response);
+        await speak(response, { model: voiceModel, volume, rate: speed });
       }
     } catch (error) {
       console.error('Error processing message:', error);
       const errorMsg = 'Sorry, I encountered an error. Please try again later.';
       addMessage(errorMsg, 'incoming');
       if (isListening) {
-        await speak(errorMsg);
+        await speak(errorMsg, { model: voiceModel, volume, rate: speed });
       }
     } finally {
       setIsProcessing(false);
@@ -134,6 +138,12 @@ export const useEnhancedVernonChat = () => {
     clearMessages,
     isListening,
     toggleListening,
+    voiceModel,
+    setVoiceModel,
+    volume,
+    setVolume,
+    speed,
+    setSpeed,
     transcript: interimTranscript || transcript,
     isSpeaking,
     initializeWelcomeMessage,

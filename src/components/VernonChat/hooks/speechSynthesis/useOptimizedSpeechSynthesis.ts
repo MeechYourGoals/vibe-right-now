@@ -41,11 +41,17 @@ export const useOptimizedSpeechSynthesis = () => {
   }, []);
   
   // ElevenLabs speech function
-  const speakWithElevenLabs = useCallback(async (text: string): Promise<boolean> => {
+  interface SpeakOptions {
+    model?: string;
+    volume?: number;
+    rate?: number;
+  }
+
+  const speakWithElevenLabs = useCallback(async (text: string, options: SpeakOptions = {}): Promise<boolean> => {
     try {
       console.log('Using Deepgram TTS for:', text.substring(0, 50) + '...');
 
-      const audioData = await DeepgramService.textToSpeech(text);
+      const audioData = await DeepgramService.textToSpeech(text, options.model ? { model: options.model } : {});
       
       if (!audioData) {
         console.warn('No audio data from ElevenLabs');
@@ -56,6 +62,8 @@ export const useOptimizedSpeechSynthesis = () => {
       const blob = new Blob([audioData], { type: 'audio/mpeg' });
       const url = URL.createObjectURL(blob);
       const audio = new Audio(url);
+      if (options.volume !== undefined) audio.volume = options.volume;
+      if (options.rate !== undefined) audio.playbackRate = options.rate;
       
       currentAudioRef.current = audio;
       setIsSpeaking(true);
@@ -96,21 +104,21 @@ export const useOptimizedSpeechSynthesis = () => {
   }, []);
   
   // Browser speech fallback
-  const speakWithBrowser = useCallback((text: string, voice?: SpeechSynthesisVoice) => {
+  const speakWithBrowser = useCallback((text: string, options: SpeakOptions & { voiceName?: string } = {}) => {
     if (!synthRef.current) {
       handleSynthesisError('Speech synthesis not available');
       return;
     }
-    
+
     const utterance = createUtterance(text);
-    
-    if (voice) {
-      utterance.voice = voice;
+    if (options.voiceName) {
+      const found = voices.find(v => v.name === options.voiceName);
+      if (found) utterance.voice = found;
     } else {
       // Try to find a male voice
-      const maleVoice = voices.find(v => 
-        v.name.includes('Male') || 
-        v.name.includes('David') || 
+      const maleVoice = voices.find(v =>
+        v.name.includes('Male') ||
+        v.name.includes('David') ||
         v.name.includes('Daniel') ||
         v.name.includes('Google UK English Male')
       );
@@ -118,6 +126,9 @@ export const useOptimizedSpeechSynthesis = () => {
         utterance.voice = maleVoice;
       }
     }
+
+    if (options.volume !== undefined) utterance.volume = options.volume;
+    if (options.rate !== undefined) utterance.rate = options.rate;
     
     utterance.onstart = () => {
       setIsSpeaking(true);
@@ -139,7 +150,7 @@ export const useOptimizedSpeechSynthesis = () => {
   }, [voices]);
   
   // Main speak function that tries ElevenLabs first, then falls back to browser
-  const speak = useCallback(async (text: string): Promise<void> => {
+  const speak = useCallback(async (text: string, options: SpeakOptions = {}): Promise<void> => {
     if (!text.trim()) return;
     
     // Don't repeat the same text if it's already playing
@@ -153,14 +164,14 @@ export const useOptimizedSpeechSynthesis = () => {
     
     // Try ElevenLabs first if available
     if (isElevenLabsReady) {
-      const success = await speakWithElevenLabs(text);
+      const success = await speakWithElevenLabs(text, options);
       if (success) return;
       
       console.log('Deepgram failed, falling back to browser speech');
     }
     
     // Fallback to browser speech synthesis
-    speakWithBrowser(text);
+    speakWithBrowser(text, options);
   }, [isElevenLabsReady, isSpeaking, speakWithElevenLabs, speakWithBrowser]);
   
   // Stop function
