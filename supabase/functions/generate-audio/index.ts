@@ -19,9 +19,9 @@ serve(async (req) => {
       throw new Error('Text is required')
     }
 
-    const elevenLabsApiKey = Deno.env.get('ELEVEN_LABS_API_KEY')
-    if (!elevenLabsApiKey) {
-      throw new Error('ElevenLabs API key not configured')
+    const deepgramApiKey = Deno.env.get('DEEPGRAM_API_KEY')
+    if (!deepgramApiKey) {
+      throw new Error('Deepgram API key not configured')
     }
 
     // Voice ID mapping
@@ -34,13 +34,13 @@ serve(async (req) => {
 
     const voiceId = voiceIds[voice] || voiceIds.default
 
-    // Generate speech using ElevenLabs
+    // Generate speech using Deepgram
     const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
       method: 'POST',
       headers: {
         'Accept': 'audio/mpeg',
         'Content-Type': 'application/json',
-        'xi-api-key': elevenLabsApiKey,
+        'xi-api-key': deepgramApiKey,
       },
       body: JSON.stringify({
         text: text,
@@ -56,7 +56,7 @@ serve(async (req) => {
 
     if (!response.ok) {
       const error = await response.text()
-      console.error('ElevenLabs API error:', error)
+      console.error('Deepgram API error:', error)
       throw new Error(`Failed to generate speech: ${response.status}`)
     }
 

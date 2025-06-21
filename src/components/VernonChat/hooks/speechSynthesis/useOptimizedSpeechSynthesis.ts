@@ -227,11 +227,9 @@ export const useOptimizedSpeechSynthesis = (settings: VoiceSettings = {}) => {
     speakWithDeepgram,
     speakWithBrowser,
     promptForDeepgramKey,
-    
+
     // Legacy compatibility
     speakResponse: speak,
-    stopSpeaking: stop,
-    isElevenLabsReady: isDeepgramReady,
-    promptForElevenLabsKey: promptForDeepgramKey
+    stopSpeaking: stop
   };
 };

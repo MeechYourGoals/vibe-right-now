@@ -21,7 +21,7 @@ const VernonChat: React.FC = () => {
     transcript,
     isSpeaking,
     stopSpeaking,
-    promptForElevenLabsKey,
+    promptForDeepgramKey,
     initializeWelcomeMessage
   } = useEnhancedVernonChat();
 
@@ -49,7 +49,7 @@ const VernonChat: React.FC = () => {
           transcript={transcript}
           isSpeaking={isSpeaking}
           stopSpeaking={stopSpeaking}
-          promptForElevenLabsKey={promptForElevenLabsKey}
+          promptForDeepgramKey={promptForDeepgramKey}
         />
       ) : (
         <ChatButton onClick={toggleChat} />

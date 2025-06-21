@@ -9,7 +9,7 @@ export { useSpeakResponse } from './useSpeakResponse';
 export { useSpeechSynthesisVoices } from './useSpeechSynthesisVoices';
 export { useBrowserSpeechSynthesis } from './useBrowserSpeechSynthesis';
 
-// Export Deepgram hooks (replacing ElevenLabs)
+// Export Deepgram hooks
 export { useDeepgramSpeech } from './useDeepgramSpeech';
 
 // Export utility functions

@@ -22,7 +22,7 @@ const getWelcomeMessage = (isVenueMode: boolean): Message => ({
   sender: 'ai'
 });
 
-export const useElevenLabsConversation = (isVenueMode: boolean = false) => {
+export const useDeepgramConversation = (isVenueMode: boolean = false) => {
   const [isConnected, setIsConnected] = useState(false);
   const [messages, setMessages] = useState<Message[]>([getWelcomeMessage(isVenueMode)]);
   

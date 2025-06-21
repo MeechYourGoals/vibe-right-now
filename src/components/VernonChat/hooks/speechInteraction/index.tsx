@@ -26,8 +26,8 @@ export const useSpeechInteraction = () => {
     speakResponse,
     stopSpeaking,
     // These are now added to the return object in useSpeechSynthesis
-    useElevenLabs,
-    promptForElevenLabsKey
+    useDeepgram,
+    promptForDeepgramKey
   } = useSpeechSynthesis();
   
   // Set up voice initialization
@@ -96,8 +96,8 @@ export const useSpeechInteraction = () => {
     stopSpeaking,
     speakResponse,
     processTranscript,
-    useElevenLabs,
-    promptForElevenLabsKey,
+    useDeepgram,
+    promptForDeepgramKey,
     hasSpokenIntro,
     markIntroAsSpoken,
     isFirstInteraction,

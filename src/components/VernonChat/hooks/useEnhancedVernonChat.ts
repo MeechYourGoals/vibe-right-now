@@ -139,7 +139,6 @@ export const useEnhancedVernonChat = () => {
     transcript: interimTranscript || transcript,
     isSpeaking,
     stopSpeaking,
-    promptForElevenLabsKey: promptForDeepgramKey, // Backward compatibility
     promptForDeepgramKey,
     initializeWelcomeMessage
   };
