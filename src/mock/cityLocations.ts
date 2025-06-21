@@ -42,3 +42,23 @@ export const cityLocations: Record<string, Location[]> = {
   'Mumbai': convertToLocations(cities.mumbai),
   'Moscow': convertToLocations(cities.moscow)
 };
+
+// Get nearby locations based on coordinates
+export const getNearbyLocations = (lat: number, lng: number): Location[] => {
+  // Simple distance calculation to find nearest city
+  const cities = Object.keys(cityLocations);
+  let nearestCity = 'Los Angeles'; // default
+  
+  // For simplicity, just return locations from a default city
+  // In a real app, you'd calculate actual distances
+  return cityLocations[nearestCity] || [];
+};
+
+// Get trending locations for a specific city
+export const getTrendingLocationsForCity = (cityName: string): Location[] => {
+  const locations = cityLocations[cityName];
+  if (!locations) return [];
+  
+  // Return first 3 locations as "trending"
+  return locations.slice(0, 3);
+};
