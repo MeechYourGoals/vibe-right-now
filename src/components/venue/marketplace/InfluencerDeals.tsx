@@ -168,7 +168,7 @@ const InfluencerDeals: React.FC = () => {
                   
                   <p className="text-sm my-2">{influencer.bio}</p>
                   
-                  <div className="flex flex-wrap gap-1 mt-2 mb-3">
+                    <div className="flex flex-wrap gap-2 mt-2 mb-3">
                     {influencer.categories.map((category) => (
                       <Badge key={category} variant="outline">{category}</Badge>
                     ))}

@@ -377,7 +377,7 @@ const VenueManagementTab: React.FC<VenueManagementTabProps> = ({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Card>
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-base">Visitor Analytics</CardTitle>
+                      <CardTitle className="text-base md:text-lg">Visitor Analytics</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <p className="text-sm text-muted-foreground mb-3">
@@ -389,7 +389,7 @@ const VenueManagementTab: React.FC<VenueManagementTabProps> = ({
                   
                   <Card>
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-base">Engagement Report</CardTitle>
+                      <CardTitle className="text-base md:text-lg">Engagement Report</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <p className="text-sm text-muted-foreground mb-3">
@@ -401,7 +401,7 @@ const VenueManagementTab: React.FC<VenueManagementTabProps> = ({
                   
                   <Card>
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-base">Staff Performance</CardTitle>
+                      <CardTitle className="text-base md:text-lg">Staff Performance</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <p className="text-sm text-muted-foreground mb-3">
@@ -413,7 +413,7 @@ const VenueManagementTab: React.FC<VenueManagementTabProps> = ({
                   
                   <Card>
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-base">Custom Analytics</CardTitle>
+                      <CardTitle className="text-base md:text-lg">Custom Analytics</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <p className="text-sm text-muted-foreground mb-3">

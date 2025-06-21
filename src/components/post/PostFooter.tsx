@@ -30,40 +30,40 @@ const PostFooter: React.FC<PostFooterProps> = ({
 
   return (
     <div className="px-4 py-3 border-t">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleLike}
-            className={`flex items-center space-x-2 ${liked ? 'text-red-500' : ''}`}
-          >
-            <Heart className={`h-4 w-4 ${liked ? 'fill-current' : ''}`} />
-            <span>{likesCount}</span>
-          </Button>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleLike}
+              className={`flex items-center gap-2 h-10 ${liked ? 'text-red-500' : ''}`}
+            >
+              <Heart className={`h-4 w-4 ${liked ? 'fill-current' : ''}`} />
+              <span>{likesCount}</span>
+            </Button>
 
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onComment}
-            className="flex items-center space-x-2"
-          >
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onComment}
+              className="flex items-center gap-2 h-10"
+            >
             <MessageCircle className="h-4 w-4" />
             <span>{post.comments}</span>
           </Button>
 
-          <Button variant="ghost" size="sm" className="flex items-center space-x-2">
+            <Button variant="ghost" size="sm" className="flex items-center gap-2 h-10">
             <Share className="h-4 w-4" />
             <span>Share</span>
           </Button>
         </div>
 
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleSave}
-          className={saved ? 'text-blue-500' : ''}
-        >
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleSave}
+            className={`h-10 ${saved ? 'text-blue-500' : ''}`}
+          >
           <Bookmark className={`h-4 w-4 ${saved ? 'fill-current' : ''}`} />
         </Button>
       </div>

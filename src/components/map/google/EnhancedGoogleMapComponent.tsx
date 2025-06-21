@@ -227,7 +227,7 @@ const EnhancedGoogleMapComponent = ({
             <div className="p-2 max-w-xs bg-gray-900 text-white rounded-lg">
               <h3 className="font-semibold text-sm text-white">{selectedMarker.name}</h3>
               <p className="text-xs text-gray-300 mt-1">{selectedMarker.address}</p>
-              <div className="flex items-center gap-1 mt-2">
+                <div className="flex items-center gap-2 mt-2">
                 <Badge variant="secondary" className="text-xs bg-gray-700 text-gray-200">{selectedMarker.type}</Badge>
                 {selectedMarker.rating && (
                   <Badge variant="outline" className="text-xs border-gray-600 text-gray-200">
@@ -247,7 +247,7 @@ const EnhancedGoogleMapComponent = ({
           >
             <div className="p-3 max-w-sm bg-gray-900 text-white rounded-lg">
               <div className="flex justify-between items-start mb-2">
-                <h3 className="font-semibold text-base text-white">{selectedRealPlace.name}</h3>
+                <h3 className="font-semibold text-base md:text-lg text-white">{selectedRealPlace.name}</h3>
                 {selectedRealPlace.google_maps_url && (
                   <Button
                     variant="ghost"
@@ -264,7 +264,7 @@ const EnhancedGoogleMapComponent = ({
                 <p className="text-sm text-gray-300 mb-2">{selectedRealPlace.address}</p>
               )}
 
-              <div className="flex flex-wrap gap-1 mb-2">
+              <div className="flex flex-wrap gap-2 mb-2">
                 {selectedRealPlace.rating && (
                   <Badge variant="secondary" className="text-xs flex items-center gap-1 bg-gray-700 text-gray-200">
                     <Star className="h-3 w-3" fill="currentColor" />
@@ -284,8 +284,8 @@ const EnhancedGoogleMapComponent = ({
                 )}
               </div>
 
-              {selectedRealPlace.vibes && (
-                <div className="flex flex-wrap gap-1 mb-2">
+                {selectedRealPlace.vibes && (
+                  <div className="flex flex-wrap gap-2 mb-2">
                   {selectedRealPlace.vibes.slice(0, 3).map((vibe, idx) => (
                     <Badge key={idx} variant="secondary" className="text-xs bg-gray-700 text-gray-200">
                       {vibe}

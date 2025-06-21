@@ -165,8 +165,8 @@ const SearchSection: React.FC<SearchSectionProps> = ({
                   {place.formatted_address && (
                     <div className="text-sm text-muted-foreground">{place.formatted_address}</div>
                   )}
-                  {place.types && (
-                    <div className="flex gap-1 mt-1">
+                    {place.types && (
+                      <div className="flex gap-2 mt-1">
                       {place.types.slice(0, 2).map((type, idx) => (
                         <Badge key={idx} variant="secondary" className="text-xs">
                           {type.replace(/_/g, ' ')}

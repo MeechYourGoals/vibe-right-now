@@ -344,8 +344,8 @@ const SearchVibes = ({ onSearch, onFeedTabChange, currentFeedTab = "for-you", is
               : "Showing diverse results for your natural language search"}
           </p>
           {nlpAnalysis && nlpAnalysis.entities && nlpAnalysis.entities.length > 0 && (
-            <div className="mt-1">
-              <div className="flex flex-wrap gap-1 mt-1">
+              <div className="mt-1">
+                <div className="flex flex-wrap gap-2 mt-1">
                 {nlpAnalysis.entities.slice(0, 5).map((entity: any, index: number) => (
                   <Badge 
                     key={index} 

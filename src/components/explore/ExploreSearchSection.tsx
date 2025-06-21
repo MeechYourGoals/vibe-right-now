@@ -69,12 +69,12 @@ const ExploreSearchSection: React.FC<ExploreSearchSectionProps> = ({
         <div className="w-full">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <Input
-              placeholder="Search venues, vibes, or experiences..."
-              value={searchQuery}
-              onChange={(e) => onSearchChange(e.target.value)}
-              className="pl-10 h-12 text-base"
-            />
+              <Input
+                placeholder="Search venues, vibes, or experiences..."
+                value={searchQuery}
+                onChange={(e) => onSearchChange(e.target.value)}
+                className="pl-10 h-12 text-base md:text-lg"
+              />
           </div>
         </div>
 
