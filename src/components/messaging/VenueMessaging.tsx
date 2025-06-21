@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Send, Settings, Bell } from "lucide-react";
+import { Send, Settings, Bell, ChevronLeft } from "lucide-react";
+import { useIsMobile } from '@/hooks/use-mobile';
 import { useUserSubscription } from '@/hooks/useUserSubscription';
 import { mockVenueConversations, MockVenueConversation, VenueMessage } from './mockVenueData';
 import MessageTypeBadge from './MessageTypeBadge';
@@ -14,6 +15,7 @@ import VenueMessagingSettings from './VenueMessagingSettings';
 
 const VenueMessaging: React.FC = () => {
   const { hasFeature } = useUserSubscription();
+  const isMobile = useIsMobile();
   const [conversations, setConversations] = useState<MockVenueConversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const [messages, setMessages] = useState<VenueMessage[]>([]);
@@ -94,17 +96,18 @@ const VenueMessaging: React.FC = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto h-[600px] flex gap-4">
+    <div className={`max-w-6xl mx-auto h-[600px] flex gap-4 ${isMobile ? 'flex-col w-full' : ''}`}>
       {/* Conversations List */}
-      <Card className="w-1/3">
+      {(!isMobile || !selectedConversation) && (
+      <Card className={`${isMobile ? 'w-full' : 'w-1/3'}`}>
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Messages</CardTitle>
             <div className="flex items-center gap-2">
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button variant="ghost" size="sm">
-                    <Bell className="h-4 w-4" />
+                  <Button variant="ghost" size="icon" className="h-10 w-10">
+                    <Bell className="h-5 w-5" />
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-2xl">
@@ -118,8 +121,8 @@ const VenueMessaging: React.FC = () => {
               </Dialog>
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button variant="ghost" size="sm">
-                    <Settings className="h-4 w-4" />
+                  <Button variant="ghost" size="icon" className="h-10 w-10">
+                    <Settings className="h-5 w-5" />
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-2xl">
@@ -187,13 +190,25 @@ const VenueMessaging: React.FC = () => {
           ))}
         </CardContent>
       </Card>
+      )}
 
       {/* Chat Window */}
-      <Card className="flex-1 flex flex-col">
+      {(!isMobile || selectedConversation) && (
+      <Card className={`${isMobile ? 'w-full' : 'flex-1'} flex flex-col`}>
         {selectedConv ? (
           <>
             <CardHeader className="border-b">
               <div className="flex items-center gap-3">
+                {isMobile && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setSelectedConversation(null)}
+                    className="h-10 w-10"
+                  >
+                    <ChevronLeft className="h-5 w-5" />
+                  </Button>
+                )}
                 <Avatar className="h-10 w-10">
                   <AvatarImage src={selectedConv.venueAvatar} alt={selectedConv.venueName} />
                   <AvatarFallback>{selectedConv.venueName.charAt(0)}</AvatarFallback>
@@ -219,7 +234,7 @@ const VenueMessaging: React.FC = () => {
                   >
                     <div className="flex items-start gap-2 max-w-[80%]">
                       {message.senderType === 'venue' && (
-                        <Avatar className="h-8 w-8 mt-1">
+                        <Avatar className="h-10 w-10 mt-1">
                           <AvatarImage src={message.senderAvatar} alt={message.senderName} />
                           <AvatarFallback>{message.senderName.charAt(0)}</AvatarFallback>
                         </Avatar>
@@ -242,7 +257,7 @@ const VenueMessaging: React.FC = () => {
                         </p>
                       </div>
                       {message.senderType === 'user' && (
-                        <Avatar className="h-8 w-8 mt-1">
+                        <Avatar className="h-10 w-10 mt-1">
                           <AvatarImage src={message.senderAvatar} alt={message.senderName} />
                           <AvatarFallback>{message.senderName.charAt(0)}</AvatarFallback>
                         </Avatar>
@@ -262,8 +277,8 @@ const VenueMessaging: React.FC = () => {
                   onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
                   disabled={!messagingEnabled}
                 />
-                <Button onClick={sendMessage} disabled={!messagingEnabled}>
-                  <Send className="h-4 w-4" />
+                <Button onClick={sendMessage} disabled={!messagingEnabled} size="icon" className="h-10 w-10">
+                  <Send className="h-5 w-5" />
                 </Button>
               </div>
               {!messagingEnabled && (
@@ -284,6 +299,7 @@ const VenueMessaging: React.FC = () => {
           </CardContent>
         )}
       </Card>
+      )}
     </div>
   );
 };
