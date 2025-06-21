@@ -22,6 +22,7 @@ export interface Location {
   business_status?: string;
   google_maps_url?: string;
   isOpen24Hours?: boolean;
+  createdAt?: Date;
 }
 
 export interface VenueHours {

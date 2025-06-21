@@ -1,180 +1,175 @@
 
-import React, { useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, MapPin, Search } from "lucide-react";
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
-import { Location } from "@/types";
+import React, { useState, useEffect, useMemo } from 'react';
+import { Search, Filter, MapPin, Star, Clock } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Location } from '@/types';
 
 interface ExploreSearchSectionProps {
+  locations: Location[];
+  onLocationSelect: (location: Location) => void;
   searchQuery: string;
   onSearchChange: (query: string) => void;
-  dateRange?: { from: Date; to: Date } | null;
-  onDateChange: (dates: { from: Date; to: Date } | null) => void;
-  location: string;
-  onLocationChange: (location: string) => void;
-  onPlaceSelect: (place: Location) => void;
-  onVenueSelect: (venue: Location) => void;
+  selectedFilters: string[];
+  onFilterChange: (filters: string[]) => void;
 }
 
 const ExploreSearchSection: React.FC<ExploreSearchSectionProps> = ({
+  locations,
+  onLocationSelect,
   searchQuery,
   onSearchChange,
-  dateRange,
-  onDateChange,
-  location,
-  onLocationChange,
-  onPlaceSelect,
-  onVenueSelect
+  selectedFilters,
+  onFilterChange
 }) => {
-  const [isDateOpen, setIsDateOpen] = useState(false);
-  const [isLocationOpen, setIsLocationOpen] = useState(false);
-  const [locationInputValue, setLocationInputValue] = useState(location);
+  const [showFilters, setShowFilters] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
-  const handleLocationInputChange = (value: string) => {
-    setLocationInputValue(value);
-    onLocationChange(value);
+  // Filter and search logic
+  const filteredLocations = useMemo(() => {
+    return locations.filter(location => {
+      const matchesSearch = location.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          location.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          location.city.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const matchesFilters = selectedFilters.length === 0 || 
+                           selectedFilters.includes(location.type) ||
+                           (location.vibes && location.vibes.some(vibe => selectedFilters.includes(vibe)));
+      
+      return matchesSearch && matchesFilters;
+    });
+  }, [locations, searchQuery, selectedFilters]);
+
+  const availableFilters = useMemo(() => {
+    const filters = new Set<string>();
+    locations.forEach(location => {
+      filters.add(location.type);
+      if (location.vibes) {
+        location.vibes.forEach(vibe => filters.add(vibe));
+      }
+    });
+    return Array.from(filters);
+  }, [locations]);
+
+  // Show suggestions when there's a search query
+  useEffect(() => {
+    setShowSuggestions(searchQuery.length > 0 && filteredLocations.length > 0);
+  }, [searchQuery, filteredLocations]);
+
+  const handleLocationClick = (location: Location) => {
+    onLocationSelect({
+      ...location,
+      id: location.id || `loc-${Date.now()}` // Ensure id is present
+    });
+    setShowSuggestions(false);
+    onSearchChange('');
   };
 
-  const handleLocationSelect = (selectedLocation: string) => {
-    setLocationInputValue(selectedLocation);
-    onLocationChange(selectedLocation);
-    setIsLocationOpen(false);
-    
-    // Create a mock place object for the selection
-    const mockPlace: Location = {
-      id: `search-${Date.now()}`,
-      name: selectedLocation,
-      address: selectedLocation,
-      city: selectedLocation,
-      country: "USA",
-      lat: 40.7128,
-      lng: -74.0060,
-      type: "city",
-      verified: true,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-    
-    onPlaceSelect(mockPlace);
+  const toggleFilter = (filter: string) => {
+    if (selectedFilters.includes(filter)) {
+      onFilterChange(selectedFilters.filter(f => f !== filter));
+    } else {
+      onFilterChange([...selectedFilters, filter]);
+    }
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-4 sm:px-0">
-      <div className="flex flex-col gap-3 mb-4">
-        {/* Search Input - Full width on mobile */}
-        <div className="w-full">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                placeholder="Search venues, vibes, or experiences..."
-                value={searchQuery}
-                onChange={(e) => onSearchChange(e.target.value)}
-                className="pl-10 h-12 text-base md:text-lg"
-              />
-          </div>
-        </div>
-
-        {/* Location and Date - Stack on mobile, side by side on larger screens */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          {/* Location Input */}
-          <div className="flex-1">
-            <Popover open={isLocationOpen} onOpenChange={setIsLocationOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="w-full h-12 justify-start text-left font-normal overflow-hidden"
+    <div className="relative">
+      <div className="flex gap-2 mb-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+          <Input
+            placeholder="Search venues, bars, restaurants..."
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
+            className="pl-10"
+          />
+          
+          {/* Search Suggestions */}
+          {showSuggestions && (
+            <div className="absolute top-full left-0 right-0 bg-background border rounded-md shadow-lg z-50 max-h-60 overflow-y-auto">
+              {filteredLocations.slice(0, 5).map((location) => (
+                <button
+                  key={location.id}
+                  onClick={() => handleLocationClick(location)}
+                  className="w-full px-4 py-3 text-left hover:bg-muted flex items-center gap-3 border-b last:border-b-0"
                 >
-                  <MapPin className="mr-2 h-4 w-4 flex-shrink-0" />
-                  <span className="truncate">{location || "Select location..."}</span>
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-80 p-0" align="start">
-                <div className="p-4">
-                  <Input
-                    placeholder="Enter city or address..."
-                    value={locationInputValue}
-                    onChange={(e) => handleLocationInputChange(e.target.value)}
-                    className="mb-2"
-                  />
-                  <div className="max-h-60 overflow-y-auto overscroll-contain scroll-smooth">
-                    {["New York", "Los Angeles", "Chicago", "Miami", "San Francisco", "Las Vegas", "Austin", "Boston"].map((city, index) => (
-                      <Button
-                        key={index}
-                        variant="ghost"
-                        className="w-full justify-start text-left p-2 h-12"
-                        onClick={() => handleLocationSelect(city)}
-                      >
-                        <div className="truncate overflow-hidden">
-                          <div className="font-medium">{city}</div>
-                          <div className="text-sm text-muted-foreground">
-                            United States
-                          </div>
+                  <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                  <div className="flex-1">
+                    <div className="font-medium">{location.name}</div>
+                    <div className="text-sm text-muted-foreground flex items-center gap-2">
+                      <span>{location.address}</span>
+                      {location.rating && (
+                        <div className="flex items-center gap-1">
+                          <Star className="h-3 w-3 text-yellow-500" fill="currentColor" />
+                          <span>{location.rating}</span>
                         </div>
-                      </Button>
-                    ))}
+                      )}
+                    </div>
                   </div>
-                </div>
-              </PopoverContent>
-            </Popover>
-          </div>
-
-          {/* Date Range Picker */}
-          <div className="flex-1">
-            <Popover open={isDateOpen} onOpenChange={setIsDateOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full h-12 justify-start text-left font-normal overflow-hidden",
-                    !dateRange && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4 flex-shrink-0" />
-                  <span className="truncate">
-                    {dateRange?.from ? (
-                      dateRange.to ? (
-                        <>
-                          {format(dateRange.from, "MMM dd")} -{" "}
-                          {format(dateRange.to, "MMM dd, y")}
-                        </>
-                      ) : (
-                        format(dateRange.from, "MMM dd, y")
-                      )
-                    ) : (
-                      "Pick dates"
-                    )}
-                  </span>
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  initialFocus
-                  mode="range"
-                  defaultMonth={dateRange?.from}
-                  selected={dateRange ? { from: dateRange.from, to: dateRange.to } : undefined}
-                  onSelect={(range) => {
-                    if (range?.from) {
-                      onDateChange({
-                        from: range.from,
-                        to: range.to || range.from
-                      });
-                    } else {
-                      onDateChange(null);
-                    }
-                    setIsDateOpen(false);
-                  }}
-                  numberOfMonths={1}
-                  className="overscroll-contain"
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
+                  <Badge variant="secondary" className="text-xs">
+                    {location.type}
+                  </Badge>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
+        
+        <Button
+          variant="outline"
+          onClick={() => setShowFilters(!showFilters)}
+          className={selectedFilters.length > 0 ? "border-primary" : ""}
+        >
+          <Filter className="h-4 w-4 mr-2" />
+          Filters {selectedFilters.length > 0 && `(${selectedFilters.length})`}
+        </Button>
       </div>
+
+      {/* Filter Options */}
+      {showFilters && (
+        <div className="mb-4 p-4 bg-muted/50 rounded-lg">
+          <div className="flex flex-wrap gap-2">
+            {availableFilters.map((filter) => (
+              <Button
+                key={filter}
+                variant={selectedFilters.includes(filter) ? "default" : "outline"}
+                size="sm"
+                onClick={() => toggleFilter(filter)}
+                className="text-xs"
+              >
+                {filter}
+              </Button>
+            ))}
+          </div>
+          
+          {selectedFilters.length > 0 && (
+            <div className="mt-3 flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">Active filters:</span>
+              {selectedFilters.map((filter) => (
+                <Badge key={filter} variant="secondary" className="text-xs">
+                  {filter}
+                  <button
+                    onClick={() => toggleFilter(filter)}
+                    className="ml-1 hover:text-destructive"
+                  >
+                    ×
+                  </button>
+                </Badge>
+              ))}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onFilterChange([])}
+                className="text-xs"
+              >
+                Clear all
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
