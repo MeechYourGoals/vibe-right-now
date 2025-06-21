@@ -293,9 +293,14 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
         {messages.map(renderMessage)}
         {isProcessing && (
           <div className="self-start mb-3">
-            <div className="flex items-center p-3 rounded-lg bg-muted text-foregroun
-
-</div>
+            <div className="flex items-center p-3 rounded-lg bg-muted text-foreground">
+              <div className="flex space-x-1">
+                <div className="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
+                <div className="w-2 h-2 bg-primary rounded-full animate-bounce delay-100"></div>
+                <div className="w-2 h-2 bg-primary rounded-full animate-bounce delay-200"></div>
+              </div>
+              <span className="ml-2 text-sm">Vernon is thinking...</span>
+            </div>
           </div>
         )}
         <div ref={messagesEndRef} />
