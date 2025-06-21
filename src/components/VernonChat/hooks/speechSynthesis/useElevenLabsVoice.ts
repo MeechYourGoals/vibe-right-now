@@ -1,15 +1,15 @@
 
 import { useState, useCallback } from 'react';
-import { ElevenLabsService } from '@/services/ElevenLabsService';
+import { DeepgramService } from '@/services';
 
 export const useElevenLabsVoice = () => {
-  const [isElevenLabsReady, setIsElevenLabsReady] = useState<boolean>(ElevenLabsService.hasApiKey());
+  const [isElevenLabsReady, setIsElevenLabsReady] = useState<boolean>(DeepgramService.hasApiKey());
   
   // Function to prompt user for ElevenLabs API key
   const promptForElevenLabsKey = useCallback(() => {
     const apiKey = prompt('Enter your Eleven Labs API key for improved voice quality:');
     if (apiKey) {
-      ElevenLabsService.setApiKey(apiKey);
+      DeepgramService.setApiKey(apiKey);
       setIsElevenLabsReady(true);
     }
   }, []);
@@ -17,7 +17,7 @@ export const useElevenLabsVoice = () => {
   // Function to speak using ElevenLabs
   const speakWithElevenLabs = useCallback(async (text: string): Promise<void> => {
     try {
-      const audioData = await ElevenLabsService.textToSpeech(text);
+      const audioData = await DeepgramService.textToSpeech(text);
       
       if (!audioData) {
         throw new Error('Failed to get audio from Eleven Labs');

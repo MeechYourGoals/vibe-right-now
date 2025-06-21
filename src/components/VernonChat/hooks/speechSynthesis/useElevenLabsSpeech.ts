@@ -1,6 +1,6 @@
 
 import { useCallback } from 'react';
-import { ElevenLabsService } from '@/services/ElevenLabsService';
+import { DeepgramService } from '@/services';
 import { toast } from '@/hooks/use-toast';
 
 interface UseElevenLabsSpeechProps {
@@ -35,8 +35,8 @@ export const useElevenLabsSpeech = ({
       currentlyPlayingText.current = text;
       
       // Request to convert text to speech
-      console.log('Requesting Eleven Labs text-to-speech with Adam voice');
-      const audioData = await ElevenLabsService.textToSpeech(text);
+      console.log('Requesting Deepgram text-to-speech');
+      const audioData = await DeepgramService.textToSpeech(text);
       
       if (!audioData || !audioElement.current) {
         console.error('Failed to get audio from Eleven Labs or audio element not available');

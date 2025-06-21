@@ -19,44 +19,26 @@ serve(async (req) => {
       throw new Error('Text is required')
     }
 
-    const elevenLabsApiKey = Deno.env.get('ELEVEN_LABS_API_KEY')
-    if (!elevenLabsApiKey) {
-      throw new Error('ElevenLabs API key not configured')
+    const deepgramApiKey = Deno.env.get('DEEPGRAM_API_KEY')
+    if (!deepgramApiKey) {
+      throw new Error('Deepgram API key not configured')
     }
 
-    // Voice ID mapping
-    const voiceIds: Record<string, string> = {
-      'Sarah': 'EXAVITQu4vr4xnSDxMaL',
-      'Charlie': 'IKne3meq5aSn9XLyUdCD',
-      'George': 'JBFqnCBsd6RMkjVDRZzb',
-      'default': 'EXAVITQu4vr4xnSDxMaL'
-    }
+    const model = 'aura-asteria-en'
 
-    const voiceId = voiceIds[voice] || voiceIds.default
-
-    // Generate speech using ElevenLabs
-    const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+    const response = await fetch(`https://api.deepgram.com/v1/speak?model=${model}`, {
       method: 'POST',
       headers: {
         'Accept': 'audio/mpeg',
         'Content-Type': 'application/json',
-        'xi-api-key': elevenLabsApiKey,
+        'Authorization': `Token ${deepgramApiKey}`,
       },
-      body: JSON.stringify({
-        text: text,
-        model_id: 'eleven_multilingual_v2',
-        voice_settings: {
-          stability: 0.5,
-          similarity_boost: 0.5,
-          style: 0.0,
-          use_speaker_boost: true
-        }
-      }),
+      body: JSON.stringify({ text })
     })
 
     if (!response.ok) {
       const error = await response.text()
-      console.error('ElevenLabs API error:', error)
+      console.error('Deepgram API error:', error)
       throw new Error(`Failed to generate speech: ${response.status}`)
     }
 

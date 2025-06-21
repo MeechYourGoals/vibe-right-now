@@ -1,6 +1,6 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { ElevenLabsService } from '@/services/ElevenLabsService';
+import { DeepgramService } from '@/services';
 import { configureSpeechSynthesis, createUtterance, handleSynthesisError } from './speechSynthesisUtils';
 import { toast } from 'sonner';
 
@@ -8,7 +8,7 @@ export const useOptimizedSpeechSynthesis = () => {
   // Core state
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
-  const [isElevenLabsReady, setIsElevenLabsReady] = useState<boolean>(ElevenLabsService.hasApiKey());
+  const [isElevenLabsReady, setIsElevenLabsReady] = useState<boolean>(DeepgramService.hasApiKey());
   
   // Refs for tracking
   const currentAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -43,9 +43,9 @@ export const useOptimizedSpeechSynthesis = () => {
   // ElevenLabs speech function
   const speakWithElevenLabs = useCallback(async (text: string): Promise<boolean> => {
     try {
-      console.log('Using ElevenLabs TTS for:', text.substring(0, 50) + '...');
-      
-      const audioData = await ElevenLabsService.textToSpeech(text);
+      console.log('Using Deepgram TTS for:', text.substring(0, 50) + '...');
+
+      const audioData = await DeepgramService.textToSpeech(text);
       
       if (!audioData) {
         console.warn('No audio data from ElevenLabs');
@@ -87,7 +87,7 @@ export const useOptimizedSpeechSynthesis = () => {
         });
       });
     } catch (error) {
-      console.error('ElevenLabs speech error:', error);
+      console.error('Deepgram speech error:', error);
       setIsSpeaking(false);
       currentlyPlayingText.current = null;
       currentAudioRef.current = null;
@@ -156,7 +156,7 @@ export const useOptimizedSpeechSynthesis = () => {
       const success = await speakWithElevenLabs(text);
       if (success) return;
       
-      console.log('ElevenLabs failed, falling back to browser speech');
+      console.log('Deepgram failed, falling back to browser speech');
     }
     
     // Fallback to browser speech synthesis
@@ -181,9 +181,9 @@ export const useOptimizedSpeechSynthesis = () => {
   
   // ElevenLabs key management
   const promptForElevenLabsKey = useCallback(() => {
-    const apiKey = prompt('Enter your ElevenLabs API key for improved voice quality:');
+    const apiKey = prompt('Enter your Deepgram API key for improved voice quality:');
     if (apiKey) {
-      ElevenLabsService.setApiKey(apiKey);
+      DeepgramService.setApiKey(apiKey);
       setIsElevenLabsReady(true);
       toast.success('ElevenLabs API key set successfully!');
     }
