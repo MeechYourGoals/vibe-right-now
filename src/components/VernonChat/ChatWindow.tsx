@@ -1,6 +1,6 @@
 
 import React, { useEffect, useRef } from 'react';
-import { X, Send, Mic, MicOff, User, Bot, Trash2, Volume2 } from 'lucide-react';
+import { X, Send, Mic, MicOff, User, Bot, Trash2, Volume2, VolumeX } from 'lucide-react';
 import { ChatWindowProps, Message } from './types';
 import ChatSettings from './components/ChatSettings';
 import VoiceActivityBar from '../VoiceActivityBar';
@@ -17,6 +17,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   clearMessages,
   isListening,
   toggleListening,
+  stopSpeaking,
   isSpeaking,
   audioLevel,
   isModelLoading,
@@ -66,6 +67,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
     if (!isListening && setInput) {
       setInput('');
     }
+    stopSpeaking();
     toggleListening();
   };
 
@@ -163,6 +165,13 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
             title="Clear conversation"
           >
             <Trash2 className="w-4 h-4" />
+          </button>
+          <button
+            onClick={stopSpeaking}
+            className="p-1 rounded-md hover:bg-muted"
+            title="Stop speaking"
+          >
+            <VolumeX className="w-4 h-4" />
           </button>
           <button
             onClick={onClose}

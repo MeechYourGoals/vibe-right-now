@@ -140,6 +140,7 @@ export const useEnhancedVernonChat = () => {
     clearMessages,
     isListening,
     toggleListening,
+    stopSpeaking,
     voiceModel,
     setVoiceModel,
     volume,
@@ -150,6 +151,7 @@ export const useEnhancedVernonChat = () => {
     isSpeaking,
     audioLevel,
     initializeWelcomeMessage,
-    handleTranscriptUpdate
+    handleTranscriptUpdate,
+    stopSpeaking
   };
 };

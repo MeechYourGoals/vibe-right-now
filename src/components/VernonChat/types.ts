@@ -27,6 +27,7 @@ export interface ChatWindowProps {
   clearMessages: () => void;
   isListening: boolean;
   toggleListening: () => void;
+  stopSpeaking: () => void;
   isModelLoading: boolean;
   transcript: string;
   isSpeaking: boolean;

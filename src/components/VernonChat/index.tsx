@@ -18,6 +18,7 @@ const VernonChat: React.FC = () => {
     clearMessages,
     isListening,
     toggleListening,
+    stopSpeaking,
     voiceModel,
     setVoiceModel,
     volume,
@@ -50,6 +51,7 @@ const VernonChat: React.FC = () => {
           clearMessages={clearMessages}
           isListening={isListening}
           toggleListening={toggleListening}
+          stopSpeaking={stopSpeaking}
           isSpeaking={isSpeaking}
           audioLevel={audioLevel}
           isModelLoading={false}
