@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Post, Location, User } from '@/types';
+import { Post, Location, User, Media } from '@/types';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Heart, MessageCircle, Share, MapPin, Star } from "lucide-react";
@@ -47,11 +47,29 @@ const ProfileTabContent: React.FC<ProfileTabContentProps> = ({
             
             {post.media && post.media.length > 0 && (
               <div className="mb-3">
-                <img 
-                  src={post.media[0]} 
-                  alt="Post content" 
-                  className="w-full h-64 object-cover rounded-lg"
-                />
+                {typeof post.media[0] === 'string' ? (
+                  <img 
+                    src={post.media[0] as string} 
+                    alt="Post content" 
+                    className="w-full h-64 object-cover rounded-lg"
+                  />
+                ) : (
+                  <img 
+                    src={(post.media[0] as Media).url} 
+                    alt="Post content" 
+                    className="w-full h-64 object-cover rounded-lg"
+                  />
+                )}
+              </div>
+            )}
+
+            {post.vibes && post.vibes.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-3">
+                {post.vibes.slice(0, 3).map((vibe, idx) => (
+                  <Badge key={idx} variant="secondary" className="text-xs">
+                    {vibe}
+                  </Badge>
+                ))}
               </div>
             )}
             
@@ -67,11 +85,8 @@ const ProfileTabContent: React.FC<ProfileTabContentProps> = ({
                 </button>
                 <button className="flex items-center gap-1 text-muted-foreground hover:text-green-500 transition-colors">
                   <Share className="h-4 w-4" />
-                  <span className="text-sm">Share</span>
+                  <span className="text-sm">{post.shares || 0}</span>
                 </button>
-              </div>
-              <div className="text-sm text-muted-foreground">
-                {post.vibes?.join(', ')}
               </div>
             </div>
           </div>
@@ -84,40 +99,20 @@ const ProfileTabContent: React.FC<ProfileTabContentProps> = ({
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {locations.map((location) => (
-          <div key={location.id} className="bg-card rounded-lg p-4 border hover:shadow-md transition-shadow">
+          <div key={location.id} className="bg-card rounded-lg p-4 border">
             <div className="flex items-start gap-3">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center text-white font-bold text-lg">
-                {location.name.charAt(0)}
-              </div>
               <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <h3 className="font-semibold">{location.name}</h3>
-                  {location.verified && (
-                    <Badge variant="secondary" className="text-xs">✓</Badge>
+                <h3 className="font-semibold">{location.name}</h3>
+                <p className="text-muted-foreground text-sm">{location.address}</p>
+                <div className="flex items-center gap-2 mt-2">
+                  <Badge variant="secondary" className="text-xs">{location.type}</Badge>
+                  {location.rating && (
+                    <Badge variant="outline" className="text-xs">
+                      <Star className="h-3 w-3 mr-1" fill="currentColor" />
+                      {location.rating}
+                    </Badge>
                   )}
                 </div>
-                <div className="flex items-center gap-1 text-sm text-muted-foreground mb-1">
-                  <MapPin className="h-3 w-3" />
-                  <span>{location.address}</span>
-                </div>
-                <div className="flex items-center gap-1 text-sm text-muted-foreground mb-2">
-                  <span>{location.city}, {location.state}</span>
-                </div>
-                {location.rating && (
-                  <div className="flex items-center gap-1">
-                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    <span className="text-sm font-medium">{location.rating}</span>
-                  </div>
-                )}
-                  {location.vibes && location.vibes.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-2">
-                    {location.vibes.slice(0, 3).map((vibe, index) => (
-                      <Badge key={index} variant="outline" className="text-xs">
-                        {vibe}
-                      </Badge>
-                    ))}
-                  </div>
-                )}
               </div>
             </div>
           </div>
@@ -127,8 +122,8 @@ const ProfileTabContent: React.FC<ProfileTabContentProps> = ({
   }
 
   return (
-    <div className="text-center py-12">
-      <p className="text-muted-foreground">No content available</p>
+    <div className="text-center py-8">
+      <p className="text-muted-foreground">No content to display</p>
     </div>
   );
 };
