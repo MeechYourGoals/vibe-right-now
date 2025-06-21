@@ -33,8 +33,8 @@ const RewardsList = ({ userPoints, onRedeemReward }: RewardsListProps) => {
       <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
         {mockRewards.map((reward) => (
           <Card key={reward.id} className={`border ${userPoints >= reward.points ? 'border-primary/40' : 'border-muted'}`}>
-            <CardHeader className="p-3 pb-0">
-              <CardTitle className="text-base">{reward.venueName}</CardTitle>
+              <CardHeader className="p-3 pb-0">
+                <CardTitle className="text-base md:text-lg">{reward.venueName}</CardTitle>
               <CardDescription>{reward.description}</CardDescription>
             </CardHeader>
             <CardContent className="p-3 pt-2">

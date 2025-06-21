@@ -55,7 +55,7 @@ const EventListItem = ({ event }: EventListItemProps) => {
           <div className="flex-1 p-3">
             <div className="flex justify-between">
               <div>
-                <h3 className="font-semibold text-base sm:text-lg line-clamp-1">{event.title}</h3>
+                <h3 className="font-semibold text-base md:text-lg line-clamp-1">{event.title}</h3>
                 <div className="flex items-center text-xs text-muted-foreground mt-1">
                   <Calendar className="h-3 w-3 mr-1" />
                   <span className="font-medium text-foreground">{format(parseISO(event.date), "EEE, MMM d, yyyy")}</span>

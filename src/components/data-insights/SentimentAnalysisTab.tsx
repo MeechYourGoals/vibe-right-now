@@ -328,7 +328,7 @@ const SentimentAnalysisTab: React.FC<SentimentAnalysisTabProps> = ({ venueId, is
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-base mb-4 text-foreground">{platform.summary}</p>
+                      <p className="text-base md:text-lg mb-4 text-foreground">{platform.summary}</p>
                       
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>

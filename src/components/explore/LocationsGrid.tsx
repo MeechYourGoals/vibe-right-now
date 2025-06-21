@@ -45,7 +45,7 @@ const LocationsGrid = ({ locations, locationTags }: LocationsGridProps) => {
                 <HoverCardContent className="w-auto">
                   <div className="space-y-2">
                     <h4 className="text-sm font-semibold">More Tags</h4>
-                    <div className="flex flex-wrap gap-1.5">
+                      <div className="flex flex-wrap gap-2">
                       <Badge variant="outline" className="bg-primary/10">
                         {location.type}
                       </Badge>

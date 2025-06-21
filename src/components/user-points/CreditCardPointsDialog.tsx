@@ -303,8 +303,8 @@ const OpportunityCard = ({ opportunity, onRedeem }: OpportunityCardProps) => {
         <div className="flex-1">
           <CardHeader className="pb-2">
             <div className="flex justify-between items-start">
-              <div>
-                <CardTitle className="text-base">{location.name}</CardTitle>
+                <div>
+                  <CardTitle className="text-base md:text-lg">{location.name}</CardTitle>
                 <CardDescription className="flex items-center">
                   <MapPin className="h-3 w-3 mr-1" /> 
                   {location.city}, {location.state}

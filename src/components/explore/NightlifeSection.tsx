@@ -101,8 +101,8 @@ const NightlifeSection = ({ nightlifeVenues, searchedCity, dateRange }: Nightlif
                 </span>
               </div>
               
-              {venue.vibes && venue.vibes.length > 0 && (
-                <div className="flex flex-wrap gap-1 mb-3">
+                {venue.vibes && venue.vibes.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-3">
                   {venue.vibes.map((vibe, index) => (
                     <Badge 
                       key={index} 

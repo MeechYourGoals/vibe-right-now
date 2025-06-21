@@ -109,8 +109,8 @@ const ProfileTabContent: React.FC<ProfileTabContentProps> = ({
                     <span className="text-sm font-medium">{location.rating}</span>
                   </div>
                 )}
-                {location.vibes && location.vibes.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mt-2">
+                  {location.vibes && location.vibes.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-2">
                     {location.vibes.slice(0, 3).map((vibe, index) => (
                       <Badge key={index} variant="outline" className="text-xs">
                         {vibe}

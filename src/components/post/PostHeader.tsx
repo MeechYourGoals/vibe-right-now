@@ -87,8 +87,8 @@ const PostHeader: React.FC<PostHeaderProps> = ({
             <span className="text-xs text-muted-foreground">• {dateStr} at {timeStr}</span>
           </div>
           
-          {location && (
-            <div className="flex items-center gap-1 mt-1">
+            {location && (
+              <div className="flex items-center gap-2 mt-1">
               <MapPin className="h-3 w-3 text-muted-foreground" />
               <Link to={`/venue/${location.id}`} className="text-xs text-muted-foreground hover:underline">
                 {location.name}, {location.city}

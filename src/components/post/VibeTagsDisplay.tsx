@@ -13,7 +13,7 @@ const VibeTagsDisplay: React.FC<VibeTagsDisplayProps> = ({ tags, className = "" 
   }
 
   return (
-    <div className={`flex flex-wrap gap-1.5 mb-2 ${className}`}>
+    <div className={`flex flex-wrap gap-2 mb-2 ${className}`}>
       {tags.map((tag, index) => (
         <Badge 
           key={index}
