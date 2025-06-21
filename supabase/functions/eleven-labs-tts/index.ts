@@ -10,7 +10,7 @@ import { corsHeaders } from "../_shared/cors.ts";
 const DEFAULT_MODEL = "aura-asteria-en";
 
 const handler = withErrorHandling(async (req: Request): Promise<Response> => {
-  const DEEPGRAM_API_KEY = Deno.env.get('DEEPGRAM_API_KEY') || '';
+  const DEEPGRAM_API_KEY = Deno.env.get('DEEPGRAM_API_KEY');
 
   if (!DEEPGRAM_API_KEY) {
     return createValidationErrorResponse('Deepgram API key not configured');

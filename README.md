@@ -64,6 +64,10 @@ This project is built with .
 
 Simply open [Lovable](https://lovable.dev/projects/6615c5b7-93f5-41b0-b375-6a37437bdc16) and click on Share -> Publish.
 
+## Supabase setup
+
+Make sure the `DEEPGRAM_API_KEY` environment variable is defined in your Supabase project so the Deepgram speech functions can operate correctly.
+
 ## I want to use a custom domain - is that possible?
 
 We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
