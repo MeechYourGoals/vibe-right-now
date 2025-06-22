@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation as useRouterLocation } from "react-router-dom";
 import { toast } from "sonner";
@@ -44,6 +45,7 @@ const NearbyVibesMap: React.FC<NearbyVibesMapProps> = ({
   const [showDistances, setShowDistances] = useState(false);
   const [isAddressPopoverOpen, setIsAddressPopoverOpen] = useState(false);
   const [localLoading, setLocalLoading] = useState(false);
+  const [currentUserLocation, setCurrentUserLocation] = useState<[number, number] | null>(userLocation);
   
   const { mapState, setMapRef, updateMapCenter, updateRealPlaces, zoomToPlace } = useMapSync();
   
@@ -68,7 +70,7 @@ const NearbyVibesMap: React.FC<NearbyVibesMapProps> = ({
 
   const toggleMapExpansion = () => {
     setIsMapExpanded(!isMapExpanded);
-    setSelectedLocation(null);
+    onLocationSelect(null);
     
     setTimeout(() => {
       if (window.resizeMap) {
@@ -82,7 +84,7 @@ const NearbyVibesMap: React.FC<NearbyVibesMapProps> = ({
   };
 
   const handleLocationSelect = (location: Location) => {
-    setSelectedLocation(location);
+    onLocationSelect(location);
   };
 
   const handlePlaceSelect = (place: Location) => {
@@ -123,7 +125,7 @@ const NearbyVibesMap: React.FC<NearbyVibesMapProps> = ({
   };
   
   const handleUseCurrentLocation = () => {
-    if (!userLocation) {
+    if (!currentUserLocation) {
       toast.error("Unable to access your location. Please allow location access or enter an address manually.");
       return;
     }
@@ -136,14 +138,13 @@ const NearbyVibesMap: React.FC<NearbyVibesMapProps> = ({
 
   const handleLocationFound = (e: any) => {
     const coords = e.latlng;
-    setUserLocation([coords.lat, coords.lng]); // Use coords.lat and coords.lng instead of lat/lng properties
+    setCurrentUserLocation([coords.lat, coords.lng]);
     console.log('User location found:', coords.lat, coords.lng);
   };
 
   const handleLocationError = (e: any) => {
     console.error('Location error:', e.message);
-    // Default to a central location if geolocation fails
-    setUserLocation([40.7128, -74.0060]); // New York City as fallback
+    setCurrentUserLocation([40.7128, -74.0060]); // New York City as fallback
   };
 
   const handleLocationUpdate = () => {
@@ -154,11 +155,11 @@ const NearbyVibesMap: React.FC<NearbyVibesMapProps> = ({
             position.coords.latitude,
             position.coords.longitude
           ];
-          setUserLocation(coords);
+          setCurrentUserLocation(coords);
         },
         (error) => {
           console.error('Geolocation error:', error);
-          setUserLocation([40.7128, -74.0060]); // Fallback to NYC
+          setCurrentUserLocation([40.7128, -74.0060]); // Fallback to NYC
         }
       );
     }
@@ -185,7 +186,7 @@ const NearbyVibesMap: React.FC<NearbyVibesMapProps> = ({
               onSearch={handleAddressSearch}
               onUseCurrentLocation={handleUseCurrentLocation}
               loading={effectiveLoading}
-              hasUserLocation={!!userLocation}
+              hasUserLocation={!!currentUserLocation}
             />
           )}
         </div>
@@ -193,7 +194,7 @@ const NearbyVibesMap: React.FC<NearbyVibesMapProps> = ({
       
       <div className={`rounded-lg overflow-hidden ${isMapExpanded ? "h-[calc(100vh-8rem)]" : "h-96"}`}>
         <EnhancedGoogleMapComponent
-          userLocation={userLocation}
+          userLocation={currentUserLocation}
           locations={nearbyLocations}
           realPlaces={mapState.realPlaces}
           searchedCity={searchedCity}
