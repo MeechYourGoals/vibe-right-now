@@ -17,8 +17,20 @@ import { useEffect, useState } from "react";
 import { AuthDialog } from "@/components/AuthDialog";
 import VernonConciergeDialog from "./VernonConcierge/VernonConciergeDialog";
 
-// Expanded array of V-words to cycle through including all the requested ones
-const vWords = ["Vibe", "Vacation", "Vlog", "Visit", "Voyage", "View", "Venture", "Value", "Viral"];
+// Full list of rotating V-words for the branding
+// "Vacation" appears twice to match the original examples
+const vWords = [
+  "Vibe",
+  "Vacation",
+  "Vlog",
+  "Vacation",
+  "Visit",
+  "Voyage",
+  "View",
+  "Venture",
+  "Value",
+  "Viral",
+];
 
 const Header = () => {
   const isMobile = useIsMobile();
