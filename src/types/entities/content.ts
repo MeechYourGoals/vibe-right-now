@@ -32,8 +32,8 @@ export interface Post {
 export interface Comment {
   id: string;
   content: string;
-  author: string;
-  timestamp: string | Date;
+  author: User; // Changed from string to User
+  timestamp: Date; // Changed from string | Date to Date
   likes: number;
   user: User;
   postId: string;

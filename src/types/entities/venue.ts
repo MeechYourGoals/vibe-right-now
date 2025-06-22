@@ -1,28 +1,47 @@
-
 // Location and venue related types
 export interface Location {
   id: string;
   name: string;
   address: string;
   city: string;
-  state?: string;
   country: string;
-  zip?: string;
+  zip: string;
   lat: number;
   lng: number;
-  type: "restaurant" | "bar" | "event" | "attraction" | "sports" | "other" | "nightclub" | "cafe" | "city" | "nightlife";
-  verified?: boolean;
+  type: "restaurant" | "bar" | "event" | "attraction" | "sports" | "other";
+  verified: boolean;
   rating?: number;
-  price_level?: number;
   vibes?: string[];
   tags?: string[];
-  hours?: string | { [key: string]: string | { open: string; close: string; closed?: boolean } };
+  createdAt: Date;
+  updatedAt: Date;
+  description?: string;
   phone?: string;
   website?: string;
-  business_status?: string;
-  google_maps_url?: string;
-  isOpen24Hours?: boolean;
-  createdAt?: Date | string;
+  hours?: BusinessHours;
+  images?: string[];
+  priceRange?: '$' | '$$' | '$$$' | '$$$$';
+  features?: VenueFeature[];
+  socialMedia?: SocialMediaLinks;
+  capacity?: number;
+  ageRestriction?: number;
+  dresscode?: string;
+  reservationRequired?: boolean;
+  parkingAvailable?: boolean;
+  accessibilityFeatures?: string[];
+  cuisine?: string[];
+  ambiance?: string[];
+  musicGenres?: string[];
+  eventTypes?: string[];
+  popularTimes?: PopularTime[];
+  checkinCount?: number;
+  followersCount?: number;
+  averageStay?: number;
+  peakHours?: string[];
+  coordinates?: {
+    lat: number;
+    lng: number;
+  };
 }
 
 export interface VenueHours {

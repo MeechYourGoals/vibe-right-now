@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation as useRouterLocation } from "react-router-dom";
 import { toast } from "sonner";
@@ -17,7 +16,19 @@ declare global {
   }
 }
 
-const NearbyVibesMap = () => {
+interface NearbyVibesMapProps {
+  locations: Location[];
+  selectedLocation: Location | null;
+  onLocationSelect: (location: Location) => void;
+  className?: string;
+}
+
+const NearbyVibesMap: React.FC<NearbyVibesMapProps> = ({ 
+  locations, 
+  selectedLocation, 
+  onLocationSelect,
+  className 
+}) => {
   const {
     userLocation,
     nearbyLocations,
@@ -30,7 +41,6 @@ const NearbyVibesMap = () => {
   
   const [isMapExpanded, setIsMapExpanded] = useState(false);
   const [mapStyle, setMapStyle] = useState<"default" | "terrain" | "satellite">("terrain");
-  const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
   const [showDistances, setShowDistances] = useState(false);
   const [isAddressPopoverOpen, setIsAddressPopoverOpen] = useState(false);
   const [localLoading, setLocalLoading] = useState(false);
@@ -123,7 +133,37 @@ const NearbyVibesMap = () => {
     setIsAddressPopoverOpen(false);
     toast.success("Using your current location for distances");
   };
-  
+
+  const handleLocationFound = (e: any) => {
+    const coords = e.latlng;
+    setUserLocation([coords.lat, coords.lng]); // Use coords.lat and coords.lng instead of lat/lng properties
+    console.log('User location found:', coords.lat, coords.lng);
+  };
+
+  const handleLocationError = (e: any) => {
+    console.error('Location error:', e.message);
+    // Default to a central location if geolocation fails
+    setUserLocation([40.7128, -74.0060]); // New York City as fallback
+  };
+
+  const handleLocationUpdate = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const coords: [number, number] = [
+            position.coords.latitude,
+            position.coords.longitude
+          ];
+          setUserLocation(coords);
+        },
+        (error) => {
+          console.error('Geolocation error:', error);
+          setUserLocation([40.7128, -74.0060]); // Fallback to NYC
+        }
+      );
+    }
+  };
+
   const effectiveLoading = loading || localLoading;
   
   return (

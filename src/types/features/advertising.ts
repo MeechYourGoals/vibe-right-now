@@ -1,68 +1,13 @@
 
-import { BaseEntity } from '../core/base';
-
-export interface Ad extends BaseEntity {
-  title: string;
-  content: string;
-}
-
-// Extended AdFormat for compatibility
 export interface AdFormat {
   id: string;
   name: string;
   type: string;
-  description?: string;
-  duration?: number | string;
-  platform?: string;
+  description: string;
   dimensions?: string;
+  duration?: string;
+  platform?: string;
   kpis?: string[];
-  placement?: string;
-  specifications?: any;
-  bestPractices?: string[];
-}
-
-// Fix TargetingOptions to match actual component usage
-export interface TargetingOptions {
-  ageRanges: string[];
-  locations: string[];
-  interests: string[];
-  gender: GenderTargeting;
-  demographics?: {
-    gender: GenderTargeting | string;
-    ageRange: { min: number; max: number } | number[];
-    interests?: string[];
-    behaviors?: string[];
-    location?: string[];
-  };
-  geographic?: {
-    radius: number;
-    cities: string[];
-    regions: string[];
-  };
-  behaviors?: {
-    categories: string[];
-    frequency: string;
-    venueVisits?: string[];
-    socialEngagement?: string[];
-    purchaseHistory?: string[];
-  };
-  contextual?: {
-    categories: string[];
-    frequency: string;
-    vibeTags?: string[];
-    venueTypes?: string[];
-    daypart?: string[];
-    timeOfDay?: string[];
-    dayOfWeek?: string[];
-    weather?: string[];
-    eventTypes?: string[];
-  };
-  momentScore?: number | {
-    crowdDensity: string;
-    vibeScore: string;
-    crowdLevel: string;
-    engagement: string;
-  };
 }
 
 export interface GenderTargeting {
@@ -70,4 +15,42 @@ export interface GenderTargeting {
   male: boolean;
   female: boolean;
   other: boolean;
+}
+
+export interface TargetingOptions {
+  ageRange: {
+    min: number;
+    max: number;
+  };
+  gender: GenderTargeting;
+  demographics: {
+    income: string[];
+    education: string[];
+  };
+  behaviors: string[];
+  contextual: string[];
+  momentScore: {
+    min: number;
+    max: number;
+  };
+}
+
+export interface AdCampaign {
+  id: string;
+  name: string;
+  status: 'active' | 'paused' | 'completed';
+  budget: number;
+  spent: number;
+  startDate: string;
+  endDate: string;
+  targeting: TargetingOptions;
+  formats: AdFormat[];
+  metrics: {
+    impressions: number;
+    clicks: number;
+    conversions: number;
+    ctr: number;
+    cpc: number;
+    roas: number;
+  };
 }
