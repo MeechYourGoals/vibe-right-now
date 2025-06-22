@@ -7,7 +7,6 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { TrendingUp, TrendingDown, MessageSquare, Star, RefreshCw, ExternalLink, Edit3, Coffee } from 'lucide-react';
 import { SentimentAnalysisService } from "@/services/sentimentAnalysisService";
 import { PlatformSentimentSummary, SentimentTheme } from "@/types";
@@ -90,14 +89,6 @@ const SentimentAnalysisTab: React.FC<SentimentAnalysisTabProps> = ({ venueId, is
     if (score > -0.1) return 'Neutral';
     if (score > -0.5) return 'Negative';
     return 'Very Negative';
-  };
-
-  const formatThemeData = (themes: SentimentTheme[]) => {
-    return themes.map(theme => ({
-      name: theme.name,
-      score: Math.round((theme.score + 1) * 50),
-      originalScore: theme.score
-    }));
   };
 
   if (!isPremium) {
@@ -271,41 +262,6 @@ const SentimentAnalysisTab: React.FC<SentimentAnalysisTabProps> = ({ venueId, is
                     </Card>
                   ))}
                 </div>
-
-                {platformSummaries.length > 0 && (
-                  <Card className="bg-card border-border">
-                    <CardHeader>
-                      <CardTitle className="text-foreground">Sentiment Trends</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={platformSummaries}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                          <XAxis 
-                            dataKey="platform" 
-                            stroke="hsl(var(--foreground))"
-                            className="capitalize"
-                          />
-                          <YAxis domain={[-1, 1]} stroke="hsl(var(--foreground))" />
-                          <Tooltip 
-                            formatter={(value: number) => [getSentimentLabel(value), 'Sentiment']}
-                            contentStyle={{
-                              backgroundColor: 'hsl(var(--card))',
-                              border: '1px solid hsl(var(--border))',
-                              borderRadius: '6px',
-                              color: 'hsl(var(--foreground))'
-                            }}
-                          />
-                          <Bar 
-                            dataKey="overallSentiment" 
-                            fill="#8b5cf6"
-                            name="Overall Sentiment"
-                          />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </CardContent>
-                  </Card>
-                )}
               </TabsContent>
 
               <TabsContent value="platforms" className="space-y-4">
