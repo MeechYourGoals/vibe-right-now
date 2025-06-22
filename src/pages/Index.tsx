@@ -36,10 +36,7 @@ const Index = () => {
           <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between mb-2">
               <h1 className={`${isMobile ? 'text-xl' : 'text-3xl'} font-bold vibe-gradient-text`}>
-                {currentFeedTab === "for-you" && "Discover the Vibe Right Now"}
-                {currentFeedTab === "trending" && "Trending Vibes"}
-                {currentFeedTab === "recent" && "Recent Activity"}
-                {currentFeedTab === "nearby" && "Nearby Vibes"}
+                Discover the Vibe Right Now
               </h1>
             </div>
 

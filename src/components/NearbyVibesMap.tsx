@@ -9,12 +9,17 @@ import NearbyLocationsList from "./map/NearbyLocationsList";
 import AddressSearchPopover from "./map/AddressSearchPopover";
 import EnhancedGoogleMapComponent from "./map/google/EnhancedGoogleMapComponent";
 import { useMapSync } from "@/hooks/useMapSync";
-import { Location, Coordinates } from "@/types";
+import { Location } from "@/types";
 
 declare global {
   interface Window {
     resizeMap?: () => void;
   }
+}
+
+interface Coordinates {
+  lat: number;
+  lng: number;
 }
 
 interface NearbyVibesMapProps {
@@ -45,7 +50,9 @@ const NearbyVibesMap: React.FC<NearbyVibesMapProps> = ({
   const [showDistances, setShowDistances] = useState(false);
   const [isAddressPopoverOpen, setIsAddressPopoverOpen] = useState(false);
   const [localLoading, setLocalLoading] = useState(false);
-  const [currentUserLocation, setCurrentUserLocation] = useState<[number, number] | null>(userLocation);
+  const [currentUserLocation, setCurrentUserLocation] = useState<[number, number] | null>(
+    userLocation ? [userLocation.lat, userLocation.lng] : null
+  );
   
   const { mapState, setMapRef, updateMapCenter, updateRealPlaces, zoomToPlace } = useMapSync();
   

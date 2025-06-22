@@ -17,8 +17,8 @@ import { useEffect, useState } from "react";
 import { AuthDialog } from "@/components/AuthDialog";
 import VernonConciergeDialog from "./VernonConcierge/VernonConciergeDialog";
 
-// Array of V-words to cycle through
-const vWords = ["Vibe", "Vacation", "Vlog", "Visit", "Voyage", "Venture"];
+// Expanded array of V-words to cycle through including all the requested ones
+const vWords = ["Vibe", "Vacation", "Vlog", "Visit", "Voyage", "View", "Venture", "Value", "Viral"];
 
 const Header = () => {
   const isMobile = useIsMobile();
