@@ -24,18 +24,19 @@ const CommentList = ({ postId, commentsCount }: CommentListProps) => {
     const commentCount = Math.min(commentsCount, Math.floor(Math.random() * 2) + 2);
     const exampleComments: Comment[] = [];
     
+    const randomUser1 = mockUsers[Math.floor(Math.random() * mockUsers.length)];
     exampleComments.push({
       id: `example-${postId}-1`,
       contentId: postId,
       postId: postId,
       parentId: undefined,
-      user: mockUsers[Math.floor(Math.random() * mockUsers.length)],
-      author: mockUsers[Math.floor(Math.random() * mockUsers.length)].username,
+      user: randomUser1,
+      author: randomUser1,
       body: "This place looks amazing! How's the crowd right now?",
       content: "This place looks amazing! How's the crowd right now?",
       createdAt: new Date(Date.now() - 1000 * 60 * 30),
       updatedAt: new Date(Date.now() - 1000 * 60 * 30),
-      timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
+      timestamp: new Date(Date.now() - 1000 * 60 * 30),
       vibedHere: false,
       likes: 0,
       status: 'published' as const,
@@ -43,18 +44,19 @@ const CommentList = ({ postId, commentsCount }: CommentListProps) => {
       moderation: { status: 'approved' as const, flags: [] }
     });
     
+    const randomUser2 = mockUsers[Math.floor(Math.random() * mockUsers.length)];
     exampleComments.push({
       id: `example-${postId}-2`,
       contentId: postId,
       postId: postId,
       parentId: undefined,
-      user: mockUsers[Math.floor(Math.random() * mockUsers.length)],
-      author: mockUsers[Math.floor(Math.random() * mockUsers.length)].username,
+      user: randomUser2,
+      author: randomUser2,
       body: "I was here yesterday and it was incredible! The line moves fast if you go around to the side entrance.",
       content: "I was here yesterday and it was incredible! The line moves fast if you go around to the side entrance.",
       createdAt: new Date(Date.now() - 1000 * 60 * 120),
       updatedAt: new Date(Date.now() - 1000 * 60 * 120),
-      timestamp: new Date(Date.now() - 1000 * 60 * 120).toISOString(),
+      timestamp: new Date(Date.now() - 1000 * 60 * 120),
       vibedHere: true,
       likes: 0,
       status: 'published' as const,
@@ -63,18 +65,19 @@ const CommentList = ({ postId, commentsCount }: CommentListProps) => {
     });
     
     if (commentCount > 2) {
+      const randomUser3 = mockUsers[Math.floor(Math.random() * mockUsers.length)];
       exampleComments.push({
         id: `example-${postId}-3`,
         contentId: postId,
         postId: postId,
         parentId: undefined,
-        user: mockUsers[Math.floor(Math.random() * mockUsers.length)],
-        author: mockUsers[Math.floor(Math.random() * mockUsers.length)].username,
+        user: randomUser3,
+        author: randomUser3,
         body: "Heading there now! Anyone want to meet up?",
         content: "Heading there now! Anyone want to meet up?",
         createdAt: new Date(Date.now() - 1000 * 60 * 10),
         updatedAt: new Date(Date.now() - 1000 * 60 * 10),
-        timestamp: new Date(Date.now() - 1000 * 60 * 10).toISOString(),
+        timestamp: new Date(Date.now() - 1000 * 60 * 10),
         vibedHere: Math.random() > 0.5,
         likes: 0,
         status: 'published' as const,

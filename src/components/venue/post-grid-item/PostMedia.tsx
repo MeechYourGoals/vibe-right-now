@@ -21,7 +21,7 @@ const PostMedia: React.FC<PostMediaProps> = ({ post }) => {
   const firstMedia = post.media[0];
   const isMediaObject = typeof firstMedia === 'object' && firstMedia !== null;
   const mediaType = isMediaObject ? firstMedia.type : 'image';
-  const mediaUrl = isMediaObject ? firstMedia.url : firstMedia as string;
+  const mediaUrl = isMediaObject ? firstMedia.url : (firstMedia as unknown as string);
 
   if (mediaType === "image") {
     return (
