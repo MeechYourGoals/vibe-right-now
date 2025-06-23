@@ -4,7 +4,7 @@ import { Message } from '../types';
 import { toast } from 'sonner';
 import { useSpeechSynthesis } from './useSpeechSynthesis';
 import { useSpeechRecognition } from './speechRecognition';
-import { VertexAIService } from '@/services/VertexAIService';
+import { PerplexityService } from '@/services/PerplexityService';
 import { SearchService } from '@/services/search/SearchService';
 
 // Create a welcome message based on the mode
@@ -104,15 +104,8 @@ export const useElevenLabsConversation = (isVenueMode: boolean = false) => {
         setMessages(prev => [...prev, aiMessage]);
         return aiMessage.content;
       } else {
-        // Format messages for Vertex AI
-        const contextMessages = messages.slice(-6);
-        
-        // Generate response from Vertex AI
-        const aiResponse = await VertexAIService.generateResponse(
-          voiceText,
-          isVenueMode ? 'venue' : 'default',
-          contextMessages
-        );
+        // Generate response from Perplexity
+        const aiResponse = await PerplexityService.generateResponse(voiceText);
         
         const aiMessage: Message = {
           id: (Date.now() + 1).toString(),
@@ -180,12 +173,8 @@ export const useElevenLabsConversation = (isVenueMode: boolean = false) => {
         // Format messages for Vertex AI
         const contextMessages = messages.slice(-6);
         
-        // Generate response from Vertex AI
-        const aiResponse = await VertexAIService.generateResponse(
-          text,
-          isVenueMode ? 'venue' : 'default',
-          contextMessages
-        );
+        // Generate response from Perplexity
+        const aiResponse = await PerplexityService.generateResponse(text);
         
         const aiMessage: Message = {
           id: (Date.now() + 1).toString(),

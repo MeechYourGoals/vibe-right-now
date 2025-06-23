@@ -1,5 +1,5 @@
 
-import { VertexAIService } from '@/services/VertexAIService';
+import { PerplexityService } from '@/services/PerplexityService';
 
 /**
  * Google Vertex AI / Gemini search provider implementation
@@ -10,9 +10,9 @@ export const GoogleVertexProvider = {
    */
   async search(query: string): Promise<string | null> {
     try {
-      console.log('Searching with Google Vertex AI:', query);
-      
-      const result = await VertexAIService.searchWithVertex(query);
+      console.log('Searching with Perplexity:', query);
+
+      const result = await PerplexityService.searchPerplexity(query);
       return result || null;
     } catch (error) {
       console.error('Error with Google Vertex search:', error);

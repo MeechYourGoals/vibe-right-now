@@ -1,4 +1,5 @@
 
+import { supabase } from '@/integrations/supabase/client';
 import { SearchService } from './search/SearchService';
 
 /**
@@ -7,11 +8,44 @@ import { SearchService } from './search/SearchService';
  */
 export const PerplexityService = {
   /**
-   * Search using multiple providers
-   * @param query The search query
-   * @returns The search results as text
+   * Generate a chat completion using Perplexity
+   */
+  async generateResponse(prompt: string): Promise<string> {
+    try {
+      const { data, error } = await supabase.functions.invoke('perplexity-search', {
+        body: { query: prompt }
+      });
+
+      if (error) {
+        console.error('Perplexity API error:', error);
+        throw new Error('Failed to generate response');
+      }
+
+      return data?.text || '';
+    } catch (err) {
+      console.error('Perplexity generateResponse error:', err);
+      return "I'm having trouble connecting to my AI services right now.";
+    }
+  },
+
+  /**
+   * Search using Perplexity with fallbacks
    */
   async searchPerplexity(query: string): Promise<string> {
-    return SearchService.search(query);
+    try {
+      const { data, error } = await supabase.functions.invoke('perplexity-search', {
+        body: { query }
+      });
+
+      if (error) {
+        console.error('Perplexity search error:', error);
+        return SearchService.search(query);
+      }
+
+      return data?.text || SearchService.search(query);
+    } catch (err) {
+      console.error('Perplexity search exception:', err);
+      return SearchService.search(query);
+    }
   }
 };

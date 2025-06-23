@@ -1,6 +1,6 @@
 
 import { SearchStrategy, SearchOptions } from '../types';
-import { VertexAIService } from '@/services/VertexAIService';
+import { PerplexityService } from '@/services/PerplexityService';
 import { extractCategories } from '@/services/VertexAI/analysis';
 import { cleanResponseText } from '../../../responseFormatter';
 
@@ -30,8 +30,8 @@ export class LocationSearchStrategy implements SearchStrategy {
         }
       }
 
-      // Use VertexAI for location-based search
-      const result = await VertexAIService.searchWithVertex(query, extractedCategories);
+      // Use Perplexity for location-based search
+      const result = await PerplexityService.searchPerplexity(query);
       
       if (result && result.length > 100) {
         const exploreLinkText = "\n\nYou can also [view all these results on our Explore page](/explore?q=" + 

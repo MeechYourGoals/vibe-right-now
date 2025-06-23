@@ -1,6 +1,6 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { VertexAIService } from '@/services/VertexAIService';
+import { DeepgramService } from '@/services';
 
 interface SpeechSynthesisOptions {
   voice?: 'male' | 'female';
@@ -33,25 +33,24 @@ export const useSpeechSynthesis = (options: SpeechSynthesisOptions = {}) => {
       console.log('Requesting speech for text:', text.substring(0, 50) + '...');
       setIsSpeaking(true);
       
-      // Use Google TTS via VertexAIService
-      const audioContent = await VertexAIService.textToSpeech(text, {
-        voice: 'en-US-Neural2-D', // Force male voice for consistency
-        speakingRate: options.rate || 1.0,
-        pitch: options.pitch || 0
-      });
-      
-      if (audioContent) {
-        // Create audio element and play
-        const audio = new Audio(`data:audio/mp3;base64,${audioContent}`);
+      // Use Deepgram for text to speech
+      const audioBuffer = await DeepgramService.textToSpeech(text);
+
+      if (audioBuffer) {
+        const blob = new Blob([audioBuffer], { type: 'audio/mpeg' });
+        const url = URL.createObjectURL(blob);
+        const audio = new Audio(url);
         currentAudio.current = audio;
         
         // Add event listeners
         audio.onended = () => {
+          URL.revokeObjectURL(url);
           setIsSpeaking(false);
           currentAudio.current = null;
         };
-        
+
         audio.onerror = () => {
+          URL.revokeObjectURL(url);
           console.error('Error playing audio');
           setIsSpeaking(false);
           currentAudio.current = null;

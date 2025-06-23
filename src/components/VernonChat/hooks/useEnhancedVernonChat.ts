@@ -136,7 +136,7 @@ export const useEnhancedVernonChat = () => {
     if (messages.length === 0) {
       const timestamp = new Date();
       const welcomeMsg =
-        "Hello! I'm Vernon, your AI assistant powered by Google Gemini. How can I help you discover venues and events today?";
+        "Hello! I'm Vernon, your AI assistant powered by Perplexity. How can I help you discover venues and events today?";
 
       setMessages([
         {

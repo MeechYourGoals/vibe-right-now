@@ -1,7 +1,7 @@
 
 import { useState, useCallback } from 'react';
 import { Message, ChatMode } from '../types';
-import { VertexAIService } from '@/services/VertexAIService';
+import { PerplexityService } from '@/services/PerplexityService';
 
 export const useMessageProcessor = () => {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -21,14 +21,10 @@ export const useMessageProcessor = () => {
           text: msg.content || msg.text || ''
         }));
         
-        // Use VertexAI for all message processing
-        const response = await VertexAIService.generateResponse(
-          query, 
-          chatMode === 'venue' ? 'venue' : 'default',
-          context
-        );
-        
-        console.log("Received response from VertexAI:", response.substring(0, 50) + "...");
+        // Use Perplexity for message processing
+        const response = await PerplexityService.generateResponse(query);
+
+        console.log("Received response from Perplexity:", response.substring(0, 50) + "...");
         return response;
       } catch (error) {
         console.error('Error processing message:', error);

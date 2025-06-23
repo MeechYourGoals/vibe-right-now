@@ -1,5 +1,6 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
+import { DeepgramService } from '@/services';
 
 export const useOptimizedSpeechSynthesis = () => {
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -30,8 +31,35 @@ export const useOptimizedSpeechSynthesis = () => {
     
     try {
       setIsSpeaking(true);
-      
-      // Use browser's speech synthesis
+
+      // Try Deepgram first
+      const audioData = await DeepgramService.textToSpeech(text);
+      if (audioData) {
+        const blob = new Blob([audioData], { type: 'audio/mpeg' });
+        const url = URL.createObjectURL(blob);
+        const audio = new Audio(url);
+        audioRef.current = audio;
+
+        return await new Promise<boolean>((resolve) => {
+          audio.onended = () => {
+            URL.revokeObjectURL(url);
+            setIsSpeaking(false);
+            resolve(true);
+          };
+          audio.onerror = () => {
+            URL.revokeObjectURL(url);
+            setIsSpeaking(false);
+            resolve(false);
+          };
+          audio.play().catch(() => {
+            URL.revokeObjectURL(url);
+            setIsSpeaking(false);
+            resolve(false);
+          });
+        });
+      }
+
+      // Fallback to browser's speech synthesis
       const utterance = new SpeechSynthesisUtterance(text);
       currentUtterance.current = utterance;
       

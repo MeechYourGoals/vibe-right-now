@@ -97,7 +97,7 @@ export const useEnhancedVernonChatStore = () => {
 
   const initializeWelcomeMessage = useCallback(() => {
     if (chatState.messages.length === 0) {
-      const welcomeMsg = 'Hello! I\'m Vernon, your AI assistant powered by Google Gemini. How can I help you discover venues and events today?';
+      const welcomeMsg = 'Hello! I\'m Vernon, your AI assistant powered by Perplexity. How can I help you discover venues and events today?';
       addChatMessage(welcomeMsg, 'incoming', true);
     }
   }, [chatState.messages.length, addChatMessage]);
