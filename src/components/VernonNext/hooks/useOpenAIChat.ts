@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import { v4 as uuidv4 } from 'uuid';
 import { Message } from '../types';
-import { VertexAIService } from '@/services/VertexAIService';
+import { VertexAIHub } from '@/services/VertexAI';
 import { PerplexityService } from '@/services/PerplexityService';
 import { DeepgramService } from '@/services';
 
@@ -127,7 +127,7 @@ export const useOpenAIChat = ({ initialMessages = [], onContentChange }: UseOpen
             
             try {
               // Use Vertex AI speech-to-text
-              const transcriptionResult = await VertexAIService.speechToText(base64Audio);
+              const transcriptionResult = await VertexAIHub.speechToText(base64Audio);
               
               if (transcriptionResult) {
                 setTranscript(transcriptionResult);

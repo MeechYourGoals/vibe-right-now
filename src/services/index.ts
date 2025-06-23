@@ -1,7 +1,6 @@
 
 // Centralized service exports
 export { DeepgramService } from './Deepgram';
-export { VertexAIService } from './VertexAIService';
 export { OpenAIService } from './OpenAIService';
 export { SocialMediaAggregator } from './socialMedia/aggregator';
 
