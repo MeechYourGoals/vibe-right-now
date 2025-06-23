@@ -146,7 +146,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
             <h2 className="text-white font-medium flex items-center">
               Vernon
               <Badge variant="outline" className="ml-2 bg-blue-700 text-white border-blue-500 text-xs px-1.5">
-                Gemini
+                Perplexity
               </Badge>
             </h2>
             <p className="text-blue-100 text-xs">AI Assistant</p>

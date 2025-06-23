@@ -89,7 +89,7 @@ const ChatSettings: React.FC<ChatSettingsProps> = ({
         
         <DropdownMenuSeparator className="bg-gray-700" />
         <DropdownMenuItem className="text-xs text-center justify-center text-gray-400">
-          Powered by Gemini
+          Powered by Perplexity
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
