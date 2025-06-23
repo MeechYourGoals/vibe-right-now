@@ -1,5 +1,5 @@
 
-import { VertexAIService } from '@/services/VertexAIService';
+import { PerplexityService } from '@/services/PerplexityService';
 
 /**
  * OpenAI search provider implementation - now proxied through Google Vertex AI
@@ -12,8 +12,8 @@ export const OpenAISearchProvider = {
     try {
       console.log('Searching with OpenAI (via Google Vertex AI):', query);
       
-      // Use VertexAIService for search instead of direct OpenAI calls
-      const result = await VertexAIService.searchWithVertex(query);
+      // Use Perplexity for search instead of direct OpenAI calls
+      const result = await PerplexityService.searchPerplexity(query);
       return result || null;
     } catch (error) {
       console.error('Error with OpenAI search (via Vertex AI):', error);

@@ -1,5 +1,5 @@
 
-import { VertexAIService } from '@/services/VertexAIService';
+import { PerplexityService } from '@/services/PerplexityService';
 
 /**
  * Service for searching comedy shows and events
@@ -31,18 +31,15 @@ export const ComedySearchService = {
         Return the information in a well-formatted, easy to read format.
       `;
       
-      // Use VertexAI for both search and context-aware responses
-      const comedyInfo = await VertexAIService.searchWithVertex(
-        enhancedQuery,
-        ['entertainment', 'comedy', 'events']
-      );
+      // Use Perplexity for both search and context-aware responses
+      const comedyInfo = await PerplexityService.searchPerplexity(enhancedQuery);
       
       if (comedyInfo && comedyInfo.length > 0) {
         return comedyInfo;
       }
       
       // Fallback to general AI response if search doesn't yield results
-      return VertexAIService.generateResponse(query, 'default');
+      return PerplexityService.generateResponse(query);
     } catch (error) {
       console.error('Error searching for comedy events:', error);
       return 'I apologize, but I had trouble finding comedy events. Please try asking in a different way or check back later.';

@@ -1,6 +1,5 @@
 
-import { GoogleVertexProvider } from './providers/GoogleVertexProvider';
-import { VertexAIService } from '@/services/VertexAIService';
+import { PerplexityService } from '@/services/PerplexityService';
 
 /**
  * Unified search service that coordinates between multiple search providers
@@ -15,22 +14,10 @@ export class SearchService {
     console.log('Searching with query:', query);
     
     try {
-      // Try Google Vertex AI first
-      const vertexResult = await GoogleVertexProvider.search(query);
-      if (vertexResult) {
-        console.log('Got result from Google Vertex AI');
-        return vertexResult;
-      }
-      
-      // Fall back to a direct call to Vertex AI service
-      try {
-        const vertexServiceResult = await VertexAIService.searchWithVertex(query);
-        if (vertexServiceResult) {
-          console.log('Got result from VertexAIService search');
-          return vertexServiceResult;
-        }
-      } catch (vertexError) {
-        console.error('Error with VertexAIService search:', vertexError);
+      // Use Perplexity as the primary search provider
+      const perplexityResult = await PerplexityService.searchPerplexity(query);
+      if (perplexityResult) {
+        return perplexityResult;
       }
       
       // Fall back to a generic response if all searches fail
@@ -49,8 +36,8 @@ export class SearchService {
       // Enhance the query to focus on comedy
       const enhancedQuery = `comedy events: ${query}`;
       
-      // Use Vertex AI's contextual search
-      return await VertexAIService.searchWithVertex(enhancedQuery, ['Comedy', 'Entertainment']);
+      // Use Perplexity for contextual search
+      return await PerplexityService.searchPerplexity(enhancedQuery);
     } catch (error) {
       console.error('Error in comedy search:', error);
       return await this.search(query);
@@ -62,7 +49,6 @@ export class SearchService {
    */
   static async vectorSearch(query: string, filters?: any): Promise<string> {
     try {
-      // Use Google's NLP capabilities through Vertex AI
       const categories = filters?.categories || [];
       
       // Create a more detailed search prompt
@@ -76,7 +62,7 @@ export class SearchService {
         - Any other relevant details
       `;
       
-      return await VertexAIService.generateResponse(searchPrompt, 'search');
+      return await PerplexityService.generateResponse(searchPrompt);
     } catch (error) {
       console.error('Error in vector search:', error);
       return await this.search(query);

@@ -3,6 +3,8 @@ import { useToast } from "@/components/ui/use-toast";
 import { v4 as uuidv4 } from 'uuid';
 import { Message } from '../types';
 import { VertexAIService } from '@/services/VertexAIService';
+import { PerplexityService } from '@/services/PerplexityService';
+import { DeepgramService } from '@/services';
 
 interface UseOpenAIChatProps {
   initialMessages?: Message[];
@@ -53,8 +55,8 @@ export const useOpenAIChat = ({ initialMessages = [], onContentChange }: UseOpen
         text: msg.content
       }));
       
-      // Call Vertex AI service
-      const response = await VertexAIService.generateResponse(text, 'default', context);
+      // Call Perplexity for completion
+      const response = await PerplexityService.generateResponse(text);
       
       // Create AI message
       const aiResponse: Message = {
@@ -175,23 +177,22 @@ export const useOpenAIChat = ({ initialMessages = [], onContentChange }: UseOpen
     setIsSpeaking(true);
     
     try {
-      // Use Vertex AI text-to-speech
-      const audioContent = await VertexAIService.textToSpeech(text, {
-        voice: 'en-US-Neural2-D',
-        speakingRate: 1.0,
-        pitch: 0
-      });
-      
-      if (audioContent) {
-        // Create audio element
-        const audio = new Audio(`data:audio/mp3;base64,${audioContent}`);
+      // Use Deepgram text-to-speech
+      const audioBuffer = await DeepgramService.textToSpeech(text);
+
+      if (audioBuffer) {
+        const blob = new Blob([audioBuffer], { type: 'audio/mpeg' });
+        const url = URL.createObjectURL(blob);
+        const audio = new Audio(url);
         
         // Set up event listeners
         audio.onended = () => {
+          URL.revokeObjectURL(url);
           setIsSpeaking(false);
         };
-        
+
         audio.onerror = () => {
+          URL.revokeObjectURL(url);
           console.error('Audio playback error');
           setIsSpeaking(false);
         };
