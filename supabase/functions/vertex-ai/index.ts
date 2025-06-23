@@ -7,8 +7,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Use the provided API key
-const VERTEX_AI_API_KEY = "AIzaSyDHBe4hL8fQZdz9wSYi9srL0BGTnZ6XmyM";
+// Vertex AI API key from environment variable
+const VERTEX_AI_API_KEY = Deno.env.get('VERTEX_AI_API_KEY');
 
 // Available models with proper fallback logic
 const MODELS = {
@@ -20,6 +20,13 @@ serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
+  }
+
+  if (!VERTEX_AI_API_KEY) {
+    return new Response(
+      JSON.stringify({ error: 'Vertex AI API key not configured' }),
+      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
   }
 
   try {
