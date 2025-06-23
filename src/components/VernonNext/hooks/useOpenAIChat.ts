@@ -2,7 +2,6 @@ import { useState, useCallback } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import { v4 as uuidv4 } from 'uuid';
 import { Message } from '../types';
-import { VertexAIService } from '@/services/VertexAIService';
 import { PerplexityService } from '@/services/PerplexityService';
 import { DeepgramService } from '@/services';
 
@@ -117,32 +116,25 @@ export const useOpenAIChat = ({ initialMessages = [], onContentChange }: UseOpen
         setInterimTranscript('Processing...');
         
         try {
-          // Convert blob to base64
           const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-          const reader = new FileReader();
-          reader.readAsDataURL(audioBlob);
-          
-          reader.onloadend = async () => {
-            const base64Audio = (reader.result as string).split(',')[1];
-            
-            try {
-              // Use Vertex AI speech-to-text
-              const transcriptionResult = await VertexAIService.speechToText(base64Audio);
-              
-              if (transcriptionResult) {
-                setTranscript(transcriptionResult);
-                sendMessage(transcriptionResult);
-              }
-            } catch (error) {
-              console.error('Speech recognition error:', error);
-              setInterimTranscript('');
-              toast({
-                title: "Speech recognition error",
-                description: "Could not process audio. Please try again.",
-                variant: "destructive",
-              });
+
+          try {
+            // Use Deepgram speech-to-text
+            const transcriptionResult = await DeepgramService.speechToText(audioBlob);
+
+            if (transcriptionResult) {
+              setTranscript(transcriptionResult);
+              sendMessage(transcriptionResult);
             }
-          };
+          } catch (error) {
+            console.error('Speech recognition error:', error);
+            setInterimTranscript('');
+            toast({
+              title: "Speech recognition error",
+              description: "Could not process audio. Please try again.",
+              variant: "destructive",
+            });
+          }
         } catch (error) {
           console.error('Error processing audio:', error);
           setInterimTranscript('');
