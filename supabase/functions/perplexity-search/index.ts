@@ -6,7 +6,7 @@ import { validateRequired } from "../_shared/validation.ts";
 import { getApiKey, createAuthHeaders } from "../_shared/auth.ts";
 import { logInfo, logError } from "../_shared/logging.ts";
 
-const PERPLEXITY_API_KEY = "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";
+const PERPLEXITY_API_KEY = Deno.env.get('PERPLEXITY_API_KEY');
 
 const handler = withErrorHandling(async (req: Request): Promise<Response> => {
   if (!PERPLEXITY_API_KEY) {
