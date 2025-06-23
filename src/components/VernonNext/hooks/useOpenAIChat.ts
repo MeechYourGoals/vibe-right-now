@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Message } from '../types';
 import { VertexAIService } from '@/services/VertexAIService';
 import { PerplexityService } from '@/services/PerplexityService';
-import { DeepgramService } from '@/services';
+import { useDeepgramSpeechSynthesis } from '@/components/VernonChat/hooks/speechSynthesis/useDeepgramSpeechSynthesis';
 
 interface UseOpenAIChatProps {
   initialMessages?: Message[];
@@ -16,7 +16,7 @@ export const useOpenAIChat = ({ initialMessages = [], onContentChange }: UseOpen
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
+  const { speak: speakText, isSpeaking } = useDeepgramSpeechSynthesis();
   const [transcript, setTranscript] = useState('');
   const [interimTranscript, setInterimTranscript] = useState('');
   const [completion, setCompletion] = useState('');
@@ -171,57 +171,6 @@ export const useOpenAIChat = ({ initialMessages = [], onContentChange }: UseOpen
     setInterimTranscript('');
   }, []);
 
-  const speakText = useCallback(async (text: string) => {
-    if (isSpeaking) return;
-    
-    setIsSpeaking(true);
-    
-    try {
-      // Use Deepgram text-to-speech
-      const audioBuffer = await DeepgramService.textToSpeech(text);
-
-      if (audioBuffer) {
-        const blob = new Blob([audioBuffer], { type: 'audio/mpeg' });
-        const url = URL.createObjectURL(blob);
-        const audio = new Audio(url);
-        
-        // Set up event listeners
-        audio.onended = () => {
-          URL.revokeObjectURL(url);
-          setIsSpeaking(false);
-        };
-
-        audio.onerror = () => {
-          URL.revokeObjectURL(url);
-          console.error('Audio playback error');
-          setIsSpeaking(false);
-        };
-        
-        // Play the audio
-        await audio.play();
-      } else {
-        // Fall back to browser TTS
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.onend = () => setIsSpeaking(false);
-        utterance.onerror = () => setIsSpeaking(false);
-        speechSynthesis.speak(utterance);
-      }
-    } catch (error) {
-      console.error('Error speaking text:', error);
-      setIsSpeaking(false);
-      
-      // Fall back to browser TTS
-      try {
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.onend = () => setIsSpeaking(false);
-        utterance.onerror = () => setIsSpeaking(false);
-        speechSynthesis.speak(utterance);
-      } catch (fallbackError) {
-        console.error('Speech synthesis fallback error:', fallbackError);
-        setIsSpeaking(false);
-      }
-    }
-  }, [isSpeaking]);
 
   const toggleChat = useCallback(() => {
     setIsOpen(prev => !prev);
