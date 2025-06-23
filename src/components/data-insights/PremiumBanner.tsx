@@ -68,7 +68,7 @@ const PremiumBanner = ({ onUpgrade }: PremiumBannerProps) => {
             <div className="space-y-3 text-center text-sm text-muted-foreground">
               <div className="flex items-center justify-center">
                 <BarChart className="mr-2 h-4 w-4 text-green-400" />
-                Gemini Deep Research Analytics
+                Perplexity Research Analytics
               </div>
               <div className="flex items-center justify-center">
                 <Target className="mr-2 h-4 w-4 text-green-400" />
@@ -79,7 +79,7 @@ const PremiumBanner = ({ onUpgrade }: PremiumBannerProps) => {
                 Notebook LM Podcast Reports
               </div>
               <p className="text-xs">
-                Access detailed insights powered by Google's Gemini AI about visitor demographics and behavior patterns, create targeted promotions and track their performance in real-time, and generate AI-powered podcast summaries of your weekly insights using Google Notebook LM
+                Access detailed insights powered by Perplexity about visitor demographics and behavior patterns, create targeted promotions and track their performance in real-time, and generate AI-powered podcast summaries of your weekly insights using Google Notebook LM
               </p>
             </div>
             <div className="text-center mt-4">
@@ -115,7 +115,7 @@ const PremiumBanner = ({ onUpgrade }: PremiumBannerProps) => {
                 Influencer Marketplace
               </div>
               <p className="text-xs">
-                Everything in Plus and Premium, plus AI-Powered Gemini analysis of uploaded financial records, access to Google's Veo and Imagen AI models to create ads and videos for marketing campaigns, and access to the Influencer Marketplace
+                Everything in Plus and Premium, plus AI-powered Perplexity analysis of uploaded financial records, access to Google's Veo and Imagen AI models to create ads and videos for marketing campaigns, and access to the Influencer Marketplace
               </p>
             </div>
             <div className="text-center mt-4">
@@ -132,7 +132,7 @@ const PremiumBanner = ({ onUpgrade }: PremiumBannerProps) => {
             Upgrade to Pro
           </Button>
           <p className="text-xs text-muted-foreground mt-4 max-w-2xl mx-auto">
-            All plans include basic venue profile features. Upgrade to Pro for access to Google's cutting-edge Gemini, Veo, Imagen, 
+            All plans include basic venue profile features. Upgrade to Pro for access to cutting-edge Perplexity, Veo, Imagen,
             and Notebook LM technologies to grow your business. Project Mariner handles bookings automatically. Annual billing 
             available with a 15% discount.
           </p>

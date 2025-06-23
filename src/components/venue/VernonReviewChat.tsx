@@ -52,7 +52,7 @@ const VernonReviewChat: React.FC<VernonReviewChatProps> = ({
     setIsLoading(true);
 
     try {
-      // Call Gemini via our existing edge function
+      // Call Perplexity via our existing edge function
       const { data, error } = await supabase.functions.invoke('gemini-ai', {
         body: {
           prompt: `Based on the following ${platform} review summary for a venue, please answer this question: "${messageText}"

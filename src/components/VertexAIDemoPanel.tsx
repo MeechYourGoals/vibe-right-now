@@ -87,9 +87,9 @@ const VertexAIDemoPanel = () => {
   return (
     <Card className="w-full max-w-3xl mx-auto">
       <CardHeader>
-        <CardTitle>Vertex AI Demo</CardTitle>
+        <CardTitle>Perplexity AI Demo</CardTitle>
         <CardDescription>
-          Test various Vertex AI capabilities
+          Test various Perplexity AI capabilities
         </CardDescription>
       </CardHeader>
       
@@ -145,7 +145,7 @@ const VertexAIDemoPanel = () => {
       
       <CardFooter className="flex justify-between">
         <p className="text-sm text-muted-foreground">
-          Powered by Google Vertex AI
+          Powered by Perplexity
         </p>
       </CardFooter>
     </Card>
