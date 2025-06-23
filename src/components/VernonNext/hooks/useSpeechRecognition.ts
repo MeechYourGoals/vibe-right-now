@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useRef } from 'react';
-import { VertexAIService } from '@/services/VertexAIService';
+import { VertexAIHub } from '@/services/VertexAI';
 
 interface SpeechRecognitionOptions {
   continuous?: boolean;
@@ -141,7 +141,7 @@ export const useSpeechRecognition = (options: SpeechRecognitionOptions = {}) => 
           const base64Audio = (reader.result as string).split(',')[1];
           
           try {
-            const transcript = await VertexAIService.speechToText(base64Audio);
+            const transcript = await VertexAIHub.speechToText(base64Audio);
             
             if (transcript) {
               setTranscript(transcript);
