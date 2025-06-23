@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { useLocalStorage } from "./useLocalStorage";
 import { useMessageProcessor } from "./useMessageProcessor";
 import { useOptimizedSpeechRecognition } from "./speechRecognition/useOptimizedSpeechRecognition";
-import { useOptimizedSpeechSynthesis } from "./speechSynthesis/useOptimizedSpeechSynthesis";
+import { useDeepgramSpeechSynthesis } from "./speechSynthesis/useDeepgramSpeechSynthesis";
 import { Message, MessageDirection, ChatMode } from "../types";
 
 export const useEnhancedVernonChat = () => {
@@ -24,7 +24,7 @@ export const useEnhancedVernonChat = () => {
     speak,
     stop: stopSpeaking,
     isSpeaking,
-  } = useOptimizedSpeechSynthesis();
+  } = useDeepgramSpeechSynthesis();
   const {
     isListening,
     transcript,

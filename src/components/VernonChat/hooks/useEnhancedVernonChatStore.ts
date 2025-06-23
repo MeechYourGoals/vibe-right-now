@@ -3,7 +3,7 @@ import { useCallback } from 'react';
 import { useChatStore, useUserStore } from '@/store';
 import { useMessageProcessor } from './useMessageProcessor';
 import { useOptimizedSpeechRecognition } from './speechRecognition/useOptimizedSpeechRecognition';
-import { useOptimizedSpeechSynthesis } from './speechSynthesis/useOptimizedSpeechSynthesis';
+import { useDeepgramSpeechSynthesis } from './speechSynthesis/useDeepgramSpeechSynthesis';
 import { Message, MessageDirection } from '../types';
 import { createAIMessage, createUserMessage } from '../utils/messageFactory';
 
@@ -24,7 +24,7 @@ export const useEnhancedVernonChatStore = () => {
   const { processMessage } = useMessageProcessor();
   
   // Use optimized speech hooks
-  const { speak, stop: stopSpeaking, isSpeaking } = useOptimizedSpeechSynthesis();
+  const { speak, stop: stopSpeaking, isSpeaking } = useDeepgramSpeechSynthesis();
   const { 
     isListening, 
     transcript, 
