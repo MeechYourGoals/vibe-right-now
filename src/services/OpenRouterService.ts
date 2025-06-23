@@ -20,7 +20,8 @@ interface TextToSpeechOptions {
 }
 
 export const OpenRouterService = {
-  apiKey: "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",
+  // API key is loaded from Vite environment variables
+  apiKey: import.meta.env.VITE_OPENROUTER_API_KEY || '',
   baseUrl: "https://openrouter.ai/api/v1",
 
   async getCompletion({

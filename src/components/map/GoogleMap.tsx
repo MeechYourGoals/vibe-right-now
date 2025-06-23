@@ -8,8 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Navigation, Pin, Compass } from "lucide-react";
 import { toast } from "sonner";
 
-// Google Maps API key - in production, this should be stored in environment variables
-const GOOGLE_MAPS_API_KEY = "AIzaSyDIwf3LDvHPDNR3A5s1jWu_-o4Zat4f6TY";
+// Google Maps API key loaded from Vite environment variables
+const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
 const mapContainerStyle = {
   width: '100%',

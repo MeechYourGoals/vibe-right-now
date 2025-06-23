@@ -77,3 +77,13 @@ We don't support custom domains (yet). If you want to deploy your project under 
 Some Supabase Edge Functions in this repo use Deepgram for text-to-speech. These functions expect a `DEEPGRAM_API_KEY` environment variable to be available.
 
 Make sure **not** to commit your API key to the repository. Add the key to a `.env` file for local development or provide it in your deployment dashboard when you deploy the functions.
+
+## Additional API keys
+
+Other Supabase functions and the front-end require extra keys. Create a `.env` file (or `.env.local` inside each function directory) and set these variables locally:
+
+- `GEMINI_API_KEY` – used by the image generation and review sentiment functions
+- `OPENROUTER_API_KEY` – used by the `openai-chat` function
+- `GOOGLE_MAPS_API_KEY` – used by the map components and city detection logic
+
+These values should also be configured in your deployment environment.

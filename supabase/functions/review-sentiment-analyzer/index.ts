@@ -6,8 +6,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Use the Gemini API key for sentiment analysis
-const GEMINI_API_KEY = "AIzaSyCfJFLglZMGwe2j-XbYtbHKB8-xN15PXZM";
+// Gemini API key loaded from environment variables
+const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -16,6 +16,13 @@ serve(async (req) => {
   }
 
   try {
+    if (!GEMINI_API_KEY) {
+      return new Response(
+        JSON.stringify({ error: 'Gemini API key not configured' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const { venue_id, platform, reviews } = await req.json();
 
     if (!venue_id || !platform || !reviews || !Array.isArray(reviews)) {
