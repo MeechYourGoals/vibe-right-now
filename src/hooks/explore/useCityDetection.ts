@@ -1,6 +1,8 @@
 
 import { useEffect } from "react";
 
+const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+
 export const useCityDetection = (
   setSearchQuery: (query: string) => void,
   setSearchedCity: (city: string) => void,
@@ -14,7 +16,7 @@ export const useCityDetection = (
         async (position) => {
           try {
             const response = await fetch(
-              `https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.coords.latitude},${position.coords.longitude}&key=AIzaSyAWm0vayRrQJHpMc6XcShcge52hGTt9BV4`
+              `https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.coords.latitude},${position.coords.longitude}&key=${GOOGLE_MAPS_API_KEY}`
             );
             
             if (!response.ok) return;

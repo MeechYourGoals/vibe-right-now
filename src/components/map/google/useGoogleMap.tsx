@@ -2,8 +2,8 @@ import { useState, useCallback, useEffect } from 'react';
 import { useJsApiLoader } from '@react-google-maps/api';
 import { Location } from "@/types";
 
-// Google Maps API key
-const GOOGLE_MAPS_API_KEY = "AIzaSyAWm0vayRrQJHpMc6XcShcge52hGTt9BV4";
+// Google Maps API key loaded from Vite environment variables
+const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
 export const useGoogleMap = (
   userLocation: GeolocationCoordinates | null, 

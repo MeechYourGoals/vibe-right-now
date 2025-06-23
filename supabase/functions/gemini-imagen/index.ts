@@ -1,7 +1,8 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const GEMINI_API_KEY = "AIzaSyBeEJvxSAjyvoRS6supoob0F7jGW7lhZUU";
+// Gemini Imagen API key is provided via environment variables
+const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
 const IMAGEN_API_URL = "https://generativelanguage.googleapis.com/v1/models/imagegeneration:generateImage";
 
 const corsHeaders = {
@@ -16,6 +17,13 @@ serve(async (req) => {
   }
 
   try {
+    if (!GEMINI_API_KEY) {
+      return new Response(
+        JSON.stringify({ error: 'Gemini API key not configured' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const { prompt } = await req.json();
     
     console.log("Generating image with prompt:", prompt);

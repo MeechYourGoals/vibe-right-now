@@ -9,6 +9,8 @@ import { mockLocations } from "@/mock/locations";
 import { getTrendingLocationsForCity } from "@/mock/cityLocations";
 import { toast } from "sonner";
 
+const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+
 // Event bus for updating trending locations from VernonChat
 export const eventBus = {
   listeners: new Map<string, Function[]>(),
@@ -48,7 +50,7 @@ const TrendingLocations = () => {
           try {
             // Use Google's Geocoding API to get the city name from coordinates
             const response = await fetch(
-              `https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.coords.latitude},${position.coords.longitude}&key=AIzaSyAWm0vayRrQJHpMc6XcShcge52hGTt9BV4`
+              `https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.coords.latitude},${position.coords.longitude}&key=${GOOGLE_MAPS_API_KEY}`
             );
             
             if (response.ok) {

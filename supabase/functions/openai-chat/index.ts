@@ -7,7 +7,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const OPENROUTER_API_KEY = "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";
+// API key for OpenRouter is loaded from the environment
+const OPENROUTER_API_KEY = Deno.env.get('OPENROUTER_API_KEY');
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -16,6 +17,13 @@ serve(async (req) => {
   }
 
   try {
+    if (!OPENROUTER_API_KEY) {
+      return new Response(
+        JSON.stringify({ error: 'OpenRouter API key not configured' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const { messages, model = "anthropic/claude-3-haiku", stream = false, context = "user", useOpenRouter = true } = await req.json();
 
     // Add system prompt based on context
