@@ -1,20 +1,11 @@
 
 import { SimpleSearchService } from '../SimpleSearchService';
 import { SwirlSearchService } from '@/services/SwirlSearchService';
-import { GeminiService } from '@/services/GeminiService';
-import { VertexAIHub } from '@/services/VertexAI';
-import { 
-  OpenAISearchProvider,
-  GoogleSearchProvider,
-  DuckDuckGoSearchProvider,
-  WikipediaSearchProvider,
-  DeepseekSearchProvider,
+import { PerplexityService } from '@/services/PerplexityService';
+import {
   FallbackResponseGenerator
 } from './';
 import { SearchServiceCore } from '../core/SearchServiceCore';
-
-// Flag to determine which AI service to use
-const useVertexAI = true; // Using Vertex AI by default
 
 /**
  * Provides integrated search functionality by attempting multiple search providers
@@ -59,31 +50,22 @@ export const IntegratedSearchProvider = {
    */
   async attemptDirectAISearch(query: string, categories?: string[]): Promise<string | null> {
     try {
-      console.log('Attempting direct Vertex AI search');
-      if (categories && categories.length > 0) {
-        // Pass categories to VertexAI for more contextual results
-        const enhancedQuery = this.enhanceQueryWithCategories(query, categories);
-        console.log('Enhanced query with categories:', enhancedQuery);
-        
-        // Using VertexAIHub for search with enhanced query
-        const aiResult = await VertexAIHub.searchWithAI(enhancedQuery);
-        
-        if (aiResult && aiResult.length > 100) {
-          console.log('Vertex AI direct search successful, response length:', aiResult.length);
-          return aiResult;
-        }
-      } else {
-        // Regular query without categories
-        const aiResult = await VertexAIHub.searchWithAI(query);
-        
-        if (aiResult && aiResult.length > 100) {
-          console.log('Vertex AI direct search successful, response length:', aiResult.length);
-          return aiResult;
-        }
+      console.log('Attempting direct Perplexity search');
+
+      const finalQuery = categories && categories.length > 0
+        ? this.enhanceQueryWithCategories(query, categories)
+        : query;
+
+      const aiResult = await PerplexityService.searchPerplexity(finalQuery);
+
+      if (aiResult && aiResult.length > 100) {
+        console.log('Perplexity direct search successful, response length:', aiResult.length);
+        return aiResult;
       }
+
       return null;
     } catch (error) {
-      console.log('Vertex AI search failed, trying alternative methods:', error);
+      console.log('Perplexity search failed, trying alternative methods:', error);
       return null;
     }
   },
@@ -115,57 +97,19 @@ export const IntegratedSearchProvider = {
    */
   async attemptAllProviders(query: string): Promise<string | null> {
     try {
-      const openAIResult = await OpenAISearchProvider.search(query);
-      if (openAIResult && openAIResult.length > 100) {
-        return openAIResult;
+      const result = await PerplexityService.searchPerplexity(query);
+      if (result && result.length > 100) {
+        return result;
       }
     } catch (error) {
-      console.log('OpenAI search failed, trying alternative methods:', error);
+      console.log('Perplexity search failed, trying fallback:', error);
     }
-    
-    try {
-      const googleResult = await GoogleSearchProvider.search(query);
-      if (googleResult && googleResult.length > 100) {
-        return googleResult;
-      }
-    } catch (error) {
-      console.log('Google search failed, trying next service:', error);
-    }
-    
-    try {
-      const duckDuckGoResult = await DuckDuckGoSearchProvider.search(query);
-      if (duckDuckGoResult && duckDuckGoResult.length > 100) {
-        return duckDuckGoResult;
-      }
-    } catch (error) {
-      console.log('DuckDuckGo search failed, trying alternative method:', error);
-    }
-    
-    try {
-      const wikiResult = await WikipediaSearchProvider.search(query);
-      if (wikiResult && wikiResult.length > 100) {
-        return wikiResult;
-      }
-    } catch (error) {
-      console.log('Wikipedia search failed, trying fallback service:', error);
-    }
-    
-    try {
-      const deepseekResult = await DeepseekSearchProvider.search(query);
-      if (deepseekResult && deepseekResult.length > 100) {
-        return deepseekResult;
-      }
-    } catch (error) {
-      console.log('Deepseek search failed, using final fallback:', error);
-    }
-    
-    // Try SimpleSearchService as the final fallback
+
     const simpleFallbackResult = await SimpleSearchService.searchForCityInfo(query);
     if (simpleFallbackResult) {
       return simpleFallbackResult;
     }
-    
-    // Ultimate fallback if all services fail
+
     return FallbackResponseGenerator.generateFallbackResponse(query);
   },
   
