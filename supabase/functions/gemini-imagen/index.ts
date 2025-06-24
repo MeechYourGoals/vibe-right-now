@@ -1,7 +1,8 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { getApiKey } from "../_shared/auth.ts";
 
-const GEMINI_API_KEY = "AIzaSyBeEJvxSAjyvoRS6supoob0F7jGW7lhZUU";
+const GEMINI_API_KEY = getApiKey('GEMINI_API_KEY');
 const IMAGEN_API_URL = "https://generativelanguage.googleapis.com/v1/models/imagegeneration:generateImage";
 
 const corsHeaders = {

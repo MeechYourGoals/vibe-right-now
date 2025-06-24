@@ -77,3 +77,14 @@ We don't support custom domains (yet). If you want to deploy your project under 
 Some Supabase Edge Functions in this repo use Deepgram for text-to-speech. These functions expect a `DEEPGRAM_API_KEY` environment variable to be available.
 
 Make sure **not** to commit your API key to the repository. Add the key to a `.env` file for local development or provide it in your deployment dashboard when you deploy the functions.
+
+## Configuring Google AI keys
+
+Several Supabase Edge Functions rely on Google Vertex/Gemini services. Set the `GEMINI_API_KEY` (and `GOOGLE_VERTEX_API_KEY` for compatibility) in a `.env` file or in your Supabase project settings. These should contain the same API key with access to Google Gemini and related services.
+
+An example `.env` file:
+
+```bash
+GEMINI_API_KEY=your-google-api-key
+GOOGLE_VERTEX_API_KEY=your-google-api-key
+```

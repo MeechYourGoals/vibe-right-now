@@ -1,13 +1,14 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { getApiKey } from "../_shared/auth.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Use the Gemini API key for sentiment analysis
-const GEMINI_API_KEY = "AIzaSyCfJFLglZMGwe2j-XbYtbHKB8-xN15PXZM";
+// Retrieve the Gemini API key from environment variables
+const GEMINI_API_KEY = getApiKey('GEMINI_API_KEY');
 
 serve(async (req) => {
   // Handle CORS preflight requests
