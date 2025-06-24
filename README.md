@@ -84,6 +84,8 @@ Other Supabase functions and the front-end require extra keys. Create a `.env` f
 
 - `GEMINI_API_KEY` – used by the image generation and review sentiment functions
 - `OPENROUTER_API_KEY` – used by the `openai-chat` function
+- `PERPLEXITY_API_KEY` – used by the `perplexity-search` function
+- `VITE_OPENROUTER_API_KEY` – required by the front-end `OpenRouterService`
 - `GOOGLE_MAPS_API_KEY` – used by the map components and city detection logic
 
 These values should also be configured in your deployment environment.

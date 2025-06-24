@@ -7,6 +7,7 @@ import { getApiKey, createAuthHeaders } from "../_shared/auth.ts";
 import { logInfo, logError } from "../_shared/logging.ts";
 
 const PERPLEXITY_API_KEY = Deno.env.get('PERPLEXITY_API_KEY');
+const PERPLEXITY_API_URL = Deno.env.get('PERPLEXITY_API_URL') || 'https://api.perplexity.ai/chat/completions';
 
 const handler = withErrorHandling(async (req: Request): Promise<Response> => {
   if (!PERPLEXITY_API_KEY) {
@@ -19,7 +20,7 @@ const handler = withErrorHandling(async (req: Request): Promise<Response> => {
   logInfo(`Searching with Perplexity`, { queryLength: query.length });
 
   const authHeaders = createAuthHeaders(PERPLEXITY_API_KEY);
-  const perplexityResponse = await fetch('https://api.perplexity.ai/chat/completions', {
+  const perplexityResponse = await fetch(PERPLEXITY_API_URL, {
     method: 'POST',
     headers: {
       ...authHeaders,

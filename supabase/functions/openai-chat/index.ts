@@ -7,8 +7,11 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// API key for OpenRouter is loaded from the environment
+// Configuration values for OpenRouter
 const OPENROUTER_API_KEY = Deno.env.get('OPENROUTER_API_KEY');
+const OPENROUTER_API_BASE_URL = Deno.env.get('OPENROUTER_API_BASE_URL') || 'https://openrouter.ai/api/v1';
+const OPENROUTER_REFERER = Deno.env.get('OPENROUTER_REFERER') || 'https://vibe-right-now.web.app';
+const OPENROUTER_TITLE = Deno.env.get('OPENROUTER_TITLE') || 'Vibe Right Now';
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -63,13 +66,13 @@ Do not express personal opinions or beliefs. Focus solely on providing informati
     });
     
     // Use OpenRouter for open-source models
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    const response = await fetch(`${OPENROUTER_API_BASE_URL}/chat/completions`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-        "HTTP-Referer": "https://vibe-right-now.web.app",
-        "X-Title": "Vibe Right Now"
+        "HTTP-Referer": OPENROUTER_REFERER,
+        "X-Title": OPENROUTER_TITLE
       },
       body: JSON.stringify({
         model: model, // Use the passed model or default to Claude Haiku
