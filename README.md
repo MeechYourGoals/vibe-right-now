@@ -4,6 +4,24 @@
 
 **URL**: https://lovable.dev/projects/6615c5b7-93f5-41b0-b375-6a37437bdc16
 
+## Installing dependencies
+
+Install all project dependencies with:
+
+```sh
+npm install
+```
+
+This command installs both development and runtime packages, including tools
+like **vite** for running the development server and **eslint** for code
+linting. Start the dev server with `npm run dev` and lint your code with
+`npm run lint`.
+
+### CI setup (optional)
+
+In CI environments you can use `npm ci` for a clean install. After installing,
+consider running `npm run lint` and `npm run build` as part of the pipeline.
+
 ## How can I edit this code?
 
 There are several ways of editing your application.
