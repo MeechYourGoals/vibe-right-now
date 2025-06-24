@@ -6,15 +6,20 @@ export * from './safety';
 export * from './analysis';
 export * from './types';
 
-// Simplified hub exports - remove async imports which can cause issues
+// Import functions directly
+import { generateText, searchWithAI } from './text';
+import { textToSpeech, speechToText } from './speech';
+import { checkContentSafety } from './safety';
+import { analyzeText, extractEntities, extractCategories } from './analysis';
+
+// Simplified hub exports with proper ES module imports
 export const VertexAIHub = {
-  // Re-export functions directly
-  generateText: require('./text').generateText,
-  searchWithAI: require('./text').searchWithAI,
-  textToSpeech: require('./speech').textToSpeech,
-  speechToText: require('./speech').speechToText,
-  checkContentSafety: require('./safety').checkContentSafety,
-  analyzeText: require('./analysis').analyzeText,
-  extractEntities: require('./analysis').extractEntities,
-  extractCategories: require('./analysis').extractCategories
+  generateText,
+  searchWithAI,
+  textToSpeech,
+  speechToText,
+  checkContentSafety,
+  analyzeText,
+  extractEntities,
+  extractCategories
 };
