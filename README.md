@@ -88,3 +88,12 @@ An example `.env` file:
 GEMINI_API_KEY=your-google-api-key
 GOOGLE_VERTEX_API_KEY=your-google-api-key
 ```
+
+## Additional API keys
+
+Some functions and components require extra API keys. Add them to your `.env`
+file alongside the Google AI keys:
+
+- `OPENROUTER_API_KEY` – used by the `openai-chat` function
+- `GOOGLE_MAPS_API_KEY` – powers the map features and city detection
+- `DEEPGRAM_API_KEY` – enables text-to-speech via Deepgram
