@@ -1,5 +1,5 @@
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, forwardRef, useImperativeHandle } from "react";
 import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from '@react-google-maps/api';
 import { Location } from "@/types";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -31,15 +31,19 @@ interface GoogleMapComponentProps {
   userAddressLocation?: [number, number] | null;
 }
 
-const GoogleMapComponent = ({ 
-  userLocation, 
-  locations, 
-  searchedCity, 
+export interface GoogleMapHandle {
+  resize: () => void;
+}
+
+const GoogleMapComponent = forwardRef<GoogleMapHandle, GoogleMapComponentProps>(({ 
+  userLocation,
+  locations,
+  searchedCity,
   mapStyle,
   onLocationSelect,
   showDistances = false,
   userAddressLocation = null
-}: GoogleMapComponentProps) => {
+}: GoogleMapComponentProps, ref) => {
   const { isLoaded, loadError } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: GOOGLE_MAPS_API_KEY
@@ -127,18 +131,9 @@ const GoogleMapComponent = ({
     }
   };
 
-  // Expose resize method to parent
-  useEffect(() => {
-    if (window) {
-      window.resizeMap = resizeMap;
-    }
-    
-    return () => {
-      if (window) {
-        delete window.resizeMap;
-      }
-    };
-  }, [map]);
+  useImperativeHandle(ref, () => ({
+    resize: resizeMap
+  }), [resizeMap]);
 
   if (loadError) {
     toast.error("Error loading maps");

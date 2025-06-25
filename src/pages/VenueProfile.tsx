@@ -1,5 +1,5 @@
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { Minimize } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,7 @@ import { mockLocations, mockPosts, mockComments } from "@/mock/data";
 import CameraButton from "@/components/CameraButton";
 import Header from "@/components/Header";
 import { Comment, Post, Location as VenueLocation } from "@/types";
-import GoogleMapComponent from "@/components/map/google/GoogleMap";
+import GoogleMapComponent, { GoogleMapHandle } from "@/components/map/google/GoogleMap";
 import { generateBusinessHours } from "@/utils/businessHoursUtils";
 import { 
   isPostFromDayOfWeek, 
@@ -38,6 +38,7 @@ const VenueProfile = () => {
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [isMapExpanded, setIsMapExpanded] = useState(false);
   const [selectedDays, setSelectedDays] = useState<number[]>([]);
+  const mapRef = useRef<GoogleMapHandle>(null);
   const [isVenueOwner, setIsVenueOwner] = useState(false);
   const [subscriptionTier, setSubscriptionTier] = useState<'standard' | 'plus' | 'premium' | 'pro'>('standard');
   
@@ -105,9 +106,7 @@ const VenueProfile = () => {
     setIsMapExpanded(!isMapExpanded);
     
     setTimeout(() => {
-      if (window.resizeMap) {
-        window.resizeMap();
-      }
+      mapRef.current?.resize();
     }, 10);
   };
   
@@ -155,6 +154,7 @@ const VenueProfile = () => {
           </div>
           <div className="h-[85vh] rounded-lg overflow-hidden">
             <GoogleMapComponent
+              ref={mapRef}
               userLocation={null}
               locations={[venue]}
               searchedCity={venue.city}

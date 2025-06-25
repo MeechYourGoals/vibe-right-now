@@ -23,7 +23,5 @@ declare module 'react-leaflet' {
 }
 
 declare global {
-  interface Window {
-    resizeMap?: () => void;
-  }
+  interface Window {}
 }

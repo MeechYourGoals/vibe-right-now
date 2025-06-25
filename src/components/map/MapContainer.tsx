@@ -1,8 +1,8 @@
 
-import React from "react";
+import React, { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Compass } from "lucide-react";
-import GoogleMapComponent from "./google/GoogleMapComponent";
+import GoogleMapComponent, { GoogleMapHandle } from "./google/GoogleMapComponent";
 import LocationDetailsSidebar from "./LocationDetailsSidebar";
 import { Location } from "@/types";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -41,6 +41,7 @@ const MapContainer = ({
   showAllCities = true
 }: MapContainerProps) => {
   const isMobile = useIsMobile();
+  const mapRef = useRef<GoogleMapHandle>(null);
   
   if (loading) {
     return (
@@ -55,6 +56,7 @@ const MapContainer = ({
   return (
     <div className={`relative ${isExpanded ? "h-[85vh]" : isMobile ? "h-80" : "h-80"} rounded-lg overflow-hidden transition-all`} style={{ zIndex: 1 }}>
       <GoogleMapComponent
+        ref={mapRef}
         userLocation={userLocation}
         locations={locations}
         searchedCity={searchedCity}
@@ -95,7 +97,7 @@ const MapContainer = ({
           variant="outline" 
           size="sm" 
           className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm" 
-          onClick={() => window.resizeMap && window.resizeMap()}
+          onClick={() => mapRef.current?.resize()}
         >
           Expand Map
         </Button>
