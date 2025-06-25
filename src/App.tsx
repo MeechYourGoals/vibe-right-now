@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import VernonNext from '@/components/VernonNext';
 import { Auth0Provider } from "./auth/Auth0Provider";
+import { MobileProvider } from "@/providers/MobileProvider";
 
 // Lazy-loaded components
 const Index = lazy(() => import("@/pages/Index"));
@@ -25,7 +26,7 @@ const VenueMessaging = lazy(() => import("@/components/messaging/VenueMessaging"
 const Messages = lazy(() => import("@/pages/Messages"));
 
 function App() {
-  // Add a useEffect to handle mobile view adjustments
+  // Adjust viewport for mobile devices
   useEffect(() => {
     // Set viewport meta tag to ensure proper scaling on mobile devices
     const viewportMeta = document.querySelector('meta[name="viewport"]');
@@ -35,28 +36,13 @@ function App() {
         'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover'
       );
     }
-    
-    // Add a class to the body for mobile-specific styling if needed
-    const handleResize = () => {
-      if (window.innerWidth < 768) {
-        document.body.classList.add('is-mobile');
-      } else {
-        document.body.classList.remove('is-mobile');
-      }
-    };
-    
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
   }, []);
 
   return (
     <Auth0Provider>
-      <ThemeProvider defaultTheme="light" storageKey="vibe-ui-theme">
-        <BrowserRouter>
+      <MobileProvider>
+        <ThemeProvider defaultTheme="light" storageKey="vibe-ui-theme">
+          <BrowserRouter>
           <Suspense fallback={<div className="h-screen w-screen flex items-center justify-center">Loading...</div>}>
             <Routes>
               <Route path="/" element={<Index />} />
@@ -82,7 +68,8 @@ function App() {
           <VernonNext />
           <Toaster />
         </BrowserRouter>
-      </ThemeProvider>
+        </ThemeProvider>
+      </MobileProvider>
     </Auth0Provider>
   );
 }
