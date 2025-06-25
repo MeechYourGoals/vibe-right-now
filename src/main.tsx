@@ -2,6 +2,7 @@
 import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
+import { MobileProvider } from './hooks/use-mobile'
 
 // Ensure we're creating the root element properly
 const rootElement = document.getElementById("root");
@@ -9,7 +10,11 @@ if (!rootElement) throw new Error("Failed to find the root element");
 
 // Adding error boundary at the top level
 try {
-  createRoot(rootElement).render(<App />);
+  createRoot(rootElement).render(
+    <MobileProvider>
+      <App />
+    </MobileProvider>
+  );
 } catch (error) {
   console.error("Failed to render the app:", error);
   // Show a fallback UI instead of a blank screen
