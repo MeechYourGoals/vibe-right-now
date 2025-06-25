@@ -56,7 +56,6 @@ export const useStoreActions = () => {
     
     // UI actions
     setLoading: store.setLoading,
-    setSidebarOpen: store.setSidebarOpen,
     setTheme: store.setTheme,
     addNotification: store.addNotification,
     removeNotification: store.removeNotification,

@@ -27,7 +27,6 @@ export const useAppStore = create<AppStore>()(
           followedVenues: state.followedVenues,
           ui: {
             currentTheme: state.ui.currentTheme,
-            isSidebarOpen: state.ui.isSidebarOpen,
           },
           chatState: {
             chatMode: state.chatState.chatMode,
