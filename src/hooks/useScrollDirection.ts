@@ -1,24 +1,32 @@
 
-import { useState, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react'
 
-export const useScrollDirection = () => {
-  const [scrollDirection, setScrollDirection] = useState<'up' | 'down' | 'idle'>('idle');
-  const [lastScrollY, setLastScrollY] = useState(0);
+export const useScrollDirectionInternal = () => {
+  const [scrollDirection, setScrollDirection] = useState<'up' | 'down' | 'idle'>('idle')
+  const lastScrollY = useRef(0)
+  const directionRef = useRef<'up' | 'down' | 'idle'>('idle')
 
   useEffect(() => {
     const updateScrollDirection = () => {
-      const scrollY = window.scrollY;
-      const direction = scrollY > lastScrollY ? 'down' : 'up';
-      
-      if (direction !== scrollDirection && (scrollY - lastScrollY > 10 || scrollY - lastScrollY < -10)) {
-        setScrollDirection(direction);
+      const scrollY = window.scrollY
+      const direction: 'up' | 'down' = scrollY > lastScrollY.current ? 'down' : 'up'
+
+      if (
+        direction !== directionRef.current &&
+        Math.abs(scrollY - lastScrollY.current) > 10
+      ) {
+        directionRef.current = direction
+        setScrollDirection(direction)
       }
-      setLastScrollY(scrollY > 0 ? scrollY : 0);
-    };
 
-    window.addEventListener('scroll', updateScrollDirection);
-    return () => window.removeEventListener('scroll', updateScrollDirection);
-  }, [scrollDirection, lastScrollY]);
+      lastScrollY.current = scrollY > 0 ? scrollY : 0
+    }
 
-  return scrollDirection;
-};
+    window.addEventListener('scroll', updateScrollDirection)
+    return () => window.removeEventListener('scroll', updateScrollDirection)
+  }, [])
+
+  return scrollDirection
+}
+
+export { useScrollDirection } from '../providers/ScrollDirectionProvider'
