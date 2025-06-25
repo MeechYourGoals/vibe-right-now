@@ -32,7 +32,6 @@ export interface Location {
 
 export interface UIState {
   isLoading: boolean;
-  isSidebarOpen: boolean;
   currentTheme: 'light' | 'dark' | 'system';
   notifications: Notification[];
 }
@@ -104,7 +103,6 @@ export interface ChatSlice {
 export interface UISlice {
   ui: UIState;
   setLoading: (loading: boolean) => void;
-  setSidebarOpen: (open: boolean) => void;
   setTheme: (theme: 'light' | 'dark' | 'system') => void;
   addNotification: (notification: Omit<Notification, 'id' | 'timestamp'>) => void;
   removeNotification: (id: string) => void;

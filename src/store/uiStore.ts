@@ -11,7 +11,6 @@ export const createUISlice: StateCreator<
 > = (set) => ({
   ui: {
     isLoading: false,
-    isSidebarOpen: false,
     currentTheme: 'system',
     notifications: [],
   },
@@ -22,11 +21,6 @@ export const createUISlice: StateCreator<
     });
   },
   
-  setSidebarOpen: (open: boolean) => {
-    set((state) => {
-      state.ui.isSidebarOpen = open;
-    });
-  },
   
   setTheme: (theme: 'light' | 'dark' | 'system') => {
     set((state) => {
@@ -65,10 +59,9 @@ export const createUISlice: StateCreator<
 
 // Export individual store hook
 export const useUIStore = () => {
-  const { 
+  const {
     ui,
     setLoading,
-    setSidebarOpen,
     setTheme,
     addNotification,
     removeNotification,
@@ -78,7 +71,6 @@ export const useUIStore = () => {
   return { 
     ui,
     setLoading,
-    setSidebarOpen,
     setTheme,
     addNotification,
     removeNotification,
