@@ -1,5 +1,5 @@
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, forwardRef, useImperativeHandle } from "react";
 import { GoogleMap } from '@react-google-maps/api';
 import { Location } from "@/types";
 import GoogleMapMarkers from './GoogleMapMarkers';
@@ -24,17 +24,21 @@ interface GoogleMapComponentProps {
   showAllCities?: boolean;
 }
 
-const GoogleMapComponent = ({ 
-  userLocation, 
-  locations, 
-  searchedCity, 
+export interface GoogleMapHandle {
+  resize: () => void;
+}
+
+const GoogleMapComponent = forwardRef<GoogleMapHandle, GoogleMapComponentProps>(({ 
+  userLocation,
+  locations,
+  searchedCity,
   mapStyle,
   onLocationSelect,
   showDistances = false,
   userAddressLocation = null,
   selectedLocation = null,
   showAllCities = true
-}: GoogleMapComponentProps) => {
+}: GoogleMapComponentProps, ref) => {
   const {
     isLoaded,
     loadError,
@@ -44,14 +48,19 @@ const GoogleMapComponent = ({
     setSelectedMarker,
     onLoad,
     onUnmount,
-    handleMarkerClick
+    handleMarkerClick,
+    resizeMap
   } = useGoogleMap(
-    userLocation, 
-    userAddressLocation, 
-    locations, 
-    searchedCity, 
+    userLocation,
+    userAddressLocation,
+    locations,
+    searchedCity,
     selectedLocation
   );
+
+  useImperativeHandle(ref, () => ({
+    resize: resizeMap
+  }), [resizeMap]);
 
   // Main handler for marker clicks
   const handleLocationSelect = (location: Location) => {

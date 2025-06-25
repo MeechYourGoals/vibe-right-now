@@ -73,18 +73,6 @@ export const useGoogleMap = (
     }
   }, [map, userLocation]);
 
-  // Expose resize method to window
-  useEffect(() => {
-    if (window) {
-      window.resizeMap = resizeMap;
-    }
-    
-    return () => {
-      if (window) {
-        delete window.resizeMap;
-      }
-    };
-  }, [resizeMap]);
 
   // Handle marker click
   const handleMarkerClick = useCallback((location: Location) => {
@@ -106,7 +94,8 @@ export const useGoogleMap = (
     setSelectedMarker,
     onLoad,
     onUnmount,
-    handleMarkerClick
+    handleMarkerClick,
+    resizeMap
   };
 };
 

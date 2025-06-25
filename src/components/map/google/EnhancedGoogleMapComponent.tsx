@@ -1,5 +1,5 @@
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, forwardRef, useImperativeHandle } from "react";
 import { GoogleMap, Marker, InfoWindow } from '@react-google-maps/api';
 import { Location } from "@/types";
 import { getMapOptions } from './MapStyles';
@@ -31,11 +31,15 @@ interface EnhancedGoogleMapComponentProps {
   onMapReady?: (map: google.maps.Map) => void;
 }
 
-const EnhancedGoogleMapComponent = ({ 
-  userLocation, 
-  locations, 
+export interface GoogleMapHandle {
+  resize: () => void;
+}
+
+const EnhancedGoogleMapComponent = forwardRef<GoogleMapHandle, EnhancedGoogleMapComponentProps>(({
+  userLocation,
+  locations,
   realPlaces = [],
-  searchedCity, 
+  searchedCity,
   mapStyle,
   onLocationSelect,
   onPlaceSelect,
@@ -46,7 +50,7 @@ const EnhancedGoogleMapComponent = ({
   mapCenter,
   mapZoom,
   onMapReady
-}: EnhancedGoogleMapComponentProps) => {
+}: EnhancedGoogleMapComponentProps, ref) => {
   const [selectedRealPlace, setSelectedRealPlace] = useState<Location | null>(selectedPlace);
   const [map, setMap] = useState<google.maps.Map | null>(null);
 
@@ -59,14 +63,19 @@ const EnhancedGoogleMapComponent = ({
     setSelectedMarker,
     onLoad: defaultOnLoad,
     onUnmount,
-    handleMarkerClick
+    handleMarkerClick,
+    resizeMap
   } = useGoogleMap(
-    userLocation, 
-    userAddressLocation, 
-    locations, 
-    searchedCity, 
+    userLocation,
+    userAddressLocation,
+    locations,
+    searchedCity,
     selectedLocation
   );
+
+  useImperativeHandle(ref, () => ({
+    resize: resizeMap
+  }), [resizeMap]);
 
   // Use provided center/zoom or fall back to defaults
   const effectiveCenter = mapCenter || defaultMapCenter;

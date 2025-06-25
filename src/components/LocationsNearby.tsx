@@ -56,12 +56,10 @@ const LocationsNearby = () => {
   
   const toggleMapExpansion = () => {
     setIsMapExpanded(!isMapExpanded);
-    
+
     // Trigger map resize after state update
     setTimeout(() => {
-      if (window.resizeMap) {
-        window.resizeMap();
-      }
+      // Leaflet maps automatically handle container size changes
     }, 10);
   };
   

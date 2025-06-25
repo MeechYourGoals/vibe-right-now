@@ -1,5 +1,5 @@
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, forwardRef, useImperativeHandle } from "react";
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { Location } from "@/types";
@@ -21,15 +21,19 @@ interface MapboxMapProps {
   userAddressLocation?: [number, number] | null;
 }
 
-const MapboxMap = ({ 
-  userLocation, 
-  locations, 
-  searchedCity, 
+export interface MapboxMapHandle {
+  resize: () => void;
+}
+
+const MapboxMap = forwardRef<MapboxMapHandle, MapboxMapProps>(({ 
+  userLocation,
+  locations,
+  searchedCity,
   mapStyle,
   onLocationSelect,
   showDistances = false,
   userAddressLocation = null
-}: MapboxMapProps) => {
+}: MapboxMapProps, ref) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
@@ -111,18 +115,9 @@ const MapboxMap = ({
     }
   };
 
-  // Expose resize method to parent
-  useEffect(() => {
-    if (window && mapRef.current) {
-      window.resizeMap = resizeMap;
-    }
-    
-    return () => {
-      if (window) {
-        delete window.resizeMap;
-      }
-    };
-  }, [mapRef.current]);
+  useImperativeHandle(ref, () => ({
+    resize: resizeMap
+  }), [resizeMap]);
   
   // Add markers to map
   const addMarkersToMap = () => {

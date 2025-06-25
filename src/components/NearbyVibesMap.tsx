@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation as useRouterLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { useNearbyLocations } from "@/hooks/useNearbyLocations";
@@ -7,15 +7,10 @@ import { geocodeAddress } from "@/utils/geocodingService";
 import MapControls from "./map/MapControls";
 import NearbyLocationsList from "./map/NearbyLocationsList";
 import AddressSearchPopover from "./map/AddressSearchPopover";
-import EnhancedGoogleMapComponent from "./map/google/EnhancedGoogleMapComponent";
+import EnhancedGoogleMapComponent, { GoogleMapHandle } from "./map/google/EnhancedGoogleMapComponent";
 import { useMapSync } from "@/hooks/useMapSync";
 import { Location } from "@/types";
 
-declare global {
-  interface Window {
-    resizeMap?: () => void;
-  }
-}
 
 interface Coordinates {
   lat: number;
@@ -53,6 +48,8 @@ const NearbyVibesMap: React.FC<NearbyVibesMapProps> = ({
   const [currentUserLocation, setCurrentUserLocation] = useState<[number, number] | null>(
     userLocation ? [userLocation.lat, userLocation.lng] : null
   );
+
+  const mapRef = useRef<GoogleMapHandle>(null);
   
   const { mapState, setMapRef, updateMapCenter, updateRealPlaces, zoomToPlace } = useMapSync();
   
@@ -80,9 +77,7 @@ const NearbyVibesMap: React.FC<NearbyVibesMapProps> = ({
     onLocationSelect(null);
     
     setTimeout(() => {
-      if (window.resizeMap) {
-        window.resizeMap();
-      }
+      mapRef.current?.resize();
     }, 10);
   };
 
@@ -122,8 +117,8 @@ const NearbyVibesMap: React.FC<NearbyVibesMapProps> = ({
         
         toast.success("Address found! Showing distances on the map");
         
-        if (isMapExpanded && window.resizeMap) {
-          window.resizeMap();
+        if (isMapExpanded) {
+          mapRef.current?.resize();
         }
       }
     } finally {
@@ -201,6 +196,7 @@ const NearbyVibesMap: React.FC<NearbyVibesMapProps> = ({
       
       <div className={`rounded-lg overflow-hidden ${isMapExpanded ? "h-[calc(100vh-8rem)]" : "h-96"}`}>
         <EnhancedGoogleMapComponent
+          ref={mapRef}
           userLocation={currentUserLocation}
           locations={nearbyLocations}
           realPlaces={mapState.realPlaces}
