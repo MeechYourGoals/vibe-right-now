@@ -9,7 +9,7 @@ interface VenuePostsListProps {
   venue: Location;
   viewMode: "list" | "grid";
   getComments: (postId: string) => Comment[];
-  subscriptionTier?: 'standard' | 'plus' | 'premium' | 'pro';
+  subscriptionTier?: 'free' | 'plus' | 'premium' | 'pro';
   onPostDeleted?: (postId: string) => void;
 }
 
@@ -18,7 +18,7 @@ const VenuePostsList: React.FC<VenuePostsListProps> = ({
   venue,
   viewMode,
   getComments,
-  subscriptionTier = 'standard',
+  subscriptionTier = 'free',
   onPostDeleted
 }) => {
   const [localPosts, setLocalPosts] = useState<Post[]>(posts);

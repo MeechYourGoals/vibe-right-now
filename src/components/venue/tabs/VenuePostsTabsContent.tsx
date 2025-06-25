@@ -11,7 +11,7 @@ interface VenuePostsTabsContentProps {
   venue: Location;
   viewMode: "list" | "grid";
   getPostComments: (postId: string) => Comment[];
-  subscriptionTier: 'standard' | 'plus' | 'premium' | 'pro';
+  subscriptionTier: 'free' | 'plus' | 'premium' | 'pro';
   canEmbed: boolean;
   connectedPlatforms: Record<string, boolean>;
   onUpgradeSubscription: () => void;

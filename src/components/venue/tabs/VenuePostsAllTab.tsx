@@ -8,7 +8,7 @@ interface VenuePostsAllTabProps {
   venue: Location; 
   viewMode: "list" | "grid";
   getComments: (postId: string) => Comment[];
-  subscriptionTier?: 'standard' | 'plus' | 'premium' | 'pro';
+  subscriptionTier?: 'free' | 'plus' | 'premium' | 'pro';
   onPostDeleted?: (postId: string) => void;
 }
 
@@ -17,7 +17,7 @@ const VenuePostsAllTab: React.FC<VenuePostsAllTabProps> = ({
   venue,
   viewMode,
   getComments,
-  subscriptionTier = 'standard',
+  subscriptionTier = 'free',
   onPostDeleted
 }) => {
   return (
