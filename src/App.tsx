@@ -25,9 +25,8 @@ const VenueMessaging = lazy(() => import("@/components/messaging/VenueMessaging"
 const Messages = lazy(() => import("@/pages/Messages"));
 
 function App() {
-  // Add a useEffect to handle mobile view adjustments
+  // Set viewport meta tag on mount
   useEffect(() => {
-    // Set viewport meta tag to ensure proper scaling on mobile devices
     const viewportMeta = document.querySelector('meta[name="viewport"]');
     if (viewportMeta) {
       viewportMeta.setAttribute(
@@ -35,22 +34,6 @@ function App() {
         'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover'
       );
     }
-    
-    // Add a class to the body for mobile-specific styling if needed
-    const handleResize = () => {
-      if (window.innerWidth < 768) {
-        document.body.classList.add('is-mobile');
-      } else {
-        document.body.classList.remove('is-mobile');
-      }
-    };
-    
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
   }, []);
 
   return (
