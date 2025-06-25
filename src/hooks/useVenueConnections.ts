@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { useUserSubscription } from '@/hooks/useUserSubscription';
 
 export const useVenueConnections = (venueId: string) => {
   // State for social media connections
@@ -14,8 +15,8 @@ export const useVenueConnections = (venueId: string) => {
     other: false
   });
   
-  // State to track subscription tier
-  const [subscriptionTier, setSubscriptionTier] = useState<'standard' | 'plus' | 'premium' | 'pro'>('standard');
+  // Access subscription data from the authoritative hook
+  const { tier, updateSubscriptionTier } = useUserSubscription();
   
   // Load saved platforms on component mount
   useEffect(() => {
@@ -23,7 +24,7 @@ export const useVenueConnections = (venueId: string) => {
     if (savedKeys) {
       try {
         const parsedKeys = JSON.parse(savedKeys);
-        
+
         // Set platforms as connected if they have API keys
         const connected: Record<string, boolean> = {};
         Object.keys(parsedKeys).forEach(key => {
@@ -34,31 +35,24 @@ export const useVenueConnections = (venueId: string) => {
         console.error('Error parsing saved API keys:', error);
       }
     }
-    
-    // Check for subscription tier in localStorage
-    const savedTier = localStorage.getItem('subscriptionTier');
-    if (savedTier) {
-      setSubscriptionTier(savedTier as 'standard' | 'plus' | 'premium' | 'pro');
-    }
   }, [venueId]);
   
   // Handle upgrading subscription
   const handleUpgradeSubscription = () => {
     // For demo purposes, cycle through subscription tiers
-    const tiers: Array<'standard' | 'plus' | 'premium' | 'pro'> = ['standard', 'plus', 'premium', 'pro'];
-    const currentIndex = tiers.indexOf(subscriptionTier);
+    const tiers: Array<'free' | 'plus' | 'premium' | 'pro'> = ['free', 'plus', 'premium', 'pro'];
+    const currentIndex = tiers.indexOf(tier);
     const nextTier = tiers[(currentIndex + 1) % tiers.length];
-    setSubscriptionTier(nextTier);
-    localStorage.setItem('subscriptionTier', nextTier);
+    updateSubscriptionTier(nextTier);
   };
   
   // Check if embedding is allowed (premium/pro tiers only)
-  const canEmbed = subscriptionTier === 'premium' || subscriptionTier === 'pro';
+  const canEmbed = tier === 'premium' || tier === 'pro';
   
   return {
     connectedPlatforms,
     setConnectedPlatforms,
-    subscriptionTier,
+    subscriptionTier: tier,
     handleUpgradeSubscription,
     canEmbed
   };

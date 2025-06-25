@@ -9,7 +9,7 @@ import { SocialMediaApiKeys } from '@/services/SocialMediaService';
 interface VenuePostsExternalTabProps {
   venueName: string;
   connectedPlatforms: Record<string, boolean>;
-  subscriptionTier: 'standard' | 'plus' | 'premium' | 'pro';
+  subscriptionTier: 'free' | 'plus' | 'premium' | 'pro';
   canEmbed: boolean;
   onUpgradeSubscription: () => void;
 }
@@ -80,7 +80,7 @@ const VenuePostsExternalTab: React.FC<VenuePostsExternalTabProps> = ({
       <div className="flex justify-end mb-4">
         <Button variant="default" size="sm" onClick={handleUpgradeClick}>
           <Plus className="h-4 w-4 mr-1" />
-          {subscriptionTier === 'standard' || subscriptionTier === 'plus' 
+          {subscriptionTier === 'free' || subscriptionTier === 'plus'
             ? 'Upgrade to Premium' 
             : 'Connect Platform'}
         </Button>
