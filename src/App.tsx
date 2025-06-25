@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import VernonNext from '@/components/VernonNext';
 import { Auth0Provider } from "./auth/Auth0Provider";
+import { ScrollDirectionProvider } from "@/providers/ScrollDirectionProvider";
 
 // Lazy-loaded components
 const Index = lazy(() => import("@/pages/Index"));
@@ -56,8 +57,9 @@ function App() {
   return (
     <Auth0Provider>
       <ThemeProvider defaultTheme="light" storageKey="vibe-ui-theme">
-        <BrowserRouter>
-          <Suspense fallback={<div className="h-screen w-screen flex items-center justify-center">Loading...</div>}>
+        <ScrollDirectionProvider>
+          <BrowserRouter>
+            <Suspense fallback={<div className="h-screen w-screen flex items-center justify-center">Loading...</div>}>
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/explore" element={<Explore />} />
@@ -81,7 +83,8 @@ function App() {
           </Suspense>
           <VernonNext />
           <Toaster />
-        </BrowserRouter>
+          </BrowserRouter>
+        </ScrollDirectionProvider>
       </ThemeProvider>
     </Auth0Provider>
   );
