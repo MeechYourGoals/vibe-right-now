@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import VernonNext from '@/components/VernonNext';
 import { Auth0Provider } from "./auth/Auth0Provider";
 import { ScrollDirectionProvider } from "@/providers/ScrollDirectionProvider";
+import { MobileProvider } from "@/providers/MobileProvider";
 
 // Lazy-loaded components
 const Index = lazy(() => import("@/pages/Index"));
@@ -56,10 +57,11 @@ function App() {
 
   return (
     <Auth0Provider>
-      <ThemeProvider defaultTheme="light" storageKey="vibe-ui-theme">
-        <ScrollDirectionProvider>
-          <BrowserRouter>
-            <Suspense fallback={<div className="h-screen w-screen flex items-center justify-center">Loading...</div>}>
+      <MobileProvider>
+        <ThemeProvider defaultTheme="light" storageKey="vibe-ui-theme">
+          <ScrollDirectionProvider>
+            <BrowserRouter>
+              <Suspense fallback={<div className="h-screen w-screen flex items-center justify-center">Loading...</div>}>
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/explore" element={<Explore />} />
@@ -86,6 +88,7 @@ function App() {
           </BrowserRouter>
         </ScrollDirectionProvider>
       </ThemeProvider>
+      </MobileProvider>
     </Auth0Provider>
   );
 }
