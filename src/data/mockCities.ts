@@ -3,12 +3,7 @@ import { CityData, Location } from '@/types';
 
 import nyc from './mockCities/nyc';
 import la from './mockCities/la';
-import london from './mockCities/london';
-import chicago from './mockCities/chicago';
-import miami from './mockCities/miami';
 import sanfrancisco from './mockCities/sanfrancisco';
-import paris from './mockCities/paris';
-import tokyo from './mockCities/tokyo';
 import sydney from './mockCities/sydney';
 import barcelona from './mockCities/barcelona';
 
@@ -16,12 +11,7 @@ import barcelona from './mockCities/barcelona';
 export const mockCities: CityData[] = [
   nyc,
   la,
-  london,
-  chicago,
-  miami,
   sanfrancisco,
-  paris,
-  tokyo,
   sydney,
   barcelona
 ];
