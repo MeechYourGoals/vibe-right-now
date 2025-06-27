@@ -42,7 +42,7 @@ const ProfileTabContent: React.FC<ProfileTabContentProps> = ({
       case 'photos':
         return post.media && post.media.length > 0;
       case 'videos':
-        return post.media && post.media.some(m => 
+        return post.media && Array.isArray(post.media) && post.media.some(m => 
           typeof m === 'object' ? m.type === 'video' : m.includes('video')
         );
       case 'vibes':
