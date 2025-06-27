@@ -100,6 +100,6 @@ const GoogleMapComponent = forwardRef<GoogleMapHandle, GoogleMapComponentProps>(
       </GoogleMap>
     </div>
   );
-};
+});
 
 export default GoogleMapComponent;

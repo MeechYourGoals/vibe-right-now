@@ -338,6 +338,6 @@ const EnhancedGoogleMapComponent = forwardRef<GoogleMapHandle, EnhancedGoogleMap
       </GoogleMap>
     </div>
   );
-};
+});
 
 export default EnhancedGoogleMapComponent;

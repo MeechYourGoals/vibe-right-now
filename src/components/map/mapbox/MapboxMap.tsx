@@ -170,6 +170,6 @@ const MapboxMap = forwardRef<MapboxMapHandle, MapboxMapProps>(({
   return (
     <div ref={mapContainerRef} className="h-full w-full" />
   );
-};
+});
 
 export default MapboxMap;
