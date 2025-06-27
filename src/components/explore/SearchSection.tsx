@@ -1,273 +1,141 @@
 
 import React, { useState, useEffect } from 'react';
-import { Calendar, MapPin, Search } from 'lucide-react';
+import { Search, MapPin, Calendar, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { DatePickerWithRange } from '@/components/ui/date-picker-with-range';
-import { format } from 'date-fns';
 import { useGooglePlacesAutocomplete } from '@/hooks/useGooglePlacesAutocomplete';
-import { useGooglePlacesSearch } from '@/hooks/useGooglePlacesSearch';
-import { cn } from '@/lib/utils';
+import { Location } from '@/types';
 
 interface SearchSectionProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
-  selectedDates: { from: Date; to: Date } | null;
-  onDateChange: (dates: { from: Date; to: Date } | null) => void;
   location: string;
   onLocationChange: (location: string) => void;
-  onPlaceSelect: (place: google.maps.places.PlaceResult) => void;
-  onVenueSelect: (place: google.maps.places.PlaceResult) => void;
+  onPlaceSelect: (place: Location) => void;
+  className?: string;
 }
 
 const SearchSection: React.FC<SearchSectionProps> = ({
   searchQuery,
   onSearchChange,
-  selectedDates,
-  onDateChange,
   location,
   onLocationChange,
   onPlaceSelect,
-  onVenueSelect
+  className = ""
 }) => {
   const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
-  const [showVenueSuggestions, setShowVenueSuggestions] = useState(false);
-  const [locationInput, setLocationInput] = useState(location);
-  const [venueInput, setVenueInput] = useState(searchQuery);
-
-  // Location autocomplete
+  
   const {
-    suggestions: locationSuggestions,
-    loading: locationLoading,
+    suggestions,
+    loading,
     searchLocation,
-    clearSuggestions: clearLocationSuggestions
-  } = useGooglePlacesAutocomplete('cities');
-
-  // Venue search
-  const {
-    suggestions: venueSuggestions,
-    loading: venueLoading,
-    spellingSuggestion,
-    searchVenues,
-    clearSuggestions: clearVenueSuggestions
-  } = useGooglePlacesSearch(location);
+    clearSuggestions
+  } = useGooglePlacesAutocomplete();
 
   // Handle location input changes
-  useEffect(() => {
-    if (locationInput.trim() && locationInput !== location) {
-      searchLocation(locationInput);
+  const handleLocationInputChange = (value: string) => {
+    onLocationChange(value);
+    if (value.length > 2) {
+      searchLocation(value);
       setShowLocationSuggestions(true);
     } else {
-      clearLocationSuggestions();
+      clearSuggestions();
       setShowLocationSuggestions(false);
     }
-  }, [locationInput, searchLocation, clearLocationSuggestions, location]);
+  };
 
-  // Handle venue input changes
-  useEffect(() => {
-    if (venueInput.trim() && venueInput !== searchQuery) {
-      searchVenues(venueInput);
-      setShowVenueSuggestions(true);
-    } else {
-      clearVenueSuggestions();
-      setShowVenueSuggestions(false);
-    }
-  }, [venueInput, searchVenues, clearVenueSuggestions, searchQuery]);
-
-  const handleLocationSelect = (place: google.maps.places.PlaceResult) => {
-    const placeName = place.name || place.formatted_address?.split(',')[0] || '';
-    setLocationInput(placeName);
-    onLocationChange(placeName);
-    onPlaceSelect(place);
+  // Handle place selection from autocomplete
+  const handlePlaceClick = (place: any) => {
+    const locationName = place.structured_formatting?.main_text || place.name || place.description || '';
+    onLocationChange(locationName);
+    
+    // Convert to Location format for onPlaceSelect
+    const locationData: Location = {
+      id: place.place_id || `place-${Date.now()}`,
+      name: locationName,
+      address: place.description || place.formatted_address || '',
+      city: place.structured_formatting?.secondary_text?.split(',')[0] || '',
+      state: place.structured_formatting?.secondary_text?.split(',')[1]?.trim() || '',
+      zip: '',
+      country: '',
+      lat: place.geometry?.location?.lat?.() || 0,
+      lng: place.geometry?.location?.lng?.() || 0,
+      type: 'city' as const,
+      verified: false,
+      rating: 0,
+      vibes: [],
+      tags: [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    
+    onPlaceSelect(locationData);
     setShowLocationSuggestions(false);
-    clearLocationSuggestions();
+    clearSuggestions();
   };
 
-  const handleVenueSelect = (place: google.maps.places.PlaceResult) => {
-    const venueName = place.name || '';
-    setVenueInput(venueName);
-    onSearchChange(venueName);
-    onVenueSelect(place);
-    setShowVenueSuggestions(false);
-    clearVenueSuggestions();
-  };
-
-  const handleLocationInputChange = (value: string) => {
-    setLocationInput(value);
-    if (!value.trim()) {
-      onLocationChange('');
+  // Hide suggestions when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => {
       setShowLocationSuggestions(false);
-    }
-  };
+    };
 
-  const handleVenueInputChange = (value: string) => {
-    setVenueInput(value);
-    onSearchChange(value);
-    if (!value.trim()) {
-      setShowVenueSuggestions(false);
-    }
-  };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col md:flex-row gap-4">
-        {/* Venue Search */}
-        <div className="relative flex-1">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <Input
-              placeholder="Search Venues, eVents, Vibes..."
-              value={venueInput}
-              onChange={(e) => handleVenueInputChange(e.target.value)}
-              className="pl-10"
-              onFocus={() => {
-                if (venueInput.trim()) {
-                  setShowVenueSuggestions(true);
-                }
-              }}
-              onBlur={() => {
-                setTimeout(() => setShowVenueSuggestions(false), 200);
-              }}
-            />
-            {venueLoading && (
-              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-r-transparent" />
-              </div>
-            )}
-          </div>
-
-          {/* Venue Suggestions Dropdown */}
-          {showVenueSuggestions && (venueSuggestions.length > 0 || spellingSuggestion) && (
-            <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-background border border-border rounded-md shadow-lg max-h-80 overflow-y-auto">
-              {spellingSuggestion && (
-                <div className="p-3 border-b border-border">
-                  <p className="text-sm text-muted-foreground">
-                    Did you mean: 
-                    <Button 
-                      variant="link" 
-                      className="p-0 h-auto ml-1 text-primary"
-                      onClick={() => handleVenueInputChange(spellingSuggestion)}
-                    >
-                      {spellingSuggestion}
-                    </Button>
-                  </p>
-                </div>
-              )}
-              
-              {venueSuggestions.map((place, index) => (
-                <button
-                  key={index}
-                  className="w-full text-left p-3 hover:bg-muted border-b border-border last:border-b-0 transition-colors"
-                  onClick={() => handleVenueSelect(place)}
-                >
-                  <div className="font-medium">{place.name}</div>
-                  {place.formatted_address && (
-                    <div className="text-sm text-muted-foreground">{place.formatted_address}</div>
-                  )}
-                    {place.types && (
-                      <div className="flex gap-2 mt-1">
-                      {place.types.slice(0, 2).map((type, idx) => (
-                        <Badge key={idx} variant="secondary" className="text-xs">
-                          {type.replace(/_/g, ' ')}
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Location Search */}
-        <div className="relative w-full md:w-64">
-          <div className="relative">
-            <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <Input
-              placeholder="Location (e.g., Chicago)"
-              value={locationInput}
-              onChange={(e) => handleLocationInputChange(e.target.value)}
-              className="pl-10"
-              onFocus={() => {
-                if (locationInput.trim()) {
-                  setShowLocationSuggestions(true);
-                }
-              }}
-              onBlur={() => {
-                setTimeout(() => setShowLocationSuggestions(false), 200);
-              }}
-            />
-            {locationLoading && (
-              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-r-transparent" />
-              </div>
-            )}
-          </div>
-
-          {/* Location Suggestions Dropdown */}
-          {showLocationSuggestions && locationSuggestions.length > 0 && (
-            <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-background border border-border rounded-md shadow-lg max-h-60 overflow-y-auto">
-              {locationSuggestions.map((place, index) => (
-                <button
-                  key={index}
-                  className="w-full text-left p-3 hover:bg-muted border-b border-border last:border-b-0 transition-colors"
-                  onClick={() => handleLocationSelect(place)}
-                >
-                  <div className="font-medium">{place.name}</div>
-                  {place.formatted_address && (
-                    <div className="text-sm text-muted-foreground">{place.formatted_address}</div>
-                  )}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Date Picker */}
-        <div className="relative">
-          <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4 z-10" />
-          <DatePickerWithRange
-            selected={selectedDates}
-            onSelect={onDateChange}
-            className="pl-10"
-            placeholder="Select dates..."
-          />
-        </div>
+    <div className={`space-y-4 ${className}`}>
+      {/* Search Input */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+        <Input
+          placeholder="Search venues, events, activities..."
+          value={searchQuery}
+          onChange={(e) => onSearchChange(e.target.value)}
+          className="pl-10 h-12"
+        />
       </div>
 
-      {/* Selected Filters */}
-      {(selectedDates || location) && (
-        <div className="flex flex-wrap gap-2">
-          {selectedDates && (
-            <Badge variant="secondary" className="flex items-center gap-1">
-              <Calendar className="h-3 w-3" />
-              {format(selectedDates.from, 'MMM dd')} - {format(selectedDates.to, 'MMM dd')}
-              <button 
-                onClick={() => onDateChange(null)}
-                className="ml-1 hover:text-destructive"
+      {/* Location Input with Autocomplete */}
+      <div className="relative">
+        <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+        <Input
+          placeholder="Enter city or location"
+          value={location}
+          onChange={(e) => handleLocationInputChange(e.target.value)}
+          className="pl-10 h-12"
+          onClick={(e) => e.stopPropagation()}
+        />
+        
+        {/* Loading indicator */}
+        {loading && (
+          <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 animate-spin" />
+        )}
+        
+        {/* Location Suggestions */}
+        {showLocationSuggestions && suggestions.length > 0 && (
+          <div className="absolute top-full left-0 right-0 bg-background border rounded-md shadow-lg z-50 max-h-60 overflow-y-auto">
+            {suggestions.slice(0, 5).map((place, index) => (
+              <button
+                key={place.place_id || index}
+                onClick={() => handlePlaceClick(place)}
+                className="w-full px-4 py-3 text-left hover:bg-muted flex items-center gap-3 border-b last:border-b-0"
               >
-                ×
+                <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                <div className="flex-1">
+                  <div className="font-medium">
+                    {place.structured_formatting?.main_text || place.name || place.description}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {place.structured_formatting?.secondary_text || place.formatted_address}
+                  </div>
+                </div>
               </button>
-            </Badge>
-          )}
-          {location && (
-            <Badge variant="secondary" className="flex items-center gap-1">
-              <MapPin className="h-3 w-3" />
-              {location}
-              <button 
-                onClick={() => {
-                  onLocationChange('');
-                  setLocationInput('');
-                }}
-                className="ml-1 hover:text-destructive"
-              >
-                ×
-              </button>
-            </Badge>
-          )}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

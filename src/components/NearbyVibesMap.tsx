@@ -140,43 +140,6 @@ const NearbyVibesMap: React.FC<NearbyVibesMapProps> = ({
     toast.success("Using your current location for distances");
   };
 
-  const handleLocationFound = (e: any) => {
-    const coords = e.latlng;
-    setCurrentUserLocation({
-      latitude: coords.lat,
-      longitude: coords.lng
-    });
-    console.log('User location found:', coords.lat, coords.lng);
-  };
-
-  const handleLocationError = (e: any) => {
-    console.error('Location error:', e.message);
-    setCurrentUserLocation({
-      latitude: 40.7128,
-      longitude: -74.0060
-    });
-  };
-
-  const handleLocationUpdate = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setCurrentUserLocation({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude
-          });
-        },
-        (error) => {
-          console.error('Geolocation error:', error);
-          setCurrentUserLocation({
-            latitude: 40.7128,
-            longitude: -74.0060
-          });
-        }
-      );
-    }
-  };
-
   const effectiveLoading = loading || localLoading;
   
   return (
