@@ -20,6 +20,29 @@ export { default as torontoData } from './mockCities/toronto';
 export { default as vegasData } from './mockCities/vegas';
 export { default as romeData } from './mockCities/rome';
 
+// Export a simplified array of available cities
+export const availableCities = [
+  'barcelona',
+  'berlin',
+  'dubai',
+  'istanbul',
+  'la',
+  'melbourne',
+  'moscow',
+  'mumbai',
+  'nyc',
+  'phoenix',
+  'riodejaneiro',
+  'rome',
+  'sanfrancisco',
+  'saopaulo',
+  'seoul',
+  'singapore',
+  'sydney',
+  'toronto',
+  'vegas'
+];
+
 import { CityData } from '@/types';
 
 // Consolidated city data map
