@@ -31,23 +31,43 @@ export const useGooglePlacesAutocomplete = () => {
     setIsLoading(true);
     
     try {
-      // Mock implementation for now - replace with actual Google Places API call
-      const mockResults: PlaceResult[] = [
-        {
-          place_id: `place_${Date.now()}_1`,
-          description: `${input}, City, State`,
-          structured_formatting: {
-            main_text: input,
-            secondary_text: 'City, State'
+      // Check if Google Places is available
+      if (typeof google !== 'undefined' && google.maps && google.maps.places) {
+        const service = new google.maps.places.AutocompleteService();
+        
+        service.getPlacePredictions(
+          {
+            input,
+            types: ['(cities)'],
+          },
+          (predictions, status) => {
+            if (status === google.maps.places.PlacesServiceStatus.OK && predictions) {
+              setSuggestions(predictions);
+            } else {
+              setSuggestions([]);
+            }
+            setIsLoading(false);
           }
-        }
-      ];
-      
-      setSuggestions(mockResults);
+        );
+      } else {
+        // Fallback to mock results
+        const mockResults: PlaceResult[] = [
+          {
+            place_id: `place_${Date.now()}_1`,
+            description: `${input}, City, State`,
+            structured_formatting: {
+              main_text: input,
+              secondary_text: 'City, State'
+            }
+          }
+        ];
+        
+        setSuggestions(mockResults);
+        setIsLoading(false);
+      }
     } catch (error) {
       console.error('Error searching places:', error);
       setSuggestions([]);
-    } finally {
       setIsLoading(false);
     }
   };

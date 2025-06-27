@@ -6,7 +6,7 @@ import { useSimplifiedNearbyLocations } from "@/hooks/useSimplifiedNearbyLocatio
 import { geocodeAddress } from "@/utils/geocodingService";
 import MapControls from "./map/MapControls";
 import NearbyLocationsList from "./map/NearbyLocationsList";
-import AddressSearchPopover from "./map/AddressSearchPopover";
+import AddressSearchSection from "./map/AddressSearchSection";
 import EnhancedGoogleMapComponent, { GoogleMapHandle } from "./map/google/EnhancedGoogleMapComponent";
 import { useMapSync } from "@/hooks/useMapSync";
 import { Location } from "@/types";
@@ -112,7 +112,6 @@ const NearbyVibesMap: React.FC<NearbyVibesMapProps> = ({
       const coordinates = await geocodeAddress(address);
       
       if (coordinates) {
-        // Convert Coordinates to [lng, lat] format for userAddressLocation
         setUserAddressLocation([coordinates.lng, coordinates.lat]);
         setShowDistances(true);
         setIsAddressPopoverOpen(false);
@@ -155,10 +154,10 @@ const NearbyVibesMap: React.FC<NearbyVibesMapProps> = ({
           />
           
           {!isMapExpanded && (
-            <AddressSearchPopover
+            <AddressSearchSection
               isOpen={isAddressPopoverOpen}
               setIsOpen={setIsAddressPopoverOpen}
-              onSearch={handleAddressSearch}
+              onAddressSearch={handleAddressSearch}
               onUseCurrentLocation={handleUseCurrentLocation}
               loading={effectiveLoading}
               hasUserLocation={!!currentUserLocation}
