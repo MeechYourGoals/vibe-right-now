@@ -1,6 +1,6 @@
 
 import { MessageContext, MessageProcessor, ProcessingResult } from '../types';
-import { PerplexityService } from '@/services/PerplexityService';
+import { OpenAIService } from '@/services/OpenAIService';
 import { createAIMessage } from '../../messageFactory';
 
 export class AIProcessor implements MessageProcessor {
@@ -15,13 +15,23 @@ export class AIProcessor implements MessageProcessor {
     try {
       const contextMessages = context.messages.slice(-10);
       
+      // Convert messages to the format expected by OpenAI service
+      const conversationContext = contextMessages.map(msg => ({
+        sender: msg.direction === 'outgoing' ? 'user' : 'assistant',
+        text: msg.content || msg.text || ''
+      }));
+      
       let responseText = '';
       
       try {
-        responseText = await PerplexityService.generateResponse(context.query);
-        console.log('Got response from Perplexity:', responseText.substring(0, 50) + '...');
+        responseText = await OpenAIService.generateResponse(
+          context.query,
+          conversationContext,
+          context.isVenueMode ? 'venue' : 'user'
+        );
+        console.log('Got response from OpenAI:', responseText.substring(0, 50) + '...');
       } catch (error) {
-        console.error('Error with Perplexity:', error);
+        console.error('Error with OpenAI:', error);
         responseText = "I'm having trouble connecting to my AI services right now. Please try again later.";
       }
       

@@ -2,8 +2,8 @@ import { useState, useCallback } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import { v4 as uuidv4 } from 'uuid';
 import { Message } from '../types';
+import { OpenAIService } from '@/services/OpenAIService';
 import { VertexAIHub } from '@/services/VertexAI';
-import { PerplexityService } from '@/services/PerplexityService';
 import { useDeepgramSpeechSynthesis } from '@/components/VernonChat/hooks/speechSynthesis/useDeepgramSpeechSynthesis';
 
 interface UseOpenAIChatProps {
@@ -45,7 +45,6 @@ export const useOpenAIChat = ({ initialMessages = [], onContentChange }: UseOpen
     setMessages(prevMessages => [...prevMessages, userMessage]);
     setInput('');
     
-    // Call Vertex AI / Gemini
     setIsLoading(true);
     
     try {
@@ -55,8 +54,8 @@ export const useOpenAIChat = ({ initialMessages = [], onContentChange }: UseOpen
         text: msg.content
       }));
       
-      // Call Perplexity for completion
-      const response = await PerplexityService.generateResponse(text);
+      // Call OpenAI for completion
+      const response = await OpenAIService.generateResponse(text, context);
       
       // Create AI message
       const aiResponse: Message = {
