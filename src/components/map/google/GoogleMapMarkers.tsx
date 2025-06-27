@@ -2,6 +2,7 @@
 import React from 'react';
 import { Marker, InfoWindow } from '@react-google-maps/api';
 import { Location } from '@/types';
+import { UserLocation } from '@/types/coordinates';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Star, MapPin } from 'lucide-react';
@@ -10,7 +11,7 @@ import { calculateDistance } from '../common/DistanceCalculator';
 interface GoogleMapMarkersProps {
   locations: Location[];
   realPlaces?: google.maps.places.PlaceResult[];
-  userLocation: GeolocationCoordinates | null;
+  userLocation: UserLocation | null;
   userAddressLocation?: [number, number] | null;
   selectedMarker: Location | null;
   selectedPlace?: google.maps.places.PlaceResult | null;
@@ -84,10 +85,10 @@ const GoogleMapMarkers: React.FC<GoogleMapMarkersProps> = ({
 
   return (
     <>
-      {/* Mock location markers */}
+      {/* Location markers */}
       {locations.map((location) => (
         <Marker
-          key={`mock-${location.id}`}
+          key={`location-${location.id}`}
           position={{ lat: location.lat, lng: location.lng }}
           onClick={() => onMarkerClick(location)}
           icon={getMarkerIcon(location.type)}
@@ -146,7 +147,7 @@ const GoogleMapMarkers: React.FC<GoogleMapMarkersProps> = ({
         />
       )}
       
-      {/* InfoWindow for selected mock location */}
+      {/* InfoWindow for selected location */}
       {selectedMarker && (
         <InfoWindow
           position={{ lat: selectedMarker.lat, lng: selectedMarker.lng }}

@@ -9,7 +9,6 @@ import ExploreContent from "@/components/explore/ExploreContent";
 import ExploreSidebar from "@/components/explore/ExploreSidebar";
 import { useMapSync } from "@/hooks/useMapSync";
 import { Location } from "@/types";
-import { findCityByName } from "@/data/mockCities";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const Explore = () => {
@@ -45,23 +44,16 @@ const Explore = () => {
     setShowDateFilter
   } = useExploreState();
 
-  // Enhanced place selection handlers
   const handlePlaceSelect = useCallback((place: Location) => {
     if (place.lat && place.lng) {
       updateMapCenter(place);
 
-      // If this is a city selection, update the location field and show venues
       if (place.type === 'city') {
         const cityName = place.name || '';
         setLocation(cityName);
-        
-        // Find and show venues for this city
-        const cityData = findCityByName(cityName);
-        if (cityData) {
-          updateRealPlaces(cityData.venues);
-        }
+        // Note: For now, we're not populating venues since we removed mock data
+        // This will be updated when real venue data is integrated
       } else {
-        // Show this specific venue
         updateRealPlaces([place]);
       }
       
@@ -73,18 +65,15 @@ const Explore = () => {
     if (place.lat && place.lng) {
       updateMapCenter(place);
 
-      // Try to populate city for context
       if (place.city && !location) {
         setLocation(place.city);
       }
       
-      // Always show this place on the map
       updateRealPlaces([place]);
       zoomToPlace(place);
     }
   }, [updateMapCenter, updateRealPlaces, location, setLocation, zoomToPlace]);
 
-  // Update the page title logic to handle empty cities
   const getDisplayTitle = () => {
     if (isNaturalLanguageSearch) {
       return "Smart Search Results";
@@ -115,7 +104,6 @@ const Explore = () => {
             onVenueSelect={handleVenueSelect}
           />
           
-          {/* Enhanced Map */}
           <div className="w-full mb-6">
             <NearbyVibesMap />
           </div>

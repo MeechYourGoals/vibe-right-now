@@ -1,12 +1,13 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import { useJsApiLoader } from '@react-google-maps/api';
 import { Location } from "@/types";
+import { UserLocation } from "@/types/coordinates";
 
-// Google Maps API key loaded from Vite environment variables
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
 export const useGoogleMap = (
-  userLocation: GeolocationCoordinates | null, 
+  userLocation: UserLocation | null, 
   userAddressLocation: [number, number] | null,
   locations: Location[],
   searchedCity: string,
@@ -33,7 +34,6 @@ export const useGoogleMap = (
     setMap(null);
   }, []);
 
-  // Set map center based on locations
   useEffect(() => {
     if (userLocation) {
       setMapCenter({ 
@@ -54,12 +54,10 @@ export const useGoogleMap = (
     }
   }, [userLocation, userAddressLocation, locations, searchedCity]);
 
-  // Keep selectedMarker in sync with selectedLocation
   useEffect(() => {
     setSelectedMarker(selectedLocation);
   }, [selectedLocation]);
 
-  // Method for resizing the map
   const resizeMap = useCallback(() => {
     if (map) {
       google.maps.event.trigger(map, "resize");
@@ -73,8 +71,6 @@ export const useGoogleMap = (
     }
   }, [map, userLocation]);
 
-
-  // Handle marker click
   const handleMarkerClick = useCallback((location: Location) => {
     setSelectedMarker(location);
     

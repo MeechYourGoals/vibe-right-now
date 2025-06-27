@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState, useCallback, forwardRef, useImperativeHandle } from "react";
 import { GoogleMap } from '@react-google-maps/api';
 import { Location } from "@/types";
+import { UserLocation } from "@/types/coordinates";
 import GoogleMapMarkers from './GoogleMapMarkers';
 import { getMapOptions } from './MapStyles';
 import MapLoadingStates from './MapLoadingStates';
@@ -13,7 +14,7 @@ const mapContainerStyle = {
 };
 
 interface GoogleMapComponentProps {
-  userLocation: GeolocationCoordinates | null;
+  userLocation: UserLocation | null;
   locations: Location[];
   searchedCity: string;
   mapStyle: "default" | "terrain" | "satellite";
@@ -62,13 +63,11 @@ const GoogleMapComponent = forwardRef<GoogleMapHandle, GoogleMapComponentProps>(
     resize: resizeMap
   }), [resizeMap]);
 
-  // Main handler for marker clicks
   const handleLocationSelect = (location: Location) => {
     handleMarkerClick(location);
     onLocationSelect(location);
   };
 
-  // Loading and error states
   const loadingState = (
     <MapLoadingStates loadError={!!loadError} isLoaded={isLoaded} />
   );

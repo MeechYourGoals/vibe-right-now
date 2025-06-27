@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation as useRouterLocation } from "react-router-dom";
 import { toast } from "sonner";
-import { useNearbyLocations } from "@/hooks/useNearbyLocations";
+import { useSimplifiedNearbyLocations } from "@/hooks/useSimplifiedNearbyLocations";
 import { geocodeAddress } from "@/utils/geocodingService";
 import MapControls from "./map/MapControls";
 import NearbyLocationsList from "./map/NearbyLocationsList";
@@ -10,18 +10,19 @@ import AddressSearchPopover from "./map/AddressSearchPopover";
 import EnhancedGoogleMapComponent, { GoogleMapHandle } from "./map/google/EnhancedGoogleMapComponent";
 import { useMapSync } from "@/hooks/useMapSync";
 import { Location } from "@/types";
+import { Coordinates, UserLocation, toCoordinates, toUserLocation } from "@/types/coordinates";
 
 interface NearbyVibesMapProps {
-  locations: Location[];
-  selectedLocation: Location | null;
-  onLocationSelect: (location: Location) => void;
+  locations?: Location[];
+  selectedLocation?: Location | null;
+  onLocationSelect?: (location: Location) => void;
   className?: string;
 }
 
 const NearbyVibesMap: React.FC<NearbyVibesMapProps> = ({ 
-  locations, 
-  selectedLocation, 
-  onLocationSelect,
+  locations = [], 
+  selectedLocation = null, 
+  onLocationSelect = () => {},
   className 
 }) => {
   const {
@@ -32,23 +33,15 @@ const NearbyVibesMap: React.FC<NearbyVibesMapProps> = ({
     setSearchedCity,
     userAddressLocation,
     setUserAddressLocation
-  } = useNearbyLocations();
+  } = useSimplifiedNearbyLocations();
   
   const [isMapExpanded, setIsMapExpanded] = useState(false);
   const [mapStyle, setMapStyle] = useState<"default" | "terrain" | "satellite">("terrain");
   const [showDistances, setShowDistances] = useState(false);
   const [isAddressPopoverOpen, setIsAddressPopoverOpen] = useState(false);
   const [localLoading, setLocalLoading] = useState(false);
-  const [currentUserLocation, setCurrentUserLocation] = useState<GeolocationCoordinates | null>(
-    userLocation ? { 
-      latitude: userLocation.lat, 
-      longitude: userLocation.lng,
-      accuracy: 0,
-      altitude: null,
-      altitudeAccuracy: null,
-      heading: null,
-      speed: null
-    } : null
+  const [currentUserLocation, setCurrentUserLocation] = useState<UserLocation | null>(
+    userLocation ? toUserLocation(userLocation) : null
   );
 
   const mapRef = useRef<GoogleMapHandle>(null);
@@ -69,6 +62,12 @@ const NearbyVibesMap: React.FC<NearbyVibesMapProps> = ({
       setSearchedCity("");
     }
   }, [location, setSearchedCity]);
+
+  useEffect(() => {
+    if (userLocation) {
+      setCurrentUserLocation(toUserLocation(userLocation));
+    }
+  }, [userLocation]);
 
   const handleViewMap = () => {
     navigate("/explore");
@@ -144,12 +143,7 @@ const NearbyVibesMap: React.FC<NearbyVibesMapProps> = ({
     const coords = e.latlng;
     setCurrentUserLocation({
       latitude: coords.lat,
-      longitude: coords.lng,
-      accuracy: 0,
-      altitude: null,
-      altitudeAccuracy: null,
-      heading: null,
-      speed: null
+      longitude: coords.lng
     });
     console.log('User location found:', coords.lat, coords.lng);
   };
@@ -158,12 +152,7 @@ const NearbyVibesMap: React.FC<NearbyVibesMapProps> = ({
     console.error('Location error:', e.message);
     setCurrentUserLocation({
       latitude: 40.7128,
-      longitude: -74.0060,
-      accuracy: 0,
-      altitude: null,
-      altitudeAccuracy: null,
-      heading: null,
-      speed: null
+      longitude: -74.0060
     });
   };
 
@@ -171,18 +160,16 @@ const NearbyVibesMap: React.FC<NearbyVibesMapProps> = ({
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setCurrentUserLocation(position.coords);
+          setCurrentUserLocation({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude
+          });
         },
         (error) => {
           console.error('Geolocation error:', error);
           setCurrentUserLocation({
             latitude: 40.7128,
-            longitude: -74.0060,
-            accuracy: 0,
-            altitude: null,
-            altitudeAccuracy: null,
-            heading: null,
-            speed: null
+            longitude: -74.0060
           });
         }
       );
