@@ -71,8 +71,8 @@ const ExploreSearchSection: React.FC<ExploreSearchSectionProps> = ({
       rating: 0,
       vibes: [],
       tags: [],
-      createdAt: new Date(),
-      updatedAt: new Date()
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     };
     
     onPlaceSelect(locationData);

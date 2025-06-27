@@ -10,7 +10,7 @@ import AddressSearchPopover from "./map/AddressSearchPopover";
 import EnhancedGoogleMapComponent, { GoogleMapHandle } from "./map/google/EnhancedGoogleMapComponent";
 import { useMapSync } from "@/hooks/useMapSync";
 import { Location } from "@/types";
-import { Coordinates, UserLocation, toCoordinates, toUserLocation } from "@/types/coordinates";
+import { UserLocation, Coordinates } from "@/types/coordinates";
 
 interface NearbyVibesMapProps {
   locations?: Location[];
@@ -41,7 +41,7 @@ const NearbyVibesMap: React.FC<NearbyVibesMapProps> = ({
   const [isAddressPopoverOpen, setIsAddressPopoverOpen] = useState(false);
   const [localLoading, setLocalLoading] = useState(false);
   const [currentUserLocation, setCurrentUserLocation] = useState<UserLocation | null>(
-    userLocation ? toUserLocation(userLocation) : null
+    userLocation ? { latitude: userLocation.lat, longitude: userLocation.lng } : null
   );
 
   const mapRef = useRef<GoogleMapHandle>(null);
@@ -65,7 +65,7 @@ const NearbyVibesMap: React.FC<NearbyVibesMapProps> = ({
 
   useEffect(() => {
     if (userLocation) {
-      setCurrentUserLocation(toUserLocation(userLocation));
+      setCurrentUserLocation({ latitude: userLocation.lat, longitude: userLocation.lng });
     }
   }, [userLocation]);
 
@@ -112,6 +112,7 @@ const NearbyVibesMap: React.FC<NearbyVibesMapProps> = ({
       const coordinates = await geocodeAddress(address);
       
       if (coordinates) {
+        // Convert Coordinates to [lng, lat] format for userAddressLocation
         setUserAddressLocation([coordinates.lng, coordinates.lat]);
         setShowDistances(true);
         setIsAddressPopoverOpen(false);
