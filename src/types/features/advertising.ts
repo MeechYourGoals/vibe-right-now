@@ -8,6 +8,9 @@ export interface AdFormat {
   duration?: string;
   platform?: string;
   kpis?: string[];
+  placement?: string;
+  specifications?: any;
+  bestPractices?: string[];
 }
 
 export interface GenderTargeting {
@@ -18,21 +21,52 @@ export interface GenderTargeting {
 }
 
 export interface TargetingOptions {
-  ageRange: {
+  ageRange?: {
     min: number;
     max: number;
   };
-  gender: GenderTargeting;
-  demographics: {
-    income: string[];
-    education: string[];
+  ageRanges?: any[];
+  locations?: string[];
+  interests: string[];
+  gender?: GenderTargeting;
+  demographics?: {
+    gender?: string;
+    ageRange?: number[] | { min: number; max: number };
+    interests?: string[];
+    behaviors?: string[];
+    location?: string[];
   };
-  behaviors: string[];
-  contextual: string[];
-  momentScore: {
-    min: number;
-    max: number;
+  geographic?: {
+    radius?: number;
+    cities?: string[];
+    regions?: string[];
   };
+  behaviors?: {
+    categories?: string[];
+    frequency?: string;
+    venueVisits?: string[];
+    socialEngagement?: string[];
+    purchaseHistory?: string[];
+  };
+  contextual?: {
+    categories?: string[];
+    frequency?: string;
+    vibeTags?: string[];
+    venueTypes?: string[];
+    daypart?: string[];
+    timeOfDay?: string[];
+    dayOfWeek?: string[];
+    weather?: string[];
+    eventTypes?: string[];
+  };
+  momentScore?: {
+    min?: number;
+    max?: number;
+    crowdDensity?: string;
+    vibeScore?: string;
+    crowdLevel?: string;
+    engagement?: string;
+  } | string;
 }
 
 export interface AdCampaign {

@@ -11,12 +11,6 @@ import EnhancedGoogleMapComponent, { GoogleMapHandle } from "./map/google/Enhanc
 import { useMapSync } from "@/hooks/useMapSync";
 import { Location } from "@/types";
 
-
-interface Coordinates {
-  lat: number;
-  lng: number;
-}
-
 interface NearbyVibesMapProps {
   locations: Location[];
   selectedLocation: Location | null;
@@ -45,8 +39,16 @@ const NearbyVibesMap: React.FC<NearbyVibesMapProps> = ({
   const [showDistances, setShowDistances] = useState(false);
   const [isAddressPopoverOpen, setIsAddressPopoverOpen] = useState(false);
   const [localLoading, setLocalLoading] = useState(false);
-  const [currentUserLocation, setCurrentUserLocation] = useState<[number, number] | null>(
-    userLocation ? [userLocation.lat, userLocation.lng] : null
+  const [currentUserLocation, setCurrentUserLocation] = useState<GeolocationCoordinates | null>(
+    userLocation ? { 
+      latitude: userLocation.lat, 
+      longitude: userLocation.lng,
+      accuracy: 0,
+      altitude: null,
+      altitudeAccuracy: null,
+      heading: null,
+      speed: null
+    } : null
   );
 
   const mapRef = useRef<GoogleMapHandle>(null);
@@ -111,7 +113,7 @@ const NearbyVibesMap: React.FC<NearbyVibesMapProps> = ({
       const coordinates = await geocodeAddress(address);
       
       if (coordinates) {
-        setUserAddressLocation({ lat: coordinates.lat, lng: coordinates.lng });
+        setUserAddressLocation([coordinates.lng, coordinates.lat]);
         setShowDistances(true);
         setIsAddressPopoverOpen(false);
         
@@ -140,28 +142,48 @@ const NearbyVibesMap: React.FC<NearbyVibesMapProps> = ({
 
   const handleLocationFound = (e: any) => {
     const coords = e.latlng;
-    setCurrentUserLocation([coords.lat, coords.lng]);
+    setCurrentUserLocation({
+      latitude: coords.lat,
+      longitude: coords.lng,
+      accuracy: 0,
+      altitude: null,
+      altitudeAccuracy: null,
+      heading: null,
+      speed: null
+    });
     console.log('User location found:', coords.lat, coords.lng);
   };
 
   const handleLocationError = (e: any) => {
     console.error('Location error:', e.message);
-    setCurrentUserLocation([40.7128, -74.0060]); // New York City as fallback
+    setCurrentUserLocation({
+      latitude: 40.7128,
+      longitude: -74.0060,
+      accuracy: 0,
+      altitude: null,
+      altitudeAccuracy: null,
+      heading: null,
+      speed: null
+    });
   };
 
   const handleLocationUpdate = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          const coords: [number, number] = [
-            position.coords.latitude,
-            position.coords.longitude
-          ];
-          setCurrentUserLocation(coords);
+          setCurrentUserLocation(position.coords);
         },
         (error) => {
           console.error('Geolocation error:', error);
-          setCurrentUserLocation([40.7128, -74.0060]); // Fallback to NYC
+          setCurrentUserLocation({
+            latitude: 40.7128,
+            longitude: -74.0060,
+            accuracy: 0,
+            altitude: null,
+            altitudeAccuracy: null,
+            heading: null,
+            speed: null
+          });
         }
       );
     }
