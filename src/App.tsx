@@ -53,7 +53,9 @@ function App() {
               <Route path="/trip/:tripId" element={<TripDetails />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/points" element={<UserPoints />} />
+              <Route path="/user-points" element={<UserPoints />} />
               <Route path="/pinned" element={<PinnedVibes />} />
+              <Route path="/pinned-vibes" element={<PinnedVibes />} />
               <Route path="/venue/:id" element={<VenueProfile />} />
               <Route path="/profile" element={<ProfileBio />} />
               <Route path="/user/:username" element={<UserProfile />} />

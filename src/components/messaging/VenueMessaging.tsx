@@ -96,209 +96,212 @@ const VenueMessaging: React.FC = () => {
   }
 
   return (
-    <div className={`max-w-6xl mx-auto h-[600px] flex gap-4 ${isMobile ? 'flex-col w-full' : ''}`}>
+    <div className={`max-w-6xl mx-auto h-[600px] flex ${isMobile ? 'flex-col' : 'gap-6'}`}>
       {/* Conversations List */}
       {(!isMobile || !selectedConversation) && (
-      <Card className={`${isMobile ? 'w-full' : 'w-1/3'}`}>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Messages</CardTitle>
-            <div className="flex items-center gap-2">
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-10 w-10">
-                    <Bell className="h-5 w-5" />
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl">
-                  <DialogHeader>
-                    <DialogTitle>Notification Settings</DialogTitle>
-                  </DialogHeader>
-                  <div className="mt-4">
-                    <VenueMessagingSettings />
-                  </div>
-                </DialogContent>
-              </Dialog>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-10 w-10">
-                    <Settings className="h-5 w-5" />
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl">
-                  <DialogHeader>
-                    <DialogTitle>Messaging Settings</DialogTitle>
-                  </DialogHeader>
-                  <div className="mt-4">
-                    <VenueMessagingSettings />
-                  </div>
-                </DialogContent>
-              </Dialog>
-            </div>
-          </div>
-          <div className="relative">
-            <Input
-              placeholder="Search venues..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full"
-            />
-          </div>
-        </CardHeader>
-        <CardContent className="p-0">
-          {filteredConversations.map((conversation) => (
-            <div
-              key={conversation.id}
-              className={`p-4 border-b cursor-pointer hover:bg-muted/50 ${
-                selectedConversation === conversation.id ? 'bg-muted' : ''
-              }`}
-              onClick={() => setSelectedConversation(conversation.id)}
-            >
-              <div className="flex items-center gap-3">
-                <Avatar className="h-12 w-12">
-                  <AvatarImage src={conversation.venueAvatar} alt={conversation.venueName} />
-                  <AvatarFallback>{conversation.venueName.charAt(0)}</AvatarFallback>
-                </Avatar>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <h4 className="font-medium truncate">{conversation.venueName}</h4>
-                      {conversation.unreadCount > 0 && (
-                        <Badge variant="destructive" className="h-5 w-5 p-0 text-xs flex items-center justify-center">
-                          {conversation.unreadCount}
-                        </Badge>
-                      )}
+        <Card className={`${isMobile ? 'w-full mb-4' : 'w-80 flex-shrink-0'}`}>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg">Messages</CardTitle>
+              <div className="flex items-center gap-1">
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <Bell className="h-4 w-4" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                      <DialogTitle>Notification Settings</DialogTitle>
+                    </DialogHeader>
+                    <div className="mt-4">
+                      <VenueMessagingSettings />
                     </div>
-                    <Badge variant="outline" className="text-xs">
-                      {conversation.venueType}
-                    </Badge>
-                  </div>
-                  {conversation.lastMessage && (
-                    <div className="flex items-center gap-2 mt-1">
-                      <MessageTypeBadge type={conversation.lastMessage.messageType} />
-                      <p className="text-sm text-muted-foreground truncate flex-1">
-                        {conversation.lastMessage.content}
-                      </p>
+                  </DialogContent>
+                </Dialog>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <Settings className="h-4 w-4" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                      <DialogTitle>Messaging Settings</DialogTitle>
+                    </DialogHeader>
+                    <div className="mt-4">
+                      <VenueMessagingSettings />
                     </div>
-                  )}
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {conversation.responseTime}
-                  </p>
-                </div>
+                  </DialogContent>
+                </Dialog>
               </div>
             </div>
-          ))}
-        </CardContent>
-      </Card>
+            <div className="relative">
+              <Input
+                placeholder="Search venues..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full"
+              />
+            </div>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className={`${isMobile ? 'max-h-48 overflow-y-auto' : 'max-h-96 overflow-y-auto'}`}>
+              {filteredConversations.map((conversation) => (
+                <div
+                  key={conversation.id}
+                  className={`p-3 border-b cursor-pointer hover:bg-muted/50 transition-colors ${
+                    selectedConversation === conversation.id ? 'bg-muted' : ''
+                  }`}
+                  onClick={() => setSelectedConversation(conversation.id)}
+                >
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-10 w-10 flex-shrink-0">
+                      <AvatarImage src={conversation.venueAvatar} alt={conversation.venueName} />
+                      <AvatarFallback>{conversation.venueName.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-medium truncate text-sm">{conversation.venueName}</h4>
+                          {conversation.unreadCount > 0 && (
+                            <Badge variant="destructive" className="h-4 w-4 p-0 text-xs flex items-center justify-center">
+                              {conversation.unreadCount}
+                            </Badge>
+                          )}
+                        </div>
+                        <Badge variant="outline" className="text-xs flex-shrink-0">
+                          {conversation.venueType}
+                        </Badge>
+                      </div>
+                      {conversation.lastMessage && (
+                        <div className="flex items-center gap-2 mb-1">
+                          <MessageTypeBadge type={conversation.lastMessage.messageType} />
+                          <p className="text-xs text-muted-foreground truncate flex-1">
+                            {conversation.lastMessage.content}
+                          </p>
+                        </div>
+                      )}
+                      <p className="text-xs text-muted-foreground">
+                        {conversation.responseTime}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* Chat Window */}
       {(!isMobile || selectedConversation) && (
-      <Card className={`${isMobile ? 'w-full' : 'flex-1'} flex flex-col`}>
-        {selectedConv ? (
-          <>
-            <CardHeader className="border-b">
-              <div className="flex items-center gap-3">
-                {isMobile && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setSelectedConversation(null)}
-                    className="h-10 w-10"
-                  >
-                    <ChevronLeft className="h-5 w-5" />
-                  </Button>
-                )}
-                <Avatar className="h-10 w-10">
-                  <AvatarImage src={selectedConv.venueAvatar} alt={selectedConv.venueName} />
-                  <AvatarFallback>{selectedConv.venueName.charAt(0)}</AvatarFallback>
-                </Avatar>
-                <div>
-                  <h3 className="font-semibold">{selectedConv.venueName}</h3>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="text-xs">
-                      {selectedConv.venueType}
-                    </Badge>
-                    <p className="text-sm text-muted-foreground">{selectedConv.responseTime}</p>
-                  </div>
-                </div>
-              </div>
-            </CardHeader>
-            
-            <CardContent className="flex-1 p-4 overflow-y-auto">
-              <div className="space-y-4">
-                {messages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex ${message.senderType === 'user' ? 'justify-end' : 'justify-start'}`}
-                  >
-                    <div className="flex items-start gap-2 max-w-[80%]">
-                      {message.senderType === 'venue' && (
-                        <Avatar className="h-10 w-10 mt-1">
-                          <AvatarImage src={message.senderAvatar} alt={message.senderName} />
-                          <AvatarFallback>{message.senderName.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                      )}
-                      <div
-                        className={`px-3 py-2 rounded-lg ${
-                          message.senderType === 'user'
-                            ? 'bg-primary text-primary-foreground'
-                            : 'bg-muted text-foreground'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2 mb-1">
-                          {message.messageType && (
-                            <MessageTypeBadge type={message.messageType} />
-                          )}
-                        </div>
-                        <p className="text-sm">{message.content}</p>
-                        <p className="text-xs opacity-70 mt-1">
-                          {new Date(message.timestamp).toLocaleTimeString()}
-                        </p>
-                      </div>
-                      {message.senderType === 'user' && (
-                        <Avatar className="h-10 w-10 mt-1">
-                          <AvatarImage src={message.senderAvatar} alt={message.senderName} />
-                          <AvatarFallback>{message.senderName.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                      )}
+        <Card className={`${isMobile ? 'w-full flex-1' : 'flex-1'} flex flex-col`}>
+          {selectedConv ? (
+            <>
+              <CardHeader className="border-b pb-3">
+                <div className="flex items-center gap-3">
+                  {isMobile && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setSelectedConversation(null)}
+                      className="h-8 w-8 flex-shrink-0"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                  )}
+                  <Avatar className="h-8 w-8 flex-shrink-0">
+                    <AvatarImage src={selectedConv.venueAvatar} alt={selectedConv.venueName} />
+                    <AvatarFallback>{selectedConv.venueName.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-sm truncate">{selectedConv.venueName}</h3>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="text-xs">
+                        {selectedConv.venueType}
+                      </Badge>
+                      <p className="text-xs text-muted-foreground">{selectedConv.responseTime}</p>
                     </div>
                   </div>
-                ))}
+                </div>
+              </CardHeader>
+              
+              <CardContent className="flex-1 p-3 overflow-y-auto">
+                <div className="space-y-3">
+                  {messages.map((message) => (
+                    <div
+                      key={message.id}
+                      className={`flex ${message.senderType === 'user' ? 'justify-end' : 'justify-start'}`}
+                    >
+                      <div className="flex items-start gap-2 max-w-[85%]">
+                        {message.senderType === 'venue' && (
+                          <Avatar className="h-8 w-8 mt-1 flex-shrink-0">
+                            <AvatarImage src={message.senderAvatar} alt={message.senderName} />
+                            <AvatarFallback>{message.senderName.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                        )}
+                        <div
+                          className={`px-3 py-2 rounded-lg ${
+                            message.senderType === 'user'
+                              ? 'bg-primary text-primary-foreground'
+                              : 'bg-muted text-foreground'
+                          }`}
+                        >
+                          {message.messageType && (
+                            <div className="mb-1">
+                              <MessageTypeBadge type={message.messageType} />
+                            </div>
+                          )}
+                          <p className="text-sm">{message.content}</p>
+                          <p className="text-xs opacity-70 mt-1">
+                            {new Date(message.timestamp).toLocaleTimeString()}
+                          </p>
+                        </div>
+                        {message.senderType === 'user' && (
+                          <Avatar className="h-8 w-8 mt-1 flex-shrink-0">
+                            <AvatarImage src={message.senderAvatar} alt={message.senderName} />
+                            <AvatarFallback>{message.senderName.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+              
+              <div className="p-3 border-t">
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Type a message..."
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                    disabled={!messagingEnabled}
+                    className="flex-1"
+                  />
+                  <Button onClick={sendMessage} disabled={!messagingEnabled} size="icon" className="h-10 w-10 flex-shrink-0">
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </div>
+                {!messagingEnabled && (
+                  <p className="text-xs text-muted-foreground mt-2">
+                    You have opted out of venue messaging. Enable it in settings to continue.
+                  </p>
+                )}
+              </div>
+            </>
+          ) : (
+            <CardContent className="flex-1 flex items-center justify-center">
+              <div className="text-center">
+                <h3 className="text-lg font-semibold mb-2">Select a conversation</h3>
+                <p className="text-muted-foreground">
+                  Choose a venue from the list to start messaging
+                </p>
               </div>
             </CardContent>
-            
-            <div className="p-4 border-t">
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Type a message..."
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                  disabled={!messagingEnabled}
-                />
-                <Button onClick={sendMessage} disabled={!messagingEnabled} size="icon" className="h-10 w-10">
-                  <Send className="h-5 w-5" />
-                </Button>
-              </div>
-              {!messagingEnabled && (
-                <p className="text-xs text-muted-foreground mt-2">
-                  You have opted out of venue messaging. Enable it in settings to continue.
-                </p>
-              )}
-            </div>
-          </>
-        ) : (
-          <CardContent className="flex-1 flex items-center justify-center">
-            <div className="text-center">
-              <h3 className="text-lg font-semibold mb-2">Select a conversation</h3>
-              <p className="text-muted-foreground">
-                Choose a venue from the list to start messaging
-              </p>
-            </div>
-          </CardContent>
-        )}
-      </Card>
+          )}
+        </Card>
       )}
     </div>
   );
