@@ -20,9 +20,11 @@ interface TextToSpeechOptions {
 }
 
 export const OpenRouterService = {
-  // API key is loaded from Vite environment variables
+  // API key and other values loaded from Vite environment variables
   apiKey: import.meta.env.VITE_OPENROUTER_API_KEY || '',
-  baseUrl: "https://openrouter.ai/api/v1",
+  baseUrl: import.meta.env.VITE_OPENROUTER_API_BASE_URL || 'https://openrouter.ai/api/v1',
+  referer: import.meta.env.VITE_OPENROUTER_REFERER || window.location.origin,
+  title: import.meta.env.VITE_OPENROUTER_TITLE || 'VibesApp',
 
   async getCompletion({
     prompt,
@@ -41,8 +43,8 @@ export const OpenRouterService = {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${this.apiKey}`,
-          'HTTP-Referer': window.location.origin,
-          'X-Title': 'VibesApp'
+          'HTTP-Referer': this.referer,
+          'X-Title': this.title
         },
         body: JSON.stringify({
           model,
@@ -108,8 +110,8 @@ export const OpenRouterService = {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${this.apiKey}`,
-          'HTTP-Referer': window.location.origin,
-          'X-Title': 'VibesApp'
+          'HTTP-Referer': this.referer,
+          'X-Title': this.title
         },
         body: JSON.stringify({
           model: "anthropic/claude-3-opus",
@@ -163,8 +165,8 @@ export const OpenRouterService = {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${this.apiKey}`,
-          'HTTP-Referer': window.location.origin,
-          'X-Title': 'VibesApp'
+          'HTTP-Referer': this.referer,
+          'X-Title': this.title
         },
         body: JSON.stringify({
           model: "anthropic/claude-3-sonnet",
@@ -218,8 +220,8 @@ export const OpenRouterService = {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${this.apiKey}`,
-          'HTTP-Referer': window.location.origin,
-          'X-Title': 'VibesApp'
+          'HTTP-Referer': this.referer,
+          'X-Title': this.title
         },
         body: JSON.stringify({
           model: options.model || "anthropic/claude-3-haiku",
