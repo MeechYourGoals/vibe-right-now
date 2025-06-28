@@ -7,15 +7,9 @@ export interface Coordinates {
 export interface UserLocation {
   latitude: number;
   longitude: number;
+  accuracy?: number;
+  altitude?: number | null;
+  altitudeAccuracy?: number | null;
+  heading?: number | null;
+  speed?: number | null;
 }
-
-// Helper function to convert between coordinate types
-export const toCoordinates = (location: UserLocation): Coordinates => ({
-  lat: location.latitude,
-  lng: location.longitude
-});
-
-export const toUserLocation = (coords: Coordinates): UserLocation => ({
-  latitude: coords.lat,
-  longitude: coords.lng
-});

@@ -64,7 +64,18 @@ const NearbyVibesMap: React.FC<NearbyVibesMapProps> = ({
 
   useEffect(() => {
     if (userLocation) {
-      setCurrentUserLocation({ latitude: userLocation.lat, longitude: userLocation.lng });
+      // Convert UserLocation to GeolocationCoordinates format
+      const geoCoords: UserLocation = { 
+        latitude: userLocation.lat, 
+        longitude: userLocation.lng,
+        // Add default values for missing GeolocationCoordinates properties
+        accuracy: 0,
+        altitude: null,
+        altitudeAccuracy: null,
+        heading: null,
+        speed: null
+      };
+      setCurrentUserLocation(geoCoords);
     }
   }, [userLocation]);
 

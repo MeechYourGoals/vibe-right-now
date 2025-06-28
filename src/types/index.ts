@@ -2,6 +2,7 @@
 export interface User {
   id: string;
   username: string;
+  displayName?: string; // Add displayName property
   name: string;
   email?: string;
   avatar?: string;
@@ -10,6 +11,7 @@ export interface User {
   isPrivate?: boolean;
   followers?: number;
   following?: number;
+  posts?: number;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -30,6 +32,8 @@ export interface Location {
   price_level?: number;
   phone?: string;
   website?: string;
+  google_maps_url?: string; // Add google_maps_url property
+  business_status?: string; // Add business_status property
   hours?: string | VenueHours | { [key: string]: string | { open: string; close: string; closed?: boolean } };
   vibes?: string[];
   tags?: string[];
@@ -69,4 +73,38 @@ export interface UserProfileStats {
   followers: number;
   following: number;
   likes: number;
+}
+
+// Add missing type exports
+export interface VenueInsights {
+  totalVisits: number;
+  avgRating: number;
+  topVibes: string[];
+  peakHours: string[];
+  demographics: {
+    ageGroups: Record<string, number>;
+    genderSplit: Record<string, number>;
+  };
+}
+
+export interface PlatformSentimentSummary {
+  platform: string;
+  overallSentiment: number;
+  reviewCount: number;
+  themes: SentimentTheme[];
+}
+
+export interface SentimentTheme {
+  theme: string;
+  sentiment: number;
+  count: number;
+}
+
+export interface CityData {
+  id: string;
+  name: string;
+  country: string;
+  lat: number;
+  lng: number;
+  venues: Location[];
 }

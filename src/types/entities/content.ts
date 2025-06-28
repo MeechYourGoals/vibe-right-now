@@ -2,7 +2,7 @@
 export interface Media {
   id: string;
   url: string;
-  type: 'image' | 'video';
+  type: 'image' | 'video' | 'audio';
   thumbnail?: string;
   duration?: number;
   width?: number;
@@ -13,19 +13,24 @@ export interface Media {
 export interface Post {
   id: string;
   userId: string;
+  user?: User; // Add user property
   content: string;
   media?: Media[] | string[];
   vibes?: string[];
   tags?: string[];
+  vibeTags?: string[]; // Add vibeTags property
   timestamp: string;
   likes: number;
   comments: number;
   shares?: number;
+  saved?: boolean; // Add saved property
+  isVenuePost?: boolean; // Add isVenuePost property
   location?: {
     id: string;
     name: string;
     city: string;
     state: string;
+    country?: string; // Add country property
   };
   isVerified?: boolean;
   isPinned?: boolean;
@@ -44,16 +49,31 @@ export interface Post {
 export interface Comment {
   id: string;
   postId: string;
+  contentId: string;
   userId: string;
+  user: User; // Add user property
+  author: User; // Add author property
   content: string;
-  timestamp: string;
+  body: string; // Add body property
+  timestamp: string | Date;
+  createdAt: string | Date;
+  updatedAt: string | Date;
   likes: number;
   replies?: Comment[];
   parentId?: string;
   isVerified?: boolean;
+  vibedHere?: boolean; // Add vibedHere property
   mentions?: string[];
-  createdAt: string;
-  updatedAt: string;
+  status: 'published' | 'draft' | 'deleted';
+  engagement: {
+    likes: number;
+    replies: number;
+    reactions: any[];
+  };
+  moderation: {
+    status: 'approved' | 'pending' | 'rejected';
+    flags: string[];
+  };
 }
 
 export interface Story {
@@ -94,4 +114,22 @@ export interface ContentMetrics {
     averageEngagement: number;
     bestPostingTimes: string[];
   };
+}
+
+// Add User interface here to avoid circular imports
+export interface User {
+  id: string;
+  username: string;
+  displayName?: string; // Add displayName property
+  name: string;
+  email?: string;
+  avatar?: string;
+  bio?: string;
+  verified?: boolean;
+  isPrivate?: boolean;
+  followers?: number;
+  following?: number;
+  posts?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
