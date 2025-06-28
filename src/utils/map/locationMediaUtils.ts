@@ -28,11 +28,12 @@ export const getMediaForLocation = (location: Location): Media => {
   const fallbackImage = "https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=600&q=80&auto=format&fit=crop";
 
   // Build the URL with explicit quality and size parameters to ensure loading
-  const imageUrl = imageMap[location.id] || 
-                  typeDefaultMedia[location.type as string] || 
+  const imageUrl = imageMap[location.id] ||
+                  typeDefaultMedia[location.type as string] ||
                   `https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600&q=80&auto=format&fit=crop`;
 
   return {
+    id: location.id,
     type: "image" as const,
     url: imageUrl
   };

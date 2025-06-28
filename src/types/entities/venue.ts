@@ -1,4 +1,6 @@
 // Location and venue related types
+import { MockUserProfile } from "@/mock/users";
+
 export interface Location {
   id: string;
   name: string;
@@ -13,13 +15,14 @@ export interface Location {
   rating?: number;
   vibes?: string[];
   tags?: string[];
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
   description?: string;
   phone?: string;
   website?: string;
   hours?: BusinessHours;
   images?: string[];
+  userProfile?: MockUserProfile;
   priceRange?: '$' | '$$' | '$$$' | '$$$$';
   features?: VenueFeature[];
   socialMedia?: SocialMediaLinks;
