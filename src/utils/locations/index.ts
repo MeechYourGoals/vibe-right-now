@@ -1,24 +1,17 @@
 
-import { Location } from '@/types/entities/venue';
+import { Location } from '@/types';
 import { CityCoordinates } from './types';
 
 // Import all city data
 import nyc from '@/data/mockCities/nyc';
 import la from '@/data/mockCities/la';
-import london from '@/data/mockCities/london';
-import chicago from '@/data/mockCities/chicago';
-import miami from '@/data/mockCities/miami';
 import sanfrancisco from '@/data/mockCities/sanfrancisco';
-import paris from '@/data/mockCities/paris';
-import tokyo from '@/data/mockCities/tokyo';
 import sydney from '@/data/mockCities/sydney';
 import barcelona from '@/data/mockCities/barcelona';
 import berlin from '@/data/mockCities/berlin';
-import amsterdam from '@/data/mockCities/amsterdam';
 import rome from '@/data/mockCities/rome';
 import dubai from '@/data/mockCities/dubai';
 import singapore from '@/data/mockCities/singapore';
-import bangkok from '@/data/mockCities/bangkok';
 import seoul from '@/data/mockCities/seoul';
 import istanbul from '@/data/mockCities/istanbul';
 import moscow from '@/data/mockCities/moscow';
@@ -34,22 +27,46 @@ import vegas from '@/data/mockCities/vegas';
 export const cityCoordinates: CityCoordinates[] = [
   { name: "New York", state: "NY", country: "USA", lat: 40.7128, lng: -74.0060 },
   { name: "Los Angeles", state: "CA", country: "USA", lat: 34.0522, lng: -118.2437 },
-  { name: "London", country: "UK", lat: 51.5074, lng: -0.1278 },
-  { name: "Chicago", state: "IL", country: "USA", lat: 41.8781, lng: -87.6298 },
-  { name: "Miami", state: "FL", country: "USA", lat: 25.7617, lng: -80.1918 },
   { name: "San Francisco", state: "CA", country: "USA", lat: 37.7749, lng: -122.4194 },
-  { name: "Paris", country: "France", lat: 48.8566, lng: 2.3522 },
-  { name: "Tokyo", country: "Japan", lat: 35.6762, lng: 139.6503 },
   { name: "Sydney", country: "Australia", lat: -33.8688, lng: 151.2093 },
-  { name: "Barcelona", country: "Spain", lat: 41.3851, lng: 2.1734 }
+  { name: "Barcelona", country: "Spain", lat: 41.3851, lng: 2.1734 },
+  { name: "Berlin", country: "Germany", lat: 52.52, lng: 13.405 },
+  { name: "Rome", country: "Italy", lat: 41.9028, lng: 12.4964 },
+  { name: "Dubai", country: "UAE", lat: 25.2048, lng: 55.2708 },
+  { name: "Singapore", country: "Singapore", lat: 1.3521, lng: 103.8198 },
+  { name: "Seoul", country: "South Korea", lat: 37.5665, lng: 126.9780 },
+  { name: "Istanbul", country: "Turkey", lat: 41.0082, lng: 28.9784 },
+  { name: "Moscow", country: "Russia", lat: 55.7558, lng: 37.6173 },
+  { name: "Mumbai", country: "India", lat: 19.0760, lng: 72.8777 },
+  { name: "Rio de Janeiro", country: "Brazil", lat: -22.9068, lng: -43.1729 },
+  { name: "São Paulo", country: "Brazil", lat: -23.5505, lng: -46.6333 },
+  { name: "Melbourne", country: "Australia", lat: -37.8136, lng: 144.9631 },
+  { name: "Toronto", country: "Canada", lat: 43.6532, lng: -79.3832 },
+  { name: "Phoenix", state: "AZ", country: "USA", lat: 33.4484, lng: -112.0740 },
+  { name: "Las Vegas", state: "NV", country: "USA", lat: 36.1699, lng: -115.1398 }
 ];
 
 // All mock cities
 const allCities = [
-  nyc, la, london, chicago, miami, sanfrancisco, paris, tokyo, 
-  sydney, barcelona, berlin, amsterdam, rome, dubai, singapore,
-  bangkok, seoul, istanbul, moscow, mumbai, riodejaneiro, 
-  saopaulo, melbourne, toronto, phoenix, vegas
+  nyc,
+  la,
+  sanfrancisco,
+  sydney,
+  barcelona,
+  berlin,
+  rome,
+  dubai,
+  singapore,
+  seoul,
+  istanbul,
+  moscow,
+  mumbai,
+  riodejaneiro,
+  saopaulo,
+  melbourne,
+  toronto,
+  phoenix,
+  vegas
 ];
 
 // Generate locations for a specific city

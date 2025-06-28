@@ -1,5 +1,5 @@
 
-import { Location } from '@/types';
+import { CityData, Location } from '@/types';
 
 export const barcelonaLocations: Location[] = [
   {
@@ -54,3 +54,13 @@ export const barcelonaLocations: Location[] = [
     updatedAt: "2024-01-01T00:00:00Z"
   }
 ];
+
+const barcelona: CityData = {
+  name: "Barcelona",
+  country: "Spain",
+  lat: 41.3851,
+  lng: 2.1734,
+  venues: barcelonaLocations
+};
+
+export default barcelona;

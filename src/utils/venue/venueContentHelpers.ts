@@ -75,7 +75,15 @@ export const determineVenueType = (venueName: string = ''): "restaurant" | "bar"
 export const ensurePostLocationData = (post: Post): Post => {
   if (!post.location) {
     console.warn('Post has no location data, adding default location');
-    post.location = mockLocations[0];
+    const defaultLoc = mockLocations[0];
+    post.location = {
+      id: defaultLoc.id,
+      name: defaultLoc.name,
+      city: defaultLoc.city,
+      state: defaultLoc.state || '',
+      country: defaultLoc.country,
+      type: defaultLoc.type
+    };
   }
   
   if (!post.location.type) {

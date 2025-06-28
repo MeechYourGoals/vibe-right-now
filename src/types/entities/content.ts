@@ -31,6 +31,7 @@ export interface Post {
     city: string;
     state: string;
     country?: string; // Add country property
+    type?: string;
   };
   isVerified?: boolean;
   isPinned?: boolean;

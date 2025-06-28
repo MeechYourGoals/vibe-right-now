@@ -1,4 +1,8 @@
 
+import { MockUserProfile } from "@/mock/users";
+import type { Post, Media, Comment, Story, ContentMetrics } from './entities/content';
+import type { AdFormat, TargetingOptions, GenderTargeting, AdCampaign } from './features/advertising';
+
 export interface User {
   id: string;
   username: string;
@@ -38,8 +42,9 @@ export interface Location {
   vibes?: string[];
   tags?: string[];
   images?: string[];
-  createdAt: string;
-  updatedAt: string;
+  userProfile?: MockUserProfile;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface VenueHours {
@@ -53,11 +58,14 @@ export interface VenueHours {
   sunday?: { open: string; close: string; closed?: boolean };
 }
 
+export type BusinessHours = VenueHours;
+
 // Re-export from content types
-export { Post, Media, Comment, Story, ContentMetrics } from './entities/content';
+export type { Post, Media, Comment, Story, ContentMetrics } from './entities/content';
 
 // Re-export from advertising types
-export { AdFormat, TargetingOptions, GenderTargeting, AdCampaign } from './features/advertising';
+export type { AdFormat, TargetingOptions, GenderTargeting, AdCampaign } from './features/advertising';
+export type { BusinessHours };
 
 // User profile types
 export interface UserProfileData {

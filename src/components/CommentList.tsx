@@ -27,6 +27,7 @@ const CommentList = ({ postId, commentsCount }: CommentListProps) => {
     const randomUser1 = mockUsers[Math.floor(Math.random() * mockUsers.length)];
     exampleComments.push({
       id: `example-${postId}-1`,
+      userId: randomUser1.id,
       contentId: postId,
       postId: postId,
       parentId: undefined,
@@ -47,6 +48,7 @@ const CommentList = ({ postId, commentsCount }: CommentListProps) => {
     const randomUser2 = mockUsers[Math.floor(Math.random() * mockUsers.length)];
     exampleComments.push({
       id: `example-${postId}-2`,
+      userId: randomUser2.id,
       contentId: postId,
       postId: postId,
       parentId: undefined,
@@ -64,10 +66,11 @@ const CommentList = ({ postId, commentsCount }: CommentListProps) => {
       moderation: { status: 'approved' as const, flags: [] }
     });
     
-    if (commentCount > 2) {
+      if (commentCount > 2) {
       const randomUser3 = mockUsers[Math.floor(Math.random() * mockUsers.length)];
       exampleComments.push({
         id: `example-${postId}-3`,
+        userId: randomUser3.id,
         contentId: postId,
         postId: postId,
         parentId: undefined,

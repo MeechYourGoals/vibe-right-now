@@ -91,5 +91,9 @@ export const isOpenNow = (location: Location): boolean => {
     return false;
   }
 
-  return location.hours.isOpenNow || false;
+  if (typeof location.hours === 'object' && 'isOpenNow' in location.hours) {
+    return Boolean((location.hours as any).isOpenNow);
+  }
+
+  return false;
 };
