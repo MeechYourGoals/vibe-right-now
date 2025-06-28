@@ -43,7 +43,7 @@ const ProfileTabContent: React.FC<ProfileTabContentProps> = ({
         return post.media && post.media.length > 0;
       case 'videos':
         return post.media && Array.isArray(post.media) && post.media.some(m => 
-          typeof m === 'object' ? m.type === 'video' : m.includes('video')
+          typeof m === 'object' ? m.type === 'video' : false
         );
       case 'vibes':
         return post.vibes && post.vibes.length > 0;
@@ -52,25 +52,63 @@ const ProfileTabContent: React.FC<ProfileTabContentProps> = ({
     }
   });
 
-  if (activeTab === 'places' && locations) {
+  // Handle location-based tabs (venues, visited, wishlist)
+  if (['venues', 'visited', 'wishlist'].includes(activeTab) && locations) {
+    const getTabTitle = () => {
+      switch (activeTab) {
+        case 'venues': return 'Followed Venues';
+        case 'visited': return 'Visited Places';
+        case 'wishlist': return 'Wishlist';
+        default: return 'Places';
+      }
+    };
+
+    const getEmptyMessage = () => {
+      switch (activeTab) {
+        case 'venues': return 'No venues followed yet';
+        case 'visited': return 'No places visited yet';
+        case 'wishlist': return 'No places in wishlist yet';
+        default: return 'No places found';
+      }
+    };
+
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {locations.map((location) => (
-          <div key={location.id} className="bg-card border rounded-lg p-4">
-            <h3 className="font-semibold">{location.name}</h3>
-            <p className="text-sm text-muted-foreground">{location.address}</p>
-            <div className="flex items-center gap-2 mt-2">
-              <Badge variant="secondary">{location.type}</Badge>
-              {location.rating && (
-                <span className="text-sm">⭐ {location.rating}</span>
-              )}
-            </div>
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold">{getTabTitle()}</h3>
+        {locations.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">{getEmptyMessage()}</p>
           </div>
-        ))}
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {locations.map((location) => (
+              <div key={location.id} className="bg-card border rounded-lg p-4 hover:shadow-md transition-shadow">
+                <h4 className="font-semibold text-foreground">{location.name}</h4>
+                <p className="text-sm text-muted-foreground">{location.address}</p>
+                <div className="flex items-center gap-2 mt-2">
+                  <Badge variant="secondary">{location.type}</Badge>
+                  {location.rating && (
+                    <span className="text-sm">⭐ {location.rating}</span>
+                  )}
+                </div>
+                {location.vibes && location.vibes.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {location.vibes.slice(0, 3).map((vibe, index) => (
+                      <Badge key={index} variant="outline" className="text-xs">
+                        {vibe}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     );
   }
 
+  // Handle vibes tab
   if (activeTab === 'vibes') {
     return (
       <div className="space-y-4">
@@ -123,13 +161,22 @@ const ProfileTabContent: React.FC<ProfileTabContentProps> = ({
     );
   }
 
+  // Handle posts tab (grid view)
   return (
-    <div className="grid grid-cols-3 gap-1 md:gap-2">
-      {filteredPosts.map((post) => (
-        <div key={post.id} className="aspect-square bg-muted rounded-lg overflow-hidden">
-          {renderMedia(post.media)}
+    <div className="space-y-4">
+      {filteredPosts.length === 0 ? (
+        <div className="text-center py-8">
+          <p className="text-muted-foreground">No posts yet</p>
         </div>
-      ))}
+      ) : (
+        <div className="grid grid-cols-3 gap-1 md:gap-2">
+          {filteredPosts.map((post) => (
+            <div key={post.id} className="aspect-square bg-muted rounded-lg overflow-hidden hover:opacity-90 transition-opacity cursor-pointer">
+              {renderMedia(post.media)}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
