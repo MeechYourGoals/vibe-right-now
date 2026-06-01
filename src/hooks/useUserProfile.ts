@@ -1,12 +1,21 @@
 
-import { useState, useEffect } from 'react';
-import { UserProfileData, UserProfileStats, User, Post, Location, Comment } from '@/types';
+import { useState, useEffect, useCallback } from 'react';
+import { UserProfileStats, User, Post, Location, Comment } from '@/types';
 import { mockUsers, getUserById, getUserByUsername } from '@/mock/users';
-import { mockPosts } from '@/mock/posts';
 import { mockComments } from '@/mock/comments';
 import { mockLocations } from '@/mock/locations';
+import { profilesRepo, postsRepo } from '@/services/data';
+import { followService } from '@/services/social/followService';
+import { useUserStore } from '@/store/userStore';
 
+/**
+ * Loads a user's public profile (by username, falling back to id) and their posts
+ * through the data layer (Supabase with mock fallback). Follow/unfollow writes go
+ * through followService and require an authenticated session; when signed out they
+ * resolve false so callers can prompt sign-in.
+ */
 export const useUserProfile = (userIdOrUsername?: string) => {
+  const { user: currentUser, isAuthenticated } = useUserStore();
   const [profile, setProfile] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -14,6 +23,7 @@ export const useUserProfile = (userIdOrUsername?: string) => {
   const [followedVenues, setFollowedVenues] = useState<Location[]>([]);
   const [visitedPlaces, setVisitedPlaces] = useState<Location[]>([]);
   const [wantToVisitPlaces, setWantToVisitPlaces] = useState<Location[]>([]);
+  const [isFollowing, setIsFollowing] = useState(false);
   const [stats, setStats] = useState<UserProfileStats>({
     posts: 0,
     followers: 0,
@@ -22,95 +32,127 @@ export const useUserProfile = (userIdOrUsername?: string) => {
   });
 
   useEffect(() => {
-    if (userIdOrUsername) {
+    if (!userIdOrUsername) return;
+    let active = true;
+
+    const load = async () => {
       setLoading(true);
-      
-      setTimeout(() => {
-        // Try to find user by ID first, then by username
-        let user = getUserById(userIdOrUsername);
+      try {
+        // Resolve by username first, then by id.
+        let user = await profilesRepo.getByUsername(userIdOrUsername);
         if (!user) {
-          user = getUserByUsername(userIdOrUsername);
+          user = await profilesRepo.getById(userIdOrUsername);
         }
-        
+
+        if (!active) return;
+
         if (user) {
           setProfile(user);
-          const posts = mockPosts.filter(p => p.user.id === user.id);
+          const posts = await postsRepo.getByUser(user.id);
+          if (!active) return;
           setUserPosts(posts);
+
+          const [followers, following] = await Promise.all([
+            followService.followerCount(user.id),
+            followService.followingCount(user.id),
+          ]);
+          if (!active) return;
+
           setStats({
             posts: posts.length,
-            followers: user.followers || 0,
-            following: user.following || 0,
-            likes: posts.reduce((sum, post) => sum + post.likes, 0)
+            followers: followers || user.followers || 0,
+            following: following || user.following || 0,
+            likes: posts.reduce((sum, post) => sum + (post.likes || 0), 0),
           });
+
+          // Places sections remain mock-backed (owned by other streams).
           setFollowedVenues(mockLocations.slice(0, 3));
           setVisitedPlaces(mockLocations.slice(0, 5));
           setWantToVisitPlaces(mockLocations.slice(5, 8));
           setError(null);
+
+          if (currentUser?.id && currentUser.id !== user.id) {
+            const following = await followService.isFollowing(currentUser.id, user.id);
+            if (active) setIsFollowing(following);
+          }
         } else {
           setError('User not found');
           setProfile(null);
         }
-        setLoading(false);
-      }, 500);
-    }
-  }, [userIdOrUsername]);
-
-  const followUser = async (userToFollow: string): Promise<boolean> => {
-    return true;
-  };
-
-  const unfollowUser = async (userToUnfollow: string): Promise<boolean> => {
-    return true;
-  };
-
-  const getFollowStatus = (userId: string): boolean => {
-    return false;
-  };
-
-  const getMutualFollowers = (userId: string): User[] => {
-    return mockUsers.slice(0, 2);
-  };
-
-  const getUserPosts = (userId: string): Post[] => {
-    return mockPosts.filter(p => p.user.id === userId);
-  };
-
-  const getUserStats = (userId: string): UserProfileStats => {
-    const posts = getUserPosts(userId);
-    const user = mockUsers.find(u => u.id === userId);
-    return {
-      posts: posts.length,
-      followers: user?.followers || 0,
-      following: user?.following || 0,
-      likes: posts.reduce((sum, post) => sum + post.likes, 0)
+      } catch (err) {
+        if (active) {
+          console.warn('[useUserProfile] load failed:', err);
+          setError('User not found');
+          setProfile(null);
+        }
+      } finally {
+        if (active) setLoading(false);
+      }
     };
-  };
 
-  const getPostComments = (postId: string): Comment[] => {
-    return mockComments.filter(c => c.postId === postId);
-  };
+    load();
+    return () => {
+      active = false;
+    };
+  }, [userIdOrUsername, currentUser?.id]);
+
+  const followUser = useCallback(
+    async (): Promise<boolean> => {
+      if (!isAuthenticated || !currentUser?.id || !profile?.id) return false;
+      try {
+        await followService.follow(currentUser.id, profile.id);
+        setIsFollowing(true);
+        setStats((s) => ({ ...s, followers: s.followers + 1 }));
+        return true;
+      } catch (err) {
+        console.warn('[useUserProfile] follow failed:', err);
+        return false;
+      }
+    },
+    [isAuthenticated, currentUser?.id, profile?.id],
+  );
+
+  const unfollowUser = useCallback(
+    async (): Promise<boolean> => {
+      if (!isAuthenticated || !currentUser?.id || !profile?.id) return false;
+      try {
+        await followService.unfollow(currentUser.id, profile.id);
+        setIsFollowing(false);
+        setStats((s) => ({ ...s, followers: Math.max(0, s.followers - 1) }));
+        return true;
+      } catch (err) {
+        console.warn('[useUserProfile] unfollow failed:', err);
+        return false;
+      }
+    },
+    [isAuthenticated, currentUser?.id, profile?.id],
+  );
+
+  const getFollowStatus = (): boolean => isFollowing;
+
+  const getMutualFollowers = (): User[] => mockUsers.slice(0, 2) as unknown as User[];
+
+  const getUserStats = (): UserProfileStats => stats;
+
+  const getPostComments = (postId: string): Comment[] =>
+    mockComments.filter((c) => c.postId === postId);
 
   const updateBio = async (bio: string): Promise<boolean> => {
-    return true;
+    if (!isAuthenticated || !currentUser?.id || currentUser.id !== profile?.id) return false;
+    try {
+      await profilesRepo.update(currentUser.id, { bio });
+      setProfile((p) => (p ? { ...p, bio } : p));
+      return true;
+    } catch (err) {
+      console.warn('[useUserProfile] updateBio failed:', err);
+      return false;
+    }
   };
 
-  const blockUser = async (userId: string): Promise<boolean> => {
-    return true;
-  };
+  const blockUser = async (): Promise<boolean> => true;
+  const reportUser = async (): Promise<boolean> => true;
 
-  const reportUser = async (userId: string, reason: string): Promise<boolean> => {
-    return true;
-  };
-
-  const getUserBio = (userId: string): string => {
-    const user = mockUsers.find(u => u.id === userId);
-    return user?.bio || '';
-  };
-
-  const isPrivateProfile = (userId: string): boolean => {
-    const user = mockUsers.find(u => u.id === userId);
-    return user?.isPrivate || false;
-  };
+  const getUserBio = (): string => profile?.bio || '';
 
   return {
     profile,
@@ -121,11 +163,11 @@ export const useUserProfile = (userIdOrUsername?: string) => {
     visitedPlaces,
     wantToVisitPlaces,
     stats,
+    isFollowing,
     followUser,
     unfollowUser,
     getFollowStatus,
     getMutualFollowers,
-    getUserPosts,
     getUserStats,
     getPostComments,
     setStats,
@@ -133,6 +175,6 @@ export const useUserProfile = (userIdOrUsername?: string) => {
     blockUser,
     reportUser,
     getUserBio,
-    isPrivateProfile: profile?.isPrivate || false
+    isPrivateProfile: profile?.isPrivate || false,
   };
 };

@@ -1,11 +1,35 @@
 
+import { useEffect, useState } from "react";
 import { Layout } from "@/components/Layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Award, TrendingUp, MapPin, Calendar, Clock, CheckCircle2, Ticket } from "lucide-react";
+import { Award, TrendingUp, Star } from "lucide-react";
+import { useUserStore } from "@/store/userStore";
+import { pointsService, type PointsLedgerEntry } from "@/services/social/pointsService";
 
 const UserPointsPage = () => {
+  const { user } = useUserStore();
+  const [totalPoints, setTotalPoints] = useState(1250);
+  const [ledger, setLedger] = useState<PointsLedgerEntry[]>([]);
+
+  useEffect(() => {
+    let active = true;
+    Promise.all([
+      pointsService.getTotal(user?.id),
+      pointsService.getLedger(user?.id),
+    ])
+      .then(([total, entries]) => {
+        if (!active) return;
+        setTotalPoints(total);
+        setLedger(entries);
+      })
+      .catch((err) => console.warn("[UserPoints] load failed:", err));
+    return () => {
+      active = false;
+    };
+  }, [user?.id]);
+
   return (
     <Layout>
       <div className="container py-8">
@@ -19,7 +43,7 @@ const UserPointsPage = () => {
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
-                <span className="text-3xl font-bold text-primary">1,250</span>
+                <span className="text-3xl font-bold text-primary">{totalPoints.toLocaleString()}</span>
                 <Award className="h-8 w-8 text-primary opacity-80" />
               </div>
             </CardContent>
@@ -71,49 +95,29 @@ const UserPointsPage = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {[
-                    { 
-                      action: "Checked in at Griffith Observatory", 
-                      points: 25, 
-                      date: "Apr 4, 2025", 
-                      icon: <MapPin className="h-4 w-4" /> 
-                    },
-                    { 
-                      action: "Posted a video at Crypto.com Arena", 
-                      points: 75, 
-                      date: "Apr 2, 2025",
-                      icon: <Calendar className="h-4 w-4" />
-                    },
-                    { 
-                      action: "5-day streak bonus", 
-                      points: 50, 
-                      date: "Apr 1, 2025",
-                      icon: <TrendingUp className="h-4 w-4" />
-                    },
-                    { 
-                      action: "Verified Venice Beach review", 
-                      points: 30, 
-                      date: "Mar 28, 2025",
-                      icon: <CheckCircle2 className="h-4 w-4" />
-                    },
-                    { 
-                      action: "Shared 3 locations", 
-                      points: 45, 
-                      date: "Mar 25, 2025",
-                      icon: <Clock className="h-4 w-4" />
-                    }
-                  ].map((item, index) => (
-                    <div key={index} className="flex items-center justify-between border-b border-border pb-3 last:border-0 last:pb-0">
+                  {ledger.length === 0 && (
+                    <p className="text-sm text-muted-foreground">No recent activity yet.</p>
+                  )}
+                  {ledger.map((item) => (
+                    <div key={item.id} className="flex items-center justify-between border-b border-border pb-3 last:border-0 last:pb-0">
                       <div className="flex items-center">
                         <div className="flex items-center justify-center h-8 w-8 rounded-full bg-primary/10 text-primary mr-3">
-                          {item.icon}
+                          <Star className="h-4 w-4" />
                         </div>
                         <div>
-                          <p className="font-medium">{item.action}</p>
-                          <p className="text-xs text-muted-foreground">{item.date}</p>
+                          <p className="font-medium">{item.reason}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {new Date(item.createdAt).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })}
+                          </p>
                         </div>
                       </div>
-                      <span className="font-semibold text-sm text-primary">+{item.points} pts</span>
+                      <span className="font-semibold text-sm text-primary">
+                        {item.points >= 0 ? "+" : ""}{item.points} pts
+                      </span>
                     </div>
                   ))}
                 </div>

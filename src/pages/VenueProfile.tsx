@@ -22,7 +22,7 @@ import VenuePostsContent from "@/components/venue/VenuePostsContent";
 import WaitTimeDisplay from "@/components/venue/WaitTimeDisplay";
 import WaitTimeUpdater from "@/components/venue/WaitTimeUpdater";
 import PremiumFeaturesContainer from "@/components/venue/PremiumFeaturesContainer";
-import { useAuth0 } from "@auth0/auth0-react";
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 import { useUserSubscription } from "@/hooks/useUserSubscription";
 
 // Define an extended Post type that includes venue-specific properties
@@ -42,7 +42,7 @@ const VenueProfile = () => {
   const [isVenueOwner, setIsVenueOwner] = useState(false);
   const [subscriptionTier, setSubscriptionTier] = useState<'standard' | 'plus' | 'premium' | 'pro'>('standard');
   
-  const { user, isAuthenticated } = useAuth0();
+  const { user, isAuthenticated } = useSupabaseAuth();
   const { canAccessFeature } = useUserSubscription();
   
   const venue = mockLocations.find(location => location.id === id);

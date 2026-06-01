@@ -1,8 +1,10 @@
 
 import { useState, useEffect } from 'react';
 import { UserSubscription, UserSubscriptionTier, TIER_FEATURES } from '@/types/subscription';
+import { useUserStore } from '@/store/userStore';
 
 export const useUserSubscription = () => {
+  const { user } = useUserStore();
   const [subscription, setSubscription] = useState<UserSubscription>({
     tier: 'free',
     isActive: true,
@@ -10,7 +12,18 @@ export const useUserSubscription = () => {
   });
 
   useEffect(() => {
-    // Load subscription from localStorage or API
+    // Prefer the authenticated profile's subscription tier (synced from Supabase),
+    // then fall back to any locally-persisted subscription for the demo.
+    const storeTier = user?.subscription as UserSubscriptionTier | undefined;
+    if (storeTier && TIER_FEATURES[storeTier]) {
+      setSubscription({
+        tier: storeTier,
+        isActive: true,
+        features: TIER_FEATURES[storeTier],
+      });
+      return;
+    }
+
     const savedSubscription = localStorage.getItem('userSubscription');
     if (savedSubscription) {
       const parsed = JSON.parse(savedSubscription);
@@ -19,7 +32,7 @@ export const useUserSubscription = () => {
         features: TIER_FEATURES[parsed.tier as UserSubscriptionTier]
       });
     }
-  }, []);
+  }, [user?.subscription]);
 
   const updateSubscriptionTier = (newTier: UserSubscriptionTier) => {
     const updatedSubscription: UserSubscription = {
