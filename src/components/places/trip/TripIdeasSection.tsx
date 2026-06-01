@@ -5,11 +5,16 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PlusCircle, MapPin, Star, ThumbsUp, ThumbsDown } from "lucide-react";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
-import { db } from '@/services/database';
-import { TripVenueIdea } from '@/services/database/repositories/TripRepository';
 import { toast } from "sonner";
 import AddVenueIdeaDialog from './AddVenueIdeaDialog';
 import { supabase } from "@/integrations/supabase/client";
+import {
+  listVenueIdeas,
+  proposeVenueIdea,
+  voteOnVenueIdea,
+  getCurrentUserId,
+  VenueIdeaRecord,
+} from "@/services/trips/tripCollabService";
 
 interface TripIdeasSectionProps {
   tripId: string;
@@ -21,14 +26,7 @@ interface TripIdeasSectionProps {
   userColors: Array<{ id: string; color: string }>;
 }
 
-interface VenueIdea extends TripVenueIdea {
-  trip_venue_votes?: Array<{
-    id: string;
-    vote_type: 'up' | 'down';
-    user_name: string;
-    user_avatar: string;
-  }>;
-}
+type VenueIdea = VenueIdeaRecord;
 
 const TripIdeasSection: React.FC<TripIdeasSectionProps> = ({
   tripId,
@@ -39,90 +37,95 @@ const TripIdeasSection: React.FC<TripIdeasSectionProps> = ({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Display identity for the current user; falls back to a generic label when
+  // signed out so the UI still renders.
   const currentUser = {
-    id: "current-user",
-    name: "Current User",
-    avatar: "/placeholder.svg"
+    id: collaborators[0]?.id || "current-user",
+    name: collaborators[0]?.name || "You",
+    avatar: collaborators[0]?.avatar || "/placeholder.svg"
   };
 
   useEffect(() => {
     fetchVenueIdeas();
-    subscribeToVenueIdeas();
+    const unsubscribe = subscribeToVenueIdeas();
+    return unsubscribe;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tripId]);
 
   const fetchVenueIdeas = async () => {
     try {
-      const result = await db.trips.getVenueIdeas(tripId);
-      if (result.success && result.data) {
-        setVenueIdeas(result.data as VenueIdea[]);
-      } else if (result.error) {
-        console.error('Error fetching venue ideas:', result.error);
-        toast.error('Failed to load venue ideas');
-      }
+      const ideas = await listVenueIdeas(tripId);
+      setVenueIdeas(ideas);
     } catch (error) {
       console.error('Error fetching venue ideas:', error);
-      toast.error('Failed to load venue ideas');
     } finally {
       setIsLoading(false);
     }
   };
 
   const subscribeToVenueIdeas = () => {
-    const channel = supabase
-      .channel(`trip-venue-ideas-${tripId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'trip_venue_ideas',
-          filter: `trip_id=eq.${tripId}`
-        },
-        () => {
-          fetchVenueIdeas();
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'trip_venue_votes'
-        },
-        () => {
-          fetchVenueIdeas();
-        }
-      )
-      .subscribe();
+    try {
+      const channel = supabase
+        .channel(`trip-venue-ideas-${tripId}`)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'trip_venue_ideas',
+            filter: `trip_id=eq.${tripId}`
+          },
+          () => {
+            fetchVenueIdeas();
+          }
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'trip_venue_votes'
+          },
+          () => {
+            fetchVenueIdeas();
+          }
+        )
+        .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    } catch (err) {
+      // Realtime is a nice-to-have; never let it break the view.
+      console.warn('[TripIdeasSection] realtime subscribe failed:', err);
+      return () => {};
+    }
   };
 
   const addVenueIdea = async (venueData: any) => {
+    const uid = await getCurrentUserId();
+    if (!uid) {
+      toast.error('Please sign in to propose a venue');
+      return;
+    }
     try {
-      const result = await db.trips.addVenueIdea({
+      await proposeVenueIdea({
         trip_id: tripId,
-        venue_id: venueData.id,
+        venue_id: String(venueData.id),
         venue_name: venueData.name,
         venue_address: venueData.address,
         venue_city: venueData.city,
         venue_rating: venueData.rating,
         venue_image_url: venueData.image_url,
-        proposed_by_id: currentUser.id,
+        proposed_by_id: uid,
         proposed_by_name: currentUser.name,
         proposed_by_avatar: currentUser.avatar,
         notes: venueData.notes || '',
         status: 'pending'
       });
-
-      if (result.success) {
-        toast.success('Venue idea added successfully!');
-        setIsDialogOpen(false);
-      } else {
-        throw result.error || new Error('Failed to add venue idea');
-      }
+      toast.success('Venue idea added successfully!');
+      setIsDialogOpen(false);
+      fetchVenueIdeas();
     } catch (error) {
       console.error('Error adding venue idea:', error);
       toast.error('Failed to add venue idea');
@@ -130,6 +133,11 @@ const TripIdeasSection: React.FC<TripIdeasSectionProps> = ({
   };
 
   const voteOnVenue = async (venueIdeaId: string, voteType: 'up' | 'down') => {
+    const uid = await getCurrentUserId();
+    if (!uid) {
+      toast.error('Please sign in to vote');
+      return;
+    }
     try {
       // Check if user already voted
       const existingVote = venueIdeas
@@ -141,19 +149,15 @@ const TripIdeasSection: React.FC<TripIdeasSectionProps> = ({
         return;
       }
 
-      const result = await db.trips.voteOnVenue({
+      await voteOnVenueIdea({
         venue_idea_id: venueIdeaId,
         vote_type: voteType,
-        user_id: currentUser.id,
+        user_id: uid,
         user_name: currentUser.name,
         user_avatar: currentUser.avatar
       });
-
-      if (result.success) {
-        toast.success('Vote recorded!');
-      } else {
-        throw result.error || new Error('Failed to record vote');
-      }
+      toast.success('Vote recorded!');
+      fetchVenueIdeas();
     } catch (error) {
       console.error('Error voting:', error);
       toast.error('Failed to record vote');

@@ -12,6 +12,8 @@ import { AddPlaceDialog } from "./trip/AddPlaceDialog";
 import { EmptyPlaceState } from "./trip/EmptyPlaceState";
 import TripCommunicationHub from "./trip/TripCommunicationHub";
 import { useTripPlaces } from "./trip/useTripPlaces";
+import { tripsRepo } from "@/services/data";
+import { listTripMembers } from "@/services/trips/tripCollabService";
 
 // Mock colors for users
 const userColors = [
@@ -27,20 +29,60 @@ const TripDetails = () => {
   const navigate = useNavigate();
   const [trip, setTrip] = React.useState<any>(null);
   
-  // Fetch trip data
+  // Fetch trip data: prefer the data layer (Supabase + mock fallback), and fall
+  // back to any locally-stored offline trip if the repo can't resolve it.
   React.useEffect(() => {
-    // In a real app, this would be an API call
-    const storedTrips = localStorage.getItem('trips');
-    let tripsData = storedTrips ? JSON.parse(storedTrips) : [];
-    
-    const foundTrip = tripsData.find((t: any) => t.id === tripId);
-    
-    if (foundTrip) {
-      setTrip(foundTrip);
-    } else {
-      toast.error("Trip not found");
-      navigate("/my-places");
-    }
+    let cancelled = false;
+
+    const loadTrip = async () => {
+      if (!tripId) return;
+
+      try {
+        const record = await tripsRepo.getById(tripId);
+        if (record) {
+          const members = await listTripMembers(tripId);
+          if (cancelled) return;
+          setTrip({
+            id: record.id,
+            name: record.name,
+            destination: record.description || "Trip",
+            description: record.description || "",
+            startDate: record.startDate || new Date().toISOString().split("T")[0],
+            endDate: record.endDate || new Date().toISOString().split("T")[0],
+            collaborators:
+              members.length > 0
+                ? members
+                : [{ id: "1", name: "You", avatar: "/placeholder.svg" }],
+          });
+          return;
+        }
+      } catch (err) {
+        console.warn("[TripDetails] repo lookup failed, trying local:", err);
+      }
+
+      // Offline fallback: locally-stored trips.
+      try {
+        const storedTrips = localStorage.getItem("trips");
+        const tripsData = storedTrips ? JSON.parse(storedTrips) : [];
+        const foundTrip = tripsData.find((t: any) => t.id === tripId);
+        if (foundTrip && !cancelled) {
+          setTrip(foundTrip);
+          return;
+        }
+      } catch {
+        // ignore
+      }
+
+      if (!cancelled) {
+        toast.error("Trip not found");
+        navigate("/my-places");
+      }
+    };
+
+    loadTrip();
+    return () => {
+      cancelled = true;
+    };
   }, [tripId, navigate]);
 
   const {

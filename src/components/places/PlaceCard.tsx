@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { MapPin, Star, Clock, Car, ExternalLink, BookmarkPlus } from "lucide-react";
 import { Location } from "@/types";
 import { toast } from "sonner";
+import { addUserPlace, getCurrentUserId } from "@/services/trips/tripCollabService";
 
 type PlaceCardProps = {
   place: Location;
@@ -51,8 +52,25 @@ const PlaceCard = ({ place, visitType }: PlaceCardProps) => {
   const rideServiceUrl = getRideServiceUrl(place);
   const officialUrl = getOfficialUrl(place);
   
-  const handleSaveToWantToVisit = () => {
-    toast.success(`Added ${place.name} to your "Want to Visit" list`);
+  const handleSaveToWantToVisit = async () => {
+    const uid = await getCurrentUserId();
+    if (!uid) {
+      toast.error('Please sign in to save places');
+      return;
+    }
+    try {
+      await addUserPlace({
+        user_id: uid,
+        location_id: place.id,
+        location_name: place.name,
+        location_city: place.city,
+        status: "want_to_visit",
+      });
+      toast.success(`Added ${place.name} to your "Want to Visit" list`);
+    } catch (err) {
+      console.error('[PlaceCard] save failed:', err);
+      toast.error('Failed to save place');
+    }
   };
   
   return (

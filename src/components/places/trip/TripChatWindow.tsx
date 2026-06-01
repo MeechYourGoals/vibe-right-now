@@ -3,11 +3,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Send, Search, ThumbsUp, ThumbsDown, Heart } from "lucide-react";
-import { db } from '@/services/database';
-import { TripMessage } from '@/services/database/repositories/TripRepository';
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  listTripMessages,
+  sendTripMessage,
+  getCurrentUserId,
+  TripMessageRecord,
+} from "@/services/trips/tripCollabService";
+
+type TripMessage = TripMessageRecord;
 
 interface TripChatWindowProps {
   tripId: string;
@@ -39,14 +45,16 @@ const TripChatWindow: React.FC<TripChatWindowProps> = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const currentUser = {
-    id: "current-user",
-    name: "Current User",
-    avatar: "/placeholder.svg"
+    id: collaborators[0]?.id || "current-user",
+    name: collaborators[0]?.name || "You",
+    avatar: collaborators[0]?.avatar || "/placeholder.svg"
   };
 
   useEffect(() => {
     fetchMessages();
-    subscribeToMessages();
+    const unsubscribe = subscribeToMessages();
+    return unsubscribe;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tripId]);
 
   useEffect(() => {
@@ -59,12 +67,12 @@ const TripChatWindow: React.FC<TripChatWindowProps> = ({
 
   const fetchMessages = async () => {
     try {
-      // First get messages
-      const messagesResult = await db.trips.getMessages(tripId);
-      if (messagesResult.success && messagesResult.data) {
-        // Then get reactions via direct Supabase call for now
-        const { data: messagesWithReactions, error } = await supabase
-          .from('trip_messages')
+      const rows = await listTripMessages(tripId);
+      // Try to enrich with reactions, but don't fail the view if that table
+      // isn't present.
+      try {
+        const { data, error } = await supabase
+          .from('trip_messages' as any)
           .select(`
             *,
             trip_message_reactions (
@@ -75,72 +83,85 @@ const TripChatWindow: React.FC<TripChatWindowProps> = ({
           `)
           .eq('trip_id', tripId)
           .order('created_at', { ascending: true });
-
-        if (error) throw error;
-        setMessages(messagesWithReactions || []);
-      } else if (messagesResult.error) {
-        console.error('Error fetching messages:', messagesResult.error);
-        toast.error('Failed to load messages');
+        if (!error && data && data.length > 0) {
+          setMessages(data as ChatMessage[]);
+          return;
+        }
+      } catch {
+        // ignore reaction enrichment failure
       }
+      setMessages(rows as ChatMessage[]);
     } catch (error) {
       console.error('Error fetching messages:', error);
-      toast.error('Failed to load messages');
     } finally {
       setIsLoading(false);
     }
   };
 
   const subscribeToMessages = () => {
-    const channel = supabase
-      .channel(`trip-messages-${tripId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'trip_messages',
-          filter: `trip_id=eq.${tripId}`
-        },
-        (payload) => {
-          setMessages(prev => [...prev, payload.new as ChatMessage]);
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'trip_message_reactions'
-        },
-        () => {
-          fetchMessages(); // Refresh to get updated reactions
-        }
-      )
-      .subscribe();
+    try {
+      const channel = supabase
+        .channel(`trip-messages-${tripId}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'trip_messages',
+            filter: `trip_id=eq.${tripId}`
+          },
+          (payload) => {
+            setMessages(prev => {
+              const incoming = payload.new as ChatMessage;
+              if (prev.some(m => m.id === incoming.id)) return prev;
+              return [...prev, incoming];
+            });
+          }
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'trip_message_reactions'
+          },
+          () => {
+            fetchMessages(); // Refresh to get updated reactions
+          }
+        )
+        .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    } catch (err) {
+      console.warn('[TripChatWindow] realtime subscribe failed:', err);
+      return () => {};
+    }
   };
 
   const sendMessage = async () => {
     if (!newMessage.trim()) return;
 
+    const uid = await getCurrentUserId();
+    if (!uid) {
+      toast.error('Please sign in to send a message');
+      return;
+    }
+
     try {
-      const result = await db.trips.sendMessage({
+      const created = await sendTripMessage({
         trip_id: tripId,
         content: newMessage,
-        user_id: currentUser.id,
+        user_id: uid,
         user_name: currentUser.name,
         user_avatar: currentUser.avatar,
         message_type: 'text'
       });
-
-      if (result.success) {
-        setNewMessage('');
-      } else {
-        throw result.error || new Error('Failed to send message');
-      }
+      setNewMessage('');
+      setMessages(prev =>
+        prev.some(m => m.id === created.id) ? prev : [...prev, created as ChatMessage],
+      );
     } catch (error) {
       console.error('Error sending message:', error);
       toast.error('Failed to send message');
@@ -148,17 +169,22 @@ const TripChatWindow: React.FC<TripChatWindowProps> = ({
   };
 
   const addReaction = async (messageId: string, reactionType: string) => {
+    const uid = await getCurrentUserId();
+    if (!uid) {
+      toast.error('Please sign in to react');
+      return;
+    }
     try {
-      const result = await db.trips.addReaction({
-        message_id: messageId,
-        reaction_type: reactionType,
-        user_id: currentUser.id,
-        user_name: currentUser.name
-      });
-
-      if (!result.success) {
-        throw result.error || new Error('Failed to add reaction');
-      }
+      const { error } = await supabase
+        .from('trip_message_reactions' as any)
+        .insert({
+          message_id: messageId,
+          reaction_type: reactionType,
+          user_id: uid,
+          user_name: currentUser.name,
+        });
+      if (error) throw error;
+      fetchMessages();
     } catch (error) {
       console.error('Error adding reaction:', error);
       toast.error('Failed to add reaction');
