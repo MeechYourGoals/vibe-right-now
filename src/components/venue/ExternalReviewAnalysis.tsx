@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { MessageSquare, ExternalLink, Loader2, Globe, TrendingUp } from "lucide-react";
 import { useUserSubscription } from "@/hooks/useUserSubscription";
-import { supabase } from "@/integrations/supabase/client";
+import { invokeEdgeWithFallback } from "@/services/edge/invokeEdge";
 import VernonReviewChat from './VernonReviewChat';
 
 interface ExternalReviewAnalysisProps {
@@ -28,6 +28,33 @@ interface ReviewAnalysisData {
   };
   analyzedAt: string;
 }
+
+/**
+ * Deterministic mock insight used when the review-sentiment-analyzer edge function is
+ * unavailable (e.g. no API keys). Keeps the venue insights surface populated in the demo.
+ */
+const buildMockAnalysis = (url: string, venueName: string): ReviewAnalysisData => {
+  let domain = "reviews";
+  try {
+    domain = new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    /* keep default */
+  }
+  return {
+    url,
+    domain,
+    platform: domain.split(".")[0] || "web",
+    summary: `Reviewers describe ${venueName} as a welcoming spot with great atmosphere and friendly staff. Most visitors highlight the quality of the experience, with occasional notes about wait times during peak hours.`,
+    reviewCount: 128,
+    overallSentiment: 0.82,
+    themes: {
+      positive: ["great atmosphere", "friendly staff", "good value"],
+      negative: ["busy on weekends", "limited parking"],
+      neutral: ["central location", "casual setting"],
+    },
+    analyzedAt: new Date().toISOString(),
+  };
+};
 
 const ExternalReviewAnalysis: React.FC<ExternalReviewAnalysisProps> = ({
   venueId,
@@ -62,21 +89,16 @@ const ExternalReviewAnalysis: React.FC<ExternalReviewAnalysisProps> = ({
     try {
       // Validate URL
       new URL(url);
-      
-      const { data, error: functionError } = await supabase.functions.invoke('parse-venue-reviews', {
-        body: {
-          url: url.trim(),
-          venueId
-        }
-      });
 
-      if (functionError) throw functionError;
+      // Route venue review sentiment through the edge helper, falling back to a local
+      // mock insight so the feature works with zero API keys configured.
+      const analysis = await invokeEdgeWithFallback<ReviewAnalysisData>(
+        'review-sentiment-analyzer',
+        { url: url.trim(), venueId, venueName },
+        () => buildMockAnalysis(url.trim(), venueName)
+      );
 
-      if (data.success) {
-        setAnalysisData(data.data);
-      } else {
-        throw new Error('Failed to analyze reviews');
-      }
+      setAnalysisData(analysis);
     } catch (error) {
       console.error('Error analyzing reviews:', error);
       setError(error instanceof Error ? error.message : 'Invalid URL or analysis failed');

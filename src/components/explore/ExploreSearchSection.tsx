@@ -11,6 +11,7 @@ import { useGooglePlacesAutocomplete } from '@/hooks/useGooglePlacesAutocomplete
 interface ExploreSearchSectionProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
+  onSearchSubmit?: (query: string) => void;
   dateRange: { from: Date; to: Date } | null;
   onDateChange: (dates: { from: Date; to: Date } | null) => void;
   location: string;
@@ -22,6 +23,7 @@ interface ExploreSearchSectionProps {
 const ExploreSearchSection: React.FC<ExploreSearchSectionProps> = ({
   searchQuery,
   onSearchChange,
+  onSearchSubmit,
   dateRange,
   onDateChange,
   location,
@@ -106,6 +108,9 @@ const ExploreSearchSection: React.FC<ExploreSearchSectionProps> = ({
             placeholder="Search venues, events, activities..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') onSearchSubmit?.(searchQuery);
+            }}
             className="pl-10"
           />
         </div>

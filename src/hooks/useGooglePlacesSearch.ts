@@ -1,6 +1,6 @@
 
 import { useState, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { invokeEdge } from '@/services/edge/invokeEdge';
 
 export const useGooglePlacesSearch = (location: string) => {
   const [suggestions, setSuggestions] = useState<google.maps.places.PlaceResult[]>([]);
@@ -17,13 +17,14 @@ export const useGooglePlacesSearch = (location: string) => {
     setLoading(true);
     try {
       const searchQuery = location ? `${query} in ${location}` : query;
-      
-      const { data, error } = await supabase.functions.invoke('google-places', {
-        body: {
+
+      const { data, error } = await invokeEdge<{ results?: google.maps.places.PlaceResult[] }>(
+        'google-places',
+        {
           query: searchQuery,
           type: 'establishment'
         }
-      });
+      );
 
       if (error) {
         console.error('Error fetching venues:', error);

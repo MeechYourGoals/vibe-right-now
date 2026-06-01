@@ -104,10 +104,11 @@ const WaitTimeDisplay = ({ venueId, showLastUpdated = true, className = "" }: Wa
     <div className={`flex items-center gap-2 text-sm ${className}`}>
       <Clock className="h-4 w-4 text-amber-500" />
       <span className="font-medium">
-        {waitTimeData.wait_minutes === 0 
-          ? "No wait time" 
+        {waitTimeData.wait_minutes === 0
+          ? "No wait time"
           : `~${waitTimeData.wait_minutes} min wait`}
       </span>
+      <span className="text-xs text-muted-foreground ml-1">(estimated)</span>
       {showLastUpdated && (
         <span className="text-xs text-muted-foreground ml-1">
           Updated {timeAgo}

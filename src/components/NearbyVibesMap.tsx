@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate, useLocation as useRouterLocation } from "react-router-dom";
+import { useNavigate, useLocation as useRouterLocation, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { useSimplifiedNearbyLocations } from "@/hooks/useSimplifiedNearbyLocations";
 import { geocodeAddress } from "@/utils/geocodingService";
@@ -49,18 +49,21 @@ const NearbyVibesMap: React.FC<NearbyVibesMapProps> = ({
   
   const navigate = useNavigate();
   const location = useRouterLocation();
-  
+  const { city: cityParam } = useParams<{ city?: string }>();
+
   useEffect(() => {
+    // Prefer the /explore/:city route param, then fall back to the ?q= query param.
     const params = new URLSearchParams(location.search);
     const q = params.get('q') || '';
-    
-    if (q) {
-      const city = q.split(',')[0].trim();
+    const source = cityParam || q;
+
+    if (source) {
+      const city = source.split(',')[0].trim();
       setSearchedCity(city);
     } else {
       setSearchedCity("");
     }
-  }, [location, setSearchedCity]);
+  }, [location, cityParam, setSearchedCity]);
 
   useEffect(() => {
     if (userLocation) {

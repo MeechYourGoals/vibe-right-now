@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { MapPin, ArrowRight, Navigation } from "lucide-react";
 import OpenStreetMap from "./map/OpenStreetMap";
 import { Location } from "@/types";
-import { getNearbyLocations } from "@/mock/cityLocations";
 import VerifiedIcon from "@/components/icons/VerifiedIcon";
+import { locationsRepo } from "@/services/data";
 
 const LocationsNearby = () => {
   const navigate = useNavigate();
@@ -17,30 +17,32 @@ const LocationsNearby = () => {
   const [userLocation, setUserLocation] = useState<GeolocationCoordinates | null>(null);
   const [nearbyLocations, setNearbyLocations] = useState<Location[]>([]);
   
-  // Get user's current location
+  // Get user's current location and load nearby venues from the data layer
+  // (Supabase with mock fallback).
   useEffect(() => {
+    const loadNearby = async (lat: number, lng: number) => {
+      try {
+        const locations = await locationsRepo.nearby(lat, lng);
+        setNearbyLocations(locations.slice(0, 3)); // Limit to 3 for this component
+      } catch (err) {
+        console.error("Error loading nearby locations:", err);
+        setNearbyLocations([]);
+      }
+    };
+
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           setUserLocation(position.coords);
-          
-          // Get nearby locations based on user coordinates
-          const userLat = position.coords.latitude;
-          const userLng = position.coords.longitude;
-          const locations = getNearbyLocations(userLat, userLng);
-          setNearbyLocations(locations.slice(0, 3)); // Limit to 3 for this component
+          loadNearby(position.coords.latitude, position.coords.longitude);
         },
         (error) => {
           console.error("Error getting location:", error);
-          // Use a default set of locations if geolocation fails
-          const defaultLocations = getNearbyLocations(34.0522, -118.2437); // Los Angeles
-          setNearbyLocations(defaultLocations.slice(0, 3));
+          loadNearby(34.0522, -118.2437); // Default: Los Angeles
         }
       );
     } else {
-      // Use a default set of locations if geolocation is not available
-      const defaultLocations = getNearbyLocations(34.0522, -118.2437); // Los Angeles
-      setNearbyLocations(defaultLocations.slice(0, 3));
+      loadNearby(34.0522, -118.2437); // Default: Los Angeles
     }
   }, []);
   

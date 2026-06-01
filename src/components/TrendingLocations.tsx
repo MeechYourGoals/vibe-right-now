@@ -8,8 +8,25 @@ import { Location } from "@/types";
 import { mockLocations } from "@/mock/locations";
 import { getTrendingLocationsForCity } from "@/mock/cityLocations";
 import { toast } from "sonner";
+import { locationsRepo } from "@/services/data";
 
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+
+/**
+ * Resolve trending venues for a city through the data layer (Supabase with mock
+ * fallback). If the repo has no rows for the city, fall back to the curated mock list.
+ */
+const resolveTrendingForCity = async (city: string): Promise<Location[]> => {
+  try {
+    const fromRepo = await locationsRepo.byCity(city);
+    if (fromRepo && fromRepo.length > 0) {
+      return fromRepo.slice(0, 5);
+    }
+  } catch (err) {
+    console.error("Error loading trending locations:", err);
+  }
+  return getTrendingLocationsForCity(city);
+};
 
 // Event bus for updating trending locations from VernonChat
 export const eventBus = {
@@ -68,9 +85,9 @@ const TrendingLocations = () => {
                 if (cityComponent) {
                   const detectedCity = cityComponent.long_name;
                   setCurrentCity(detectedCity);
-                  
+
                   // Get trending locations for the detected city
-                  const cityTrending = getTrendingLocationsForCity(detectedCity);
+                  const cityTrending = await resolveTrendingForCity(detectedCity);
                   if (cityTrending.length > 0) {
                     setTrendingLocations(cityTrending);
                   }
@@ -80,16 +97,16 @@ const TrendingLocations = () => {
           } catch (error) {
             console.error("Error getting city from coordinates:", error);
             // Fall back to default trending locations
-            const defaultTrending = getTrendingLocationsForCity("Los Angeles");
+            const defaultTrending = await resolveTrendingForCity("Los Angeles");
             if (defaultTrending.length > 0) {
               setTrendingLocations(defaultTrending);
             }
           }
         },
-        (error) => {
+        async (error) => {
           console.error("Error getting location:", error);
           // Fall back to default trending locations
-          const defaultTrending = getTrendingLocationsForCity("Los Angeles");
+          const defaultTrending = await resolveTrendingForCity("Los Angeles");
           if (defaultTrending.length > 0) {
             setTrendingLocations(defaultTrending);
           }
@@ -101,10 +118,15 @@ const TrendingLocations = () => {
   // Initialize with trending locations for a default city if geolocation fails
   useEffect(() => {
     if (!geolocationAttempted) {
-      const defaultTrending = getTrendingLocationsForCity("Los Angeles");
-      if (defaultTrending.length > 0) {
-        setTrendingLocations(defaultTrending);
-      }
+      let cancelled = false;
+      resolveTrendingForCity("Los Angeles").then((defaultTrending) => {
+        if (!cancelled && defaultTrending.length > 0) {
+          setTrendingLocations(defaultTrending);
+        }
+      });
+      return () => {
+        cancelled = true;
+      };
     }
   }, [geolocationAttempted]);
   
@@ -123,10 +145,11 @@ const TrendingLocations = () => {
         toast.success(`Updated trending locations for ${cityName}`);
       } else {
         // If no events were provided, get trending locations for the city
-        const cityTrending = getTrendingLocationsForCity(cityName);
-        if (cityTrending.length > 0) {
-          setTrendingLocations(cityTrending);
-        }
+        resolveTrendingForCity(cityName).then((cityTrending) => {
+          if (cityTrending.length > 0) {
+            setTrendingLocations(cityTrending);
+          }
+        });
       }
     };
     
