@@ -11,6 +11,8 @@ import {
   Bot
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { OpenAIService } from '@/services/OpenAIService';
+import { getVenueRecommendations } from '@/components/VernonChat/utils/venueRecommendations';
 
 interface Message {
   id: string;
@@ -51,38 +53,56 @@ const VLMChatBox = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
   
-  const handleSendMessage = (e?: React.FormEvent) => {
+  const handleSendMessage = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    
+
     if (!inputValue.trim()) return;
-    
+
+    const prompt = inputValue;
+
     // Add user message
     const userMessage: Message = {
       id: Date.now().toString(),
-      text: inputValue,
+      text: prompt,
       sender: 'user',
       timestamp: new Date()
     };
-    
+
+    const history = messages.map(m => ({
+      sender: m.sender,
+      text: m.text,
+    }));
+
     setMessages(prev => [...prev, userMessage]);
     setInputValue('');
     setIsTyping(true);
-    
-    // Simulate AI thinking and typing
-    setTimeout(() => {
-      // Get random response from mockResponses
-      const randomResponse = mockResponses[Math.floor(Math.random() * mockResponses.length)];
-      
-      const aiMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        text: randomResponse,
-        sender: 'ai',
-        timestamp: new Date()
-      };
-      
-      setMessages(prev => [...prev, aiMessage]);
-      setIsTyping(false);
-    }, 1500);
+
+    let responseText = '';
+    try {
+      // Prefer real venue recommendations when applicable, then the edge-backed
+      // AI completion chain (vertex-ai -> openai-chat -> canned).
+      const recommendation = await getVenueRecommendations(prompt);
+      responseText = recommendation
+        ? recommendation.text
+        : await OpenAIService.generateResponse(prompt, history, 'user');
+    } catch (error) {
+      console.error('VLM chat error:', error);
+    }
+
+    if (!responseText) {
+      // Final safety net: canned mock response so the chat always replies.
+      responseText = mockResponses[Math.floor(Math.random() * mockResponses.length)];
+    }
+
+    const aiMessage: Message = {
+      id: (Date.now() + 1).toString(),
+      text: responseText,
+      sender: 'ai',
+      timestamp: new Date()
+    };
+
+    setMessages(prev => [...prev, aiMessage]);
+    setIsTyping(false);
   };
   
   const toggleMinimize = () => {

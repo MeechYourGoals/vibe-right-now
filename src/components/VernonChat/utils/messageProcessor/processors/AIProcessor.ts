@@ -2,6 +2,7 @@
 import { MessageContext, MessageProcessor, ProcessingResult } from '../types';
 import { OpenAIService } from '@/services/OpenAIService';
 import { createAIMessage } from '../../messageFactory';
+import { getVenueRecommendations, isVenueRecommendationQuery } from '../../venueRecommendations';
 
 export class AIProcessor implements MessageProcessor {
   name = 'ai';
@@ -22,17 +23,32 @@ export class AIProcessor implements MessageProcessor {
       }));
       
       let responseText = '';
-      
-      try {
-        responseText = await OpenAIService.generateResponse(
-          context.query,
-          conversationContext,
-          context.isVenueMode ? 'venue' : 'user'
-        );
-        console.log('Got response from OpenAI:', responseText.substring(0, 50) + '...');
-      } catch (error) {
-        console.error('Error with OpenAI:', error);
-        responseText = "I'm having trouble connecting to my AI services right now. Please try again later.";
+
+      // If the user is asking for venue recommendations ("X near me", "places in
+      // <city>"), answer with REAL venue links from locationsRepo first.
+      if (!context.isVenueMode && isVenueRecommendationQuery(context.query)) {
+        try {
+          const recommendation = await getVenueRecommendations(context.query);
+          if (recommendation) {
+            responseText = recommendation.text;
+          }
+        } catch (error) {
+          console.error('Venue recommendation lookup failed:', error);
+        }
+      }
+
+      if (!responseText) {
+        try {
+          responseText = await OpenAIService.generateResponse(
+            context.query,
+            conversationContext,
+            context.isVenueMode ? 'venue' : 'user'
+          );
+          console.log('Got response from AI:', responseText.substring(0, 50) + '...');
+        } catch (error) {
+          console.error('Error with AI service:', error);
+          responseText = "I'm having trouble connecting to my AI services right now. Please try again later.";
+        }
       }
       
       const aiMessage = createAIMessage(responseText);

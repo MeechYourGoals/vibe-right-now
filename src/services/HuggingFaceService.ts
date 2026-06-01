@@ -1,4 +1,6 @@
 
+import { invokeEdgeWithFallback } from '@/services/edge/invokeEdge';
+
 /**
  * Service for interacting with Hugging Face Transformers
  */
@@ -89,15 +91,20 @@ export class HuggingFaceService {
    * Generate text using a pre-trained model
    */
   static async generateText(prompt: string): Promise<string> {
-    try {
-      // In a production environment, we would use the Hugging Face API or a local model
-      // For now, we'll simulate text generation
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
-      return `Here's information about "${prompt}" based on my knowledge.`;
-    } catch (error) {
-      console.error('Error generating text with HuggingFace:', error);
-      return 'Sorry, I could not generate information at this time.';
+    const fallback = () => `Here's information about "${prompt}" based on my knowledge.`;
+    const data = await invokeEdgeWithFallback<unknown>(
+      'vertex-ai',
+      { prompt, mode: 'default' },
+      async () =>
+        invokeEdgeWithFallback<unknown>('openai-chat', { prompt }, fallback)
+    );
+
+    if (typeof data === 'string' && data.trim()) return data;
+    if (data && typeof data === 'object') {
+      const obj = data as Record<string, any>;
+      const text = obj.text || obj.response || obj.content;
+      if (typeof text === 'string' && text.trim()) return text;
     }
+    return fallback();
   }
 }

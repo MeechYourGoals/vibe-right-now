@@ -2,79 +2,78 @@
 /**
  * Text generation services using Vertex AI
  */
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { invokeEdgeWithFallback } from '@/services/edge/invokeEdge';
 import { GenerateTextOptions } from './types';
 
+function asText(data: unknown, fallback: string): string {
+  if (typeof data === 'string' && data.trim()) return data;
+  if (data && typeof data === 'object') {
+    const obj = data as Record<string, any>;
+    const text =
+      obj.text || obj.response || obj.content || obj.choices?.[0]?.message?.content;
+    if (typeof text === 'string' && text.trim()) return text;
+  }
+  return fallback;
+}
+
 /**
- * Generate text using Vertex AI
+ * Generate text. Routes through the `vertex-ai` edge function and falls back
+ * to `openai-chat`, then a safe canned message so the chat never breaks.
  */
 export async function generateText(
-  prompt: string, 
-  history: Array<{sender: 'user' | 'ai', text: string}> = [],
+  prompt: string,
+  history: Array<{ sender: 'user' | 'ai'; text: string }> = [],
   options: GenerateTextOptions = {}
 ): Promise<string> {
-  try {
-    console.log(`Generating text with Vertex AI for prompt: "${prompt.substring(0, 50)}..."`);
-    
-    const { data, error } = await supabase.functions.invoke('vertex-ai', {
-      body: { 
-        prompt, 
-        history,
-        model: options.model || 'gemini-1.5-pro',
-        maxTokens: options.maxTokens || 2048,
-        temperature: options.temperature || 0.7,
-        mode: options.mode || 'default',
-        safetySettings: options.safetySettings
-      }
-    });
-    
-    if (error) {
-      console.error('Error calling Vertex AI function:', error);
-      throw new Error(`Vertex AI text generation failed: ${error.message}`);
-    }
-    
-    if (!data || !data.text) {
-      throw new Error('No text received from Vertex AI');
-    }
-    
-    return data.text;
-  } catch (error) {
-    console.error('Error in generateText:', error);
-    toast.error('AI text generation encountered an error');
-    return "I'm having trouble generating a response right now. Please try again later.";
-  }
+  const fallbackText =
+    "I'm here to help you find great places and things to do. Tell me what you're in the mood for and where, and I'll dig up some real venues.";
+
+  const data = await invokeEdgeWithFallback<unknown>(
+    'vertex-ai',
+    {
+      prompt,
+      history,
+      model: options.model || 'gemini-1.5-pro',
+      maxTokens: options.maxTokens || 2048,
+      temperature: options.temperature || 0.7,
+      mode: options.mode || 'default',
+      safetySettings: options.safetySettings,
+    },
+    async () =>
+      invokeEdgeWithFallback<unknown>(
+        'openai-chat',
+        { prompt, history, mode: options.mode || 'default' },
+        () => fallbackText
+      )
+  );
+
+  return asText(data, fallbackText);
 }
 
 /**
  * Generate factual information using Vertex AI search capabilities
  */
 export async function searchWithAI(query: string, categories?: string[]): Promise<string> {
-  try {
-    console.log(`Searching with Vertex AI: "${query.substring(0, 50)}..."`);
-    
-    const { data, error } = await supabase.functions.invoke('vertex-ai', {
-      body: { 
-        prompt: query,
-        mode: 'search',
-        searchMode: true,
-        categories: categories || [],
-        temperature: 0.1 // Low temperature for factual responses
-      }
-    });
-    
-    if (error) {
-      console.error('Error calling Vertex AI search:', error);
-      throw new Error(`Vertex AI search failed: ${error.message}`);
-    }
-    
-    if (!data || !data.text) {
-      throw new Error('No search results received from Vertex AI');
-    }
-    
-    return data.text;
-  } catch (error) {
-    console.error('Error in searchWithAI:', error);
-    return "I couldn't find specific information about that. Could you try rephrasing your question?";
-  }
+  const fallbackText =
+    "I couldn't find specific information about that. Could you try rephrasing your question, or tell me a city to search?";
+
+  // NL/online search -> perplexity-search, falling back to vertex-ai search mode.
+  const data = await invokeEdgeWithFallback<unknown>(
+    'perplexity-search',
+    { query, categories: categories || [] },
+    async () =>
+      invokeEdgeWithFallback<unknown>(
+        'vertex-ai',
+        {
+          prompt: query,
+          mode: 'search',
+          searchMode: true,
+          categories: categories || [],
+          temperature: 0.1,
+        },
+        () => fallbackText
+      )
+  );
+
+  return asText(data, fallbackText);
 }

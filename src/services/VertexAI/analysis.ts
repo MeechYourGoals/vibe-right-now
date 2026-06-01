@@ -1,8 +1,32 @@
 
 /**
- * Extract categories from text using Google Cloud Natural Language API
- * @param text Text to analyze
- * @returns Array of detected categories
+ * Entity & category analysis. NLP-heavy calls (entities/sentiment) route
+ * through the `google-nlp` edge function and DEGRADE to deterministic local
+ * rule-based passes so results are always available with zero keys.
+ */
+import { invokeEdgeWithFallback } from '@/services/edge/invokeEdge';
+
+/**
+ * Local rule-based entity extraction used as the offline fallback.
+ */
+const localExtractEntities = (text: string): string[] => {
+  const entities: string[] = [];
+  const cityRegex =
+    /\b(?:chicago|new york|los angeles|san francisco|miami|austin|seattle|boston|portland|nashville|denver|dallas|atlanta)\b/gi;
+  const cityMatches = text.match(cityRegex);
+  if (cityMatches) cityMatches.forEach((city) => entities.push(city));
+
+  const venueRegex =
+    /\b(?:club|theater|venue|bar|restaurant|cafe|stadium|arena|gallery|museum)\b/gi;
+  const venueMatches = text.match(venueRegex);
+  if (venueMatches) venueMatches.forEach((venue) => entities.push(venue));
+
+  return entities;
+};
+
+/**
+ * Extract categories from text. Rule-based and deterministic (no network call
+ * needed), kept as the source of truth for category routing.
  */
 export const extractCategories = async (text: string): Promise<string[]> => {
   try {
@@ -42,39 +66,50 @@ export const extractCategories = async (text: string): Promise<string[]> => {
   }
 };
 
-// Add these missing methods that are referenced in the code
+/**
+ * Analyze text (sentiment + entities + categories) via the `google-nlp` edge
+ * function, falling back to local heuristics.
+ */
 export const analyzeText = async (text: string): Promise<any> => {
-  try {
-    // Simple implementation for now
-    return { sentiment: 0, entities: [], categories: await extractCategories(text) };
-  } catch (error) {
-    console.error('Error analyzing text:', error);
-    return { sentiment: 0, entities: [], categories: [] };
+  const fallback = async () => ({
+    sentiment: 0,
+    entities: localExtractEntities(text),
+    categories: await extractCategories(text),
+  });
+
+  const data = await invokeEdgeWithFallback<any>('google-nlp', { text }, fallback);
+
+  if (data && typeof data === 'object') {
+    return {
+      sentiment: data.sentiment ?? data.score ?? 0,
+      entities: Array.isArray(data.entities)
+        ? data.entities.map((e: any) => (typeof e === 'string' ? e : e?.name)).filter(Boolean)
+        : localExtractEntities(text),
+      categories:
+        Array.isArray(data.categories) && data.categories.length
+          ? data.categories
+          : await extractCategories(text),
+    };
   }
+  return fallback();
 };
 
+/**
+ * Extract named entities via `google-nlp`, falling back to local regex.
+ */
 export const extractEntities = async (text: string): Promise<string[]> => {
-  try {
-    // Simple implementation for now
-    const entities: string[] = [];
-    
-    // Look for cities
-    const cityRegex = /\b(?:chicago|new york|los angeles|san francisco|miami|austin|seattle|boston|portland|nashville|denver|dallas|atlanta)\b/gi;
-    const cityMatches = text.match(cityRegex);
-    if (cityMatches) {
-      cityMatches.forEach(city => entities.push(city));
-    }
-    
-    // Look for venue types
-    const venueRegex = /\b(?:club|theater|venue|bar|restaurant|cafe|stadium|arena|gallery|museum)\b/gi;
-    const venueMatches = text.match(venueRegex);
-    if (venueMatches) {
-      venueMatches.forEach(venue => entities.push(venue));
-    }
-    
-    return entities;
-  } catch (error) {
-    console.error('Error extracting entities:', error);
-    return [];
+  const data = await invokeEdgeWithFallback<any>('google-nlp', { text }, () =>
+    localExtractEntities(text)
+  );
+
+  if (Array.isArray(data)) {
+    return data.map((e) => (typeof e === 'string' ? e : e?.name)).filter(Boolean);
   }
+  if (data && typeof data === 'object' && Array.isArray(data.entities)) {
+    const names = data.entities
+      .map((e: any) => (typeof e === 'string' ? e : e?.name))
+      .filter(Boolean);
+    return names.length ? names : localExtractEntities(text);
+  }
+  return localExtractEntities(text);
 };

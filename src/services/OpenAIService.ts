@@ -1,3 +1,4 @@
+import { invokeEdgeWithFallback } from '@/services/edge/invokeEdge';
 
 interface OpenAIMessage {
   role: 'system' | 'user' | 'assistant';
@@ -23,7 +24,83 @@ export class OpenAIService {
   private static readonly TTS_URL = 'https://api.openai.com/v1/audio/speech';
   private static readonly DEFAULT_MODEL = 'gpt-4o-mini';
 
+  /**
+   * Generate a chat completion. Routing order:
+   *   1. `vertex-ai` edge function (primary)
+   *   2. `openai-chat` edge function (fallback)
+   *   3. Direct OpenAI/OpenRouter fetch when a browser key is present
+   *   4. Canned local response so the chat ALWAYS replies (zero keys)
+   */
   static async generateResponse(
+    prompt: string,
+    context: Array<{ sender: string; text: string }> = [],
+    chatMode: 'user' | 'venue' = 'user'
+  ): Promise<string> {
+    const history = context.map((msg) => ({
+      sender: msg.sender === 'user' ? 'user' : 'ai',
+      text: msg.text,
+    }));
+
+    // 1) Primary: vertex-ai edge -> 2) openai-chat edge -> 3) direct fetch -> 4) canned
+    return invokeEdgeWithFallback<string>(
+      'vertex-ai',
+      {
+        prompt,
+        history,
+        mode: chatMode === 'venue' ? 'venue' : 'default',
+        systemPrompt: this.getSystemMessage(chatMode),
+        temperature: 0.7,
+        maxTokens: 1000,
+      },
+      async () =>
+        invokeEdgeWithFallback<string>(
+          'openai-chat',
+          {
+            prompt,
+            messages: [
+              { role: 'system', content: this.getSystemMessage(chatMode) },
+              ...context.slice(-5).map((msg) => ({
+                role: msg.sender === 'user' ? 'user' : 'assistant',
+                content: msg.text,
+              })),
+              { role: 'user', content: prompt },
+            ],
+            chatMode,
+          },
+          async () => {
+            try {
+              return await this.directFetchResponse(prompt, context, chatMode);
+            } catch (error) {
+              console.warn('OpenAI direct fetch unavailable, using canned response:', error);
+              return this.getCannedResponse(prompt, chatMode);
+            }
+          }
+        )
+    ).then((data) => this.extractText(data, prompt, chatMode));
+  }
+
+  /** Normalize whatever shape an edge function returns into a string. */
+  private static extractText(
+    data: unknown,
+    prompt: string,
+    chatMode: 'user' | 'venue'
+  ): string {
+    if (typeof data === 'string' && data.trim()) return data;
+    if (data && typeof data === 'object') {
+      const obj = data as Record<string, any>;
+      const text =
+        obj.text ||
+        obj.response ||
+        obj.content ||
+        obj.message ||
+        obj.choices?.[0]?.message?.content;
+      if (typeof text === 'string' && text.trim()) return text;
+    }
+    return this.getCannedResponse(prompt, chatMode);
+  }
+
+  /** Direct browser-side OpenAI/OpenRouter call (only when a key exists). */
+  private static async directFetchResponse(
     prompt: string,
     context: Array<{ sender: string; text: string }> = [],
     chatMode: 'user' | 'venue' = 'user'
@@ -123,42 +200,83 @@ export class OpenAIService {
   }
 
   // Text-to-speech method for voice functionality
+  /**
+   * Text-to-speech. Routes through the `eleven-labs-tts` edge function (then
+   * `google-tts`) and DEGRADES to an empty string silently when no audio
+   * backend is available so the caller can fall back to text-only.
+   */
   static async textToSpeech(text: string): Promise<string> {
-    try {
-      const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-      
-      if (!apiKey) {
-        throw new Error('OpenAI API key required for text-to-speech');
+    return invokeEdgeWithFallback<string>(
+      'eleven-labs-tts',
+      { text },
+      async () =>
+        invokeEdgeWithFallback<string>(
+          'google-tts',
+          { text },
+          async () => {
+            // Last resort: direct OpenAI TTS only when a browser key exists.
+            try {
+              const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+              if (!apiKey) return '';
+
+              const response = await fetch(this.TTS_URL, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${apiKey}`,
+                },
+                body: JSON.stringify({
+                  model: 'tts-1',
+                  input: text,
+                  voice: 'alloy',
+                  response_format: 'mp3',
+                }),
+              });
+
+              if (!response.ok) return '';
+
+              const audioBuffer = await response.arrayBuffer();
+              return btoa(
+                new Uint8Array(audioBuffer).reduce(
+                  (data, byte) => data + String.fromCharCode(byte),
+                  ''
+                )
+              );
+            } catch (error) {
+              console.warn('TTS unavailable, degrading to text-only:', error);
+              return '';
+            }
+          }
+        )
+    ).then((data) => {
+      if (typeof data === 'string') return data;
+      if (data && typeof data === 'object') {
+        const obj = data as Record<string, any>;
+        return obj.audioContent || obj.audio || obj.base64 || '';
       }
+      return '';
+    });
+  }
 
-      const response = await fetch(this.TTS_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
-        },
-        body: JSON.stringify({
-          model: 'tts-1',
-          input: text,
-          voice: 'alloy',
-          response_format: 'mp3'
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`TTS API error: ${response.status}`);
-      }
-
-      const audioBuffer = await response.arrayBuffer();
-      const base64Audio = btoa(
-        new Uint8Array(audioBuffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
-      );
-      
-      return base64Audio;
-    } catch (error) {
-      console.error('Error with text-to-speech:', error);
-      throw error;
+  /**
+   * Local canned response used when no edge function and no browser key are
+   * available, so Vernon always replies.
+   */
+  private static getCannedResponse(prompt: string, chatMode: 'user' | 'venue'): string {
+    const q = prompt.toLowerCase();
+    if (chatMode === 'venue') {
+      return "Here's a quick take: focus on your peak nights (Thu-Sat), lean into your standout vibe, and keep your social posts consistent. I can dig into specific metrics whenever you connect your venue data.";
     }
+    if (/restaurant|food|eat|dinner|lunch|brunch/.test(q)) {
+      return "I'd start with a couple of well-rated local spots — tell me a city or neighborhood and I'll pull up real venues for you.";
+    }
+    if (/bar|drink|nightlife|club/.test(q)) {
+      return "For a good night out, give me a city and I'll surface bars and lounges that match your vibe.";
+    }
+    if (/coffee|cafe/.test(q)) {
+      return "Looking for coffee? Let me know where you are and I'll find cozy cafes nearby.";
+    }
+    return "I'm Vernon, your guide to great places and things to do. Tell me what you're in the mood for and where, and I'll find real venues for you.";
   }
 
   private static getSystemMessage(chatMode: 'user' | 'venue'): string {

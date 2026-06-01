@@ -1,10 +1,33 @@
 
-// Service to interact with a free, keyless chat service
+import { invokeEdgeWithFallback } from '@/services/edge/invokeEdge';
+
+// Service to interact with a free, keyless chat service.
+// Routes through the `perplexity-search` edge function for live answers and
+// DEGRADES to the deterministic city/keyword canned responses below so it
+// always replies with venue links even with zero API keys.
 export const HuggingChatService = {
   async searchHuggingChat(query: string): Promise<string> {
+    const data = await invokeEdgeWithFallback<unknown>(
+      'perplexity-search',
+      { query },
+      () => generateCannedResponse(query)
+    );
+
+    if (typeof data === 'string' && data.trim()) return data;
+    if (data && typeof data === 'object') {
+      const obj = data as Record<string, any>;
+      const text = obj.text || obj.response || obj.answer || obj.content;
+      if (typeof text === 'string' && text.trim()) return text;
+    }
+    return generateCannedResponse(query);
+  },
+};
+
+// Deterministic, keyless canned response (original mock behavior preserved).
+function generateCannedResponse(query: string): string {
     try {
-      console.log('Searching for:', query);
-      
+      console.log('Generating canned response for:', query);
+
       // Mock data for city-based queries to demonstrate venue linking
       const cityKeywords = ['new york', 'los angeles', 'san francisco', 'chicago', 'miami', 'boston', 'austin', 'portland', 'seattle', 'denver'];
       const containsCityKeyword = cityKeywords.some(city => query.toLowerCase().includes(city));
@@ -61,8 +84,7 @@ export const HuggingChatService = {
       console.error('Error generating response:', error);
       return "I'm having a bit of trouble right now. Could you try asking your question again?";
     }
-  }
-};
+}
 
 // Helper function to generate city-specific responses with venue links
 function generateCityResponse(query: string): string {
