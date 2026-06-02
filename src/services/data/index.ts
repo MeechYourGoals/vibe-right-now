@@ -15,3 +15,8 @@ export { commentsRepo } from "./commentsRepo";
 export { locationsRepo, mapRowToLocation } from "./locationsRepo";
 export { tripsRepo } from "./tripsRepo";
 export type { TripRecord } from "./tripsRepo";
+export { messagesRepo } from "./messagesRepo";
+export type { ChatConversation, ChatMessage } from "./messagesRepo";
+export { notificationsRepo } from "./notificationsRepo";
+export type { AppNotification } from "./notificationsRepo";
+export { preferencesRepo } from "./preferencesRepo";
