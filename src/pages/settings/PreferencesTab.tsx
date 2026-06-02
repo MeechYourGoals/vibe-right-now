@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { PREFERENCE_TAGS, PREFERENCE_CATEGORIES } from "./constants";
 import { useToast } from "@/hooks/use-toast";
+import { useSettingsPreferences } from "@/services/settings/useSettingsPreferences";
 
 // Import components
 import UserPreferences from "./components/UserPreferences";
@@ -31,8 +32,43 @@ const PreferencesTab = ({
   const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState("");
   const [favorites, setFavorites] = useState<string[]>([]);
-  
+
+  const { preferences, loaded, saving, save } = useSettingsPreferences();
   const { toast } = useToast();
+
+  // Hydrate from persisted preferences once they load.
+  useEffect(() => {
+    if (!loaded) return;
+    if (typeof preferences.distanceUnit === "string") setDistanceUnit(preferences.distanceUnit);
+    if (typeof preferences.searchRadius === "number") setSearchRadius([preferences.searchRadius]);
+    if (typeof preferences.showNearbyLocations === "boolean")
+      setShowNearbyLocations(preferences.showNearbyLocations);
+    if (typeof preferences.autoplayVideos === "boolean")
+      setAutoplayVideos(preferences.autoplayVideos);
+    if (Array.isArray(preferences.preferenceTags))
+      setSelectedTags(preferences.preferenceTags as string[]);
+    if (Array.isArray(preferences.favorites)) setFavorites(preferences.favorites as string[]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loaded]);
+
+  const handleSavePreferences = async () => {
+    try {
+      await save(
+        {
+          distanceUnit,
+          searchRadius: searchRadius[0],
+          showNearbyLocations,
+          autoplayVideos,
+          preferenceTags: selectedTags,
+          favorites,
+        },
+        { silent: true },
+      );
+    } catch {
+      /* toast handled in hook */
+    }
+    onSave();
+  };
   const [competitorVenues, setCompetitorVenues] = useState([
     { id: 1, name: "The Corner Bar", tags: ["Cozy", "Lounges", "Date Night"] },
     { id: 2, name: "Downtown Café", tags: ["Cozy", "Locally Owned", "Budget Friendly"] },
@@ -156,7 +192,9 @@ const PreferencesTab = ({
           <VenueDisplaySettings />
         )}
         
-        <Button onClick={onSave} className="w-full">Save Preferences</Button>
+        <Button onClick={handleSavePreferences} disabled={saving} className="w-full">
+          {saving ? "Saving..." : "Save Preferences"}
+        </Button>
       </div>
     </div>
   );

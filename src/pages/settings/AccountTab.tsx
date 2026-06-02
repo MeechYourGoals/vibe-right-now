@@ -1,11 +1,15 @@
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Crown } from "lucide-react";
+import { toast } from "sonner";
+import { profilesRepo } from "@/services/data";
+import { useUserStore } from "@/store";
+import { useSettingsPreferences } from "@/services/settings/useSettingsPreferences";
 
 export interface AccountTabProps {
   onSave: () => void;
@@ -13,14 +17,60 @@ export interface AccountTabProps {
   subscriptionTier?: 'standard' | 'plus' | 'premium' | 'pro';
 }
 
-const AccountTab = ({ 
-  onSave, 
-  isVenueMode = false, 
-  subscriptionTier = 'standard' 
+const AccountTab = ({
+  onSave,
+  isVenueMode = false,
+  subscriptionTier = 'standard'
 }: AccountTabProps) => {
+  const { user, isAuthenticated, updateUser } = useUserStore();
+  const { preferences, loaded, save: savePreferences } = useSettingsPreferences();
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
-  
+  const [displayName, setDisplayName] = useState("");
+  const [email, setEmail] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  // Hydrate profile fields from the signed-in user (falls back to demo placeholders).
+  useEffect(() => {
+    setDisplayName(user?.name ?? "Jane Smith");
+    setEmail(user?.email ?? "jane.smith@example.com");
+  }, [user?.name, user?.email]);
+
+  // Hydrate notification/security toggles from persisted preferences.
+  useEffect(() => {
+    if (!loaded) return;
+    if (typeof preferences.emailNotifications === "boolean")
+      setEmailNotifications(preferences.emailNotifications);
+    if (typeof preferences.twoFactorEnabled === "boolean")
+      setTwoFactorEnabled(preferences.twoFactorEnabled);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loaded]);
+
+  const handleSaveAccount = async () => {
+    setSaving(true);
+    try {
+      // Persist account toggles (works signed out via localStorage).
+      await savePreferences(
+        { emailNotifications, twoFactorEnabled },
+        { silent: true },
+      );
+
+      // Persist profile fields only when signed in.
+      if (isAuthenticated && user?.id) {
+        await profilesRepo.update(user.id, { displayName, name: displayName });
+        updateUser({ name: displayName });
+        toast.success("Account settings saved");
+      } else {
+        toast.info("Saved on this device. Sign in to update your profile.");
+      }
+    } catch (err) {
+      console.warn("[AccountTab] save failed", err);
+      toast.error("Could not save account settings.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const renderSubscriptionBadge = () => {
     if (!isVenueMode || subscriptionTier === 'standard') return null;
     
@@ -53,11 +103,20 @@ const AccountTab = ({
           <div className="grid gap-4">
             <div className="grid gap-2">
               <Label htmlFor="display-name">Display Name</Label>
-              <Input id="display-name" defaultValue="Jane Smith" />
+              <Input
+                id="display-name"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+              />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" defaultValue="jane.smith@example.com" />
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="username">Username</Label>
@@ -150,16 +209,25 @@ const AccountTab = ({
                   </p>
                   
                   <div className="grid grid-cols-2 gap-2">
-                    <Button variant="outline" size="sm">Manage Subscription</Button>
-                    <Button size="sm">Upgrade Plan</Button>
+                    <Button variant="outline" size="sm" disabled title="Coming soon">
+                      Manage Subscription
+                    </Button>
+                    <Button size="sm" disabled title="Coming soon">
+                      Upgrade Plan
+                    </Button>
                   </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Billing management is coming soon.
+                  </p>
                 </div>
               </div>
             )}
           </>
         )}
         
-        <Button onClick={onSave} className="w-full">Save Changes</Button>
+        <Button onClick={handleSaveAccount} disabled={saving} className="w-full">
+          {saving ? "Saving..." : "Save Changes"}
+        </Button>
       </div>
     </div>
   );

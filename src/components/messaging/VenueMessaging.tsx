@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,30 +7,48 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Send, Settings, Bell, ChevronLeft } from "lucide-react";
+import { toast } from "sonner";
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useUserSubscription } from '@/hooks/useUserSubscription';
-import { mockVenueConversations, MockVenueConversation, VenueMessage } from './mockVenueData';
+import { useUserStore } from '@/store';
+import { messagesRepo } from '@/services/data';
+import type { ChatConversation, ChatMessage } from '@/services/data';
+import { mockVenueConversations } from './mockVenueData';
 import MessageTypeBadge from './MessageTypeBadge';
 import VenueMessagingSettings from './VenueMessagingSettings';
 
 const VenueMessaging: React.FC = () => {
   const { hasFeature } = useUserSubscription();
+  const { user, isAuthenticated } = useUserStore();
   const isMobile = useIsMobile();
-  const [conversations, setConversations] = useState<MockVenueConversation[]>([]);
+  const [conversations, setConversations] = useState<ChatConversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
-  const [messages, setMessages] = useState<VenueMessage[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [messagingEnabled, setMessagingEnabled] = useState(true);
+  const [sending, setSending] = useState(false);
+  const unsubscribeRef = useRef<(() => void) | null>(null);
 
   const canUseVenueMessaging = hasFeature('venueMessaging');
+  const userId = user?.id ?? null;
 
-  const loadConversations = useCallback(() => {
-    setConversations(mockVenueConversations);
-    if (mockVenueConversations.length > 0 && !selectedConversation) {
-      setSelectedConversation(mockVenueConversations[0].id);
+  const loadConversations = useCallback(async () => {
+    let convs: ChatConversation[] = [];
+    try {
+      if (userId) {
+        convs = await messagesRepo.listConversations(userId);
+      }
+    } catch (err) {
+      console.warn('[VenueMessaging] listConversations failed, using mock data', err);
     }
-  }, [selectedConversation]);
+    if (!convs || convs.length === 0) {
+      // Signed-out / empty-DB demo fallback.
+      convs = mockVenueConversations as unknown as ChatConversation[];
+    }
+    setConversations(convs);
+    setSelectedConversation((prev) => prev ?? (convs.length > 0 ? convs[0].id : null));
+  }, [userId]);
 
   useEffect(() => {
     if (canUseVenueMessaging) {
@@ -38,42 +56,87 @@ const VenueMessaging: React.FC = () => {
     }
   }, [canUseVenueMessaging, loadConversations]);
 
+  // Hydrate messages of the selected conversation + subscribe to live updates.
   useEffect(() => {
-    if (selectedConversation && conversations.length > 0) {
-      const conversation = conversations.find(c => c.id === selectedConversation);
-      if (conversation) {
-        setMessages(conversation.messages);
-        // Mark as read
-        setConversations(prev => prev.map(c => 
-          c.id === selectedConversation ? { ...c, unreadCount: 0 } : c
-        ));
+    if (!selectedConversation || conversations.length === 0) return;
+    const conversation = conversations.find((c) => c.id === selectedConversation);
+    if (!conversation) return;
+
+    setMessages(conversation.messages ?? []);
+    // Mark as read locally.
+    setConversations((prev) =>
+      prev.map((c) => (c.id === selectedConversation ? { ...c, unreadCount: 0 } : c)),
+    );
+
+    // Tear down any prior subscription and (only for real conversations) subscribe.
+    unsubscribeRef.current?.();
+    unsubscribeRef.current = null;
+    if (userId) {
+      try {
+        unsubscribeRef.current = messagesRepo.subscribe(selectedConversation, (incoming) => {
+          setMessages((prev) =>
+            prev.some((m) => m.id === incoming.id) ? prev : [...prev, incoming],
+          );
+        });
+      } catch (err) {
+        console.warn('[VenueMessaging] realtime subscribe failed', err);
       }
     }
-  }, [selectedConversation, conversations]);
-
-  const sendMessage = useCallback(() => {
-    if (!newMessage.trim() || !selectedConversation) return;
-
-    const message: VenueMessage = {
-      id: Date.now().toString(),
-      content: newMessage,
-      timestamp: new Date().toISOString(),
-      senderId: 'current-user',
-      senderName: 'You',
-      senderAvatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&auto=format',
-      senderType: 'user'
+    return () => {
+      unsubscribeRef.current?.();
+      unsubscribeRef.current = null;
     };
+  }, [selectedConversation, conversations, userId]);
 
-    setMessages(prev => [...prev, message]);
+  const sendMessage = useCallback(async () => {
+    const content = newMessage.trim();
+    if (!content || !selectedConversation || sending) return;
+
+    if (!isAuthenticated || !userId) {
+      toast.info('Sign in to send messages to venues.');
+      return;
+    }
+
+    setSending(true);
+    // Optimistic append.
+    const optimistic: ChatMessage = {
+      id: `optimistic-${Date.now()}`,
+      content,
+      timestamp: new Date().toISOString(),
+      senderId: userId,
+      senderName: 'You',
+      senderAvatar: user?.avatar ?? '',
+      senderType: 'user',
+      messageType: 'general',
+    };
+    setMessages((prev) => [...prev, optimistic]);
     setNewMessage('');
 
-    // Update the conversation's last message
-    setConversations(prev => prev.map(c => 
-      c.id === selectedConversation 
-        ? { ...c, lastMessage: message, messages: [...c.messages, message] }
-        : c
-    ));
-  }, [newMessage, selectedConversation]);
+    try {
+      const saved = await messagesRepo.sendMessage({
+        conversationId: selectedConversation,
+        senderId: userId,
+        content,
+        senderType: 'user',
+      });
+      // Swap the optimistic message for the persisted one.
+      setMessages((prev) => prev.map((m) => (m.id === optimistic.id ? saved : m)));
+      setConversations((prev) =>
+        prev.map((c) =>
+          c.id === selectedConversation
+            ? { ...c, lastMessage: saved, messages: [...c.messages, saved] }
+            : c,
+        ),
+      );
+    } catch (err) {
+      console.warn('[VenueMessaging] sendMessage failed', err);
+      setMessages((prev) => prev.filter((m) => m.id !== optimistic.id));
+      setNewMessage(content);
+      toast.error('Could not send your message. Please try again.');
+    } finally {
+      setSending(false);
+    }
+  }, [newMessage, selectedConversation, sending, isAuthenticated, userId, user?.avatar]);
 
   const filteredConversations = conversations.filter(conversation =>
     conversation.venueName.toLowerCase().includes(searchQuery.toLowerCase())
@@ -170,9 +233,11 @@ const VenueMessaging: React.FC = () => {
                             </Badge>
                           )}
                         </div>
-                        <Badge variant="outline" className="text-xs flex-shrink-0">
-                          {conversation.venueType}
-                        </Badge>
+                        {conversation.venueType && (
+                          <Badge variant="outline" className="text-xs flex-shrink-0">
+                            {conversation.venueType}
+                          </Badge>
+                        )}
                       </div>
                       {conversation.lastMessage && (
                         <div className="flex items-center gap-2 mb-1">
@@ -218,10 +283,14 @@ const VenueMessaging: React.FC = () => {
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-sm truncate">{selectedConv.venueName}</h3>
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="text-xs">
-                        {selectedConv.venueType}
-                      </Badge>
-                      <p className="text-xs text-muted-foreground">{selectedConv.responseTime}</p>
+                      {selectedConv.venueType && (
+                        <Badge variant="outline" className="text-xs">
+                          {selectedConv.venueType}
+                        </Badge>
+                      )}
+                      {selectedConv.responseTime && (
+                        <p className="text-xs text-muted-foreground">{selectedConv.responseTime}</p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -280,7 +349,7 @@ const VenueMessaging: React.FC = () => {
                     disabled={!messagingEnabled}
                     className="flex-1"
                   />
-                  <Button onClick={sendMessage} disabled={!messagingEnabled} size="icon" className="h-10 w-10 flex-shrink-0">
+                  <Button onClick={sendMessage} disabled={!messagingEnabled || sending} size="icon" className="h-10 w-10 flex-shrink-0">
                     <Send className="h-4 w-4" />
                   </Button>
                 </div>
