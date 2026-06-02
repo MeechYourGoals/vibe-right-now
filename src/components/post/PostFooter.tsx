@@ -3,6 +3,9 @@ import React, { useState } from "react";
 import { Heart, MessageCircle, Share, Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Post } from "@/types";
+import { postsRepo } from "@/services/data";
+import { getCurrentUserId } from "@/services/posts/currentUser";
+import { toast } from "sonner";
 
 interface PostFooterProps {
   post: Post;
@@ -16,16 +19,62 @@ const PostFooter: React.FC<PostFooterProps> = ({
   isDetailView = false
 }) => {
   const [liked, setLiked] = useState(false);
-  const [saved, setSaved] = useState(post.saved);
+  const [saved, setSaved] = useState(Boolean(post.saved));
   const [likesCount, setLikesCount] = useState(post.likes);
+  const [likePending, setLikePending] = useState(false);
+  const [savePending, setSavePending] = useState(false);
 
-  const handleLike = () => {
-    setLiked(!liked);
-    setLikesCount(prev => liked ? prev - 1 : prev + 1);
+  const handleLike = async () => {
+    if (likePending) return;
+    const userId = await getCurrentUserId();
+    if (!userId) {
+      toast("Sign in to like posts");
+      return;
+    }
+
+    const nextLiked = !liked;
+    // Optimistic update
+    setLiked(nextLiked);
+    setLikesCount((prev) => (nextLiked ? prev + 1 : Math.max(0, prev - 1)));
+    setLikePending(true);
+
+    try {
+      await postsRepo.toggleLike(post.id, userId, nextLiked);
+    } catch (error) {
+      // Revert on error
+      setLiked(!nextLiked);
+      setLikesCount((prev) => (nextLiked ? Math.max(0, prev - 1) : prev + 1));
+      toast.error("Couldn't update your like. Please try again.");
+      console.error("toggleLike failed", error);
+    } finally {
+      setLikePending(false);
+    }
   };
 
-  const handleSave = () => {
-    setSaved(!saved);
+  const handleSave = async () => {
+    if (savePending) return;
+    const userId = await getCurrentUserId();
+    if (!userId) {
+      toast("Sign in to save posts");
+      return;
+    }
+
+    const nextSaved = !saved;
+    // Optimistic update
+    setSaved(nextSaved);
+    setSavePending(true);
+
+    try {
+      await postsRepo.toggleSave(post.id, userId, nextSaved);
+      toast(nextSaved ? "Saved to Pinned Vibes" : "Removed from Pinned Vibes");
+    } catch (error) {
+      // Revert on error
+      setSaved(!nextSaved);
+      toast.error("Couldn't update your save. Please try again.");
+      console.error("toggleSave failed", error);
+    } finally {
+      setSavePending(false);
+    }
   };
 
   return (
@@ -36,6 +85,7 @@ const PostFooter: React.FC<PostFooterProps> = ({
               variant="ghost"
               size="sm"
               onClick={handleLike}
+              disabled={likePending}
               className={`flex items-center gap-2 h-10 ${liked ? 'text-red-500' : ''}`}
             >
               <Heart className={`h-4 w-4 ${liked ? 'fill-current' : ''}`} />
@@ -62,12 +112,13 @@ const PostFooter: React.FC<PostFooterProps> = ({
             variant="ghost"
             size="sm"
             onClick={handleSave}
+            disabled={savePending}
             className={`h-10 ${saved ? 'text-blue-500' : ''}`}
           >
           <Bookmark className={`h-4 w-4 ${saved ? 'fill-current' : ''}`} />
         </Button>
       </div>
-      
+
       {post.vibeTags && post.vibeTags.length > 0 && (
         <div className="flex flex-wrap gap-2 mt-3">
           {post.vibeTags.map((tag, index) => (

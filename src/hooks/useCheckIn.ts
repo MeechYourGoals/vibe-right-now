@@ -1,8 +1,10 @@
 
 import { useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
+import { toast as sonnerToast } from "sonner";
 import { Location } from "@/types";
 import { calculateDistance } from "@/components/map/common/DistanceCalculator";
+import { checkInAndPost, NotSignedInError } from "@/services/posts/createPost";
 
 export function useCheckIn(venue: Location) {
   const [isOpen, setIsOpen] = useState(false);
@@ -59,15 +61,43 @@ export function useCheckIn(venue: Location) {
     }
   };
 
-  const confirmCheckIn = (pointsEarned: number) => {
-    setIsCheckedIn(true);
-    setIsOpen(false);
-    
-    toast({
-      title: "Checked in successfully!",
-      description: `You earned ${pointsEarned} points at ${venue.name}`,
-      variant: "default"
-    });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const confirmCheckIn = async (pointsEarned: number, photo?: File | null) => {
+    setIsSubmitting(true);
+    try {
+      // Persist a check_ins row and a post for the venue via the data layer.
+      await checkInAndPost({
+        content: `Checked in at ${venue.name}`,
+        files: photo ? [photo] : [],
+        note: `Checked in at ${venue.name}`,
+        location: {
+          id: venue.id,
+          name: venue.name,
+          city: venue.city,
+          state: venue.state,
+        },
+        isVenuePost: false,
+      });
+
+      setIsCheckedIn(true);
+      setIsOpen(false);
+
+      toast({
+        title: "Checked in successfully!",
+        description: `You earned ${pointsEarned} points at ${venue.name}`,
+        variant: "default"
+      });
+    } catch (error) {
+      if (error instanceof NotSignedInError) {
+        sonnerToast("Sign in to check in");
+      } else {
+        console.error("Check-in failed", error);
+        sonnerToast.error("Couldn't complete your check-in. Please try again.");
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return {
@@ -78,6 +108,7 @@ export function useCheckIn(venue: Location) {
     isInRange,
     distance,
     userLocation,
+    isSubmitting,
     handleCheckInClick,
     confirmCheckIn
   };
