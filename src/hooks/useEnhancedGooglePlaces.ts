@@ -1,6 +1,6 @@
 
 import { useState, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { invokeEdge } from '@/services/edge/invokeEdge';
 
 export interface EnhancedPlace {
   place_id: string;
@@ -65,19 +65,17 @@ export const useEnhancedGooglePlaces = () => {
     try {
       console.log('Enhanced search request:', { query, options });
 
-      const { data, error: functionError } = await supabase.functions.invoke('google-places', {
-        body: {
-          query,
-          searchType: options.searchType,
-          location: options.location,
-          radius: options.radius,
-          type: options.type,
-          fields: [
-            'place_id', 'name', 'formatted_address', 'geometry', 'types',
-            'rating', 'price_level', 'photos', 'opening_hours', 'business_status',
-            'website', 'formatted_phone_number'
-          ]
-        }
+      const { data, error: functionError } = await invokeEdge<SearchResult>('google-places', {
+        query,
+        searchType: options.searchType,
+        location: options.location,
+        radius: options.radius,
+        type: options.type,
+        fields: [
+          'place_id', 'name', 'formatted_address', 'geometry', 'types',
+          'rating', 'price_level', 'photos', 'opening_hours', 'business_status',
+          'website', 'formatted_phone_number'
+        ]
       });
 
       if (functionError) {
@@ -114,8 +112,9 @@ export const useEnhancedGooglePlaces = () => {
     setError(null);
 
     try {
-      const { data, error: functionError } = await supabase.functions.invoke('google-places', {
-        body: {
+      const { data, error: functionError } = await invokeEdge<{ result?: EnhancedPlace }>(
+        'google-places',
+        {
           placeId,
           fields: [
             'place_id', 'name', 'formatted_address', 'geometry', 'types',
@@ -123,7 +122,7 @@ export const useEnhancedGooglePlaces = () => {
             'website', 'formatted_phone_number', 'reviews'
           ]
         }
-      });
+      );
 
       if (functionError) {
         console.error('Error getting place details:', functionError);

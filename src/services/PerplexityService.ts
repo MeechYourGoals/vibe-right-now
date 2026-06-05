@@ -1,51 +1,73 @@
 
-import { supabase } from '@/integrations/supabase/client';
-import { SearchService } from './search/SearchService';
+import { invokeEdgeWithFallback } from '@/services/edge/invokeEdge';
+import { locationsRepo } from '@/services/data';
 
 /**
- * Service to interact with search APIs and AI-assisted search
- * This is kept for backward compatibility but delegates to the new SearchService
+ * NL / online search service backed by the `perplexity-search` edge function.
+ *
+ * When the edge call is unavailable we fall back to a local answer built from
+ * REAL venues via `locationsRepo` (with mock fallback). We deliberately do NOT
+ * call back into SearchService here to avoid recursion.
  */
+
+function extractText(data: unknown): string {
+  if (typeof data === 'string' && data.trim()) return data;
+  if (data && typeof data === 'object') {
+    const obj = data as Record<string, any>;
+    const text = obj.text || obj.response || obj.answer || obj.content;
+    if (typeof text === 'string' && text.trim()) return text;
+  }
+  return '';
+}
+
+async function localVenueAnswer(query: string): Promise<string> {
+  try {
+    const venues = await locationsRepo.search(query, 6);
+    if (venues.length > 0) {
+      const lines = venues.map(
+        (v) =>
+          `- [${v.name}](/venue/${encodeURIComponent(v.id)})${
+            v.city ? ` — ${v.type ? v.type + ' • ' : ''}${v.city}` : ''
+          }`
+      );
+      return [
+        "Here are some places I found that match what you're looking for:",
+        '',
+        ...lines,
+        '',
+        `[See more on the Explore page](/explore?q=${encodeURIComponent(query)})`,
+      ].join('\n');
+    }
+  } catch (error) {
+    console.warn('PerplexityService local venue fallback failed:', error);
+  }
+  return `I couldn't pull live results for "${query}" right now, but tell me a city or the kind of place you want and I'll find real venues for you.`;
+}
+
 export const PerplexityService = {
   /**
-   * Generate a chat completion using Perplexity
+   * Generate a chat-style answer using the Perplexity search edge function.
    */
   async generateResponse(prompt: string): Promise<string> {
-    try {
-      const { data, error } = await supabase.functions.invoke('perplexity-search', {
-        body: { query: prompt }
-      });
-
-      if (error) {
-        console.error('Perplexity API error:', error);
-        throw new Error('Failed to generate response');
-      }
-
-      return data?.text || '';
-    } catch (err) {
-      console.error('Perplexity generateResponse error:', err);
-      return "I'm having trouble connecting to my AI services right now.";
-    }
+    const data = await invokeEdgeWithFallback<unknown>(
+      'perplexity-search',
+      { query: prompt },
+      () => localVenueAnswer(prompt)
+    );
+    const text = extractText(data);
+    return text || (await localVenueAnswer(prompt));
   },
 
   /**
-   * Search using Perplexity with fallbacks
+   * Search using Perplexity with a local, real-venue fallback.
    */
   async searchPerplexity(query: string): Promise<string> {
-    try {
-      const { data, error } = await supabase.functions.invoke('perplexity-search', {
-        body: { query }
-      });
-
-      if (error) {
-        console.error('Perplexity search error:', error);
-        return SearchService.search(query);
-      }
-
-      return data?.text || SearchService.search(query);
-    } catch (err) {
-      console.error('Perplexity search exception:', err);
-      return SearchService.search(query);
-    }
-  }
+    const data = await invokeEdgeWithFallback<unknown>(
+      'perplexity-search',
+      { query },
+      () => localVenueAnswer(query)
+    );
+    const text = extractText(data);
+    return text || (await localVenueAnswer(query));
+  },
 };

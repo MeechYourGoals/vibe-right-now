@@ -3,21 +3,36 @@ import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Share, UserPlus, MapPin, Calendar, Users } from "lucide-react";
+import { Share, UserPlus, UserCheck, MapPin, Calendar, Users } from "lucide-react";
 import { User } from '@/types';
 
 interface UserProfileHeaderProps {
   user: User;
-  onFollow?: (userToFollow: string) => Promise<boolean>;
-  onUnfollow?: (userToUnfollow: string) => Promise<boolean>;
+  onFollow?: () => Promise<boolean>;
+  onUnfollow?: () => Promise<boolean>;
   onUpdateBio?: (newBio: string) => Promise<boolean>;
   onBlock?: (userToBlock: string) => Promise<boolean>;
   onReport?: (userToReport: string, reason: string) => Promise<boolean>;
   isPrivate?: boolean;
+  isFollowing?: boolean;
+  isOwnProfile?: boolean;
   getUserBio?: () => string;
 }
 
-const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({ user }) => {
+const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
+  user,
+  onFollow,
+  onUnfollow,
+  isFollowing = false,
+  isOwnProfile = false,
+}) => {
+  const handleFollowClick = () => {
+    if (isFollowing) {
+      onUnfollow?.();
+    } else {
+      onFollow?.();
+    }
+  };
   const joinedDate = new Date(user.createdAt || '').toLocaleDateString('en-US', { 
     month: 'short', 
     year: 'numeric' 
@@ -32,10 +47,26 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({ user }) => {
             <Share className="h-4 w-4 mr-1" />
             Share
           </Button>
-          <Button size="sm" className="bg-white text-black hover:bg-gray-100">
-            <UserPlus className="h-4 w-4 mr-1" />
-            Follow
-          </Button>
+          {!isOwnProfile && (
+            <Button
+              size="sm"
+              onClick={handleFollowClick}
+              variant={isFollowing ? "outline" : "default"}
+              className={isFollowing ? "bg-background/80 backdrop-blur-sm" : "bg-white text-black hover:bg-gray-100"}
+            >
+              {isFollowing ? (
+                <>
+                  <UserCheck className="h-4 w-4 mr-1" />
+                  Following
+                </>
+              ) : (
+                <>
+                  <UserPlus className="h-4 w-4 mr-1" />
+                  Follow
+                </>
+              )}
+            </Button>
+          )}
         </div>
       </div>
       

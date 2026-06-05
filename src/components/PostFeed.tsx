@@ -1,9 +1,8 @@
 
 import { useState, useEffect } from "react";
 import { Post, Comment } from "@/types";
-// Use centralized mock data imports
-import { mockPosts } from "@/mock/posts";
-import { mockComments } from "@/mock/comments";
+// Data layer: reads from Supabase, transparently falls back to mock data.
+import { postsRepo, commentsRepo } from "@/services/data";
 import PostCard from "./post/PostCard";
 import { useToast } from "@/hooks/use-toast";
 
@@ -14,15 +13,17 @@ interface PostFeedProps {
 
 const PostFeed = ({ celebrityFeatured = [], feedType = "for-you" }: PostFeedProps) => {
   const [posts, setPosts] = useState<Post[]>([]);
+  const [sourcePosts, setSourcePosts] = useState<Post[]>([]);
+  const [commentsByPost, setCommentsByPost] = useState<Record<string, Comment[]>>({});
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
   const getComments = (postId: string): Comment[] => {
-    return mockComments.filter(comment => comment.postId === postId);
+    return commentsByPost[postId] ?? [];
   };
 
   const getFilteredPosts = (type: string): Post[] => {
-    const allPosts = [...mockPosts];
+    const allPosts = [...sourcePosts];
     
     switch (type) {
       case "trending":
@@ -89,18 +90,34 @@ const PostFeed = ({ celebrityFeatured = [], feedType = "for-you" }: PostFeedProp
     }
   };
 
+  // Load the base post list once (from Supabase or mock fallback).
   useEffect(() => {
+    let active = true;
     setLoading(true);
-    
-    // Simulate loading delay
-    const timer = setTimeout(() => {
-      const filteredPosts = getFilteredPosts(feedType);
-      setPosts(filteredPosts);
-      setLoading(false);
-    }, 300);
+    postsRepo
+      .getFeed()
+      .then(async (fetched) => {
+        if (!active) return;
+        setSourcePosts(fetched);
+        // Fetch comments for the loaded posts in parallel.
+        const entries = await Promise.all(
+          fetched.map(async (p) => [p.id, await commentsRepo.getForPost(p.id)] as const),
+        );
+        if (!active) return;
+        setCommentsByPost(Object.fromEntries(entries));
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
-    return () => clearTimeout(timer);
-  }, [feedType, celebrityFeatured]);
+  // Re-apply sort/filter whenever the feed type, source posts, or comments change.
+  useEffect(() => {
+    setPosts(getFilteredPosts(feedType));
+  }, [feedType, celebrityFeatured, sourcePosts, commentsByPost]);
 
   const handlePostDeleted = (postId: string) => {
     setPosts(prev => prev.filter(post => post.id !== postId));

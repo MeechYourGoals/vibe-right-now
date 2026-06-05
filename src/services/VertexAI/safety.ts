@@ -1,28 +1,24 @@
 
 /**
- * Content safety services using Vertex AI
+ * Content safety services routed through the `content-safety` edge function.
  */
-import { supabase } from '@/integrations/supabase/client';
+import { invokeEdgeWithFallback } from '@/services/edge/invokeEdge';
 
 /**
- * Evaluate if content is safe using Vertex AI Content Safety API
+ * Evaluate if content is safe. Defaults to safe when the edge function is
+ * unavailable so the chat is never blocked.
  */
-export async function checkContentSafety(content: string): Promise<{safe: boolean, reasons?: string[]}> {
-  try {
-    const { data, error } = await supabase.functions.invoke('content-safety', {
-      body: { content }
-    });
-    
-    if (error) {
-      console.error('Error calling content safety function:', error);
-      // Default to safe if we can't check
-      return { safe: true };
-    }
-    
+export async function checkContentSafety(
+  content: string
+): Promise<{ safe: boolean; reasons?: string[] }> {
+  const data = await invokeEdgeWithFallback<{ safe: boolean; reasons?: string[] }>(
+    'content-safety',
+    { content },
+    () => ({ safe: true })
+  );
+
+  if (data && typeof data === 'object' && typeof data.safe === 'boolean') {
     return data;
-  } catch (error) {
-    console.error('Error in checkContentSafety:', error);
-    // Default to safe if we can't check
-    return { safe: true };
   }
+  return { safe: true };
 }

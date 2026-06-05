@@ -4,11 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { mockLocations } from "@/mock/data";
 import { Location } from "@/types";
 import { MapPin, Users, Crown } from "lucide-react";
 import { getMediaForLocation } from "@/utils/map/locationMediaUtils";
 import { Badge } from "@/components/ui/badge";
+import { locationsRepo } from "@/services/data";
 
 interface RecommendedForYouProps {
   featuredLocations?: string[];
@@ -16,7 +16,22 @@ interface RecommendedForYouProps {
 
 const RecommendedForYou: React.FC<RecommendedForYouProps> = ({ featuredLocations }) => {
   const [locations, setLocations] = useState<Location[]>([]);
+  const [venuePool, setVenuePool] = useState<Location[]>([]);
   const [followStates, setFollowStates] = useState<Record<string, boolean>>({});
+
+  // Pull a pool of venues from the data layer (Supabase with mock fallback).
+  useEffect(() => {
+    let cancelled = false;
+    locationsRepo
+      .nearby(0, 0, 50)
+      .then((results) => {
+        if (!cancelled) setVenuePool(results);
+      })
+      .catch((err) => console.error("Error loading recommended venues:", err));
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Mock user preferences for demonstration
   const userPreferences = ["Live Music", "Sports", "Outdoors", "Locally Owned"];
@@ -51,57 +66,59 @@ const RecommendedForYou: React.FC<RecommendedForYouProps> = ({ featuredLocations
   };
 
   useEffect(() => {
+    if (venuePool.length === 0) return;
+
     // Mix of featured, preference-matched, and premium venues
     let recommendedLocations: Location[] = [];
-    
+
     // First, get any explicitly featured locations
     if (featuredLocations && featuredLocations.length > 0) {
-      const locationMap = new Map(mockLocations.map(loc => [loc.id, loc]));
+      const locationMap = new Map(venuePool.map(loc => [loc.id, loc]));
       const filteredLocations = featuredLocations
         .map(id => locationMap.get(id))
         .filter((loc): loc is Location => loc !== undefined);
-      
+
       recommendedLocations = [...recommendedLocations, ...filteredLocations];
     }
-    
+
     // Add locations matching user preferences
-    const preferenceLocations = mockLocations.filter(location => {
+    const preferenceLocations = venuePool.filter(location => {
       // Make sure location.tags exists before trying to use it
       return location.tags && location.tags.some(tag => userPreferences.includes(tag));
     }).slice(0, 3);
-    
+
     // Add premium/promoted venues
-    const premiumLocations = mockLocations.filter(location => 
-      isPremiumVenue(location.id) && 
+    const premiumLocations = venuePool.filter(location =>
+      isPremiumVenue(location.id) &&
       !recommendedLocations.some(rec => rec.id === location.id) &&
       !preferenceLocations.some(pref => pref.id === location.id)
     ).slice(0, 2);
-    
+
     // Combine and limit to 5 recommendations
     recommendedLocations = [
       ...recommendedLocations,
-      ...preferenceLocations, 
+      ...preferenceLocations,
       ...premiumLocations
     ].slice(0, 5);
-    
+
     // If we still need more, add random locations
     if (recommendedLocations.length < 5) {
-      const randomLocations = mockLocations
+      const randomLocations = venuePool
         .filter(loc => !recommendedLocations.some(rec => rec.id === loc.id))
         .sort(() => 0.5 - Math.random())
         .slice(0, 5 - recommendedLocations.length);
-      
+
       recommendedLocations = [...recommendedLocations, ...randomLocations];
     }
-    
+
     setLocations(recommendedLocations);
 
     const initialFollowStates: Record<string, boolean> = {};
-    mockLocations.forEach(location => {
+    venuePool.forEach(location => {
       initialFollowStates[location.id] = false;
     });
     setFollowStates(initialFollowStates);
-  }, [featuredLocations]);
+  }, [featuredLocations, venuePool]);
 
   const toggleFollow = (locationId: string, e: React.MouseEvent) => {
     e.preventDefault();

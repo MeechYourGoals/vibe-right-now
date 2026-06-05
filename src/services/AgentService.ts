@@ -1,24 +1,34 @@
 
 // Agent Service for generating responses to user queries
+import { invokeEdgeWithFallback } from '@/services/edge/invokeEdge';
 
 class AgentServiceClass {
-  // Generate a response for a given query
+  // Generate a response for a given query.
+  // Routes through the `agent-protocol` edge function, then `vertex-ai`, then
+  // the canned mock responses below so it always returns something.
   async generateResponse(query: string, isVenueMode: boolean = false): Promise<string> {
-    try {
-      console.log(`Generating ${isVenueMode ? 'venue' : 'event'} agent response for: ${query}`);
-      
-      // Here you would typically make an API call to an LLM service
-      // For now, we'll return mock responses based on the query type
-      
-      if (isVenueMode) {
-        return this.generateVenueResponse(query);
-      } else {
-        return this.generateEventResponse(query);
-      }
-    } catch (error) {
-      console.error('Error in agent service:', error);
-      throw new Error('Failed to generate agent response');
+    const mode = isVenueMode ? 'venue' : 'event';
+    const cannedFallback = () =>
+      isVenueMode ? this.generateVenueResponse(query) : this.generateEventResponse(query);
+
+    const data = await invokeEdgeWithFallback<unknown>(
+      'agent-protocol',
+      { query, mode },
+      async () =>
+        invokeEdgeWithFallback<unknown>(
+          'vertex-ai',
+          { prompt: query, mode },
+          cannedFallback
+        )
+    );
+
+    if (typeof data === 'string' && data.trim()) return data;
+    if (data && typeof data === 'object') {
+      const obj = data as Record<string, any>;
+      const text = obj.text || obj.response || obj.content || obj.message;
+      if (typeof text === 'string' && text.trim()) return text;
     }
+    return cannedFallback();
   }
   
   // Generate venue-specific responses

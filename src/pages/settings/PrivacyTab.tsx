@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { PlusCircle, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useSettingsPreferences } from "@/services/settings/useSettingsPreferences";
 
 export interface PrivacyTabProps {
   onSave: () => void;
@@ -14,6 +15,7 @@ export interface PrivacyTabProps {
 }
 
 const PrivacyTab = ({ onSave, isVenueMode = false }: PrivacyTabProps) => {
+  const { preferences, loaded, saving, save } = useSettingsPreferences();
   const [locationTracking, setLocationTracking] = useState(true);
   const [profileVisibility, setProfileVisibility] = useState("public");
   const [dataSharing, setDataSharing] = useState(true);
@@ -21,7 +23,43 @@ const PrivacyTab = ({ onSave, isVenueMode = false }: PrivacyTabProps) => {
   const [vibeWithMeEnabled, setVibeWithMeEnabled] = useState(false);
   const [closeFriendInput, setCloseFriendInput] = useState("");
   const [closeFriends, setCloseFriends] = useState<string[]>([]);
-  
+
+  // Hydrate from persisted preferences.
+  useEffect(() => {
+    if (!loaded) return;
+    if (typeof preferences.locationTracking === "boolean")
+      setLocationTracking(preferences.locationTracking);
+    if (typeof preferences.profileVisibility === "string")
+      setProfileVisibility(preferences.profileVisibility);
+    if (typeof preferences.dataSharing === "boolean") setDataSharing(preferences.dataSharing);
+    if (typeof preferences.activityTracking === "boolean")
+      setActivityTracking(preferences.activityTracking);
+    if (typeof preferences.vibeWithMeEnabled === "boolean")
+      setVibeWithMeEnabled(preferences.vibeWithMeEnabled);
+    if (Array.isArray(preferences.closeFriends))
+      setCloseFriends(preferences.closeFriends as string[]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loaded]);
+
+  const handleSavePrivacy = async () => {
+    try {
+      await save(
+        {
+          locationTracking,
+          profileVisibility,
+          dataSharing,
+          activityTracking,
+          vibeWithMeEnabled,
+          closeFriends,
+        },
+        { silent: true },
+      );
+    } catch {
+      /* toast handled in hook */
+    }
+    onSave();
+  };
+
   const handleAddCloseFriend = () => {
     if (closeFriendInput.trim() && !closeFriends.includes(closeFriendInput.trim())) {
       setCloseFriends([...closeFriends, closeFriendInput.trim()]);
@@ -249,7 +287,9 @@ const PrivacyTab = ({ onSave, isVenueMode = false }: PrivacyTabProps) => {
           </div>
         )}
         
-        <Button onClick={onSave} className="w-full">Save Privacy Settings</Button>
+        <Button onClick={handleSavePrivacy} disabled={saving} className="w-full">
+          {saving ? "Saving..." : "Save Privacy Settings"}
+        </Button>
       </div>
     </div>
   );

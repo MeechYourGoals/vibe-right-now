@@ -30,11 +30,12 @@ const Settings = () => {
   };
 
   const handleConnectPlatform = (platformId: string) => {
+    // Real OAuth account linking is out of scope for the demo; communicate clearly
+    // rather than implying a connection was established.
     toast({
-      title: "Connecting to platform",
-      description: `Initiating connection to ${platformId === 'other' ? "custom platform" : platformId}...`,
+      title: "Coming soon",
+      description: `Connecting ${platformId === 'other' ? "a custom platform" : platformId} accounts isn't available yet.`,
     });
-    // In a real app, this would trigger an OAuth flow or similar
   };
 
   const toggleMode = () => {

@@ -12,9 +12,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { User, Bookmark, MapPin, Award, UserCircle, LogIn, Settings, BarChart, Headphones, Megaphone, MessageSquare } from "lucide-react";
+import { User, Bookmark, MapPin, Award, UserCircle, LogIn, LogOut, Settings, BarChart, Headphones, Megaphone, MessageSquare } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AuthDialog } from "@/components/AuthDialog";
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
+import { toast } from "sonner";
 import VernonConciergeDialog from "./VernonConcierge/VernonConciergeDialog";
 
 // Full list of rotating V-words for the branding
@@ -61,8 +63,19 @@ const Header = () => {
     return () => clearInterval(interval);
   }, []);
 
+  const { isAuthenticated, signOut } = useSupabaseAuth();
+
   const handleOpenAuth = () => {
     setShowAuthDialog(true);
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast.success("Signed out");
+    } catch (err) {
+      toast.error("Could not sign out. Please try again.");
+    }
   };
 
   return (
@@ -104,10 +117,17 @@ const Header = () => {
                     <DropdownMenuLabel>My Account</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     
-                    <DropdownMenuItem onSelect={handleOpenAuth} className="cursor-pointer">
-                      <LogIn className="mr-2 h-4 w-4" />
-                      <span>Sign In / Sign Up</span>
-                    </DropdownMenuItem>
+                    {isAuthenticated ? (
+                      <DropdownMenuItem onSelect={handleSignOut} className="cursor-pointer">
+                        <LogOut className="mr-2 h-4 w-4" />
+                        <span>Sign Out</span>
+                      </DropdownMenuItem>
+                    ) : (
+                      <DropdownMenuItem onSelect={handleOpenAuth} className="cursor-pointer">
+                        <LogIn className="mr-2 h-4 w-4" />
+                        <span>Sign In / Sign Up</span>
+                      </DropdownMenuItem>
+                    )}
                     
                     <DropdownMenuSeparator />
                     

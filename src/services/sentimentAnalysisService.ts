@@ -5,6 +5,7 @@
 // like Google Cloud Natural Language API, Azure Cognitive Services, etc.
 
 import { SentimentAnalysisResult, SentimentTheme, VenueSentimentAnalysis, PlatformSentimentSummary } from '@/types';
+import { invokeEdgeWithFallback } from '@/services/edge/invokeEdge';
 
 // Coffee shop specific themes and realistic data
 const COFFEE_SHOP_THEMES: SentimentTheme[] = [
@@ -142,18 +143,37 @@ const PLATFORM_SUMMARIES: PlatformSentimentSummary[] = [
   }
 ];
 
-// Mock function to analyze sentiment of a text
-export const analyzeSentiment = async (text: string): Promise<SentimentAnalysisResult> => {
-  // Simulate sentiment analysis for coffee shop context
+// Local mock sentiment used as the offline fallback.
+const mockAnalyzeSentiment = (text: string): SentimentAnalysisResult => {
   const score = Math.random() * 1.5 - 0.25; // Bias toward positive for coffee shop
   const magnitude = Math.random() * 0.8 + 0.2;
-
   return {
     score,
     magnitude,
     themes: COFFEE_SHOP_THEMES.slice(0, 3),
     summary: `Coffee shop sentiment analysis shows ${score > 0.3 ? 'positive' : score < -0.3 ? 'negative' : 'neutral'} customer feedback with focus on coffee quality and atmosphere.`,
   };
+};
+
+// Analyze sentiment of a text via the `review-sentiment-analyzer` edge function
+// (falling back to `google-nlp`, then local mock).
+export const analyzeSentiment = async (text: string): Promise<SentimentAnalysisResult> => {
+  const data = await invokeEdgeWithFallback<any>(
+    'review-sentiment-analyzer',
+    { text },
+    async () =>
+      invokeEdgeWithFallback<any>('google-nlp', { text }, () => mockAnalyzeSentiment(text))
+  );
+
+  if (data && typeof data === 'object' && (typeof data.score === 'number' || typeof data.sentiment === 'number')) {
+    return {
+      score: data.score ?? data.sentiment ?? 0,
+      magnitude: data.magnitude ?? 0.5,
+      themes: Array.isArray(data.themes) && data.themes.length ? data.themes : COFFEE_SHOP_THEMES.slice(0, 3),
+      summary: data.summary || mockAnalyzeSentiment(text).summary,
+    };
+  }
+  return mockAnalyzeSentiment(text);
 };
 
 // Mock function to analyze sentiment for a venue
@@ -189,18 +209,14 @@ export const analyzeVenueSentiment = async (venueId: string, venueName: string =
   };
 };
 
-// Mock function to analyze sentiment of multiple texts
+// Analyze sentiment of multiple texts (routes each through the edge function
+// with local mock fallback).
 export const analyzeBatchSentiment = async (texts: string[]): Promise<SentimentAnalysisResult[]> => {
   try {
-    return texts.map(text => ({
-      score: Math.random() * 1.5 - 0.25, // Coffee shop bias
-      magnitude: Math.random() * 0.8 + 0.2,
-      themes: COFFEE_SHOP_THEMES.slice(0, 2),
-      summary: `Analysis for coffee shop review: ${text.substring(0, 50)}...`
-    }));
+    return await Promise.all(texts.map((text) => analyzeSentiment(text)));
   } catch (error) {
     console.error('Error in batch sentiment analysis:', error);
-    throw error;
+    return texts.map((text) => mockAnalyzeSentiment(text));
   }
 };
 

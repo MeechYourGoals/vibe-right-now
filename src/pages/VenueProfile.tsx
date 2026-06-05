@@ -3,18 +3,16 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { Minimize } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { mockLocations, mockPosts, mockComments } from "@/mock/data";
+import { mockComments } from "@/mock/data";
 import CameraButton from "@/components/CameraButton";
 import Header from "@/components/Header";
-import { Comment, Post, Location as VenueLocation } from "@/types";
+import { Comment, Post, Location } from "@/types";
 import GoogleMapComponent, { GoogleMapHandle } from "@/components/map/google/GoogleMap";
 import { generateBusinessHours } from "@/utils/businessHoursUtils";
-import { 
-  isPostFromDayOfWeek, 
+import {
   isWithinThreeMonths,
   createDaySpecificVenuePosts
 } from "@/mock/time-utils";
-import { getVenueContent } from "@/utils/venue/venueContentHelpers";
 import DayOfWeekFilter from "@/components/venue/DayOfWeekFilter";
 import VenueProfileHeader from "@/components/venue/VenueProfileHeader";
 import VenueMap from "@/components/venue/VenueMap";
@@ -22,8 +20,9 @@ import VenuePostsContent from "@/components/venue/VenuePostsContent";
 import WaitTimeDisplay from "@/components/venue/WaitTimeDisplay";
 import WaitTimeUpdater from "@/components/venue/WaitTimeUpdater";
 import PremiumFeaturesContainer from "@/components/venue/PremiumFeaturesContainer";
-import { useAuth0 } from "@auth0/auth0-react";
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 import { useUserSubscription } from "@/hooks/useUserSubscription";
+import { locationsRepo, postsRepo } from "@/services/data";
 
 // Define an extended Post type that includes venue-specific properties
 interface ExtendedPost extends Post {
@@ -41,12 +40,48 @@ const VenueProfile = () => {
   const mapRef = useRef<GoogleMapHandle>(null);
   const [isVenueOwner, setIsVenueOwner] = useState(false);
   const [subscriptionTier, setSubscriptionTier] = useState<'standard' | 'plus' | 'premium' | 'pro'>('standard');
-  
-  const { user, isAuthenticated } = useAuth0();
+
+  // Venue + posts are loaded from the data layer (Supabase with mock fallback).
+  const [venue, setVenue] = useState<Location | null>(null);
+  const [venuePosts, setVenuePosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const { user, isAuthenticated } = useSupabaseAuth();
   const { canAccessFeature } = useUserSubscription();
-  
-  const venue = mockLocations.find(location => location.id === id);
-  
+
+  useEffect(() => {
+    if (!id) return;
+    let cancelled = false;
+    setLoading(true);
+
+    Promise.all([locationsRepo.getById(id), postsRepo.getByVenue(id)])
+      .then(([loc, posts]) => {
+        if (cancelled) return;
+        if (loc) {
+          // Derive business hours from the venue data when not present.
+          if (!loc.hours) {
+            loc.hours = generateBusinessHours(loc);
+          }
+          setVenue(loc);
+        } else {
+          setVenue(null);
+        }
+        // Keep only posts from the last three months for the venue feed.
+        setVenuePosts((posts ?? []).filter((p) => isWithinThreeMonths(p.timestamp)));
+      })
+      .catch((err) => {
+        console.error("Error loading venue:", err);
+        if (!cancelled) setVenue(null);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
+
   useEffect(() => {
     if (isAuthenticated && user && venue) {
       if (user.email === 'owner@example.com') {
@@ -55,18 +90,9 @@ const VenueProfile = () => {
       }
     }
   }, [isAuthenticated, user, venue]);
-  
-  if (venue && !venue.hours) {
-    venue.hours = generateBusinessHours(venue);
-  }
-  
-  const venuePosts = useMemo(() => {
-    return mockPosts.filter(post => 
-      post.location.id === id && 
-      isWithinThreeMonths(post.timestamp)
-    );
-  }, [id]);
 
+  // Demo venue content (day-specific posts) generated from mock helpers as a fallback so
+  // the feed is never empty even when the DB has no venue posts.
   const generatedVenuePosts = useMemo(() => {
     if (!venue) return [];
     return createDaySpecificVenuePosts(venue.id, venue.type) as unknown as Post[];
@@ -76,25 +102,25 @@ const VenueProfile = () => {
     if (selectedDays.length === 0) {
       return venuePosts;
     }
-    
-    return venuePosts.filter(post => 
+
+    return venuePosts.filter(post =>
       selectedDays.includes(new Date(post.timestamp).getDay())
     );
   }, [venuePosts, selectedDays]);
 
   const allPosts = useMemo(() => {
     if (!venue) return [];
-    
-    const filteredVenuePosts = selectedDays.length === 0 
-      ? generatedVenuePosts 
-      : generatedVenuePosts.filter(post => 
+
+    const filteredVenuePosts = selectedDays.length === 0
+      ? generatedVenuePosts
+      : generatedVenuePosts.filter(post =>
           selectedDays.includes(new Date(post.timestamp).getDay())
         );
-    
-    const combined = [...filteredPosts, ...filteredVenuePosts].sort((a, b) => 
+
+    const combined = [...filteredPosts, ...filteredVenuePosts].sort((a, b) =>
       new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     );
-    
+
     return combined;
   }, [filteredPosts, venue, generatedVenuePosts, selectedDays]);
 
@@ -104,12 +130,12 @@ const VenueProfile = () => {
 
   const toggleMapExpansion = () => {
     setIsMapExpanded(!isMapExpanded);
-    
+
     setTimeout(() => {
       mapRef.current?.resize();
     }, 10);
   };
-  
+
   const handleDayToggle = (dayIndex: number) => {
     setSelectedDays(prev => {
       if (prev.includes(dayIndex)) {
@@ -119,10 +145,21 @@ const VenueProfile = () => {
       }
     });
   };
-  
+
   const clearDayFilters = () => {
     setSelectedDays([]);
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container py-20 text-center">
+          <p className="text-muted-foreground">Loading venue...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!venue) {
     return (
@@ -142,7 +179,7 @@ const VenueProfile = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      
+
       {isMapExpanded && (
         <div className="fixed inset-0 z-50 bg-background p-4">
           <div className="flex justify-between items-center mb-4">
@@ -166,37 +203,37 @@ const VenueProfile = () => {
           </div>
         </div>
       )}
-      
+
       <main className="container py-6">
         <div className="max-w-4xl mx-auto">
           <div className="glass-effect p-6 rounded-xl mb-6">
             <VenueProfileHeader venue={venue} onMapExpand={toggleMapExpansion} />
-            
+
             <WaitTimeDisplay venueId={venue.id} className="mb-4" />
-            
+
             <VenueMap venue={venue} onExpand={toggleMapExpansion} />
-            
+
             {isVenueOwner && (
               <div className="mt-4">
-                <WaitTimeUpdater 
-                  venueId={venue.id} 
-                  subscriptionTier={subscriptionTier} 
+                <WaitTimeUpdater
+                  venueId={venue.id}
+                  subscriptionTier={subscriptionTier}
                 />
               </div>
             )}
           </div>
-          
-          <PremiumFeaturesContainer 
+
+          <PremiumFeaturesContainer
             venueId={venue.id}
             venueName={venue.name}
           />
-          
-          <DayOfWeekFilter 
-            selectedDays={selectedDays} 
-            onDayToggle={handleDayToggle} 
-            onClearFilters={clearDayFilters} 
+
+          <DayOfWeekFilter
+            selectedDays={selectedDays}
+            onDayToggle={handleDayToggle}
+            onClearFilters={clearDayFilters}
           />
-          
+
           <VenuePostsContent
             activeTab={activeTab}
             setActiveTab={setActiveTab}
@@ -211,7 +248,7 @@ const VenueProfile = () => {
           />
         </div>
       </main>
-      
+
       <CameraButton />
     </div>
   );

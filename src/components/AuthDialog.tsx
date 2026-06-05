@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, Github, AlertCircle, Fingerprint, Lock } from "lucide-react";
-import { useAuth0Auth } from "@/hooks/useAuth0Auth";
+import { Mail, AlertCircle, Wand2 } from "lucide-react";
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 
 interface AuthDialogProps {
   open: boolean;
@@ -21,12 +21,15 @@ export function AuthDialog({ open, onOpenChange, mode, onModeChange }: AuthDialo
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const { toast } = useToast();
-  const { login, googleLogin, isLoading } = useAuth0Auth();
+  const { signIn, signUp, signInWithGoogle, signInWithMagicLink, isLoading } = useSupabaseAuth();
+  const [submitting, setSubmitting] = useState(false);
+  const busy = isLoading || submitting;
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
+      setSubmitting(true);
       // Basic validation
       if (!email.trim() || !password) {
         throw new Error("Email and password are required");
@@ -35,9 +38,18 @@ export function AuthDialog({ open, onOpenChange, mode, onModeChange }: AuthDialo
       if (mode === 'signup' && password !== confirmPassword) {
         throw new Error("Passwords do not match");
       }
-      
-      await login();
-      
+
+      if (mode === 'signup') {
+        await signUp(email.trim(), password);
+        toast({
+          title: "Check your inbox",
+          description: "We sent you a confirmation link to finish creating your account.",
+        });
+      } else {
+        await signIn(email.trim(), password);
+        toast({ title: "Welcome back!", description: "You're now signed in." });
+        onOpenChange(false);
+      }
     } catch (error) {
       toast({
         variant: "destructive",
@@ -49,30 +61,46 @@ export function AuthDialog({ open, onOpenChange, mode, onModeChange }: AuthDialo
           </Button>
         ),
       });
+    } finally {
+      setSubmitting(false);
     }
   };
 
   const handleGoogleAuth = async () => {
     try {
-      await googleLogin();
+      setSubmitting(true);
+      await signInWithGoogle();
+      // Redirect happens; dialog will close on return.
     } catch (error) {
       toast({
         variant: "destructive",
         title: "Google authentication error",
         description: error instanceof Error ? error.message : "Something went wrong with Google sign-in",
       });
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  const handlePasskeyAuth = async () => {
+  const handleMagicLink = async () => {
     try {
-      await login();
+      setSubmitting(true);
+      if (!email.trim()) {
+        throw new Error("Enter your email to receive a magic link");
+      }
+      await signInWithMagicLink(email.trim());
+      toast({
+        title: "Magic link sent",
+        description: "Check your email for a link to sign in.",
+      });
     } catch (error) {
       toast({
         variant: "destructive",
-        title: "Passkey authentication error",
-        description: error instanceof Error ? error.message : "Something went wrong with passkey sign-in",
+        title: "Magic link error",
+        description: error instanceof Error ? error.message : "Could not send the magic link",
       });
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -119,11 +147,11 @@ export function AuthDialog({ open, onOpenChange, mode, onModeChange }: AuthDialo
                   required
                 />
               </div>
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Signing in..." : "Sign In with Email"}
+              <Button type="submit" className="w-full" disabled={busy}>
+                {busy ? "Signing in..." : "Sign In with Email"}
               </Button>
             </form>
-            
+
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t" />
@@ -132,29 +160,29 @@ export function AuthDialog({ open, onOpenChange, mode, onModeChange }: AuthDialo
                 <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
               </div>
             </div>
-            
+
             <div className="flex flex-col gap-2">
-              <Button 
-                variant="outline" 
-                className="w-full" 
+              <Button
+                variant="outline"
+                className="w-full"
                 onClick={handleGoogleAuth}
-                disabled={isLoading}
+                disabled={busy}
                 type="button"
               >
                 <Mail className="mr-2 h-4 w-4" /> Google
               </Button>
-              <Button 
-                variant="outline" 
-                className="w-full" 
-                onClick={handlePasskeyAuth}
-                disabled={isLoading}
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={handleMagicLink}
+                disabled={busy}
                 type="button"
               >
-                <Fingerprint className="mr-2 h-4 w-4" /> Passkey
+                <Wand2 className="mr-2 h-4 w-4" /> Email me a magic link
               </Button>
             </div>
           </TabsContent>
-          
+
           <TabsContent value="signup" className="space-y-4">
             <form onSubmit={handleEmailAuth} className="space-y-4">
               <div className="space-y-2">
@@ -188,11 +216,11 @@ export function AuthDialog({ open, onOpenChange, mode, onModeChange }: AuthDialo
                   required
                 />
               </div>
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Creating account..." : "Sign Up with Email"}
+              <Button type="submit" className="w-full" disabled={busy}>
+                {busy ? "Creating account..." : "Sign Up with Email"}
               </Button>
             </form>
-            
+
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t" />
@@ -201,25 +229,25 @@ export function AuthDialog({ open, onOpenChange, mode, onModeChange }: AuthDialo
                 <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
               </div>
             </div>
-            
+
             <div className="flex flex-col gap-2">
-              <Button 
-                variant="outline" 
-                className="w-full" 
+              <Button
+                variant="outline"
+                className="w-full"
                 onClick={handleGoogleAuth}
-                disabled={isLoading}
+                disabled={busy}
                 type="button"
               >
                 <Mail className="mr-2 h-4 w-4" /> Google
               </Button>
-              <Button 
-                variant="outline" 
-                className="w-full" 
-                onClick={handlePasskeyAuth}
-                disabled={isLoading}
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={handleMagicLink}
+                disabled={busy}
                 type="button"
               >
-                <Fingerprint className="mr-2 h-4 w-4" /> Passkey
+                <Wand2 className="mr-2 h-4 w-4" /> Email me a magic link
               </Button>
             </div>
           </TabsContent>

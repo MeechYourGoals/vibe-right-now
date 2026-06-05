@@ -4,7 +4,7 @@ import { Suspense, lazy, useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import VernonNext from '@/components/VernonNext';
-import { Auth0Provider } from "./auth/Auth0Provider";
+import { SupabaseAuthProvider } from "./auth/SupabaseAuthProvider";
 import { MobileProvider } from "@/providers/MobileProvider";
 
 // Lazy-loaded components
@@ -39,7 +39,7 @@ function App() {
   }, []);
 
   return (
-    <Auth0Provider>
+    <SupabaseAuthProvider>
       <MobileProvider>
         <ThemeProvider defaultTheme="light" storageKey="vibe-ui-theme">
           <BrowserRouter>
@@ -72,7 +72,7 @@ function App() {
         </BrowserRouter>
         </ThemeProvider>
       </MobileProvider>
-    </Auth0Provider>
+    </SupabaseAuthProvider>
   );
 }
 

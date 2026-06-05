@@ -10,9 +10,10 @@ import VibeTagsDisplay from "./VibeTagsDisplay";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { UserPlus, UserCheck } from "lucide-react";
-import { deletePost } from "@/utils/venue/postManagementUtils";
+import { deletePost, deletePostById, canCurrentUserDeletePost } from "@/utils/venue/postManagementUtils";
 import UserDropdown from "@/components/venue/post-grid-item/UserDropdown";
 import { generateVibeTags } from "@/utils/vibeTagsGenerator";
+import { getCurrentUserIdSync } from "@/services/posts/currentUser";
 
 interface PostCardProps {
   post?: Post;
@@ -206,12 +207,23 @@ const PostCard: React.FC<PostCardProps> = ({
     return null;
   }
 
-  const handleDelete = () => {
+  const currentUserId = getCurrentUserIdSync();
+  const isAuthor = canCurrentUserDeletePost(post, currentUserId);
+
+  const handleDelete = async () => {
+    // Author-owned post: persist a real delete via the data layer.
+    if (isAuthor) {
+      const ok = await deletePostById(post);
+      if (ok) {
+        setIsDeleted(true);
+        onPostDeleted?.(post.id);
+      }
+      return;
+    }
+    // Venue-management context (e.g. a venue removing a tagged post): legacy behavior.
     if (venue && deletePost(post.id, venue)) {
       setIsDeleted(true);
-      if (onPostDeleted) {
-        onPostDeleted(post.id);
-      }
+      onPostDeleted?.(post.id);
     }
   };
 
@@ -245,7 +257,7 @@ const PostCard: React.FC<PostCardProps> = ({
         timestamp={String(post.timestamp)} 
         location={post.location}
         isPinned={post.isPinned}
-        canDelete={canDelete && !isVenuePost}
+        canDelete={(canDelete || isAuthor) && !isVenuePost}
         onDelete={handleDelete}
       />
       

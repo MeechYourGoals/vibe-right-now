@@ -6,11 +6,14 @@ import UserProfileHeader from '@/components/user/UserProfileHeader';
 import PrivateProfileContent from '@/components/user/PrivateProfileContent';
 import ProfileTabs from '@/components/user/ProfileTabs';
 import { useUserProfile } from '@/hooks/useUserProfile';
+import { useUserStore } from '@/store/userStore';
+import { toast } from 'sonner';
 
 const UserProfile = () => {
   const { username } = useParams<{ username: string }>();
   const navigate = useNavigate();
-  
+  const { user: currentUser, isAuthenticated } = useUserStore();
+
   const {
     profile,
     loading,
@@ -19,6 +22,7 @@ const UserProfile = () => {
     followedVenues,
     visitedPlaces,
     wantToVisitPlaces,
+    isFollowing,
     followUser,
     unfollowUser,
     updateBio,
@@ -27,6 +31,26 @@ const UserProfile = () => {
     getUserBio,
     isPrivateProfile
   } = useUserProfile(username || '');
+
+  const isOwnProfile = !!currentUser?.id && currentUser.id === profile?.id;
+
+  const handleFollow = async () => {
+    if (!isAuthenticated) {
+      toast.error('Please sign in to follow people.');
+      return false;
+    }
+    const ok = await followUser();
+    if (ok) toast.success(`Following ${profile?.name || 'user'}`);
+    return ok;
+  };
+
+  const handleUnfollow = async () => {
+    if (!isAuthenticated) {
+      toast.error('Please sign in to manage follows.');
+      return false;
+    }
+    return unfollowUser();
+  };
 
   useEffect(() => {
     if (!username) {
@@ -78,15 +102,17 @@ const UserProfile = () => {
           <PrivateProfileContent user={profile} />
         ) : (
           <>
-            <UserProfileHeader 
+            <UserProfileHeader
               user={profile}
-              onFollow={followUser}
-              onUnfollow={unfollowUser}
+              onFollow={handleFollow}
+              onUnfollow={handleUnfollow}
               onUpdateBio={updateBio}
               onBlock={blockUser}
               onReport={reportUser}
               isPrivate={isPrivateProfile}
-              getUserBio={() => getUserBio(profile.id)}
+              isFollowing={isFollowing}
+              isOwnProfile={isOwnProfile}
+              getUserBio={() => getUserBio()}
             />
             
             <ProfileTabs

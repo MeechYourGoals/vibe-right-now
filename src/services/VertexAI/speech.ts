@@ -1,65 +1,62 @@
 
 /**
- * Speech services using Google's Text-to-Speech API
+ * Speech services routed through edge functions with silent text-only degrade.
  */
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { invokeEdgeWithFallback } from '@/services/edge/invokeEdge';
 import { TextToSpeechOptions, DEFAULT_MALE_VOICE } from './types';
 
-/**
- * Generate speech from text using Google Text-to-Speech API
- */
-export async function textToSpeech(text: string, options: TextToSpeechOptions = {}): Promise<string | null> {
-  try {
-    console.log('Converting text to speech with Google TTS:', text.substring(0, 50) + '...');
-    
-    const { data, error } = await supabase.functions.invoke('google-tts', {
-      body: { 
-        text,
-        voice: options.voice || DEFAULT_MALE_VOICE, // Use male voice by default
-        speakingRate: options.speakingRate || 1.0,
-        pitch: options.pitch || 0
-      }
-    });
-    
-    if (error) {
-      console.error('Error calling Google TTS function:', error);
-      throw new Error(`Text-to-speech conversion failed: ${error.message}`);
-    }
-    
-    if (!data || !data.audioContent) {
-      throw new Error('No audio content received from Google TTS');
-    }
-    
-    return data.audioContent;
-  } catch (error) {
-    console.error('Error in textToSpeech:', error);
-    toast.error('Failed to generate speech. Using browser voice instead.');
-    return null;
+function asAudio(data: unknown): string | null {
+  if (typeof data === 'string' && data.trim()) return data;
+  if (data && typeof data === 'object') {
+    const obj = data as Record<string, any>;
+    return obj.audioContent || obj.audio || obj.base64 || null;
   }
+  return null;
 }
 
 /**
- * Transcribe speech to text using Google Speech-to-Text API
+ * Generate speech from text. Tries `eleven-labs-tts`, then `google-tts`, and
+ * returns null (text-only) when no audio backend is available.
+ */
+export async function textToSpeech(
+  text: string,
+  options: TextToSpeechOptions = {}
+): Promise<string | null> {
+  const data = await invokeEdgeWithFallback<unknown>(
+    'eleven-labs-tts',
+    { text, voice: options.voice || DEFAULT_MALE_VOICE },
+    async () =>
+      invokeEdgeWithFallback<unknown>(
+        'google-tts',
+        {
+          text,
+          voice: options.voice || DEFAULT_MALE_VOICE,
+          speakingRate: options.speakingRate || 1.0,
+          pitch: options.pitch || 0,
+        },
+        () => null
+      )
+  );
+
+  return asAudio(data);
+}
+
+/**
+ * Transcribe speech to text via `google-stt`. Returns null when unavailable so
+ * the caller can fall back to browser speech recognition or text input.
  */
 export async function speechToText(audioBase64: string): Promise<string | null> {
-  try {
-    const { data, error } = await supabase.functions.invoke('google-stt', {
-      body: { audio: audioBase64 }
-    });
-    
-    if (error) {
-      console.error('Error calling Google STT function:', error);
-      throw new Error(`Speech-to-text conversion failed: ${error.message}`);
-    }
-    
-    if (!data || !data.transcript) {
-      throw new Error('No transcript received from Google STT');
-    }
-    
-    return data.transcript;
-  } catch (error) {
-    console.error('Error in speechToText:', error);
-    return null;
+  const data = await invokeEdgeWithFallback<unknown>(
+    'google-stt',
+    { audio: audioBase64 },
+    () => null
+  );
+
+  if (typeof data === 'string' && data.trim()) return data;
+  if (data && typeof data === 'object') {
+    const obj = data as Record<string, any>;
+    const transcript = obj.transcript || obj.text;
+    if (typeof transcript === 'string' && transcript.trim()) return transcript;
   }
+  return null;
 }
