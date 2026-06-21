@@ -6,7 +6,7 @@ import type { AdFormat, TargetingOptions, GenderTargeting, AdCampaign } from './
 export interface User {
   id: string;
   username: string;
-  displayName?: string; // Add displayName property
+  displayName?: string;
   name: string;
   email?: string;
   avatar?: string;
@@ -17,8 +17,11 @@ export interface User {
   followers?: number;
   following?: number;
   posts?: number;
+  subscription?: any;
+  points?: number;
   createdAt?: string;
   updatedAt?: string;
+  [key: string]: any;
 }
 
 export interface CreditCard {
@@ -29,6 +32,9 @@ export interface CreditCard {
   expYear: number;
   isDefault?: boolean;
   holderName?: string;
+  maxSpendLimit?: number;
+  vernonApproved?: boolean;
+  [key: string]: any;
 }
 
 export type { Coordinates, UserLocation } from './coordinates';
@@ -49,8 +55,8 @@ export interface Location {
   price_level?: number;
   phone?: string;
   website?: string;
-  google_maps_url?: string; // Add google_maps_url property
-  business_status?: string; // Add business_status property
+  google_maps_url?: string;
+  business_status?: string;
   hours?: string | VenueHours | { [key: string]: string | { open: string; close: string; closed?: boolean } };
   vibes?: string[];
   tags?: string[];
@@ -58,10 +64,12 @@ export interface Location {
   userProfile?: MockUserProfile;
   createdAt?: string;
   updatedAt?: string;
+  [key: string]: any;
 }
 
 export interface VenueHours {
   isOpen24Hours?: boolean;
+  isOpenNow?: boolean;
   monday?: { open: string; close: string; closed?: boolean };
   tuesday?: { open: string; close: string; closed?: boolean };
   wednesday?: { open: string; close: string; closed?: boolean };
@@ -69,6 +77,7 @@ export interface VenueHours {
   friday?: { open: string; close: string; closed?: boolean };
   saturday?: { open: string; close: string; closed?: boolean };
   sunday?: { open: string; close: string; closed?: boolean };
+  [key: string]: any;
 }
 
 export type BusinessHours = VenueHours;
@@ -78,7 +87,10 @@ export type { Post, Media, Comment, Story, ContentMetrics } from './entities/con
 
 // Re-export from advertising types
 export type { AdFormat, TargetingOptions, GenderTargeting, AdCampaign } from './features/advertising';
-export type { BusinessHours };
+
+export type SentimentAnalysisResult = any;
+export type VenueSentimentAnalysis = any;
+
 
 // User profile types
 export interface UserProfileData {
