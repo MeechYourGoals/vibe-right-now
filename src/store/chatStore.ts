@@ -2,7 +2,6 @@
 import { StateCreator } from 'zustand';
 import { AppStore, ChatSlice } from './types';
 import { Message, ChatMode } from '@/components/VernonChat/types';
-import { useAppStore } from './appStore';
 
 export const createChatSlice: StateCreator<
   AppStore,
@@ -78,32 +77,3 @@ export const createChatSlice: StateCreator<
     });
   },
 });
-
-// Export individual store hook
-export const useChatStore = () => {
-  const { 
-    chatState,
-    setChatOpen,
-    setMessages,
-    addMessage,
-    setTyping,
-    setProcessing,
-    setChatMode,
-    setListening,
-    setTranscript,
-    clearMessages
-  } = useAppStore();
-  
-  return { 
-    chatState,
-    setChatOpen,
-    setMessages,
-    addMessage,
-    setTyping,
-    setProcessing,
-    setChatMode,
-    setListening,
-    setTranscript,
-    clearMessages
-  };
-};
