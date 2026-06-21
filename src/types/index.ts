@@ -34,7 +34,6 @@ export interface CreditCard {
   holderName?: string;
   maxSpendLimit?: number;
   vernonApproved?: boolean;
-  [key: string]: any;
 }
 
 export type { Coordinates, UserLocation } from './coordinates';
