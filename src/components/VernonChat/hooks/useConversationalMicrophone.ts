@@ -14,7 +14,7 @@ export const useConversationalMicrophone = ({
   const [transcript, setTranscript] = useState('');
   
   const recognitionRef = useRef<SpeechRecognition | null>(null);
-  const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const finalTranscriptRef = useRef<string>('');
 
   useEffect(() => {
