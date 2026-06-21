@@ -7,17 +7,17 @@ const createDiscountVenue = (postId: string, discount: DiscountOffer): VenueWith
   if (!post) throw new Error(`Post ${postId} not found`);
   
   return {
-    id: post.location.id,
-    name: post.location.name,
-    type: post.location.type,
-    address: post.location.address,
-    city: post.location.city,
-    state: post.location.state,
-    country: post.location.country,
-    zip: post.location.zip || "10001", // Ensure zip is always provided
-    lat: post.location.lat,
-    lng: post.location.lng,
-    verified: post.location.verified || false,
+    id: (post.location as any).id,
+    name: (post.location as any).name,
+    type: (post.location as any).type,
+    address: (post.location as any).address,
+    city: (post.location as any).city,
+    state: (post.location as any).state,
+    country: (post.location as any).country,
+    zip: (post.location as any).zip || "10001", // Ensure zip is always provided
+    lat: (post.location as any).lat,
+    lng: (post.location as any).lng,
+    verified: (post.location as any).verified || false,
     discount
   };
 };

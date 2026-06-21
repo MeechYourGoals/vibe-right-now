@@ -13,12 +13,25 @@ export interface User {
   bio?: string;
   verified?: boolean;
   isPrivate?: boolean;
+  location?: string;
   followers?: number;
   following?: number;
   posts?: number;
   createdAt?: string;
   updatedAt?: string;
 }
+
+export interface CreditCard {
+  id: string;
+  last4: string;
+  brand: string;
+  expMonth: number;
+  expYear: number;
+  isDefault?: boolean;
+  holderName?: string;
+}
+
+export type { Coordinates, UserLocation } from './coordinates';
 
 export interface Location {
   id: string;

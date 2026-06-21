@@ -113,7 +113,7 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ userCount, post }) => {
       </div>
 
       {showAllUsers && (
-        <PostUsersList location={post.location} setShowAllUsers={setShowAllUsers} />
+        <PostUsersList location={post.location as any} setShowAllUsers={setShowAllUsers} />
       )}
     </>
   );
