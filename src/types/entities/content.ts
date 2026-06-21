@@ -12,7 +12,7 @@ export interface Media {
 
 export interface Post {
   id: string;
-  userId: string;
+  userId?: string;
   user?: User; // Add user property
   content: string;
   media?: Media[] | string[];
