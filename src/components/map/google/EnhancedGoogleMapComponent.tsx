@@ -15,7 +15,7 @@ const mapContainerStyle = {
 };
 
 interface EnhancedGoogleMapComponentProps {
-  userLocation: GeolocationCoordinates | null;
+  userLocation: { latitude: number; longitude: number } | null;
   locations: Location[];
   realPlaces: Location[];
   searchedCity: string;
