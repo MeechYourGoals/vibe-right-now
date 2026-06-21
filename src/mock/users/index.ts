@@ -7,7 +7,7 @@ import { diverseUsers } from "./diverseUsers";
 export interface MockUserProfile {
   id: string;
   username: string;
-  avatar: string;
+  avatar?: string;
   bio?: string;
   name: string;
   type?: 'regular' | 'celebrity' | 'venue';

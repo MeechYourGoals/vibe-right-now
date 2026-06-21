@@ -13,8 +13,7 @@ export interface AudioSummary {
 export const AudioSummaryService = {
   async getAudioSummary(venueId: string): Promise<AudioSummary | null> {
     try {
-      const { data, error } = await supabase
-        .from('venue_audio_summaries')
+      const { data, error } = await (supabase as any).from('venue_audio_summaries')
         .select('*')
         .eq('venue_id', venueId)
         .single();

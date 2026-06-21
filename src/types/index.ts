@@ -13,12 +13,25 @@ export interface User {
   bio?: string;
   verified?: boolean;
   isPrivate?: boolean;
+  location?: string;
   followers?: number;
   following?: number;
   posts?: number;
   createdAt?: string;
   updatedAt?: string;
 }
+
+export interface CreditCard {
+  id: string;
+  last4: string;
+  brand: string;
+  expMonth: number;
+  expYear: number;
+  isDefault?: boolean;
+  holderName?: string;
+}
+
+export type { Coordinates, UserLocation } from './coordinates';
 
 export interface Location {
   id: string;
@@ -85,14 +98,28 @@ export interface UserProfileStats {
 
 // Add missing type exports
 export interface VenueInsights {
-  totalVisits: number;
-  avgRating: number;
-  topVibes: string[];
-  peakHours: string[];
-  demographics: {
+  totalVisits?: number;
+  avgRating?: number;
+  topVibes?: string[];
+  peakHours?: string[];
+  demographics?: {
     ageGroups: Record<string, number>;
     genderSplit: Record<string, number>;
   };
+  visitors?: number;
+  visitorCount?: number;
+  checkInCount?: number;
+  receiptUploads?: number;
+  discountRedemptions?: number;
+}
+
+export interface SentimentTheme {
+  theme?: string;
+  sentiment?: number;
+  count?: number;
+  name?: string;
+  score?: number;
+  examples?: string[];
 }
 
 export interface PlatformSentimentSummary {
@@ -100,19 +127,17 @@ export interface PlatformSentimentSummary {
   overallSentiment: number;
   reviewCount: number;
   themes: SentimentTheme[];
-}
-
-export interface SentimentTheme {
-  theme: string;
-  sentiment: number;
-  count: number;
+  summary?: string;
+  lastUpdated?: string;
+  sentimentDistribution?: { positive: number; neutral: number; negative: number };
 }
 
 export interface CityData {
-  id: string;
+  id?: string;
   name: string;
+  state?: string;
   country: string;
   lat: number;
   lng: number;
-  venues: Location[];
+  venues: any[];
 }

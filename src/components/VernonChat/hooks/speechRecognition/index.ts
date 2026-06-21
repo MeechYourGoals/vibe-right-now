@@ -15,7 +15,7 @@ export const useSpeechRecognition = (): SpeechRecognitionHookReturn => {
   const [interimTranscript, setInterimTranscript] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [silenceTimer, setSilenceTimer] = useState<NodeJS.Timeout | null>(null);
+  const [silenceTimer, setSilenceTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
   const [isPushToTalkActive, setIsPushToTalkActive] = useState(false);
   
   // Setup recognition

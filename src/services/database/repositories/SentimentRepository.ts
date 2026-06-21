@@ -29,8 +29,7 @@ export interface ReviewSentimentCache {
 export class SentimentRepository extends BaseRepository {
   async getVenueSentimentAnalysis(venueId: string): Promise<PaginatedResult<VenueSentimentAnalysis>> {
     return this.executeQuery(async () => {
-      const { data, error } = await this.supabase
-        .from('venue_sentiment_analysis')
+      const { data, error } = await (this.supabase as any).from('venue_sentiment_analysis')
         .select('*')
         .eq('venue_id', venueId)
         .order('last_analyzed_at', { ascending: false });
@@ -45,8 +44,7 @@ export class SentimentRepository extends BaseRepository {
     sentimentData: Partial<VenueSentimentAnalysis>
   ): Promise<DatabaseResult<VenueSentimentAnalysis>> {
     return this.executeQuery(async () => {
-      const { data, error } = await this.supabase
-        .from('venue_sentiment_analysis')
+      const { data, error } = await (this.supabase as any).from('venue_sentiment_analysis')
         .upsert({
           venue_id: venueId,
           platform,
@@ -65,8 +63,7 @@ export class SentimentRepository extends BaseRepository {
 
   async getPlatformSentiment(venueId: string, platform: string): Promise<DatabaseResult<VenueSentimentAnalysis>> {
     return this.executeQuery(async () => {
-      const { data, error } = await this.supabase
-        .from('venue_sentiment_analysis')
+      const { data, error } = await (this.supabase as any).from('venue_sentiment_analysis')
         .select('*')
         .eq('venue_id', venueId)
         .eq('platform', platform)
@@ -88,8 +85,7 @@ export class SentimentRepository extends BaseRepository {
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + 30);
 
-      const { data, error } = await this.supabase
-        .from('review_sentiment_cache')
+      const { data, error } = await (this.supabase as any).from('review_sentiment_cache')
         .upsert({
           venue_id: venueId,
           platform,
@@ -112,8 +108,7 @@ export class SentimentRepository extends BaseRepository {
     reviewId: string
   ): Promise<DatabaseResult<ReviewSentimentCache>> {
     return this.executeQuery(async () => {
-      const { data, error } = await this.supabase
-        .from('review_sentiment_cache')
+      const { data, error } = await (this.supabase as any).from('review_sentiment_cache')
         .select('*')
         .eq('venue_id', venueId)
         .eq('platform', platform)

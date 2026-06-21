@@ -28,10 +28,16 @@ export interface Post {
   location?: {
     id: string;
     name: string;
-    city: string;
-    state: string;
-    country?: string; // Add country property
+    city?: string;
+    state?: string;
+    country?: string;
     type?: string;
+    address?: string;
+    lat?: number;
+    lng?: number;
+    zip?: string;
+    verified?: boolean;
+    [key: string]: any;
   };
   isVerified?: boolean;
   isPinned?: boolean;

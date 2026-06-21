@@ -10,7 +10,7 @@ export const useSilenceDetection = ({
   onSilenceDetected,
   silenceDuration = 1200 // Default 1.2 seconds
 }: UseSilenceDetectionProps) => {
-  const silenceTimer = useRef<NodeJS.Timeout | null>(null);
+  const silenceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastSpeechTime = useRef<number>(0);
   
   // Reset silence timer and set a new one

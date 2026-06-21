@@ -55,8 +55,7 @@ export class LocationRepository extends BaseRepository {
     } = {}
   ): Promise<PaginatedResult<Location>> {
     return this.executeQuery(async () => {
-      let query = this.supabase
-        .from('locations')
+      let query = (this.supabase as any).from('locations')
         .select('*', { count: 'exact' });
 
       if (filters.city) {
@@ -79,8 +78,7 @@ export class LocationRepository extends BaseRepository {
 
   async createLocation(location: Omit<Location, 'id' | 'created_at' | 'updated_at'>): Promise<DatabaseResult<Location>> {
     return this.executeQuery(async () => {
-      const { data, error } = await this.supabase
-        .from('locations')
+      const { data, error } = await (this.supabase as any).from('locations')
         .insert(location)
         .select()
         .single();
@@ -91,8 +89,7 @@ export class LocationRepository extends BaseRepository {
 
   async getTrendKeywords(locationName: string): Promise<PaginatedResult<TrendKeyword>> {
     return this.executeQuery(async () => {
-      const { data, error } = await this.supabase
-        .from('trend_keywords')
+      const { data, error } = await (this.supabase as any).from('trend_keywords')
         .select('*')
         .eq('location_name', locationName)
         .order('interest_score', { ascending: false });
@@ -103,8 +100,7 @@ export class LocationRepository extends BaseRepository {
 
   async getVibeScores(locationId: string): Promise<PaginatedResult<VibeScore>> {
     return this.executeQuery(async () => {
-      const { data, error } = await this.supabase
-        .from('vibe_scores')
+      const { data, error } = await (this.supabase as any).from('vibe_scores')
         .select('*')
         .eq('location_id', locationId)
         .order('timestamp', { ascending: false });
@@ -115,8 +111,7 @@ export class LocationRepository extends BaseRepository {
 
   async createVibeScore(vibeScore: Omit<VibeScore, 'id' | 'timestamp'>): Promise<DatabaseResult<VibeScore>> {
     return this.executeQuery(async () => {
-      const { data, error } = await this.supabase
-        .from('vibe_scores')
+      const { data, error } = await (this.supabase as any).from('vibe_scores')
         .insert(vibeScore)
         .select()
         .single();
@@ -127,8 +122,7 @@ export class LocationRepository extends BaseRepository {
 
   async getVibeSignals(locationId: string): Promise<PaginatedResult<VibeSignal>> {
     return this.executeQuery(async () => {
-      const { data, error } = await this.supabase
-        .from('vibe_signals')
+      const { data, error } = await (this.supabase as any).from('vibe_signals')
         .select('*')
         .eq('location_id', locationId)
         .order('timestamp', { ascending: false });
@@ -139,8 +133,7 @@ export class LocationRepository extends BaseRepository {
 
   async createVibeSignal(vibeSignal: Omit<VibeSignal, 'id' | 'timestamp'>): Promise<DatabaseResult<VibeSignal>> {
     return this.executeQuery(async () => {
-      const { data, error } = await this.supabase
-        .from('vibe_signals')
+      const { data, error } = await (this.supabase as any).from('vibe_signals')
         .insert(vibeSignal)
         .select()
         .single();

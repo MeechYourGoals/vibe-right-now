@@ -10,6 +10,7 @@ interface VenueProfileHeaderProps {
   onShare?: () => void;
   onSave?: () => void;
   onLike?: () => void;
+  onMapExpand?: () => void;
 }
 
 const VenueProfileHeader: React.FC<VenueProfileHeaderProps> = ({

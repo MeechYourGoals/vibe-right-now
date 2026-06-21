@@ -41,8 +41,7 @@ export interface TripVenueIdea {
 export class TripRepository extends BaseRepository {
   async getMessages(tripId: string): Promise<PaginatedResult<TripMessage>> {
     return this.executeQuery(async () => {
-      const { data, error } = await this.supabase
-        .from('trip_messages')
+      const { data, error } = await (this.supabase as any).from('trip_messages')
         .select('*')
         .eq('trip_id', tripId)
         .order('created_at', { ascending: true });
@@ -53,8 +52,7 @@ export class TripRepository extends BaseRepository {
 
   async sendMessage(message: Omit<TripMessage, 'id' | 'created_at'>): Promise<DatabaseResult<TripMessage>> {
     return this.executeQuery(async () => {
-      const { data, error } = await this.supabase
-        .from('trip_messages')
+      const { data, error } = await (this.supabase as any).from('trip_messages')
         .insert(message)
         .select()
         .single();
@@ -65,8 +63,7 @@ export class TripRepository extends BaseRepository {
 
   async getVenueIdeas(tripId: string): Promise<PaginatedResult<TripVenueIdea>> {
     return this.executeQuery(async () => {
-      const { data, error } = await this.supabase
-        .from('trip_venue_ideas')
+      const { data, error } = await (this.supabase as any).from('trip_venue_ideas')
         .select(`
           *,
           trip_venue_votes (
@@ -85,8 +82,7 @@ export class TripRepository extends BaseRepository {
 
   async addVenueIdea(venueIdea: Omit<TripVenueIdea, 'id' | 'created_at'>): Promise<DatabaseResult<TripVenueIdea>> {
     return this.executeQuery(async () => {
-      const { data, error } = await this.supabase
-        .from('trip_venue_ideas')
+      const { data, error } = await (this.supabase as any).from('trip_venue_ideas')
         .insert(venueIdea)
         .select()
         .single();
@@ -103,8 +99,7 @@ export class TripRepository extends BaseRepository {
     user_avatar: string;
   }): Promise<DatabaseResult<any>> {
     return this.executeQuery(async () => {
-      const { data, error } = await this.supabase
-        .from('trip_venue_votes')
+      const { data, error } = await (this.supabase as any).from('trip_venue_votes')
         .insert(vote)
         .select()
         .single();
@@ -120,8 +115,7 @@ export class TripRepository extends BaseRepository {
     user_name: string;
   }): Promise<DatabaseResult<any>> {
     return this.executeQuery(async () => {
-      const { data, error } = await this.supabase
-        .from('trip_message_reactions')
+      const { data, error } = await (this.supabase as any).from('trip_message_reactions')
         .insert(reaction)
         .select()
         .single();
