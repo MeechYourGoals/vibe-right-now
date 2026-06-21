@@ -74,3 +74,9 @@ export interface VenueInsights {
   receiptUploads?: number;
   discountRedemptions?: number;
 }
+
+export type BusinessHours = VenueHours;
+export type VenueFeature = string;
+export type SocialMediaLinks = Record<string, string>;
+export interface PopularTime { day: string; hour: number; popularity: number; }
+
