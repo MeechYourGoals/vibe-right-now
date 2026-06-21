@@ -85,14 +85,28 @@ export interface UserProfileStats {
 
 // Add missing type exports
 export interface VenueInsights {
-  totalVisits: number;
-  avgRating: number;
-  topVibes: string[];
-  peakHours: string[];
-  demographics: {
+  totalVisits?: number;
+  avgRating?: number;
+  topVibes?: string[];
+  peakHours?: string[];
+  demographics?: {
     ageGroups: Record<string, number>;
     genderSplit: Record<string, number>;
   };
+  visitors?: number;
+  visitorCount?: number;
+  checkInCount?: number;
+  receiptUploads?: number;
+  discountRedemptions?: number;
+}
+
+export interface SentimentTheme {
+  theme?: string;
+  sentiment?: number;
+  count?: number;
+  name?: string;
+  score?: number;
+  examples?: string[];
 }
 
 export interface PlatformSentimentSummary {
@@ -100,12 +114,9 @@ export interface PlatformSentimentSummary {
   overallSentiment: number;
   reviewCount: number;
   themes: SentimentTheme[];
-}
-
-export interface SentimentTheme {
-  theme: string;
-  sentiment: number;
-  count: number;
+  summary?: string;
+  lastUpdated?: string;
+  sentimentDistribution?: { positive: number; neutral: number; negative: number };
 }
 
 export interface CityData {
