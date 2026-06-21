@@ -1,7 +1,6 @@
 
 import { StateCreator } from 'zustand';
 import { AppStore, LocationSlice, Location } from './types';
-import { useAppStore } from './appStore';
 
 export const createLocationSlice: StateCreator<
   AppStore,
@@ -45,32 +44,3 @@ export const createLocationSlice: StateCreator<
     });
   },
 });
-
-// Export individual store hook
-export const useLocationStore = () => {
-  const { 
-    locations, 
-    nearbyLocations, 
-    selectedLocation, 
-    searchResults, 
-    isLoading,
-    setLocations, 
-    setNearbyLocations, 
-    setSelectedLocation, 
-    setSearchResults, 
-    setLoading 
-  } = useAppStore();
-  
-  return { 
-    locations, 
-    nearbyLocations, 
-    selectedLocation, 
-    searchResults, 
-    isLoading,
-    setLocations, 
-    setNearbyLocations, 
-    setSelectedLocation, 
-    setSearchResults, 
-    setLoading 
-  };
-};

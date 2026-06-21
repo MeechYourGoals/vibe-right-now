@@ -1,7 +1,6 @@
 
 import { StateCreator } from 'zustand';
 import { AppStore, VenueSlice, Venue } from './types';
-import { useAppStore } from './appStore';
 
 export const createVenueSlice: StateCreator<
   AppStore,
@@ -55,26 +54,3 @@ export const createVenueSlice: StateCreator<
     });
   },
 });
-
-// Export individual store hook
-export const useVenueStore = () => {
-  const { 
-    venues, 
-    followedVenues, 
-    currentVenue, 
-    followVenue, 
-    unfollowVenue, 
-    setCurrentVenue, 
-    updateVenue 
-  } = useAppStore();
-  
-  return { 
-    venues, 
-    followedVenues, 
-    currentVenue, 
-    followVenue, 
-    unfollowVenue, 
-    setCurrentVenue, 
-    updateVenue 
-  };
-};

@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Edit, Camera } from "lucide-react";
 import { toast } from "sonner";
 import { profilesRepo } from "@/services/data";
-import { useUserStore } from "@/store/userStore";
+import { useUserStore } from "@/store";
 import type { User } from "@/types";
 
 const ProfileBio = () => {

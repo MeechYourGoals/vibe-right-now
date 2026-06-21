@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { UserSubscription, UserSubscriptionTier, TIER_FEATURES } from '@/types/subscription';
-import { useUserStore } from '@/store/userStore';
+import { useUserStore } from '@/store';
 
 export const useUserSubscription = () => {
   const { user } = useUserStore();

@@ -1,7 +1,6 @@
 
 import { StateCreator } from 'zustand';
 import { AppStore, UISlice, Notification } from './types';
-import { useAppStore } from './appStore';
 
 export const createUISlice: StateCreator<
   AppStore,
@@ -56,24 +55,3 @@ export const createUISlice: StateCreator<
     });
   },
 });
-
-// Export individual store hook
-export const useUIStore = () => {
-  const {
-    ui,
-    setLoading,
-    setTheme,
-    addNotification,
-    removeNotification,
-    clearNotifications
-  } = useAppStore();
-  
-  return { 
-    ui,
-    setLoading,
-    setTheme,
-    addNotification,
-    removeNotification,
-    clearNotifications
-  };
-};

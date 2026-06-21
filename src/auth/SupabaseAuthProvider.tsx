@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import type { Session, User as SupabaseUser } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { profilesRepo } from "@/services/data";
-import { useUserStore, mapProfileToStoreUser } from "@/store/userStore";
+import { useUserStore, mapProfileToStoreUser } from "@/store";
 
 export interface SupabaseAuthContextValue {
   session: Session | null;

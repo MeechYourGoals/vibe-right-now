@@ -1,7 +1,6 @@
 
 import { StateCreator } from 'zustand';
 import { AppStore, UserSlice, User } from './types';
-import { useAppStore } from './appStore';
 import type { User as RichUser } from '@/types';
 
 /**
@@ -60,9 +59,3 @@ export const createUserSlice: StateCreator<
     });
   },
 });
-
-// Export individual store hook
-export const useUserStore = () => {
-  const { user, isAuthenticated, login, logout, updateUser, updatePoints } = useAppStore();
-  return { user, isAuthenticated, login, logout, updateUser, updatePoints };
-};
