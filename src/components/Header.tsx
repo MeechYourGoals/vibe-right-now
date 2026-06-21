@@ -83,7 +83,7 @@ const Header = () => {
       <header className="fixed top-0 z-[9999] w-full border-b backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center">
           <div className="mr-4 flex">
-            <Link to="/" className="flex items-center space-x-2">
+            <Link to="/home" className="flex items-center space-x-2">
               <span className={`text-xl font-bold ${isMobile ? 'text-sm' : ''}`}>
                 <span className={`inline-block vibe-gradient-text transition-opacity duration-500 ease-in-out ${isAnimating ? 'opacity-0' : 'opacity-100'}`}>
                   {currentVWord}
@@ -100,7 +100,7 @@ const Header = () => {
             {!isMobile && (
               <nav className="flex items-center space-x-2">
                 <Button variant="ghost" asChild>
-                  <Link to="/">Home</Link>
+                  <Link to="/home">Home</Link>
                 </Button>
                 <Button variant="ghost" asChild>
                   <Link to="/explore">Explore</Link>
