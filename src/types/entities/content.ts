@@ -12,19 +12,19 @@ export interface Media {
 
 export interface Post {
   id: string;
-  userId: string;
+  userId?: string;
   user?: User; // Add user property
   content: string;
   media?: Media[] | string[];
   vibes?: string[];
   tags?: string[];
   vibeTags?: string[]; // Add vibeTags property
-  timestamp: string;
+  timestamp: string | Date;
   likes: number;
   comments: number;
   shares?: number;
-  saved?: boolean; // Add saved property
-  isVenuePost?: boolean; // Add isVenuePost property
+  saved?: boolean;
+  isVenuePost?: boolean;
   location?: {
     id: string;
     name: string;
@@ -41,7 +41,7 @@ export interface Post {
   };
   isVerified?: boolean;
   isPinned?: boolean;
-  visibility: 'public' | 'friends' | 'private';
+  visibility?: 'public' | 'friends' | 'private';
   reactions?: {
     type: string;
     count: number;
@@ -49,39 +49,40 @@ export interface Post {
   }[];
   mentions?: string[];
   hashtags?: string[];
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Comment {
   id: string;
   postId: string;
-  contentId: string;
-  userId: string;
-  user: User; // Add user property
-  author: User; // Add author property
+  contentId?: string;
+  userId?: string;
+  user: User;
+  author?: User;
   content: string;
-  body: string; // Add body property
+  body?: string;
   timestamp: string | Date;
-  createdAt: string | Date;
-  updatedAt: string | Date;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
   likes: number;
   replies?: Comment[];
   parentId?: string;
   isVerified?: boolean;
-  vibedHere?: boolean; // Add vibedHere property
+  vibedHere?: boolean;
   mentions?: string[];
-  status: 'published' | 'draft' | 'deleted';
-  engagement: {
+  status?: 'published' | 'draft' | 'deleted';
+  engagement?: {
     likes: number;
     replies: number;
     reactions: any[];
   };
-  moderation: {
+  moderation?: {
     status: 'approved' | 'pending' | 'rejected';
     flags: string[];
   };
 }
+
 
 export interface Story {
   id: string;

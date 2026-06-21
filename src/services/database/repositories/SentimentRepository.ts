@@ -122,7 +122,7 @@ export class SentimentRepository extends BaseRepository {
 
   async cleanupExpiredCache(): Promise<DatabaseResult<void>> {
     return this.executeQuery(async () => {
-      const { error } = await this.supabase.rpc('cleanup_expired_reviews');
+      const { error } = await (this.supabase as any).rpc('cleanup_expired_reviews');
       return { data: null, error };
     });
   }
