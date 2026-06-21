@@ -241,7 +241,7 @@ const VenueMessaging: React.FC = () => {
                       </div>
                       {conversation.lastMessage && (
                         <div className="flex items-center gap-2 mb-1">
-                          <MessageTypeBadge type={conversation.lastMessage.messageType} />
+                          <MessageTypeBadge type={conversation.lastMessage.messageType as any} />
                           <p className="text-xs text-muted-foreground truncate flex-1">
                             {conversation.lastMessage.content}
                           </p>
@@ -319,7 +319,7 @@ const VenueMessaging: React.FC = () => {
                         >
                           {message.messageType && (
                             <div className="mb-1">
-                              <MessageTypeBadge type={message.messageType} />
+                              <MessageTypeBadge type={message.messageType as any} />
                             </div>
                           )}
                           <p className="text-sm">{message.content}</p>

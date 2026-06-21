@@ -25,8 +25,7 @@ const WaitTimeUpdater = ({ venueId, initialWaitTime, subscriptionTier }: WaitTim
     // Fetch the current wait time when component mounts
     const fetchCurrentWaitTime = async () => {
       try {
-        const { data, error } = await supabase
-          .from('vibe_signals')
+        const { data, error } = await (supabase as any).from('vibe_signals')
           .select('value')
           .eq('location_id', venueId)
           .eq('signal_type', 'wait_time')
@@ -72,8 +71,7 @@ const WaitTimeUpdater = ({ venueId, initialWaitTime, subscriptionTier }: WaitTim
       
       try {
         // Insert a new vibe_signal entry with signal_type "wait_time"
-        const { error } = await supabase
-          .from('vibe_signals')
+        const { error } = await (supabase as any).from('vibe_signals')
           .insert({
             location_id: venueId,
             value: waitTime,
@@ -103,8 +101,7 @@ const WaitTimeUpdater = ({ venueId, initialWaitTime, subscriptionTier }: WaitTim
     
     try {
       // Insert a new entry with null value to indicate cleared wait time
-      const { error } = await supabase
-        .from('vibe_signals')
+      const { error } = await (supabase as any).from('vibe_signals')
         .insert({
           location_id: venueId,
           value: 0, // Use 0 to indicate no wait time

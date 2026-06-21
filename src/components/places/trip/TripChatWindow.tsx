@@ -71,8 +71,7 @@ const TripChatWindow: React.FC<TripChatWindowProps> = ({
       // Try to enrich with reactions, but don't fail the view if that table
       // isn't present.
       try {
-        const { data, error } = await supabase
-          .from('trip_messages' as any)
+        const { data, error } = await (supabase as any).from('trip_messages')
           .select(`
             *,
             trip_message_reactions (
@@ -175,8 +174,7 @@ const TripChatWindow: React.FC<TripChatWindowProps> = ({
       return;
     }
     try {
-      const { error } = await supabase
-        .from('trip_message_reactions' as any)
+      const { error } = await (supabase as any).from('trip_message_reactions')
         .insert({
           message_id: messageId,
           reaction_type: reactionType,

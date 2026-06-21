@@ -51,8 +51,7 @@ const WaitTimeDisplay = ({ venueId, showLastUpdated = true, className = "" }: Wa
         } else {
           // Try to fetch from supabase if mock data isn't available
           try {
-            const { data, error } = await supabase
-              .from('vibe_signals')
+            const { data, error } = await (supabase as any).from('vibe_signals')
               .select('value, timestamp')
               .eq('location_id', venueId)
               .eq('signal_type', 'wait_time')
