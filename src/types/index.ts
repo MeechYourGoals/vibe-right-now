@@ -126,11 +126,12 @@ export interface VenueInsights {
 
 export interface SentimentTheme {
   theme?: string;
-  sentiment?: number;
+  sentiment?: number | string;
   count?: number;
   name?: string;
   score?: number;
   examples?: string[];
+  [key: string]: any;
 }
 
 export interface PlatformSentimentSummary {
@@ -139,9 +140,11 @@ export interface PlatformSentimentSummary {
   reviewCount: number;
   themes: SentimentTheme[];
   summary?: string;
-  lastUpdated?: string;
+  lastUpdated?: string | Date;
   sentimentDistribution?: { positive: number; neutral: number; negative: number };
+  [key: string]: any;
 }
+
 
 export interface CityData {
   id?: string;
