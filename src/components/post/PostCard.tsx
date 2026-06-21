@@ -162,7 +162,7 @@ const PostCard: React.FC<PostCardProps> = ({
               <VenueFirstPostHeader 
                 user={safeUser} 
                 timestamp={String(post.timestamp)}
-                location={post.location}
+                location={post.location as any}
                 isPinned={post.isPinned}
                 canDelete={canDelete}
                 onDelete={() => {}}
@@ -175,7 +175,7 @@ const PostCard: React.FC<PostCardProps> = ({
                 <PostContent content={post.content} />
                 
                 {post.media && post.media.length > 0 && (
-                  <PostMedia media={post.media} />
+                  <PostMedia media={post.media as any} />
                 )}
                 
                 <PostFooter 
@@ -255,7 +255,7 @@ const PostCard: React.FC<PostCardProps> = ({
       <VenueFirstPostHeader 
         user={safeUser} 
         timestamp={String(post.timestamp)} 
-        location={post.location}
+        location={post.location as any}
         isPinned={post.isPinned}
         canDelete={(canDelete || isAuthor) && !isVenuePost}
         onDelete={handleDelete}
@@ -273,7 +273,7 @@ const PostCard: React.FC<PostCardProps> = ({
       <PostContent content={post.content} />
       
       {post.media && post.media.length > 0 && (
-        <PostMedia media={post.media} />
+        <PostMedia media={post.media as any} />
       )}
       
       <PostFooter 

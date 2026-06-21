@@ -120,10 +120,11 @@ export interface PlatformSentimentSummary {
 }
 
 export interface CityData {
-  id: string;
+  id?: string;
   name: string;
+  state?: string;
   country: string;
   lat: number;
   lng: number;
-  venues: Location[];
+  venues: any[];
 }
