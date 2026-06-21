@@ -8,6 +8,8 @@ import { SupabaseAuthProvider } from "./auth/SupabaseAuthProvider";
 import { MobileProvider } from "@/providers/MobileProvider";
 
 // Lazy-loaded components
+const Landing = lazy(() => import("@/pages/Landing"));
+const Login = lazy(() => import("@/pages/Login"));
 const Index = lazy(() => import("@/pages/Index"));
 const Explore = lazy(() => import("@/pages/Explore"));
 const MyPlaces = lazy(() => import("@/pages/MyPlaces"));
@@ -45,7 +47,9 @@ function App() {
           <BrowserRouter>
           <Suspense fallback={<div className="h-screen w-screen flex items-center justify-center">Loading...</div>}>
             <Routes>
-              <Route path="/" element={<Index />} />
+              <Route path="/" element={<Landing />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/home" element={<Index />} />
               <Route path="/explore" element={<Explore />} />
               <Route path="/explore/:city" element={<Explore />} />
               <Route path="/my-places" element={<MyPlaces />} />

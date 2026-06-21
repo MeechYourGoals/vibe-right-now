@@ -115,20 +115,55 @@ const config = {
           to: { height: "0" },
         },
         "pulse-gradient": {
-          "0%, 100%": { 
+          "0%, 100%": {
             backgroundPosition: "0% 50%",
             backgroundSize: "200% 200%",
           },
-          "50%": { 
+          "50%": {
             backgroundPosition: "100% 50%",
             backgroundSize: "200% 200%",
           },
+        },
+        "ken-burns": {
+          "0%": { transform: "scale(1) translate3d(0, 0, 0)" },
+          "100%": { transform: "scale(1.18) translate3d(-2%, -2%, 0)" },
+        },
+        "float-slow": {
+          "0%, 100%": { transform: "translateY(0px)" },
+          "50%": { transform: "translateY(-14px)" },
+        },
+        "float-slower": {
+          "0%, 100%": { transform: "translateY(0px)" },
+          "50%": { transform: "translateY(-22px)" },
+        },
+        "gradient-shift": {
+          "0%, 100%": { backgroundPosition: "0% 50%" },
+          "50%": { backgroundPosition: "100% 50%" },
+        },
+        "marquee": {
+          "0%": { transform: "translateX(0)" },
+          "100%": { transform: "translateX(-50%)" },
+        },
+        "shimmer": {
+          "0%": { backgroundPosition: "-200% 0" },
+          "100%": { backgroundPosition: "200% 0" },
+        },
+        "pulse-ring": {
+          "0%": { transform: "scale(0.8)", opacity: "0.7" },
+          "100%": { transform: "scale(2.2)", opacity: "0" },
         },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "pulse-gradient": "pulse-gradient 3s ease-in-out infinite",
+        "ken-burns": "ken-burns 12s ease-out forwards",
+        "float-slow": "float-slow 6s ease-in-out infinite",
+        "float-slower": "float-slower 9s ease-in-out infinite",
+        "gradient-shift": "gradient-shift 8s ease-in-out infinite",
+        "marquee": "marquee 40s linear infinite",
+        "shimmer": "shimmer 2.5s linear infinite",
+        "pulse-ring": "pulse-ring 2.5s cubic-bezier(0.4,0,0.6,1) infinite",
       },
     },
   },
