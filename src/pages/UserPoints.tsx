@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Award, TrendingUp, Star } from "lucide-react";
-import { useUserStore } from "@/store/userStore";
+import { useUserStore } from "@/store";
 import { pointsService, type PointsLedgerEntry } from "@/services/social/pointsService";
 
 const UserPointsPage = () => {

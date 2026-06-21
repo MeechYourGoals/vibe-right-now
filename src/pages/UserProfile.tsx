@@ -6,7 +6,7 @@ import UserProfileHeader from '@/components/user/UserProfileHeader';
 import PrivateProfileContent from '@/components/user/PrivateProfileContent';
 import ProfileTabs from '@/components/user/ProfileTabs';
 import { useUserProfile } from '@/hooks/useUserProfile';
-import { useUserStore } from '@/store/userStore';
+import { useUserStore } from '@/store';
 import { toast } from 'sonner';
 
 const UserProfile = () => {

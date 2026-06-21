@@ -27,3 +27,4 @@ export const useUIStore = () => {
   const { ui, setLoading, setTheme, addNotification, removeNotification, clearNotifications } = useAppStore();
   return { ui, setLoading, setTheme, addNotification, removeNotification, clearNotifications };
 };
+export { mapProfileToStoreUser } from './userStore';

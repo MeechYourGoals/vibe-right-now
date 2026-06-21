@@ -6,7 +6,7 @@ import { mockComments } from '@/mock/comments';
 import { mockLocations } from '@/mock/locations';
 import { profilesRepo, postsRepo } from '@/services/data';
 import { followService } from '@/services/social/followService';
-import { useUserStore } from '@/store/userStore';
+import { useUserStore } from '@/store';
 
 /**
  * Loads a user's public profile (by username, falling back to id) and their posts
