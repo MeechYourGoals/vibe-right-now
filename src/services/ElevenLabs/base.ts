@@ -19,7 +19,6 @@ export interface ScribeTranscriptionOptions {
 
 export class ElevenLabsBase {
   private static apiKey: string | null = null;
-  private static defaultApiKey: string = 'sk_236c24971a353bfa897b2c150b2d256ae65e352b405e3e4f';
   // Adam voice ID - consistent male voice
   private static defaultVoiceId: string = 'pNInz6obpgDQGcFmaJgB';
   
@@ -29,16 +28,15 @@ export class ElevenLabsBase {
     localStorage.setItem('elevenLabsApiKey', apiKey);
   }
   
-  // Get API key from local storage if available, or use default
+  // Get API key from local storage if available.
+  //
+  // Never ship a default provider key in client code: browser bundles and
+  // localStorage are user-readable, so any embedded key should be treated as
+  // compromised. Production ElevenLabs calls should prefer Supabase Edge
+  // Functions with server-side secrets.
   public static getApiKey(): string | null {
     if (!this.apiKey) {
-      // Try to get from localStorage first
-      this.apiKey = localStorage.getItem('elevenLabsApiKey') || this.defaultApiKey;
-      
-      // If still no key, save the default key
-      if (this.apiKey === this.defaultApiKey && !localStorage.getItem('elevenLabsApiKey')) {
-        localStorage.setItem('elevenLabsApiKey', this.defaultApiKey);
-      }
+      this.apiKey = localStorage.getItem('elevenLabsApiKey');
     }
     return this.apiKey;
   }
