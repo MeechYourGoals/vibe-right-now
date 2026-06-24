@@ -1,16 +1,11 @@
 import { supabase } from "@/services/data";
-import { useAppStore } from "@/store";
 
 /**
  * Resolve the current user's id for persistence writes (like / save / delete / create
  * / check-in).
  *
- * Order of resolution:
- *  1. Supabase auth session (authoritative when signed in against a real backend).
- *  2. The Zustand app store user (covers demo / mock sign-in flows).
- *
- * Returns `null` when nobody is signed in. Callers should treat `null` as "prompt the
- * user to sign in" rather than throwing.
+ * Production writes require an authoritative Supabase Auth user. The Zustand user is
+ * presentation/cache state only and must not authorize database mutations.
  */
 export async function getCurrentUserId(): Promise<string | null> {
   try {
@@ -19,11 +14,13 @@ export async function getCurrentUserId(): Promise<string | null> {
   } catch {
     // ignore — fall through to store
   }
-  const storeUser = useAppStore.getState().user;
-  return storeUser?.id ?? null;
+  return null;
 }
 
-/** Synchronous best-effort current user id from the Zustand store (no auth round-trip). */
+/**
+ * No synchronous value is authoritative enough for writes/deletes. Components may use
+ * this as a conservative UI hint only; Supabase RLS remains the source of truth.
+ */
 export function getCurrentUserIdSync(): string | null {
-  return useAppStore.getState().user?.id ?? null;
+  return null;
 }

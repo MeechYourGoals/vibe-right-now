@@ -1,14 +1,15 @@
 import { supabase } from "@/integrations/supabase/client";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 /**
  * Mock-fallback switch for the whole data layer.
  *
- * Defaults to ON so the app renders full demo content even against an empty or
- * unauthenticated database. Set `VITE_USE_MOCK_FALLBACK=false` to force real-data-only
- * mode (useful for verifying persistence end-to-end).
+ * Defaults to OFF for production safety: an empty/erroring database should surface as
+ * an empty/error state, not silently render demo content. Set
+ * `VITE_USE_MOCK_FALLBACK=true` only for local demos, Storybook-style previews, or
+ * intentionally seeded prototype environments.
  */
-export const USE_MOCK_FALLBACK =
-  (import.meta.env.VITE_USE_MOCK_FALLBACK ?? "true") !== "false";
+export const USE_MOCK_FALLBACK = import.meta.env.VITE_USE_MOCK_FALLBACK === "true";
 
 /**
  * Untyped table accessor. The generated Supabase types in
@@ -17,7 +18,10 @@ export const USE_MOCK_FALLBACK =
  * against the migrated database, repositories use this accessor to query the new tables
  * without TypeScript complaining about unknown table names.
  */
-export const table = (name: string) => (supabase as any).from(name);
+type UntypedSupabaseClient = SupabaseClient<Record<string, never>, "public", Record<string, never>>;
+
+export const table = (name: string) =>
+  (supabase as unknown as UntypedSupabaseClient).from(name);
 
 export { supabase };
 
@@ -49,7 +53,10 @@ export async function withFallback<T>(
     if (isEmpty && USE_MOCK_FALLBACK) {
       return await mock();
     }
-    return (data ?? (await mock())) as T;
+    if (data == null) {
+      return USE_MOCK_FALLBACK ? await mock() : (data as T);
+    }
+    return data as T;
   } catch (err) {
     if (USE_MOCK_FALLBACK) {
       console.warn(`[data:${label}] falling back to mock:`, err);

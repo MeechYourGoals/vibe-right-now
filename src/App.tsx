@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import VernonNext from '@/components/VernonNext';
 import { SupabaseAuthProvider } from "./auth/SupabaseAuthProvider";
 import { MobileProvider } from "@/providers/MobileProvider";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 // Lazy-loaded components
 const Landing = lazy(() => import("@/pages/Landing"));
@@ -52,20 +53,20 @@ function App() {
               <Route path="/home" element={<Index />} />
               <Route path="/explore" element={<Explore />} />
               <Route path="/explore/:city" element={<Explore />} />
-              <Route path="/my-places" element={<MyPlaces />} />
-              <Route path="/my-places/trip/:tripId" element={<TripDetails />} />
-              <Route path="/trip/:tripId" element={<TripDetails />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/points" element={<UserPoints />} />
-              <Route path="/user-points" element={<UserPoints />} />
-              <Route path="/pinned" element={<PinnedVibes />} />
-              <Route path="/pinned-vibes" element={<PinnedVibes />} />
+              <Route path="/my-places" element={<ProtectedRoute><MyPlaces /></ProtectedRoute>} />
+              <Route path="/my-places/trip/:tripId" element={<ProtectedRoute><TripDetails /></ProtectedRoute>} />
+              <Route path="/trip/:tripId" element={<ProtectedRoute><TripDetails /></ProtectedRoute>} />
+              <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+              <Route path="/points" element={<ProtectedRoute><UserPoints /></ProtectedRoute>} />
+              <Route path="/user-points" element={<ProtectedRoute><UserPoints /></ProtectedRoute>} />
+              <Route path="/pinned" element={<ProtectedRoute><PinnedVibes /></ProtectedRoute>} />
+              <Route path="/pinned-vibes" element={<ProtectedRoute><PinnedVibes /></ProtectedRoute>} />
               <Route path="/venue/:id" element={<VenueProfile />} />
-              <Route path="/profile" element={<ProfileBio />} />
+              <Route path="/profile" element={<ProtectedRoute><ProfileBio /></ProtectedRoute>} />
               <Route path="/user/:username" element={<UserProfile />} />
               <Route path="/data-insights" element={<DataInsights />} />
               <Route path="/advertiser-hub" element={<AdvertiserHub />} />
-              <Route path="/messages" element={<Messages />} />
+              <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
               <Route path="/mcp-callback" element={<div>Processing authentication...</div>} />
               <Route path="/discounts" element={<Discounts />} />
               <Route path="*" element={<NotFound />} />

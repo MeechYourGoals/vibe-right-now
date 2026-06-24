@@ -105,3 +105,38 @@ Other Supabase functions and the front-end require extra keys. Create a `.env` f
 - `GOOGLE_MAPS_API_KEY` – used by the map components and city detection logic
 
 These values should also be configured in your deployment environment.
+
+## Production readiness notes
+
+This app now defaults to real-data-only mode. Production, preview, and any QA environment that is validating persistence should set `VITE_USE_MOCK_FALLBACK=false` or leave it unset. Set `VITE_USE_MOCK_FALLBACK=true` only for an intentional local demo where mock content is acceptable.
+
+Required production environment variables:
+
+- `VITE_SUPABASE_URL` — public Supabase project URL.
+- `VITE_SUPABASE_PUBLISHABLE_KEY` — Supabase anon/publishable key.
+- `VITE_GOOGLE_MAPS_API_KEY` — required for Google map rendering where used.
+- Supabase Edge Function secrets as applicable: `GEMINI_API_KEY`, `OPENROUTER_API_KEY`, `PERPLEXITY_API_KEY`, `GOOGLE_PLACES_API_KEY`, `YELP_API_KEY`, `TICKETMASTER_API_KEY`, `ELEVENLABS_API_KEY`, `DEEPGRAM_API_KEY`, `SQUARE_ACCESS_TOKEN`.
+
+Database deployment steps:
+
+1. Apply migrations with `supabase db push` from this repository or paste the migration SQL into the Supabase SQL editor in order.
+2. Confirm tables from `supabase/migrations/20260601120000_core_social_schema.sql` and `supabase/migrations/20260601130000_messaging_notifications_prefs.sql` exist.
+3. Confirm RLS is enabled and policies are present for `profiles`, `posts`, `comments`, `post_likes`, `saved_posts`, `check_ins`, `user_places`, `trips`, `trip_members`, `conversations`, `messages`, `notifications`, and `user_preferences`.
+4. Regenerate Supabase TypeScript types against the migrated project and replace `src/integrations/supabase/types.ts`.
+5. Deploy Supabase Edge Functions with `supabase functions deploy` for the integrations you intend to enable.
+
+Verification SQL examples:
+
+```sql
+-- Public feed read should only expose public posts or the current user's own posts.
+select id, author_id, visibility, created_at from public.posts order by created_at desc limit 20;
+
+-- Private data should be scoped to the authenticated user under RLS.
+select * from public.user_places where user_id = auth.uid();
+select * from public.user_preferences where user_id = auth.uid();
+```
+
+Rollback path:
+
+- For frontend-only rollback, redeploy the previous commit.
+- For database rollback, restore the latest Supabase backup/snapshot taken before applying migrations. Avoid dropping production tables manually unless you have exported user data and confirmed no deployed client depends on those tables.
