@@ -36,32 +36,38 @@ const recordToLocation = (record: UserPlaceRecord): Location => {
 const MyPlaces = () => {
   const [activeSection, setActiveSection] = useState<"places" | "trips">("places");
 
-  // Mock fallback subsets used when signed out or the DB has no rows.
-  const mockVisited = mockLocations.slice(0, 5);
-  const mockWantToVisit = mockLocations.slice(5, 10);
-
-  const [visitedPlaces, setVisitedPlaces] = useState<Location[]>(mockVisited);
-  const [wantToVisitPlaces, setWantToVisitPlaces] = useState<Location[]>(mockWantToVisit);
+  const [visitedPlaces, setVisitedPlaces] = useState<Location[]>([]);
+  const [wantToVisitPlaces, setWantToVisitPlaces] = useState<Location[]>([]);
+  const [loadingPlaces, setLoadingPlaces] = useState(true);
+  const [placesError, setPlacesError] = useState<string | null>(null);
 
   const loadPlaces = useCallback(async () => {
-    const uid = await getCurrentUserId();
-    if (!uid) {
-      // Signed out: render the mock catalog.
-      setVisitedPlaces(mockVisited);
-      setWantToVisitPlaces(mockWantToVisit);
-      return;
+    setLoadingPlaces(true);
+    setPlacesError(null);
+    try {
+      const uid = await getCurrentUserId();
+      if (!uid) {
+        setVisitedPlaces([]);
+        setWantToVisitPlaces([]);
+        setPlacesError("Sign in again to load your saved places.");
+        return;
+      }
+
+      const [visited, wanted] = await Promise.all([
+        listUserPlaces(uid, "visited"),
+        listUserPlaces(uid, "want_to_visit"),
+      ]);
+
+      setVisitedPlaces(visited.map(recordToLocation));
+      setWantToVisitPlaces(wanted.map(recordToLocation));
+    } catch (err) {
+      console.error("[MyPlaces] failed to load places", err);
+      setPlacesError("We couldn't load your places. Please retry.");
+      setVisitedPlaces([]);
+      setWantToVisitPlaces([]);
+    } finally {
+      setLoadingPlaces(false);
     }
-
-    const [visited, wanted] = await Promise.all([
-      listUserPlaces(uid, "visited"),
-      listUserPlaces(uid, "want_to_visit"),
-    ]);
-
-    setVisitedPlaces(visited.length > 0 ? visited.map(recordToLocation) : mockVisited);
-    setWantToVisitPlaces(
-      wanted.length > 0 ? wanted.map(recordToLocation) : mockWantToVisit,
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -101,6 +107,16 @@ const MyPlaces = () => {
 
                 <TabsContent value="visited" className="space-y-4">
                   <p className="text-muted-foreground mb-4">Places you've checked in at or marked as visited.</p>
+                  {loadingPlaces && <p className="text-muted-foreground">Loading visited places...</p>}
+                  {placesError && (
+                    <div className="rounded-md border border-destructive/30 bg-destructive/5 p-4 text-sm">
+                      <p className="text-destructive">{placesError}</p>
+                      <Button className="mt-3" size="sm" variant="outline" onClick={loadPlaces}>Retry</Button>
+                    </div>
+                  )}
+                  {!loadingPlaces && !placesError && visitedPlaces.length === 0 && (
+                    <p className="rounded-md border p-4 text-sm text-muted-foreground">No visited places yet. Check in at a venue to start building your history.</p>
+                  )}
                   {visitedPlaces.map((place) => (
                     <PlaceCard key={place.id} place={place} visitType="visited" />
                   ))}
@@ -108,6 +124,16 @@ const MyPlaces = () => {
 
                 <TabsContent value="want-to-visit" className="space-y-4">
                   <p className="text-muted-foreground mb-4">Places you've saved to visit in the future.</p>
+                  {loadingPlaces && <p className="text-muted-foreground">Loading saved places...</p>}
+                  {placesError && (
+                    <div className="rounded-md border border-destructive/30 bg-destructive/5 p-4 text-sm">
+                      <p className="text-destructive">{placesError}</p>
+                      <Button className="mt-3" size="sm" variant="outline" onClick={loadPlaces}>Retry</Button>
+                    </div>
+                  )}
+                  {!loadingPlaces && !placesError && wantToVisitPlaces.length === 0 && (
+                    <p className="rounded-md border p-4 text-sm text-muted-foreground">No saved future visits yet. Save a venue to plan where to go next.</p>
+                  )}
                   {wantToVisitPlaces.map((place) => (
                     <PlaceCard key={place.id} place={place} visitType="planned" />
                   ))}
